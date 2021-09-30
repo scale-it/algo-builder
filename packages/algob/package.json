@@ -53,8 +53,11 @@
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
-    "publish": "yarn publish --access public",
     "algob:dev": "sh ./setup_dev_project.sh"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "build/",
@@ -78,6 +81,7 @@
     "@types/tmp": "^0.2.0",
     "chai": "^4.2.0",
     "glob": "^7.1.6",
+    "lodash": "^4.17.21",
     "normalize-url": "6.0.1",
     "sinon": "^9.0.2",
     "time-require": "^0.1.2",
@@ -85,7 +89,7 @@
   },
   "dependencies": {
     "@algo-builder/runtime": "^1.2.0",
-    "algosdk": "scale-it/js-algorand-sdk.git#0f9d09e8d0bddc37145013e538b3ddfd001d364f",
+    "algosdk": "^1.11.1",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
@@ -95,12 +99,12 @@
     "findup-sync": "^4.0.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
+    "mocha": "^9.0.3",
     "murmurhash": "^1.0.0",
     "semver": "^7.3.2",
     "source-map-support": "^0.5.19",
     "tmp": "^0.2.1",
     "yaml": "^1.10.0",
-    "mocha": "^9.0.3",
     "zod": "^1.10.2"
   },
   "nyc": {

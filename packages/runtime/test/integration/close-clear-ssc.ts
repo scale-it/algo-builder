@@ -1,9 +1,10 @@
 import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { SSC_VALUE_BYTES } from "../../build/lib/constants";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE } from "../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_VALUE_UINT } from "../../src/lib/constants";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -60,7 +61,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     syncAccount();
     assert.equal(john.minBalance,
       initialJohnMinBalance +
-      (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
+      (APPLICATION_BASE_FEE + ((SSC_VALUE_UINT) * 3 + (SSC_VALUE_BYTES) * 3)) // optInToApp increase
     ); // verify minimum balance raised after optIn
 
     runtime.executeTx({ ...closeOutParams, appID: appID });
@@ -104,7 +105,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     syncAccount();
     const minBalanceAfterOptIn = john.minBalance;
     assert.equal(minBalanceAfterOptIn,
-      initialJohnMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
+      initialJohnMinBalance + (APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + (SSC_VALUE_BYTES) * 3)) // optInToApp increase
     ); // verify minimum balance raised after optIn
 
     const invalidParams: types.AppCallsParam = {

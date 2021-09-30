@@ -75,8 +75,8 @@ describe("Compile task", () => {
     assert.deepEqual(op.compiledFiles, [
       { filename: f1, tealHash: fhash },
       { filename: f2, tealHash: fhash },
-      { filename: f3PY, tealHash: 3867907430 },
-      { filename: f4, tealHash: 3649244736 }]);
+      { filename: f3PY, tealHash: 2014712600 },
+      { filename: f4, tealHash: 1625384743 }]);
 
     const writtenFiles = [];
     for (const fn of [f1, f2, f3PY, f4]) {

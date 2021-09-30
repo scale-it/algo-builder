@@ -8,6 +8,20 @@ import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types"
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import CfgErrors from "./config-errors";
 
+const AlgodTokenHeaderType = z.object({
+  'X-Algo-API-Token': z.string()
+});
+
+const KMDTokenHeaderType = z.object({
+  'X-KMD-API-Token': z.string()
+});
+
+const IndexerTokenHeaderType = z.object({
+  'X-Indexer-API-Token': z.string()
+});
+
+const CustomTokenHeaderType = z.record(z.string()); // { [key: string]: string }
+
 const AccountType = z.object({
   addr: z.string(),
   sk: z.unknown(),
@@ -38,9 +52,15 @@ const KmdWallet = z.object({
 
 const KmdCfg = z.object({
   host: z.string(),
-  port: z.number(),
-  token: z.string(),
+  port: z.union([z.number(), z.string()]),
+  token: z.union([z.string(), KMDTokenHeaderType, CustomTokenHeaderType]),
   wallets: z.array(KmdWallet)
+}).nonstrict();
+
+const IndexerCfg = z.object({
+  host: z.string(),
+  port: z.union([z.number(), z.string()]),
+  token: z.union([z.string(), IndexerTokenHeaderType, CustomTokenHeaderType])
 }).nonstrict();
 
 const HttpNetworkType = z.object({
@@ -48,10 +68,11 @@ const HttpNetworkType = z.object({
   chainName: z.string().optional(),
   // from: z.string().optional(),
   host: z.string().optional(),
-  port: z.number().optional(),
-  token: z.string().optional(),
+  port: z.union([z.number(), z.string()]).optional(),
+  token: z.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType]).optional(),
   httpHeaders: HttpHeaders.optional(),
-  kmdCfg: KmdCfg.optional()
+  kmdCfg: KmdCfg.optional(),
+  indexerCfg: IndexerCfg.optional()
 }).nonstrict();
 
 const NetworkType = z.union([ChainType, HttpNetworkType]);
@@ -116,8 +137,10 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
         errors.push(net, "host", host, "hostname string (eg: http://example.com)");
       }
       const token = hcfg.token;
-      if (typeof token !== "string" || token.length < 10) {
-        errors.push(net, "token", token, "string");
+      if (typeof token === "string" && token.length < 10) {
+        errors.push(net, "token", token, "string (with length > 10)");
+      } else if (typeof token !== "object" && typeof token !== "string") {
+        errors.push(net, "token", token, "string or object");
       }
 
       try {

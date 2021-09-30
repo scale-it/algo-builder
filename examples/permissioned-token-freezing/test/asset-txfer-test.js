@@ -115,14 +115,7 @@ describe('Test for transferring asset using custom logic', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: escrowAddress,
-      amountMicroAlgos: minBalance,
-      payFlags: {}
-    });
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
 
     /** Update clawback address to escrow + Locking the manager and freeze address **/
     const assetModFields = {
@@ -167,7 +160,7 @@ describe('Test for transferring asset using custom logic', function () {
      * so if any of the accounts(sender, receiver) has a level < 2, tx will be rejected.
      */
     const setLevelParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       appID: applicationId,
@@ -189,7 +182,7 @@ describe('Test for transferring asset using custom logic', function () {
     const prevBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: applicationId,
@@ -242,7 +235,7 @@ describe('Test for transferring asset using custom logic', function () {
 
     syncAccounts();
     const setLevelParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: bob.account,
       appID: applicationId,
@@ -292,7 +285,7 @@ describe('Test for transferring asset using custom logic', function () {
 
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: applicationId,

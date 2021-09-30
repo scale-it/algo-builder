@@ -12,7 +12,7 @@ async function changePermissionsManager (deployer, permissionsManager, address) 
   const permissionSSCInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
 
   const changePerManagerParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // asset manager account (fails otherwise)
     appID: permissionSSCInfo.appID,

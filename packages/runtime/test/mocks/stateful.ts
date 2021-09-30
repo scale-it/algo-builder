@@ -42,7 +42,7 @@ export const accInfo = [{
     'clear-state-program': '',
     creator: elonAddr,
     'global-state': globalStateMap,
-    'global-state-schema': { ...base, numByteSlice: 3, numUint: 1 },
+    'global-state-schema': { ...base, numByteSlice: 10, numUint: 10 },
     'local-state-schema': { ...base, numByteSlice: 0, numUint: 16 }
   }),
   createdAssets: createdAssets.set(3, {
@@ -53,7 +53,7 @@ export const accInfo = [{
     unitName: "AD",
     name: "ASSETAD",
     url: "assetUrl",
-    metadataHash: "hash",
+    metadataHash: new Uint8Array(Buffer.from("hash", 'base64')),
     manager: "addr-1",
     reserve: "addr-2",
     freeze: "addr-3",

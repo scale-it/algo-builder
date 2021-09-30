@@ -25,7 +25,8 @@ async function runTests (config: Config): Promise<void> {
       mocha.run(resolve);
     });
   } catch (error) {
-    console.log(error.message);
+    if (error instanceof Error) { console.log(error.message); }
+    console.error("An unexpected error occurred:", error);
   };
 }
 

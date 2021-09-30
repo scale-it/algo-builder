@@ -1,4 +1,4 @@
-import { Account as AccountSDK, LogicSig } from 'algosdk';
+import { Account as AccountSDK, LogicSigAccount, Transaction } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -112,7 +112,7 @@ export enum TransactionType {
   FreezeAsset,
   RevokeAsset,
   DestroyAsset,
-  CallNoOpSSC,
+  CallApp,
   ClearApp,
   CloseApp,
   DeleteApp,
@@ -136,7 +136,7 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
-  lsig: LogicSig
+  lsig: LogicSigAccount
   /** stateless smart contract args */
   args?: Uint8Array[]
 }
@@ -176,7 +176,7 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
 };
 
 export type AppCallsParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
+  type: TransactionType.CallApp | TransactionType.ClearApp |
   TransactionType.CloseApp | TransactionType.DeleteApp | TransactionType.OptInToApp
   appID: number
 };
@@ -229,6 +229,11 @@ export type AssetTransferParam = BasicParams & {
   assetID: number | string
 };
 
+export interface TransactionAndSign {
+  transaction: Transaction
+  sign: Sign
+}
+
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
@@ -243,4 +248,44 @@ export interface RequestError extends Error {
     error?: Error
   }
   error?: Error
+}
+
+export interface FileError extends Error {
+  errno: number
+}
+
+// This function is used to check if given objects implements `FileError` interface
+export function isFileError (object: unknown): object is FileError {
+  return Object.prototype.hasOwnProperty.call(object, "errno");
+}
+
+// This function is used to check if given objects implements `RequestError` interface
+// https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
+export function isRequestError (object: unknown): object is RequestError {
+  const res = Object.prototype.hasOwnProperty.call(object, "response.statusCode") &&
+   Object.prototype.hasOwnProperty.call(object, "response.text") &&
+   Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
+   Object.prototype.hasOwnProperty.call(object, "response.error");
+  return res && Object.prototype.hasOwnProperty.call(object, "error");
+}
+
+// This function checks if given object implements `Transaction` class
+export function isSDKTransaction (object: unknown): object is Transaction {
+  if (object === undefined || object === null) { return false; }
+  const props = [
+    "tag", "from", "fee", "firstRound", "lastRound",
+    "genesisID", "genesisHash"
+  ];
+  let res = Object.prototype.hasOwnProperty.call(object, "name");
+  for (const prop of props) {
+    res = res && Object.prototype.hasOwnProperty.call(object, prop);
+  }
+  return res;
+}
+
+// This function checks if given object implements `Transaction` class and has Sign
+export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
+  if (object === undefined || object === null) { return false; }
+  const res = isSDKTransaction((object as TransactionAndSign).transaction);
+  return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }

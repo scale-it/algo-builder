@@ -5,13 +5,18 @@ import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
-  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global, GreaterThan,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
+  Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
+  ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
+  ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
+  ByteZero, Callsub, Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, Exp, Expw, Gaid, Gaids, GetAssetDef, GetAssetHolding,
+  GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte, Sha256,
-  Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
+  Return, Select, SetBit, SetByte, Sha256,
+  Sha512_256, Shl, Shr, Sqrt, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -150,6 +155,51 @@ opCodeMap[3] = {
   min_balance: MinBalance
 };
 
+/**
+ * TEALv4 opcodes: https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
+ */
+opCodeMap[4] = {
+  ...opCodeMap[3],
+
+  gload: Gload,
+  gloads: Gloads,
+
+  callsub: Callsub,
+  retsub: Retsub,
+
+  b: Branchv4,
+  bnz: BranchIfNotZerov4,
+  bz: BranchIfZerov4,
+  // byteslice arithmetic ops
+  'b+': ByteAdd,
+  'b-': ByteSub,
+  'b*': ByteMul,
+  'b/': ByteDiv,
+  'b%': ByteMod,
+  'b<': ByteLessThan,
+  'b>': ByteGreatorThan,
+  'b<=': ByteLessThanEqualTo,
+  'b>=': ByteGreaterThanEqualTo,
+  'b==': ByteEqualTo,
+  'b!=': ByteNotEqualTo,
+  'b|': ByteBitwiseOr,
+  'b&': ByteBitwiseAnd,
+  'b^': ByteBitwiseXor,
+  'b~': ByteBitwiseInvert,
+  bzero: ByteZero,
+
+  divmodw: DivModw,
+  exp: Exp,
+  expw: Expw,
+  shl: Shl,
+  shr: Shr,
+  sqrt: Sqrt,
+
+  // Knowable creatable asset
+  gaid: Gaid,
+  gaids: Gaids
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
@@ -157,7 +207,8 @@ const interpreterReqList = new Set([
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
-  "gtxns", "gtxnsa", "min_balance"
+  "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
+  "gaid", "gaids"
 ]);
 
 /**
@@ -302,9 +353,13 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
       { opcode: opCode, version: tealVersion, line: counter });
   }
 
-  // increment gas of TEAL code
-  // Add 1 if opCode is not present in OpGasCost map
-  if (opCode !== '#pragma') { interpreter.gas += OpGasCost[tealVersion][opCode] ?? 1; }
+  // store cost for opcodes at each line in `interpreter.lineToCost`
+  if (opCode === '#pragma') {
+    interpreter.lineToCost[counter] = 0;
+  } else {
+    interpreter.lineToCost[counter] = OpGasCost[tealVersion][opCode] ?? 1;
+  }
+  interpreter.gas += interpreter.lineToCost[counter]; // total "static" cost
 
   if (interpreterReqList.has(opCode)) {
     return new opCodeMap[tealVersion][opCode](words, counter, interpreter);
@@ -313,7 +368,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
 }
 
 // verify max cost of TEAL code is within consensus parameters
-function assertMaxCost (gas: number, mode: ExecutionMode): void {
+export function assertMaxCost (gas: number, mode: ExecutionMode): void {
   if (mode === ExecutionMode.SIGNATURE) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
@@ -383,7 +438,11 @@ export function parser (program: string, mode: ExecutionMode, interpreter: Inter
     }
   }
 
-  assertMaxCost(interpreter.gas, mode);
+  // for versions <= 3, cost is calculated & evaluated statically
+  if (interpreter.tealVersion <= 3) {
+    assertMaxCost(interpreter.gas, mode);
+  }
+
   // TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
   // assertMaxLen(interpreter.length, mode);
   return opCodeList;

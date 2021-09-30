@@ -13,8 +13,8 @@ import { Tealdbg } from "./lib/dryrun";
 import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
-import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
+import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readAppGlobalState, readAppLocalState } from "./lib/status";
+import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams, signTransactions } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
 
@@ -36,8 +36,9 @@ export {
   KMDCredentialsFromEnv,
   printLocalStateSSC,
   printGlobalStateSSC,
-  readGlobalStateSSC,
-  readLocalStateSSC,
+  readAppGlobalState,
+  readAppLocalState,
+  signTransactions,
   globalZeroAddress,
   getProgram,
   types,

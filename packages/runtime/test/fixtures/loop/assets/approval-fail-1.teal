@@ -1,0 +1,16 @@
+#pragma version 3
+// loop 1 - 10
+// init loop var
+int 0
+loop:
+int 1
++
+// loop code
+// check upper bound
+dup
+int 10
+<=
+bnz loop
+// check whether loop was executed
+int 11
+==

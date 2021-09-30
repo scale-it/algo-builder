@@ -3,7 +3,7 @@
 import algosdk from "algosdk";
 
 import { ALGOB_CHAIN_NAME } from "../internal/constants";
-import { HttpNetworkConfig, KmdCfg, Network } from "../types";
+import { HttpNetworkConfig, IndexerCfg, KmdCfg, Network } from "../types";
 
 // appends https protocol to host if no protocol is added
 function _parseHost (host: string): string {
@@ -24,4 +24,9 @@ export function createClient (n: Network): algosdk.Algodv2 {
 
 export function createKmdClient (kmdCfg: KmdCfg): algosdk.Kmd {
   return new algosdk.Kmd(kmdCfg.token, _parseHost(kmdCfg.host), kmdCfg.port);
+}
+
+export function createIndexerClient (indexerCfg?: IndexerCfg): algosdk.Indexer | undefined {
+  if (indexerCfg === undefined) { return; }
+  return new algosdk.Indexer(indexerCfg.token, _parseHost(indexerCfg.host), indexerCfg.port);
 }

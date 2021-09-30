@@ -60,3 +60,14 @@ In `scripts/run` folder we have scripts with the following files:
     - Elon redeems all his bonds.
     - Bob redeems his bonds from epoch 0 and 1
     - Maturity period is set to 240 seconds(4 min) after the contract deployment. At maturity, manager creates and funds buyback and both elon and bob can exit all their tokens (12 and 2 respectively).
+
+## Helper functions
+
+In `scripts/run/common/common.js` we have helper functions for making group transactions.
+Following functions are present in this file:
+
+- `optInTx`: Returns optIn transaction for opting in to a logic signature
+- `buyTx`: Returns group transaction to buy tokens
+- `issueTx`: Returns group transaction for issuing bonds to issuer
+- `createDexTx`: Returns group transaction for creating dex
+- `redeemCouponTx`: Returns group transaction for redeeming bonds

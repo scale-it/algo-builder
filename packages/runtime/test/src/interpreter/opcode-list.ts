@@ -13,15 +13,21 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global,
+  Byte, ByteAdd, ByteBitwiseAnd,
+  ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
+  ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
+  ByteNotEqualTo, ByteSub, ByteZero,
+  Concat, Dig, Div, DivModw,
+  Dup, Dup2, Ed25519verify,
+  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store,
+  Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer } from "../../../src/lib/parsing";
+import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
@@ -2417,6 +2423,7 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const lineNumber = 0;
+    const elonPk = decodeAddress(elonAddr).publicKey;
 
     // setup 1st account (to be used as sender)
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
@@ -2434,7 +2441,7 @@ describe("Teal Opcodes", function () {
       // setting txn object and sender's addr
       interpreter.runtime.ctx.tx = {
         ...TXN_OBJ,
-        snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+        snd: Buffer.from(elonPk)
       };
     });
 
@@ -2482,10 +2489,75 @@ describe("Teal Opcodes", function () {
         top = stack.pop();
         assert.equal(0n, top);
       });
+
+      it("should throw error if address is passed directly with teal version < 4", function () {
+        execExpectError(
+          stack,
+          [elonPk, 1111n], // passing elonPk directly should throw error
+          new AppOptedIn([], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+        );
+      });
+
+      it("should push 0 to stack if offset to foreign apps is passed with teal version < 4", function () {
+        stack.push(0n);
+        stack.push(2n); // offset (but in prior version, this is treated as appIndex directly)
+
+        const op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+      });
+
+      it("tealv4: should push expected value to stack if address is passed directly", function () {
+        interpreter.tealVersion = 4;
+        interpreter.runtime.ctx.tx.apid = 1847; // set txn.ApplicationID
+
+        // elonPk is the Txn.Sender
+        stack.push(elonPk);
+        stack.push(1847n);
+
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        // johnAddr is present in Txn.Accounts, so we can pass it directly
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        assert.doesNotThrow(() => op.execute(stack));
+      });
+
+      it("tealv4: should push expected value to stack if app offset is passed directly", function () {
+        stack.push(0n);
+        stack.push(0n); // 0 offset means current_app_id
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        interpreter.runtime.ctx.tx.apfa = [11, 1847];
+        stack.push(0n);
+        stack.push(2n); // should push 2nd app_id from Txn.ForeignApps (with TEALv4)
+        op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+      });
+
+      it("tealv4: should throw error if address is passed directly but not present in Txn.Accounts[]", function () {
+        // should throw error as this address is not present in Txn.Accounts[]
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+
+        const op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
+      });
     });
 
     describe("AppLocalGet", function () {
       before(function () {
+        interpreter.tealVersion = 3;
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
@@ -2531,6 +2603,33 @@ describe("Teal Opcodes", function () {
 
         top = stack.pop();
         assert.equal(0n, top);
+      });
+
+      it("tealv4: should accept address directly for app_local_get", function () {
+        interpreter.tealVersion = 4;
+
+        // for Sender
+        stack.push(elonPk);
+        stack.push(parsing.stringToBytes("random-key"));
+        let op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // for Txn.Accounts[A]
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(parsing.stringToBytes('random-key'));
+        op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // random address (not present in accounts should throw error)
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
       });
     });
 
@@ -2599,6 +2698,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.tx.apfa = TXN_OBJ.apfa;
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2787,6 +2887,28 @@ describe("Teal Opcodes", function () {
       });
     });
 
+    describe("TEALv4: More Versatile Global and Local Storage", () => {
+      before(function () {
+        interpreter.runtime.ctx.tx.apid = 1828;
+      });
+
+      it("should throw error if schema is invalid", function () {
+        const invalidKey = 's'.repeat(65); // 'sss..65 times'
+
+        // check for byte
+        stack.push(parsing.stringToBytes(invalidKey)); // key length > 64
+        stack.push(parsing.stringToBytes('Valid-Val'));
+        let op = new AppGlobalPut([], 1, interpreter);
+        expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+
+        // key is OK, but total length > 128
+        stack.push(new Uint8Array(40).fill(1));
+        stack.push(new Uint8Array(100).fill(1));
+        op = new AppGlobalPut([], 1, interpreter);
+        expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+      });
+    });
+
     describe("AppLocalDel", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1847;
@@ -2969,7 +3091,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Balance", () => {
+  describe("Balance, GetAssetHolding, GetAssetDef", () => {
     useFixture('asa-check');
     const stack = new Stack<StackElem>();
     let interpreter: Interpreter;
@@ -3165,7 +3287,7 @@ describe("Teal Opcodes", function () {
       const prev = stack.pop();
 
       assert.deepEqual(last.toString(), "1");
-      assert.deepEqual(prev, convertToBuffer("hash"));
+      assert.deepEqual(prev, convertToBuffer("hash", EncodingType.BASE64));
     });
 
     it("should push correct Asset Manager", () => {
@@ -3242,6 +3364,42 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
+    });
+
+    it("tealv4: should push correct value accepting offset to foreignAssets", () => {
+      interpreter.tealVersion = 4;
+      // interpreter.runtime.ctx.tx.apas = [1234, 3];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      stack.push(1n); // account index
+      stack.push(0n); // this will push 1st value from Txn.ForeignAssets
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+
+      stack.push(1n); // account index
+      stack.push(3n); // assetId can also be passed directly
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+    });
+
+    it("tealv4: should return value as treating ref as offset, if it represents an index", () => {
+      interpreter.tealVersion = 4;
+      interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      /*
+       * We wanted to pass assetId directly (3n) here, but since length of
+       * foreignAssets array is 5 (line 3363), "3n" will be treated as an offset, and
+       * the value to pushed to stack is Txn.ForeignApps[3] (i.e 45 in this case).
+       * Since asset 45 does not exist, [did_exist flag, value] will be [0, 0]
+       */
+      stack.push(1n); // account index
+      stack.push(3n); // assetArr.len >= 3, so this is treated as an offset
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "0");
+      assert.deepEqual(stack.pop().toString(), "0");
     });
   });
 
@@ -4072,6 +4230,890 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
+    });
+  });
+
+  describe("TEALv4: shared data between contracts", () => {
+    let stack: Stack<StackElem>;
+    let interpreter: Interpreter;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.tealVersion = MaxTEALVersion;
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.sharedScratchSpace = new Map<number, StackElem[]>();
+      interpreter.runtime.ctx.sharedScratchSpace.set(0, [12n, 2n, 0n]);
+      interpreter.runtime.ctx.sharedScratchSpace.set(2, [12n, 2n, 0n, 1n]);
+    });
+
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push value from ith tx in shared scratch space(gload)", () => {
+      const op = new Gload(["0", "1"], 1, interpreter);
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, 2n);
+    });
+
+    it("should throw error if tx doesn't exist(gload)", () => {
+      let op = new Gload(["1", "1"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+
+      op = new Gload(["1", "3"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+    });
+
+    it("should throw error if value doesn't exist in stack elem array(gload)", () => {
+      const op = new Gload(["2", "5"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push value from ith tx in shared scratch space(gloads)", () => {
+      const op = new Gloads(["1"], 1, interpreter);
+      stack.push(0n);
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, 2n);
+    });
+
+    it("should throw error if tx doesn't exist(gloads)", () => {
+      let op = new Gloads(["1"], 1, interpreter);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+
+      op = new Gloads(["3"], 1, interpreter);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+    });
+
+    it("should throw error if value doesn't exist in stack elem array(gloads)", () => {
+      const op = new Gloads(["5"], 1, interpreter);
+      stack.push(2n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("TEALv4: Byteslice Arithmetic Ops", () => {
+    const hexToByte = (hex: string): Uint8Array => {
+      const [string, encoding] = getEncoding([hex], 0);
+      return Uint8Array.from(convertToBuffer(string, encoding));
+    };
+
+    describe("ByteAdd", () => {
+      const stack = new Stack<StackElem>();
+
+      // hex values are taken from go-algorand tests
+      // https://github.com/algorand/go-algorand/blob/master/data/transactions/logic/eval_test.go
+      it("should return correct addition of two unit64", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x02'));
+
+        stack.push(hexToByte('0x01FF'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0200'));
+
+        stack.push(hexToByte('0x01234576'));
+        stack.push(hexToByte('0x01ffffffffffffff'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([2, 0, 0, 0, 1, 35, 69, 117]));
+
+        // u256 + u256
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x01ffffffffffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          3, 35, 69, 118, 1, 35, 69, 117, 3,
+          35, 69, 118, 1, 35, 69, 117, 2, 70,
+          138, 236, 2, 70, 138, 236, 2, 70, 138,
+          236, 2, 70, 138, 236
+        ]));
+
+        // "A" + "" == "A"
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes(''));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes('A'));
+      });
+
+      it("should accept output of > 64 bytes", function () {
+        let str = '';
+        for (let i = 0; i < 64; i++) { str += 'ff'; } // ff repeated 64 times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        assert.doesNotThrow(() => op.execute(stack));
+        const top = stack.pop() as Uint8Array;
+        assert.isAbove(top.length, 64); // output array is of 65 bytes (because o/p length is limited to 128 bytes)
+      });
+
+      it("should throw error with ByteAdd if input > 64 bytes", () => {
+        let str = '';
+        for (let i = 0; i < 65; i++) { str += 'ff'; } // ff repeated "65" times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
+        );
+      });
+
+      it("should throw error with ByteAdd if stack is below min length",
+        execExpectError(
+          stack,
+          [hexToByte('0x10')],
+          new ByteAdd([], 0),
+          RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        )
+      );
+
+      it("should throw error if ByteAdd is used with int",
+        execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+      );
+    });
+
+    describe("ByteSub", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct subtraction of two byte arrays", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes("")); // Byte ""
+
+        stack.push(hexToByte('0x0200'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01FF'));
+
+        // returns are smallest possible
+        stack.push(hexToByte('0x0100'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0xFF'));
+
+        stack.push(hexToByte('0x0ffff1234576'));
+        stack.push(hexToByte('0x1202'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([15, 255, 241, 35, 51, 116]));
+
+        // big num
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0xffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 35, 69, 118, 0, 35, 69, 118, 255,
+          35, 69, 118, 1, 35, 69, 119, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0
+        ]));
+      });
+
+      it("should panic on underflow", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x02'));
+        const op = new ByteSub([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.UINT64_UNDERFLOW
+        );
+      });
+
+      it("should throw error with ByteSub if stack is below min length",
+        execExpectError(
+          stack,
+          [hexToByte('0x10')],
+          new ByteAdd([], 0),
+          RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        )
+      );
+
+      it("should throw error if ByteSub is used with int",
+        execExpectError(stack, [1n, 2n], new ByteSub([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+      );
+    });
+
+    describe("ByteMul", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct multiplication of two byte arrays", function () {
+        stack.push(hexToByte('0x10'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0100'));
+
+        stack.push(hexToByte('0x100000000000'));
+        stack.push(hexToByte('0x00'));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // "A" * "" === ""
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes(''));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // u256*u256
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0xf123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          151, 200, 103, 239, 94, 230, 133, 186, 92, 4, 163,
+          133, 89, 34, 193, 80, 86, 64, 223, 27, 83, 94,
+          252, 230, 80, 125, 26, 177, 77, 155, 56, 124, 72,
+          239, 162, 240, 235, 209, 133, 37, 238, 179, 103, 90,
+          241, 149, 73, 143, 244, 119, 43, 196, 247, 89, 13,
+          249, 250, 58, 240, 46, 253, 28, 210, 100
+        ]));
+      });
+
+      // rest of tests for all opcodes are common, which should be covered by b+, b-
+    });
+
+    describe("ByteDiv", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct division of two byte arrays", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        // "A" / "A" === "1"
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes('A'));
+        op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        // u256 / u128
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x34576012345760123457601234576312'));
+        op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          3, 20, 30, 232, 85, 184,
+          244, 125, 170, 92, 127, 59,
+          140, 137, 168, 211, 37
+        ]));
+      });
+
+      it("should panic if B == 0", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00'));
+        const op = new ByteDiv([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ZERO_DIV
+        );
+      });
+    });
+
+    describe("ByteMod", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct modulo of two byte arrays", function () {
+        stack.push(hexToByte('0x10'));
+        stack.push(hexToByte('0x07'));
+        let op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x02'));
+
+        // "A" % "A" === ""
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes('A'));
+        op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // u256 % u128
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x34576012345760123457601234576312'));
+        op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 202, 148, 236, 225, 10,
+          151, 2, 64, 208, 240, 122,
+          196, 10, 29, 220
+        ]));
+      });
+
+      it("should panic if B == 0", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00'));
+        const op = new ByteMod([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ZERO_DIV
+        );
+      });
+    });
+
+    describe("ByteLessThan", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for bytelessthan", function () {
+        // A < B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // B is not less than A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A is not less than A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteGreatorThan", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteGreatorThan", function () {
+        // A is not greator B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // B > A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A is not greator than A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteLessThanEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteLessThanEqualTo", function () {
+        // A is <= B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // B is not lessthan or equal to A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A is <= A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteGreaterThanEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteGreaterThanEqualTo", function () {
+        // A is not >= B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // B is >= A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A is >= A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteEqualTo", function () {
+        // A is not == B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A == A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // "" == ""
+        stack.push(parsing.stringToBytes(""));
+        stack.push(parsing.stringToBytes(""));
+        op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteNotEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteNotEqualTo", function () {
+        // A is not == B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A == A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // "" !== ""
+        stack.push(parsing.stringToBytes(""));
+        stack.push(parsing.stringToBytes(""));
+        op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteBitwiseOr", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push OR of two byte arrays for ByteBitwiseOr", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x12f1'));
+
+        stack.push(hexToByte('0x0001'));
+        stack.push(hexToByte('0x00f1'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00f1'));
+      });
+    });
+
+    describe("ByteBitwiseAnd", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push AND of two byte arrays for ByteBitwiseAnd", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x10'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0001'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00f1'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0001'));
+
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x01ffffffffffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 35, 69, 118, 1, 35, 69, 118, 1,
+          35, 69, 118, 1, 35, 69, 118, 1, 35,
+          69, 118, 1, 35, 69, 118, 1, 35, 69,
+          118, 1, 35, 69, 118
+        ]));
+      });
+    });
+
+    describe("ByteBitwiseXOR", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push XOR of two byte arrays for ByteBitwiseXOR", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x12f0'));
+
+        stack.push(hexToByte('0x0001'));
+        stack.push(hexToByte('0xf1'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00f0'));
+
+        stack.push(hexToByte('0x123457601234576012345760123457601234576012345760123457601234576a'));
+        stack.push(hexToByte('0xf123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          227, 23, 18, 22, 19, 23, 18, 22, 19,
+          23, 18, 22, 19, 23, 18, 22, 19, 23,
+          18, 22, 19, 23, 18, 22, 19, 23, 18,
+          22, 19, 23, 18, 28
+        ]));
+      });
+    });
+
+    describe("ByteBitwiseInvert", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push bitwise invert of byte array", function () {
+        stack.push(hexToByte('0x0001'));
+        let op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0xfffe'));
+
+        stack.push(hexToByte('0x'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x'));
+
+        stack.push(hexToByte('0xf001'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0ffe'));
+
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          94, 220, 186, 137, 254, 220, 186,
+          137, 254, 220, 186, 137, 254, 220,
+          186, 137, 254, 220, 186, 137, 254,
+          220, 186, 137, 254, 220, 186, 137,
+          254, 220, 186, 137
+        ]));
+      });
+    });
+
+    describe("ByteZero", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push zero byte array to stack", function () {
+        stack.push(3n);
+        let op = new ByteZero([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x000000'));
+
+        stack.push(33n);
+        op = new ByteZero([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x000000000000000000000000000000000000000000000000000000000000000000'));
+      });
+
+      it("should fail if len > 4096", function () {
+        stack.push(4097n);
+        let op = new ByteZero([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
+        );
+
+        stack.push(4096n);
+        op = new ByteZero([], 0);
+        assert.doesNotThrow(() => op.execute(stack));
+      });
+    });
+  });
+
+  describe("Tealv4: Additional mathematical opcodes", () => {
+    const stack = new Stack<StackElem>();
+
+    it("divmodw", () => {
+      stack.push(0n);
+      stack.push(500n);
+      stack.push(0n);
+      stack.push(10n);
+
+      const op = new DivModw([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 50n);
+      assert.equal(stack.pop(), 0n);
+
+      stack.push(MAX_UINT64);
+      stack.push(MAX_UINT64);
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), MAX_UINT64);
+      assert.equal(stack.pop(), MAX_UINT64);
+
+      stack.push(MAX_UINT64);
+      stack.push(5n);
+      stack.push(MAX_UINT64);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 5n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("exp", () => {
+      stack.push(2n);
+      stack.push(5n);
+      const op = new Exp([], 1);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 32n);
+
+      stack.push(5n);
+      stack.push(0n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 0n);
+
+      stack.push(2n);
+      stack.push(63n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 2n ** 63n);
+
+      stack.push(2n);
+      stack.push(64n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      stack.push(0n);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXP_ERROR
+      );
+
+      stack.push(2n);
+      stack.push(66n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+    });
+
+    it("expw", () => {
+      stack.push(2n);
+      stack.push(66n);
+      const op = new Expw([], 1);
+
+      op.execute(stack);
+      const res = 2n ** 66n;
+      const low = res & MAX_UINT64;
+      const high = res >> BigInt('64');
+
+      assert.equal(stack.pop(), low);
+      assert.equal(stack.pop(), high);
+
+      stack.push(5n);
+      stack.push(0n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(0n);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXP_ERROR
+      );
+
+      stack.push(2n);
+      stack.push(128n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT128_OVERFLOW
+      );
+    });
+
+    it("shl", () => {
+      stack.push(0n);
+      stack.push(20n);
+
+      let exp = 0n << 20n;
+      const op = new Shl([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+
+      stack.push(5n);
+      stack.push(21n);
+
+      exp = 5n << 21n;
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+    });
+
+    it("shr", () => {
+      stack.push(0n);
+      stack.push(20n);
+
+      let exp = 0n >> 20n;
+      const op = new Shr([], 1);
+      op.execute(stack);
+      assert.equal(stack.pop(), exp);
+
+      stack.push(5n);
+      stack.push(21n);
+      exp = 5n >> 21n;
+      op.execute(stack);
+      assert.equal(stack.pop(), exp);
+    });
+
+    it("sqrt", () => {
+      stack.push(5n);
+      const op = new Sqrt([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 2n);
+
+      stack.push(1024n);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 32n);
+
+      stack.push(1023n);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 31n);
     });
   });
 });

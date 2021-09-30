@@ -19,7 +19,7 @@ We will create a simple stateful smart contract which will:
 We will create an approval program which has global `counter` and it is incremented by 1 each time we call the application. Put the code below in `/assets/approval_program.teal`:
 
 ```
-#pragma version 2
+#pragma version 4
 
 int NoOp
 txn OnCompletion
@@ -62,7 +62,7 @@ This program has a single global key/value pair to store the number of times the
 Now, we will create clear program. This program does not evaluate any conditions and simply approves the call. Put the code below in `/assets/clear_program.teal`:
 
 ```
-#pragma version 2
+#pragma version 4
 
 int 1
 return
@@ -149,7 +149,7 @@ To call an application use the following code in one of your scripts (in `./scri
 
 ```javascript
 const tx = {
-  type: types.TransactionType.CallNoOpSSC,
+  type: types.TransactionType.CallApp,
   sign: types.SignType.SecretKey,
   fromAccount: creatorAccount,
   appID: applicationID,
@@ -160,7 +160,7 @@ await executeTransaction(deployer, tx);
 ```
 
 In `tx` there are following parameters:
-  - we set the type which is `CallNoOpSSC` - Call to stateful smart contract
+  - we set the type which is `CallApp` - Call to stateful smart contract
   - set the sign to SecretKey (tx is signed by creatorAccount's sk)
   - provide fromAccount details
   - provide application index of SSC (retreived from checkpoint)
@@ -171,7 +171,7 @@ To view the global state of the application you can use the following code:
 
 ```
 // Retreive Global State
-let globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
+let globalState = await readAppGlobalState(deployer, creatorAccount.addr, applicationID);
 console.log(globalState);
 ```
 

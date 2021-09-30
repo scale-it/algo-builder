@@ -10,7 +10,7 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   const absoluteScriptPath = path.join(process.cwd(), relativeScriptPath);
   try {
     return require(absoluteScriptPath);
-  } catch (err) {
+  } catch (err: any) {
     throw new BuilderError(ERRORS.GENERAL.SCRIPT_LOAD_ERROR, {
       script: absoluteScriptPath,
       error: err.message

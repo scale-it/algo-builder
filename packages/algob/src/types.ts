@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSig, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -37,6 +37,7 @@ interface CommonNetworkConfig {
   // optional, when provided KMD accounts will be loaded by the config resolver
   // and merged into the accounts variable (above)
   kmdCfg?: KmdCfg
+  indexerCfg?: IndexerCfg
   chainName?: string
   // from?: string;
   // TODO: timeout?: number;
@@ -51,8 +52,8 @@ export interface ChainCfg extends CommonNetworkConfig {
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
   host: string // with optional http o https prefix
-  port: number
-  token: string
+  port: string | number
+  token: string | AlgodTokenHeader | CustomTokenHeader
   httpHeaders?: { [name: string]: string }
 }
 
@@ -70,15 +71,41 @@ export interface KmdWallet {
 
 export interface KmdCfg {
   host: string
-  port: number
-  token: string
+  port: string | number
+  token: string | KMDTokenHeader | CustomTokenHeader
   wallets: KmdWallet[]
+}
+
+export interface IndexerCfg {
+  host: string
+  port: string | number
+  token: string | IndexerTokenHeader | CustomTokenHeader
 }
 
 export interface NetworkCredentials {
   host: string
-  port: number
+  port: string | number
   token: string
+}
+
+/**
+ * TODO: Use js-sdk types
+ * https://github.com/algorand/js-algorand-sdk/issues/437
+ */
+export interface AlgodTokenHeader {
+  'X-Algo-API-Token': string
+}
+
+export interface IndexerTokenHeader {
+  'X-Indexer-API-Token': string
+}
+
+export interface KMDTokenHeader {
+  'X-KMD-API-Token': string
+}
+
+export interface CustomTokenHeader {
+  [headerName: string]: string
 }
 
 /**
@@ -311,7 +338,7 @@ export type AccountAddress = string;
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
-  lsig: LogicSig
+  lsig: LogicSigAccount
 }
 
 /**
@@ -547,13 +574,13 @@ export interface Deployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
-  optInAcountToASA: (asa: string, accountName: string,
+  optInAccountToASA: (asa: string, accountName: string,
     flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: LogicSig, flags: wtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
@@ -579,7 +606,7 @@ export interface Deployer {
    */
   optInLsigToApp: (
     appID: number,
-    lsig: LogicSig,
+    lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
@@ -605,7 +632,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSig>
+  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
    * Returns ASCCache (with compiled code)
@@ -644,6 +671,10 @@ export interface PyASCCache extends ASCCache {
 // ************************
 //     helper types
 
+export type StateValue = string | number | bigint;
+
+export type Key = string;
+
 export interface StrMap {
   [key: string]: string
 }
@@ -663,10 +694,11 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+export type LogicSig = LogicSigAccount['lsig'];
 
 export interface DebuggerContext {
   tealFile?: string
-  scInitParam?: unknown // if tealfile is ".py"
+  scInitParam?: SCParams // if tealfile is ".py"
   groupIndex?: number
   mode?: rtypes.ExecutionMode
 }

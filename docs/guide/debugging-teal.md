@@ -87,7 +87,7 @@ It will create a `assets/dryrun-pass.json` file, which looks like (notice the lo
   "txns": [
     {
       "disassembly": [
-        "#pragma version 2",
+        "#pragma version 4",
         "intcblock 1 0 4 1000 10000",
         "bytecblock 0x20ee6e18c121cab6dfc0f94d3d97d9dce06453d6ad52d75cd85d5b35d86e1112",
         "global GroupSize",
@@ -217,7 +217,7 @@ const escrowAddress = escrowLsig.address();
 
 const txGroup = [
   {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: creator,
     appID: appInfo.appID,

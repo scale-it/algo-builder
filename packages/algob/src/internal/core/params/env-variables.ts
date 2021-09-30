@@ -48,14 +48,17 @@ export function getEnvRuntimeArgs (
       try {
         envArgs[paramName] = definition.type.parse(paramName, rawValue);
       } catch (error) {
-        throw new BuilderError(
-          ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE,
-          {
-            varName: envVarName,
-            value: rawValue
-          },
-          error
-        );
+        if (error instanceof Error) {
+          throw new BuilderError(
+            ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE,
+            {
+              varName: envVarName,
+              value: rawValue
+            },
+            error
+          );
+        }
+        console.error("An unexpected error occurred:", error);
       }
     } else {
       envArgs[paramName] = definition.defaultValue;

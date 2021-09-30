@@ -1,7 +1,3 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
 const { accounts } = require('./common/accounts.js');
 const { fundAccount, getAssetID, tokenMap } = require('./common/common.js');
 const { createBuyback } = require('./createBuyback.js');

@@ -22,7 +22,7 @@ async function run (runtimeEnv, deployer) {
   let appArgs = ['create', nftRef, '1234'].map(convert.stringToBytes);
 
   let txnParam = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     appID: appID,
@@ -48,7 +48,7 @@ async function run (runtimeEnv, deployer) {
   // transfer nft from master to john
   // account_A = master, account_B = john
   txnParam = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     appID: appID,

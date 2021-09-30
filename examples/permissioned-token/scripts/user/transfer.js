@@ -29,7 +29,7 @@ async function transfer (deployer, from, toAddr, amount) {
      * so that rules are checked during token transfer.
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: controllerAppInfo.appID,
@@ -67,13 +67,14 @@ async function transfer (deployer, from, toAddr, amount) {
      * The contract ensures that both accA & accB are whitelisted and asset_receiver does not hold
      * more than 100 tokens. */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: permissionsAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
-      accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
+      accounts: [from.addr, toAddr], //  AppAccounts (pass asset sender & receiver address)
+      foreignAssets: [tesla.assetIndex] // from TEALv4 ASA reference must be passed in assets array
     }
   ];
 
@@ -129,9 +130,9 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to asa 'tesla' (so they can receive it)
   await Promise.all([
-    deployer.optInAcountToASA('tesla', elon.name, {}),
-    deployer.optInAcountToASA('tesla', bob.name, {}),
-    deployer.optInAcountToASA('tesla', john.name, {})
+    deployer.optInAccountToASA('tesla', elon.name, {}),
+    deployer.optInAccountToASA('tesla', bob.name, {}),
+    deployer.optInAccountToASA('tesla', john.name, {})
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function

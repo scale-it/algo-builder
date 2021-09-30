@@ -12,7 +12,7 @@ import {
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, ExecutionMode,
-  SSCAttributesM, State, Txn
+  ID, SSCAttributesM, StackElem, State, Txn
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -24,6 +24,8 @@ export class Ctx implements Context {
   args: Uint8Array[];
   runtime: Runtime;
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+  sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
+  knowableID: Map<number, ID>; // here number is index of transaction in a group
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
@@ -33,6 +35,10 @@ export class Ctx implements Context {
     this.args = args;
     this.runtime = runtime;
     this.debugStack = debugStack;
+    // Mapping from the tx index number to the scratch space.
+    // Scratch space is a list of elements.
+    this.sharedScratchSpace = new Map<number, StackElem[]>();
+    this.knowableID = new Map<number, ID>();
   }
 
   // verify account's balance is above minimum required balance
@@ -219,13 +225,14 @@ export class Ctx implements Context {
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param idx index of transaction in group
    * NOTE:
    * - approval and clear program must be the TEAL code as string (not compiled code)
    * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
   addApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string
+    approvalProgram: string, clearProgram: string, idx: number
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
@@ -242,7 +249,9 @@ export class Ctx implements Context {
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
-    this.runtime.run(approvalProgram, ExecutionMode.APPLICATION, this.debugStack); // execute TEAL code with appID = 0
+    this.runtime.run(
+      approvalProgram, ExecutionMode.APPLICATION, idx, this.debugStack
+    ); // execute TEAL code with appID = 0
 
     // create new application in globalApps map
     this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -270,15 +279,16 @@ export class Ctx implements Context {
    * Account address opt-in for application Id
    * @param accountAddr Account address to opt into application
    * @param appID Application index
+   * @param idx index of transaction in group
    * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  optInToApp (accountAddr: AccountAddress, appID: number): void {
+  optInToApp (accountAddr: AccountAddress, appID: number, idx: number): void {
     const appParams = this.getApp(appID);
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
   }
 
   /**
@@ -474,7 +484,8 @@ export class Ctx implements Context {
   updateApp (
     appID: number,
     approvalProgram: string,
-    clearProgram: string
+    clearProgram: string,
+    idx: number
   ): void {
     if (approvalProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
@@ -484,7 +495,7 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
 
     const updatedApp = this.getApp(appID);
     updatedApp[APPROVAL_PROGRAM] = approvalProgram;
@@ -523,16 +534,16 @@ export class Ctx implements Context {
           this.transferAsset(txnParam);
           break;
         }
-        case types.TransactionType.CallNoOpSSC: {
+        case types.TransactionType.CallApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           break;
         }
         case types.TransactionType.CloseApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           this.closeApp(fromAccountAddr, txnParam.appID);
           break;
         }
@@ -540,7 +551,7 @@ export class Ctx implements Context {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
           this.updateApp(
-            txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram
+            txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram, idx
           );
           break;
         }
@@ -548,7 +559,7 @@ export class Ctx implements Context {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appID, this.getApp(txnParam.appID));
           try {
-            this.runtime.run(appParams["clear-state-program"], ExecutionMode.APPLICATION, this.debugStack);
+            this.runtime.run(appParams["clear-state-program"], ExecutionMode.APPLICATION, idx, this.debugStack);
           } catch (error) {
             // if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
             // tested by running on algorand network
@@ -561,7 +572,7 @@ export class Ctx implements Context {
         case types.TransactionType.DeleteApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           this.deleteApp(txnParam.appID);
           break;
         }
@@ -611,12 +622,13 @@ export class Ctx implements Context {
             ...txnParam.payFlags,
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
-
+          let assetID: number;
           if (txnParam.asaDef) {
-            this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
+            assetID = this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
           } else {
-            this.addAsset(txnParam.asaName, fromAccountAddr, flags);
+            assetID = this.addAsset(txnParam.asaName, fromAccountAddr, flags);
           }
+          this.knowableID.set(idx, assetID);
           break;
         }
         case types.TransactionType.OptInASA: {
@@ -634,17 +646,19 @@ export class Ctx implements Context {
           };
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          this.addApp(
+          const appID = this.addApp(
             fromAccountAddr, flags,
             txnParam.approvalProgram,
-            txnParam.approvalProgram
+            txnParam.clearProgram,
+            idx
           );
+          this.knowableID.set(idx, appID);
           break;
         }
         case types.TransactionType.OptInToApp: {
           this.tx = this.gtxs[idx]; // update current tx to txn being exectuted in group
 
-          this.optInToApp(fromAccountAddr, txnParam.appID);
+          this.optInToApp(fromAccountAddr, txnParam.appID, idx);
           break;
         }
       }

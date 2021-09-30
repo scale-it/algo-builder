@@ -23,7 +23,7 @@ async function issue (deployer, address, amount) {
      * Issuance tx will be rejected if token has been killed by the manager
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: issuer,
       appID: controllerAppInfo.appID,
@@ -64,7 +64,7 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in asa to account first (skip if opted-in already)
   console.log(`* Opt-In ASA tesla for ${elon.name} *`);
-  await deployer.optInAcountToASA('tesla', elon.name, {});
+  await deployer.optInAccountToASA('tesla', elon.name, {});
   console.log('* Opt-In Successful *');
 
   // use below function to whitelist elon

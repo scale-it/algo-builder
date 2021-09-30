@@ -194,3 +194,38 @@ Ex:
 ```
 
 Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.
+
+
+## Sign and Send SDK Transaction object using `executeTransaction` function
+
+`executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
+```
+const tx = makeAssetCreateTxn(
+  bobAcc.addr, mockSuggestedParam.fee,
+  mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
+  undefined, mockSuggestedParam.genesisHash, mockSuggestedParam.genesisID,
+  1e6, 0, false, undefined, undefined, undefined, undefined, "UM", "ASM", undefined
+);
+const transaction: wtypes.TransactionAndSign = {
+  transaction: tx,
+  sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
+}
+
+const res = await executeTransaction(deployer, transaction);
+```
+You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
+
+## SignTransactions function
+
+This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) objects and returns raw signed transaction
+
+```
+const transaction: wtypes.TransactionAndSign = [{
+  transaction: SDKTx,
+  sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
+}]
+const rawSign = signTransactions(transaction)
+```
+
+`rawSign` has array of raw signed transactions.
+You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.

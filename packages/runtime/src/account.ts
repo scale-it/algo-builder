@@ -7,7 +7,7 @@ import { checkAndSetASAFields } from "./lib/asa";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
   ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
-  MAX_ALGORAND_ACCOUNT_ASSETS, SSC_KEY_BYTE_SLICE,
+  MAX_ALGORAND_ACCOUNT_ASSETS,
   SSC_VALUE_BYTES, SSC_VALUE_UINT
 } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
@@ -184,7 +184,6 @@ export class AccountStore implements AccountStoreI {
     this.minBalance += ASSET_CREATION_FEE;
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
-
     // set holding in creator account. note: for creator default-frozen is always false
     // https://developer.algorand.org/docs/reference/rest-apis/algod/v2/#assetparams
     const assetHolding: AssetHoldingM = {
@@ -282,8 +281,7 @@ export class AccountStore implements AccountStoreI {
     // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
     this.minBalance += (
       APPLICATION_BASE_FEE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
+      (SSC_VALUE_UINT * params.globalInts) + (SSC_VALUE_BYTES * params.globalBytes)
     );
     const app = new App(appID, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
@@ -303,8 +301,8 @@ export class AccountStore implements AccountStoreI {
       // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
       this.minBalance += (
         APPLICATION_BASE_FEE +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(appParams[localStateSchema].numUint) +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(appParams[localStateSchema].numByteSlice)
+        (SSC_VALUE_UINT * Number(appParams[localStateSchema].numUint)) +
+        (SSC_VALUE_BYTES * Number(appParams[localStateSchema].numByteSlice))
       );
 
       // create new local app attribute
@@ -343,8 +341,8 @@ export class AccountStore implements AccountStoreI {
     // reduce minimum balance
     this.minBalance -= (
       APPLICATION_BASE_FEE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(app[globalStateSchema].numUint) +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(app[globalStateSchema].numByteSlice)
+      (SSC_VALUE_UINT * Number(app[globalStateSchema].numUint)) +
+      (SSC_VALUE_BYTES * Number(app[globalStateSchema].numByteSlice))
     );
     this.createdApps.delete(appID);
   }
@@ -359,8 +357,8 @@ export class AccountStore implements AccountStoreI {
     // decrease min balance
     this.minBalance -= (
       APPLICATION_BASE_FEE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(localApp.schema.numUint) +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(localApp.schema.numByteSlice)
+      (SSC_VALUE_UINT * Number(localApp.schema.numUint)) +
+      (SSC_VALUE_BYTES * Number(localApp.schema.numByteSlice))
     );
     this.appsLocalState.delete(appID);
   }
@@ -402,7 +400,9 @@ class Asset {
       defaultFrozen: def.defaultFrozen ?? false,
       unitName: def.unitName,
       url: def.url,
-      metadataHash: def.metadataHash,
+      metadataHash: typeof def.metadataHash === 'string'
+        ? new Uint8Array(Buffer.from(def.metadataHash, 'base64'))
+        : def.metadataHash,
       manager: def.manager,
       reserve: def.reserve,
       freeze: def.freeze,
@@ -429,7 +429,7 @@ export class BaseModelI implements BaseModel {
   public constructor () {
     this.attribute_map = {};
   }
-  _is_primitive(val: any): val is string | boolean | number | bigint { 
+  _is_primitive(val: any): val is string | boolean | number | bigint {
     return true;
   }
 
@@ -442,7 +442,7 @@ export class BaseModelI implements BaseModel {
   _get_obj_for_encoding(val: Record<string, any>): Record<string, any> {
     throw new Error("_get_obj_for_encoding Not Implemented");
   }
-  
+
   get_obj_for_encoding(): Record<string, any> {
     throw new Error("get_obj_for_encoding Not Implemented");
   }

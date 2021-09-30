@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { LogicSig } from "../../src/logicsig";
+import { LogicSigAccount } from "../../src/logicsig";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -30,7 +30,7 @@ describe("Logic Signature: Escrow Account", function () {
   // we can't load teal code and create an escrow, because in this test we are loading a
   // fixture environment, which happens in `beforeAll`. So, consequently we need to move
   // initialization of lsig and escrow to beforeAll
-  let lsig: LogicSig;
+  let lsig: LogicSigAccount;
   let escrow: AccountStore;
   let paymentTxParams: types.AlgoTransferParam;
 

@@ -177,6 +177,12 @@ Please check algob output for more details.`
     description: `Invalid ASA definition: '%source%'.
     Reason: %reason%
     Please check your ASA file`
+  },
+  EXECPARAMS_LENGTH_ERROR: {
+    number: 18,
+    message: `Exec params length is zero'.`,
+    title: "Invalid parameter",
+    description: `Empty list is not supported.`
   }
 };
 

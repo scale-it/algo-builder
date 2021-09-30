@@ -58,6 +58,8 @@ export enum EncodingType {
 
 export type AccountAddress = string;
 
+export type ID = number; // Asset or Application index
+
 export interface AccountsMap {
   [addr: string]: AccountStoreI
 }
@@ -100,6 +102,8 @@ export interface SSCInfo extends DeployedAssetInfo {
 // describes interpreter's local context (state + txns)
 export interface Context {
   state: State
+  sharedScratchSpace: Map<number, StackElem[]>
+  knowableID: Map<number, ID>
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]
@@ -127,13 +131,14 @@ export interface Context {
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ) => number
-  optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
+  optIntoASA: (
+    assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string
+    approvalProgram: string, clearProgram: string, idx: number
   ) => number
-  optInToApp: (accountAddr: string, appID: number) => void
-  updateApp: (appID: number, approvalProgram: string, clearProgram: string) => void
+  optInToApp: (accountAddr: string, appID: number, idx: number) => void
+  updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => void
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

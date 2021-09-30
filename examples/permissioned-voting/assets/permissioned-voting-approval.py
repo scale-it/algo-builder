@@ -3,12 +3,12 @@ from pyteal import *
 def approval_program():
     """
     https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/?query=asset%2520contract
-    To implement a permissioned voting application on Algorand, a central authority is needed to 
-    provide users the right to vote. In this example, this is handled by an Algorand Standard 
-    Asset. The central authority creates a vote token and then gives voters who have registered 
-    one voting token. The voter then registers within a round range with the voting smart 
-    contract, by Opting into the contract. Voters then vote by grouping two transactions. 
-    The first is a smart contract call to vote for either candidate A or candidate B, and 
+    To implement a permissioned voting application on Algorand, a central authority is needed to
+    provide users the right to vote. In this example, this is handled by an Algorand Standard
+    Asset. The central authority creates a vote token and then gives voters who have registered
+    one voting token. The voter then registers within a round range with the voting smart
+    contract, by Opting into the contract. Voters then vote by grouping two transactions.
+    The first is a smart contract call to vote for either candidate A or candidate B, and
     the second is transferring the vote token back to the central authority. Voting is only
     allowed within the voting range.
     """
@@ -107,4 +107,4 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application))
+    print(compileTeal(approval_program(), Mode.Application, version = 4))

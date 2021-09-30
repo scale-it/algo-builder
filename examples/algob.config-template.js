@@ -42,13 +42,21 @@ let accounts = mkAccounts([
   }
 ]);
 
+const indexerCfg = {
+  host: "http://localhost",
+  port: 8980,
+  token: ""
+};
 
 let defaultCfg = {
   host: "http://localhost",
   port: 4001,
   token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   // you can also load accounts from KMD, look at /docs/algob-config.md for more details.
-  accounts: accounts
+  accounts: accounts,
+  /// if you have started indexer service locally (using make start-indexer), you can
+  /// pass indexerCfg. See algob-config guide for more details.
+  // indexerCfg: indexerCfg
 };
 
 module.exports = {

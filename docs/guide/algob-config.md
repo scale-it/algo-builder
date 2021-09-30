@@ -15,6 +15,13 @@ A network object can specify following entries:
 + `token` (required, default `none`)
 + `httpHeaders` -- HTTP headers attached to every raw transaction request (optional, default `none`)
 
+*NOTE:* `token` can be passed directly as a `string`, or as an object. Eg
+```js
+token: {
+  "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
 A special network named `algobchain` can specify the `AlgobChain` configuration:
 
 ```ts
@@ -156,6 +163,44 @@ NOTE: don't use any of the accounts above. They are provided only as an example 
 You can merge accounts in the config file (eg by using `concat` method on an `Array`).
 You can also construct different accounts for different networks.
 
+## Indexer
+
+You can add the indexer config in your network config `indexerCfg`. You can use the client with the `deployer` object (`dedployer.indexerClient`) in `algob` scripts.
+
+To start indexer for a local development network, please refer to our [`infrastructure`](https://github.com/scale-it/algo-builder/tree/master/infrastructure#indexer-v2) scripts.
+
+Eg.
+```js
+const indexerCfg = {
+  host: "http://localhost",
+  port: 8980, // indexer port
+  token: { "X-Algo-API-Token": "" }
+};
+
+let defaultCfg = {
+  host: "http://localhost",
+  port: 4001,
+  token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  accounts: accounts,
+  indexerCfg: indexerCfg
+};
+
+module.exports = {
+ networks: {
+  default: defaultCfg
+  ..
+ }
+}
+```
+
+Now in a an algob script, you can use `deployer.indexerClient`. Eg.
+```js
+async function run (runtimeEnv, deployer) {
+  console.log('Script has started execution!');
+
+  const iClient = deployer.indexerClient;
+  const health = await iClient.makeHealthCheck().do();
+```
 
 ## Example
 
@@ -168,10 +213,10 @@ const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");
 
 var myprivateNet = {
-     host: "http://127.0.0.1",
-     port: 4001,
-     token: "abc",
-     accounts: accounts
+  host: "http://127.0.0.1",
+  port: 4001,
+  token: "abc",
+  accounts: accounts
 }
 
 module.exports = {

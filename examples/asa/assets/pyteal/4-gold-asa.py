@@ -1,7 +1,7 @@
 from pyteal import *
 
 """GOLD Transfer"""
-''' Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer, 
+''' Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer,
     sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))'''
 
 asset_amt = Int(1000)
@@ -25,7 +25,7 @@ def gold_asc(asset_amt=asset_amt, arg_sen=arg_sen):
 	pay_gold = And(
 		Txn.type_enum() == Int(4),
 		Txn.sender() == arg_sen,
-		Txn.asset_amount() <= asset_amt 
+		Txn.asset_amount() <= asset_amt
 	)
 
 	combine = And(Or(asa_opt_in, pay_gold), common_fields)
@@ -33,4 +33,4 @@ def gold_asc(asset_amt=asset_amt, arg_sen=arg_sen):
 	return combine
 
 if __name__ == "__main__":
-    print(compileTeal(gold_asc(), Mode.Signature))
+    print(compileTeal(gold_asc(), Mode.Signature, version = 4))
