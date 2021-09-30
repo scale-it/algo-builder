@@ -43,7 +43,7 @@
 * Rename `readLocalStateSSC` to `readAppLocalState`, `readGlobalStateSSC` to `readAppGlobalState`.
 
 ### Dependencies
-* Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
+* Upgraded pyTEAL version [`0.9.0`](https://github.com/algorand/pyteal/releases/tag/v0.9.0) in pipfile.
 * Upgraded indexer binary version to `2.6.1` in `/infrastructure/Makefile`.
 
 ### Examples
