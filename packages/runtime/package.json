@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/runtime",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "contributors": [
     {
       "name": "Robert Zaremba",
@@ -48,7 +48,6 @@
   "publishConfig": {
     "access": "public"
   },
-
   "files": [
     "build/",
     "LICENSE",
@@ -65,7 +64,7 @@
     "sinon": "^9.0.2"
   },
   "dependencies": {
-    "@algo-builder/web": "1.2.0",
+    "@algo-builder/web": "2.0.0",
     "@nodelib/fs.walk": "^1.2.8",
     "@types/lodash.clonedeep": "^4.5.6",
     "algosdk": "^1.11.1",
