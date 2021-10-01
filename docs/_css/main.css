@@ -16,3 +16,7 @@
 .first-section .doc-links .btn {
     margin: 8px;
 }
+
+.first-section a {
+    text-decoration: underline;
+}

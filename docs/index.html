@@ -32,8 +32,8 @@
             </div>
         </div>
         <div class="row mt-5 first-section">
-            <div class="col-md-10 mx-auto text-center">
-								<h2>Algo Builder is a trustworthy framework for Algorand dapps (Decentralized Applications), Algorand Standard Assets, Tokens and Smart Contracts.
+          <div class="col-md-10 mx-auto text-center">
+						<h2>Algo Builder is the ★ number one ★ trustworthy framework for Algorand dapps, Algorand Standard Assets, Tokens and Smart Contracts.
 									Its main goal is to make Algorand applications development simple, efficient, and scalable.</h2>
 
 								<p class="text-left"> Available packages:</p>
@@ -41,32 +41,26 @@
                     <ul>
                         <li>
                             <div class="col-sm-16 text-md-left">
-                                <b><a style="text-decoration: underline;" href="https://github.com/scale-it/algo-builder/tree/master/packages/algob">
+                                <b><a href="https://github.com/scale-it/algo-builder/tree/master/packages/algob">
                                     algob</a></b>: a framework and CLI of the Algo Builder Suite
                             </div>
                         </li>
                         <li>
                             <div class="col-sm-16 text-md-left">
-                                <b><a style="text-decoration: underline;" href="https://github.com/scale-it/algo-builder/tree/master/packages/types-algosdk">
-                                    types/algosdk</a></b>: TypeScript typings for
-                                    <a style="text-decoration: underline;" href="https://github.com/algorand/js-algorand-sdk">algosdk-js</a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="col-sm-16 text-md-left">
-                                <b><a style="text-decoration: underline;" href="https://github.com/scale-it/algo-builder/tree/master/packages/runtime">
+                                <b><a href="https://github.com/scale-it/algo-builder/tree/master/packages/runtime">
                                     runtime</a></b>: Light Algorand runtime and TEAL interpreter
                             </div>
                         </li>
                         <li>
                             <div class="col-sm-16 text-md-left">
-                                <b><a style="text-decoration: underline;" href="https://github.com/scale-it/algo-builder/tree/master/packages/runtime">
-                                    web</a></b>: a package to interact with contracts from react app/frontend app
+                              <b><a href="https://github.com/scale-it/algo-builder/tree/master/packages/runtime">
+                                web</a></b>: a package to interact with contracts from react app/frontend app
                             </div>
                         </li>
                     </ul>
                 </div>
 
+								<p class="text-left">Algo Builder is also a repository of verified <a href="https://github.com/scale-it/algo-builder/tree/master/examples">smart contract templates</a> that will speedup your dapp design and development process.</p>
 
                 <div style="margin-top: 35px;" class="doc-links">
                     <a href="./guide/README" class="btn btn-success svg-icon" style="margin-right: 20px;">
@@ -90,6 +84,11 @@
                         Web API
                     </a>
 
+                    <a href="https://github.com/scale-it/algo-builder/tree/master/examples" class="btn btn-success svg-icon">
+                      <em class="mr-2" data-feather="github"></em>
+                      Smart Contract templates
+                    </a>
+
                     <a href="https://github.com/scale-it/algo-builder-templates" class="btn btn-success svg-icon">
                         <em class="mr-2" data-feather="github"></em>
                             Dapp templates
@@ -103,8 +102,8 @@
         <div class="row mt-5">
             <div class="col-md-9 mx-auto">
                 <h3>Example Code</h3>
-                <p>Check <a style="text-decoration: underline;" href="https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js">
-                    this </a> for the original implementaion (using SDK takes approx. ~450 LOC). Below snippet demonstrates the same using algob in <b>18x less code</b>:
+                <p>Check a <a style="text-decoration: underline;" href="https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js">
+                    bare SDK </a> implementaion (it takes approx. 450 LOC). Below snippet demonstrates the same thing using algob in <b>18x less code</b>:
                 </p>
                 <div class="code-window">
                     <div class="dots">
@@ -136,12 +135,10 @@ async function run (runtimeEnv, deployer) {
 
   await deployer.optInAccountToASA('gold', 'bob', {});
 }</code></pre>
-            </div>
-                <p style="font-size: 20px; margin-top: 10px;">
-                    Check our rich <a style="text-decoration: underline;" href="https://github.com/scale-it/algo-builder/tree/master/examples">library</a> of examples (ASA deployment, PyTEAL support, contract account, delegated signature, stateful smart contracts etc..)
-                </p>
+                </div>
             </div>
         </div>
+
     </div>
 </section>
 
