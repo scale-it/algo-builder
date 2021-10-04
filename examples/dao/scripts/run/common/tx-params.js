@@ -142,7 +142,7 @@ module.exports = {
   mkClearVoteRecordTx,
   mkClearProposalTx,
   now,
-  voting_start: votingStart,
-  voting_end: votingEnd,
-  execute_before: executeBefore
+  votingStart,
+  votingEnd,
+  executeBefore
 };
