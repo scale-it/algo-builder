@@ -57,6 +57,17 @@ def approval_program(ARG_GOV_TOKEN):
     recipient = App.localGet(Int(1), Bytes("recipient"))
     amount = App.localGet(Int(1), Bytes("amount"))
 
+    # propsal is passed if
+    # 1. voting is over and
+    # 2. proposal.yes >= min_support and
+    # 3. proposal.yes > proposal.no
+    def is_proposal_passed(idx: Int):
+        return And(
+            Global.latest_timestamp() > App.localGet(idx, Bytes("voting_end")),
+            App.localGet(idx, Bytes("yes")) >= App.globalGet(min_support),
+            App.localGet(idx, Bytes("yes")) > App.localGet(idx, Bytes("no"))
+        )
+
     # Computes result of proposal. Saves result in scratch. Args:
     # * idx - index of account where proposal_lsig.address() is passed
     # NOTE: idx == Int(0) means proposalLsig is Txn.sender()
@@ -69,23 +80,19 @@ def approval_program(ARG_GOV_TOKEN):
                 [Global.latest_timestamp() <= App.localGet(idx, Bytes("voting_end")), scratchvar_result.store(Int(3))],
                 # 1 if voting is over and proposal.yes >= min_support and proposal.yes > proposal.no
                 [
-                    And(
-                        Global.latest_timestamp() > App.localGet(idx, Bytes("voting_end")),
-                        App.localGet(idx, Bytes("yes")) >= App.globalGet(min_support),
-                        App.localGet(idx, Bytes("yes")) > App.localGet(idx, Bytes("no"))
-                    ) == Int(1),
+                    is_proposal_passed(idx) == Int(1),
                     scratchvar_result.store(Int(1))
                 ],
+                [
+                    # if proposal is not expired, not in progess, and not passed, then reject (set result == Int(2))
+                    And(
+                        Global.latest_timestamp() <= App.localGet(idx, Bytes("execute_before")),
+                        Global.latest_timestamp() > App.localGet(idx, Bytes("voting_end")),
+                        is_proposal_passed(idx) == Int(0)
+                    ),
+                    scratchvar_result.store(Int(2))
+                ]
             ),
-            # if proposal is not expired, not in progess, and not passed, then reject (set result == Int(2))
-            If(
-                And(
-                    scratchvar_result.load() != Int(4), # expired
-                    scratchvar_result.load() != Int(3), # in progess
-                    scratchvar_result.load() != Int(1), # passed
-                ),
-                scratchvar_result.store(Int(2))
-            )
         ])
 
     # Checks if the proposal is active or not. Saves result in scratchvar_proposal_active. Args:
