@@ -9,6 +9,7 @@ const now = Math.round(new Date().getTime() / 1000);
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const INDEX_OUT_OF_BOUND_ERR = 'RUNTIME_ERR1008: Index out of bound';
+const INTEGER_UNDERFLOW_ERR = 'RUNTIME_ERR1005: Result of current operation caused integer underflow';
 const APP_NOT_FOUND = 'RUNTIME_ERR1306: Application Index 1 not found or is invalid';
 
 describe('DAO - Failing Paths', function () {
@@ -75,7 +76,7 @@ describe('DAO - Failing Paths', function () {
       proposalParams[6] = `int:${votingStart - 30}`;
       addProposalTx[0].appArgs = proposalParams;
 
-      assert.throws(() => ctx.executeTx(addProposalTx), 'RUNTIME_ERR1005: Result of current operation caused integer underflow');
+      assert.throws(() => ctx.executeTx(addProposalTx), INTEGER_UNDERFLOW_ERR);
     });
 
     it('should fail if "min_duration <= votingEnd - votingStart <= max_duration" is not satisfied', () => {
@@ -86,15 +87,24 @@ describe('DAO - Failing Paths', function () {
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
 
-    it('should fail if executeBefore < votingEnd', () => {
-      // set executeBefore
+    it('should fail if executeBefore <= votingEnd', () => {
+      // set executeBefore < votingEnd
       proposalParams[7] = `int:${votingEnd - 30}`;
+      addProposalTx[0].appArgs = proposalParams;
+      assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
+
+      // set executeBefore == votingEnd
+      proposalParams[7] = `int:${votingEnd}`;
       addProposalTx[0].appArgs = proposalParams;
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
 
     it('should fail if proposal type is not between [1-3]', () => {
       proposalParams[8] = 'int:4';
+      addProposalTx[0].appArgs = proposalParams;
+      assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
+
+      proposalParams[8] = 'int:0';
       addProposalTx[0].appArgs = proposalParams;
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
@@ -104,7 +114,10 @@ describe('DAO - Failing Paths', function () {
     });
 
     it('should fail if gov tokens deposit is not equal to DAO.deposit', () => {
-      addProposalTx[1].amount = 10;
+      addProposalTx[1].amount = deposit - 1;
+      assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
+
+      addProposalTx[1].amount = deposit + 1;
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
 
@@ -113,8 +126,11 @@ describe('DAO - Failing Paths', function () {
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
 
-    it('should fail if votingStart < now', () => {
-      ctx.runtime.setRoundAndTimestamp(1, now + (2 * 60)); // latest time set as (now + 2min)
+    it('should fail if votingStart <= now', () => {
+      ctx.runtime.setRoundAndTimestamp(1, votingStart + 10); // now > votingStart
+      assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
+
+      ctx.runtime.setRoundAndTimestamp(1, votingStart); // now == votingStart
       assert.throws(() => ctx.executeTx(addProposalTx), RUNTIME_ERR1009);
     });
   });
@@ -124,9 +140,9 @@ describe('DAO - Failing Paths', function () {
       ctx.addProposal();
     });
 
-    const _depositVoteToken = (account, lsig, amount) => {
+    const _depositVoteToken = (from, lsig, amount) => {
       const depositVoteTx = mkDepositVoteTokenTx(
-        ctx.daoAppID, ctx.govTokenID, account, lsig, amount
+        ctx.daoAppID, ctx.govTokenID, from, lsig, amount
       );
       ctx.executeTx(depositVoteTx);
     };
@@ -166,7 +182,7 @@ describe('DAO - Failing Paths', function () {
 
   describe('Vote', function () {
     this.beforeAll(() => {
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
+      // ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
     });
 
     let registerVoteParam;
@@ -205,10 +221,16 @@ describe('DAO - Failing Paths', function () {
     });
 
     it('should fail user tries to register votes again for same proposal (double voting)', () => {
-      // register votes by voterA
+      // user deposits gov tokens for voting (OK)
+      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
+
+      // user votes (OK)
       ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterA.account });
 
-      // fails (voter A tries to register votes again)
+      // user deposits again (OK)
+      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 4);
+
+      // user tries to vote again after depositing more tokens (FAIL)
       assert.throws(
         () => ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterA.account }),
         RUNTIME_ERR1009
@@ -278,6 +300,15 @@ describe('DAO - Failing Paths', function () {
     it('should reject execute if proposal is expired', () => {
       // set current time as > executeBefore
       ctx.runtime.setRoundAndTimestamp(10, executeBefore + 30);
+      assert.throws(
+        () => ctx.executeTx(executeProposalTx),
+        RUNTIME_ERR1009
+      );
+    });
+
+    it('execution should fail if now < votingStart (before voting started)', () => {
+      // set current time as > executeBefore
+      ctx.runtime.setRoundAndTimestamp(10, votingStart - 30);
       assert.throws(
         () => ctx.executeTx(executeProposalTx),
         RUNTIME_ERR1009
@@ -392,9 +423,13 @@ describe('DAO - Failing Paths', function () {
       // add proposal
       ctx.addProposal();
 
-      // deposit & register yes votes
+      // deposit & register yes votes (by A)
       ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
+
+      // deposit & register yes votes (by B)
+      ctx.depositVoteToken(ctx.voterB, ctx.depositLsig, minSupport + 1);
+      ctx.vote(ctx.voterB, Vote.YES, ctx.proposalLsigAcc);
 
       // execute proposal
       ctx.executeProposal(ctx.proposalLsigAcc);
@@ -444,7 +479,46 @@ describe('DAO - Failing Paths', function () {
           { ...withdrawVoteDepositTx[0] },
           { ...withdrawVoteDepositTx[1], amount: origDeposit + 5n }
         ]),
-        'Result of current operation caused integer underflow at line 426' // -ve value handled by TEAL
+        INTEGER_UNDERFLOW_ERR // -ve value handled by TEAL
+      );
+    });
+
+    it('should allow partial withdrawals', () => {
+      const origDeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
+      // we use voterB for withdrawal here
+      withdrawVoteDepositTx = mkWithdrawVoteDepositTx(
+        ctx.daoAppID, ctx.govTokenID, ctx.voterB.account, ctx.depositLsig, 5
+      );
+
+      // withdraw 1 gov token
+      ctx.executeTx([
+        { ...withdrawVoteDepositTx[0] },
+        { ...withdrawVoteDepositTx[1], amount: 1n }
+      ]);
+
+      // withdraw (origDeposit - 1) gov tokens (PASSES)
+      ctx.executeTx([
+        { ...withdrawVoteDepositTx[0] },
+        { ...withdrawVoteDepositTx[1], amount: origDeposit - 1n }
+      ]);
+    });
+
+    it('should reject on overflow in partial withdrawals', () => {
+      const origDeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
+
+      // withdraw 1 gov token
+      ctx.executeTx([
+        { ...withdrawVoteDepositTx[0] },
+        { ...withdrawVoteDepositTx[1], amount: 2n }
+      ]);
+
+      // trying to withdraw (origDeposit - 1) gov tokens (FAILS, as total amount exceeds origDeposit)
+      assert.throws(
+        () => ctx.executeTx([
+          { ...withdrawVoteDepositTx[0] },
+          { ...withdrawVoteDepositTx[1], amount: origDeposit - 1n }
+        ]),
+        INTEGER_UNDERFLOW_ERR // -ve value handled by TEAL
       );
     });
   });
