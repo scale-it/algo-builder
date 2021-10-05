@@ -199,7 +199,7 @@ describe('DAO - Failing Paths', function () {
       };
 
       // set "now" between [votingStart, votingEnd]
-      ctx.runtime.setRoundAndTimestamp(10, votingStart + ((votingEnd - votingStart) / 2));
+      ctx.runtime.setRoundAndTimestamp(10, votingStart + Math.round((votingEnd - votingStart) / 2));
     });
 
     it('should fail if proposalLsig address is not passed', () => {
@@ -560,7 +560,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject clear voting record if propsal is active(still in voting)', () => {
       // set current time between [votingStart, votingEnd]
-      ctx.runtime.setRoundAndTimestamp(10, votingStart + ((votingEnd - votingStart) / 2));
+      ctx.runtime.setRoundAndTimestamp(10, votingStart + Math.round((votingEnd - votingStart) / 2));
 
       // Note: we register enough YES votes in beforeAll, so it will pass,
       // but proposal is not executed as it is still in voting
@@ -647,7 +647,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject clear_proposal if voting is active', () => {
       // set current time between [votingStart, votingEnd]
-      ctx.runtime.setRoundAndTimestamp(10, votingStart + ((votingEnd - votingStart) / 2));
+      ctx.runtime.setRoundAndTimestamp(10, votingStart + Math.round((votingEnd - votingStart) / 2));
 
       assert.throws(
         () => ctx.executeTx(clearProposalTx),
