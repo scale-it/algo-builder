@@ -61,6 +61,7 @@ describe('DAO - Failing Paths', function () {
         ctx.proposalLsig,
         ctx.daoFundLsig
       );
+      // update transfer amount of proposal deposit tx
       addProposalTx[1].amount = 15;
     });
 
@@ -212,15 +213,15 @@ describe('DAO - Failing Paths', function () {
       );
     });
 
-    it('should fail if no votes are deposited', () => {
-      // voterB hasn't deposited votes yet
+    it('should fail if no gov tokens are deposited', () => {
+      // voterB hasn't deposited gov tokens yet
       assert.throws(
         () => ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterB.account }),
         RUNTIME_ERR1009
       );
     });
 
-    it('should fail user tries to register votes again for same proposal (double voting)', () => {
+    it('should fail if a user votes again for the same proposal (double voting)', () => {
       // user deposits gov tokens for voting (OK)
       ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
 
@@ -265,9 +266,7 @@ describe('DAO - Failing Paths', function () {
       ctx.addProposal();
     }
 
-    this.beforeEach(() => {
-      resetCtx();
-    });
+    this.beforeEach(resetCtx);
 
     let executeProposalTx;
     this.beforeEach(() => {
@@ -277,7 +276,7 @@ describe('DAO - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: ctx.proposer.account,
           appID: ctx.daoAppID,
-          payFlags: { totalFee: 2000 },
+          payFlags: { totalFee: 2000 }, // here we pay for both transactions
           appArgs: ['str:execute'],
           accounts: [ctx.proposalLsig.address()]
         },
@@ -447,7 +446,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject withdrawal if voting is active', () => {
       // set current time between [votingStart, votingEnd]
-      ctx.runtime.setRoundAndTimestamp(10, votingStart + ((votingEnd - votingStart) / 2));
+      ctx.runtime.setRoundAndTimestamp(10, votingStart + Math.round((votingEnd - votingStart) / 2));
 
       assert.throws(
         () => ctx.executeTx(withdrawVoteDepositTx),
