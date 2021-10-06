@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
   await balanceOf(deployer, lsig.address(), goldAssetID);
 
   // To get raw signed transaction you may use `signTransactions` function
-  const rawSign = signTransactions([{ transaction: tx, sign: sign }]);
+  const _rawSign = signTransactions([{ transaction: tx, sign: sign }]);
 }
 
 module.exports = { default: run };

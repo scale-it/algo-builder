@@ -3,6 +3,10 @@ const { ProposalType } = require('./common');
 
 const now = Math.round(new Date().getTime() / 1000);
 
+const votingStart = now + (1 * 60);
+const votingEnd = now + (3 * 60);
+const executeBefore = now + (7 * 60);
+
 function mkProposalTx (
   daoAppID, govTokenID, proposerAcc, depositLsig, proposalLsig, daoFundLsig) {
   const proposerAddr = proposerAcc.addr ?? proposerAcc.address;
@@ -12,9 +16,9 @@ function mkProposalTx (
     'str:www.myurl.com', // url
     'str:url-hash', // url_hash
     'str:', // hash_algo (passing null)
-    `int:${now + (1 * 60)}`, // voting_start (now + 1min)
-    `int:${now + (3 * 60)}`, // voting_end (now + 3min)
-    `int:${now + (7 * 60)}`, // execute_before (now + 7min)
+    `int:${votingStart}`, // voting_start (now + 1min)
+    `int:${votingEnd}`, // voting_end (now + 3min)
+    `int:${executeBefore}`, // execute_before (now + 7min)
     `int:${ProposalType.ALGO_TRANSFER}`, // type
     `addr:${daoFundLsig.address()}`, // from (DAO treasury)
     `addr:${proposerAddr}`, // recepient
@@ -137,5 +141,8 @@ module.exports = {
   mkWithdrawVoteDepositTx,
   mkClearVoteRecordTx,
   mkClearProposalTx,
-  now
+  now,
+  votingStart,
+  votingEnd,
+  executeBefore
 };
