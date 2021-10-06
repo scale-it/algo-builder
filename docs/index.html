@@ -113,8 +113,8 @@
                     </div>
                     <pre class="language-javascript line-numbers"><code class="language-javascript">// Transfer Algo, create "gold" ASA and opt-in
 
-import { executeTransaction, balanceOf } from '@algorand-builder/algob';
-import { rtypes } from '@algorand-builder/runtime';
+import { executeTransaction, balanceOf } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount `=` deployer.accountsByName.get('master-account');
