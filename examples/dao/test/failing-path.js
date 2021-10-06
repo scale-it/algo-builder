@@ -182,9 +182,6 @@ describe('DAO - Failing Paths', function () {
   });
 
   describe('Vote', function () {
-    this.beforeAll(() => {
-      // ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
-    });
 
     let registerVoteParam;
     this.beforeEach(() => {
