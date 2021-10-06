@@ -33,6 +33,27 @@ describe('DAO - Failing Paths', function () {
     );
   }
 
+  describe('SetUp', function () {
+    this.beforeAll(setUpCtx);
+
+    it('should reject set_deposit in DAO if sender !== creator', () => {
+      // add deposit_lsig address to DAO
+      const addAccountsTx = {
+        type: types.TransactionType.CallApp,
+        sign: types.SignType.SecretKey,
+        fromAccount: ctx.voterA.account,
+        appID: ctx.daoAppID,
+        payFlags: {},
+        appArgs: [
+          'str:add_deposit_accounts',
+          `addr:${ctx.depositLsig.address()}`
+        ]
+      };
+
+      assert.throws(() => ctx.executeTx(addAccountsTx), RUNTIME_ERR1009);
+    });
+  });
+
   describe('Add proposal', function () {
     this.beforeAll(setUpCtx);
 
@@ -182,7 +203,6 @@ describe('DAO - Failing Paths', function () {
   });
 
   describe('Vote', function () {
-
     let registerVoteParam;
     this.beforeEach(() => {
       registerVoteParam = {
@@ -394,7 +414,10 @@ describe('DAO - Failing Paths', function () {
         RUNTIME_ERR1009
       );
 
-      // from_account is wrong
+      // from_account is wrong (for tx1)
+      // for tx0, from_account can be any account
+      // NOTE: Here we change the "from account" of transaction as per proposal instructions (tx1).
+      // And should fail if from account address is different from the one recorded in original proposal
       assert.throws(
         () => ctx.executeTx([
           { ...executeProposalTx[0] },
