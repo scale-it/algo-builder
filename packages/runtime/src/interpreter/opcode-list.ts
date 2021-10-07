@@ -3307,3 +3307,35 @@ export class Gaids extends Gaid {
     super.execute(stack);
   }
 }
+
+// Pops: ... stack, any
+// Pushes: any
+// remove top of stack, and place it deeper in the stack such that
+// N elements are above it. Fails if stack depth <= N.
+export class Cover extends Op {
+  readonly line: number;
+  readonly n: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.n = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.n + 1, this.line);
+
+    const top = stack.pop();
+    const tempStack: TEALStack = new Stack(this.n);
+    for (let count = 1; count <= this.n; ++count) {
+      tempStack.push(stack.pop());
+    }
+    stack.push(top);
+  }
+}

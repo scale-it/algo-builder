@@ -200,6 +200,14 @@ opCodeMap[4] = {
   gaids: Gaids
 };
 
+/**
+ * TEALv5 opcodes
+ */
+opCodeMap[5] = {
+  ...opCodeMap[4]
+
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
