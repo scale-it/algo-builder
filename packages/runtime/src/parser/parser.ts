@@ -9,14 +9,14 @@ import {
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
-  ByteZero, Callsub, Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
+  ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
   EqualTo, Err, Exp, Expw, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256,
-  Sha512_256, Shl, Shr, Sqrt, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -204,8 +204,13 @@ opCodeMap[4] = {
  * TEALv5 opcodes
  */
 opCodeMap[5] = {
-  ...opCodeMap[4]
+  ...opCodeMap[4],
 
+  cover: Cover,
+  uncover: Uncover,
+
+  loads: Loads,
+  stores: Stores
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -216,7 +221,7 @@ const interpreterReqList = new Set([
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
-  "gaid", "gaids"
+  "gaid", "gaids", "loads", "stores"
 ]);
 
 /**
