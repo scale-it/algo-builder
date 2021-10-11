@@ -3321,7 +3321,7 @@ export class Cover extends Op {
    * @param args Expected arguments: [N]
    * @param line line number in TEAL file
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
@@ -3332,11 +3332,14 @@ export class Cover extends Op {
     this.assertMinStackLen(stack, this.n + 1, this.line);
 
     const top = stack.pop();
-    const tempStack: TEALStack = new Stack(this.n);
+    const temp = [];
     for (let count = 1; count <= this.n; ++count) {
-      tempStack.push(stack.pop());
+      temp.push(stack.pop());
     }
     stack.push(top);
+    for (let i = this.n - 1; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
   }
 }
 
@@ -3353,7 +3356,7 @@ export class Uncover extends Op {
    * @param args Expected arguments: [N]
    * @param line line number in TEAL file
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
@@ -3363,12 +3366,15 @@ export class Uncover extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, this.n + 1, this.line);
 
-    const top = stack.pop();
-    const tempStack: TEALStack = new Stack(this.n);
+    const temp = [];
     for (let count = 1; count <= this.n; ++count) {
-      tempStack.push(stack.pop());
+      temp.push(stack.pop());
     }
-    stack.push(top);
+    const deepValue = stack.pop();
+    for (let i = this.n - 1; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+    stack.push(deepValue);
   }
 }
 
