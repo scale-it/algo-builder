@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
++ TEALv4 support in `@algo-builder/runtime`:
+    * Cover, Uncover opcodes
+    * Loads, Stores opcodes
+
 ## v2.0.0 2021-09-30
 
 ### Improvements
