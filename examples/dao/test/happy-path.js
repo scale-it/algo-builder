@@ -97,8 +97,6 @@ describe('DAO - Happy Paths', function () {
     });
 
     it('should save proposal config in proposalLsig for ALGO transfer (type == 1)', () => {
-      const beforeBal = ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount;
-
       ctx.executeTx(addProposalTx);
       ctx.syncAccounts();
 
@@ -115,9 +113,6 @@ describe('DAO - Happy Paths', function () {
       assert.deepEqual(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, 'from'), parsing.addressToPk(ctx.daoFundLsig.address()));
       assert.deepEqual(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, 'recipient'), parsing.addressToPk(ctx.proposer.address));
       assert.deepEqual(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, 'amount'), BigInt(2e6));
-
-      // verify deposit recieved in depositLsig
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 15n);
     });
 
     it('should save proposal config in proposalLsig for ASA transfer (type == 2)', () => {
