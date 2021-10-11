@@ -22,8 +22,8 @@ import {
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store,
+  Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
   Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
@@ -500,6 +500,30 @@ describe("Teal Opcodes", function () {
       assert.equal(val, interpreter.scratch[0]);
     });
 
+    it("should store uint64 to scratch using `stores`", function () {
+      const interpreter = new Interpreter();
+      const val = 0n;
+      stack.push(0n);
+      stack.push(val);
+
+      const op = new Stores([], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should store byte[] to scratch using `stores`", function () {
+      const interpreter = new Interpreter();
+      const val = parsing.stringToBytes("HelloWorld");
+      stack.push(0n);
+      stack.push(val);
+
+      const op = new Stores([], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
     it("should throw error on store if index is out of bound", function () {
       const interpreter = new Interpreter();
       stack.push(0n);
@@ -609,7 +633,7 @@ describe("Teal Opcodes", function () {
     );
   });
 
-  describe("Load", function () {
+  describe("Load, Loads(Tealv5)", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
     const scratch = [0n, parsing.stringToBytes("HelloWorld")];
@@ -630,6 +654,22 @@ describe("Teal Opcodes", function () {
 
       op.execute(stack);
       assert.equal(len + 1, stack.length()); // verify stack is pushed
+      assert.equal(interpreter.scratch[1], stack.pop());
+    });
+
+    it("should load uint64 from scratch space to stack using `loads`", () => {
+      stack.push(0n);
+      const op = new Loads([], 1, interpreter);
+
+      op.execute(stack);
+      assert.equal(interpreter.scratch[0], stack.pop());
+    });
+
+    it("should load byte[] from scratch space to stack using `loads`", function () {
+      stack.push(1n);
+      const op = new Loads([], 1, interpreter);
+
+      op.execute(stack);
       assert.equal(interpreter.scratch[1], stack.pop());
     });
 
@@ -5117,7 +5157,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Tealv5 opcodes", () => {
+  describe("Tealv5: cover, uncover", () => {
     let stack = new Stack<StackElem>();
     afterEach(() => {
       stack = new Stack<StackElem>();
