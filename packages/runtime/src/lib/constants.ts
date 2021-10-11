@@ -72,7 +72,7 @@ export const TxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
     TypeEnum: null,
     XferAsset: 'xaid',
     AssetAmount: 'aamt',
-    AssetSender: 'snd',
+    AssetSender: 'asnd',
     AssetReceiver: 'arcv',
     AssetCloseTo: 'aclose',
     GroupIndex: null,
