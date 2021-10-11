@@ -3367,11 +3367,11 @@ export class Uncover extends Op {
     this.assertMinStackLen(stack, this.n + 1, this.line);
 
     const temp = [];
-    for (let count = 1; count <= this.n; ++count) {
+    for (let count = 1; count < this.n; ++count) {
       temp.push(stack.pop());
     }
     const deepValue = stack.pop();
-    for (let i = this.n - 1; i >= 0; --i) {
+    for (let i = this.n - 2; i >= 0; --i) {
       stack.push(temp[i]);
     }
     stack.push(deepValue);

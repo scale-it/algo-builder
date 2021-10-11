@@ -17,14 +17,14 @@ import {
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
-  Concat, Dig, Div, DivModw,
+  Concat, Cover, Dig, Div, DivModw,
   Dup, Dup2, Ed25519verify,
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
   Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store,
-  Sub, Substring, Substring3, Swap, Txn, Txna
+  Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
@@ -5114,6 +5114,73 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       assert.equal(stack.pop(), 31n);
+    });
+  });
+
+  describe("Tealv5 opcodes", () => {
+    let stack = new Stack<StackElem>();
+    afterEach(() => {
+      stack = new Stack<StackElem>();
+    });
+
+    it("cover: move top to below N elements", () => {
+      stack.push(1n);
+      stack.push(2n);
+      stack.push(3n);
+      stack.push(4n);
+
+      const op = new Cover(['2'], 1);
+      // move top below 2 elements
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("cover: should throw error is length of stack is not enough", () => {
+      stack.push(1n);
+      stack.push(2n);
+      stack.push(3n);
+      stack.push(4n);
+
+      const op = new Cover(['5'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("uncover: move Nth value to top", () => {
+      stack.push(1n);
+      stack.push(2n);
+      stack.push(3n);
+      stack.push(4n);
+
+      const op = new Uncover(['3'], 1);
+      // move top below 2 elements
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("uncover: should throw error is length of stack is not enough", () => {
+      stack.push(1n);
+      stack.push(2n);
+      stack.push(3n);
+      stack.push(4n);
+
+      const op = new Uncover(['5'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
     });
   });
 });
