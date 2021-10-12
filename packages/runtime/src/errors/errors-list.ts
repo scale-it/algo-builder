@@ -292,6 +292,12 @@ maximun uint128`
     message: "Requested transaction hasn't created an asset or application for index: %index%. [error-line: %line%], requested transaction didn't create an asset or application or T < GroupIndex",
     title: 'Requested transaction not found',
     description: `requested transaction didn't creat an asset or application or T < GroupIndex.`
+  },
+  EXTRACT_RANGE_ERROR: {
+    number: 1044,
+    message: "Extract range beyond length of string",
+    title: 'Extract range beyond length of string',
+    description: `Extract range beyond length of string`
   }
 };
 

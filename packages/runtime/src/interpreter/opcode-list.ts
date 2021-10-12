@@ -3307,3 +3307,144 @@ export class Gaids extends Gaid {
     super.execute(stack);
   }
 }
+
+// Pops: ... stack, []byte
+// Pushes: []byte
+// pop a byte-array A. For immediate values in 0..255 S and L: extract a
+// range of bytes from A starting at S up to but not including S+L,
+// push the substring result. If L is 0, then extract to the end of the string.
+// If S or S+L is larger than the array length, the program fails
+export class Extract extends Op {
+  readonly line: number;
+  readonly start: number;
+  length: number;
+
+  /**
+   * Asserts 2 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, line);
+    this.start = Number(args[0]);
+    this.length = Number(args[1]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    // if length is 0, take bytes from start index to the end
+    if (this.length === 0) {
+      this.length = array.length - this.start;
+    }
+
+    stack.push(this.opExtractImpl(array, this.start, this.length));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}, {uint64 C}
+// Pushes: []byte
+// pop a byte-array A and two integers B and C.
+// Extract a range of bytes from A starting at B up to but not including B+C,
+// push the substring result. If B+C is larger than the array length, the program fails
+export class Extract3 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const length = this.assertBigInt(stack.pop(), this.line);
+    const start = this.assertBigInt(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, Number(start), Number(length)));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes
+// from A starting at B up to but not including B+2,
+// convert bytes as big endian and push the uint64 result.
+// If B+2 is larger than the array length, the program fails
+export class ExtractUint16 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const start = this.assertBigInt(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, Number(start), Number(length)));
+  }
+}
+
+export class ExtractUint32 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const start = this.assertBigInt(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, Number(start), Number(length)));
+  }
+}
+
+export class ExtractUint64 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const start = this.assertBigInt(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, Number(start), Number(length)));
+  }
+}

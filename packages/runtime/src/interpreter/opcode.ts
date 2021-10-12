@@ -221,4 +221,20 @@ export class Op {
     }
     return stack;
   }
+
+  /**
+   * Returns range of bytes from A starting at S up to but not including S+L,
+   * If S or S+L is larger than the array length, throw error
+   * @param array Uint8array
+   * @param start starting point in array
+   * @param length length of substring
+   */
+  opExtractImpl (array: Uint8Array, start: number, length: number): Uint8Array {
+    const end = start + length;
+    if (start > array.length || end > array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
+    }
+
+    return array.slice(start, end);
+  }
 }
