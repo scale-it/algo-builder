@@ -7,7 +7,8 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
+  Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify, EqualTo, Err,
+  Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32, ExtractUint64, Gaid, Gaids,
   GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
@@ -1038,6 +1039,68 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["sqrt", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("should return correct opcodes for tealv5 ops", () => {
+      it("extract", () => {
+        const res = opcodeFromSentence(["extract", "1", "2"], 1, interpreter);
+        const expected = new Extract(["1", "2"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract3", () => {
+        const res = opcodeFromSentence(["extract3"], 1, interpreter);
+        const expected = new Extract3([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract3", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint16", () => {
+        const res = opcodeFromSentence(["extract_uint16"], 1, interpreter);
+        const expected = new ExtractUint16([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint16", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint32", () => {
+        const res = opcodeFromSentence(["extract_uint16"], 1, interpreter);
+        const expected = new ExtractUint32([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint32", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint64", () => {
+        const res = opcodeFromSentence(["extract_uint64"], 1, interpreter);
+        const expected = new ExtractUint64([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint64", "1"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
