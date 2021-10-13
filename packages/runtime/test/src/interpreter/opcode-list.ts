@@ -19,7 +19,8 @@ import {
   ByteNotEqualTo, ByteSub, ByteZero,
   Concat, Dig, Div, DivModw,
   Dup, Dup2, Ed25519verify,
-  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
+  EqualTo, Err, Exp, Expw, Extract, Extract3, GetAssetDef, GetAssetHolding, GetBit,
+  GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
@@ -5114,6 +5115,61 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       assert.equal(stack.pop(), 31n);
+    });
+  });
+
+  describe("Tealv5: Extract opcodes", () => {
+    const stack = new Stack<StackElem>();
+
+    it("extract", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      let op = new Extract(["1", "3"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      // If L is 0, then extract to the end of the string.
+      stack.push(new Uint8Array([12, 23, 2, 4]));
+      op = new Extract(["1", "0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 2, 4]));
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["1", "10"], 1);
+
+      // If S or S+L is larger than the array length, the program fails
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["111", "1"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract3", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      stack.push(1n);
+      stack.push(3n);
+      let op = new Extract3([], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      stack.push(new Uint8Array([12, 23]));
+      stack.push(1n);
+      stack.push(10n);
+      op = new Extract3([], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
     });
   });
 });
