@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
++ TEALv4 support in `@algo-builder/runtime`:
+    * Extract, Extract3 opcodes
+    * ExtractUint16, ExtractUint32, ExtractUint64 opcodes
+
 ## v2.0.0 2021-09-30
 
 ### Improvements
