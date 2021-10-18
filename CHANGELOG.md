@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Bug Fixes
++ [web] Fixed `metadataHash` attribute verification for `ASADefSchema` and consequently `deployASA`.
+
 ## v2.0.0 2021-09-30
 
 ### Improvements

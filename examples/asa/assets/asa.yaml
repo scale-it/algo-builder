@@ -4,6 +4,7 @@ gold:
   defaultFrozen: false
   unitName: "GLD"
   url: "url"
+  # Uint8Array or UTF-8 string representation of a hash commitment with respect to the asset. Must be exactly 32 bytes long.
   # User may get "signature validation failed" from node if shorter hash is used.
   metadataHash: "12312442142141241244444411111133"
   note: "note"
