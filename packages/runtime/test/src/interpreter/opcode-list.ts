@@ -3,6 +3,8 @@
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
+import { sign } from "crypto";
+import { ec as EC } from "elliptic";
 
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -18,7 +20,7 @@ import {
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
   Concat, Dig, Div, DivModw,
-  Dup, Dup2, Ed25519verify,
+  Dup, Dup2, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -5114,6 +5116,69 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       assert.equal(stack.pop(), 31n);
+    });
+  });
+
+  describe("Tealv5: ECDSA", () => {
+    const stack = new Stack<StackElem>();
+    const ec = new EC('secp256k1');
+    const key = ec.genKeyPair();
+    const msgHash = new Uint8Array([0, 1, 2, 3, 4, 5]);
+    const signature = key.sign(msgHash);
+
+    it("ecdsa_verify, should verify correct signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      // push public key
+      stack.push(key.getPublic().getX().toBuffer());
+      stack.push(key.getPublic().getY().toBuffer());
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("ecdsa_verify, should not verify wrong signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature (signed by key)
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      const wrongKey = ec.genKeyPair();
+      // push public key(public key is wrong)
+      stack.push(wrongKey.getPublic().getX().toBuffer());
+      stack.push(wrongKey.getPublic().getY().toBuffer());
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("ecdsa_verify, should throw error if curve is not supported", () => {
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      stack.push(key.getPublic().getX().toBuffer());
+      stack.push(key.getPublic().getY().toBuffer());
+
+      const op = new EcdsaVerify(["2"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+
+    it("ecdsa_pk_decompress", () => {
+
+    });
+
+    it("ecdsa_pk_recover", () => {
+
     });
   });
 });
