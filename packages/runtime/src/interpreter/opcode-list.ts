@@ -3345,7 +3345,9 @@ export class EcdsaVerify extends Op {
     const data = this.assertBytes(stack.pop(), this.line);
 
     if (this.curveIndex !== 0) {
-      // throw error, curve is not supported
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
     }
 
     const ec = new EC('secp256k1');
@@ -3385,7 +3387,9 @@ export class EcdsaPkDecompress extends Op {
     const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
 
     if (this.curveIndex !== 0) {
-      // throw error, curve is not supported
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
     }
 
     const ec = new EC('secp256k1');
@@ -3430,7 +3434,9 @@ export class EcdsaPkRecover extends Op {
     const data = this.assertBytes(stack.pop(), this.line);
 
     if (this.curveIndex !== 0) {
-      // throw error, curve is not supported
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
     }
 
     const ec = new EC('secp256k1');
