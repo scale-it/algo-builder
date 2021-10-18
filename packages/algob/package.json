@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/algob",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
@@ -88,7 +88,7 @@
     "ts-mocha": "^8.0.0"
   },
   "dependencies": {
-    "@algo-builder/runtime": "^2.0.0",
+    "@algo-builder/runtime": "^2.0.1",
     "algosdk": "^1.11.1",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
