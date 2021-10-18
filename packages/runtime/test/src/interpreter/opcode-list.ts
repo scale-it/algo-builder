@@ -20,7 +20,7 @@ import {
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
   Concat, Dig, Div, DivModw,
-  Dup, Dup2, EcdsaPkDecompress, EcdsaVerify, Ed25519verify,
+  Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -5195,7 +5195,30 @@ describe("Teal Opcodes", function () {
     });
 
     it("ecdsa_pk_recover", () => {
+      // push message
+      stack.push(msgHash);
+      // push recovery id
+      stack.push(BigInt(signature.recoveryParam ?? 0n));
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
 
+      let op = new EcdsaPkRecover(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), key.getPublic().getY().toBuffer());
+      assert.deepEqual(stack.pop(), key.getPublic().getX().toBuffer());
+
+      stack.push(msgHash);
+      stack.push(2n);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      op = new EcdsaPkRecover(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
     });
   });
 });
