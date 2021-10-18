@@ -408,7 +408,7 @@ export class Interpreter {
     if (this.stack.length() === 1) {
       const s = this.stack.pop();
 
-      if (!(s instanceof Uint8Array) && s > 0n) { return; }
+      if (typeof s === 'bigint' && s > 0n) { return; }
     }
     throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
   }
