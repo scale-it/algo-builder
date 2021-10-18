@@ -3322,7 +3322,7 @@ export class EcdsaVerify extends Op {
    * @param args Expected arguments: [txIndex]
    * @param line line number in TEAL file
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
@@ -3371,7 +3371,7 @@ export class EcdsaPkDecompress extends Op {
    * @param args Expected arguments: [txIndex]
    * @param line line number in TEAL file
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
@@ -3414,7 +3414,7 @@ export class EcdsaPkRecover extends Op {
    * @param args Expected arguments: [txIndex]
    * @param line line number in TEAL file
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
