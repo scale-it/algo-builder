@@ -20,7 +20,7 @@ import {
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
   Concat, Dig, Div, DivModw,
-  Dup, Dup2, EcdsaVerify, Ed25519verify,
+  Dup, Dup2, EcdsaPkDecompress, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -5174,7 +5174,24 @@ describe("Teal Opcodes", function () {
     });
 
     it("ecdsa_pk_decompress", () => {
+      // https://bitcoin.stackexchange.com/questions/69315/how-are-compressed-pubkeys-generated
+      // example taken from above link
+      const compressed = '0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352';
+      stack.push(Buffer.from(compressed, "hex"));
 
+      let op = new EcdsaPkDecompress(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), Buffer.from('2CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6', "hex"));
+      assert.deepEqual(stack.pop(), Buffer.from('50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352', "hex"));
+
+      stack.push(Buffer.from(compressed, "hex"));
+      op = new EcdsaPkDecompress(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
     });
 
     it("ecdsa_pk_recover", () => {

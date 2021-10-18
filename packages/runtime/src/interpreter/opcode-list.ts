@@ -3393,7 +3393,7 @@ export class EcdsaPkDecompress extends Op {
     }
 
     const ec = new EC('secp256k1');
-    const publicKeyUncompressed = ec.keyFromPublic(Buffer.from(pubkeyCompressed).toString('hex'), 'hex').getPublic();
+    const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, 'hex').getPublic();
     const x = publicKeyUncompressed.getX();
     const y = publicKeyUncompressed.getY();
 
