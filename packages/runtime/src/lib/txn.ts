@@ -119,6 +119,12 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
       result = foreignAppsArr?.length;
       break;
     }
+    case 'AssetSender': {
+      /// + for asset_transfer transactions, we use "snd"
+      /// + for revoke asset tx (also an asset_transfer) tx, we use "asnd"
+      if (tx.type === 'axfer') { result = tx.asnd ?? tx.snd; }
+      break;
+    }
     default: {
       const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
       result = tx[s as keyof Txn]; // pk_buffer = tx['rcv']

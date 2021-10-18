@@ -1891,7 +1891,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.asnd, stack.pop());
+        assert.deepEqual(TXN_OBJ.snd, stack.pop());
       });
 
       it("should push txn AssetReceiver to stack", function () {
