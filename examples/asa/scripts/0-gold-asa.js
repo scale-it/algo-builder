@@ -27,14 +27,11 @@ async function run (runtimeEnv, deployer) {
   await Promise.all(promises);
 
   // create an assetMetadataHash as Uint8Array
-  const metadataHashBuffer = crypto.createHash('sha256').update('some content').digest();
-  const metadataHash = new Uint8Array(metadataHashBuffer);
+  const metadataHash = crypto.createHash('sha256').update('some content').digest();
   // or UTF-8 string:
-  // let metadataHash = crypto.createHash('sha256').update("some content").digest('utf-8');
+  // let metadataHash = "this must be 32 chars long text."
   // or from hex:
-  // let metadataHash = new Uint8Array(
-  //   Buffer.from('664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex')
-  // );
+  // let metadataHash = Buffer.from('664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex')
 
   // Let's deploy ASA. The following commnad will open the `assets/asa.yaml` file and search for
   // the `gold` ASA. The transaction can specify standard transaction parameters. If skipped
