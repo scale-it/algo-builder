@@ -5209,11 +5209,12 @@ describe("Teal Opcodes", function () {
       stack = new Stack<StackElem>();
     });
 
+    const push = (stack: Stack<StackElem>, n: number): void => {
+      for (let i = 1; i <= n; ++i) { stack.push(BigInt(i)); }
+    };
+
     it("cover: move top to below N elements", () => {
-      stack.push(1n);
-      stack.push(2n);
-      stack.push(3n);
-      stack.push(4n);
+      push(stack, 4);
 
       const op = new Cover(['2'], 1);
       // move top below 2 elements
@@ -5226,10 +5227,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("cover: should throw error is length of stack is not enough", () => {
-      stack.push(1n);
-      stack.push(2n);
-      stack.push(3n);
-      stack.push(4n);
+      push(stack, 4);
 
       const op = new Cover(['5'], 1);
 
@@ -5239,11 +5237,31 @@ describe("Teal Opcodes", function () {
       );
     });
 
+    it("cover: n == 0", () => {
+      push(stack, 4);
+
+      const op = new Cover(['0'], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("cover: n == stack.length", () => {
+      push(stack, 4);
+
+      const op = new Cover(['4'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
     it("uncover: move Nth value to top", () => {
-      stack.push(1n);
-      stack.push(2n);
-      stack.push(3n);
-      stack.push(4n);
+      push(stack, 4);
 
       const op = new Uncover(['3'], 1);
       // move top below 2 elements
@@ -5256,10 +5274,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("uncover: should throw error is length of stack is not enough", () => {
-      stack.push(1n);
-      stack.push(2n);
-      stack.push(3n);
-      stack.push(4n);
+      push(stack, 4);
 
       const op = new Uncover(['5'], 1);
 
