@@ -402,8 +402,9 @@ export class Interpreter {
    * @param runtime : runtime object
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
-   * @returns The final result on the stack or undefined if nothing was on the stack. 
-   *    NOTE: program should fail there is no result (stack is empty after the execution) or the result is zero.
+   * @returns The final result on the stack or undefined if nothing was on the stack.
+   * NOTE: program should fail if there is no result (stack is empty after the execution) or
+   *       the result is zero.
    */
   executeWithResult (program: string, mode: ExecutionMode, runtime: Runtime,
     debugStack?: number): StackElem | undefined {
