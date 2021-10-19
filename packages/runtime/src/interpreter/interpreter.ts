@@ -398,7 +398,7 @@ export class Interpreter {
   /**
    * This function executes TEAL code after parsing and returns the result of the program.
    * @param program: teal code
-   * @param mode : execution mode of TEAL code (Stateless or Stateful)
+   * @param mode : execution mode of TEAL code (smart signature or contract)
    * @param runtime : runtime object
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
