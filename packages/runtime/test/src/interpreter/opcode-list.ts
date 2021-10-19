@@ -476,7 +476,10 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Store", function () {
-    const stack = new Stack<StackElem>();
+    let stack: Stack<StackElem>;
+    beforeEach(() => {
+      stack = new Stack<StackElem>();
+    });
 
     it("should store uint64 to scratch", function () {
       const interpreter = new Interpreter();
@@ -498,6 +501,27 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
       assert.equal(stack.length(), 0); // verify stack is popped
       assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should throw error on store if index is out of bound", function () {
+      const interpreter = new Interpreter();
+      stack.push(0n);
+
+      const op = new Store([(MAX_UINT8 + 5).toString()], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should throw error on store if stack is empty", function () {
+      const interpreter = new Interpreter();
+      const stack = new Stack<StackElem>(); // empty stack
+      const op = new Store(["0"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
     });
 
     it("should store uint64 to scratch using `stores`", function () {
@@ -524,21 +548,22 @@ describe("Teal Opcodes", function () {
       assert.equal(val, interpreter.scratch[0]);
     });
 
-    it("should throw error on store if index is out of bound", function () {
+    it("should throw error on store if index is out of bound using `stores`", function () {
       const interpreter = new Interpreter();
+      stack.push(BigInt(MAX_UINT8 + 5));
       stack.push(0n);
 
-      const op = new Store([(MAX_UINT8 + 5).toString()], 1, interpreter);
+      const op = new Stores([], 1, interpreter);
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
-    it("should throw error on store if stack is empty", function () {
+    it("should throw error on store if stack is empty using `stores`", function () {
       const interpreter = new Interpreter();
       const stack = new Stack<StackElem>(); // empty stack
-      const op = new Store(["0"], 1, interpreter);
+      const op = new Stores([], 1, interpreter);
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
@@ -634,10 +659,14 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Load, Loads(Tealv5)", function () {
-    const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
     const scratch = [0n, parsing.stringToBytes("HelloWorld")];
     interpreter.scratch = scratch;
+    let stack: Stack<StackElem>;
+
+    beforeEach(() => {
+      stack = new Stack<StackElem>();
+    });
 
     it("should load uint64 from scratch space to stack", function () {
       const op = new Load(["0"], 1, interpreter);
@@ -657,6 +686,21 @@ describe("Teal Opcodes", function () {
       assert.equal(interpreter.scratch[1], stack.pop());
     });
 
+    it("should throw error on load if index is out of bound", function () {
+      const op = new Load([(MAX_UINT8 + 5).toString()], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should load default value to stack if value at a slot is not intialized", function () {
+      const interpreter = new Interpreter();
+      const op = new Load(["0"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(DEFAULT_STACK_ELEM, stack.pop());
+    });
+
     it("should load uint64 from scratch space to stack using `loads`", () => {
       stack.push(0n);
       const op = new Loads([], 1, interpreter);
@@ -673,17 +717,19 @@ describe("Teal Opcodes", function () {
       assert.equal(interpreter.scratch[1], stack.pop());
     });
 
-    it("should throw error on load if index is out of bound", function () {
-      const op = new Load([(MAX_UINT8 + 5).toString()], 1, interpreter);
+    it("should throw error on load if index is out of bound using `loads`", function () {
+      stack.push(BigInt(MAX_UINT8 + 5));
+      const op = new Loads([], 1, interpreter);
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
-    it("should load default value to stack if value at a slot is not intialized", function () {
+    it("should load default value to stack if value at a slot is not intialized using `loads`", function () {
       const interpreter = new Interpreter();
-      const op = new Load(["0"], 1, interpreter);
+      stack.push(0n);
+      const op = new Loads([], 1, interpreter);
       op.execute(stack);
       assert.equal(DEFAULT_STACK_ELEM, stack.pop());
     });
@@ -5158,7 +5204,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Tealv5: cover, uncover", () => {
-    let stack;
+    let stack: Stack<StackElem>;
     beforeEach(() => {
       stack = new Stack<StackElem>();
     });
