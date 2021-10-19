@@ -118,3 +118,9 @@ jobs:
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/interaction/call_application.js
+
+      - name: Example DAO
+        working-directory: ./examples/dao
+        run: |
+          pipenv run yarn algob deploy
+          pipenv run yarn algob run scripts/run/add_proposal.js

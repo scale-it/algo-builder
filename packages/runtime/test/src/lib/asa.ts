@@ -1,5 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
+import * as crypto from "crypto";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { validateASADefs } from "../../../src/lib/asa";
@@ -50,7 +51,7 @@ describe("ASA parser", () => {
         defaultFrozen: true,
         unitName: "unitName",
         url: "url",
-        metadataHash: "metadataHash",
+        metadataHash: "32ByteLongString32ByteLongString",
         note: "note",
         noteb64: "noteb64",
         manager: "manager",
@@ -67,7 +68,7 @@ describe("ASA parser", () => {
         defaultFrozen: true,
         freeze: "freeze",
         manager: "manager",
-        metadataHash: "metadataHash",
+        metadataHash: "32ByteLongString32ByteLongString",
         note: "note",
         noteb64: "noteb64",
         reserve: "reserve",
@@ -188,22 +189,67 @@ describe("ASA parser", () => {
     );
   });
 
-  it("Should validate metadataHash; too long", async () => {
-    const obj = {
+  it("Should validate metadataHash", async () => {
+    /** negative paths **/
+
+    // check utf-8 strings
+    const asaDefs = {
       A1: {
         total: 1,
         decimals: 1,
         unitName: 'ASA',
         // more than 32 bytes:
-        metadataHash: "1234567890abcdef1234567890abcdef_",
+        metadataHash: "1234567890abcdef1234567890xyzklmnone_",
         defaultFrozen: false
-      }
+      } as types.ASADef
     };
-    expectRuntimeError(
-      () => validateASADefs(obj, new Map<string, Account>(), ""),
+
+    const expectFail = (msg: string): void => expectRuntimeError(
+      () => validateASADefs(asaDefs, new Map<string, Account>(), ""),
       RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
-      "metadataHash"
+      "Metadata Hash must be a 32 byte",
+      msg
     );
+
+    expectFail("metadataHash too long");
+
+    asaDefs.A1.metadataHash = "too short";
+    expectFail("metadataHash too short");
+
+    // check with bytes array
+
+    asaDefs.A1.metadataHash = new Uint8Array(
+      Buffer.from('aaabbba664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex'));
+    expectFail("byte array too long");
+
+    asaDefs.A1.metadataHash = new Uint8Array(Buffer.from('a8', 'hex'));
+    expectFail("byte array too short");
+
+    // digest with a parameter will return string ... which will be too long
+    const content = "some content";
+    asaDefs.A1.metadataHash = crypto.createHash('sha256').update(content).digest("hex");
+    expectFail("Hex string should be converted to a UInt8Array");
+
+    /** potitive test **/
+
+    asaDefs.A1.metadataHash = new Uint8Array(
+      Buffer.from('664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex'));
+    let a = validateASADefs(asaDefs, new Map<string, Account>(), "");
+    assert.instanceOf(a.A1.metadataHash, Uint8Array, "valid, 64-long character hex string converted to byte array must work");
+
+    // digest with no parameters returns Buffer
+    asaDefs.A1.metadataHash = crypto.createHash('sha256').update(content).digest();
+    a = validateASADefs(asaDefs, new Map<string, Account>(), "");
+    assert.instanceOf(a.A1.metadataHash, Uint8Array, "sha256 hash buffer must work");
+
+    // digest with no parameters returns Buffer
+    asaDefs.A1.metadataHash = new Uint8Array(crypto.createHash('sha256').update(content).digest());
+    a = validateASADefs(asaDefs, new Map<string, Account>(), "");
+    assert.instanceOf(a.A1.metadataHash, Uint8Array, "sha256 hash bytes array must work");
+
+    asaDefs.A1.metadataHash = "s".repeat(32);
+    a = validateASADefs(asaDefs, new Map<string, Account>(), "");
+    assert.typeOf(a.A1.metadataHash, 'string', "valid, 64-long character hex string converted to byte array must work");
   });
 
   it("Should check existence of opt-in account name accounts; green path", async () => {

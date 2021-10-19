@@ -3,8 +3,17 @@
 ## Unreleased
 
 ### Improvements
++ Upgrade indexer version
 + TEALv5 support in `@algo-builder/runtime`:
     * Ecdsa opcodes: ecdsa_verify, ecdsa_pk_decompress, ecdsa_pk_recover
+
+## v2.0.1 2021-10-18
+
+### Bug Fixes
++ [web] Fixed `metadataHash` attribute verification for `ASADefSchema` and consequently `deployASA` and updated the [`ASADef`](https://algobuilder.dev/api/web/modules/types.html#ASADef).
+
+### Examples
++ [examples/asa] Added more in `0-gold-asa.js` script we added an example how to correctly provide `metadataHash` for an ASA.
 
 ## v2.0.0 2021-09-30
 
