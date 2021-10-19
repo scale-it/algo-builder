@@ -41,11 +41,11 @@
     "README.md"
   ],
   "devDependencies": {
-    "@types/chai": "^4.2.12",
+    "@types/chai": "^4.2.22",
     "@types/glob": "^7.1.2",
     "@types/murmurhash": "0.0.1",
     "@types/sinon": "^9.0.4",
-    "chai": "^4.2.0",
+    "chai": "^4.3.4",
     "glob": "^7.1.6",
     "nyc": "^15.1.0",
     "sinon": "^9.0.2"
