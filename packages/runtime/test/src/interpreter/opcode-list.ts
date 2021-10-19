@@ -3,7 +3,6 @@
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
-import { sign } from "crypto";
 import { ec as EC } from "elliptic";
 
 import { AccountStore } from "../../../src/account";
@@ -5230,8 +5229,8 @@ describe("Teal Opcodes", function () {
       let op = new EcdsaPkRecover(["0"], 1);
       op.execute(stack);
 
-      assert.deepEqual(stack.pop(), pkX);
       assert.deepEqual(stack.pop(), pkY);
+      assert.deepEqual(stack.pop(), pkX);
 
       stack.push(msgHash);
       stack.push(2n);
