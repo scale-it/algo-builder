@@ -5123,6 +5123,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
     const ec = new EC('secp256k1');
     const key = ec.genKeyPair();
+    const pkX = key.getPublic().getX().toBuffer();
+    const pkY = key.getPublic().getY().toBuffer();
     const msgHash = new Uint8Array([0, 1, 2, 3, 4, 5]);
     const signature = key.sign(msgHash);
 
