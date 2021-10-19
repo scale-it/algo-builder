@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Improvements
-+ TEALv4 support in `@algo-builder/runtime`:
++ TEALv5 support in `@algo-builder/runtime`:
     * Cover, Uncover opcodes
     * Loads, Stores opcodes
 

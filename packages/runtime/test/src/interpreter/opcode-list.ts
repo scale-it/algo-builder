@@ -5158,8 +5158,8 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Tealv5: cover, uncover", () => {
-    let stack = new Stack<StackElem>();
-    afterEach(() => {
+    let stack;
+    beforeEach(() => {
       stack = new Stack<StackElem>();
     });
 

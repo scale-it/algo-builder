@@ -3308,7 +3308,7 @@ export class Gaids extends Gaid {
   }
 }
 
-// Pops: ... stack, any
+// Pops: ...stack, any
 // Pushes: any
 // remove top of stack, and place it deeper in the stack such that
 // N elements are above it. Fails if stack depth <= N.
