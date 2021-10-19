@@ -5135,13 +5135,35 @@ describe("Teal Opcodes", function () {
       stack.push(signature.r.toBuffer());
       stack.push(signature.s.toBuffer());
       // push public key
-      stack.push(key.getPublic().getX().toBuffer());
-      stack.push(key.getPublic().getY().toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
 
       const op = new EcdsaVerify(["0"], 1);
       op.execute(stack);
 
       assert.equal(stack.pop(), 1n);
+
+      const r = signature.r.toBuffer();
+      r[0] = ~r[0];
+      stack.push(msgHash);
+      stack.push(r);
+      stack.push(signature.s.toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+
+      const s = signature.r.toBuffer();
+      s[0] = ~s[0];
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(s);
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
     });
 
     it("ecdsa_verify, should not verify wrong signature", () => {
@@ -5165,8 +5187,8 @@ describe("Teal Opcodes", function () {
       stack.push(msgHash);
       stack.push(signature.r.toBuffer());
       stack.push(signature.s.toBuffer());
-      stack.push(key.getPublic().getX().toBuffer());
-      stack.push(key.getPublic().getY().toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
 
       const op = new EcdsaVerify(["2"], 1);
       expectRuntimeError(
@@ -5208,8 +5230,8 @@ describe("Teal Opcodes", function () {
       let op = new EcdsaPkRecover(["0"], 1);
       op.execute(stack);
 
-      assert.deepEqual(stack.pop(), key.getPublic().getY().toBuffer());
-      assert.deepEqual(stack.pop(), key.getPublic().getX().toBuffer());
+      assert.deepEqual(stack.pop(), pkX);
+      assert.deepEqual(stack.pop(), pkY);
 
       stack.push(msgHash);
       stack.push(2n);
