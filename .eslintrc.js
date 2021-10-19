@@ -23,7 +23,7 @@ module.exports = {
     "max-classes-per-file": 0,
     "max-len": ["error", { "code": 110, "ignoreTrailingComments": true, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true}],
     "no-underscore-dangle": 0,
-    "simple-import-sort/sort": "warn",
+    "simple-import-sort/imports": "warn",
     "sort-imports": "off",
     "no-unused-vars": "off",
 
