@@ -292,7 +292,7 @@ export class AccountStore implements AccountStoreI {
   optInToApp (appID: number, appParams: SSCAttributesM): void {
     const localState = this.appsLocalState.get(appID); // fetch local state from account
     if (localState) {
-      console.warn(`${this.address} is already opted in to app ${appID}`);
+      throw new Error(`${this.address} is already opted in to app ${appID}`);
     } else {
       if (this.appsLocalState.size === 10) {
         throw new Error('Maximum Opt In applications per account is 10');
