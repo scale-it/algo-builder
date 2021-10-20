@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Improvements
++ Upgrade indexer version
+
 ## v2.0.1 2021-10-18
 
 ### Bug Fixes
