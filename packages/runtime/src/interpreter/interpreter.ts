@@ -388,7 +388,7 @@ export class Interpreter {
    */
   execute (program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
     const result = this.executeWithResult(program, mode, runtime, debugStack);
-    if (result !== undefined && !(result instanceof Uint8Array) && result > 0n) {
+    if (result !== undefined && typeof result === 'bigint' && result > 0n) {
       return;
     }
 
