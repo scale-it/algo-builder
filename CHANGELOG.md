@@ -7,6 +7,8 @@
 
 ### Improvements
 + Upgrade indexer version
++ TEALv5 support in `@algo-builder/runtime`:
+    * Ecdsa opcodes: ecdsa_verify, ecdsa_pk_decompress, ecdsa_pk_recover
 
 ## v2.0.1 2021-10-18
 

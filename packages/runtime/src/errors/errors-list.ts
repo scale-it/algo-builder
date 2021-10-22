@@ -292,6 +292,12 @@ maximun uint128`
     message: "Requested transaction hasn't created an asset or application for index: %index%. [error-line: %line%], requested transaction didn't create an asset or application or T < GroupIndex",
     title: 'Requested transaction not found',
     description: `requested transaction didn't creat an asset or application or T < GroupIndex.`
+  },
+  CURVE_NOT_SUPPORTED: {
+    number: 1044,
+    message: "Curve index: %index% is not supported. [error-line: %line%]",
+    title: 'curve not supported',
+    description: `curve index is not supported.`
   }
 };
 
