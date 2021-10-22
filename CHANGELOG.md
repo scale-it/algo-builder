@@ -4,6 +4,7 @@
 
 ### Bug Fixes
 + `@algo-builder/runtime`: `runtime.optInToApp` should throw error if an account is already opted-in to the App.
++ Fix `ALGORAND_DATA` environment variable use and documentation.
 
 ### Improvements
 + Upgrade indexer version
