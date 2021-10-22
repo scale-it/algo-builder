@@ -95,6 +95,18 @@ describe("ASA parser", () => {
     );
   });
 
+  it("Should accept ASA with total == 0", async () => {
+    const obj = {
+      A1: {
+        total: 0,
+        decimals: 0,
+        unitName: 'ASA',
+        defaultFrozen: false
+      }
+    };
+    assert.doesNotThrow(() => validateASADefs(obj, new Map<string, Account>(), ""));
+  });
+
   it("Should check total to be a positive number <= 2^64 - 1", async () => {
     let obj = {
       A1: {
