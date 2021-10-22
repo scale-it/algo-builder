@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Bug Fixes
++ `@algo-builder/runtime`: `runtime.optInToApp` should throw error if an account is already opted-in to the App.
+
 ### Improvements
 + Upgrade indexer version
 + TEALv5 support in `@algo-builder/runtime`:

@@ -151,7 +151,11 @@ class Context {
 
   // Opt-In address to Permissions SSC
   optInToPermissionsSSC (address) {
-    this.runtime.optInToApp(address, this.permissionsappID, {}, {});
+    try {
+      this.runtime.optInToApp(address, this.permissionsappID, {}, {});
+    } catch (error) {
+      // already opted-in
+    }
   }
 
   issue (asaReserve, receiver, amount) {
