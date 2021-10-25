@@ -127,7 +127,7 @@ describe('Bond token failing tests', function () {
 
   function buy () {
     runtime.optIntoASA(initialBond, elon.address, {});
-    runtime.optInToApp(elon.address, applicationId, {}, {});
+    try { runtime.optInToApp(elon.address, applicationId, {}, {}); } catch (e) { } // can be already opted-in
     const amount = 10;
     const algoAmount = amount * 1000;
 
@@ -283,7 +283,6 @@ describe('Bond token failing tests', function () {
     issue();
     // Buy tokens from issuer
     runtime.optIntoASA(initialBond, elon.address, {});
-    runtime.optInToApp(elon.address, applicationId, {}, {});
     const algoAmount = 10 * 1000;
 
     const groupTx = buyTxRuntime(

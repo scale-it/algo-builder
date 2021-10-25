@@ -2,6 +2,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
+import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -3305,6 +3306,147 @@ export class Gaids extends Gaid {
     this.assertMinStackLen(stack, 1, this.line);
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {[]byte B}, {[]byte C}, {[]byte D}, {[]byte E}
+// Pushes: uint64
+// for (data A, signature B, C and pubkey D, E) verify the signature of the
+// data against the pubkey => {0 or 1}
+export class EcdsaVerify extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+   * The 32 byte Y-component of a public key is the last element on the stack,
+   * preceded by X-component of a pubkey, preceded by S and R components of a
+   * signature, preceded by the data that is fifth element on the stack.
+   * All values are big-endian encoded. The signed data must be 32 bytes long,
+   * and signatures in lower-S form are only accepted.
+   */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 5, this.line);
+    const pubkeyE = this.assertBytes(stack.pop(), this.line);
+    const pubkeyD = this.assertBytes(stack.pop(), this.line);
+    const signatureC = this.assertBytes(stack.pop(), this.line);
+    const signatureB = this.assertBytes(stack.pop(), this.line);
+    const data = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const pub = { x: Buffer.from(pubkeyD).toString('hex'), y: Buffer.from(pubkeyE).toString('hex') };
+    const key = ec.keyFromPublic(pub);
+    const signature = { r: signatureB, s: signatureC };
+
+    this.pushBooleanCheck(stack, key.verify(data, signature));
+  }
+}
+
+// Pops: ... stack, []byte
+// Pushes: ... stack, []byte, []byte
+// decompress pubkey A into components X, Y => [... stack, X, Y]
+export class EcdsaPkDecompress extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+   * The 33 byte public key in a compressed form to be decompressed into X and Y (top)
+   * components. All values are big-endian encoded.
+   */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, 'hex').getPublic();
+    const x = publicKeyUncompressed.getX();
+    const y = publicKeyUncompressed.getY();
+
+    stack.push(x.toBuffer());
+    stack.push(y.toBuffer());
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}, {[]byte C}, {[]byte D}
+// Pushes: ... stack, []byte, []byte
+// for (data A, recovery id B, signature C, D) recover a public key => [... stack, X, Y]
+export class EcdsaPkRecover extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+  * S (top) and R elements of a signature, recovery id and data (bottom) are
+  * expected on the stack and used to deriver a public key. All values are
+  * big-endian encoded. The signed data must be 32 bytes long.
+  */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 4, this.line);
+    const signatureD = this.assertBytes(stack.pop(), this.line);
+    const signatureC = this.assertBytes(stack.pop(), this.line);
+    const recoverId = this.assertBigInt(stack.pop(), this.line);
+    const data = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const signature = { r: signatureC, s: signatureD };
+    const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
+    const x = pubKey.getX();
+    const y = pubKey.getY();
+
+    stack.push(x.toBuffer());
+    stack.push(y.toBuffer());
   }
 }
 

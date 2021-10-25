@@ -3,6 +3,7 @@
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
+import { ec as EC } from "elliptic";
 
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -18,7 +19,7 @@ import {
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
   Concat, Cover, Dig, Div, DivModw,
-  Dup, Dup2, Ed25519verify,
+  Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -1977,7 +1978,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.asnd, stack.pop());
+        assert.deepEqual(TXN_OBJ.snd, stack.pop());
       });
 
       it("should push txn AssetReceiver to stack", function () {
@@ -5203,6 +5204,133 @@ describe("Teal Opcodes", function () {
     });
   });
 
+  describe("Tealv5: ECDSA", () => {
+    const stack = new Stack<StackElem>();
+    const ec = new EC('secp256k1');
+    const key = ec.genKeyPair();
+    const pkX = key.getPublic().getX().toBuffer();
+    const pkY = key.getPublic().getY().toBuffer();
+    const msgHash = new Uint8Array([0, 1, 2, 3, 4, 5]);
+    const signature = key.sign(msgHash);
+
+    it("ecdsa_verify, should verify correct signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      // push public key
+      stack.push(pkX);
+      stack.push(pkY);
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 1n);
+
+      const r = signature.r.toBuffer();
+      r[0] = ~r[0];
+      stack.push(msgHash);
+      stack.push(r);
+      stack.push(signature.s.toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+
+      const s = signature.r.toBuffer();
+      s[0] = ~s[0];
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(s);
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("ecdsa_verify, should not verify wrong signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature (signed by key)
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      const wrongKey = ec.genKeyPair();
+      // push public key(public key is wrong)
+      stack.push(wrongKey.getPublic().getX().toBuffer());
+      stack.push(wrongKey.getPublic().getY().toBuffer());
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("ecdsa_verify, should throw error if curve is not supported", () => {
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
+
+      const op = new EcdsaVerify(["2"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+
+    it("ecdsa_pk_decompress", () => {
+      // https://bitcoin.stackexchange.com/questions/69315/how-are-compressed-pubkeys-generated
+      // example taken from above link
+      const compressed = '0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352';
+      stack.push(Buffer.from(compressed, "hex"));
+
+      let op = new EcdsaPkDecompress(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), Buffer.from('2CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6', "hex"));
+      assert.deepEqual(stack.pop(), Buffer.from('50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352', "hex"));
+
+      stack.push(Buffer.from(compressed, "hex"));
+      op = new EcdsaPkDecompress(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+
+    it("ecdsa_pk_recover", () => {
+      // push message
+      stack.push(msgHash);
+      // push recovery id
+      stack.push(BigInt(signature.recoveryParam ?? 0n));
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+
+      let op = new EcdsaPkRecover(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), pkY);
+      assert.deepEqual(stack.pop(), pkX);
+
+      stack.push(msgHash);
+      stack.push(2n);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      op = new EcdsaPkRecover(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+  });
+
   describe("Tealv5: cover, uncover", () => {
     let stack: Stack<StackElem>;
     beforeEach(() => {
@@ -5225,7 +5353,6 @@ describe("Teal Opcodes", function () {
       assert.equal(stack.pop(), 4n);
       assert.equal(stack.pop(), 1n);
     });
-
     it("cover: should throw error is length of stack is not enough", () => {
       push(stack, 4);
 

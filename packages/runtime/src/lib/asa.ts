@@ -36,13 +36,17 @@ export function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
 }
 
 /**
- * Validate and parse each field of asset definition
+ * Validate and parse each field of asset definition. `metadataHash`, if provided as a Buffer
+ * will be transformed into Uint8Array.
  * @param asaDef asset definition
  * @param source source of assetDef: asa.yaml file OR function deployASA
  * @returns parsed asa definition
  */
 export function parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
   try {
+    if (asaDef.metadataHash && asaDef.metadataHash instanceof Buffer) {
+      asaDef.metadataHash = new Uint8Array(asaDef.metadataHash);
+    }
     const parsedDef = ASADefSchema.parse(asaDef);
     parsedDef.manager = parsedDef.manager !== "" ? parsedDef.manager : undefined;
     parsedDef.reserve = parsedDef.reserve !== "" ? parsedDef.reserve : undefined;
