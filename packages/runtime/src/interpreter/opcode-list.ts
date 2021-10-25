@@ -3314,7 +3314,7 @@ export class Gaids extends Gaid {
 // N elements are above it. Fails if stack depth <= N.
 export class Cover extends Op {
   readonly line: number;
-  readonly n: number;
+  readonly nthInStack: number;
 
   /**
    * Asserts 1 arguments are passed.
@@ -3325,19 +3325,19 @@ export class Cover extends Op {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
-    this.n = Number(args[0]);
+    this.nthInStack = Number(args[0]);
   };
 
   execute (stack: TEALStack): void {
-    this.assertMinStackLen(stack, this.n + 1, this.line);
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
 
     const top = stack.pop();
     const temp = [];
-    for (let count = 1; count <= this.n; ++count) {
+    for (let count = 1; count <= this.nthInStack; ++count) {
       temp.push(stack.pop());
     }
     stack.push(top);
-    for (let i = this.n - 1; i >= 0; --i) {
+    for (let i = this.nthInStack - 1; i >= 0; --i) {
       stack.push(temp[i]);
     }
   }
@@ -3349,7 +3349,7 @@ export class Cover extends Op {
 // so the Nth deep value is on top of the stack. Fails if stack depth <= N.
 export class Uncover extends Op {
   readonly line: number;
-  readonly n: number;
+  readonly nthInStack: number;
 
   /**
    * Asserts 1 arguments are passed.
@@ -3360,18 +3360,18 @@ export class Uncover extends Op {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
-    this.n = Number(args[0]);
+    this.nthInStack = Number(args[0]);
   };
 
   execute (stack: TEALStack): void {
-    this.assertMinStackLen(stack, this.n + 1, this.line);
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
 
     const temp = [];
-    for (let count = 1; count < this.n; ++count) {
+    for (let count = 1; count < this.nthInStack; ++count) {
       temp.push(stack.pop());
     }
     const deepValue = stack.pop();
-    for (let i = this.n - 2; i >= 0; --i) {
+    for (let i = this.nthInStack - 2; i >= 0; --i) {
       stack.push(temp[i]);
     }
     stack.push(deepValue);
