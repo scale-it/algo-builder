@@ -2,11 +2,20 @@
 
 ## Unreleased
 
-### Bug Fixes
-+ `@algo-builder/runtime`: `runtime.optInToApp` should throw error if an account is already opted-in to the App.
+## v2.1.0 2021-10-22
 
 ### Improvements
 + Upgrade indexer version
++ TEALv5 support (part1) in `@algo-builder/runtime`:
+    * Ecdsa opcodes: ecdsa_verify, ecdsa_pk_decompress, ecdsa_pk_recover
++ Update Algorand indexer to v2.6.4
++ `@algo-builder/runtime` support return smart-contract return values in Interpreter. Credits:  Ashley Davis
++ Upgrade Algorand JS-SDK to v1.12
+
+### Bug Fixes
++ `@algo-builder/runtime`: `runtime.optInToApp` should throw error if an account is already opted-in to the App.
++ Fix `ALGORAND_DATA` environment variable use and documentation.
++ `@algo-builder/runtime`: Accept ASA deployment with total supply == 0
 
 ## v2.0.1 2021-10-18
 

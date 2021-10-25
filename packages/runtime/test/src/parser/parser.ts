@@ -7,9 +7,11 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
-  GetAssetDef, GetAssetHolding,
-  GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  Concat, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
+  EcdsaVerify,
+  Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
+  GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
+  GreaterThanEqualTo, Gtxn, Gtxna,
   Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
   LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
   Or, Pop, Pragma, PushBytes, PushInt, Retsub,
@@ -1038,6 +1040,44 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["sqrt", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("Tealv5: ECDSA opcodes", () => {
+      it("ecdsa_verify", () => {
+        const res = opcodeFromSentence(["ecdsa_verify", "0"], 1, interpreter);
+        const expected = new EcdsaVerify(["0"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["ecdsa_verify"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("ecdsa_pk_decompress", () => {
+        const res = opcodeFromSentence(["ecdsa_pk_decompress", "0"], 1, interpreter);
+        const expected = new EcdsaPkDecompress(["0"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["ecdsa_pk_decompress"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("ecdsa_pk_recover", () => {
+        const res = opcodeFromSentence(["ecdsa_pk_recover", "0"], 1, interpreter);
+        const expected = new EcdsaPkRecover(["0"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["ecdsa_pk_recover"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });

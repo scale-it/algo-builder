@@ -11,7 +11,7 @@ export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
-export const MaxTEALVersion = 4;
+export const MaxTEALVersion = 5;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
@@ -125,6 +125,10 @@ TxnFields[4] = {
   ...TxnFields[3]
 };
 
+TxnFields[5] = {
+  ...TxnFields[4]
+};
+
 // transaction fields of type array
 export const TxArrFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -132,6 +136,7 @@ export const TxArrFields: {[key: number]: Set<string>} = {
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
 TxArrFields[4] = TxArrFields[3];
+TxArrFields[5] = TxArrFields[4];
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: zeroAddress,
@@ -257,6 +262,11 @@ GlobalFields[4] = {
   ...GlobalFields[3]
 };
 
+// global fields supported by tealv5
+GlobalFields[5] = {
+  ...GlobalFields[4]
+};
+
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
   // v1 opcodes cost
@@ -296,6 +306,13 @@ OpGasCost[4] = {
   'b&': 6,
   'b^': 6,
   'b~': 4
+};
+
+/**
+ * teal v5
+ */
+OpGasCost[5] = {
+  ...OpGasCost[4]
 };
 
 export const enum MathOp {
