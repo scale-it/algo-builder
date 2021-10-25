@@ -494,10 +494,10 @@ export class Store extends Op {
   }
 }
 
-// copy last value from scratch space to the stack
+// copy ith value from scratch space to the stack
 // push to stack [...stack, bigint/bytes]
 export class Load extends Op {
-  readonly index: number;
+  index: number;
   readonly interpreter: Interpreter;
   readonly line: number;
 
@@ -3447,5 +3447,127 @@ export class EcdsaPkRecover extends Op {
 
     stack.push(x.toBuffer());
     stack.push(y.toBuffer());
+  }
+}
+
+// Pops: ...stack, any
+// Pushes: any
+// remove top of stack, and place it deeper in the stack such that
+// N elements are above it. Fails if stack depth <= N.
+export class Cover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const top = stack.pop();
+    const temp = [];
+    for (let count = 1; count <= this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    stack.push(top);
+    for (let i = this.nthInStack - 1; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+  }
+}
+
+// Pops: ... stack, any
+// Pushes: any
+// remove the value at depth N in the stack and shift above items down
+// so the Nth deep value is on top of the stack. Fails if stack depth <= N.
+export class Uncover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const temp = [];
+    for (let count = 1; count < this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    const deepValue = stack.pop();
+    for (let i = this.nthInStack - 2; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+    stack.push(deepValue);
+  }
+}
+
+// Pops: ... stack, uint64
+// Pushes: any
+// copy a value from the Xth scratch space to the stack.
+// All scratch spaces are 0 at program start.
+export class Loads extends Load {
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    this.index = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {uint64 A}, {any B}
+// Pushes: None
+// pop indexes A and B. store B to the Ath scratch space
+export class Stores extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const value = stack.pop();
+    const index = this.assertBigInt(stack.pop(), this.line);
+    this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
+    this.interpreter.scratch[Number(index)] = value;
   }
 }

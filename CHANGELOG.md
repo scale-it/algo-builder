@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Improvements
++ TEALv5 support in `@algo-builder/runtime` [AVM 1.0](https://developer.algorand.org/articles/discover-avm-10/):
+    * Cover, Uncover opcodes
+    * Loads, Stores opcodes
+
 ## v2.1.0 2021-10-22
 
 ### Improvements
