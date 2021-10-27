@@ -7,16 +7,16 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
+  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
   EcdsaVerify,
   Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
   GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna,
   Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
-  LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
+  LessThanEqualTo, Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
   Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
-  Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
@@ -1078,6 +1078,56 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["ecdsa_pk_recover"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("should return correct opcodes for tealv5 ops", () => {
+      it("loads", () => {
+        const res = opcodeFromSentence(['loads'], 1, interpreter);
+        const expected = new Loads([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["loads", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("stores", () => {
+        const res = opcodeFromSentence(['stores'], 1, interpreter);
+        const expected = new Stores([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["stores", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("cover", () => {
+        const res = opcodeFromSentence(["cover", "1"], 1, interpreter);
+        const expected = new Cover(["1"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["cover", "1", "2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("uncover", () => {
+        const res = opcodeFromSentence(["uncover", "1"], 1, interpreter);
+        const expected = new Uncover(["1"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["uncover", "1", "2"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
