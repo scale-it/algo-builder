@@ -8,9 +8,9 @@ export function algodCredentialsFromEnv (): NetworkCredentials {
   const algodAddr = process.env.ALGOD_ADDR;
 
   if (token === undefined && algodAddr === undefined) {
-    const algoData = process.env.$ALGORAND_DATA;
+    const algoData = process.env.ALGORAND_DATA;
     if (algoData === undefined) {
-      throw new Error("Either Algod Credentials or $ALGORAND_DATA should be defined in env");
+      throw new Error("Either Algod Credentials or ALGORAND_DATA must be defined as an environment variable");
     }
 
     const loadToken = fs.readFileSync(path.join(algoData, "algod.token"), 'utf8');

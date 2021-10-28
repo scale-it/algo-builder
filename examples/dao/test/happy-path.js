@@ -312,6 +312,7 @@ describe('DAO - Happy Paths', function () {
   describe('Execute', function () {
     let executeProposalTx;
     this.beforeEach(() => {
+      ctx.syncAccounts();
       executeProposalTx = [
         {
           type: types.TransactionType.CallApp,

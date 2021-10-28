@@ -3,6 +3,7 @@
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
+import { ec as EC } from "elliptic";
 
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -17,17 +18,19 @@ import {
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
-  Concat, Dig, Div, DivModw,
-  Dup, Dup2, Ed25519verify,
-  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
+  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify,
+  Ed25519verify, EqualTo,
+  Err, Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32,
+  ExtractUint64, GetAssetDef, GetAssetHolding, GetBit,
+  GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store,
-  Sub, Substring, Substring3, Swap, Txn, Txna
+  Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
+  Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
+import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
@@ -476,7 +479,10 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Store", function () {
-    const stack = new Stack<StackElem>();
+    let stack: Stack<StackElem>;
+    beforeEach(() => {
+      stack = new Stack<StackElem>();
+    });
 
     it("should store uint64 to scratch", function () {
       const interpreter = new Interpreter();
@@ -515,6 +521,52 @@ describe("Teal Opcodes", function () {
       const interpreter = new Interpreter();
       const stack = new Stack<StackElem>(); // empty stack
       const op = new Store(["0"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should store uint64 to scratch using `stores`", function () {
+      const interpreter = new Interpreter();
+      const val = 0n;
+      stack.push(0n);
+      stack.push(val);
+
+      const op = new Stores([], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should store byte[] to scratch using `stores`", function () {
+      const interpreter = new Interpreter();
+      const val = parsing.stringToBytes("HelloWorld");
+      stack.push(0n);
+      stack.push(val);
+
+      const op = new Stores([], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should throw error on store if index is out of bound using `stores`", function () {
+      const interpreter = new Interpreter();
+      stack.push(BigInt(MAX_UINT8 + 5));
+      stack.push(0n);
+
+      const op = new Stores([], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should throw error on store if stack is empty using `stores`", function () {
+      const interpreter = new Interpreter();
+      const stack = new Stack<StackElem>(); // empty stack
+      const op = new Stores([], 1, interpreter);
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
@@ -609,11 +661,15 @@ describe("Teal Opcodes", function () {
     );
   });
 
-  describe("Load", function () {
-    const stack = new Stack<StackElem>();
+  describe("Load, Loads(Tealv5)", function () {
     const interpreter = new Interpreter();
     const scratch = [0n, parsing.stringToBytes("HelloWorld")];
     interpreter.scratch = scratch;
+    let stack: Stack<StackElem>;
+
+    beforeEach(() => {
+      stack = new Stack<StackElem>();
+    });
 
     it("should load uint64 from scratch space to stack", function () {
       const op = new Load(["0"], 1, interpreter);
@@ -644,6 +700,39 @@ describe("Teal Opcodes", function () {
     it("should load default value to stack if value at a slot is not intialized", function () {
       const interpreter = new Interpreter();
       const op = new Load(["0"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(DEFAULT_STACK_ELEM, stack.pop());
+    });
+
+    it("should load uint64 from scratch space to stack using `loads`", () => {
+      stack.push(0n);
+      const op = new Loads([], 1, interpreter);
+
+      op.execute(stack);
+      assert.equal(interpreter.scratch[0], stack.pop());
+    });
+
+    it("should load byte[] from scratch space to stack using `loads`", function () {
+      stack.push(1n);
+      const op = new Loads([], 1, interpreter);
+
+      op.execute(stack);
+      assert.equal(interpreter.scratch[1], stack.pop());
+    });
+
+    it("should throw error on load if index is out of bound using `loads`", function () {
+      stack.push(BigInt(MAX_UINT8 + 5));
+      const op = new Loads([], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should load default value to stack if value at a slot is not intialized using `loads`", function () {
+      const interpreter = new Interpreter();
+      stack.push(0n);
+      const op = new Loads([], 1, interpreter);
       op.execute(stack);
       assert.equal(DEFAULT_STACK_ELEM, stack.pop());
     });
@@ -5114,6 +5203,326 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       assert.equal(stack.pop(), 31n);
+    });
+  });
+
+  describe("Tealv5: Extract opcodes", () => {
+    const stack = new Stack<StackElem>();
+
+    it("extract", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      let op = new Extract(["1", "3"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      // If L is 0, then extract to the end of the string.
+      stack.push(new Uint8Array([12, 23, 2, 4]));
+      op = new Extract(["1", "0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 2, 4]));
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["1", "10"], 1);
+
+      // If S or S+L is larger than the array length, the program fails
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["111", "1"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract3", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      stack.push(1n);
+      stack.push(3n);
+      let op = new Extract3([], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      stack.push(new Uint8Array([12, 23]));
+      stack.push(1n);
+      stack.push(10n);
+      op = new Extract3([], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint16", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(2n);
+
+      const op = new ExtractUint16([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint32", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(1n);
+
+      const op = new ExtractUint32([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([2, 3, 4, 5]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint64", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+      stack.push(2n);
+
+      const op = new ExtractUint64([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4, 5, 6, 7, 8, 9, 10]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(8n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+  });
+
+  describe("Tealv5: ECDSA", () => {
+    const stack = new Stack<StackElem>();
+    const ec = new EC('secp256k1');
+    const key = ec.genKeyPair();
+    const pkX = key.getPublic().getX().toBuffer();
+    const pkY = key.getPublic().getY().toBuffer();
+    const msgHash = new Uint8Array([0, 1, 2, 3, 4, 5]);
+    const signature = key.sign(msgHash);
+
+    it("ecdsa_verify, should verify correct signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      // push public key
+      stack.push(pkX);
+      stack.push(pkY);
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 1n);
+
+      const r = signature.r.toBuffer();
+      r[0] = ~r[0];
+      stack.push(msgHash);
+      stack.push(r);
+      stack.push(signature.s.toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+
+      const s = signature.r.toBuffer();
+      s[0] = ~s[0];
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(s);
+      stack.push(pkX);
+      stack.push(pkY);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("ecdsa_verify, should not verify wrong signature", () => {
+      // push message
+      stack.push(msgHash);
+      // push signature (signed by key)
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      const wrongKey = ec.genKeyPair();
+      // push public key(public key is wrong)
+      stack.push(wrongKey.getPublic().getX().toBuffer());
+      stack.push(wrongKey.getPublic().getY().toBuffer());
+
+      const op = new EcdsaVerify(["0"], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("ecdsa_verify, should throw error if curve is not supported", () => {
+      stack.push(msgHash);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      stack.push(pkX);
+      stack.push(pkY);
+
+      const op = new EcdsaVerify(["2"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+
+    it("ecdsa_pk_decompress", () => {
+      // https://bitcoin.stackexchange.com/questions/69315/how-are-compressed-pubkeys-generated
+      // example taken from above link
+      const compressed = '0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352';
+      stack.push(Buffer.from(compressed, "hex"));
+
+      let op = new EcdsaPkDecompress(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), Buffer.from('2CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6', "hex"));
+      assert.deepEqual(stack.pop(), Buffer.from('50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352', "hex"));
+
+      stack.push(Buffer.from(compressed, "hex"));
+      op = new EcdsaPkDecompress(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+
+    it("ecdsa_pk_recover", () => {
+      // push message
+      stack.push(msgHash);
+      // push recovery id
+      stack.push(BigInt(signature.recoveryParam ?? 0n));
+      // push signature
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+
+      let op = new EcdsaPkRecover(["0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), pkY);
+      assert.deepEqual(stack.pop(), pkX);
+
+      stack.push(msgHash);
+      stack.push(2n);
+      stack.push(signature.r.toBuffer());
+      stack.push(signature.s.toBuffer());
+      op = new EcdsaPkRecover(["2"], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+      );
+    });
+  });
+
+  describe("Tealv5: cover, uncover", () => {
+    let stack: Stack<StackElem>;
+    beforeEach(() => {
+      stack = new Stack<StackElem>();
+    });
+
+    const push = (stack: Stack<StackElem>, n: number): void => {
+      for (let i = 1; i <= n; ++i) { stack.push(BigInt(i)); }
+    };
+
+    it("cover: move top to below N elements", () => {
+      push(stack, 4);
+
+      const op = new Cover(['2'], 1);
+      // move top below 2 elements
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 1n);
+    });
+    it("cover: should throw error is length of stack is not enough", () => {
+      push(stack, 4);
+
+      const op = new Cover(['5'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("cover: n == 0", () => {
+      push(stack, 4);
+
+      const op = new Cover(['0'], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("cover: n == stack.length", () => {
+      push(stack, 4);
+
+      const op = new Cover(['4'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("uncover: move Nth value to top", () => {
+      push(stack, 4);
+
+      const op = new Uncover(['3'], 1);
+      // move top below 2 elements
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("uncover: should throw error is length of stack is not enough", () => {
+      push(stack, 4);
+
+      const op = new Uncover(['5'], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
     });
   });
 });

@@ -387,6 +387,27 @@ export class Interpreter {
    * each opcode execution (upto depth = debugStack)
    */
   execute (program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
+    const result = this.executeWithResult(program, mode, runtime, debugStack);
+    if (result !== undefined && typeof result === 'bigint' && result > 0n) {
+      return;
+    }
+
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
+  }
+
+  /**
+   * This function executes TEAL code after parsing and returns the result of the program.
+   * @param program: teal code
+   * @param mode : execution mode of TEAL code (smart signature or contract)
+   * @param runtime : runtime object
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
+   * @returns The final result on the stack or undefined if nothing was on the stack.
+   * NOTE: program should fail if there is no result (stack is empty after the execution) or
+   *       the result is zero.
+   */
+  executeWithResult (program: string, mode: ExecutionMode, runtime: Runtime,
+    debugStack?: number): StackElem | undefined {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
     this.mapLabelWithIndexes();
@@ -405,11 +426,10 @@ export class Interpreter {
       this.instructionIndex++;
     }
 
+    let result: StackElem | undefined;
     if (this.stack.length() === 1) {
-      const s = this.stack.pop();
-
-      if (!(s instanceof Uint8Array) && s > 0n) { return; }
+      result = this.stack.pop();
     }
-    throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
+    return result;
   }
 }

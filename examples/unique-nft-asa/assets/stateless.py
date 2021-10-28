@@ -4,12 +4,11 @@ sys.path.insert(0,'..')
 from algobpy.parse import parse_params
 from pyteal import *
 
-def proposal_lsig(ARG_P, ARG_NFT_APP_ID):
+def c_p_lsig(ARG_P, ARG_NFT_APP_ID):
     """
-    C_p will:
-        - Have `p` hardcoded as a constant;
-        - Require any transaction from `C_p` to be in a group of transactions with a
-    call to App.
+    - has `p` hardcoded as a constant;
+    - requires any transaction from `C_p` (this) to be in a group of transactions with an
+    App call.
     """
 
     def basic_checks(txn: Txn): return And(
@@ -62,4 +61,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(proposal_lsig(params["ARG_P"], params["ARG_NFT_APP_ID"]), Mode.Signature, version = 4))
+    print(compileTeal(c_p_lsig(params["ARG_P"], params["ARG_NFT_APP_ID"]), Mode.Signature, version = 4))

@@ -7,7 +7,7 @@ def approval_program():
 
     Commands:
         handle_optin     Transfer Algo from creater, optin & deploy NFT
-        handle_noop      Transfer NFT from C_p --> creator
+        handle_redeem    Noop call, transfers NFT from C_p --> creator
     """
 
     handle_optin = Seq([
@@ -36,7 +36,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    handle_noop = Seq([
+    handle_redeem = Seq([
         Assert(
             # creator of NFT should receive the NFT
             App.localGet(Int(0), Bytes("creator")) == Gtxn[1].asset_receiver()
@@ -48,8 +48,8 @@ def approval_program():
     program = Cond(
         # Deployment
         [Txn.application_id() == Int(0), Return(Int(1))],
-        # Verifies NoOp call, jumps to handle_noop branch.
-        [Txn.on_completion() == OnComplete.NoOp, handle_noop],
+        # Verifies NoOp call, jumps to handle_redeem branch.
+        [Txn.on_completion() == OnComplete.NoOp, handle_redeem],
         # Verifies opt-in call, jumps to handle_optin branch.
         [Txn.on_completion() == OnComplete.OptIn, handle_optin],
         # Verifies Update or delete transaction, rejects it.

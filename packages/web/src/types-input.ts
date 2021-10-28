@@ -8,8 +8,8 @@ const totalRegex = /^\d+$/;
 export const ASADefSchema = z.object({
   total: z.union([z.number(), z.bigint(), z.string()]) // 'string' to support bigint from yaml file
     .refine(
-      t => (totalRegex.test(String(t)) && BigInt(t) <= 0xFFFFFFFFFFFFFFFFn && BigInt(t) > 0n),
-      { message: "Total must be a positive number and smaller than 2^64-1 " }),
+      t => (totalRegex.test(String(t)) && BigInt(t) <= 0xFFFFFFFFFFFFFFFFn && BigInt(t) >= 0n),
+      { message: "Total must be a positive number and smaller than 2^64-1" }),
   decimals: z.union([z.number(), z.bigint()]).refine(
     decimals => ((decimals <= 19) && (decimals >= 0)),
     { message: "Decimals must be between 0 (non divisible) and 19" }),
