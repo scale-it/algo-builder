@@ -48,7 +48,7 @@ def approval_program():
     program = Cond(
         # Deployment
         [Txn.application_id() == Int(0), Return(Int(1))],
-        # Verifies NoOp call, jumps to handle_noop branch.
+        # Verifies NoOp call, jumps to handle_redeem branch.
         [Txn.on_completion() == OnComplete.NoOp, handle_redeem],
         # Verifies opt-in call, jumps to handle_optin branch.
         [Txn.on_completion() == OnComplete.OptIn, handle_optin],

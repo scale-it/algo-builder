@@ -61,4 +61,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(proposal_lsig(params["ARG_P"], params["ARG_NFT_APP_ID"]), Mode.Signature, version = 4))
+    print(compileTeal(c_p_lsig(params["ARG_P"], params["ARG_NFT_APP_ID"]), Mode.Signature, version = 4))
