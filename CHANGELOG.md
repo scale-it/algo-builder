@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Improvements
-+ TEALv4 support in `@algo-builder/runtime`:
++ TEALv5 support in `@algo-builder/runtime`:
     * Extract, Extract3 opcodes
     * ExtractUint16, ExtractUint32, ExtractUint64 opcodes
 
