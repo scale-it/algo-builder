@@ -23,7 +23,7 @@ describe("Credentials loading from env: ", () => {
 
   it("Algod Credentials Using Method 2", () => {
     delete process.env.ALGOD_TOKEN;
-    process.env.$ALGORAND_DATA = path.join(getFixtureProjectPath("algorand-node-data"), "Node");
+    process.env.ALGORAND_DATA = path.join(getFixtureProjectPath("algorand-node-data"), "Node");
 
     const result = algodCredentialsFromEnv();
     assert.deepEqual(result, {
@@ -34,9 +34,9 @@ describe("Credentials loading from env: ", () => {
   });
 
   it("Algod Credentials Missing (Method 2)", () => {
-    delete process.env.$ALGORAND_DATA;
+    delete process.env.ALGORAND_DATA;
 
-    const errmsg = "Either Algod Credentials or $ALGORAND_DATA should be defined in env";
+    const errmsg = "Either Algod Credentials or ALGORAND_DATA must be defined as an environment variable";
     assert.throws(() => algodCredentialsFromEnv(), errmsg);
   });
 

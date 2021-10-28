@@ -298,6 +298,12 @@ maximun uint128`
     message: "Extract range beyond length of string",
     title: 'Extract range beyond length of string (given: %given%, length: %length%)',
     description: `Extract range beyond length of string`
+  },
+  CURVE_NOT_SUPPORTED: {
+    number: 1045,
+    message: "Curve index: %index% is not supported. [error-line: %line%]",
+    title: 'curve not supported',
+    description: `curve index is not supported.`
   }
 };
 

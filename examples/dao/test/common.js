@@ -29,7 +29,10 @@ class Context {
     this.deployDAOApp(creator, 'dao-app-approval.py', 'dao-app-clear.py');
     this.setUpLsig();
     this.setDepositLsigInDAO();
-    this.distributeGovTokens([this.proposer, this.voterA, this.voterB, this.depositLsigAcc], 100);
+    this.distributeGovTokens([
+      this.proposer, this.voterA, this.voterB,
+      this.depositLsigAcc, this.daoFundLsigAcc
+    ], 100);
   }
 
   // refresh state

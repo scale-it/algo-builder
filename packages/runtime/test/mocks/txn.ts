@@ -18,7 +18,6 @@ export const johnAddr = johnAccount.addr;
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),
   rcv: Buffer.from(addr.publicKey),
-  asnd: Buffer.from(addr.publicKey),
   arcv: Buffer.from(addr.publicKey),
   fee: 1000,
   amt: 20200,

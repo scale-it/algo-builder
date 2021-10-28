@@ -2,6 +2,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
+import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -493,10 +494,10 @@ export class Store extends Op {
   }
 }
 
-// copy last value from scratch space to the stack
+// copy ith value from scratch space to the stack
 // push to stack [...stack, bigint/bytes]
 export class Load extends Op {
-  readonly index: number;
+  index: number;
   readonly interpreter: Interpreter;
   readonly line: number;
 
@@ -3450,5 +3451,268 @@ export class ExtractUint64 extends ExtractUintN {
 
   execute (stack: TEALStack): void {
     super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {[]byte B}, {[]byte C}, {[]byte D}, {[]byte E}
+// Pushes: uint64
+// for (data A, signature B, C and pubkey D, E) verify the signature of the
+// data against the pubkey => {0 or 1}
+export class EcdsaVerify extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+   * The 32 byte Y-component of a public key is the last element on the stack,
+   * preceded by X-component of a pubkey, preceded by S and R components of a
+   * signature, preceded by the data that is fifth element on the stack.
+   * All values are big-endian encoded. The signed data must be 32 bytes long,
+   * and signatures in lower-S form are only accepted.
+   */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 5, this.line);
+    const pubkeyE = this.assertBytes(stack.pop(), this.line);
+    const pubkeyD = this.assertBytes(stack.pop(), this.line);
+    const signatureC = this.assertBytes(stack.pop(), this.line);
+    const signatureB = this.assertBytes(stack.pop(), this.line);
+    const data = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const pub = { x: Buffer.from(pubkeyD).toString('hex'), y: Buffer.from(pubkeyE).toString('hex') };
+    const key = ec.keyFromPublic(pub);
+    const signature = { r: signatureB, s: signatureC };
+
+    this.pushBooleanCheck(stack, key.verify(data, signature));
+  }
+}
+
+// Pops: ... stack, []byte
+// Pushes: ... stack, []byte, []byte
+// decompress pubkey A into components X, Y => [... stack, X, Y]
+export class EcdsaPkDecompress extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+   * The 33 byte public key in a compressed form to be decompressed into X and Y (top)
+   * components. All values are big-endian encoded.
+   */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, 'hex').getPublic();
+    const x = publicKeyUncompressed.getX();
+    const y = publicKeyUncompressed.getY();
+
+    stack.push(x.toBuffer());
+    stack.push(y.toBuffer());
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}, {[]byte C}, {[]byte D}
+// Pushes: ... stack, []byte, []byte
+// for (data A, recovery id B, signature C, D) recover a public key => [... stack, X, Y]
+export class EcdsaPkRecover extends Op {
+  readonly line: number;
+  readonly curveIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.curveIndex = Number(args[0]);
+  };
+
+  /**
+  * S (top) and R elements of a signature, recovery id and data (bottom) are
+  * expected on the stack and used to deriver a public key. All values are
+  * big-endian encoded. The signed data must be 32 bytes long.
+  */
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 4, this.line);
+    const signatureD = this.assertBytes(stack.pop(), this.line);
+    const signatureC = this.assertBytes(stack.pop(), this.line);
+    const recoverId = this.assertBigInt(stack.pop(), this.line);
+    const data = this.assertBytes(stack.pop(), this.line);
+
+    if (this.curveIndex !== 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, { line: this.line, index: this.curveIndex }
+      );
+    }
+
+    const ec = new EC('secp256k1');
+    const signature = { r: signatureC, s: signatureD };
+    const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
+    const x = pubKey.getX();
+    const y = pubKey.getY();
+
+    stack.push(x.toBuffer());
+    stack.push(y.toBuffer());
+  }
+}
+
+// Pops: ...stack, any
+// Pushes: any
+// remove top of stack, and place it deeper in the stack such that
+// N elements are above it. Fails if stack depth <= N.
+export class Cover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const top = stack.pop();
+    const temp = [];
+    for (let count = 1; count <= this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    stack.push(top);
+    for (let i = this.nthInStack - 1; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+  }
+}
+
+// Pops: ... stack, any
+// Pushes: any
+// remove the value at depth N in the stack and shift above items down
+// so the Nth deep value is on top of the stack. Fails if stack depth <= N.
+export class Uncover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const temp = [];
+    for (let count = 1; count < this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    const deepValue = stack.pop();
+    for (let i = this.nthInStack - 2; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+    stack.push(deepValue);
+  }
+}
+
+// Pops: ... stack, uint64
+// Pushes: any
+// copy a value from the Xth scratch space to the stack.
+// All scratch spaces are 0 at program start.
+export class Loads extends Load {
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    this.index = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {uint64 A}, {any B}
+// Pushes: None
+// pop indexes A and B. store B to the Ath scratch space
+export class Stores extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const value = stack.pop();
+    const index = this.assertBigInt(stack.pop(), this.line);
+    this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
+    this.interpreter.scratch[Number(index)] = value;
   }
 }
