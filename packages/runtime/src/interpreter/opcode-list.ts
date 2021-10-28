@@ -3309,6 +3309,151 @@ export class Gaids extends Gaid {
   }
 }
 
+// Pops: ... stack, []byte
+// Pushes: []byte
+// pop a byte-array A. Op code parameters:
+// * S: number in 0..255, start index
+// * L: number in 0..255, length
+//  extracts a range of bytes from A starting at S up to but not including S+L,
+// push the substring result. If L is 0, then extract to the end of the string.
+// If S or S+L is larger than the array length, the program fails
+export class Extract extends Op {
+  readonly line: number;
+  readonly start: number;
+  length: number;
+
+  /**
+   * Asserts 2 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, line);
+    this.start = Number(args[0]);
+    this.length = Number(args[1]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    // if length is 0, take bytes from start index to the end
+    if (this.length === 0) {
+      this.length = array.length - this.start;
+    }
+
+    stack.push(this.opExtractImpl(array, this.start, this.length));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 S}, {uint64 L}
+// Pushes: []byte
+// pop a byte-array A and two integers S and L (both in 0..255).
+// Extract a range of bytes from A starting at S up to but not including S+L,
+// push the substring result. If S+L is larger than the array length, the program fails
+export class Extract3 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const length = this.assertUInt8(stack.pop(), this.line);
+    const start = this.assertUInt8(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, start, length));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 S}
+// Pushes: uint64
+// Op code parameters:
+// * N: number in {2,4,8}, length
+// Base class to implement the extract_uint16, extract_uint32 and extract_uint64 op codes
+// for N equal 2, 4, 8 respectively.
+// pop a byte-array A and integer S (in 0..255). Extracts a range of bytes
+// from A starting at S up to but not including B+N,
+// convert bytes as big endian and push the uint(N*8) result.
+// If B+N is larger than the array length, the program fails
+class ExtractUintN extends Op {
+  readonly line: number;
+  extractBytes = 2;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+    // this.extractBytes = 2;
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const start = this.assertUInt8(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    const sliced = this.opExtractImpl(array, start, this.extractBytes); // extract n bytes
+    stack.push(bigEndianBytesToBigInt(sliced));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes
+// from A starting at B up to but not including B+2,
+// convert bytes as big endian and push the uint64 result.
+// If B+2 is larger than the array length, the program fails
+export class ExtractUint16 extends ExtractUintN {
+  extractBytes = 2;
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes
+// from A starting at B up to but not including B+4, convert
+// bytes as big endian and push the uint64 result.
+// If B+4 is larger than the array length, the program fails
+export class ExtractUint32 extends ExtractUintN {
+  extractBytes = 4;
+
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes from
+// A starting at B up to but not including B+8, convert bytes as
+// big endian and push the uint64 result. If B+8 is larger than
+// the array length, the program fails
+export class ExtractUint64 extends ExtractUintN {
+  extractBytes = 8;
+
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
 // Pops: ... stack, {[]byte A}, {[]byte B}, {[]byte C}, {[]byte D}, {[]byte E}
 // Pushes: uint64
 // for (data A, signature B, C and pubkey D, E) verify the signature of the

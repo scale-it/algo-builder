@@ -293,8 +293,14 @@ maximun uint128`
     title: 'Requested transaction not found',
     description: `requested transaction didn't creat an asset or application or T < GroupIndex.`
   },
-  CURVE_NOT_SUPPORTED: {
+  EXTRACT_RANGE_ERROR: {
     number: 1044,
+    message: "Extract range beyond length of string",
+    title: 'Extract range beyond length of string (given: %given%, length: %length%)',
+    description: `Extract range beyond length of string`
+  },
+  CURVE_NOT_SUPPORTED: {
+    number: 1045,
     message: "Curve index: %index% is not supported. [error-line: %line%]",
     title: 'curve not supported',
     description: `curve index is not supported.`
