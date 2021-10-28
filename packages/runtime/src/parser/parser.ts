@@ -11,7 +11,8 @@ import {
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
   ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress,
   EcdsaPkRecover, EcdsaVerify, Ed25519verify,
-  EqualTo, Err, Exp, Expw, Gaid, Gaids, GetAssetDef, GetAssetHolding,
+  EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
+  ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, MinBalance, Mod,
@@ -215,7 +216,15 @@ opCodeMap[5] = {
   // ECDSA
   ecdsa_verify: EcdsaVerify,
   ecdsa_pk_decompress: EcdsaPkDecompress,
-  ecdsa_pk_recover: EcdsaPkRecover
+  ecdsa_pk_recover: EcdsaPkRecover,
+
+  // Extract opcodes
+  extract: Extract,
+  extract3: Extract3,
+  extract_uint16: ExtractUint16,
+  extract_uint32: ExtractUint32,
+  extract_uint64: ExtractUint64
+
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.

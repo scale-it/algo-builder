@@ -18,9 +18,11 @@ import {
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
-  Concat, Cover, Dig, Div, DivModw,
-  Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify, Ed25519verify,
-  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
+  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify,
+  Ed25519verify, EqualTo,
+  Err, Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32,
+  ExtractUint64, GetAssetDef, GetAssetHolding, GetBit,
+  GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
@@ -28,7 +30,7 @@ import {
   Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
+import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
@@ -5201,6 +5203,118 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       assert.equal(stack.pop(), 31n);
+    });
+  });
+
+  describe("Tealv5: Extract opcodes", () => {
+    const stack = new Stack<StackElem>();
+
+    it("extract", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      let op = new Extract(["1", "3"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      // If L is 0, then extract to the end of the string.
+      stack.push(new Uint8Array([12, 23, 2, 4]));
+      op = new Extract(["1", "0"], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 2, 4]));
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["1", "10"], 1);
+
+      // If S or S+L is larger than the array length, the program fails
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+
+      stack.push(new Uint8Array([12, 23]));
+      op = new Extract(["111", "1"], 1);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract3", () => {
+      stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
+      stack.push(1n);
+      stack.push(3n);
+      let op = new Extract3([], 1);
+      op.execute(stack);
+
+      assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
+
+      stack.push(new Uint8Array([12, 23]));
+      stack.push(1n);
+      stack.push(10n);
+      op = new Extract3([], 1);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint16", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(2n);
+
+      const op = new ExtractUint16([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint32", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(1n);
+
+      const op = new ExtractUint32([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([2, 3, 4, 5]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
+    });
+
+    it("extract_uint64", () => {
+      stack.push(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+      stack.push(2n);
+
+      const op = new ExtractUint64([], 1);
+      op.execute(stack);
+
+      const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4, 5, 6, 7, 8, 9, 10]));
+      assert.equal(stack.pop(), expected);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5]));
+      stack.push(8n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR
+      );
     });
   });
 
