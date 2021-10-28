@@ -9,9 +9,9 @@ import {
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
-  ByteZero, Callsub, Cover, Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, Exp, Expw, EcdsaPkDecompress,
-  EcdsaPkRecover, EcdsaVerify, Extract, Extract3, ExtractUint16,
+  ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress,
+  EcdsaPkRecover, EcdsaVerify, Ed25519verify,
+  EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
   ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
@@ -216,7 +216,7 @@ opCodeMap[5] = {
   // ECDSA
   ecdsa_verify: EcdsaVerify,
   ecdsa_pk_decompress: EcdsaPkDecompress,
-  ecdsa_pk_recover: EcdsaPkRecover
+  ecdsa_pk_recover: EcdsaPkRecover,
 
   // Extract opcodes
   extract: Extract,
