@@ -296,7 +296,7 @@ maximun uint128`
   EXTRACT_RANGE_ERROR: {
     number: 1044,
     message: "Extract range beyond length of string",
-    title: 'Extract range beyond length of string',
+    title: 'Extract range beyond length of string (given: %given%, length: %length%)',
     description: `Extract range beyond length of string`
   }
 };

@@ -1082,7 +1082,7 @@ describe("Parser", function () {
       });
 
       it("extract_uint32", () => {
-        const res = opcodeFromSentence(["extract_uint16"], 1, interpreter);
+        const res = opcodeFromSentence(["extract_uint32"], 1, interpreter);
         const expected = new ExtractUint32([], 1);
 
         assert.deepEqual(res, expected);

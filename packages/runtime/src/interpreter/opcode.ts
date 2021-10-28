@@ -90,6 +90,26 @@ export class Op {
     return a;
   }
 
+  assertUInt8(a: unknown, line: number): number {
+    if (typeof a === "undefined" || typeof a !== "bigint") {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: "uint64",
+        actual: typeof a,
+        line: line
+      });
+    }
+    if (a >= 2<<7) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: "uint8 {0..255}",
+        actual: a,
+        line: line
+      });
+    }
+
+    return Number(a);
+  }
+
+
   /**
    * asserts if given variable type is bytes
    * @param b variable
@@ -231,9 +251,13 @@ export class Op {
    */
   opExtractImpl (array: Uint8Array, start: number, length: number): Uint8Array {
     const end = start + length;
-    if (start > array.length || end > array.length) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
+    if (start > array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR, {given: start, length: array.length});
     }
+    if (end > array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR, { given: end, length: array.length });
+    }
+
 
     return array.slice(start, end);
   }
