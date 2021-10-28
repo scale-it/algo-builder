@@ -52,9 +52,9 @@ To load it from ENV:
 
 - Method 2
 
-  - To add `$ALGORAND_DATA` in env, you can use the following command in terminal:
+  - To add `ALGORAND_DATA` in env, you can use the following command in terminal:
 
-          export $ALGORAND_DATA = "content_of/algorand-node-data"
+          export ALGORAND_DATA="content_of/algorand-node-data"
 
   - To load algod credentials from env in config, you can use:
 
