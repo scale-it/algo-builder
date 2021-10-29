@@ -73,5 +73,7 @@ export const TXN_OBJ = {
   },
   txID: 'transaction-id',
   rekey: Buffer.from(addr.publicKey),
-  grp: Buffer.from('group')
+  grp: Buffer.from('group'),
+  apep: 1,
+  nonpart: true
 };
