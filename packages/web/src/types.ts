@@ -59,6 +59,7 @@ export interface AppDeploymentFlags extends AppOptionalFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
 }
 
 /**
@@ -162,6 +163,7 @@ export type DeployAppParam = BasicParams & AppOptionalFlags & {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
 };
