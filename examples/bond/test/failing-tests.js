@@ -95,7 +95,8 @@ describe('Bond token failing tests', function () {
       TMPL_APP_MANAGER: appManager.address
     };
     const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
-    lsig = runtime.getLogicSig(issuerLsigProg, []);
+    console.log(">>>>>>", runtime);
+    lsig = runtime.createLSigAccount(issuerLsigProg, []);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account

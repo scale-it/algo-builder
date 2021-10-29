@@ -49,7 +49,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     assert.equal(bob.balance(), initialBobHolding);
 
     // make delegated logic signature
-    const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
+    const lsig = runtime.createLSigAccount(getProgram('basic.teal'), []);
     lsig.sign(john.account.sk);
 
     runtime.executeTx({
@@ -67,7 +67,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
-    const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
+    const lsig = runtime.createLSigAccount(getProgram('incorrect-logic.teal'), []);
     lsig.sign(john.account.sk);
 
     const invalidParam = {

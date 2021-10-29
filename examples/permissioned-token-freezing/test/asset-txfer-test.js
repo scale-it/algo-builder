@@ -12,7 +12,7 @@ describe('Test for transferring asset using custom logic', function () {
   const master = new AccountStore(1000e6);
   let alice;
   let bob;
-  let escrow; // initialized later (using runtime.getLogicSig)
+  let escrow; // initialized later (using runtime.createLSigAccount)
 
   let runtime;
   let creationFlags;
@@ -107,7 +107,7 @@ describe('Test for transferring asset using custom logic', function () {
 
     /* Setup Escrow Account */
     const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.getLogicSig(escrowProg, []);
+    const escrowLsig = runtime.createLSigAccount(escrowProg, []);
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -227,7 +227,7 @@ describe('Test for transferring asset using custom logic', function () {
 
     /* Setup Escrow Account */
     const escrowProg = getEscrowProg(assetId, applicationId); ;
-    const escrowLsig = runtime.getLogicSig(escrowProg, []);
+    const escrowLsig = runtime.createLSigAccount(escrowProg, []);
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -272,7 +272,7 @@ describe('Test for transferring asset using custom logic', function () {
 
     /* Setup Escrow Account */
     const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.getLogicSig(escrowProg, []);
+    const escrowLsig = runtime.createLSigAccount(escrowProg, []);
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account

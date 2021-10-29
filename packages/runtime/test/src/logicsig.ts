@@ -26,14 +26,14 @@ describe("Logic Signature", () => {
   });
 
   it("john should be able to create a delegated signature", () => {
-    const lsig = runtime.getLogicSig(getProgram(programName), []);
+    const lsig = runtime.createLSigAccount(getProgram(programName), []);
 
     lsig.sign(john.account.sk);
     assert.isTrue(lsig.lsig.verify(johnPk));
   });
 
   it("should fail to verify delegated signature signed by someone else", () => {
-    const lsig = runtime.getLogicSig(getProgram(programName), []);
+    const lsig = runtime.createLSigAccount(getProgram(programName), []);
 
     lsig.sign(bob.account.sk);
     const result = lsig.lsig.verify(johnPk);
@@ -42,7 +42,7 @@ describe("Logic Signature", () => {
   });
 
   it("should handle contract lsig (escrow account) verification correctly", () => {
-    const lsig = runtime.getLogicSig(getProgram(programName), []);
+    const lsig = runtime.createLSigAccount(getProgram(programName), []);
 
     let result = lsig.lsig.verify(decodeAddress(lsig.address()).publicKey);
     assert.equal(result, true);
@@ -53,16 +53,16 @@ describe("Logic Signature", () => {
 
   it("should fail if empty program is passed", () => {
     expectRuntimeError(
-      () => runtime.getLogicSig("", []),
+      () => runtime.createLSigAccount("", []),
       RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM
     );
   });
 
   it("should return same address for same program", () => {
-    let lsig = runtime.getLogicSig(getProgram(programName), []);
+    let lsig = runtime.createLSigAccount(getProgram(programName), []);
 
     const addr = lsig.address();
-    lsig = runtime.getLogicSig(getProgram(programName), []);
+    lsig = runtime.createLSigAccount(getProgram(programName), []);
 
     assert.equal(lsig.address(), addr);
   });
@@ -102,7 +102,7 @@ describe("Multi-Signature Test", () => {
   });
 
   it("should verify if threshold is verified and sender is multisigAddr", () => {
-    const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
+    const lsig = runtime.createLSigAccount(getProgram(multiSigProg), []);
     // lsig signed by alice
     lsig.signMultisig(mparams, alice.account.sk);
     // lsig signed again (threshold = 2) by john
@@ -113,7 +113,7 @@ describe("Multi-Signature Test", () => {
   });
 
   it("should not verify if threshold is achieved but sender is not multisigAddr", () => {
-    const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
+    const lsig = runtime.createLSigAccount(getProgram(multiSigProg), []);
     // lsig signed by alice
     lsig.signMultisig(mparams, alice.account.sk);
     // lsig signed again (threshold = 2) by john
@@ -124,7 +124,7 @@ describe("Multi-Signature Test", () => {
   });
 
   it("should not verify if threshold is not achieved but sender is multisigAddr", () => {
-    const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
+    const lsig = runtime.createLSigAccount(getProgram(multiSigProg), []);
     // lsig signed by alice
     lsig.signMultisig(mparams, alice.account.sk);
 

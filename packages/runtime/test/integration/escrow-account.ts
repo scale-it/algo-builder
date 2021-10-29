@@ -36,7 +36,7 @@ describe("Logic Signature: Escrow Account", function () {
 
   this.beforeAll(function () {
     runtime = new Runtime([john, admin]); // setup runtime
-    lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+    lsig = runtime.createLSigAccount(getProgram('escrow.teal'), []);
     escrow = runtime.getAccount(lsig.address());
     paymentTxParams = {
       type: types.TransactionType.TransferAlgo,

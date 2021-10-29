@@ -26,7 +26,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   let txnParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
-    lsig = runtime.getLogicSig(getProgram(programName), []);
+    lsig = runtime.createLSigAccount(getProgram(programName), []);
     txnParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
@@ -63,7 +63,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   });
 
   it("should verify signature but reject logic", async () => {
-    const logicSig = runtime.getLogicSig(getProgram("reject.teal"), []);
+    const logicSig = runtime.createLSigAccount(getProgram("reject.teal"), []);
     const txParams: types.ExecParams = {
       ...txnParam,
       sign: types.SignType.LogicSignature,
