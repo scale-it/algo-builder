@@ -14,7 +14,7 @@ import {
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
-  MaxTEALVersion, TxArrFields, zeroAddress
+  MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
@@ -1612,7 +1612,7 @@ export class Global extends Op {
         break;
       }
       case 'GroupID': {
-        result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? zeroAddress);
+        result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
         break;
       }
       default: {

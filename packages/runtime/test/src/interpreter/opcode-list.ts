@@ -29,7 +29,7 @@ import {
   Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
   Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, zeroAddress } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -2506,7 +2506,7 @@ describe("Teal Opcodes", function () {
       const op = new Global(['GroupID'], 1, interpreter);
       op.execute(stack);
 
-      assert.deepEqual(zeroAddress, stack.pop());
+      assert.deepEqual(ZERO_ADDRESS, stack.pop());
     });
 
     it("should throw error if global field is not present in teal version", function () {

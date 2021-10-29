@@ -41,7 +41,7 @@ export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
-export const zeroAddress = new Uint8Array(32);
+export const ZERO_ADDRESS = new Uint8Array(32);
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 
@@ -141,17 +141,17 @@ TxArrFields[4] = TxArrFields[3];
 TxArrFields[5] = TxArrFields[4];
 
 export const TxFieldDefaults: {[key: string]: any} = {
-  Sender: zeroAddress,
+  Sender: ZERO_ADDRESS,
   Fee: zeroUint64,
   FirstValid: zeroUint64,
   LastValid: zeroUint64,
   Note: zeroByte,
   Lease: zeroByte,
-  Receiver: zeroAddress,
+  Receiver: ZERO_ADDRESS,
   Amount: zeroUint64,
-  CloseRemainderTo: zeroAddress,
-  VotePK: zeroAddress,
-  SelectionPK: zeroAddress,
+  CloseRemainderTo: ZERO_ADDRESS,
+  VotePK: ZERO_ADDRESS,
+  SelectionPK: ZERO_ADDRESS,
   VoteFirst: zeroUint64,
   VoteLast: zeroUint64,
   VoteKeyDilution: zeroUint64,
@@ -159,9 +159,9 @@ export const TxFieldDefaults: {[key: string]: any} = {
   TypeEnum: zeroUint64,
   XferAsset: zeroUint64,
   AssetAmount: zeroUint64,
-  AssetSender: zeroAddress,
-  AssetReceiver: zeroAddress,
-  AssetCloseTo: zeroAddress,
+  AssetSender: ZERO_ADDRESS,
+  AssetReceiver: ZERO_ADDRESS,
+  AssetCloseTo: ZERO_ADDRESS,
   GroupIndex: zeroUint64,
   ApplicationID: zeroUint64,
   OnCompletion: zeroUint64,
@@ -171,7 +171,7 @@ export const TxFieldDefaults: {[key: string]: any} = {
   NumAccounts: zeroUint64,
   ApprovalProgram: zeroByte,
   ClearStateProgram: zeroByte,
-  RekeyTo: zeroAddress,
+  RekeyTo: ZERO_ADDRESS,
   ConfigAsset: zeroUint64,
   ConfigAssetTotal: zeroUint64,
   ConfigAssetDecimals: zeroUint64,
@@ -180,12 +180,12 @@ export const TxFieldDefaults: {[key: string]: any} = {
   ConfigAssetName: zeroByte,
   ConfigAssetURL: zeroByte,
   ConfigAssetMetadataHash: zeroByte,
-  ConfigAssetManager: zeroAddress,
-  ConfigAssetReserve: zeroAddress,
-  ConfigAssetFreeze: zeroAddress,
-  ConfigAssetClawback: zeroAddress,
+  ConfigAssetManager: ZERO_ADDRESS,
+  ConfigAssetReserve: ZERO_ADDRESS,
+  ConfigAssetFreeze: ZERO_ADDRESS,
+  ConfigAssetClawback: ZERO_ADDRESS,
   FreezeAsset: zeroUint64,
-  FreezeAssetAccount: zeroAddress,
+  FreezeAssetAccount: ZERO_ADDRESS,
   FreezeAssetFrozen: zeroUint64,
   Assets: zeroByte,
   NumAssets: zeroUint64,
@@ -248,7 +248,7 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
     MinTxnFee: ALGORAND_MIN_TX_FEE,
     MinBalance: 10000,
     MaxTxnLife: 1000,
-    ZeroAddress: zeroAddress,
+    ZeroAddress: ZERO_ADDRESS,
     GroupSize: null
   }
 };
