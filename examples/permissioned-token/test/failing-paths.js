@@ -642,7 +642,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // fails because controller is not called (rejected by clawback)
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[1], txGroup[2]]),
-      RUNTIME_ERR1009
+      REJECTED_BY_LOGIC
       );
     });
 
