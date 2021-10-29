@@ -636,7 +636,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // fails because paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1]]),
-      REJECTED_BY_LOGIC
+      RUNTIME_ERR1009
       );
 
       // fails because controller is not called (rejected by clawback)

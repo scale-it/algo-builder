@@ -69,6 +69,7 @@ def clawback_lsig(TOKEN_ID, CONTROLLER_APP_ID):
     # asset_reserve and to check that token is not killed.
     issuance_tx = And(
         common_fields,
+        Global.group_size() == Int(2),
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
         Gtxn[0].application_id() == Int(CONTROLLER_APP_ID),
         Gtxn[0].sender() == Gtxn[1].asset_sender(),
