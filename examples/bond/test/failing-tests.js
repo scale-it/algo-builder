@@ -95,13 +95,11 @@ describe('Bond token failing tests', function () {
       TMPL_APP_MANAGER: appManager.address
     };
     const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
-    console.log(">>>>>>", runtime);
     lsig = runtime.createLSigAccount(issuerLsigProg, []);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account
     issuerAddress = runtime.getAccount(issuerLsigAddress);
-    console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
     runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
@@ -275,7 +273,6 @@ describe('Bond token failing tests', function () {
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
-    console.log('Dex 1 Address: ', dexLsig1.address());
 
     assert.throws(() => redeem(runtime, elon, 1, 20, dexLsig1), RUNTIME_ERR1402);
   });
