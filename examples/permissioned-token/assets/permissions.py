@@ -35,7 +35,12 @@ def approval_program(PERM_MANAGER):
     # * whitelist_counter is intialized to 0
     # * save permissions manager in global state
     on_deployment = Seq([
-        Assert(basic_checks),
+        Assert(
+            And(
+                Global.group_size() == Int(1),
+                basic_checks
+            )
+        ),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
@@ -53,6 +58,7 @@ def approval_program(PERM_MANAGER):
     # * addr : address of the new permissions manager
     change_permissions_manager = Seq([
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.accounts.length() == Int(1),
             basic_checks,
             Txn.sender() == App.globalGet(permissions_manager),
@@ -67,6 +73,7 @@ def approval_program(PERM_MANAGER):
     # Only accepted if txn sender is the permissions manager.
     add_whitelist = Seq([
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.accounts.length() == Int(1),
             basic_checks,
 
@@ -95,28 +102,33 @@ def approval_program(PERM_MANAGER):
     # * toAccountAddress
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
-        Assert(And(
-            Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call
+        Assert(
+            And(
+                Global.group_size() <= Int(4),
+                Gtxn[1].rekey_to() == Global.zero_address(),
+                Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call
 
-            # verify [from, to] addresses (from Txn.accounts) of current_tx
-            # should be same as [asset_sender, asset_receiver]
-            Txn.accounts[1] == Gtxn[1].asset_sender(),
-            Txn.accounts[2] == Gtxn[1].asset_receiver(),
+                # verify [from, to] addresses (from Txn.accounts) of current_tx
+                # should be same as [asset_sender, asset_receiver]
+                Txn.accounts[1] == Gtxn[1].asset_sender(),
+                Txn.accounts[2] == Gtxn[1].asset_receiver(),
 
-            # rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
-            asset_balance.value() <= App.globalGet(max_tokens),
+                # rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
+                asset_balance.value() <= App.globalGet(max_tokens),
 
-            # rule 2 - [from, to] accounts must be whitelisted
-            # NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
-            App.localGet(Int(1), Bytes("whitelisted")) == true, # from account must be whitelisted
-            App.localGet(Int(2), Bytes("whitelisted")) == true  # to account must be whitelisted
-        )),
+                # rule 2 - [from, to] accounts must be whitelisted
+                # NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
+                App.localGet(Int(1), Bytes("whitelisted")) == true, # from account must be whitelisted
+                App.localGet(Int(2), Bytes("whitelisted")) == true  # to account must be whitelisted
+            )
+        ),
         Return(Int(1))
     ])
 
     # During close_out, if account is whitelisted then decrement the whitelist_counter by 1
     handle_closeout = Seq([
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.application_args.length() == Int(0),
             basic_checks
         )),
@@ -132,6 +144,7 @@ def approval_program(PERM_MANAGER):
 
     handle_optin = Seq([
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.application_args.length() == Int(0),
             basic_checks
         )),
@@ -143,6 +156,7 @@ def approval_program(PERM_MANAGER):
     handle_update = Seq([
         Assert(And(
             basic_checks,
+            Global.group_size() == Int(1),
             Txn.sender() == App.globalGet(permissions_manager),
         )),
         Return(Int(1))
