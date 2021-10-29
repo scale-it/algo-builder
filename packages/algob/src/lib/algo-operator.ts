@@ -328,6 +328,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       localBytes: flags.localBytes,
       globalInts: flags.globalInts,
       globalBytes: flags.globalBytes,
+      extraPages: flags.extraPages,
       accounts: flags.accounts,
       foreignApps: flags.foreignApps,
       foreignAssets: flags.foreignAssets,

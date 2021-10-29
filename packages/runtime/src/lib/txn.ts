@@ -32,7 +32,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
   if (Buffer.isBuffer(a)) {
     return new Uint8Array(a);
   }
-  if (typeof a === "number" || typeof a === "bigint") {
+  if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
     return BigInt(a);
   }
   if (typeof a === "string") {

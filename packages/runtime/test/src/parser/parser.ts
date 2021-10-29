@@ -534,6 +534,10 @@ describe("Parser", function () {
       expected = new Global(["CreatorAddress"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["global", "GroupID"], 1, interpreter);
+      expected = new Global(["GroupID"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -581,6 +585,19 @@ describe("Parser", function () {
       expectRuntimeError(
         () => opcodeFromSentence(["asset_params_get", "AssetTotal", "123"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      expectRuntimeError(
+        () => opcodeFromSentence(["asset_params_get", "AssetCreator", "123"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+      );
+    });
+
+    it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", () => {
+      interpreter.tealVersion = 4;
+      expectRuntimeError(
+        () => opcodeFromSentence(["asset_params_get", "AssetCreator"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD
       );
     });
 

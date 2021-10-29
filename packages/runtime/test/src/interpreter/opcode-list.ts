@@ -29,7 +29,7 @@ import {
   Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
   Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -2171,6 +2171,22 @@ describe("Teal Opcodes", function () {
         assert.equal(1, stack.length());
         assert.equal(BigInt(TXN_OBJ.apls.nbs), stack.pop());
       });
+
+      // introduced in TEALv4
+      it("should push extra program pages to stack", function () {
+        const op = new Txn(["ExtraProgramPages"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apep), stack.pop());
+      });
+
+      // introduced in TEALv5
+      it("should push txn.nonparticipation key to stack", function () {
+        const op = new Txn(["Nonparticipation"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.nonpart), stack.pop());
+      });
     });
 
     describe("Gtxn", function () {
@@ -2478,6 +2494,21 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(decodeAddress(elonAddr).publicKey, stack.pop());
     });
 
+    it("TEALv5: should push GroupID to stack", function () {
+      const op = new Global(['GroupID'], 1, interpreter);
+      op.execute(stack);
+
+      assert.deepEqual(Uint8Array.from(TXN_OBJ.grp), stack.pop());
+    });
+
+    it("TEALv5: should push zero 32 bytes to stack if global.groupID not found", function () {
+      (TXN_OBJ.grp as any) = undefined;
+      const op = new Global(['GroupID'], 1, interpreter);
+      op.execute(stack);
+
+      assert.deepEqual(ZERO_ADDRESS, stack.pop());
+    });
+
     it("should throw error if global field is not present in teal version", function () {
       interpreter.tealVersion = 1;
 
@@ -2504,6 +2535,12 @@ describe("Teal Opcodes", function () {
       interpreter.tealVersion = 2;
       expectRuntimeError(
         () => new Global(['CreatorAddress'], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
+
+      interpreter.tealVersion = 4;
+      expectRuntimeError(
+        () => new Global(['GroupID'], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
@@ -3431,6 +3468,20 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(prev, convertToBuffer("addr-4"));
     });
 
+    it("TEALv5: should push correct Asset Creator", () => {
+      interpreter.tealVersion = 5;
+      const op = new GetAssetDef(["AssetCreator"], 1, interpreter);
+
+      stack.push(0n); // asset index
+
+      op.execute(stack);
+      const isFound = stack.pop();
+      const creator = stack.pop();
+
+      assert.deepEqual(isFound.toString(), "1");
+      assert.deepEqual(creator, convertToBuffer("addr-1"));
+    });
+
     it("should push 0 if Asset not defined", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
@@ -3445,13 +3496,14 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw index out of bound error for Asset Param", () => {
+      interpreter.tealVersion = 1;
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
       stack.push(4n); // asset index
 
       expectRuntimeError(
         () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND // for higher versions, reference not found error is thrown
       );
     });
 

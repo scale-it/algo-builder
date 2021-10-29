@@ -409,7 +409,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   // uncomment when
   // https://github.com/algorand/js-algorand-sdk/commit/b18e3beab8004d7e53a5370334b8e9f5c7699146#diff-75520b02c557ab3f0b89e5f03029db31af2f0dc79e5215d3e221ed9ea59fe441
   // commit is released
-  /* it('should fail if ReKeyTo is not zeroAddress in transaction', () => {
+  /* it('should fail if ReKeyTo is not ZERO_ADDRESS in transaction', () => {
     updateAndOptIn();
     // set donation to greater than goal
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
