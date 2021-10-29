@@ -1493,9 +1493,9 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct substring", function () {
+      stack.push(parsing.stringToBytes("Algorand"));
       stack.push(0n);
       stack.push(4n);
-      stack.push(parsing.stringToBytes("Algorand"));
 
       const op = new Substring3([], 1);
       op.execute(stack);
@@ -1518,7 +1518,7 @@ describe("Teal Opcodes", function () {
       const start = end + 1n;
       execExpectError(
         stack,
-        [start, end, parsing.stringToBytes("Algorand")],
+        [parsing.stringToBytes("Algorand"), start, end],
         new Substring3([], 1),
         RUNTIME_ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
@@ -1527,7 +1527,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [0n, 40n, parsing.stringToBytes("Algorand")],
+        [parsing.stringToBytes("Algorand"), 0n, 40n],
         new Substring3([], 1),
         RUNTIME_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
