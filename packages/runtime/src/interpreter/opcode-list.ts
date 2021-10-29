@@ -14,7 +14,7 @@ import {
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
-  MaxTEALVersion, TxArrFields
+  MaxTEALVersion, TxArrFields, zeroAddress
 } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
@@ -1611,6 +1611,10 @@ export class Global extends Op {
         result = decodeAddress(app.creator).publicKey;
         break;
       }
+      case 'GroupID': {
+        result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? zeroAddress);
+        break;
+      }
       default: {
         result = GlobalFields[this.interpreter.tealVersion][this.field];
       }
@@ -2058,8 +2062,12 @@ export class GetAssetDef extends Op {
     this.line = line;
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
-    if (AssetParamMap[args[0]] === undefined) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0], line: line });
+    if (AssetParamMap[interpreter.tealVersion][args[0]] === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
+        field: args[0],
+        line: line,
+        tealV: interpreter.tealVersion
+      });
     }
 
     this.field = args[0];
@@ -2077,7 +2085,7 @@ export class GetAssetDef extends Op {
       stack.push(0n);
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof modelsv2.AssetParams;
+      const s = AssetParamMap[this.interpreter.tealVersion][this.field] as keyof modelsv2.AssetParams;
 
       switch (this.field) {
         case "AssetTotal":

@@ -41,7 +41,7 @@ export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
-const zeroAddress = new Uint8Array(32);
+export const zeroAddress = new Uint8Array(32);
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 
@@ -122,11 +122,13 @@ TxnFields[3] = {
 };
 
 TxnFields[4] = {
-  ...TxnFields[3]
+  ...TxnFields[3],
+  ExtraProgramPages: 'apep'
 };
 
 TxnFields[5] = {
-  ...TxnFields[4]
+  ...TxnFields[4],
+  Nonparticipation: 'nonpart'
 };
 
 // transaction fields of type array
@@ -192,21 +194,32 @@ export const TxFieldDefaults: {[key: string]: any} = {
   GlobalNumUint: zeroUint64,
   GlobalNumByteSlice: zeroUint64,
   LocalNumUint: zeroUint64,
-  LocalNumByteSlice: zeroUint64
+  LocalNumByteSlice: zeroUint64,
+  ExtraProgramPages: zeroUint64,
+  Nonparticipation: zeroUint64
 };
 
-export const AssetParamMap: {[key: string]: string} = {
-  AssetTotal: 'total', // Total number of units of this asset
-  AssetDecimals: 'decimals', // See AssetDef.Decimals
-  AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
-  AssetUnitName: 'unitName', // Asset unit name
-  AssetName: 'name', // Asset name
-  AssetURL: 'url', // URL with additional info about the asset
-  AssetMetadataHash: 'metadataHash', // Arbitrary commitment
-  AssetManager: 'manager', // Manager commitment
-  AssetReserve: 'reserve', // Reserve address
-  AssetFreeze: 'freeze', // Freeze address
-  AssetClawback: 'clawback' // Clawback address
+export const AssetParamMap: {[key: number]: {[key: string]: string}} = {
+  1: {
+    AssetTotal: 'total', // Total number of units of this asset
+    AssetDecimals: 'decimals', // See AssetDef.Decimals
+    AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
+    AssetUnitName: 'unitName', // Asset unit name
+    AssetName: 'name', // Asset name
+    AssetURL: 'url', // URL with additional info about the asset
+    AssetMetadataHash: 'metadataHash', // Arbitrary commitment
+    AssetManager: 'manager', // Manager commitment
+    AssetReserve: 'reserve', // Reserve address
+    AssetFreeze: 'freeze', // Freeze address
+    AssetClawback: 'clawback' // Clawback address
+  }
+};
+
+AssetParamMap[4] = AssetParamMap[3] = AssetParamMap[2] = AssetParamMap[1];
+
+AssetParamMap[5] = {
+  ...AssetParamMap[4],
+  AssetCreator: 'creator'
 };
 
 export const reDigit = /^\d+$/;
@@ -264,7 +277,8 @@ GlobalFields[4] = {
 
 // global fields supported by tealv5
 GlobalFields[5] = {
-  ...GlobalFields[4]
+  ...GlobalFields[4],
+  GroupID: null
 };
 
 // creating map for opcodes whose cost is other than 1
