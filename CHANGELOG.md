@@ -8,6 +8,7 @@
     * Loads, Stores opcodes
     * Extract, Extract3 opcodes
     * ExtractUint16, ExtractUint32, ExtractUint64 opcodes
+    * Txn, Global fields
 
 ## v2.1.0 2021-10-22
 
