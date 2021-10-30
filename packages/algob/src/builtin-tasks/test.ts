@@ -4,11 +4,11 @@ import Mocha from "mocha";
 import { task } from "../internal/core/config/config-env";
 import { loadFilenames } from "../lib/files";
 import { testsDirectory } from "../lib/script-checkpoints";
-import type { Config } from "../types";
+import type { TaskTestConfig } from "../types";
 import { TASK_TEST } from "./task-names";
 
 const TEST_DIR = 'test';
-async function runTests (config: Config): Promise<void> {
+async function runTests (config: TaskTestConfig): Promise<void> {
   try {
     const tsPath = findupSync("tsconfig.json", { cwd: process.cwd() });
     if (tsPath) {
@@ -16,8 +16,12 @@ async function runTests (config: Config): Promise<void> {
       process.env.TS_NODE_PROJECT = tsPath;
       require('ts-mocha');
     }
+    // User pass testFiles to arguments so just run those files.
+    // else we run test files in default test dir.
+    const testFiles = config.testFiles.length !== 0
+      ? config.testFiles
+      : loadFilenames(testsDirectory, TEST_DIR);
 
-    const testFiles = loadFilenames(testsDirectory, TEST_DIR);
     const mocha = new Mocha(config.mocha);
     // Adding test files to mocha object
     testFiles.forEach((file) => mocha.addFile(file));
@@ -32,5 +36,10 @@ async function runTests (config: Config): Promise<void> {
 
 export default function (): void {
   task(TASK_TEST, "Run tests using mocha in project root")
+    .addOptionalVariadicPositionalParam(
+      "testFiles",
+      "An optional list of files to test",
+      []
+    )
     .setAction((config) => runTests(config));
 }
