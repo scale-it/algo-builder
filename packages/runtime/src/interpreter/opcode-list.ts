@@ -14,7 +14,7 @@ import {
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
-  MaxTEALVersion, TxArrFields
+  MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
@@ -1152,19 +1152,19 @@ export class Substring extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const byteString = this.assertBytes(stack.pop(), this.line);
-    const start = this.assertUint8(this.start, this.line);
     const end = this.assertUint8(this.end, this.line);
+    const start = this.assertUint8(this.start, this.line);
+    const byteString = this.assertBytes(stack.pop(), this.line);
 
-    const subString = this.subString(start, end, byteString, this.line);
+    const subString = this.subString(byteString, start, end, this.line);
     stack.push(subString);
   }
 }
 
-// pop last byte string A and two integers B and C.
-// Extract last range of bytes from A starting at B up to
-// but not including C, push the substring result. If C < B,
-// or either is larger than the string length, the program fails
+// pop a byte-array A and two integers B and C.
+// Extract a range of bytes from A starting at B up to but not including C,
+// push the substring result. If C < B, or either is larger than the array length,
+// the program fails
 // push to stack [...stack, substring]
 export class Substring3 extends Op {
   readonly line: number;
@@ -1180,11 +1180,11 @@ export class Substring3 extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const byteString = this.assertBytes(stack.pop(), this.line);
     const end = this.assertBigInt(stack.pop(), this.line);
     const start = this.assertBigInt(stack.pop(), this.line);
+    const byteString = this.assertBytes(stack.pop(), this.line);
 
-    const subString = this.subString(start, end, byteString, this.line);
+    const subString = this.subString(byteString, start, end, this.line);
     stack.push(subString);
   }
 }
@@ -1609,6 +1609,10 @@ export class Global extends Op {
         const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
+        break;
+      }
+      case 'GroupID': {
+        result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
         break;
       }
       default: {
@@ -2058,8 +2062,12 @@ export class GetAssetDef extends Op {
     this.line = line;
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
-    if (AssetParamMap[args[0]] === undefined) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0], line: line });
+    if (AssetParamMap[interpreter.tealVersion][args[0]] === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
+        field: args[0],
+        line: line,
+        tealV: interpreter.tealVersion
+      });
     }
 
     this.field = args[0];
@@ -2077,7 +2085,7 @@ export class GetAssetDef extends Op {
       stack.push(0n);
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof modelsv2.AssetParams;
+      const s = AssetParamMap[this.interpreter.tealVersion][this.field] as keyof modelsv2.AssetParams;
 
       switch (this.field) {
         case "AssetTotal":

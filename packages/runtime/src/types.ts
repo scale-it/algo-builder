@@ -237,6 +237,7 @@ export interface AppDeploymentFlags extends AppOptionalFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
 }
 
 /**

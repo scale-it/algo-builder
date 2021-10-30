@@ -192,7 +192,7 @@ by an index that does not exist.`
   },
   UNKNOWN_ASSET_FIELD: {
     number: 1027,
-    message: "Asset Field Error - Unknown Field:  %field% at line %line%",
+    message: "Asset Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
     title: "Asset Field Error at line %line%",
     description: `Asset field unknown`
   },
