@@ -2,9 +2,9 @@ import findupSync from "findup-sync";
 import Mocha from "mocha";
 
 import { task } from "../internal/core/config/config-env";
+import { loadFilenames } from "../lib/files";
 import { testsDirectory } from "../lib/script-checkpoints";
 import type { Config } from "../types";
-import { loadFilenames } from "./deploy";
 import { TASK_TEST } from "./task-names";
 
 const TEST_DIR = 'test';
