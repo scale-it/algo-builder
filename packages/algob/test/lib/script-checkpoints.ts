@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
+import { getApplicationAddress, LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
@@ -15,6 +15,7 @@ import {
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
+import { MOCK_APPLICATION_ADDRESS } from "../mocks/tx";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
   assert.isNotNull(netCheckpoint.timestamp);
@@ -79,6 +80,7 @@ describe("Checkpoint", () => {
     const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "536",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -208,6 +210,7 @@ describe("Checkpoint", () => {
     const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "123",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -217,6 +220,7 @@ describe("Checkpoint", () => {
     const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap1.set(2, {
       creator: "123",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -256,6 +260,7 @@ describe("Checkpoint", () => {
     const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC deployer address",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -438,6 +443,7 @@ describe("CheckpointRepoImpl", () => {
     const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC creator 951",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -447,6 +453,7 @@ describe("CheckpointRepoImpl", () => {
     const cpData = new CheckpointRepoImpl()
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "",
         confirmedRound: 0,
         appID: -1,
@@ -603,6 +610,7 @@ describe("CheckpointRepoImpl", () => {
     const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC creator",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -611,6 +619,7 @@ describe("CheckpointRepoImpl", () => {
     });
     nestedMap1.set(1, {
       creator: "SSC creator1",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "",
       confirmedRound: 0,
       appID: -1,
@@ -708,6 +717,7 @@ describe("CheckpointRepoImpl", () => {
       })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "",
         confirmedRound: 0,
         appID: -1,
@@ -730,6 +740,7 @@ describe("CheckpointRepoImpl", () => {
       const nestedMap = new Map<number, rtypes.SSCInfo>();
       nestedMap.set(1, {
         creator: "SSC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "",
         confirmedRound: 0,
         appID: -1,
@@ -840,6 +851,7 @@ describe("CheckpointRepoImpl", () => {
     })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "",
         confirmedRound: 0,
         appID: -1,

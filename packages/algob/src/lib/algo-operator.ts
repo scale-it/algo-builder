@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -355,6 +355,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: Number(appId),
+      applicationAccount: getApplicationAddress(Number(appId)),
       timestamp: Math.round(+new Date() / 1000),
       deleted: false
     };
@@ -420,6 +421,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: appID,
+      applicationAccount: getApplicationAddress(appID),
       timestamp: Math.round(+new Date() / 1000),
       deleted: false
     };

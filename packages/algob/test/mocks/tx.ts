@@ -1,9 +1,11 @@
-import { Algodv2, LogicSigAccount, modelsv2, SuggestedParams } from "algosdk";
+import { Algodv2, getApplicationAddress, LogicSigAccount, modelsv2, SuggestedParams } from "algosdk";
 
 import { ConfirmedTxInfo } from "../../src/types";
 import { bobAcc } from "./account";
 
 export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080);
+
+export const MOCK_APPLICATION_ADDRESS = getApplicationAddress(1);
 
 export const mockSuggestedParam: SuggestedParams = {
   flatFee: false,
