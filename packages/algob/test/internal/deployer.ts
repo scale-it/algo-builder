@@ -13,6 +13,7 @@ import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
+import { MOCK_APPLICATION_ADDRESS } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 function mkASA (): wtypes.ASADef {
@@ -157,6 +158,7 @@ describe("DeployerDeployMode", () => {
     const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
@@ -175,6 +177,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(sscInfo,
       {
         creator: "addr-1-get-address-dry-run",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
@@ -195,6 +198,7 @@ describe("DeployerDeployMode", () => {
 
     nestedMap.set(2, {
       creator: "addr-1-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
@@ -206,6 +210,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
@@ -330,6 +335,7 @@ describe("DeployerDeployMode", () => {
       })
       .registerSSC(networkName, "ASC name", {
         creator: "ASC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
         txId: "",
         confirmedRound: 0,
         appID: -1,

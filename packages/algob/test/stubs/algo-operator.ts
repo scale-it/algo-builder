@@ -10,7 +10,7 @@ import {
   FundASCFlags,
   LsigInfo
 } from "../../src/types";
-import { mockAlgod, mockAssetInfo, mockConfirmedTx } from "../mocks/tx";
+import { MOCK_APPLICATION_ADDRESS, mockAlgod, mockAssetInfo, mockConfirmedTx } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
@@ -73,6 +73,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
@@ -92,6 +93,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   ): Promise<rtypes.SSCInfo> {
     return {
       creator: String(sender.addr) + "-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,

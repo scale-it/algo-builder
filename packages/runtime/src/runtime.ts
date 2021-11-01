@@ -248,6 +248,7 @@ export class Runtime {
   /**
    * Queries app id by app name from global state.
    * Returns undefined if app is not found.
+   * https://www.pivotaltracker.com/story/show/180142720
    * @param approval
    * @param clear
    */
