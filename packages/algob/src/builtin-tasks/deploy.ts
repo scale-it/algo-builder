@@ -2,8 +2,9 @@ import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs";
 
 import { task } from "../internal/core/config/config-env";
+import { loadFilenames } from "../internal/util/files";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
-import { assertDirectDirChildren, loadFilenames } from "../lib/files";
+import { assertDirectDirChildren } from "../lib/files";
 import {
   persistCheckpoint,
   scriptsDirectory,

@@ -2,7 +2,7 @@ import findupSync from "findup-sync";
 import Mocha from "mocha";
 
 import { task } from "../internal/core/config/config-env";
-import { loadFilenames } from "../lib/files";
+import { loadFilenames } from "../internal/util/files";
 import { testsDirectory } from "../lib/script-checkpoints";
 import type { TaskTestConfig } from "../types";
 import { TASK_TEST } from "./task-names";
