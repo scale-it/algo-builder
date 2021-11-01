@@ -15,7 +15,6 @@ export async function getLsig (
   name: string,
   algodClient: Algodv2,
   scTmplParams?: SCParams): Promise<LogicSigAccount> {
-
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.base64ToBytes;
