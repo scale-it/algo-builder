@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyteal = "~=0.8"
+pyteal = "~=0.9"
 pyyaml = "*"
 
 [dev-packages]
