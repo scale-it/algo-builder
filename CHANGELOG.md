@@ -9,6 +9,7 @@
     * Extract, Extract3 opcodes
     * ExtractUint16, ExtractUint32, ExtractUint64 opcodes
     * Txn, Global fields
+    * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
