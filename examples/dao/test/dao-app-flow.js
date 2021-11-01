@@ -136,16 +136,16 @@ describe('DAO test', function () {
       ARG_DAO_APP_ID: appID
     };
     const depositLsigProg = getProgram('deposit-lsig.py', scInitParam);
-    depositLsig = runtime.createLSigAccount(depositLsigProg, []);
+    depositLsig = runtime.createLsigAccount(depositLsigProg, []);
     depositLsigAcc = runtime.getAccount(depositLsig.address());
 
     const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
-    daoFundLsig = runtime.createLSigAccount(daoFundLsigProg, []);
+    daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
     daoFundLsigAcc = runtime.getAccount(daoFundLsig.address());
 
     const proposalLsigProg = getProgram('proposal-lsig.py',
       { ARG_OWNER: proposer.address, ARG_DAO_APP_ID: appID });
-    proposalLsig = runtime.createLSigAccount(proposalLsigProg, []);
+    proposalLsig = runtime.createLsigAccount(proposalLsigProg, []);
     proposalLsigAcc = runtime.getAccount(proposalLsig.address());
 
     // fund lsig's

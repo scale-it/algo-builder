@@ -565,7 +565,7 @@ export class Runtime {
    * @param args arguments passed
    * @returns logic signature with arguments.
    */
-  createLSigAccount (program: string, args: Uint8Array[]): LogicSigAccount {
+  createLsigAccount (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }

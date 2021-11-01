@@ -79,7 +79,7 @@ class Context {
       TOKEN_ID: this.assetIndex,
       CONTROLLER_APP_ID: this.controllerappID
     });
-    this.lsig = this.runtime.createLSigAccount(clawbackTeal, []);
+    this.lsig = this.runtime.createLsigAccount(clawbackTeal, []);
 
     fund(this.runtime, this.master, this.lsig.address());
     const asaDef = this.runtime.getAssetDef(this.assetIndex);

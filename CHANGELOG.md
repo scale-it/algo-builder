@@ -12,7 +12,7 @@
 ### Breaking changes
 
 `@algo-builder/runtime`:
-+ Renamed `Runtime.getLogicSig` to `Runtime.createLSigAccount` #506.
++ Renamed `Runtime.getLogicSig` to `Runtime.createLsigAccount` #506.
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
