@@ -17,7 +17,7 @@ async function runTests (config: TaskTestConfig): Promise<void> {
       require('ts-mocha');
     }
     // User pass testFiles to arguments so just run those files.
-    // else we run test files in default test dir.
+    // else we run test files in default(root) test dir.
     const testFiles = config.testFiles.length !== 0
       ? config.testFiles
       : loadFilenames(testsDirectory, TEST_DIR);
@@ -38,7 +38,7 @@ export default function (): void {
   task(TASK_TEST, "Run tests using mocha in project root")
     .addOptionalVariadicPositionalParam(
       "testFiles",
-      "An optional list of files to test",
+      "An optional list of file path(s) to test",
       []
     )
     .setAction((config) => runTests(config));
