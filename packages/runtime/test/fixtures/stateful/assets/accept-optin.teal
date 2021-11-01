@@ -1,0 +1,23 @@
+#pragma version 4
+
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+int OptIn
+txn OnCompletion
+==
+bnz on_optin
+
+on_creation:
+int 1
+return
+
+on_optin:
+int 0
+byte "counter"
+int 0
+app_local_put
+int 1
+return

@@ -17,6 +17,7 @@
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
++ Fix bug: `runtime.optinToApp` updating state even after opt-in fails. Reported by @patrick
 
 ## v2.1.0 2021-10-22
 
