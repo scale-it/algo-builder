@@ -559,11 +559,11 @@ export class Runtime {
 
   /**
    * Creates a new account with logic signature and smart contract arguments
-   * in the runtime store. The arguments are use when we send a transaction with this
+   * in the runtime store. The arguments are used when we send a transaction with this
    * account and verify it.
    * @param program TEAL code
    * @param args arguments passed
-   * @returns logic signature account with arguments.
+   * @returns logic signature with arguments.
    */
   createLSigAccount (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
