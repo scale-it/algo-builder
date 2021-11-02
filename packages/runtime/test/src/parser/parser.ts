@@ -12,8 +12,8 @@ import {
   Ed25519verify, EqualTo, Err, Exp, Expw,
   Extract, Extract3, ExtractUint16, ExtractUint32, ExtractUint64, Gaid, Gaids,
   GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna,
-  Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob, ITxnBegin, ITxnField,
+  ITxnSubmit, Keccak256, Label, Len, LessThan,
   LessThanEqualTo, Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
   Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
@@ -1208,6 +1208,48 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["uncover", "1", "2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_begin", () => {
+        const res = opcodeFromSentence(["itxn_begin"], 1, interpreter);
+        const expected = new ITxnBegin([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_begin", "exxtra"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_field f", () => {
+        let res = opcodeFromSentence(["itxn_field", "Sender"], 1, interpreter);
+        let expected = new ITxnField(["Sender"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["itxn_field", "FreezeAsset"], 1, interpreter);
+        expected = new ITxnField(["FreezeAsset"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["itxn_field", "ConfigAssetTotal"], 1, interpreter);
+        expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_field", "Sender", "Fee"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_submit", () => {
+        const res = opcodeFromSentence(["itxn_submit"], 1, interpreter);
+        const expected = new ITxnSubmit([], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_submit", "exxtra"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
