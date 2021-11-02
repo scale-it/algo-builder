@@ -1617,6 +1617,11 @@ export class Global extends Op {
         result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
         break;
       }
+      case 'CurrentApplicationAddress': {
+        const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+        result = decodeAddress(getApplicationAddress(appID)).publicKey;
+        break;
+      }
       default: {
         result = GlobalFields[this.interpreter.tealVersion][this.field];
       }

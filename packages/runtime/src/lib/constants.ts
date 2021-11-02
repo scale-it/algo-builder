@@ -279,7 +279,8 @@ GlobalFields[4] = {
 // global fields supported by tealv5
 GlobalFields[5] = {
   ...GlobalFields[4],
-  GroupID: null
+  GroupID: null,
+  CurrentApplicationAddress: null
 };
 
 // creating map for opcodes whose cost is other than 1

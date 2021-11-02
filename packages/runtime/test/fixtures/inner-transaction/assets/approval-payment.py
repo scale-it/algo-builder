@@ -2,7 +2,7 @@ from pyteal import *
 
 def approval_program():
     """
-    A stateful app to test inner transactions
+    A stateful app to test inner transactions (payment)
     """
 
     # Pay 1ALGO from Contract -> Sender (aka txn.accounts[0])

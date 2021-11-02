@@ -11,7 +11,7 @@ import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
 const uintTxnFields = new Set([
-  'Fee', 'Amount', 'TypeEnum', 'FreezeAssetFrozen',
+  'Fee', 'Amount', 'AssetAmount', 'TypeEnum', 'FreezeAssetFrozen',
   'ConfigAssetTotal', 'ConfigAssetDecimals',
   'ConfigAssetDefaultFrozen'
 ]);
@@ -255,5 +255,7 @@ export function parseEncodedTxnToExecParams (tx: Txn,
     }
   }
 
+  // console.log('returing... ', execParams);
+  // console.log('enc tx ', tx);
   return execParams;
 }

@@ -252,7 +252,7 @@ by an index that does not exist.`
   },
   ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
     number: 1037,
-    message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender. [error-line: %line%]",
+    message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender OR CurrentApplicationAddress. [error-line: %line%]",
     title: 'Address not found in Txn',
     description: `Address should be present in Txn.Account OR should be Txn.Sender`
   },

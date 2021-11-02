@@ -1,4 +1,4 @@
-import { encodeAddress, getApplicationAddress, modelsv2 } from "algosdk";
+import { decodeAddress, encodeAddress, getApplicationAddress, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -110,9 +110,10 @@ export class Interpreter {
     // address must still be present in tx.Accounts OR should be equal to Txn.Sender
     const pkBuffer = Buffer.from(accountPk);
     if (
-      txAccounts?.find(buff => compareArray(Uint8Array.from(buff), accountPk)) ??
-      compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ??
-      compareArray(accountPk, Uint8Array.from(Buffer.from(getApplicationAddress(appID))))
+      txAccounts?.find(buff => compareArray(Uint8Array.from(buff), accountPk)) !== undefined ||
+      compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
+      // since tealv5, currentApplicationAddress is also allowed (directly)
+      compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey)
     ) {
       const address = encodeAddress(pkBuffer);
       const account = this.runtime.ctx.state.accounts.get(address);
