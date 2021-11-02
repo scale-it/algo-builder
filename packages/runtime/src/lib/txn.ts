@@ -169,7 +169,6 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
   return parseToStackElem(result[idx], txField);
 }
 
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /**
  * Check if given encoded transaction obj is asset deletion
  * @param txn Encoded Txn Object
@@ -180,7 +179,7 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
 export function isEncTxAssetDeletion (txn: Txn): boolean {
   return txn.type === 'acfg' && // type should be asset config
   (txn.xaid !== 0) && // assetIndex should not be 0
-  !(txn.apar?.m || txn.apar?.r || txn.apar?.f || txn.apar?.c); // fields should be empty
+  !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
 
 /**
