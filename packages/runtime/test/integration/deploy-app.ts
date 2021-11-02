@@ -45,7 +45,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
     assert.isDefined(runtime.getAccount(getApplicationAddress(appIdY)));
   });
 
-  it("initialize new account for deployed app(s) for execParams type", function () {
+  it("initialize new account for app(s) deployed using executeTx", function () {
     // create new app
     const execParams: types.DeployAppParam = {
       ...appCreationFlags,

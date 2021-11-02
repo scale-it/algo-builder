@@ -297,7 +297,12 @@ export class Ctx implements Context {
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+    try {
+      this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+    } catch (error) {
+      account.closeApp(appID); // remove already added state if optIn fails
+      throw error;
+    }
   }
 
   /**

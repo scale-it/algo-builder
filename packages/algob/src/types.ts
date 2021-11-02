@@ -134,6 +134,10 @@ export interface Config {
   mocha?: Mocha.MochaOptions
 }
 
+export interface TaskTestConfig extends Config {
+  testFiles: string[]
+}
+
 export interface ResolvedConfig extends Config {
   paths?: ProjectPaths
   networks: Networks

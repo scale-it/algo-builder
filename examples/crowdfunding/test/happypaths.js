@@ -79,7 +79,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // setup and sync escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    escrowLsig = runtime.getLogicSig(escrowProg, []);
+    escrowLsig = runtime.createLsigAccount(escrowProg, []);
     const escrowAddress = escrowLsig.address();
     escrow = runtime.getAccount(escrowAddress);
 
