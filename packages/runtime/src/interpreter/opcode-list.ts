@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
-import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
+import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -12,10 +12,12 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
   AssetParamMap, GlobalFields, MathOp,
-  MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
+  MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
+  MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
+import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
@@ -3722,5 +3724,208 @@ export class Stores extends Op {
     const index = this.assertBigInt(stack.pop(), this.line);
     this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
     this.interpreter.scratch[Number(index)] = value;
+  }
+}
+
+// Pops: None
+// Pushes: None
+// Begin preparation of a new inner transaction
+export class ITxnBegin extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (typeof this.interpreter.subTxn !== "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, { line: this.line });
+    }
+
+    if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
+          line: this.line,
+          len: this.interpreter.innerTxns.length + 1,
+          max: MAX_INNER_TRANSACTIONS
+        });
+    }
+
+    // get app, assert it exists
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+    this.interpreter.runtime.assertAppDefined(
+      appID, this.interpreter.getApp(appID, this.line), this.line
+    );
+
+    // get application's account
+    const address = getApplicationAddress(appID);
+    const applicationAccount = this.interpreter.runtime.assertAccountDefined(
+      address,
+      this.interpreter.runtime.ctx.state.accounts.get(address),
+      this.line
+    );
+
+    // calculate feeCredit(extra fee) accross all txns
+    let totalFee = 0;
+    for (const t of this.interpreter.runtime.ctx.gtxs) {
+      totalFee += (t.fee ?? 0);
+    };
+    for (const t of this.interpreter.innerTxns) {
+      totalFee += (t.fee ?? 0);
+    }
+
+    const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length;
+    const feeCredit = (totalFee - (ALGORAND_MIN_TX_FEE * totalTxCnt));
+
+    let txFee;
+    if (feeCredit >= ALGORAND_MIN_TX_FEE) {
+      txFee = 0; // we have enough fee in pool
+    } else {
+      const diff = feeCredit - ALGORAND_MIN_TX_FEE;
+      txFee = (diff >= 0) ? diff : ALGORAND_MIN_TX_FEE;
+    }
+
+    const txnParams = {
+      // set sender, fee, fv, lv
+      snd: Buffer.from(
+        algosdk.decodeAddress(
+          applicationAccount.address
+        ).publicKey
+      ),
+      fee: txFee,
+      fv: this.interpreter.runtime.ctx.tx.fv,
+      lv: this.interpreter.runtime.ctx.tx.lv,
+      // to avoid type hack
+      gen: this.interpreter.runtime.ctx.tx.gen,
+      gh: this.interpreter.runtime.ctx.tx.gh,
+      txID: "",
+      type: ""
+    };
+
+    this.interpreter.subTxn = txnParams;
+  }
+}
+
+// Set field F of the current inner transaction to X(last value fetched from stack)
+// itxn_field fails if X is of the wrong type for F, including a byte array
+// of the wrong size for use as an address when F is an address field.
+// itxn_field also fails if X is an account or asset that does not appear in txn.Accounts
+// or txn.ForeignAssets of the top-level transaction.
+// (Setting addresses in asset creation are exempted from this requirement.)
+// pops from stack [...stack, any]
+// push to stack [...stack, none]
+export class ITxnField extends Op {
+  readonly field: string;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Set transaction field according to arguments passed
+   * @param args Expected arguments: [transaction field]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+    assertLen(args.length, 1, line);
+    this.field = args[0]; // field
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const valToSet: StackElem = stack.pop();
+
+    if (typeof this.interpreter.subTxn === "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, { line: this.line });
+    }
+
+    const updatedSubTx =
+      setInnerTxField(this.interpreter.subTxn, this.field, valToSet, this, this.interpreter, this.line);
+
+    this.interpreter.subTxn = updatedSubTx;
+  }
+}
+
+// Pops: None
+// Pushes: None
+// Execute the current inner transaction.
+export class ITxnSubmit extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (typeof this.interpreter.subTxn === "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, { line: this.line });
+    }
+
+    // calculate fee accross all txns
+    let totalFee = 0;
+    for (const t of this.interpreter.runtime.ctx.gtxs) {
+      totalFee += (t.fee ?? 0);
+    };
+    for (const t of this.interpreter.innerTxns) {
+      totalFee += (t.fee ?? 0);
+    }
+    totalFee += (this.interpreter.subTxn.fee ?? 0);
+    const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length + 1;
+
+    // fee too less accross pool
+    const feeBal = (totalFee - (ALGORAND_MIN_TX_FEE * totalTxCnt));
+    if (feeBal < 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
+          required: ALGORAND_MIN_TX_FEE * totalTxCnt,
+          collected: totalFee
+        }
+      );
+    }
+
+    // get execution txn params (parsed from encoded sdk txn obj)
+    const execParams = parseEncodedTxnToExecParams(this.interpreter.subTxn, this.interpreter, this.line);
+    const baseCurrTx = this.interpreter.runtime.ctx.tx;
+    const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
+
+    // execute innner transaction
+    this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
+    this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
+    this.interpreter.runtime.ctx.processTransactions([execParams], true);
+
+    // update current txns to base (top-level) after innerTx execution
+    this.interpreter.runtime.ctx.tx = baseCurrTx;
+    this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+
+    // save executed tx, reset current tx
+    this.interpreter.innerTxns.push(this.interpreter.subTxn);
+    this.interpreter.subTxn = undefined;
   }
 }
