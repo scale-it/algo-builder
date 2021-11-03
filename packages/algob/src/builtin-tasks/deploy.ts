@@ -1,11 +1,9 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs";
-import glob from "glob";
-import path from "path";
 
 import { task } from "../internal/core/config/config-env";
+import { loadFilenames } from "../internal/util/files";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
-import { cmpStr } from "../lib/comparators";
 import { assertDirectDirChildren } from "../lib/files";
 import {
   persistCheckpoint,
@@ -19,30 +17,6 @@ import { TASK_DEPLOY } from "./task-names";
 export interface TaskArgs {
   fileNames: string[]
   force: boolean
-}
-
-/**
- * Load .js, .ts files from /scripts (default) directory
- * @param directory directory to load files from
- * @param taskType task type (eg. test)
- * @returns array of paths as string eg. ['scripts/file1.js', 'scripts/file2.js', ..]
- */
-export function loadFilenames (directory: string, taskType?: string): string[] {
-  if (!fs.existsSync(directory)) {
-    if (taskType === "test") {
-      throw new BuilderError(ERRORS.BUILTIN_TASKS.TESTS_DIRECTORY_NOT_FOUND, {
-        directory
-      });
-    } else {
-      throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND, {
-        directory
-      });
-    }
-  }
-
-  return glob.sync(path.join(directory, "*.js"))
-    .concat(glob.sync(path.join(directory, "*.ts")))
-    .sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {

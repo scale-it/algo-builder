@@ -69,7 +69,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    lsig = runtime.getLogicSig(escrowProg, []);
+    lsig = runtime.createLsigAccount(escrowProg, []);
     escrowAddress = lsig.address();
 
     // sync escrow account
@@ -280,7 +280,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
-    const wrongLsig = runtime.getLogicSig(escrowProg, []);
+    const wrongLsig = runtime.createLsigAccount(escrowProg, []);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [

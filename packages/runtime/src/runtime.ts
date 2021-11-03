@@ -248,6 +248,7 @@ export class Runtime {
   /**
    * Queries app id by app name from global state.
    * Returns undefined if app is not found.
+   * https://www.pivotaltracker.com/story/show/180142720
    * @param approval
    * @param clear
    */
@@ -558,11 +559,14 @@ export class Runtime {
   }
 
   /**
-   * Returns logic signature
+   * Creates a new account with logic signature and smart contract arguments
+   * in the runtime store. The arguments are used when we send a transaction with this
+   * account and verify it.
    * @param program TEAL code
    * @param args arguments passed
+   * @returns logic signature with arguments.
    */
-  getLogicSig (program: string, args: Uint8Array[]): LogicSigAccount {
+  createLsigAccount (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }

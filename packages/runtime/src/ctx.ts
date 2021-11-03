@@ -1,7 +1,7 @@
 import { tx as webTx, types } from "@algo-builder/web";
-import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
+import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
-import { parseASADef, Runtime } from ".";
+import { AccountStore, parseASADef, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
@@ -265,12 +265,21 @@ export class Ctx implements Context {
       {
         creator: senderAcc.address,
         appID: this.state.appCounter,
+        applicationAccount: getApplicationAddress(this.state.appCounter),
         txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
         timestamp: Math.round(+new Date() / 1000),
         deleted: false
       }
     );
+
+    // create new "app account" (an account belonging to smart contract)
+    // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#using-a-smart-contract-as-an-escrow
+    const acc = new AccountStore(0, {
+      addr: getApplicationAddress(this.state.appCounter),
+      sk: new Uint8Array(0)
+    });
+    this.state.accounts.set(acc.address, acc);
 
     return this.state.appCounter;
   }
@@ -288,7 +297,12 @@ export class Ctx implements Context {
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+    try {
+      this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+    } catch (error) {
+      account.closeApp(appID); // remove already added state if optIn fails
+      throw error;
+    }
   }
 
   /**
@@ -302,7 +316,8 @@ export class Ctx implements Context {
    * the transaction fee requirement will be met.
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
-  verifyMinimumFees (): void {
+  verifyMinimumFees (isInnerTx?: boolean): void {
+    if (isInnerTx === true) { return; } // pooled fee for inner tx is calculated at itxn_submit
     let collected = 0;
     for (const val of this.gtxs) {
       if (val.fee === undefined) val.fee = 0;
@@ -510,10 +525,11 @@ export class Ctx implements Context {
    * then it does not affect runtime.store, otherwise we just update
    * store with ctx (if all transactions are executed successfully).
    * @param txnParams Transaction Parameters
+   * @param isInnerTx true if currently executing transaction is an inner txn or txn group
    */
   /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: types.ExecParams[]): void {
-    this.verifyMinimumFees();
+  processTransactions (txnParams: types.ExecParams[], isInnerTx?: boolean): void {
+    this.verifyMinimumFees(isInnerTx);
     txnParams.forEach((txnParam, idx) => {
       const fromAccountAddr = webTx.getFromAddress(txnParam);
       this.deductFee(fromAccountAddr, idx, txnParam.payFlags);

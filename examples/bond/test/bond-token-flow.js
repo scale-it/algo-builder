@@ -107,7 +107,7 @@ describe('Bond token Tests', function () {
       TMPL_APP_MANAGER: appManager.address
     };
     const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
-    lsig = runtime.getLogicSig(issuerLsigProg, []);
+    lsig = runtime.createLsigAccount(issuerLsigProg, []);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account
@@ -246,7 +246,7 @@ describe('Bond token Tests', function () {
       TMPL_BOND: bond2
     };
     const buyLsigProgram = getProgram('buyback-lsig.py', scParam);
-    const buybackLsig = runtime.getLogicSig(buyLsigProgram, []);
+    const buybackLsig = runtime.createLsigAccount(buyLsigProgram, []);
 
     // fund dex with some minimum balance first
     runtime.fundLsig(master.account, buybackLsig.address(), minBalance + 10000);

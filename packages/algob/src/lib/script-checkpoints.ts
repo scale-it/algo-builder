@@ -1,7 +1,7 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import { encodeAddress, modelsv2, Transaction } from "algosdk";
+import { encodeAddress, getApplicationAddress, modelsv2, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -251,6 +251,7 @@ export async function registerCheckpoints (
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             appID: Number(txConfirmation['application-index']),
+            applicationAccount: getApplicationAddress(Number(txConfirmation['application-index'])),
             confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
             deleted: false
