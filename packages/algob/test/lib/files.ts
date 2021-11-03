@@ -1,11 +1,8 @@
 import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { TASK_TEST } from "../../build/builtin-tasks/task-names";
-import { loadFilenames } from "../../src/internal/util/files";
 import { assertDirChildren, assertDirectDirChildren } from "../../src/lib/files";
 import { expectBuilderError } from "../helpers/errors";
-import { useCleanFixtureProject } from "../helpers/project";
 
 describe("assertDirChildren", () => {
   it("Should pass for children inputs", async () => {
