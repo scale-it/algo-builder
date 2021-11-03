@@ -83,6 +83,38 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Freeze ASA passed in Txn.Assets[0] for account Txn.Accounts[1]
+    # (fails if app account !== freeze address)
+    freeze_asa = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetFreeze,
+                TxnField.freeze_asset: Txn.assets[0],
+                TxnField.freeze_asset_account: Txn.accounts[1],
+                TxnField.freeze_asset_frozen: Int(1), # freeze = true
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
+    # Unfreeze ASA passed in Txn.Assets[0] for account Txn.Accounts[1]
+    # (fails if app account !== freeze address)
+    unfreeze_asa = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetFreeze,
+                TxnField.freeze_asset: Txn.assets[0],
+                TxnField.freeze_asset_account: Txn.accounts[1],
+                TxnField.freeze_asset_frozen: Int(0), # freeze = false
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
     program = Cond(
         # Verfies that the application_id is 0, accepts it
         [Txn.application_id() == Int(0), Return(Int(1))],
@@ -106,6 +138,8 @@ def approval_program():
         [Txn.application_args[0] == Bytes("transfer_asa"), transfer_asa],
         [Txn.application_args[0] == Bytes("transfer_asa_with_close_rem_to"), transfer_asa_with_close_rem_to],
         [Txn.application_args[0] == Bytes("asa_clawback_from_txn1_to_txn2"), asa_clawback_from_txn1_to_txn2],
+        [Txn.application_args[0] == Bytes("freeze_asa"), freeze_asa],
+        [Txn.application_args[0] == Bytes("unfreeze_asa"), unfreeze_asa],
     )
 
     return program

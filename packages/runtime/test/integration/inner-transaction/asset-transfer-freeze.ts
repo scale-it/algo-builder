@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
@@ -200,7 +201,6 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     // empties contract's ALGO's to elon (after deducting fees)
     const txParams = {
       ...appCallParams,
-      payFlags: { totalFee: 1000 },
       appArgs: ['str:asa_clawback_from_txn1_to_txn2'],
       accounts: [john.address, elon.address], // clawback 2 ASA from john -> elon by App
       foreignAssets: [assetID]
@@ -212,5 +212,80 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     // verify 2 ASA are clawbacked from john -> elon
     assert.equal(john.getAssetHolding(assetID)?.amount, johnHoldingBefore - 2n);
     assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + 2n);
+  });
+
+  it("should fail on asset freeze if asset freeze !== application account", function () {
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:freeze_asa'],
+      accounts: [john.address],
+      foreignAssets: [assetID]
+    };
+
+    assert.throws(
+      () => runtime.executeTx(txParams),
+      `RUNTIME_ERR1505: Only Freeze account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can freeze asset`
+    );
+  });
+
+  it("should fail if txn.accounts[1] not optedIn to ASA", function () {
+    // update freeze to app account
+    const asaDef = john.createdAssets.get(assetID);
+    if (asaDef) asaDef.freeze = appAccount.address;
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:freeze_asa'],
+      accounts: [elon.address], // elon is not optedin
+      foreignAssets: [assetID]
+    };
+
+    assert.throws(
+      () => runtime.executeTx(txParams),
+      `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index 8`
+    );
+  });
+
+  it("should freeze asset (by app account)", function () {
+    // update freeze to app account
+    const asaDef = john.createdAssets.get(assetID);
+    if (asaDef) asaDef.freeze = appAccount.address;
+
+    // not frozen
+    assert.equal(john.getAssetHolding(assetID)?.["is-frozen"], false);
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:freeze_asa'],
+      accounts: [john.address],
+      foreignAssets: [assetID]
+    };
+    runtime.executeTx(txParams);
+    syncAccounts();
+
+    // frozen
+    assert.equal(john.getAssetHolding(assetID)?.["is-frozen"], true);
+  });
+
+  it("should unfreeze asset (by app account)", function () {
+    // update freeze to app account
+    const asaDef = john.createdAssets.get(assetID);
+    if (asaDef) asaDef.freeze = appAccount.address;
+
+    // set frozen == true
+    const johnAssetHolding = john.getAssetHolding(assetID);
+    if (johnAssetHolding) johnAssetHolding["is-frozen"] = true;
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:unfreeze_asa'],
+      accounts: [john.address],
+      foreignAssets: [assetID]
+    };
+    runtime.executeTx(txParams);
+    syncAccounts();
+
+    // verify unfrozen
+    assert.equal(john.getAssetHolding(assetID)?.["is-frozen"], false);
   });
 });
