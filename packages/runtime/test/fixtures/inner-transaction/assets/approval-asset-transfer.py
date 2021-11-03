@@ -47,7 +47,6 @@ def approval_program():
             }
         ),
         InnerTxnBuilder.Submit(),
-
         Return(Int(1))
     ])
 
@@ -150,6 +149,29 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Deploy ASA (by app account)
+    # https://developer.algorand.org/articles/discover-avm-10/
+    deploy_asa = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetConfig,
+                TxnField.config_asset_name: Bytes('gold'),
+                TxnField.config_asset_unit_name: Bytes('oz'),
+                TxnField.config_asset_total: Int(10000000),
+                TxnField.config_asset_decimals: Int(3),
+                TxnField.config_asset_url: Bytes('https://gold.rush/'),
+                TxnField.config_asset_manager: Global.current_application_address(),
+                TxnField.config_asset_reserve: Global.current_application_address(),
+                TxnField.config_asset_freeze: Global.current_application_address(),
+                TxnField.config_asset_clawback: Global.current_application_address(),
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        # save newly created assetID
+        App.globalPut(Bytes("created_asa_key"), InnerTxn.created_asset_id()),
+        Return(Int(1))
+    ])
 
     program = Cond(
         # Verfies that the application_id is 0, accepts it
@@ -178,6 +200,7 @@ def approval_program():
         [Txn.application_args[0] == Bytes("unfreeze_asa"), unfreeze_asa],
         [Txn.application_args[0] == Bytes("delete_asa"), delete_asa],
         [Txn.application_args[0] == Bytes("modify_asa"), modify_asa],
+        [Txn.application_args[0] == Bytes("deploy_asa"), deploy_asa],
     )
 
     return program
