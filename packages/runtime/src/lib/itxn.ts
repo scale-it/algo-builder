@@ -256,7 +256,5 @@ export function parseEncodedTxnToExecParams (tx: Txn,
     }
   }
 
-  // console.log('returing... ', execParams);
-  // console.log('enc tx ', tx);
   return execParams;
 }

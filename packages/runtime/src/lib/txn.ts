@@ -178,7 +178,7 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
  */
 export function isEncTxAssetDeletion (txn: Txn): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.xaid !== undefined && txn.xaid !== 0) && // assetIndex should not be 0
+  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
   !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
 
@@ -188,6 +188,6 @@ export function isEncTxAssetDeletion (txn: Txn): boolean {
  */
 export function isEncTxAssetConfig (txn: Txn): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.xaid !== undefined && txn.xaid !== 0) && // assetIndex should not be 0
+  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
   !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
