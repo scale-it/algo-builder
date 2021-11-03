@@ -252,7 +252,7 @@ by an index that does not exist.`
   },
   ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
     number: 1037,
-    message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender. [error-line: %line%]",
+    message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender OR CurrentApplicationAddress. [error-line: %line%]",
     title: 'Address not found in Txn',
     description: `Address should be present in Txn.Account OR should be Txn.Sender`
   },
@@ -304,6 +304,30 @@ maximun uint128`
     message: "Curve index: %index% is not supported. [error-line: %line%]",
     title: 'curve not supported',
     description: `curve index is not supported.`
+  },
+  ITXN_BEGIN_WITHOUT_ITXN_SUBMIT: {
+    number: 1046,
+    message: "itxn_begin without itxn_submit: an inner transaction is already being configured, at line %line%",
+    title: "itxn_begin without itxn_submit",
+    description: `itxn_begin without itxn_submit`
+  },
+  ITXN_FIELD_WITHOUT_ITXN_BEGIN: {
+    number: 1047,
+    message: "itxn_field without itxn_begin: tring to set inner transaction field without inner tx begin, at line %line%",
+    title: "itxn_field without itxn_begin",
+    description: `itxn_field without itxn_begin`
+  },
+  ITXN_FIELD_ERR: {
+    number: 1048,
+    message: "execution of itxn_field %field% failed. Message: %msg%. Teal version: #%tealV%, [error-line: %line%]",
+    title: "execution of itxn_field %field% failed",
+    description: `execution of itxn_field %field% failed`
+  },
+  ITXN_SUBMIT_WITHOUT_ITXN_BEGIN: {
+    number: 1049,
+    message: "itxn_submit without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
+    title: "itxn_submit without itxn_begin",
+    description: `itxn_submit without itxn_begin`
   }
 };
 
@@ -397,6 +421,12 @@ export const runtimeGeneralErrors = {
     message: "tx has too many references, max is %max%, got: %len%",
     title: "Transaction references(assets + apps + accounts) exceeds max length of %max%",
     description: `Transaction references cannot exceed max length of %max%`
+  },
+  MAX_INNER_TRANSACTIONS_EXCEEDED: {
+    number: 1315,
+    message: "Attempt to create too many inner transactions, max is %max%, got: %len%, at line %line%",
+    title: "Max inner transactions exceeded",
+    description: `Inner transaction in a single call cannot be more than %max%`
   }
 };
 

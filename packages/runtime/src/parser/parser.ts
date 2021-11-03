@@ -15,6 +15,7 @@ import {
   ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
+  ITxnBegin, ITxnField, ITxnSubmit,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256,
@@ -223,8 +224,12 @@ opCodeMap[5] = {
   extract3: Extract3,
   extract_uint16: ExtractUint16,
   extract_uint32: ExtractUint32,
-  extract_uint64: ExtractUint64
+  extract_uint64: ExtractUint64,
 
+  // Inner Transaction Ops
+  itxn_begin: ITxnBegin,
+  itxn_field: ITxnField,
+  itxn_submit: ITxnSubmit
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -235,7 +240,7 @@ const interpreterReqList = new Set([
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
-  "gaid", "gaids", "loads", "stores"
+  "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit"
 ]);
 
 /**

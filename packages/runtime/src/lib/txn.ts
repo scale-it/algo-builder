@@ -1,5 +1,5 @@
 import { parsing } from "@algo-builder/web";
-import type { EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
+import { EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -7,7 +7,7 @@ import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
 import { StackElem, TxField, Txn, TxnType } from "../types";
 
-const assetTxnFields = new Set([
+export const assetTxnFields = new Set([
   'ConfigAssetTotal',
   'ConfigAssetDecimals',
   'ConfigAssetDefaultFrozen',
@@ -167,4 +167,27 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
   }
   op.checkIndexBound(idx, result, line);
   return parseToStackElem(result[idx], txField);
+}
+
+/**
+ * Check if given encoded transaction obj is asset deletion
+ * @param txn Encoded Txn Object
+ * Logic:
+ * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
+ * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
+ */
+export function isEncTxAssetDeletion (txn: Txn): boolean {
+  return txn.type === 'acfg' && // type should be asset config
+  (txn.xaid !== 0) && // assetIndex should not be 0
+  !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
+}
+
+/**
+ * Check if given encoded transaction obj is asset deletion
+ * @param txn Encoded Txn Object
+ */
+export function isEncTxAssetConfig (txn: Txn): boolean {
+  return txn.type === 'acfg' && // type should be asset config
+  (txn.xaid !== 0) && // assetIndex should not be 0
+  !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }

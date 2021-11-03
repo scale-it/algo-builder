@@ -113,7 +113,7 @@ export interface Context {
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  verifyMinimumFees: () => void
+  verifyMinimumFees: (isInnerTx?: boolean) => void
   deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
   transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
@@ -125,7 +125,7 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: types.ExecParams[]) => void
+  processTransactions: (txnParams: types.ExecParams[], isInnerTx?: boolean) => void
   addAsset: (name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   addASADef: (

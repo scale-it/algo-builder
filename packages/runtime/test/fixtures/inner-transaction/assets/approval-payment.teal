@@ -1,0 +1,71 @@
+#pragma version 5
+txn ApplicationID
+int 0
+==
+bnz main_l10
+txn OnCompletion
+int UpdateApplication
+==
+txn OnCompletion
+int DeleteApplication
+==
+||
+bnz main_l9
+txn OnCompletion
+int CloseOut
+==
+txn OnCompletion
+int OptIn
+==
+||
+bnz main_l8
+txna ApplicationArgs 0
+byte "pay"
+==
+bnz main_l7
+txna ApplicationArgs 0
+byte "pay_with_close_rem_to"
+==
+bnz main_l6
+err
+main_l6:
+itxn_begin
+int pay
+itxn_field TypeEnum
+txn Sender
+itxn_field Receiver
+int 0
+itxn_field Amount
+txna Accounts 1
+itxn_field CloseRemainderTo
+itxn_submit
+int 1
+return
+main_l7:
+itxn_begin
+int pay
+itxn_field TypeEnum
+txn Sender
+itxn_field Receiver
+int 1000000
+itxn_field Amount
+itxn_submit
+itxn_begin
+int pay
+itxn_field TypeEnum
+txna Accounts 1
+itxn_field Receiver
+int 2000000
+itxn_field Amount
+itxn_submit
+int 1
+return
+main_l8:
+int 1
+return
+main_l9:
+int 0
+return
+main_l10:
+int 1
+return

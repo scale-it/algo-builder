@@ -316,7 +316,8 @@ export class Ctx implements Context {
    * the transaction fee requirement will be met.
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
-  verifyMinimumFees (): void {
+  verifyMinimumFees (isInnerTx?: boolean): void {
+    if (isInnerTx === true) { return; } // pooled fee for inner tx is calculated at itxn_submit
     let collected = 0;
     for (const val of this.gtxs) {
       if (val.fee === undefined) val.fee = 0;
@@ -524,10 +525,11 @@ export class Ctx implements Context {
    * then it does not affect runtime.store, otherwise we just update
    * store with ctx (if all transactions are executed successfully).
    * @param txnParams Transaction Parameters
+   * @param isInnerTx true if currently executing transaction is an inner txn or txn group
    */
   /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: types.ExecParams[]): void {
-    this.verifyMinimumFees();
+  processTransactions (txnParams: types.ExecParams[], isInnerTx?: boolean): void {
+    this.verifyMinimumFees(isInnerTx);
     txnParams.forEach((txnParam, idx) => {
       const fromAccountAddr = webTx.getFromAddress(txnParam);
       this.deductFee(fromAccountAddr, idx, txnParam.payFlags);
