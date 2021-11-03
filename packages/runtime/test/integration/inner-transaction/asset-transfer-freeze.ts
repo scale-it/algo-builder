@@ -41,7 +41,8 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   });
 
   this.beforeEach(() => {
-    // create app
+    // reset app (delete + create)
+    john.createdApps.delete(appID);
     appID = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram);
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
@@ -287,5 +288,80 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     // verify unfrozen
     assert.equal(john.getAssetHolding(assetID)?.["is-frozen"], false);
+  });
+
+  it("should fail on asset delete if asset manager !== application account", function () {
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:delete_asa'],
+      foreignAssets: [assetID]
+    };
+
+    assert.throws(
+      () => runtime.executeTx(txParams),
+      `RUNTIME_ERR1504: Only Manager account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can modify or destroy asset`
+    );
+  });
+
+  it("should delete asset (by app account)", function () {
+    // update asset manager to app account
+    const asaDef = john.createdAssets.get(assetID);
+    if (asaDef) asaDef.manager = appAccount.address;
+
+    // assert ASA defined
+    assert.isDefined(runtime.getAssetDef(assetID));
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:delete_asa'],
+      foreignAssets: [assetID]
+    };
+    runtime.executeTx(txParams);
+    syncAccounts();
+
+    // assert ASA deleted
+    assert.throws(
+      () => runtime.getAssetDef(assetID),
+      `RUNTIME_ERR1502: Asset with Index ${assetID} not found`
+    );
+  });
+
+  it("should fail on asset modification if asset manager !== application account", function () {
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:modify_asa'],
+      foreignAssets: [assetID],
+      accounts: [elon.address, bob.address]
+    };
+
+    assert.throws(
+      () => runtime.executeTx(txParams),
+      `RUNTIME_ERR1504: Only Manager account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can modify or destroy asset`
+    );
+  });
+
+  it("should modify asset (by app account)", function () {
+    // update asset manager to app account
+    let asaDef = john.createdAssets.get(assetID);
+    if (asaDef) asaDef.manager = appAccount.address;
+
+    // assert ASA defined
+    assert.isDefined(runtime.getAssetDef(assetID));
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:modify_asa'],
+      foreignAssets: [assetID],
+      accounts: [elon.address, bob.address]
+    };
+    runtime.executeTx(txParams);
+    syncAccounts();
+
+    // verify fields modified (according to asc logic)
+    asaDef = runtime.getAssetDef(assetID);
+    assert.deepEqual(asaDef.manager, txParams.accounts[0]);
+    assert.deepEqual(asaDef.reserve, txParams.accounts[1]);
+    assert.deepEqual(asaDef.freeze, txParams.fromAccount?.addr);
+    assert.deepEqual(asaDef.clawback, appAccount.address);
   });
 });

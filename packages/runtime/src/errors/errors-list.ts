@@ -509,7 +509,7 @@ export const runtimeAsaErrors = {
   },
   MANAGER_ERROR: {
     number: 1504,
-    message: `Only Manager account %address% can modify asset`,
+    message: `Only Manager account %address% can modify or destroy asset`,
     title: "Manager Error",
     description: "Manager Error"
   },

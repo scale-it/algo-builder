@@ -2,7 +2,7 @@
 txn ApplicationID
 int 0
 ==
-bnz main_l18
+bnz main_l22
 txn OnCompletion
 int UpdateApplication
 ==
@@ -10,7 +10,7 @@ txn OnCompletion
 int DeleteApplication
 ==
 ||
-bnz main_l17
+bnz main_l21
 txn OnCompletion
 int CloseOut
 ==
@@ -18,33 +18,67 @@ txn OnCompletion
 int OptIn
 ==
 ||
-bnz main_l16
+bnz main_l20
 txna ApplicationArgs 0
 byte "opt_in_to_asa"
 ==
-bnz main_l15
+bnz main_l19
 txna ApplicationArgs 0
 byte "transfer_asa"
 ==
-bnz main_l14
+bnz main_l18
 txna ApplicationArgs 0
 byte "transfer_asa_with_close_rem_to"
 ==
-bnz main_l13
+bnz main_l17
 txna ApplicationArgs 0
 byte "asa_clawback_from_txn1_to_txn2"
 ==
-bnz main_l12
+bnz main_l16
 txna ApplicationArgs 0
 byte "freeze_asa"
 ==
-bnz main_l11
+bnz main_l15
 txna ApplicationArgs 0
 byte "unfreeze_asa"
 ==
-bnz main_l10
+bnz main_l14
+txna ApplicationArgs 0
+byte "delete_asa"
+==
+bnz main_l13
+txna ApplicationArgs 0
+byte "modify_asa"
+==
+bnz main_l12
 err
-main_l10:
+main_l12:
+itxn_begin
+int acfg
+itxn_field TypeEnum
+txna Assets 0
+itxn_field ConfigAsset
+txna Accounts 1
+itxn_field ConfigAssetManager
+txna Accounts 2
+itxn_field ConfigAssetReserve
+txn Sender
+itxn_field ConfigAssetFreeze
+global CurrentApplicationAddress
+itxn_field ConfigAssetClawback
+itxn_submit
+int 1
+return
+main_l13:
+itxn_begin
+int acfg
+itxn_field TypeEnum
+txna Assets 0
+itxn_field ConfigAsset
+itxn_submit
+int 1
+return
+main_l14:
 itxn_begin
 int afrz
 itxn_field TypeEnum
@@ -57,7 +91,7 @@ itxn_field FreezeAssetFrozen
 itxn_submit
 int 1
 return
-main_l11:
+main_l15:
 itxn_begin
 int afrz
 itxn_field TypeEnum
@@ -70,7 +104,7 @@ itxn_field FreezeAssetFrozen
 itxn_submit
 int 1
 return
-main_l12:
+main_l16:
 itxn_begin
 int axfer
 itxn_field TypeEnum
@@ -85,7 +119,7 @@ itxn_field AssetAmount
 itxn_submit
 int 1
 return
-main_l13:
+main_l17:
 itxn_begin
 int axfer
 itxn_field TypeEnum
@@ -100,7 +134,7 @@ itxn_field AssetCloseTo
 itxn_submit
 int 1
 return
-main_l14:
+main_l18:
 itxn_begin
 int axfer
 itxn_field TypeEnum
@@ -123,7 +157,7 @@ itxn_field AssetAmount
 itxn_submit
 int 1
 return
-main_l15:
+main_l19:
 itxn_begin
 int axfer
 itxn_field TypeEnum
@@ -136,12 +170,12 @@ itxn_field AssetAmount
 itxn_submit
 int 1
 return
-main_l16:
+main_l20:
 int 1
 return
-main_l17:
+main_l21:
 int 0
 return
-main_l18:
+main_l22:
 int 1
 return

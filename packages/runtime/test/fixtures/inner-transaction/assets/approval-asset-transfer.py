@@ -100,7 +100,7 @@ def approval_program():
     ])
 
     # Unfreeze ASA passed in Txn.Assets[0] for account Txn.Accounts[1]
-    # (fails if app account !== freeze address)
+    # (fails if app account !== asset freeze address)
     unfreeze_asa = Seq([
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(
@@ -114,6 +114,42 @@ def approval_program():
         InnerTxnBuilder.Submit(),
         Return(Int(1))
     ])
+
+    # Delete ASA passed in Txn.Assets[0]
+    # (fails if app account !== asset manager address)
+    delete_asa = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetConfig,
+                TxnField.config_asset: Txn.assets[0]
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
+    # Modify ASA passed in Txn.Assets[0]
+    # (fails if app account !== asset manager address). Updates:
+    # manager, reserve = txn.accounts[1], txn.accounts[2]
+    # freeze = sender
+    # clawback = app account address
+    modify_asa = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetConfig,
+                TxnField.config_asset: Txn.assets[0],
+                TxnField.config_asset_manager: Txn.accounts[1],
+                TxnField.config_asset_reserve: Txn.accounts[2],
+                TxnField.config_asset_freeze: Txn.sender(),
+                TxnField.config_asset_clawback: Global.current_application_address(),
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
 
     program = Cond(
         # Verfies that the application_id is 0, accepts it
@@ -140,6 +176,8 @@ def approval_program():
         [Txn.application_args[0] == Bytes("asa_clawback_from_txn1_to_txn2"), asa_clawback_from_txn1_to_txn2],
         [Txn.application_args[0] == Bytes("freeze_asa"), freeze_asa],
         [Txn.application_args[0] == Bytes("unfreeze_asa"), unfreeze_asa],
+        [Txn.application_args[0] == Bytes("delete_asa"), delete_asa],
+        [Txn.application_args[0] == Bytes("modify_asa"), modify_asa],
     )
 
     return program

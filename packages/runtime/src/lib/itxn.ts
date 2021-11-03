@@ -148,6 +148,7 @@ export function setInnerTxField (
   if (encodedField === null) {
     return subTxn; // could be for "TypeEnum"
   } else if (assetTxnFields.has(field)) {
+    (subTxn as any).apar = (subTxn as any).apar ?? {};
     (subTxn as any).apar[encodedField] = txValue;
   } else {
     (subTxn as any)[encodedField] = txValue;
@@ -220,12 +221,12 @@ export function parseEncodedTxnToExecParams (tx: Txn,
     case 'acfg': { // can be asset modification, destroy, or deployment(create)
       if (isEncTxAssetDeletion(tx)) {
         execParams.type = types.TransactionType.DestroyAsset;
-        execParams.assetID = tx.xaid;
+        execParams.assetID = tx.caid;
       } else if (isEncTxAssetConfig(tx)) {
         // from the docs: all fields must be reset, otherwise they will be cleared
         // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#asset-configuration
         execParams.type = types.TransactionType.ModifyAsset;
-        execParams.assetID = tx.xaid;
+        execParams.assetID = tx.caid;
         execParams.fields = {
           manager: _getRuntimeAccountAddr(tx.apar?.m, interpreter, line) ?? "",
           reserve: _getRuntimeAccountAddr(tx.apar?.r, interpreter, line) ?? "",
