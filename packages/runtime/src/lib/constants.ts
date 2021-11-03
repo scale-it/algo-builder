@@ -132,14 +132,35 @@ TxnFields[5] = {
   Nonparticipation: 'nonpart'
 };
 
+export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
+  1: {},
+  2: {},
+  3: {},
+  4: {},
+  5: {
+    Logs: null,
+    NumLogs: null,
+    CreatedAssetID: null,
+    CreatedApplicationID: null
+  }
+};
+
 // transaction fields of type array
 export const TxArrFields: {[key: number]: Set<string>} = {
   1: new Set(),
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
-TxArrFields[4] = TxArrFields[3];
-TxArrFields[5] = TxArrFields[4];
+TxArrFields[5] = TxArrFields[4] = TxArrFields[3];
+
+// itxn fields of type array
+export const ITxArrFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set(['Logs'])
+};
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: ZERO_ADDRESS,

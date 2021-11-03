@@ -109,11 +109,14 @@ export interface Context {
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
+  // inner transaction props
+  isInnerTx: boolean // true if "ctx" is switched to an inner transaction
+  createdAssetID: number // Asset ID allocated by the creation of an ASA (for an inner-tx)
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  verifyMinimumFees: (isInnerTx?: boolean) => void
+  verifyMinimumFees: () => void
   deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
   transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
@@ -125,7 +128,7 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: types.ExecParams[], isInnerTx?: boolean) => void
+  processTransactions: (txnParams: types.ExecParams[]) => void
   addAsset: (name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   addASADef: (
