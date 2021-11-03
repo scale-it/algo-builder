@@ -8,7 +8,7 @@ import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 
-describe("Algorand Smart Contracts(TEALv5) - Inner Transactions", function () {
+describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", function () {
   useFixture("inner-transaction");
   const fee = 1000;
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + fee;
