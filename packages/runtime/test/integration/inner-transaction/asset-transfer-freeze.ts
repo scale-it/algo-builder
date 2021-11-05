@@ -5,6 +5,7 @@ import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE } from "../../../src/lib/constants";
+import { convertToString } from "../../../src/lib/parsing";
 import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
@@ -390,6 +391,44 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     assert.deepEqual(asaDef.metadataHash, undefined);
     assert.equal(asaDef.unitName, "oz");
     assert.equal(asaDef.url, "https://gold.rush/");
+    assert.equal(asaDef.manager, appAccount.address);
+    assert.equal(asaDef.reserve, appAccount.address);
+    assert.equal(asaDef.freeze, appAccount.address);
+    assert.equal(asaDef.clawback, appAccount.address);
+
+    // verify app account's min balance is also raised
+    assert.equal(appAccount.minBalance, initialMinBalance + ASSET_CREATION_FEE);
+  });
+
+  it("should deploy a new ASA with app_args (by app account)", function () {
+    // saved in global state, initially undefined
+    let createdAsaID = runtime.getGlobalState(appID, "created_asa_key");
+    assert.isUndefined(createdAsaID);
+    const initialMinBalance = appAccount.minBalance;
+
+    const txParams = {
+      ...appCallParams,
+      appArgs: ['str:deploy_asa_with_app_args', `str:asa_name`, `str:ipfs://ABCDEF`]
+    };
+    runtime.executeTx(txParams);
+    syncAccounts();
+
+    // verify asa created by contract
+    createdAsaID = runtime.getGlobalState(appID, "created_asa_key");
+    assert.isDefined(createdAsaID);
+
+    const asaDef = runtime.getAssetDef(Number(createdAsaID));
+    // you can also get asa definition from passed asa name
+    const asaDefFromName = runtime.getAssetInfoFromName("asa_name")?.assetDef;
+    assert.deepEqual(asaDef, asaDefFromName as any);
+
+    assert.isDefined(asaDef);
+    assert.equal(asaDef.decimals, 0);
+    assert.equal(asaDef.defaultFrozen, true);
+    assert.equal(asaDef.total, 1n);
+    if (asaDef.metadataHash) { assert.deepEqual(asaDef.metadataHash, new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64'))); }
+    assert.equal(asaDef.unitName, "TEST");
+    assert.equal(asaDef.url, "ipfs://ABCDEF");
     assert.equal(asaDef.manager, appAccount.address);
     assert.equal(asaDef.reserve, appAccount.address);
     assert.equal(asaDef.freeze, appAccount.address);
