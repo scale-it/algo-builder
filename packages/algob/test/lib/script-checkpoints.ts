@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
-import { getApplicationAddress, LogicSigAccount } from "algosdk";
+import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 

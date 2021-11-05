@@ -5,7 +5,6 @@ import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE } from "../../../src/lib/constants";
-import { convertToString } from "../../../src/lib/parsing";
 import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
@@ -29,7 +28,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   let appCallParams: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([master, john, elon, bob]); // setup test
-    approvalProgram = getProgram('approval-asset-transfer.teal');
+    approvalProgram = getProgram('approval-asset-tx.teal');
     clearProgram = getProgram('clear.teal');
 
     appCreationFlags = {
