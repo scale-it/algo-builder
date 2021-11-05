@@ -199,7 +199,7 @@ export class Ctx implements Context {
       deleted: false
     });
 
-    if (this.isInnerTx === true) { this.createdAssetID = this.state.assetCounter; }
+    if (this.isInnerTx) { this.createdAssetID = this.state.assetCounter; }
     return this.state.assetCounter;
   }
 
@@ -325,7 +325,7 @@ export class Ctx implements Context {
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
   verifyMinimumFees (): void {
-    if (this.isInnerTx === true) { return; } // pooled fee for inner tx is calculated at itxn_submit
+    if (this.isInnerTx) { return; } // pooled fee for inner tx is calculated at itxn_submit
     let collected = 0;
     for (const val of this.gtxs) {
       if (val.fee === undefined) val.fee = 0;

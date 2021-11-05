@@ -1,4 +1,3 @@
-import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";

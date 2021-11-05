@@ -238,7 +238,7 @@ export function parseEncodedTxnToExecParams (tx: Txn,
         execParams.asaName = tx.apar?.an;
         execParams.asaDef = {
           total: tx.apar?.t,
-          decimals: tx.apar?.dc ? Number(tx.apar?.dc) : undefined,
+          decimals: tx.apar?.dc !== undefined ? Number(tx.apar.dc) : undefined,
           defaultFrozen: BigInt(tx.apar?.df ?? 0n) === 1n,
           unitName: tx.apar?.un,
           url: tx.apar?.au,
