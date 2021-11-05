@@ -53,7 +53,7 @@ export function parseAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[
       args.push(appArg);
       continue;
     }
-    const [type, value] = appArg.split(':'); // eg "int:1" => ['int', '1']
+    const [type, value] = appArg.split(/:(.+)/); // eg "int:1" => ['int', '1']
 
     // if given string is not invalid, throw error
     if (type === undefined || value === undefined) { throwFmtError(appArg); }
