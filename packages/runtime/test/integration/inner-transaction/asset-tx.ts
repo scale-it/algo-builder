@@ -433,6 +433,14 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     assert.equal(asaDef.freeze, appAccount.address);
     assert.equal(asaDef.clawback, appAccount.address);
 
+    // verify ASA holding is set in creator account
+    const creatorASAHolding = runtime.getAssetHolding(Number(createdAsaID), appAccount.address);
+    assert.isDefined(creatorASAHolding);
+    assert.equal(creatorASAHolding.amount, asaDef.total);
+    assert.equal(creatorASAHolding["asset-id"], Number(createdAsaID));
+    assert.equal(creatorASAHolding.creator, appAccount.address);
+    assert.equal(creatorASAHolding["is-frozen"], false);
+
     // verify app account's min balance is also raised
     assert.equal(appAccount.minBalance, initialMinBalance + ASSET_CREATION_FEE);
   });
