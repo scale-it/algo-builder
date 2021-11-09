@@ -674,6 +674,9 @@ export class Runtime {
   run (program: string, executionMode: ExecutionMode, indexInGroup: number, debugStack?: number): void {
     const interpreter = new Interpreter();
     interpreter.execute(program, executionMode, this, debugStack);
+    // reset pooled opcode cost for single tx, this is to handle singular functions
+    // which don't "initialize" a new ctx (eg. addApp)
+    if (this.ctx.gtxs.length === 1) { this.ctx.pooledApplCost = 0; }
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }

@@ -4,7 +4,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Runtime } from "../index";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { ALGORAND_MAX_APP_ARGS_LEN, ALGORAND_MAX_TX_ACCOUNTS_LEN, ALGORAND_MAX_TX_ARRAY_LEN, DEFAULT_STACK_ELEM, MaxTEALVersion } from "../lib/constants";
+import { ALGORAND_MAX_APP_ARGS_LEN, ALGORAND_MAX_TX_ACCOUNTS_LEN, ALGORAND_MAX_TX_ARRAY_LEN, DEFAULT_STACK_ELEM, MaxAppProgramCost, MaxTEALVersion } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
@@ -427,8 +427,17 @@ export class Interpreter {
       instruction.execute(this.stack);
 
       // for teal version >= 4, cost is calculated dynamically at the time of execution
+      // for teal version < 4, cost is handled statically during parsing
       dynamicCost += this.lineToCost[instruction.line];
-      if (this.tealVersion >= 4) { assertMaxCost(dynamicCost, mode); }
+      if (this.tealVersion >= 4) {
+        if (mode === ExecutionMode.SIGNATURE) {
+          assertMaxCost(dynamicCost, mode);
+        } else {
+          this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+          const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
+          assertMaxCost(this.runtime.ctx.pooledApplCost, ExecutionMode.APPLICATION, maxPooledApplCost);
+        }
+      }
 
       this.printStack(instruction, debugStack);
       this.instructionIndex++;

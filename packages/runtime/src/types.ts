@@ -109,6 +109,7 @@ export interface Context {
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
+  pooledApplCost: number // total opcode cost for each application call for single/group tx
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM

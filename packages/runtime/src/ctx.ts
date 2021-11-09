@@ -26,6 +26,7 @@ export class Ctx implements Context {
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
   sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
   knowableID: Map<number, ID>; // here number is index of transaction in a group
+  pooledApplCost: number; // total opcode cost for each application call for single/group tx
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
@@ -39,6 +40,7 @@ export class Ctx implements Context {
     // Scratch space is a list of elements.
     this.sharedScratchSpace = new Map<number, StackElem[]>();
     this.knowableID = new Map<number, ID>();
+    this.pooledApplCost = 0;
   }
 
   // verify account's balance is above minimum required balance

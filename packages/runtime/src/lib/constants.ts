@@ -328,7 +328,10 @@ OpGasCost[4] = {
  * teal v5
  */
 OpGasCost[5] = {
-  ...OpGasCost[4]
+  ...OpGasCost[4],
+  ecdsa_verify: 1700,
+  ecdsa_pk_decompress: 650,
+  ecdsa_pk_recover: 2000
 };
 
 export const enum MathOp {
