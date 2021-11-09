@@ -1,0 +1,42 @@
+#pragma version 5
+
+int 0
+txn ApplicationID
+==
+bnz accept
+
+int OptIn
+txn OnCompletion
+==
+bnz accept
+
+// cost of this branch is very high
+txna ApplicationArgs 0
+byte "exceeded_cost"
+==
+bnz exceeded_cost
+
+// cost of this branch is very low
+txna ApplicationArgs 0
+byte "normal_cost"
+==
+bnz accept
+
+exceeded_cost:
+byte base64 iZWMx72KvU6Bw6sPAWQFL96YH+VMrBA0XKWD9XbZOZI=
+byte base64 if8ooA+32YZc4SQBvIDDY8tgTatPoq4IZ8Kr+We1t38LR2RuURmaVu9D4shbi4VvND87PUqq5/0vsNFEGIIEDA==
+addr 7JOPVEP3ABJUW5YZ5WFIONLPWTZ5MYX5HFK4K7JLGSIAG7RRB42MNLQ224
+// costs about 1900
+ed25519verify
+byte base64 iZWMx72KvU6Bw6sPAWQFL96YH+VMrBA0XKWD9XbZOZI=
+byte base64 if8ooA+32YZc4SQBvIDDY8tgTatPoq4IZ8Kr+We1t38LR2RuURmaVu9D4shbi4VvND87PUqq5/0vsNFEGIIEDA==
+addr 7JOPVEP3ABJUW5YZ5WFIONLPWTZ5MYX5HFK4K7JLGSIAG7RRB42MNLQ224
+// costs about 1900
+ed25519verify
+byte "hello"
+// costs about 130
+keccak256
+
+accept:
+int 1
+return
