@@ -583,7 +583,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       assert.notEqual(asaManager.address, bob.address);
       assert.throws(() =>
         ctx.runtime.executeTx(txGroup),
-        `RUNTIME_ERR1504: Only Manager account ${asaManager.address} can modify asset`
+        `RUNTIME_ERR1504: Only Manager account ${asaManager.address} can modify or destroy asset`
       );
     });
   });

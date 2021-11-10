@@ -328,6 +328,12 @@ maximun uint128`
     message: "itxn_submit without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
     title: "itxn_submit without itxn_begin",
     description: `itxn_submit without itxn_begin`
+  },
+  NO_INNER_TRANSACTION_AVAILABLE: {
+    number: 1049,
+    message: "No inner transaction available. Teal version: #%tealV%, [error-line: %line%]",
+    title: "No inner transaction available.",
+    description: `No inner transaction available.`
   }
 };
 
@@ -509,7 +515,7 @@ export const runtimeAsaErrors = {
   },
   MANAGER_ERROR: {
     number: 1504,
-    message: `Only Manager account %address% can modify asset`,
+    message: `Only Manager account %address% can modify or destroy asset`,
     title: "Manager Error",
     description: "Manager Error"
   },

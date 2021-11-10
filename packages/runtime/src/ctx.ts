@@ -27,6 +27,9 @@ export class Ctx implements Context {
   sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
   knowableID: Map<number, ID>; // here number is index of transaction in a group
   pooledApplCost: number; // total opcode cost for each application call for single/group tx
+  // inner transaction props
+  isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
+  createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
@@ -41,6 +44,9 @@ export class Ctx implements Context {
     this.sharedScratchSpace = new Map<number, StackElem[]>();
     this.knowableID = new Map<number, ID>();
     this.pooledApplCost = 0;
+    // inner transaction props
+    this.isInnerTx = false;
+    this.createdAssetID = 0;
   }
 
   // verify account's balance is above minimum required balance
@@ -194,6 +200,8 @@ export class Ctx implements Context {
       confirmedRound: this.runtime.getRound(),
       deleted: false
     });
+
+    if (this.isInnerTx) { this.createdAssetID = this.state.assetCounter; }
     return this.state.assetCounter;
   }
 
@@ -318,8 +326,8 @@ export class Ctx implements Context {
    * the transaction fee requirement will be met.
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
-  verifyMinimumFees (isInnerTx?: boolean): void {
-    if (isInnerTx === true) { return; } // pooled fee for inner tx is calculated at itxn_submit
+  verifyMinimumFees (): void {
+    if (this.isInnerTx) { return; } // pooled fee for inner tx is calculated at itxn_submit
     let collected = 0;
     for (const val of this.gtxs) {
       if (val.fee === undefined) val.fee = 0;
@@ -527,11 +535,10 @@ export class Ctx implements Context {
    * then it does not affect runtime.store, otherwise we just update
    * store with ctx (if all transactions are executed successfully).
    * @param txnParams Transaction Parameters
-   * @param isInnerTx true if currently executing transaction is an inner txn or txn group
    */
   /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: types.ExecParams[], isInnerTx?: boolean): void {
-    this.verifyMinimumFees(isInnerTx);
+  processTransactions (txnParams: types.ExecParams[]): void {
+    this.verifyMinimumFees();
     txnParams.forEach((txnParam, idx) => {
       const fromAccountAddr = webTx.getFromAddress(txnParam);
       this.deductFee(fromAccountAddr, idx, txnParam.payFlags);
