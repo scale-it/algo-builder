@@ -1,4 +1,4 @@
-import { BuilderError, ERRORS, types } from "@algo-builder/web";
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs";
 import glob from "glob";
 import path from "path";

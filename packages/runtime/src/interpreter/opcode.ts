@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { GlobalFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
+import { GlobalFields, ITxArrFields, ITxnFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -209,6 +209,32 @@ export class Op {
    */
   assertTxArrFieldDefined (str: string, tealVersion: number, line: number): void {
     if (!TxArrFields[tealVersion].has(str)) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG,
+        { opcode: str, version: tealVersion, line: line });
+    }
+  }
+
+  /**
+   * asserts if known itxn field is passed
+   * @param str itxn field
+   * @param tealVersion version of TEAL
+   * @param line line number in TEAL file
+   */
+  assertITxFieldDefined (str: string, tealVersion: number, line: number): void {
+    if (TxnFields[tealVersion][str] === undefined && ITxnFields[tealVersion][str] === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
+        { field: str, version: tealVersion, line: line });
+    }
+  }
+
+  /**
+   * asserts if known itxn field of type array is passed
+   * @param str itxn field
+   * @param tealVersion version of TEAL
+   * @param line line number in TEAL file
+   */
+  assertITxArrFieldDefined (str: string, tealVersion: number, line: number): void {
+    if (!TxArrFields[tealVersion].has(str) && !ITxArrFields[tealVersion].has(str)) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG,
         { opcode: str, version: tealVersion, line: line });
     }

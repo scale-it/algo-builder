@@ -3923,14 +3923,136 @@ export class ITxnSubmit extends Op {
     // execute innner transaction
     this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
     this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
-    this.interpreter.runtime.ctx.processTransactions([execParams], true);
+    this.interpreter.runtime.ctx.isInnerTx = true;
+    this.interpreter.runtime.ctx.processTransactions([execParams]);
 
     // update current txns to base (top-level) after innerTx execution
     this.interpreter.runtime.ctx.tx = baseCurrTx;
     this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
 
     // save executed tx, reset current tx
+    this.interpreter.runtime.ctx.isInnerTx = false;
     this.interpreter.innerTxns.push(this.interpreter.subTxn);
     this.interpreter.subTxn = undefined;
+  }
+}
+
+// push field F of the last inner transaction to stack
+// push to stack [...stack, transaction field]
+export class ITxn extends Op {
+  readonly field: string;
+  readonly idx: number | undefined;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Set transaction field according to arguments passed
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.idx = undefined;
+
+    this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+    if (TxArrFields[interpreter.tealVersion].has(args[0])) { // eg. itxn Accounts 1
+      assertLen(args.length, 2, line);
+      assertOnlyDigits(args[1], line);
+      this.idx = Number(args[1]);
+    } else {
+      assertLen(args.length, 1, line);
+    }
+    this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+
+    this.field = args[0]; // field
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (this.interpreter.innerTxns.length === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE,
+        { version: this.interpreter.tealVersion, line: this.line });
+    }
+
+    let result;
+    const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+
+    switch (this.field) {
+      case 'Logs': {
+        // TODO handle this after log opcode is implemented
+        // https://www.pivotaltracker.com/story/show/179855820
+        result = 0n;
+        break;
+      }
+      case 'NumLogs': {
+        // TODO handle this after log opcode is implemented
+        result = 0n;
+        break;
+      }
+      case 'CreatedAssetID': {
+        result = BigInt(this.interpreter.runtime.ctx.createdAssetID);
+        break;
+      }
+      case 'CreatedApplicationID': {
+        result = 0n; // can we create an app in inner-tx?
+        break;
+      }
+      default: {
+        // similarly as Txn Op
+        if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
+          result = txAppArg(this.field, tx, this.idx, this,
+            this.interpreter.tealVersion, this.line);
+        } else {
+          result = txnSpecbyField(this.field, tx, [tx], this.interpreter.tealVersion);
+        }
+
+        break;
+      }
+    }
+
+    stack.push(result);
+  }
+}
+
+export class ITxna extends Op {
+  readonly field: string;
+  readonly idx: number;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Sets `field` and `idx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field, transaction field array index]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[1], line);
+    this.assertITxArrFieldDefined(args[0], interpreter.tealVersion, line);
+
+    this.field = args[0]; // field
+    this.idx = Number(args[1]);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (this.interpreter.innerTxns.length === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE,
+        { version: this.interpreter.tealVersion, line: this.line });
+    }
+
+    const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+    const result = txAppArg(this.field, tx, this.idx, this,
+      this.interpreter.tealVersion, this.line);
+    stack.push(result);
   }
 }

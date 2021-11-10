@@ -159,10 +159,12 @@ describe("Parse appArgs to App to bytes", () => {
     ].map(z => new Uint8Array(z));
     assert.deepEqual(res, expected);
 
-    res = parsing.parseAppArgs(['str:hello', 'str:world']);
+    res = parsing.parseAppArgs(['str:hello', 'str:world', 'str:ipfs://ABCD', 'str:']);
     expected = [
       [104, 101, 108, 108, 111], // 'hello'
-      [119, 111, 114, 108, 100] // 'world'
+      [119, 111, 114, 108, 100], // 'world'
+      [105, 112, 102, 115, 58, 47, 47, 65, 66, 67, 68], // 'ipfs://ABCD'
+      [] // empty string
     ].map(z => new Uint8Array(z));
     assert.deepEqual(res, expected);
 
