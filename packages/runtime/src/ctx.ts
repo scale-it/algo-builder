@@ -26,6 +26,7 @@ export class Ctx implements Context {
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
   sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
   knowableID: Map<number, ID>; // here number is index of transaction in a group
+  pooledApplCost: number; // total opcode cost for each application call for single/group tx
   // inner transaction props
   isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
   createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
@@ -42,6 +43,7 @@ export class Ctx implements Context {
     // Scratch space is a list of elements.
     this.sharedScratchSpace = new Map<number, StackElem[]>();
     this.knowableID = new Map<number, ID>();
+    this.pooledApplCost = 0;
     // inner transaction props
     this.isInnerTx = false;
     this.createdAssetID = 0;

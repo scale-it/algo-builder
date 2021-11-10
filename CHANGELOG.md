@@ -10,6 +10,8 @@
     * ExtractUint16, ExtractUint32, ExtractUint64 opcodes
     * Txn, Global fields
     * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
+    * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
+    * Support Pooled opcode budget
 
 ### Breaking changes
 

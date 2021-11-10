@@ -402,8 +402,14 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   return new opCodeMap[tealVersion][opCode](words, counter);
 }
 
-// verify max cost of TEAL code is within consensus parameters
-export function assertMaxCost (gas: number, mode: ExecutionMode): void {
+/**
+ * verify max cost of TEAL code is within consensus parameters
+ * @param gas total cost consumed by the TEAL code (can be dynamic or static)
+ * @param mode Execution mode - Signature (stateless) OR Application (stateful)
+ * @param maxPooledApplCost Since AVM 1.0, opcode cost for APPLICATION mode can be pooled accross
+ * multiple transactions. If passed, gas is evaluated against maxPooledApplCost
+ */
+export function assertMaxCost (gas: number, mode: ExecutionMode, maxPooledApplCost?: number): void {
   if (mode === ExecutionMode.SIGNATURE) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
@@ -414,7 +420,7 @@ export function assertMaxCost (gas: number, mode: ExecutionMode): void {
       });
     }
   } else {
-    if (gas > MaxAppProgramCost) {
+    if (gas > (maxPooledApplCost ?? MaxAppProgramCost)) {
       // check max cost (for stateful)
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
         cost: gas,

@@ -109,6 +109,7 @@ export interface Context {
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
+  pooledApplCost: number // total opcode cost for each application call for single/group tx
   // inner transaction props
   isInnerTx: boolean // true if "ctx" is switched to an inner transaction
   createdAssetID: number // Asset ID allocated by the creation of an ASA (for an inner-tx)
