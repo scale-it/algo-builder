@@ -9,7 +9,7 @@ import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 
-describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, Asset Freeze]", function () {
+describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, Asset Freeze..]", function () {
   useFixture("inner-transaction");
   const fee = 1000;
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 50 + fee;
