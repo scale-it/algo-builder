@@ -34,7 +34,9 @@ export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
 export const MAX_INNER_TRANSACTIONS = 16;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
-export const MAX_ALGORAND_ACCOUNT_APPS = 10;
+export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
+
+export const MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS = 50;
 
 // for byteslice arithmetic ops, inputs are limited to 64 bytes,
 // but ouput can be upto 128 bytes (eg. when using b+ OR b*)

@@ -6,8 +6,8 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { checkAndSetASAFields } from "./lib/asa";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
-  ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
-  MAX_ALGORAND_ACCOUNT_ASSETS,
+  ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_ASSETS,
+  MAX_ALGORAND_ACCOUNT_CREATED_APPS,
   SSC_VALUE_BYTES, SSC_VALUE_UINT
 } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
@@ -270,10 +270,10 @@ export class AccountStore implements AccountStoreI {
    */
   addApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
-    if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
+    if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
         address: this.address,
-        max: MAX_ALGORAND_ACCOUNT_APPS
+        max: MAX_ALGORAND_ACCOUNT_CREATED_APPS
       });
     };
 
