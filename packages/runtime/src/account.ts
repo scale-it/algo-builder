@@ -8,6 +8,7 @@ import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
   ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_ASSETS,
   MAX_ALGORAND_ACCOUNT_CREATED_APPS,
+  MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS,
   SSC_VALUE_BYTES, SSC_VALUE_UINT
 } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
@@ -294,8 +295,8 @@ export class AccountStore implements AccountStoreI {
     if (localState) {
       throw new Error(`${this.address} is already opted in to app ${appID}`);
     } else {
-      if (this.appsLocalState.size === 10) {
-        throw new Error('Maximum Opt In applications per account is 10');
+      if (this.appsLocalState.size === MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS) {
+        throw new Error(`Maximum Opt In applications per account is ${MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS}`);
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
