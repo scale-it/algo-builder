@@ -43,6 +43,7 @@ export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
 export const ZERO_ADDRESS = new Uint8Array(32);
+export const ZERO_ADDRESS_STR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 

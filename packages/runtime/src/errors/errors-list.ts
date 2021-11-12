@@ -334,6 +334,12 @@ maximun uint128`
     message: "No inner transaction available. Teal version: #%tealV%, [error-line: %line%]",
     title: "No inner transaction available.",
     description: `No inner transaction available.`
+  },
+  ADDR_NOT_VALID: {
+    number: 1050,
+    message: "Address %address% is not a valid Algorand address, at line %line%",
+    title: "Address not valid",
+    description: `Address not valid`
   }
 };
 

@@ -1,4 +1,4 @@
-import { decodeAddress, encodeAddress, getApplicationAddress, modelsv2 } from "algosdk";
+import { decodeAddress, encodeAddress, getApplicationAddress, isValidAddress, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -97,7 +97,6 @@ export class Interpreter {
   private _getAccountFromAddr (accountPk: Uint8Array, line: number): AccountStoreI {
     const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
     const appID = this.runtime.ctx.tx.apid ?? 0;
-
     if (this.tealVersion <= 3) {
       // address can only be passed directly since tealv4
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
@@ -109,6 +108,14 @@ export class Interpreter {
 
     // address must still be present in tx.Accounts OR should be equal to Txn.Sender
     const pkBuffer = Buffer.from(accountPk);
+    const addr = encodeAddress(pkBuffer);
+    if (!isValidAddress(addr)) { // invalid address
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID, {
+        address: addr,
+        line: line
+      });
+    }
+
     if (
       txAccounts?.find(buff => compareArray(Uint8Array.from(buff), accountPk)) !== undefined ||
       compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
@@ -418,6 +425,7 @@ export class Interpreter {
     debugStack?: number): StackElem | undefined {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
+
     this.mapLabelWithIndexes();
     if (mode === ExecutionMode.APPLICATION) { this.assertValidTxArray(); }
 
