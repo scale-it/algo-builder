@@ -1,11 +1,8 @@
 import { types } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -67,5 +64,16 @@ describe("Rekey Transaction testing", function () {
     const bobBalanceAfter = bob.balance();
     assert.equal(aliceBalanceBefore, aliceBalanceAfter + BigInt(fee) + amount);
     assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
+  });
+
+  it("Should fail if singer is not auth account", function () {
+    expectRuntimeError(
+      () => runtime.executeTx({
+        ...txnParams,
+        fromAccount: alice.account,
+        fromAccountAddr: alice.address
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+    );
   });
 });

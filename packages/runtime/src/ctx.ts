@@ -566,7 +566,7 @@ export class Ctx implements Context {
           const authAccount = fromAccount.account.authAccount;
           if (authAccount.addr !== signAccount.account.addr) {
             // TODO: should use right message error
-            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
+            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
           }
           // throw new RUNTIME_ERRORS
         } else {
