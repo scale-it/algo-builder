@@ -1,4 +1,5 @@
 import { types } from "@algo-builder/web";
+import { AccountAddress } from "@algo-builder/web/build/types";
 import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
@@ -14,7 +15,7 @@ import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
   AccountStoreI, AppDeploymentFlags, AppLocalStateM,
-  AssetHoldingM, CreatedAppM, PublicKey, RuntimeAccountI,
+  AssetHoldingM, CreatedAppM, RuntimeAccountI,
   SSCAttributesM, StackElem
 } from "./types";
 
@@ -27,6 +28,8 @@ class RuntimeAccount implements RuntimeAccountI {
   sk: Uint8Array
   addr: string
   name?: string;
+  authAccount?: RuntimeAccountI;
+
   constructor (builder: RuntimeAccountBuilder) {
     this.sk = builder.sk;
     this.addr = builder.addr;
@@ -35,7 +38,8 @@ class RuntimeAccount implements RuntimeAccountI {
     }
   }
 
-  rekey (pk: PublicKey): void {
+  rekey (authAccount: RuntimeAccountI): void {
+    this.authAccount = authAccount;
   }
 }
 
@@ -124,8 +128,8 @@ export class AccountStore implements AccountStoreI {
     return this.amount;
   }
 
-  rekey (pk: string): void {
-    this.account.rekey(pk);
+  rekey (authAccount: RuntimeAccountI): void {
+    this.account.rekey(authAccount);
   }
 
   /**
