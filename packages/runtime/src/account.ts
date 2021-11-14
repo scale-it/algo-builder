@@ -128,8 +128,8 @@ export class AccountStore implements AccountStoreI {
     return this.amount;
   }
 
-  rekey (authAccount: RuntimeAccountI): void {
-    this.account.rekey(authAccount);
+  rekey (authAccount: AccountStoreI): void {
+    this.account.rekey(authAccount.account);
   }
 
   /**

@@ -197,7 +197,7 @@ export interface AccountStoreI {
   account: RuntimeAccountI
 
   balance: () => bigint
-  rekey: (authAccount: RuntimeAccountI) => void
+  rekey: (authAccount: AccountStoreI) => void
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,
