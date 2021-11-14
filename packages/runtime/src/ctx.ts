@@ -148,6 +148,11 @@ export class Ctx implements Context {
     toAccount.amount += BigInt(txnParam.amountMicroAlgos); // add 'x' algo to receiver
     this.assertAccBalAboveMin(fromAccount.address);
 
+    if (txnParam.rekey) {
+      const authAccount = this.getAccount(txnParam.rekey);
+      fromAccount.rekey(authAccount);
+    }
+
     if (txnParam.payFlags.closeRemainderTo) {
       const closeRemToAcc = this.getAccount(txnParam.payFlags.closeRemainderTo);
 
