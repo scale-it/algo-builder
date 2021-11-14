@@ -2,6 +2,7 @@ import { tx as webTx, types } from "@algo-builder/web";
 import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
 import { AccountStore, parseASADef, Runtime } from ".";
+import { RuntimeAccountBuilder } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
@@ -285,10 +286,16 @@ export class Ctx implements Context {
 
     // create new "app account" (an account belonging to smart contract)
     // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#using-a-smart-contract-as-an-escrow
-    const acc = new AccountStore(0, {
-      addr: getApplicationAddress(this.state.appCounter),
-      sk: new Uint8Array(0)
-    });
+    // const acc = new AccountStore(0, {
+    //   addr: getApplicationAddress(this.state.appCounter),
+    //   sk: new Uint8Array(0)
+    // });
+    const acc = new AccountStore(
+      0,
+      new RuntimeAccountBuilder()
+        .setAddr(getApplicationAddress(this.state.appCounter))
+        .build()
+    );
     this.state.accounts.set(acc.address, acc);
 
     return this.state.appCounter;

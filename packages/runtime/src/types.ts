@@ -58,6 +58,8 @@ export enum EncodingType {
 
 export type AccountAddress = string;
 
+export type PublicKey = string;
+
 export type ID = number; // Asset or Application index
 
 export interface AccountsMap {
@@ -177,8 +179,9 @@ export interface CreatedAppM {
   attributes: SSCAttributesM
 }
 
-export interface RuntimeAccount extends AccountSDK {
+export interface RuntimeAccountI extends AccountSDK {
   name?: string
+  rekey: (pk: PublicKey) => void
 }
 
 // represent account used in tests and by the context
@@ -192,7 +195,7 @@ export interface AccountStoreI {
   appsTotalSchema: modelsv2.ApplicationStateSchema
   createdApps: Map<number, SSCAttributesM>
   createdAssets: Map<number, modelsv2.AssetParams>
-  account: RuntimeAccount
+  account: RuntimeAccountI
 
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined

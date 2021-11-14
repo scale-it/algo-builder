@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { Address, generateAccount, modelsv2 } from "algosdk";
+import { Account, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -14,7 +14,7 @@ import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
   AccountStoreI, AppDeploymentFlags, AppLocalStateM,
-  AssetHoldingM, CreatedAppM, RuntimeAccount,
+  AssetHoldingM, CreatedAppM, PublicKey, RuntimeAccountI,
   SSCAttributesM, StackElem
 } from "./types";
 
@@ -23,8 +23,67 @@ const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
+class RuntimeAccount implements RuntimeAccountI {
+  sk: Uint8Array
+  addr: string
+  name?: string;
+  constructor (builder: RuntimeAccountBuilder) {
+    this.sk = builder.sk;
+    this.addr = builder.addr;
+    if (builder.name) {
+      this.name = builder.name;
+    }
+  }
+
+  rekey (pk: PublicKey): void {
+  }
+}
+
+export class RuntimeAccountBuilder {
+  sk: Uint8Array
+  addr: string
+  name: string | undefined
+
+  constructor () {
+    this.sk = new Uint8Array(0);
+    this.addr = "";
+  }
+
+  public genKey (): RuntimeAccountBuilder {
+    const account = generateAccount();
+    this.sk = account.sk;
+    this.addr = account.addr;
+    return this;
+  }
+
+  public setName (name: string): RuntimeAccountBuilder {
+    this.name = name;
+    return this;
+  }
+
+  public setAccount (account: Account): RuntimeAccountBuilder {
+    this.addr = account.addr;
+    this.sk = account.sk;
+    return this;
+  }
+
+  public setSk (sk: Uint8Array): RuntimeAccountBuilder {
+    this.sk = sk;
+    return this;
+  }
+
+  public setAddr (addr: string): RuntimeAccountBuilder {
+    this.addr = addr;
+    return this;
+  }
+
+  build (): RuntimeAccount {
+    return new RuntimeAccount(this);
+  }
+}
+
 export class AccountStore implements AccountStoreI {
-  readonly account: RuntimeAccount;
+  readonly account: RuntimeAccountI;
   readonly address: string;
   minBalance: number; // required minimum balance for account
   assets: Map<number, AssetHoldingM>;
@@ -34,18 +93,17 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
-  constructor (balance: number | bigint, account?: RuntimeAccount | string) {
+  constructor (balance: number | bigint, account?: Account | RuntimeAccountI | string) {
     if (typeof account === 'string') {
-      this.account = generateAccount();
-      this.account.name = account;
+      this.account = new RuntimeAccountBuilder().genKey().setName(account).build();
       this.address = this.account.addr;
     } else if (account) {
       // set config if account is passed by user
-      this.account = account;
+      this.account = new RuntimeAccountBuilder().setAccount(account).build();
       this.address = account.addr;
     } else {
       // generate new account if not passed by user
-      this.account = generateAccount();
+      this.account = new RuntimeAccountBuilder().genKey().build();
       this.address = this.account.addr;
     }
 
@@ -426,7 +484,7 @@ export interface BaseModel {
 export class BaseModelI implements BaseModel {
   attribute_map: Record<string, string>;
 
-  public constructor () {
+  public constructor() {
     this.attribute_map = {};
   }
   _is_primitive(val: any): val is string | boolean | number | bigint {

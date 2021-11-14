@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore } from "./account";
+import { AccountStore, RuntimeAccountBuilder } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -15,7 +15,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn
+  ExecutionMode, RuntimeAccountI, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -571,7 +571,8 @@ export class Runtime {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
     const lsig = new LogicSigAccount(program, args);
-    const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
+    // const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
+    const acc = new AccountStore(0, new RuntimeAccountBuilder().setAddr(lsig.address()).build());
     this.store.accounts.set(acc.address, acc);
     return lsig;
   }
@@ -582,7 +583,7 @@ export class Runtime {
    * @param to to address
    * @param amount amount of algo in microalgos
    */
-  fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): void {
+  fundLsig (from: RuntimeAccountI, to: AccountAddress, amount: number): void {
     const fundParam: types.ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
