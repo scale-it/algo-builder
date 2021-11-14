@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { Account, Address, generateAccount, modelsv2 } from "algosdk";
+import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -61,7 +61,7 @@ export class RuntimeAccountBuilder {
     return this;
   }
 
-  public setAccount (account: Account): RuntimeAccountBuilder {
+  public from (account: AccountSDK): RuntimeAccountBuilder {
     this.addr = account.addr;
     this.sk = account.sk;
     return this;
@@ -93,20 +93,23 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
-  constructor (balance: number | bigint, account?: Account | RuntimeAccountI | string) {
+  constructor (balance: number | bigint, account?: RuntimeAccountI | AccountSDK | string) {
     if (typeof account === 'string') {
+      // create new account with name
       this.account = new RuntimeAccountBuilder().genKey().setName(account).build();
-      this.address = this.account.addr;
+    } else if (account instanceof RuntimeAccount) {
+      // set account to other RuntimeAccount
+      this.account = account;
     } else if (account) {
-      // set config if account is passed by user
-      this.account = new RuntimeAccountBuilder().setAccount(account).build();
-      this.address = account.addr;
+      // This case account is AccountSDK interface
+      // so set account from AccountSDK
+      this.account = new RuntimeAccountBuilder().from(account).build();
     } else {
-      // generate new account if not passed by user
+      // create new account because user pass notthing.
       this.account = new RuntimeAccountBuilder().genKey().build();
-      this.address = this.account.addr;
     }
 
+    this.address = this.account.addr;
     this.assets = new Map<number, AssetHoldingM>();
     this.amount = BigInt(balance);
     this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
@@ -119,6 +122,10 @@ export class AccountStore implements AccountStoreI {
   // returns account balance in microAlgos
   balance (): bigint {
     return this.amount;
+  }
+
+  rekey (pk: string): void {
+    this.account.rekey(pk);
   }
 
   /**
