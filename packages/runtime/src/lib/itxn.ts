@@ -5,7 +5,7 @@ import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxnFields, TxnTypeMap } from "../lib/constants";
+import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
 import { AccountAddress, RuntimeAccount, StackElem, Txn } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
@@ -67,7 +67,8 @@ export function setInnerTxField (
   // txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
   if (txValue === undefined) {
     throw new RuntimeError(
-      RUNTIME_ERRORS.TEAL.INVALID_ITXN_FIELD, {
+      RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR, {
+        msg: `Field ${field} is invalid`,
         field: field,
         line: line,
         tealV: interpreter.tealVersion
@@ -191,8 +192,9 @@ export function parseEncodedTxnToExecParams (tx: Txn,
   switch (tx.type) {
     case 'pay': {
       execParams.type = types.TransactionType.TransferAlgo;
-      execParams.toAccountAddr = _getRuntimeAccountAddr(tx.rcv as Buffer, interpreter, line);
-      execParams.amountMicroAlgos = tx.amt;
+      execParams.toAccountAddr =
+        _getRuntimeAccountAddr(tx.rcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
+      execParams.amountMicroAlgos = tx.amt ?? 0n;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close as Buffer, interpreter, line);
       break;
     }
@@ -206,15 +208,17 @@ export function parseEncodedTxnToExecParams (tx: Txn,
     case 'axfer': {
       if (tx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
         execParams.type = types.TransactionType.RevokeAsset;
-        execParams.recipient = _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line);
+        execParams.recipient =
+          _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
         execParams.revocationTarget = _getRuntimeAccountAddr(tx.asnd, interpreter, line);
       } else { // asset transfer
         execParams.type = types.TransactionType.TransferAsset;
-        execParams.toAccountAddr = _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line);
+        execParams.toAccountAddr =
+          _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
       }
       // set common fields (asset amount, index, closeRemTo)
-      execParams.amount = tx.aamt;
-      execParams.assetID = tx.xaid;
+      execParams.amount = tx.aamt ?? 0n;
+      execParams.assetID = tx.xaid ?? 0;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose as Buffer, interpreter, line);
       break;
     }
@@ -252,7 +256,7 @@ export function parseEncodedTxnToExecParams (tx: Txn,
       break;
     }
     default: {
-      throw new Error(`unsupported type for itxn_submit at line ${line}`);
+      throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
     }
   }
 
