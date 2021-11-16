@@ -12,7 +12,7 @@ import {
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, ExecutionMode,
-  ID, SSCAttributesM, StackElem, State, Txn
+  ID, SSCAttributesM, StackElem, State, Txn, TxReceipt
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -47,6 +47,12 @@ export class Ctx implements Context {
     // inner transaction props
     this.isInnerTx = false;
     this.createdAssetID = 0;
+  }
+
+  private setAndGetTxnInfo (): TxReceipt {
+    const info = { txn: this.tx, txID: this.tx.txID };
+    this.state.txnInfo.set(this.tx.txID, info);
+    return info;
   }
 
   // verify account's balance is above minimum required balance
@@ -138,7 +144,7 @@ export class Ctx implements Context {
   }
 
   // transfer ALGO as per transaction parameters
-  transferAlgo (txnParam: types.AlgoTransferParam): void {
+  transferAlgo (txnParam: types.AlgoTransferParam): TxReceipt {
     const fromAccount = this.getAccount(webTx.getFromAddress(txnParam));
     const toAccount = this.getAccount(txnParam.toAccountAddr);
     txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
@@ -153,6 +159,7 @@ export class Ctx implements Context {
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
       fromAccount.amount = 0n; // close sender's account
     }
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -164,7 +171,7 @@ export class Ctx implements Context {
   addAsset (
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): number {
+  ): TxReceipt {
     return this.addASADef(
       name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
     );
@@ -180,7 +187,7 @@ export class Ctx implements Context {
   addASADef (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): number {
+  ): TxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
     parseASADef(asaDef);
     validateOptInAccNames(this.state.accountNameAddress, asaDef);
@@ -202,7 +209,15 @@ export class Ctx implements Context {
     });
 
     if (this.isInnerTx) { this.createdAssetID = this.state.assetCounter; }
-    return this.state.assetCounter;
+
+    // set & return transaction receipt
+    const receipt = {
+      txn: this.tx,
+      txID: this.tx.txID,
+      assetID: this.state.assetCounter
+    };
+    this.state.txnInfo.set(this.tx.txID, receipt);
+    return receipt;
   }
 
   /**
@@ -211,7 +226,7 @@ export class Ctx implements Context {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
     const assetDef = this.getAssetDef(assetIndex);
     makeAssetTransferTxnWithSuggestedParams(
       address, address, undefined, undefined, 0, undefined, assetIndex,
@@ -226,6 +241,7 @@ export class Ctx implements Context {
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
     this.assertAccBalAboveMin(address);
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -243,7 +259,7 @@ export class Ctx implements Context {
   addApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
-  ): number {
+  ): TxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     if (approvalProgram === "") {
@@ -291,7 +307,10 @@ export class Ctx implements Context {
     });
     this.state.accounts.set(acc.address, acc);
 
-    return this.state.appCounter;
+    // set & return transaction receipt
+    const receipt = this.state.txnInfo.get(this.tx.txID) as TxReceipt;
+    receipt.appID = this.state.appCounter;
+    return receipt;
   }
 
   /**
@@ -301,14 +320,14 @@ export class Ctx implements Context {
    * @param idx index of transaction in group
    * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  optInToApp (accountAddr: AccountAddress, appID: number, idx: number): void {
+  optInToApp (accountAddr: AccountAddress, appID: number, idx: number): TxReceipt {
     const appParams = this.getApp(appID);
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
     try {
-      this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+      return this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
     } catch (error) {
       account.closeApp(appID); // remove already added state if optIn fails
       throw error;
@@ -360,7 +379,7 @@ export class Ctx implements Context {
   }
 
   // transfer ASSET as per transaction parameters
-  transferAsset (txnParam: types.AssetTransferParam): void {
+  transferAsset (txnParam: types.AssetTransferParam): TxReceipt {
     const fromAccountAddr = webTx.getFromAddress(txnParam);
     txnParam.amount = BigInt(txnParam.amount);
     if (txnParam.amount === 0n && fromAccountAddr === txnParam.toAccountAddr) {
@@ -395,6 +414,7 @@ export class Ctx implements Context {
       const fromAccount = this.getAccount(fromAccountAddr);
       fromAccount.closeAsset(txnParam.assetID as number);
     }
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -403,9 +423,10 @@ export class Ctx implements Context {
    * @param assetId Asset Index
    * @param fields Asset modifying fields
    */
-  modifyAsset (assetId: number, fields: types.AssetModFields): void {
+  modifyAsset (assetId: number, fields: types.AssetModFields): TxReceipt {
     const creatorAcc = this.getAssetAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -417,12 +438,13 @@ export class Ctx implements Context {
    */
   freezeAsset (
     assetId: number, freezeTarget: string, freezeState: boolean
-  ): void {
+  ): TxReceipt {
     const acc = this.runtime.assertAccountDefined(
       freezeTarget,
       this.state.accounts.get(freezeTarget)
     );
     acc.setFreezeState(assetId, freezeState);
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -437,7 +459,7 @@ export class Ctx implements Context {
   revokeAsset (
     recipient: string, assetID: number,
     revocationTarget: string, amount: bigint
-  ): void {
+  ): TxReceipt {
     // Transfer assets
     const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
     const toAssetHolding = this.getAssetHolding(assetID, recipient);
@@ -450,6 +472,7 @@ export class Ctx implements Context {
     }
     fromAssetHolding.amount -= amount;
     toAssetHolding.amount += amount;
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -457,7 +480,7 @@ export class Ctx implements Context {
    * Destroy asset
    * @param assetId asset index
    */
-  destroyAsset (assetId: number): void {
+  destroyAsset (assetId: number): TxReceipt {
     const creatorAcc = this.getAssetAccount(assetId);
     // destroy asset from creator's account
     creatorAcc.destroyAsset(assetId);
@@ -465,6 +488,7 @@ export class Ctx implements Context {
     this.state.accounts.forEach((value, key) => {
       value.assets.delete(assetId);
     });
+    return this.setAndGetTxnInfo();
   }
 
   /**
@@ -511,7 +535,7 @@ export class Ctx implements Context {
     approvalProgram: string,
     clearProgram: string,
     idx: number
-  ): void {
+  ): TxReceipt {
     if (approvalProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
@@ -520,11 +544,13 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+    const txReceipt =
+      this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
 
     const updatedApp = this.getApp(appID);
     updatedApp[APPROVAL_PROGRAM] = approvalProgram;
     updatedApp["clear-state-program"] = clearProgram;
+    return txReceipt;
   }
 
   /**
@@ -537,7 +563,10 @@ export class Ctx implements Context {
    * @param txnParams Transaction Parameters
    */
   /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: types.ExecParams[]): void {
+  processTransactions (txnParams: types.ExecParams[]): TxReceipt[] {
+    const txReceipts: TxReceipt[] = [];
+    let r: TxReceipt;
+
     this.verifyMinimumFees();
     txnParams.forEach((txnParam, idx) => {
       const fromAccountAddr = webTx.getFromAddress(txnParam);
@@ -545,37 +574,37 @@ export class Ctx implements Context {
 
       if (txnParam.sign === types.SignType.LogicSignature) {
         this.tx = this.gtxs[idx]; // update current tx to index of stateless
-        this.runtime.validateLsigAndRun(txnParam, this.debugStack);
+        r = this.runtime.validateLsigAndRun(txnParam, this.debugStack);
         this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txnParam.type) {
         case types.TransactionType.TransferAlgo: {
-          this.transferAlgo(txnParam);
+          r = this.transferAlgo(txnParam);
           break;
         }
         case types.TransactionType.TransferAsset: {
-          this.transferAsset(txnParam);
+          r = this.transferAsset(txnParam);
           break;
         }
         case types.TransactionType.CallApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+          r = this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           break;
         }
         case types.TransactionType.CloseApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+          r = this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           this.closeApp(fromAccountAddr, txnParam.appID);
           break;
         }
         case types.TransactionType.UpdateApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          this.updateApp(
+          r = this.updateApp(
             txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram, idx
           );
           break;
@@ -584,7 +613,7 @@ export class Ctx implements Context {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appID, this.getApp(txnParam.appID));
           try {
-            this.runtime.run(appParams["clear-state-program"], ExecutionMode.APPLICATION, idx, this.debugStack);
+            r = this.runtime.run(appParams["clear-state-program"], ExecutionMode.APPLICATION, idx, this.debugStack);
           } catch (error) {
             // if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
             // tested by running on algorand network
@@ -597,7 +626,7 @@ export class Ctx implements Context {
         case types.TransactionType.DeleteApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
+          r = this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
           this.deleteApp(txnParam.appID);
           break;
         }
@@ -607,7 +636,7 @@ export class Ctx implements Context {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           // modify asset in ctx.
-          this.modifyAsset(txnParam.assetID as number, txnParam.fields);
+          r = this.modifyAsset(txnParam.assetID as number, txnParam.fields);
           break;
         }
         case types.TransactionType.FreezeAsset: {
@@ -615,7 +644,7 @@ export class Ctx implements Context {
           if (asset.freeze !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
-          this.freezeAsset(txnParam.assetID as number, txnParam.freezeTarget, txnParam.freezeState);
+          r = this.freezeAsset(txnParam.assetID as number, txnParam.freezeTarget, txnParam.freezeState);
           break;
         }
         case types.TransactionType.RevokeAsset: {
@@ -626,7 +655,7 @@ export class Ctx implements Context {
           if (txnParam.payFlags.closeRemainderTo) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
           }
-          this.revokeAsset(
+          r = this.revokeAsset(
             txnParam.recipient, txnParam.assetID as number,
             txnParam.revocationTarget, BigInt(txnParam.amount)
           );
@@ -637,7 +666,7 @@ export class Ctx implements Context {
           if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
-          this.destroyAsset(txnParam.assetID as number);
+          r = this.destroyAsset(txnParam.assetID as number);
           break;
         }
         case types.TransactionType.DeployASA: {
@@ -647,17 +676,16 @@ export class Ctx implements Context {
             ...txnParam.payFlags,
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
-          let assetID: number;
           if (txnParam.asaDef) {
-            assetID = this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
+            r = this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
           } else {
-            assetID = this.addAsset(txnParam.asaName, fromAccountAddr, flags);
+            r = this.addAsset(txnParam.asaName, fromAccountAddr, flags);
           }
-          this.knowableID.set(idx, assetID);
+          this.knowableID.set(idx, r.assetID as number);
           break;
         }
         case types.TransactionType.OptInASA: {
-          this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
+          r = this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
           break;
         }
         case types.TransactionType.DeployApp: {
@@ -671,22 +699,26 @@ export class Ctx implements Context {
           };
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          const appID = this.addApp(
+          r = this.addApp(
             fromAccountAddr, flags,
             txnParam.approvalProgram,
             txnParam.clearProgram,
             idx
           );
-          this.knowableID.set(idx, appID);
+          this.knowableID.set(idx, r.appID as number);
           break;
         }
         case types.TransactionType.OptInToApp: {
           this.tx = this.gtxs[idx]; // update current tx to txn being exectuted in group
 
-          this.optInToApp(fromAccountAddr, txnParam.appID, idx);
+          r = this.optInToApp(fromAccountAddr, txnParam.appID, idx);
           break;
         }
       }
+
+      if (r) { txReceipts.push(r); }
     });
+
+    return txReceipts;
   }
 }

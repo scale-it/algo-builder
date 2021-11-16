@@ -10,7 +10,7 @@ import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
 import {
   AccountStoreI, ExecutionMode, Operator, SSCAttributesM,
-  StackElem, TEALStack, Txn
+  StackElem, TEALStack, Txn, TxReceipt
 } from "../types";
 import { Op } from "./opcode";
 import { Label } from "./opcode-list";
@@ -143,7 +143,7 @@ export class Interpreter {
         account = this.runtime.ctx.state.accounts.get(address);
       } else {
         const accIndex = accountRef - 1n;
-        checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat as Buffer[], line);
+        checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
         let pkBuffer;
         if (this.runtime.ctx.tx.apat) {
           pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
@@ -425,17 +425,21 @@ export class Interpreter {
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
+      const txReceipt = this.runtime.ctx.state.txnInfo.get(this.runtime.ctx.tx.txID) as TxReceipt;
 
       // for teal version >= 4, cost is calculated dynamically at the time of execution
       // for teal version < 4, cost is handled statically during parsing
       dynamicCost += this.lineToCost[instruction.line];
+      if (this.tealVersion < 4) { txReceipt.gas = this.gas; }
       if (this.tealVersion >= 4) {
         if (mode === ExecutionMode.SIGNATURE) {
           assertMaxCost(dynamicCost, mode);
+          txReceipt.gas = dynamicCost;
         } else {
           this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
           const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
           assertMaxCost(this.runtime.ctx.pooledApplCost, ExecutionMode.APPLICATION, maxPooledApplCost);
+          txReceipt.gas = this.runtime.ctx.pooledApplCost;
         }
       }
 

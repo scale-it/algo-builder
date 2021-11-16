@@ -69,6 +69,16 @@ export interface AccountsMap {
  * (where we use maps instead of arrays in sdk structures). */
 export type RuntimeAccountMap = Map<string, AccountAddress>;
 
+export interface TxReceipt {
+  txn: Txn
+  txID: string
+  gas?: number
+  logs?: string[]
+  // returned during time of creation of asset/app
+  assetID?: number
+  appID?: number
+}
+
 export interface State {
   accounts: Map<string, AccountStoreI>
   accountNameAddress: Map<string, AccountAddress>
@@ -78,6 +88,7 @@ export interface State {
   appNameInfo: Map<string, SSCInfo>
   appCounter: number
   assetCounter: number
+  txnInfo: Map<string, TxReceipt> // map of {txID: txReceipt}
 }
 
 export interface DeployedAssetInfo {
@@ -129,21 +140,21 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: types.ExecParams[]) => void
+  processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
   addAsset: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => TxReceipt
   addASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => number
+  ) => TxReceipt
   optIntoASA: (
-    assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
+    assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
-  ) => number
-  optInToApp: (accountAddr: string, appID: number, idx: number) => void
-  updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => void
+  ) => TxReceipt
+  optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
+  updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

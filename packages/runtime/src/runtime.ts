@@ -15,7 +15,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn
+  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxReceipt
 } from "./types";
 
 export class Runtime {
@@ -43,7 +43,8 @@ export class Runtime {
       assetNameInfo: new Map<string, ASAInfo>(),
       appNameInfo: new Map<string, SSCInfo>(),
       appCounter: 0, // initialize app counter with 0
-      assetCounter: 0 // initialize asset counter with 0
+      assetCounter: 0, // initialize asset counter with 0
+      txnInfo: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -57,6 +58,14 @@ export class Runtime {
 
     this.round = 2;
     this.timestamp = 1;
+  }
+
+  /**
+   * Returns transaction receipt for a particular transaction
+   * @param txID transaction ID
+   */
+  getTransactionInfo (txID: string): TxReceipt | undefined {
+    return this.store.txnInfo.get(txID);
   }
 
   /**
@@ -312,7 +321,7 @@ export class Runtime {
   mkAssetCreateTx (
     name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
     // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetCreateTxnWithSuggestedParams(
+    const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
       webTx.encodeNote(flags.note, flags.noteb64),
       asaDef.total,
@@ -330,6 +339,12 @@ export class Runtime {
         : asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
+
+    if (this.ctx.tx === undefined || this.ctx.tx.type !== "acfg") { // could already be defined (if used as a txGroup in this.executeTx())
+      const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
+      this.ctx.tx = encTx;
+      this.ctx.gtxs = [encTx];
+    }
   }
 
   /**
@@ -337,12 +352,12 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string, flags: ASADeploymentFlags): number {
-    this.ctx.addAsset(asa, flags.creator.addr, flags);
+  addAsset (asa: string, flags: ASADeploymentFlags): TxReceipt {
+    const txReceipt = this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
-    return this.store.assetCounter;
+    return txReceipt;
   }
 
   /**
@@ -350,12 +365,12 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): number {
-    this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): TxReceipt {
+    const txReceipt = this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
-    return this.store.assetCounter;
+    return txReceipt;
   }
 
   /**
@@ -381,10 +396,11 @@ export class Runtime {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
-    this.ctx.optIntoASA(assetIndex, address, flags);
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+    const txReceipt = this.ctx.optIntoASA(assetIndex, address, flags);
 
     this.store = this.ctx.state;
+    return txReceipt;
   }
 
   /**
@@ -443,13 +459,13 @@ export class Runtime {
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
-  ): number {
+  ): TxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
+    const txReceipt = this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
     this.store = this.ctx.state;
-    return this.store.appCounter;
+    return txReceipt;
   }
 
   // creates new OptIn transaction object and update context
@@ -485,12 +501,13 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appID: number,
-    flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
+    flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): TxReceipt {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.optInToApp(accountAddr, appID, 0);
+    const txReceipt = this.ctx.optInToApp(accountAddr, appID, 0);
 
     this.store = this.ctx.state;
+    return txReceipt;
   }
 
   // creates new Update transaction object and update context
@@ -538,13 +555,14 @@ export class Runtime {
     payFlags: types.TxParams,
     flags: AppOptionalFlags,
     debugStack?: number
-  ): void {
+  ): TxReceipt {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.updateApp(appID, approvalProgram, clearProgram, 0);
+    const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;
+    return txReceipt;
   }
 
   // verify 'amt' microalgos can be withdrawn from account
@@ -591,7 +609,7 @@ export class Runtime {
       amountMicroAlgos: amount,
       payFlags: { totalFee: 1000 }
     };
-    this.executeTx(fundParam);
+    this.executeTx(fundParam); /// /////////////////
   }
 
   /**
@@ -600,7 +618,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): void {
+  validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): TxReceipt {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
@@ -619,6 +637,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
+      return this.ctx.state.txnInfo.get(this.ctx.tx.txID) as TxReceipt;
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -631,7 +650,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): void {
+  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): TxReceipt | TxReceipt[] {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
@@ -657,10 +676,13 @@ export class Runtime {
 
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
-    this.ctx.processTransactions(txnParameters);
+    const txReceipts = this.ctx.processTransactions(txnParameters);
 
     // update store only if all the transactions are passed
     this.store = this.ctx.state;
+
+    // return transaction receipt(s)
+    return Array.isArray(txnParams) ? txReceipts : txReceipts[0];
   }
 
   /**
@@ -671,14 +693,23 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE: Application mode is only supported in TEALv > 1
    */
-  run (program: string, executionMode: ExecutionMode, indexInGroup: number, debugStack?: number): void {
+  run (program: string, executionMode: ExecutionMode,
+    indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
-    interpreter.execute(program, executionMode, this, debugStack);
+    // set new tx receipt
+    this.ctx.state.txnInfo.set(this.ctx.tx.txID, {
+      txn: this.ctx.tx,
+      txID: this.ctx.tx.txID
+    });
+
     // reset pooled opcode cost for single tx, this is to handle singular functions
     // which don't "initialize" a new ctx (eg. addApp)
     if (this.ctx.gtxs.length === 1) { this.ctx.pooledApplCost = 0; }
+    interpreter.execute(program, executionMode, this, debugStack);
+
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
+    return this.ctx.state.txnInfo.get(this.ctx.tx.txID) as TxReceipt;
   }
 }
