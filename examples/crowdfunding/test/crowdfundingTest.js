@@ -93,7 +93,7 @@ describe('Crowdfunding Tests', function () {
 
     // create application
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const creatorPk = convert.addressToPk(creator.address);
 
     // setup escrow account
@@ -297,7 +297,7 @@ describe('Crowdfunding Tests', function () {
     // create application
     const creationFlags = Object.assign({}, flags);
     const applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });

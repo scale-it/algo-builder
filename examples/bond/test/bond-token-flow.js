@@ -82,8 +82,11 @@ describe('Bond token Tests', function () {
     * bob can exit all their tokens (12 and 2 respectively).
     */
 
-    const currentBondIndex = runtime.addAsset(
-      'bond-token-0', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+    const x = runtime.addAsset(
+      'bond-token-0',
+      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+
+    const currentBondIndex = x.assetID;
 
     const creationFlags = Object.assign({}, flags);
     const creationArgs = [
@@ -97,7 +100,7 @@ describe('Bond token Tests', function () {
 
     // create application
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
