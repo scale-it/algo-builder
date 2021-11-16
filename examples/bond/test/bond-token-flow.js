@@ -82,11 +82,9 @@ describe('Bond token Tests', function () {
     * bob can exit all their tokens (12 and 2 respectively).
     */
 
-    const x = runtime.addAsset(
+    const currentBondIndex = runtime.addAsset(
       'bond-token-0',
-      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
-
-    const currentBondIndex = x.assetID;
+      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 
     const creationFlags = Object.assign({}, flags);
     const creationArgs = [
