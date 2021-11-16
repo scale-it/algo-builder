@@ -12,7 +12,7 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, ByteAdd, ByteBitwiseAnd,
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
@@ -23,17 +23,17 @@ import {
   Err, Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32,
   ExtractUint64, GetAssetDef, GetAssetHolding, GetBit,
   GetByte, Gload, Gloads, Global,
-  GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
+  GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxnas, Gtxns, Gtxnsa, Gtxnsas, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  Load, Loads, Log, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
   Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
-  Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
+  Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
+import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx, TxReceipt } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
@@ -270,8 +270,9 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if accessing arg is not defined", function () {
+      const op = new Arg(["5"], 1, interpreter);
       expectRuntimeError(
-        () => new Arg(["5"], 1, interpreter),
+        () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
@@ -4354,6 +4355,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should panic if account does not exist", () => {
+      interpreter.runtime.ctx.tx.apat = [
+        decodeAddress(johnAddr).publicKey,
+        decodeAddress(generateAccount().addr).publicKey // random account
+      ].map(Buffer.from);
+
       const op = new MinBalance([], 1, interpreter);
       stack.push(2n);
 
@@ -5575,6 +5581,245 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
       );
+    });
+  });
+
+  describe("Tealv5: txnas, Gtxnas, gtxnsas, args, log", () => {
+    const stack = new Stack<StackElem>();
+    let interpreter: Interpreter;
+    before(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+      // a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+      // https://developer.algorand.org/docs/reference/transactions/
+      const tx2 = { ...TXN_OBJ, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
+      interpreter.runtime.ctx.gtxs = [TXN_OBJ, tx2];
+    });
+
+    describe("Txnas", function () {
+      before(function () {
+        interpreter.runtime.ctx.tx.type = 'pay';
+      });
+
+      it("push addr from txn.Accounts to stack according to index", function () {
+        // index 0 should push sender's address to stack
+        stack.push(0n);
+        let op = new Txnas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        stack.push(1n);
+        op = new Txnas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        stack.push(2n);
+        op = new Txnas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+      });
+
+      it("push addr from 1st AppArg to stack", function () {
+        stack.push(0n);
+        const op = new Txnas(["ApplicationArgs"], 0, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+      });
+    });
+
+    describe("Gtxnas", function () {
+      before(function () {
+        interpreter.runtime.ctx.tx.type = 'pay';
+      });
+
+      it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+        // index 0 should push sender's address to stack from 1st tx
+        stack.push(0n);
+        let op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        stack.push(1n);
+        op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        stack.push(2n);
+        op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+      });
+
+      it("should throw error if field is not an array", function () {
+        stack.push(0n);
+        execExpectError(
+          stack,
+          [],
+          new Gtxnas(["1", "Accounts"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+        );
+      });
+    });
+
+    describe("Gtxnsas", function () {
+      before(function () {
+        interpreter.runtime.ctx.tx.type = 'pay';
+        while (stack.length()) { stack.pop(); } // empty stack firstt
+      });
+
+      it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+        // index 0 should push sender's address to stack from 1st tx
+        stack.push(0n);
+        stack.push(0n);
+        let op = new Gtxnsas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        stack.push(0n);
+        stack.push(1n);
+        op = new Gtxnsas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        stack.push(0n);
+        stack.push(2n);
+        op = new Gtxnsas(["Accounts"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+      });
+
+      it("should throw error if field is not an array", function () {
+        stack.push(1n);
+        stack.push(0n);
+        execExpectError(
+          stack,
+          [],
+          new Gtxnsas(["Accounts"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+        );
+      });
+    });
+
+    describe("Args[N]", function () {
+      const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(parsing.stringToBytes);
+      this.beforeAll(() => {
+        interpreter.runtime.ctx.args = args;
+      });
+
+      it("should push arg_0 from argument array to stack", function () {
+        stack.push(0n);
+        const op = new Args([], 1, interpreter);
+        op.execute(stack);
+
+        const top = stack.pop();
+        assert.deepEqual(top, args[0]);
+      });
+
+      it("should push arg_1 from argument array to stack", function () {
+        stack.push(1n);
+        const op = new Args([], 1, interpreter);
+        op.execute(stack);
+
+        const top = stack.pop();
+        assert.deepEqual(top, args[1]);
+      });
+
+      it("should push arg_2 from argument array to stack", function () {
+        stack.push(2n);
+        const op = new Args([], 1, interpreter);
+        op.execute(stack);
+
+        const top = stack.pop();
+        assert.deepEqual(top, args[2]);
+      });
+
+      it("should push arg_3 from argument array to stack", function () {
+        stack.push(3n);
+        const op = new Args([], 1, interpreter);
+        op.execute(stack);
+
+        const top = stack.pop();
+        assert.deepEqual(top, args[3]);
+      });
+
+      it("should throw error if accessing arg is not defined", function () {
+        stack.push(5n);
+        const op = new Args([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+      });
+    });
+
+    describe("Log", function () {
+      let txID: string;
+      this.beforeAll(() => {
+        txID = interpreter.runtime.ctx.tx.txID;
+        interpreter.runtime.ctx.state.txnInfo.set(txID, {
+          txn: interpreter.runtime.ctx.tx,
+          txID: txID
+        });
+      });
+
+      it("should push arg_0 from argument array to stack", function () {
+        let txInfo = interpreter.runtime.ctx.state.txnInfo.get(txID);
+        assert.isUndefined(txInfo?.logs);
+        const op = new Log([], 1, interpreter);
+
+        stack.push(parsing.stringToBytes("Hello"));
+        op.execute(stack);
+        stack.push(parsing.stringToBytes("Friend?"));
+        op.execute(stack);
+        stack.push(parsing.stringToBytes("That's lame"));
+        op.execute(stack);
+
+        txInfo = interpreter.runtime.ctx.state.txnInfo.get(txID);
+        assert.deepEqual(txInfo?.logs, [
+          'Hello', 'Friend?', "That's lame"
+        ]);
+      });
+
+      it("should throw error with uint64", function () {
+        stack.push(1n);
+        const op = new Log([], 1, interpreter);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+      });
     });
   });
 });
