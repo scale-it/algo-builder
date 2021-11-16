@@ -63,7 +63,7 @@ describe("Crowdfunding basic tests", function () {
 
     const johnMinBalance = john.minBalance;
     const appID = runtime.addApp(
-      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
+      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram).appID as number;
     // verify sender's min balance increased after creating application
     assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);
 

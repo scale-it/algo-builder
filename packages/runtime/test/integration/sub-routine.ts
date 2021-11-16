@@ -57,7 +57,7 @@ describe("TEALv4: Sub routine", function () {
 
   it("should calculate correct fibonacci number", () => {
     const fibProg = getProgram('fibonacci.teal');
-    let appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    let appID = runtime.addApp(flags, {}, fibProg, clearProgram).appID as number;
 
     // 5th fibonacci
     let result = runtime.getGlobalState(appID, 'result');
@@ -65,21 +65,21 @@ describe("TEALv4: Sub routine", function () {
 
     // 6th fibonacci
     flags.appArgs = ['int:6'];
-    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram).appID as number;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 8n);
 
     // 8th fibonacci
     flags.appArgs = ['int:8'];
-    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram).appID as number;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 21n);
 
     // 1st fibonacci
     flags.appArgs = ['int:1'];
-    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram).appID as number;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 1n);

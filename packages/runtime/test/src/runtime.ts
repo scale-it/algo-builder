@@ -183,7 +183,7 @@ describe("Algorand Standard Assets", function () {
 
   this.beforeEach(() => {
     assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID as number;
     assetTransferParam.assetID = assetId;
     syncAccounts();
   });
@@ -195,7 +195,8 @@ describe("Algorand Standard Assets", function () {
 
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
-    assetId = runtime.addAsset('gold', { creator: { ...john.account, name: "john" } });
+    assetId =
+      runtime.addAsset('gold', { creator: { ...john.account, name: "john" } }).assetID as number;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -227,7 +228,7 @@ describe("Algorand Standard Assets", function () {
     };
     assetId = runtime.addASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
-    );
+    ).assetID as number;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -463,7 +464,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
     const assetId = runtime.addAsset('silver',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID as number;
 
     const modFields: types.AssetModFields = {
       manager: bob.address,
@@ -753,14 +754,14 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should create application", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID as number;
 
     const app = runtime.getApp(appID);
     assert.isDefined(app);
   });
 
   it("Should not update application if approval or clear program is empty", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID as number;
 
     expectRuntimeError(
       () => runtime.updateApp(john.address, appID, "", clearProgram, {}, {}),
