@@ -24,7 +24,7 @@ import {
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import { DecodingMode, EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
+import { DecodingMode, EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -198,7 +198,8 @@ export class Mul extends Op {
 // pushes argument[N] from argument array to stack
 // push to stack [...stack, bytes]
 export class Arg extends Op {
-  readonly _arg?: Uint8Array;
+  index: number;
+  readonly interpreter: Interpreter;
   readonly line: number;
 
   /**
@@ -214,15 +215,15 @@ export class Arg extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0], this.line);
 
-    const index = Number(args[0]);
-    this.checkIndexBound(index, interpreter.runtime.ctx.args as Uint8Array[], this.line);
-
-    this._arg = interpreter.runtime.ctx.args ? interpreter.runtime.ctx.args[index] : undefined;
+    this.index = Number(args[0]);
+    this.interpreter = interpreter;
   }
 
   execute (stack: TEALStack): void {
-    const last = this.assertBytes(this._arg, this.line);
-    stack.push(last);
+    this.checkIndexBound(
+      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+    const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
+    stack.push(argN);
   }
 }
 
@@ -1307,9 +1308,9 @@ export class Gtxn extends Op {
  */
 export class Txna extends Op {
   readonly field: string;
-  readonly idx: number;
   readonly interpreter: Interpreter;
   readonly line: number;
+  idx: number;
 
   /**
    * Sets `field` and `idx` values according to arguments passed.
@@ -1347,9 +1348,9 @@ export class Txna extends Op {
  */
 export class Gtxna extends Op {
   readonly field: string;
-  readonly idx: number; // array index
   readonly interpreter: Interpreter;
   readonly line: number;
+  idx: number; // array index
   protected txIdx: number; // transaction group index
 
   /**
@@ -4054,5 +4055,156 @@ export class ITxna extends Op {
     const result = txAppArg(this.field, tx, this.idx, this,
       this.interpreter.tealVersion, this.line);
     stack.push(result);
+  }
+}
+
+/**
+ * txnas F:
+ * push Xth value of the array field F of the current transaction
+ * pops from stack: [...stack, uint64]
+ * pushes to stack: [...stack, transaction field]
+ */
+export class Txnas extends Txna {
+  /**
+   * Sets `field`, `txIdx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In txnas & gtxnas opcodes, index is fetched from top of stack.
+    // eg. [ int 1; txnas Accounts; ], [ txna Accounts 1].
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 1, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * gtxnas T F:
+ * push Xth value of the array field F from the Tth transaction in the current group
+ * pops from stack: [...stack, uint64]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnas extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field) and
+   * `txIdx`(Transaction Group Index) values according to arguments passed.
+   * @param args Expected arguments: [transaction group index, transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In txnas & gtxnas opcodes, index is fetched from top of stack.
+    // eg. [ int 1; gtxnas 0 Accounts; ], [ gtxna 0 Accounts 1].
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 2, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * gtxnsas F:
+ * pop an index A and an index B. push Bth value of the array
+ * field F from the Ath transaction in the current group
+ * pops from stack: [...stack, {uint64 A}, {uint64 B}]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnsas extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field)
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In gtxnsas opcode, {tx-index, index of array field} is fetched from top of stack.
+    // eg. [ int 0; int 1; gtxnsas Accounts; ], [ gtxna 0 Accounts 1].
+    super(["100", args[0], "100"], line, interpreter);
+    assertLen(args.length, 1, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const arrFieldIdx = this.assertBigInt(stack.pop(), this.line);
+    const txIdxInGrp = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(arrFieldIdx);
+    this.txIdx = Number(txIdxInGrp);
+    super.execute(stack);
+  }
+}
+
+// pushes Arg[N] from LogicSig argument array to stack
+// Pops: ... stack, uint64
+// push to stack [...stack, bytes]
+export class Args extends Arg {
+  /**
+   * Gets the argument value from interpreter.args array.
+   * store the value in _arg variable
+   * @param args Expected arguments: none
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 0, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.index = Number(top);
+    super.execute(stack);
+  }
+}
+
+// Write bytes to log state of the current application
+// pops to stack [...stack, bytes]
+// Pushes: None
+export class Log extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.interpreter = interpreter;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const logByte = this.assertBytes(stack.pop(), this.line);
+    const txID = this.interpreter.runtime.ctx.tx.txID;
+    const txReceipt = this.interpreter.runtime.ctx.state.txnInfo.get(txID) as TxReceipt;
+    if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+    txReceipt.logs.push(convertToString(logByte));
   }
 }
