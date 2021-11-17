@@ -33,6 +33,38 @@ def approval_program():
         Return(Int(1))
     ])
 
+    pay_with_fee = Seq([
+        # tx (pay 3 ALGO to Txn.accounts[1] from smart contract)
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.amount: Int(3000000),
+                TxnField.sender: Global.current_application_address(),
+                TxnField.receiver: Txn.accounts[1],
+                TxnField.fee: Int(1000),
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
+    # trying to pay without fees (only possible via pooled txn fee)
+    pay_with_zero_fee = Seq([
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.amount: Int(3000000),
+                TxnField.sender: Global.current_application_address(),
+                TxnField.receiver: Txn.accounts[1],
+                TxnField.fee: Int(0),
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        Return(Int(1))
+    ])
+
     # empties application's account
     pay_with_close_rem_to = Seq([
         InnerTxnBuilder.Begin(),
@@ -69,6 +101,8 @@ def approval_program():
         ],
         [Txn.application_args[0] == Bytes("pay"), pay],
         [Txn.application_args[0] == Bytes("pay_with_close_rem_to"), pay_with_close_rem_to],
+        [Txn.application_args[0] == Bytes("pay_with_fee"), pay_with_fee],
+        [Txn.application_args[0] == Bytes("pay_with_zero_fee"), pay_with_zero_fee],
     )
 
     return program
