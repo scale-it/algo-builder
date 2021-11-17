@@ -32,6 +32,8 @@ export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
 // the assets and application arrays combined and totaled with the accounts array can not exceed 8
 export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
 export const MAX_INNER_TRANSACTIONS = 16;
+export const ALGORAND_MAX_LOGS_COUNT = 32;
+export const ALGORAND_MAX_LOGS_LENGTH = 1024;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;

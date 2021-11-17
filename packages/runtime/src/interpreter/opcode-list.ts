@@ -11,6 +11,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
+  ALGORAND_MAX_LOGS_COUNT, ALGORAND_MAX_LOGS_LENGTH,
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
   MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
@@ -4205,6 +4206,29 @@ export class Log extends Op {
     const txID = this.interpreter.runtime.ctx.tx.txID;
     const txReceipt = this.interpreter.runtime.ctx.state.txnInfo.get(txID) as TxReceipt;
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+
+    // max no. of logs exceeded
+    if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
+          maxLogs: ALGORAND_MAX_LOGS_COUNT,
+          line: this.line
+        }
+      );
+    }
+
+    // max "length" of logs exceeded
+    const length = txReceipt.logs.join("").length + logByte.length;
+    if (length > ALGORAND_MAX_LOGS_LENGTH) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
+          maxLength: ALGORAND_MAX_LOGS_LENGTH,
+          origLength: length,
+          line: this.line
+        }
+      );
+    }
+
     txReceipt.logs.push(convertToString(logByte));
   }
 }
