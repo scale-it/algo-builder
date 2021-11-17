@@ -15,7 +15,7 @@ import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
-  ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
+  ASADeploymentFlags, ASAInfo, AssetHoldingM, BaseTxReceipt, Context,
   DeployedAppTxReceipt,
   DeployedAssetTxReceipt,
   ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxReceipt
@@ -608,7 +608,7 @@ export class Runtime {
    * @param to to address
    * @param amount amount of algo in microalgos
    */
-  fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): void {
+  fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): TxReceipt {
     const fundParam: types.ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -617,7 +617,7 @@ export class Runtime {
       amountMicroAlgos: amount,
       payFlags: { totalFee: 1000 }
     };
-    this.executeTx(fundParam); /// /////////////////
+    return this.executeTx(fundParam) as TxReceipt;
   }
 
   /**
