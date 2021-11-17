@@ -148,8 +148,8 @@ export class Ctx implements Context {
     toAccount.amount += BigInt(txnParam.amountMicroAlgos); // add 'x' algo to receiver
     this.assertAccBalAboveMin(fromAccount.address);
 
-    if (txnParam.rekey) {
-      const authAccount = this.getAccount(txnParam.rekey);
+    if (txnParam.payFlags.rekeyTo) {
+      const authAccount = this.getAccount(txnParam.payFlags.rekeyTo);
       fromAccount.rekey(authAccount);
     }
 
@@ -289,16 +289,10 @@ export class Ctx implements Context {
       }
     );
 
-    // create new "app account" (an account belonging to smart contract)
-    // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#using-a-smart-contract-as-an-escrow
-    // const acc = new AccountStore(0, {
-    //   addr: getApplicationAddress(this.state.appCounter),
-    //   sk: new Uint8Array(0)
-    // });
     const acc = new AccountStore(
       0,
       new RuntimeAccountBuilder()
-        .setAddr(getApplicationAddress(this.state.appCounter))
+        .from({ addr: getApplicationAddress(this.state.appCounter), sk: new Uint8Array(0) })
         .build()
     );
     this.state.accounts.set(acc.address, acc);

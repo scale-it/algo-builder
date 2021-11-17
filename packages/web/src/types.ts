@@ -222,7 +222,6 @@ export type AlgoTransferParam = BasicParams & {
   type: TransactionType.TransferAlgo
   toAccountAddr: AccountAddress
   amountMicroAlgos: number | bigint
-  rekey?: AccountAddress
 };
 
 export type AssetTransferParam = BasicParams & {

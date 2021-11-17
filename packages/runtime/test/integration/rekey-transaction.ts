@@ -18,19 +18,11 @@ describe("Rekey Transaction testing", function () {
   let txnParams: types.AlgoTransferParam;
 
   const amount = 1000n;
+
   this.beforeAll(async function () {
     alice = new AccountStore(baseBalance);
     bob = new AccountStore(baseBalance);
     runtime = new Runtime([alice, bob]);
-
-    txnParams = {
-      type: types.TransactionType.TransferAlgo, // payment
-      sign: types.SignType.SecretKey,
-      fromAccount: alice.account,
-      toAccountAddr: bob.address,
-      amountMicroAlgos: amount,
-      payFlags: { totalFee: fee }
-    };
   });
 
   // helper function
@@ -39,11 +31,17 @@ describe("Rekey Transaction testing", function () {
     bob = runtime.getAccount(bob.address);
   }
 
-  it("Should rekey success", function () {
-    runtime.executeTx({
-      ...txnParams,
-      rekey: bob.account.addr
-    });
+  it("Rekey from alice to bob", function () {
+    txnParams = {
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: { totalFee: fee, rekeyTo: bob.address }
+    };
+
+    runtime.executeTx(txnParams);
 
     syncAccounts();
 
@@ -54,11 +52,19 @@ describe("Rekey Transaction testing", function () {
   it("Should transfer ALGO by auth account", function () {
     const aliceBalanceBefore = alice.balance();
     const bobBalanceBefore = bob.balance();
-    runtime.executeTx({
-      ...txnParams,
+
+    txnParams = {
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.SecretKey,
       fromAccount: bob.account,
-      fromAccountAddr: alice.address
-    });
+      fromAccountAddr: alice.address,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: { totalFee: fee, rekeyTo: bob.address }
+    };
+
+    runtime.executeTx(txnParams);
+
     syncAccounts();
     const aliceBalanceAfter = alice.balance();
     const bobBalanceAfter = bob.balance();
@@ -66,13 +72,19 @@ describe("Rekey Transaction testing", function () {
     assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
   });
 
-  it("Should fail if singer is not auth account", function () {
+  it("Should fail if signer is not auth account", function () {
+    txnParams = {
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      fromAccountAddr: alice.address,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: { totalFee: fee, rekeyTo: bob.address }
+    };
+
     expectRuntimeError(
-      () => runtime.executeTx({
-        ...txnParams,
-        fromAccount: alice.account,
-        fromAccountAddr: alice.address
-      }),
+      () => runtime.executeTx(txnParams),
       RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
     );
   });

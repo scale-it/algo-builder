@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { AccountAddress } from "@algo-builder/web/build/types";
 import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
@@ -34,12 +33,10 @@ class RuntimeAccount implements RuntimeAccountI {
   constructor (builder: RuntimeAccountBuilder) {
     this.sk = builder.sk;
     this.addr = builder.addr;
-    if (builder.name) {
-      this.name = builder.name;
-    }
+    this.name = builder.name;
   }
 
-  rekey (authAccount: RuntimeAccountI): void {
+  rekeyTo (authAccount: RuntimeAccountI): void {
     this.authAccount = authAccount;
   }
 }
@@ -47,18 +44,11 @@ class RuntimeAccount implements RuntimeAccountI {
 export class RuntimeAccountBuilder {
   sk: Uint8Array
   addr: string
-  name: string | undefined
+  name?: string
 
   constructor () {
     this.sk = new Uint8Array(0);
     this.addr = "";
-  }
-
-  public genKey (): RuntimeAccountBuilder {
-    const account = generateAccount();
-    this.sk = account.sk;
-    this.addr = account.addr;
-    return this;
   }
 
   public setName (name: string): RuntimeAccountBuilder {
@@ -67,22 +57,17 @@ export class RuntimeAccountBuilder {
   }
 
   public from (account: AccountSDK): RuntimeAccountBuilder {
-    this.addr = account.addr;
     this.sk = account.sk;
+    this.addr = account.addr;
     return this;
   }
 
-  public setSk (sk: Uint8Array): RuntimeAccountBuilder {
-    this.sk = sk;
-    return this;
+  public genKey (): RuntimeAccountBuilder {
+    const account = generateAccount();
+    return this.from(account);
   }
 
-  public setAddr (addr: string): RuntimeAccountBuilder {
-    this.addr = addr;
-    return this;
-  }
-
-  build (): RuntimeAccount {
+  public build (): RuntimeAccount {
     return new RuntimeAccount(this);
   }
 }
@@ -99,19 +84,20 @@ export class AccountStore implements AccountStoreI {
   createdAssets: Map<number, modelsv2.AssetParams>;
 
   constructor (balance: number | bigint, account?: RuntimeAccountI | AccountSDK | string) {
+    const runtimeAccountBuilder = new RuntimeAccountBuilder();
     if (typeof account === 'string') {
       // create new account with name
-      this.account = new RuntimeAccountBuilder().genKey().setName(account).build();
+      this.account = runtimeAccountBuilder.genKey().setName(account).build();
     } else if (account instanceof RuntimeAccount) {
       // set account to other RuntimeAccount
       this.account = account;
     } else if (account) {
       // This case account is AccountSDK interface
       // so set account from AccountSDK
-      this.account = new RuntimeAccountBuilder().from(account).build();
+      this.account = runtimeAccountBuilder.from(account).build();
     } else {
-      // create new account because user pass notthing.
-      this.account = new RuntimeAccountBuilder().genKey().build();
+      // create new account because user passed nothing.
+      this.account = runtimeAccountBuilder.genKey().build();
     }
 
     this.address = this.account.addr;
@@ -130,7 +116,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   rekey (authAccount: AccountStoreI): void {
-    this.account.rekey(authAccount.account);
+    this.account.rekeyTo(authAccount.account);
   }
 
   /**

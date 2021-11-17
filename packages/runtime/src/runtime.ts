@@ -577,8 +577,14 @@ export class Runtime {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
     const lsig = new LogicSigAccount(program, args);
-    // const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
-    const acc = new AccountStore(0, new RuntimeAccountBuilder().setAddr(lsig.address()).build());
+
+    const acc = new AccountStore(
+      0,
+      new RuntimeAccountBuilder()
+        .from({ addr: lsig.address(), sk: new Uint8Array(0) })
+        .build()
+    );
+
     this.store.accounts.set(acc.address, acc);
     return lsig;
   }
