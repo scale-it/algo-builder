@@ -56,17 +56,32 @@ export class RuntimeAccountBuilder {
     return this;
   }
 
+  /**
+   * Create RuntimeAccountBuilder from exist account sdk interface.
+   * @param account: Account SDK interface include addr and sk property
+   * @returns RuntimeAccountBuilder object which property copy from addr and sk from `account`
+   */
   public from (account: AccountSDK): RuntimeAccountBuilder {
     this.sk = account.sk;
     this.addr = account.addr;
     return this;
   }
 
+  /**
+   * Generate new Algorand account and
+   * setup RuntimeAccountBuilder object from them.
+   * @returns RuntimeAccountBuilder object which property copy
+   *          from addr and sk from a new account has created.
+   */
   public genKey (): RuntimeAccountBuilder {
     const account = generateAccount();
     return this.from(account);
   }
 
+  /**
+   * Build RuntimeAccount from information in this RuntimeAccountBuilder object.
+   * @returns RuntimeAccount object.
+   */
   public build (): RuntimeAccount {
     return new RuntimeAccount(this);
   }
