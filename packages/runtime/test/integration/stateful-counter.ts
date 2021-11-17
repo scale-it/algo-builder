@@ -35,7 +35,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
       globalInts: 2,
       localBytes: 3,
       localInts: 3
-    }, {}, approvalProgram, clearProgram).appID as number;
+    }, {}, approvalProgram, clearProgram).appID;
 
     // opt-in to the app
     runtime.optInToApp(john.address, txnParams.appID, {}, {});

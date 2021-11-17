@@ -15,6 +15,8 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
+  DeployedAppTxReceipt,
+  DeployedAssetTxReceipt,
   ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxReceipt
 } from "./types";
 
@@ -352,7 +354,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string, flags: ASADeploymentFlags): TxReceipt {
+  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     const txReceipt = this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -365,7 +367,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): TxReceipt {
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     const txReceipt = this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -459,7 +461,7 @@ export class Runtime {
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
-  ): TxReceipt {
+  ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
     const txReceipt = this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);

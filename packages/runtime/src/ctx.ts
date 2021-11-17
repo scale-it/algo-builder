@@ -11,7 +11,7 @@ import {
   AccountAddress, AccountStoreI,
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
-  Context, ExecutionMode,
+  Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, ExecutionMode,
   ID, SSCAttributesM, StackElem, State, Txn, TxReceipt
 } from "./types";
 
@@ -171,7 +171,7 @@ export class Ctx implements Context {
   addAsset (
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): TxReceipt {
+  ): DeployedAssetTxReceipt {
     return this.addASADef(
       name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
     );
@@ -187,7 +187,7 @@ export class Ctx implements Context {
   addASADef (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): TxReceipt {
+  ): DeployedAssetTxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
     parseASADef(asaDef);
     validateOptInAccNames(this.state.accountNameAddress, asaDef);
@@ -259,7 +259,7 @@ export class Ctx implements Context {
   addApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
-  ): TxReceipt {
+  ): DeployedAppTxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     if (approvalProgram === "") {
@@ -308,7 +308,7 @@ export class Ctx implements Context {
     this.state.accounts.set(acc.address, acc);
 
     // set & return transaction receipt
-    const receipt = this.state.txnInfo.get(this.tx.txID) as TxReceipt;
+    const receipt = this.state.txnInfo.get(this.tx.txID) as DeployedAppTxReceipt;
     receipt.appID = this.state.appCounter;
     return receipt;
   }
@@ -681,7 +681,7 @@ export class Ctx implements Context {
           } else {
             r = this.addAsset(txnParam.asaName, fromAccountAddr, flags);
           }
-          this.knowableID.set(idx, r.assetID as number);
+          this.knowableID.set(idx, (r as DeployedAssetTxReceipt).assetID);
           break;
         }
         case types.TransactionType.OptInASA: {
@@ -705,7 +705,7 @@ export class Ctx implements Context {
             txnParam.clearProgram,
             idx
           );
-          this.knowableID.set(idx, r.appID as number);
+          this.knowableID.set(idx, (r as DeployedAppTxReceipt).appID);
           break;
         }
         case types.TransactionType.OptInToApp: {

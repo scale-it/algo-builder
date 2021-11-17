@@ -25,7 +25,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     runtime = new Runtime([john, alice]); // setup test
     // create asset
     assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } }).assetID as number;
+      { creator: { ...john.account, name: "john" } }).assetID;
     approvalProgram = getProgram('counter-approval.teal');
     clearProgram = getProgram('clear.teal');
 
@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       globalInts: 32,
       localBytes: 8,
       localInts: 8
-    }, {}, approvalProgram, clearProgram).appID as number;
+    }, {}, approvalProgram, clearProgram).appID;
     // opt-in to app
     runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice

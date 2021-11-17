@@ -69,15 +69,22 @@ export interface AccountsMap {
  * (where we use maps instead of arrays in sdk structures). */
 export type RuntimeAccountMap = Map<string, AccountAddress>;
 
-export interface TxReceipt {
+export interface BaseTxReceipt {
   txn: Txn
   txID: string
   gas?: number
   logs?: string[]
-  // returned during time of creation of asset/app
-  assetID?: number
-  appID?: number
 }
+
+export interface DeployedAssetTxReceipt extends BaseTxReceipt {
+  assetID: number
+}
+
+export interface DeployedAppTxReceipt extends BaseTxReceipt {
+  appID: number
+}
+
+export type TxReceipt = BaseTxReceipt | DeployedAppTxReceipt | DeployedAssetTxReceipt;
 
 export interface State {
   accounts: Map<string, AccountStoreI>
@@ -142,17 +149,17 @@ export interface Context {
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
   addAsset: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => TxReceipt
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
   addASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => TxReceipt
+  ) => DeployedAssetTxReceipt
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
-  ) => TxReceipt
+  ) => DeployedAppTxReceipt
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
   updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt
 }
