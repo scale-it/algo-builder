@@ -431,7 +431,7 @@ export function assertMaxCost (gas: number, mode: ExecutionMode, maxPooledApplCo
       // check max cost (for stateful)
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
         cost: gas,
-        maxcost: MaxAppProgramCost,
+        maxcost: maxPooledApplCost ?? MaxAppProgramCost,
         mode: 'Stateful'
       });
     }

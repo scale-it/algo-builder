@@ -9,6 +9,7 @@ import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, ZERO_ADDRESS_STR } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -284,6 +285,11 @@ export class Runtime {
         this.store.assetDefs.set(assetId, acc.address);
       }
     }
+
+    // add fee sink (fees + rewards collected are accumulated in this account)
+    const feeSink = new AccountStore(ALGORAND_ACCOUNT_MIN_BALANCE,
+      { addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) });
+    this.store.accounts.set(feeSink.address, feeSink);
   }
 
   /**

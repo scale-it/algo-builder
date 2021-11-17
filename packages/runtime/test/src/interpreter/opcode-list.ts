@@ -4260,6 +4260,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("Gtxnsa: should push value of txfieldArr[index] from tx in group", () => {
+      TXN_OBJ.apaa = [Buffer.from("arg1"), Buffer.from("arg2")];
       stack.push(0n);
       let op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
       op.execute(stack);
