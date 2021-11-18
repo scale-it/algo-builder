@@ -12,11 +12,21 @@
     * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
     * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
     * Support Pooled opcode budget
++ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API). User can do the following migration:
+    ```js
+    // from
+    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
+    daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
+
+    // to
+    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
+    ```
 
 ### Breaking changes
 
 `@algo-builder/runtime`:
 + Renamed `Runtime.getLogicSig` to `Runtime.createLsigAccount` #506.
++ `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
