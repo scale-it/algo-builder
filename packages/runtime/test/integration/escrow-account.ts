@@ -2,11 +2,11 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { LogicSigAccount } from "../../src/logicsig";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { johnAccount } from "../mocks/account";

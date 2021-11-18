@@ -2,6 +2,7 @@ import { AccountStore } from "./account";
 import * as ERRORS from "./errors/errors-list";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
+import { getProgram } from "./lib//load-program";
 import { loadASAFile, overrideASADef, parseASADef, validateASADefs, validateOptInAccNames } from "./lib/asa";
 import { getPathFromDirRecursive, loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage, lsTreeWalk } from "./lib/files";
 import { PyCompileOp } from "./lib/pycompile-op";
@@ -30,5 +31,6 @@ export {
   lsTreeWalk,
   getPathFromDirRecursive,
   PyCompileOp,
+  getProgram,
   types
 };

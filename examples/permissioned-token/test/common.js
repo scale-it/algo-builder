@@ -1,7 +1,4 @@
-const {
-  getProgram
-} = require('@algo-builder/algob');
-const { Runtime } = require('@algo-builder/runtime');
+const { Runtime, getProgram } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 
 const minBalance = 20e6; // 20 ALGOs

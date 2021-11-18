@@ -3,10 +3,10 @@ import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
+import { getProgram } from "../../../src";
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE } from "../../../src/lib/constants";
 import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
-import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 
 describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, Asset Freeze..]", function () {

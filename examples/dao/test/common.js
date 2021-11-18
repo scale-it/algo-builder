@@ -1,4 +1,4 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
 const { Runtime } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { Vote } = require('../scripts/run/common/common');

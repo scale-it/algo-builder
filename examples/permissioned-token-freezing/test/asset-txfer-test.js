@@ -1,5 +1,5 @@
-import { convert, getProgram } from '@algo-builder/algob';
-import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { convert } from '@algo-builder/algob';
+import { AccountStore, getProgram, Runtime } from '@algo-builder/runtime';
 import { assert } from 'chai';
 const { types } = require('@algo-builder/web');
 
