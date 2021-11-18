@@ -6,8 +6,9 @@ import YAML from "yaml";
 import type { ReplaceParams, SCParams } from "../types";
 import { getPathFromDirRecursive } from "./files";
 
+export const tealExt = ".teal";
 export const pyExt = ".py";
-const ASSETS_DIR = "assets";
+export const ASSETS_DIR = "assets";
 
 export class PyCompileOp {
   /**
