@@ -1,4 +1,3 @@
-const { getProgram } = require('@algo-builder/runtime');
 const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
