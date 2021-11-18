@@ -384,6 +384,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     const asaDef = runtime.getAssetDef(Number(createdAsaID));
     assert.isDefined(asaDef);
+    assert.equal(asaDef.name, 'gold');
     assert.equal(asaDef.decimals, 3);
     assert.equal(asaDef.defaultFrozen, false);
     assert.equal(asaDef.total, 10000000n);
@@ -417,11 +418,8 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     assert.isDefined(createdAsaID);
 
     const asaDef = runtime.getAssetDef(Number(createdAsaID));
-    // you can also get asa definition from passed asa name
-    const asaDefFromName = runtime.getAssetInfoFromName("asa_name")?.assetDef as any;
-    assert.deepEqual(asaDef, asaDefFromName);
-
     assert.isDefined(asaDef);
+    assert.equal(asaDef.name, 'asa_name');
     assert.equal(asaDef.decimals, 0);
     assert.equal(asaDef.defaultFrozen, true);
     assert.equal(asaDef.total, 1n);
