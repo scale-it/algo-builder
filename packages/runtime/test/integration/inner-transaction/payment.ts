@@ -26,7 +26,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
   let appCallParams: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([master, john, elon, bob]); // setup test
-    approvalProgram = getProgram('approval-payment.teal');
+    approvalProgram = getProgram('approval-payment.py');
     clearProgram = getProgram('clear.teal');
 
     appCreationFlags = {

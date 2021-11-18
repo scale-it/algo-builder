@@ -22,7 +22,7 @@ describe("App Update Test", function () {
 
   this.beforeEach(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgram = getProgram('approval_program.teal');
+    approvalProgram = getProgram('approval_program.py');
     clearProgram = getProgram('clear_program.teal');
     const flags = {
       sender: john.account,
