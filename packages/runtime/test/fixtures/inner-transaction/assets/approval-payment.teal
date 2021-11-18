@@ -2,7 +2,7 @@
 txn ApplicationID
 int 0
 ==
-bnz main_l10
+bnz main_l14
 txn OnCompletion
 int UpdateApplication
 ==
@@ -10,7 +10,7 @@ txn OnCompletion
 int DeleteApplication
 ==
 ||
-bnz main_l9
+bnz main_l13
 txn OnCompletion
 int CloseOut
 ==
@@ -18,17 +18,55 @@ txn OnCompletion
 int OptIn
 ==
 ||
-bnz main_l8
+bnz main_l12
 txna ApplicationArgs 0
 byte "pay"
 ==
-bnz main_l7
+bnz main_l11
 txna ApplicationArgs 0
 byte "pay_with_close_rem_to"
 ==
-bnz main_l6
+bnz main_l10
+txna ApplicationArgs 0
+byte "pay_with_fee"
+==
+bnz main_l9
+txna ApplicationArgs 0
+byte "pay_with_zero_fee"
+==
+bnz main_l8
 err
-main_l6:
+main_l8:
+itxn_begin
+int pay
+itxn_field TypeEnum
+int 3000000
+itxn_field Amount
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+int 0
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l9:
+itxn_begin
+int pay
+itxn_field TypeEnum
+int 3000000
+itxn_field Amount
+global CurrentApplicationAddress
+itxn_field Sender
+txna Accounts 1
+itxn_field Receiver
+int 1000
+itxn_field Fee
+itxn_submit
+int 1
+return
+main_l10:
 itxn_begin
 int pay
 itxn_field TypeEnum
@@ -41,7 +79,7 @@ itxn_field CloseRemainderTo
 itxn_submit
 int 1
 return
-main_l7:
+main_l11:
 itxn_begin
 int pay
 itxn_field TypeEnum
@@ -60,12 +98,12 @@ itxn_field Amount
 itxn_submit
 int 1
 return
-main_l8:
+main_l12:
 int 1
 return
-main_l9:
+main_l13:
 int 0
 return
-main_l10:
+main_l14:
 int 1
 return
