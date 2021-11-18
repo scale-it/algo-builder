@@ -120,7 +120,7 @@ describe("Compile task", () => {
   it("should return TEAL code", async () => {
     const pyOp = new PyCompileOp();
     const content = fs.readFileSync(path.join(ASSETS_DIR, f4), 'utf8');
-    const res = pyOp.compilePyTeal(f3PY) + '\n';
+    const res = pyOp.compilePyTeal(f3PY) + '\n'; // eslint-disable-line @typescript-eslint/restrict-plus-operands
     assert.deepEqual(content.toString(), res);
   });
 
