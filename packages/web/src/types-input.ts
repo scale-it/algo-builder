@@ -6,6 +6,7 @@ export const AddressSchema = z.string();
 const totalRegex = /^\d+$/;
 
 export const ASADefSchema = z.object({
+  name: z.string().optional(), // req. for runtime (in checkpoint we store name as the key)
   total: z.union([z.number(), z.bigint(), z.string()]) // 'string' to support bigint from yaml file
     .refine(
       t => (totalRegex.test(String(t)) && BigInt(t) <= 0xFFFFFFFFFFFFFFFFn && BigInt(t) >= 0n),
