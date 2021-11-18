@@ -384,6 +384,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     const asaDef = runtime.getAssetDef(Number(createdAsaID));
     assert.isDefined(asaDef);
+    assert.equal(asaDef.name, 'gold');
     assert.equal(asaDef.decimals, 3);
     assert.equal(asaDef.defaultFrozen, false);
     assert.equal(asaDef.total, 10000000n);
@@ -422,6 +423,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     assert.deepEqual(asaDef, asaDefFromName as any);
 
     assert.isDefined(asaDef);
+    assert.equal(asaDef.name, 'asa_name');
     assert.equal(asaDef.decimals, 0);
     assert.equal(asaDef.defaultFrozen, true);
     assert.equal(asaDef.total, 1n);

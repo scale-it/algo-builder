@@ -241,6 +241,7 @@ export function parseEncodedTxnToExecParams (tx: Txn,
         execParams.type = types.TransactionType.DeployASA;
         execParams.asaName = tx.apar?.an;
         execParams.asaDef = {
+          name: tx.apar?.an,
           total: tx.apar?.t,
           decimals: tx.apar?.dc !== undefined ? Number(tx.apar.dc) : undefined,
           defaultFrozen: BigInt(tx.apar?.df ?? 0n) === 1n,
