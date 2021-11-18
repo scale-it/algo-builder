@@ -8,7 +8,7 @@ import { AccountStore } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { Interpreter, loadASAFile } from "./index";
+import { getProgram, Interpreter, loadASAFile } from "./index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ZERO_ADDRESS_STR } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
@@ -16,7 +16,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn
+  ExecutionMode, RuntimeAccount, SCParams, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -565,6 +565,18 @@ export class Runtime {
   }
 
   /**
+   * Loads logic signature for contract mode, creates a new runtime account
+   * associated with lsig
+   * @param fileName ASC filename
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @returns loaded logic signature from assets/<file_name>.teal
+   */
+  loadLogic (fileName: string, scTmplParams?: SCParams): LogicSigAccount {
+    const program = getProgram(fileName, scTmplParams);
+    return this.createLsigAccount(program, []); // args can be set during executeTx
+  }
+
+  /**
    * Creates a new account with logic signature and smart contract arguments
    * in the runtime store. The arguments are used when we send a transaction with this
    * account and verify it.
@@ -577,6 +589,8 @@ export class Runtime {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
     const lsig = new LogicSigAccount(program, args);
+
+    // create new lsig account in runtime
     const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
