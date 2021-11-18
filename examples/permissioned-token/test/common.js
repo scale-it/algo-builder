@@ -72,11 +72,10 @@ class Context {
 
   // Deploy Clawback Lsig and Modify Asset
   deployClawback (sender, clawbackProgram) {
-    const clawbackTeal = getProgram(clawbackProgram, {
+    this.lsig = this.runtime.loadLogic(clawbackProgram, {
       TOKEN_ID: this.assetIndex,
       CONTROLLER_APP_ID: this.controllerappID
     });
-    this.lsig = this.runtime.createLsigAccount(clawbackTeal, []);
 
     fund(this.runtime, this.master, this.lsig.address());
     const asaDef = this.runtime.getAssetDef(this.assetIndex);

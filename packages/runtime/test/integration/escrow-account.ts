@@ -2,7 +2,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
@@ -36,7 +35,7 @@ describe("Logic Signature: Escrow Account", function () {
 
   this.beforeAll(function () {
     runtime = new Runtime([john, admin]); // setup runtime
-    lsig = runtime.createLsigAccount(getProgram('escrow.teal'), []);
+    lsig = runtime.loadLogic('escrow.teal');
     escrow = runtime.getAccount(lsig.address());
     paymentTxParams = {
       type: types.TransactionType.TransferAlgo,

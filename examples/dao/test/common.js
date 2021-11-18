@@ -85,17 +85,14 @@ class Context {
       ARG_DAO_APP_ID: this.daoAppID
     };
     // compile lsig's
-    const depositLsigProg = getProgram('deposit-lsig.py', scInitParam);
-    this.depositLsig = this.runtime.createLsigAccount(depositLsigProg, []);
+    this.depositLsig = this.runtime.loadLogic('deposit-lsig.py', scInitParam);
     this.depositLsigAcc = this.runtime.getAccount(this.depositLsig.address());
 
-    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
-    this.daoFundLsig = this.runtime.createLsigAccount(daoFundLsigProg, []);
+    this.daoFundLsig = this.runtime.loadLogic('dao-fund-lsig.py', scInitParam);
     this.daoFundLsigAcc = this.runtime.getAccount(this.daoFundLsig.address());
 
-    const proposalLsigProg = getProgram('proposal-lsig.py',
+    this.proposalLsig = this.runtime.loadLogic('proposal-lsig.py',
       { ARG_OWNER: this.proposer.address, ARG_DAO_APP_ID: this.daoAppID });
-    this.proposalLsig = this.runtime.createLsigAccount(proposalLsigProg, []);
     this.proposalLsigAcc = this.runtime.getAccount(this.proposalLsig.address());
 
     // fund lsig's

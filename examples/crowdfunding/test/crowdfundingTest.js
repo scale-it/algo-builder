@@ -98,8 +98,7 @@ describe('Crowdfunding Tests', function () {
     const creatorPk = convert.addressToPk(creator.address);
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    const lsig = runtime.createLsigAccount(escrowProg, []);
+    const lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = lsig.address();
 
     // sync escrow account
@@ -301,8 +300,7 @@ describe('Crowdfunding Tests', function () {
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    const lsig = runtime.createLsigAccount(escrowProg, []);
+    const lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = lsig.address();
 
     // sync escrow account

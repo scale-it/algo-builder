@@ -2,7 +2,6 @@ import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
@@ -49,7 +48,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     assert.equal(bob.balance(), initialBobHolding);
 
     // make delegated logic signature
-    const lsig = runtime.createLsigAccount(getProgram('basic.teal'), []);
+    const lsig = runtime.loadLogic('basic.teal');
     lsig.sign(john.account.sk);
 
     runtime.executeTx({
@@ -67,7 +66,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
-    const lsig = runtime.createLsigAccount(getProgram('incorrect-logic.teal'), []);
+    const lsig = runtime.loadLogic('incorrect-logic.teal');
     lsig.sign(john.account.sk);
 
     const invalidParam = {

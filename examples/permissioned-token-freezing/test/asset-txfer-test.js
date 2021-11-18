@@ -7,12 +7,12 @@ const minBalance = 10e6; // 10 ALGO's
 const aliceAddr = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
 const bobAddr = '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ';
 const ACCRED_LEVEL = 'Accred-Level';
-
+const CLAWBACK_ESCROW_PY = 'clawback-escrow.py';
 describe('Test for transferring asset using custom logic', function () {
   const master = new AccountStore(1000e6);
   let alice;
   let bob;
-  let escrow; // initialized later (using runtime.createLsigAccount)
+  let escrow; // initialized later (using runtime.loadLogic)
 
   let runtime;
   let creationFlags;
@@ -72,8 +72,6 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
-  const getEscrowProg = (assetId, appID) =>
-    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appID });
 
   // Update account state
   function syncAccounts () {
@@ -106,8 +104,8 @@ describe('Test for transferring asset using custom logic', function () {
     assert.isDefined(bobLocalApp);
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -226,8 +224,8 @@ describe('Test for transferring asset using custom logic', function () {
     runtime.optInToApp(bob.address, applicationId, {}, {});
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId); ;
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -271,8 +269,8 @@ describe('Test for transferring asset using custom logic', function () {
     runtime.optInToApp(bob.address, applicationId, {}, {});
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account

@@ -90,8 +90,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.address
   };
-  const dexLsigProgram = getProgram('dex-lsig.py', param);
-  const dexLsig = runtime.createLsigAccount(dexLsigProgram, []);
+  const dexLsig = runtime.loadLogic('dex-lsig.py', param);
   const dexLsigAddress = dexLsig.address();
 
   // fund dex with some minimum balance first
