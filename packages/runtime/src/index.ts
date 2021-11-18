@@ -4,6 +4,7 @@ import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
 import { loadASAFile, overrideASADef, parseASADef, validateASADefs, validateOptInAccNames } from "./lib/asa";
 import { getPathFromDirRecursive, loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage, lsTreeWalk } from "./lib/files";
+import { PyCompileOp } from "./lib/pycompile-op";
 import { checkIfAssetDeletionTx } from "./lib/txn";
 import { LogicSigAccount } from "./logicsig";
 import { parser } from "./parser/parser";
@@ -28,5 +29,6 @@ export {
   parser,
   lsTreeWalk,
   getPathFromDirRecursive,
+  PyCompileOp,
   types
 };
