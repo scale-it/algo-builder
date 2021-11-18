@@ -3,10 +3,12 @@ import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
 import { getProgram } from "../../../src";
+import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
+import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", function () {
   useFixture("inner-transaction");
@@ -88,6 +90,58 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
     assert.equal(john.balance(), johnBalBefore + BigInt(1e6) - 1000n);
     assert.equal(elon.balance(), elonBalBefore + BigInt(2e6));
     assert.equal(appAccount.balance(), appAccountBalBefore - BigInt(3e6) - 2000n);
+  });
+
+  it("initiate payment from smart contract with fee set in inner txn", function () {
+    const appAccountBalBefore = appAccount.balance();
+    const elonBalBefore = elon.balance();
+
+    // contracts pays 3 Algo's to txn.accounts[1]
+    const paymentTxParams = {
+      ...appCallParams,
+      appArgs: ['str:pay_with_fee'],
+      accounts: [elon.address]
+    };
+    runtime.executeTx(paymentTxParams);
+    syncAccounts();
+
+    assert.equal(elon.balance(), elonBalBefore + BigInt(3e6));
+    assert.equal(appAccount.balance(), appAccountBalBefore - BigInt(3e6) - 1000n);
+  });
+
+  it("should fail on payment from smart contract if fee is 0", function () {
+    const paymentTxParams = {
+      ...appCallParams,
+      appArgs: ['str:pay_with_zero_fee'],
+      accounts: [elon.address],
+      payFlags: { totalFee: 1000 } // not enough fees for inner txn
+    };
+    expectRuntimeError(
+      () => runtime.executeTx(paymentTxParams),
+      RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+    );
+  });
+
+  it("initiate payment from smart contract if inner txn fee is 0, but pooled fees cover it", function () {
+    const appAccountBalBefore = appAccount.balance();
+    const johnBalBefore = john.balance();
+    const elonBalBefore = elon.balance();
+
+    // contracts pays 3 Algo's to txn.accounts[1]
+    const paymentTxParams = {
+      ...appCallParams,
+      appArgs: ['str:pay_with_zero_fee'],
+      accounts: [elon.address],
+      payFlags: { totalFee: 1000 + 1000 } // enough fees for base txn & inner txn
+    };
+    runtime.executeTx(paymentTxParams);
+    syncAccounts();
+
+    assert.equal(elon.balance(), elonBalBefore + BigInt(3e6));
+    // note that fees is not deducted from app account
+    assert.equal(appAccount.balance(), appAccountBalBefore - BigInt(3e6));
+    // total fees is deducted from Txn.sender()
+    assert.equal(john.balance(), johnBalBefore - 2000n);
   });
 
   it("should not deduct fee from contract if enough fee available in pool", function () {

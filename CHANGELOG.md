@@ -12,6 +12,7 @@
     * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
     * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
     * Support Pooled opcode budget
++ Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API). User can do the following migration:
     ```js
     // from
