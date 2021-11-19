@@ -2,7 +2,7 @@ import { tx as webTx, types } from "@algo-builder/web";
 import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
 import { AccountStore, parseASADef, Runtime } from ".";
-import { RuntimeAccountBuilder } from "./account";
+import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
@@ -291,9 +291,10 @@ export class Ctx implements Context {
 
     const acc = new AccountStore(
       0,
-      new RuntimeAccountBuilder()
-        .from({ addr: getApplicationAddress(this.state.appCounter), sk: new Uint8Array(0) })
-        .build()
+      new RuntimeAccount({
+        addr: getApplicationAddress(this.state.appCounter),
+        sk: new Uint8Array(0)
+      })
     );
     this.state.accounts.set(acc.address, acc);
 

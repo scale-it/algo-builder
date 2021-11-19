@@ -24,66 +24,20 @@ const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
-class RuntimeAccount implements RuntimeAccountI {
+export class RuntimeAccount implements RuntimeAccountI {
   sk: Uint8Array
   addr: string
   name?: string;
   authAccount?: RuntimeAccountI;
 
-  constructor (builder: RuntimeAccountBuilder) {
-    this.sk = builder.sk;
-    this.addr = builder.addr;
-    this.name = builder.name;
+  constructor (account: AccountSDK, name?: string) {
+    this.sk = account.sk;
+    this.addr = account.addr;
+    this.name = name;
   }
 
   rekeyTo (authAccount: RuntimeAccountI): void {
     this.authAccount = authAccount;
-  }
-}
-
-export class RuntimeAccountBuilder {
-  sk: Uint8Array
-  addr: string
-  name?: string
-
-  constructor () {
-    this.sk = new Uint8Array(0);
-    this.addr = "";
-  }
-
-  public setName (name: string): RuntimeAccountBuilder {
-    this.name = name;
-    return this;
-  }
-
-  /**
-   * Create RuntimeAccountBuilder from exist account sdk interface.
-   * @param account: Account SDK interface include addr and sk property
-   * @returns RuntimeAccountBuilder object which property copy from addr and sk from `account`
-   */
-  public from (account: AccountSDK): RuntimeAccountBuilder {
-    this.sk = account.sk;
-    this.addr = account.addr;
-    return this;
-  }
-
-  /**
-   * Generate new Algorand account and
-   * setup RuntimeAccountBuilder object from them.
-   * @returns RuntimeAccountBuilder object which property copy
-   *          from addr and sk from a new account has created.
-   */
-  public genKey (): RuntimeAccountBuilder {
-    const account = generateAccount();
-    return this.from(account);
-  }
-
-  /**
-   * Build RuntimeAccount from information in this RuntimeAccountBuilder object.
-   * @returns RuntimeAccount object.
-   */
-  public build (): RuntimeAccount {
-    return new RuntimeAccount(this);
   }
 }
 
@@ -98,21 +52,16 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
-  constructor (balance: number | bigint, account?: RuntimeAccountI | AccountSDK | string) {
-    const runtimeAccountBuilder = new RuntimeAccountBuilder();
+  constructor (balance: number | bigint, account?: AccountSDK | string) {
     if (typeof account === 'string') {
       // create new account with name
-      this.account = runtimeAccountBuilder.genKey().setName(account).build();
-    } else if (account instanceof RuntimeAccount) {
-      // set account to other RuntimeAccount
-      this.account = account;
+      this.account = new RuntimeAccount(generateAccount(), account);
     } else if (account) {
-      // This case account is AccountSDK interface
-      // so set account from AccountSDK
-      this.account = runtimeAccountBuilder.from(account).build();
+      // create new account with AccountSDK data
+      this.account = new RuntimeAccount(account);
     } else {
       // create new account because user passed nothing.
-      this.account = runtimeAccountBuilder.genKey().build();
+      this.account = new RuntimeAccount(generateAccount());
     }
 
     this.address = this.account.addr;

@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore, RuntimeAccountBuilder } from "./account";
+import { AccountStore, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -276,8 +276,10 @@ export class Runtime {
     }
 
     // add fee sink (fees + rewards collected are accumulated in this account)
-    const feeSink = new AccountStore(ALGORAND_ACCOUNT_MIN_BALANCE,
-      { addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) });
+    const feeSink = new AccountStore(
+      ALGORAND_ACCOUNT_MIN_BALANCE,
+      new RuntimeAccount({ addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) })
+    );
     this.store.accounts.set(feeSink.address, feeSink);
   }
 
@@ -580,9 +582,7 @@ export class Runtime {
 
     const acc = new AccountStore(
       0,
-      new RuntimeAccountBuilder()
-        .from({ addr: lsig.address(), sk: new Uint8Array(0) })
-        .build()
+      new RuntimeAccount({ addr: lsig.address(), sk: new Uint8Array(0) })
     );
 
     this.store.accounts.set(acc.address, acc);

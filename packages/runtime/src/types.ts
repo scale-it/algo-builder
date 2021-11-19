@@ -179,8 +179,9 @@ export interface CreatedAppM {
 
 export interface RuntimeAccountI extends AccountSDK {
   name?: string
-  rekeyTo: (authAccount: RuntimeAccountI) => void
   authAccount?: RuntimeAccountI
+
+  rekeyTo: (authAccount: RuntimeAccountI) => void
 }
 
 // represent account used in tests and by the context
