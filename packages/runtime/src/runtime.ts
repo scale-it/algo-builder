@@ -567,6 +567,29 @@ export class Runtime {
   }
 
   /**
+   * Validate signature for Algorand account on transaction params.
+   * Include check spending account when creating a transaction from Algorand account
+   * Throw RuntimeError if signature is invalid.
+   * @param txParam transaction parameters.
+   */
+  validateAccountSignature (txParam: types.ExecParams): void {
+    const fromAccountAddr = webTx.getFromAddress(txParam);
+    const from = this.getAccount(fromAccountAddr);
+    const signAccount = txParam.fromAccount;
+
+    if (signAccount) {
+      // if spend account of fromAccountAddr is different with signAccount
+      // then throw error.
+      if (!from.account.getSpend().equal(signAccount)) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
+      }
+    } else {
+      // throw error if your don't provide account `signature`.
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
+    }
+  }
+
+  /**
    * Creates a new account with logic signature and smart contract arguments
    * in the runtime store. The arguments are used when we send a transaction with this
    * account and verify it.

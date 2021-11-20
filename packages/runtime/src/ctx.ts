@@ -555,20 +555,7 @@ export class Ctx implements Context {
         this.runtime.validateLsigAndRun(txnParam, this.debugStack);
         this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       } else if (txnParam.sign === types.SignType.SecretKey) {
-        const fromAccount = this.getAccount(fromAccountAddr);
-        const signAccount = this.getAccount(txnParam.fromAccount.addr);
-        if (fromAccount.account.authAccount) {
-          const authAccount = fromAccount.account.authAccount;
-          if (authAccount.addr !== signAccount.account.addr) {
-            // TODO: should use right message error
-            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
-          }
-          // throw new RUNTIME_ERRORS
-        } else {
-          if (fromAccountAddr !== signAccount.account.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
-          }
-        }
+        this.runtime.validateAccountSignature(txnParam);
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract

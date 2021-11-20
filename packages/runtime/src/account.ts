@@ -4,6 +4,7 @@ import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algos
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { checkAndSetASAFields } from "./lib/asa";
+import { compareArray } from "./lib/compare";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
   ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_ASSETS,
@@ -25,19 +26,28 @@ const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
 export class RuntimeAccount implements RuntimeAccountI {
-  sk: Uint8Array
+  sk: Uint8Array // signing key (private key or lsig)
   addr: string
   name?: string;
-  authAccount?: RuntimeAccountI;
+  spend: RuntimeAccountI;
 
   constructor (account: AccountSDK, name?: string) {
     this.sk = account.sk;
     this.addr = account.addr;
     this.name = name;
+    this.spend = this;
   }
 
   rekeyTo (authAccount: RuntimeAccountI): void {
-    this.authAccount = authAccount;
+    this.spend = authAccount;
+  }
+
+  getSpend (): RuntimeAccountI {
+    return this.spend;
+  }
+
+  equal (otherAccount: RuntimeAccountI | AccountSDK): boolean {
+    return compareArray(this.sk, otherAccount.sk) && this.addr === otherAccount.addr;
   }
 }
 

@@ -45,8 +45,8 @@ describe("Rekey Transaction testing", function () {
 
     syncAccounts();
 
-    assert.isNotNull(alice.account.authAccount);
-    assert.equal(alice.account.authAccount?.addr, bob.address);
+    assert.isNotNull(alice.account.spend);
+    assert.isTrue(alice.account.getSpend().equal(bob.account));
   });
 
   it("Should transfer ALGO by auth account", function () {
