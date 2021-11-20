@@ -424,6 +424,8 @@ class Asset {
     this.id = assetId;
     const base: BaseModel = new BaseModelI();
     this.definitions = {
+      ...base,
+      name: assetName,
       creator: creator,
       total: BigInt(def.total),
       decimals: def.decimals,
@@ -436,8 +438,7 @@ class Asset {
       manager: def.manager,
       reserve: def.reserve,
       freeze: def.freeze,
-      clawback: def.clawback,
-      ...base
+      clawback: def.clawback
     };
   }
 }

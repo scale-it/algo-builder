@@ -10,10 +10,14 @@ import { AccountAddress, RuntimeAccountI, StackElem, Txn } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
-const uintTxnFields = new Set([
-  'Fee', 'Amount', 'AssetAmount', 'TypeEnum', 'FreezeAssetFrozen',
-  'ConfigAssetTotal', 'ConfigAssetDecimals',
+// requires their type as number
+const numberTxnFields = new Set([
+  'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
   'ConfigAssetDefaultFrozen'
+]);
+
+const uintTxnFields = new Set([
+  'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
 ]);
 
 // these are also uint values, but require that the asset
@@ -44,6 +48,10 @@ export function setInnerTxField (
   let txValue: bigint | number | string | Uint8Array | undefined;
   if (uintTxnFields.has(field)) {
     txValue = op.assertBigInt(val, line);
+  }
+
+  if (numberTxnFields.has(field)) {
+    txValue = Number(op.assertBigInt(val, line));
   }
 
   if (assetIDFields.has(field)) {
@@ -241,6 +249,7 @@ export function parseEncodedTxnToExecParams (tx: Txn,
         execParams.type = types.TransactionType.DeployASA;
         execParams.asaName = tx.apar?.an;
         execParams.asaDef = {
+          name: tx.apar?.an,
           total: tx.apar?.t,
           decimals: tx.apar?.dc !== undefined ? Number(tx.apar.dc) : undefined,
           defaultFrozen: BigInt(tx.apar?.df ?? 0n) === 1n,
