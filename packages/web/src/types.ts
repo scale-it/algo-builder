@@ -1,6 +1,8 @@
+import { IClientMeta } from '@walletconnect/types';
 import { Account as AccountSDK, LogicSigAccount, Transaction } from 'algosdk';
 import * as z from 'zod';
 
+import { WalletMultisigMetadata, WalletTransaction } from './algo-signer-types';
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
@@ -290,4 +292,45 @@ export function isSDKTransactionAndSign (object: unknown): object is Transaction
   if (object === undefined || object === null) { return false; }
   const res = isSDKTransaction((object as TransactionAndSign).transaction);
   return Object.prototype.hasOwnProperty.call(object, "sign") && res;
+}
+
+/* Wallet Connect types */
+
+export enum ChainType {
+  MainNet = "MainNet",
+  TestNet = "TestNet"
+}
+
+export interface SessionConnectResponse {
+  peerId: string
+  peerMeta?: IClientMeta
+  accounts: string[]
+}
+
+export interface SessionUpdateResponse {
+  accounts: string[]
+}
+
+export interface SessionDisconnectResponse {
+  message?: string
+}
+
+export interface SignTxnOpts {
+  /**
+     * Optional message explaining the reason of the group of
+     * transactions.
+     */
+  message?: string
+
+  // other options may be present, but are not standard
+}
+
+export type SignTxnParams = [WalletTransaction[], SignTxnOpts?];
+
+export interface TransactionInGroup {
+  txn: Transaction
+  shouldSign?: boolean
+  signers?: string | string[]
+  msig?: WalletMultisigMetadata
+  message?: string
 }
