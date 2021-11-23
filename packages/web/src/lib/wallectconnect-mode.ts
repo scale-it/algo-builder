@@ -43,6 +43,10 @@ export class WallectConnectSession {
    * Create new session
    */
   async create (): Promise<void> {
+    if (this.connector.connected) {
+      console.warn(`A session is already active`);
+      return;
+    }
     await this.connector.createSession();
   }
 
