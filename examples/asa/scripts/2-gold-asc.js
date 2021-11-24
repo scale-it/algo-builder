@@ -1,5 +1,5 @@
-const { executeTransaction, balanceOf, getSuggestedParams, signTransactions } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+const { executeTransaction, balanceOf, signTransactions } = require('@algo-builder/algob');
+const { types, getSuggestedParams } = require('@algo-builder/web');
 const { mkParam } = require('./transfer/common');
 const { makeAssetTransferTxnWithSuggestedParams } = require('algosdk');
 
