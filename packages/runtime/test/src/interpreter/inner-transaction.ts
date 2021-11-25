@@ -607,7 +607,7 @@ describe("TEALv5: Inner Transactions", function () {
     });
 
     it(`should fail: ref is passed but bal == 0`, function () {
-      TXN_OBJ.apas = [1]; // set foreign asset
+      TXN_OBJ.apas = [1, 9]; // set foreign asset
       expectRuntimeError(
         () => executeTEAL(axfer),
         RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
@@ -631,7 +631,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_begin
         int axfer
         itxn_field TypeEnum
-        int 1
+        int 9
         itxn_field XferAsset
         int 0
         itxn_field AssetAmount
