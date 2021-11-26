@@ -18,7 +18,7 @@ const LAST_ROUND = "last-round";
 export class WallectConnectSession {
   private readonly connector: WalletConnect;
   private readonly algodClient: algosdk.Algodv2;
-  accounts: string[]
+  wcAccounts: string[]
 
   constructor (chain: ChainType, connector?: WalletConnect) {
     this.algodClient = clientForChain(chain);
@@ -36,7 +36,7 @@ export class WallectConnectSession {
     if (!this.connector.connected) {
       console.warn(`Connection not established, please use "this.create()" to create new session`);
     }
-    this.accounts = this.connector.accounts;
+    this.wcAccounts = this.connector.accounts;
   }
 
   /**
@@ -63,9 +63,9 @@ export class WallectConnectSession {
    */
   onConnect (handler: (error: Error | null, response: SessionConnectResponse) => unknown): void {
     this.connector.on("connect", (err, payload) => {
-      const { peerId, peerMeta, accounts }: SessionConnectResponse = payload.params[0];
-      this.accounts = accounts;
-      handler(err, { peerId, peerMeta, accounts });
+      const { wcPeerId, wcPeerMeta, wcAccounts }: SessionConnectResponse = payload.params[0];
+      this.wcAccounts = wcAccounts;
+      handler(err, { wcPeerId, wcPeerMeta, wcAccounts });
     });
   }
 
@@ -75,9 +75,9 @@ export class WallectConnectSession {
    */
   onUpdate (handler: (error: Error | null, response: SessionUpdateResponse) => unknown): void {
     this.connector.on("session_update", (err, payload) => {
-      const { accounts }: SessionUpdateResponse = payload.params[0];
-      this.accounts = accounts;
-      handler(err, { accounts });
+      const { wcAccounts }: SessionUpdateResponse = payload.params[0];
+      this.wcAccounts = wcAccounts;
+      handler(err, { wcAccounts });
     });
   }
 

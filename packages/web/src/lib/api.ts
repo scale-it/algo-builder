@@ -25,7 +25,6 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
     throw new Error("Suggested params returned 0 as firstRound. Ensure that your node progresses.");
-    // params.firstRound = 1
   }
   return params;
 }
