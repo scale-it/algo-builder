@@ -5788,14 +5788,14 @@ describe("Teal Opcodes", function () {
       let txID: string;
       this.beforeAll(() => {
         txID = interpreter.runtime.ctx.tx.txID;
-        interpreter.runtime.ctx.state.txnInfo.set(txID, {
+        interpreter.runtime.ctx.state.txReceipts.set(txID, {
           txn: interpreter.runtime.ctx.tx,
           txID: txID
         });
       });
 
       it("should push arg_0 from argument array to stack", function () {
-        let txInfo = interpreter.runtime.ctx.state.txnInfo.get(txID);
+        let txInfo = interpreter.runtime.ctx.state.txReceipts.get(txID);
         assert.isUndefined(txInfo?.logs);
         const op = new Log([], 1, interpreter);
 
@@ -5806,7 +5806,7 @@ describe("Teal Opcodes", function () {
         stack.push(parsing.stringToBytes("That's lame"));
         op.execute(stack);
 
-        txInfo = interpreter.runtime.ctx.state.txnInfo.get(txID);
+        txInfo = interpreter.runtime.ctx.state.txReceipts.get(txID);
         assert.deepEqual(txInfo?.logs, [
           'Hello', 'Friend?', "That's lame"
         ]);

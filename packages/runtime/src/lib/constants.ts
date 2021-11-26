@@ -389,3 +389,16 @@ export const TxnTypeMap: {[key: string]: string} = {
   4: 'axfer', // TransferAsset OR RevokeAsset,
   5: 'afrz'
 };
+
+/**
+ * https://developer.algorand.org/docs/get-details/dapps/avm/teal/specification/#typeenum-constants
+ */
+export enum TransactionTypeEnum {
+  UNKNOWN = "unknown",
+  PAYMENT = "pay",
+  KEY_REGISTRATION = "keyreg",
+  ASSET_CONFIG = "acfg",
+  ASSET_TRANSFER = "axfer",
+  ASSET_FREEZE = "afrz",
+  APPLICATION_CALL = "appl",
+}

@@ -9,7 +9,7 @@ import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, ZERO_ADDRESS_STR } from "./lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum, ZERO_ADDRESS_STR } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -348,7 +348,9 @@ export class Runtime {
       mockSuggestedParams(flags, this.round)
     );
 
-    if (this.ctx.tx === undefined || this.ctx.tx.type !== "acfg") { // could already be defined (if used as a txGroup in this.executeTx())
+    if (
+      this.ctx.tx === undefined || this.ctx.tx.type !== TransactionTypeEnum.ASSET_CONFIG
+    ) { // could already be defined (if used as a txGroup in this.executeTx())
       const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
       this.ctx.tx = encTx;
       this.ctx.gtxs = [encTx];
