@@ -101,7 +101,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amount: 1000,
-        assetID: 1,
+        assetID: 9,
         payFlags: { totalFee: 1000 }
       }
     ];
