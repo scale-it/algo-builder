@@ -14,6 +14,7 @@
     * Support Pooled opcode budget
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
++ Added `WallectConnectSession` class to create & manage wallect connect session. User can use `session.executeTransaction()` to execute algob transactions using wallet connect.
 
 ### Breaking changes
 
