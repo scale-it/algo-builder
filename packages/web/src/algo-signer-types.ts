@@ -29,9 +29,7 @@ export interface MultisigTransaction {
 }
 
 export interface WalletMultisigMetadata {
-  /**
-   * Multisig version.
-   */
+  /// Multisig version.
   version: number
 
   /**
@@ -50,8 +48,7 @@ export interface WalletMultisigMetadata {
 export interface WalletTransaction {
   /**
    * Base64 encoding of the canonical msgpack encoding of a
-   * Transaction.
-   */
+   * Transaction. */
   txn: string
 
   /**
