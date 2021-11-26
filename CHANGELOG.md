@@ -26,8 +26,8 @@
     const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram)
 
     // to
-    const txInfo = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    const appID = txInfo.appID;
+    const receipt = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = receipt.appID;
     ```
 
 ### Bug Fixes
