@@ -41,8 +41,7 @@ export async function mkTxParams (
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
   if (userParams.flatFee === undefined) {
-    if (userParams.totalFee !== undefined) s.flatFee = true;
-    else s.flatFee = false;
+    s.flatFee = userParams.totalFee !== undefined;
   }
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
 
