@@ -47,7 +47,7 @@ export class Runtime {
       appNameInfo: new Map<string, SSCInfo>(),
       appCounter: 0, // initialize app counter with 0
       assetCounter: 0, // initialize asset counter with 0
-      txnInfo: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
+      txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -67,8 +67,8 @@ export class Runtime {
    * Returns transaction receipt for a particular transaction
    * @param txID transaction ID
    */
-  getTransactionInfo (txID: string): TxReceipt | undefined {
-    return this.store.txnInfo.get(txID);
+  getTxReceipt (txID: string): TxReceipt | undefined {
+    return this.store.txReceipts.get(txID);
   }
 
   /**
@@ -645,7 +645,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txnInfo.get(this.ctx.tx.txID) as TxReceipt;
+      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -705,7 +705,7 @@ export class Runtime {
     indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
     // set new tx receipt
-    this.ctx.state.txnInfo.set(this.ctx.tx.txID, {
+    this.ctx.state.txReceipts.set(this.ctx.tx.txID, {
       txn: this.ctx.tx,
       txID: this.ctx.tx.txID
     });
@@ -718,6 +718,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txnInfo.get(this.ctx.tx.txID) as TxReceipt;
+    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
   }
 }

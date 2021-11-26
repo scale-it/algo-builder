@@ -49,9 +49,9 @@ export class Ctx implements Context {
     this.createdAssetID = 0;
   }
 
-  private setAndGetTxnInfo (): TxReceipt {
+  private setAndGetTxReceipt (): TxReceipt {
     const info = { txn: this.tx, txID: this.tx.txID };
-    this.state.txnInfo.set(this.tx.txID, info);
+    this.state.txReceipts.set(this.tx.txID, info);
     return info;
   }
 
@@ -159,7 +159,7 @@ export class Ctx implements Context {
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
       fromAccount.amount = 0n; // close sender's account
     }
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -216,7 +216,7 @@ export class Ctx implements Context {
       txID: this.tx.txID,
       assetID: this.state.assetCounter
     };
-    this.state.txnInfo.set(this.tx.txID, receipt);
+    this.state.txReceipts.set(this.tx.txID, receipt);
     return receipt;
   }
 
@@ -241,7 +241,7 @@ export class Ctx implements Context {
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
     this.assertAccBalAboveMin(address);
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -308,7 +308,7 @@ export class Ctx implements Context {
     this.state.accounts.set(acc.address, acc);
 
     // set & return transaction receipt
-    const receipt = this.state.txnInfo.get(this.tx.txID) as DeployedAppTxReceipt;
+    const receipt = this.state.txReceipts.get(this.tx.txID) as DeployedAppTxReceipt;
     receipt.appID = this.state.appCounter;
     return receipt;
   }
@@ -414,7 +414,7 @@ export class Ctx implements Context {
       const fromAccount = this.getAccount(fromAccountAddr);
       fromAccount.closeAsset(txnParam.assetID as number);
     }
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -426,7 +426,7 @@ export class Ctx implements Context {
   modifyAsset (assetId: number, fields: types.AssetModFields): TxReceipt {
     const creatorAcc = this.getAssetAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -444,7 +444,7 @@ export class Ctx implements Context {
       this.state.accounts.get(freezeTarget)
     );
     acc.setFreezeState(assetId, freezeState);
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -472,7 +472,7 @@ export class Ctx implements Context {
     }
     fromAssetHolding.amount -= amount;
     toAssetHolding.amount += amount;
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**
@@ -488,7 +488,7 @@ export class Ctx implements Context {
     this.state.accounts.forEach((value, key) => {
       value.assets.delete(assetId);
     });
-    return this.setAndGetTxnInfo();
+    return this.setAndGetTxReceipt();
   }
 
   /**

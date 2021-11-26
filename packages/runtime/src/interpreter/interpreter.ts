@@ -433,7 +433,7 @@ export class Interpreter {
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
-      const txReceipt = this.runtime.ctx.state.txnInfo.get(this.runtime.ctx.tx.txID) as TxReceipt;
+      const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as TxReceipt;
 
       // for teal version >= 4, cost is calculated dynamically at the time of execution
       // for teal version < 4, cost is handled statically during parsing

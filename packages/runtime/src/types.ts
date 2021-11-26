@@ -95,7 +95,7 @@ export interface State {
   appNameInfo: Map<string, SSCInfo>
   appCounter: number
   assetCounter: number
-  txnInfo: Map<string, TxReceipt> // map of {txID: txReceipt}
+  txReceipts: Map<string, TxReceipt> // map of {txID: txReceipt}
 }
 
 export interface DeployedAssetInfo {

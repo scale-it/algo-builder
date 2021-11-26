@@ -51,7 +51,7 @@ describe("TEALv5: Inner Transactions", function () {
     interpreter.runtime.ctx.gtxs = [interpreter.runtime.ctx.tx];
     interpreter.runtime.ctx.isInnerTx = false;
     // set new tx receipt
-    interpreter.runtime.ctx.state.txnInfo.set(TXN_OBJ.txID, {
+    interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
       txn: TXN_OBJ,
       txID: TXN_OBJ.txID
     });
@@ -1094,7 +1094,7 @@ describe("TEALv5: Inner Transactions", function () {
 
   describe("Log", () => {
     it(`should log bytes to current transaction receipt`, function () {
-      const txnInfo = interpreter.runtime.getTransactionInfo(TXN_OBJ.txID);
+      const txnInfo = interpreter.runtime.getTxReceipt(TXN_OBJ.txID);
       assert.isUndefined(txnInfo?.logs); // no logs before
 
       const log = `#pragma version 5
@@ -1116,7 +1116,7 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTransactionInfo(TXN_OBJ.txID)?.logs as string[];
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
       assert.isDefined(logs);
 
       for (let i = 0; i < 30; ++i) { assert.equal(logs[i], "a"); }
