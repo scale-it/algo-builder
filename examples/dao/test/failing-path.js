@@ -10,7 +10,7 @@ const now = Math.round(new Date().getTime() / 1000);
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const INDEX_OUT_OF_BOUND_ERR = 'RUNTIME_ERR1008: Index out of bound';
 const INTEGER_UNDERFLOW_ERR = 'Result of current operation caused integer underflow';
-const APP_NOT_FOUND = 'RUNTIME_ERR1306: Application Index 1 not found or is invalid';
+const APP_NOT_FOUND = 'RUNTIME_ERR1306: Application Index 9 not found or is invalid';
 
 describe('DAO - Failing Paths', function () {
   let master, creator, proposer, voterA, voterB;

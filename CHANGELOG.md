@@ -15,6 +15,7 @@
     * Txnas, Gtxnas, Gtxnsas, Args, Log (logs are stored in txReceipt)
 * Update all transaction functions (eg. `executeTx`, `addAsset`, `addApp` ..etc) to return a transaction receipt. Add `runtime.getTxReceipt` in `@algo-builder/runtime` to query transaction info.
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
++ Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
 
 ### Breaking changes
 `@algo-builder/runtime`:

@@ -9,7 +9,10 @@ import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum, ZERO_ADDRESS_STR } from "./lib/constants";
+import {
+  ALGORAND_ACCOUNT_MIN_BALANCE, ALGORAND_MAX_TX_ARRAY_LEN, TransactionTypeEnum,
+  ZERO_ADDRESS_STR
+} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -45,8 +48,8 @@ export class Runtime {
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
       appNameInfo: new Map<string, SSCInfo>(),
-      appCounter: 0, // initialize app counter with 0
-      assetCounter: 0, // initialize asset counter with 0
+      appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
+      assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
       txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
 
