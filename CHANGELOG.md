@@ -16,7 +16,7 @@
 * Update all transaction functions (eg. `executeTx`, `addAsset`, `addApp` ..etc) to return a transaction receipt. Add `runtime.getTxReceipt` in `@algo-builder/runtime` to query transaction info.
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
-+ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API). User can do the following migration:
++ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API) which simplifies the testing and script flow (we can use the same code in tests and scripts). User _should do_ the following migration:
     ```js
     // from
     const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
