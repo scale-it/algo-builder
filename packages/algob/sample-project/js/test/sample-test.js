@@ -1,4 +1,4 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
 const { Runtime, AccountStore } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');

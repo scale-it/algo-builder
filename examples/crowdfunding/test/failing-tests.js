@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -68,8 +69,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    lsig = runtime.createLsigAccount(escrowProg, []);
+    lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     escrowAddress = lsig.address();
 
     // sync escrow account
@@ -279,8 +279,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // set donation to greater than goal
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
-    const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
-    const wrongLsig = runtime.createLsigAccount(escrowProg, []);
+    const wrongLsig = runtime.loadLogic('wrongEscrow.teal', { APP_ID: applicationId });
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [

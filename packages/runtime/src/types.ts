@@ -322,3 +322,12 @@ export enum DecodingMode {
   MIXED = 'mixed',
   BIGINT = 'bigint'
 }
+
+// used for pyTEALOps
+export interface SCParams {
+  [key: string]: string | bigint
+}
+
+export interface ReplaceParams {
+  [key: string]: string
+}

@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const { Runtime, AccountStore } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { assert } = require('chai');
@@ -135,17 +136,14 @@ describe('DAO test', function () {
       ARG_GOV_TOKEN: govTokenID,
       ARG_DAO_APP_ID: appID
     };
-    const depositLsigProg = getProgram('deposit-lsig.py', scInitParam);
-    depositLsig = runtime.createLsigAccount(depositLsigProg, []);
+    depositLsig = runtime.loadLogic('deposit-lsig.py', scInitParam);
     depositLsigAcc = runtime.getAccount(depositLsig.address());
 
-    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
-    daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
+    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
     daoFundLsigAcc = runtime.getAccount(daoFundLsig.address());
 
-    const proposalLsigProg = getProgram('proposal-lsig.py',
+    proposalLsig = runtime.loadLogic('proposal-lsig.py',
       { ARG_OWNER: proposer.address, ARG_DAO_APP_ID: appID });
-    proposalLsig = runtime.createLsigAccount(proposalLsigProg, []);
     proposalLsigAcc = runtime.getAccount(proposalLsig.address());
 
     // fund lsig's

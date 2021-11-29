@@ -1,4 +1,4 @@
-import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
+import { getPathFromDirRecursive, getProgram, types as rtypes } from "@algo-builder/runtime";
 import { tx, types as wtypes } from "@algo-builder/web";
 import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
 import { spawn } from "child_process";
@@ -10,7 +10,6 @@ import { writeToFile } from "../builtin-tasks/gen-accounts";
 import { ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { DebuggerContext, Deployer } from "../types";
-import { getProgram } from "./load-program";
 import { makeAndSignTx } from "./tx";
 
 export const tealExt = ".teal";

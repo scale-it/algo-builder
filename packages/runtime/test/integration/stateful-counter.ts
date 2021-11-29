@@ -1,9 +1,9 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {

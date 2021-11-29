@@ -1,11 +1,8 @@
-import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import fs from "fs";
-import YAML from "yaml";
 
-import { ASSETS_DIR } from "../internal/core/project-structure";
 import { SCParams } from "../types";
-import { CompileOp, PyCompileOp, pyExt, tealExt } from "./compile";
-import { mockAlgod } from "./constants";
+import { getPathFromDirRecursive } from "./files";
+import { ASSETS_DIR, PyCompileOp, pyExt, tealExt } from "./pycompile-op";
 
 /**
  * returns program TEAL code.
@@ -22,15 +19,8 @@ export function getProgram (fileName: string, scInitParam?: SCParams): string {
   }
 
   if (fileName.endsWith(pyExt)) {
-    const py = new PyCompileOp(new CompileOp(mockAlgod));
-    // convert initial parameters
-    const [replaceParams, param] = py.parseScTmplParam(scInitParam);
-    let content = py.compilePyTeal(fileName, param);
-    if (YAML.stringify({}) !== YAML.stringify(replaceParams)) {
-      content = py.replaceTempValues(content, replaceParams);
-    }
-
-    return content;
+    const pyOp = new PyCompileOp();
+    return pyOp.ensurePyTEALCompiled(fileName, scInitParam);
   }
   return program;
 }

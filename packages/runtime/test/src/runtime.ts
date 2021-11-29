@@ -3,11 +3,11 @@ import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
+import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -26,7 +26,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   let txParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
-    lsig = runtime.createLsigAccount(getProgram(programName), []);
+    lsig = runtime.loadLogic(programName);
     txParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
@@ -63,7 +63,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   });
 
   it("should verify signature but reject logic", async () => {
-    const logicSig = runtime.createLsigAccount(getProgram("reject.teal"), []);
+    const logicSig = runtime.loadLogic("reject.teal");
     const txParams: types.ExecParams = {
       ...txParam,
       sign: types.SignType.LogicSignature,

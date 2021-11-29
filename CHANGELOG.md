@@ -16,6 +16,16 @@
 * Update all transaction functions (eg. `executeTx`, `addAsset`, `addApp` ..etc) to return a transaction receipt. Add `runtime.getTxReceipt` in `@algo-builder/runtime` to query transaction info.
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
++ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API) which simplifies the testing and script flow (we can use the same code in tests and scripts). User _should do_ the following migration:
+    ```js
+    // from
+    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
+    daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
+
+    // to
+    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
+    ```
+    For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
 
 ### Breaking changes
 `@algo-builder/runtime`:
@@ -30,6 +40,7 @@
     const receipt = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     const appID = receipt.appID;
     ```
++ `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
