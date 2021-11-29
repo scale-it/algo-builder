@@ -302,7 +302,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
       globalInts: 32,
       localBytes: 8,
       localInts: 8
-    }, {}, program);
+    }, {}, program).appID;
 
     // opt-in to the app
     await runtime.optInToApp(txnParams.appID, john.address, {}, {}, program);

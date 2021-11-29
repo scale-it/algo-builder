@@ -23,11 +23,11 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   let runtime: Runtime;
   let lsig: LogicSigAccount;
-  let txnParam: types.ExecParams;
+  let txParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
     lsig = runtime.createLsigAccount(getProgram(programName), []);
-    txnParam = {
+    txParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
@@ -40,7 +40,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   it("should execute the lsig and verify john(delegated signature)", () => {
     lsig.sign(john.account.sk);
-    runtime.executeTx(txnParam);
+    runtime.executeTx(txParam);
 
     // balance should be updated because logic is verified and accepted
     const bobAcc = runtime.getAccount(bob.address);
@@ -49,7 +49,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   it("should not verify signature because alice sent it", () => {
     const invalidParams: types.ExecParams = {
-      ...txnParam,
+      ...txParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: alice.account.addr,
       lsig: lsig
@@ -65,7 +65,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   it("should verify signature but reject logic", async () => {
     const logicSig = runtime.createLsigAccount(getProgram("reject.teal"), []);
     const txParams: types.ExecParams = {
-      ...txnParam,
+      ...txParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
       lsig: logicSig
@@ -87,12 +87,12 @@ describe("Rounds Test", function () {
   let john = new AccountStore(minBalance);
   let bob = new AccountStore(minBalance);
   let runtime: Runtime;
-  let txnParams: types.AlgoTransferParam;
+  let txParams: types.AlgoTransferParam;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob]); // setup test
 
     // set up transaction paramenters
-    txnParams = {
+    txParams = {
       type: types.TransactionType.TransferAlgo, // payment
       sign: types.SignType.SecretKey,
       fromAccount: john.account,
@@ -106,8 +106,8 @@ describe("Rounds Test", function () {
     john = new AccountStore(minBalance);
     bob = new AccountStore(minBalance);
     runtime = new Runtime([john, bob]);
-    txnParams = {
-      ...txnParams,
+    txParams = {
+      ...txParams,
       sign: types.SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: bob.address
@@ -120,10 +120,10 @@ describe("Rounds Test", function () {
   }
 
   it("should succeed if current round is between first and last valid", () => {
-    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
+    txParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     runtime.setRoundAndTimestamp(20, 20);
 
-    runtime.executeTx(txnParams);
+    runtime.executeTx(txParams);
 
     // get final state (updated accounts)
     syncAccounts();
@@ -135,15 +135,15 @@ describe("Rounds Test", function () {
     runtime.setRoundAndTimestamp(3, 20);
 
     expectRuntimeError(
-      () => runtime.executeTx(txnParams),
+      () => runtime.executeTx(txParams),
       RUNTIME_ERRORS.GENERAL.INVALID_ROUND
     );
   });
 
   it("should succeeded by default (no round requirement is passed)", () => {
-    txnParams.payFlags = { totalFee: 1000 };
+    txParams.payFlags = { totalFee: 1000 };
 
-    runtime.executeTx(txnParams);
+    runtime.executeTx(txParams);
 
     // get final state (updated accounts)
     syncAccounts();
@@ -183,7 +183,7 @@ describe("Algorand Standard Assets", function () {
 
   this.beforeEach(() => {
     assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID;
     assetTransferParam.assetID = assetId;
     syncAccounts();
   });
@@ -195,7 +195,8 @@ describe("Algorand Standard Assets", function () {
 
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
-    assetId = runtime.addAsset('gold', { creator: { ...john.account, name: "john" } });
+    assetId =
+      runtime.addAsset('gold', { creator: { ...john.account, name: "john" } }).assetID;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -227,7 +228,7 @@ describe("Algorand Standard Assets", function () {
     };
     assetId = runtime.addASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
-    );
+    ).assetID;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -463,7 +464,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
     const assetId = runtime.addAsset('silver',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID;
 
     const modFields: types.AssetModFields = {
       manager: bob.address,
@@ -753,14 +754,14 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should create application", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID;
 
     const app = runtime.getApp(appID);
     assert.isDefined(app);
   });
 
   it("Should not update application if approval or clear program is empty", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID;
 
     expectRuntimeError(
       () => runtime.updateApp(john.address, appID, "", clearProgram, {}, {}),

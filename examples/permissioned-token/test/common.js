@@ -54,7 +54,7 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.assetIndex = this.runtime.addAsset(name, { creator: creator });
+    this.assetIndex = this.runtime.addAsset(name, { creator: creator }).assetID;
   }
 
   deployController (sender, approvalProgram, clearStateProgram) {
@@ -70,7 +70,7 @@ class Context {
     const clearProgram = getProgram(clearStateProgram);
     this.controllerappID = this.runtime.addApp(
       sscFlags, {}, controllerProgram, clearProgram
-    );
+    ).appID;
   }
 
   // Deploy Clawback Lsig and Modify Asset
@@ -114,7 +114,7 @@ class Context {
     };
     this.permissionsappID = this.runtime.addApp(
       sscFlags, {}, permissionsProgram, clearProgram
-    );
+    ).appID;
 
     // set permissions SSC app_id in controller ssc
     const appArgs = [

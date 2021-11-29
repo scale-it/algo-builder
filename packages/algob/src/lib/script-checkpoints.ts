@@ -239,7 +239,7 @@ export async function registerCheckpoints (
         const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
           const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
-          if (txn.appOnComplete === Number(rtypes.TxnOnComplete.DeleteApplication) && temp) {
+          if (txn.appOnComplete === Number(rtypes.TxOnComplete.DeleteApplication) && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
             deployer.logTx("Deleting SSC: " + String(txn.appIndex), txConfirmation);

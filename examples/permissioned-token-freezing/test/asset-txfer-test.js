@@ -36,7 +36,7 @@ describe('Test for transferring asset using custom logic', function () {
     };
 
     /* Create asset + optIn to asset */
-    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } }).assetID;
     assetDef = runtime.getAssetDef(assetId);
     escrow = undefined;
     syncAccounts();
@@ -59,7 +59,7 @@ describe('Test for transferring asset using custom logic', function () {
       'int:2' // set min user level(2) for asset transfer ("Accred-level")
     ];
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     const app = alice.getApp(applicationId);
     const alicePk = convert.addressToPk(alice.address);
@@ -252,7 +252,7 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   it('should reject transaction if minimum level is not set correctly', () => {
-    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } }).assetID;
     runtime.optIntoASA(assetId, bob.address, {});
 
     /* Create application + optIn to app */
@@ -262,7 +262,7 @@ describe('Test for transferring asset using custom logic', function () {
     ];
 
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const app = alice.getApp(applicationId);
     assert.isDefined(app);
 

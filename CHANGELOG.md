@@ -12,13 +12,24 @@
     * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
     * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
     * Support Pooled opcode budget
+    * Txnas, Gtxnas, Gtxnsas, Args, Log (logs are stored in txReceipt)
+* Update all transaction functions (eg. `executeTx`, `addAsset`, `addApp` ..etc) to return a transaction receipt. Add `runtime.getTxReceipt` in `@algo-builder/runtime` to query transaction info.
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
 
 ### Breaking changes
-
 `@algo-builder/runtime`:
 + Renamed `Runtime.getLogicSig` to `Runtime.createLsigAccount` #506.
++ `runtime.addAsset(..)`, `runtime.addApp(..)` return a tx receipt object, which contains the newly created appID/assetID.
+    * Migration: Example code:
+    ```js
+    // from
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram)
+
+    // to
+    const receipt = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = receipt.appID;
+    ```
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
