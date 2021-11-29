@@ -126,7 +126,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     };
     assert.throws(
       () => runtime.executeTx(transferASAbyAppParam),
-      `RUNTIME_ERR1404: Account ${appAccount.address} doesn't hold asset index 2`
+      `RUNTIME_ERR1404: Account ${appAccount.address} doesn't hold asset index ${assetID}`
     );
   });
 
@@ -243,7 +243,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     assert.throws(
       () => runtime.executeTx(txParams),
-      `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index 8`
+      `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${assetID}`
     );
   });
 
