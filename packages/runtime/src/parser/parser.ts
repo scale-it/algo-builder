@@ -4,7 +4,7 @@ import { Interpreter } from "../interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
@@ -14,12 +14,12 @@ import {
   EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
   ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxnas, Gtxns, Gtxnsa, Gtxnsas, Int, Intc, Intcblock, Itob,
   ITxn, ITxna, ITxnBegin, ITxnField, ITxnSubmit,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, MinBalance, Mod,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, Log, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256,
-  Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
+  Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -231,7 +231,14 @@ opCodeMap[5] = {
   itxn_field: ITxnField,
   itxn_submit: ITxnSubmit,
   itxn: ITxn,
-  itxna: ITxna
+  itxna: ITxna,
+
+  // gtxn, other ops
+  txnas: Txnas,
+  gtxnas: Gtxnas,
+  gtxnsas: Gtxnsas,
+  args: Args,
+  log: Log
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -243,7 +250,7 @@ const interpreterReqList = new Set([
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
   "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
-  "itxn", "itxna"
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log"
 ]);
 
 /**

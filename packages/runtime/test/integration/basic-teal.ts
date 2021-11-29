@@ -18,14 +18,14 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   let john: AccountStore;
   let bob: AccountStore;
   let runtime: Runtime;
-  let txnParams: types.AlgoTransferParam;
+  let txParams: types.AlgoTransferParam;
 
   this.beforeAll(async function () {
     john = new AccountStore(initialJohnHolding);
     bob = new AccountStore(initialBobHolding);
     runtime = new Runtime([john, bob]);
 
-    txnParams = {
+    txParams = {
       type: types.TransactionType.TransferAlgo, // payment
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
@@ -52,7 +52,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     lsig.sign(john.account.sk);
 
     runtime.executeTx({
-      ...txnParams,
+      ...txParams,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.address,
       lsig: lsig
@@ -70,7 +70,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     lsig.sign(john.account.sk);
 
     const invalidParam = {
-      ...txnParams,
+      ...txParams,
       lsig: lsig,
       amountMicroAlgos: 50n
     };

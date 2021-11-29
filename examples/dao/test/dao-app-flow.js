@@ -113,7 +113,7 @@ describe('DAO test', function () {
     */
 
     govTokenID = runtime.addAsset(
-      'gov-token', { creator: { ...creator.account, name: 'dao-creator' } });
+      'gov-token', { creator: { ...creator.account, name: 'dao-creator' } }).assetID;
 
     const daoAppArgs = [
       `int:${deposit}`,
@@ -128,7 +128,7 @@ describe('DAO test', function () {
 
     // create application
     appID = runtime.addApp(
-      { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
+      { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup lsig accounts
     // Initialize issuer lsig with bond-app ID

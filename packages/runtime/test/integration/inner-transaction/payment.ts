@@ -41,7 +41,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
   });
 
   this.beforeEach(() => {
-    appID = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram);
+    appID = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
     // fund app (escrow belonging to app) with 10 ALGO

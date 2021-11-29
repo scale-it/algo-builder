@@ -47,7 +47,7 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.govTokenID = this.runtime.addAsset(name, { creator: creator });
+    this.govTokenID = this.runtime.addAsset(name, { creator: creator }).assetID;
   }
 
   deployDAOApp (sender, approvalProgram, clearStateProgram) {
@@ -76,7 +76,7 @@ class Context {
 
     this.daoAppID = this.runtime.addApp(
       { ...appCreationFlags, appArgs: daoAppArgs }, {}, daoApprovalProgram, daoClearProgram
-    );
+    ).appID;
   }
 
   setUpLsig () {

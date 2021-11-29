@@ -40,7 +40,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
       globalInts: 2,
       localBytes: 3,
       localInts: 3
-    }, {}, approvalProgram, clearProgram);
+    }, {}, approvalProgram, clearProgram).appID;
 
     // opt-in to the app
     runtime.optInToApp(john.address, txnParams.appID, {}, {});

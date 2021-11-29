@@ -66,7 +66,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
     // create application
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup escrow account
     lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
