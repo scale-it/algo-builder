@@ -13,7 +13,7 @@
     * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
     * Support Pooled opcode budget
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
-+ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API). User can do the following migration:
++ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API) which simplifies the testing and script flow (we can use the same code in tests and scripts). User _should do_ the following migration:
     ```js
     // from
     const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
