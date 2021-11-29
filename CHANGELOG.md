@@ -25,6 +25,7 @@
     // to
     daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
     ```
+    For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
 
 ### Breaking changes
 `@algo-builder/runtime`:
