@@ -33,7 +33,7 @@ import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, M
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx, TxReceipt } from "../../../src/types";
+import { AccountStoreI, EncodingType, EncTx as EncodedTx, StackElem } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
@@ -3096,7 +3096,7 @@ describe("Teal Opcodes", function () {
       assert.equal(MAX_UINT64, stack.pop());
     });
 
-    it("Int: should push correct TxnOnComplete enum value to stack", function () {
+    it("Int: should push correct TxOnComplete enum value to stack", function () {
       let op = new Int(['NoOp'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());

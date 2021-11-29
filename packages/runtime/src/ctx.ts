@@ -11,16 +11,16 @@ import {
   AccountAddress, AccountStoreI,
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
-  Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, ExecutionMode,
-  ID, SSCAttributesM, StackElem, State, Txn, TxReceipt
+  Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, EncTx, ExecutionMode,
+  ID, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
 
 export class Ctx implements Context {
   state: State;
-  tx: Txn;
-  gtxs: Txn[];
+  tx: EncTx;
+  gtxs: EncTx[];
   args: Uint8Array[];
   runtime: Runtime;
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
@@ -31,7 +31,7 @@ export class Ctx implements Context {
   isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
   createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
-  constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
+  constructor (state: State, tx: EncTx, gtxs: EncTx[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
     this.state = state;
     this.tx = tx;

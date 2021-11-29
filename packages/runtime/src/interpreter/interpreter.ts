@@ -9,8 +9,8 @@ import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
 import {
-  AccountStoreI, ExecutionMode, Operator, SSCAttributesM,
-  StackElem, TEALStack, Txn, TxReceipt
+  AccountStoreI, EncTx, ExecutionMode, Operator, SSCAttributesM,
+  StackElem, TEALStack, TxReceipt
 } from "../types";
 import { Op } from "./opcode";
 import { Label } from "./opcode-list";
@@ -41,8 +41,8 @@ export class Interpreter {
   // It is used to provide sub routine functionality
   callStack: Stack<number>;
   labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
-  subTxn: Txn | undefined; // "current" inner transaction
-  innerTxns: Txn[]; // executed inner transactions
+  subTxn: EncTx | undefined; // "current" inner transaction
+  innerTxns: EncTx[]; // executed inner transactions
 
   constructor () {
     this.stack = new Stack<StackElem>();

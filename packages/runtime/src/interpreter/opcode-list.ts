@@ -25,7 +25,7 @@ import {
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import { DecodingMode, EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType, TxReceipt } from "../types";
+import { DecodingMode, EncodingType, StackElem, TEALStack, TxnType, TxOnComplete, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -2140,10 +2140,10 @@ export class Int extends Op {
     assertLen(args.length, 1, line);
 
     let uint64;
-    const intConst = TxnOnComplete[args[0] as keyof typeof TxnOnComplete] ||
+    const intConst = TxOnComplete[args[0] as keyof typeof TxOnComplete] ||
       TxnType[args[0] as keyof typeof TxnType];
 
-    // check if string is keyof TxnOnComplete or TxnType
+    // check if string is keyof TxOnComplete or TxnType
     if (intConst !== undefined) {
       uint64 = BigInt(intConst);
     } else {

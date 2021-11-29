@@ -21,7 +21,7 @@ export type AppArgs = Array<string | number>;
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
 
-export interface Txn extends EncodedTransaction {
+export interface EncTx extends EncodedTransaction {
   txID: string
 }
 
@@ -70,7 +70,7 @@ export interface AccountsMap {
 export type RuntimeAccountMap = Map<string, AccountAddress>;
 
 export interface BaseTxReceipt {
-  txn: Txn
+  txn: EncTx
   txID: string
   gas?: number
   logs?: string[]
@@ -123,8 +123,8 @@ export interface Context {
   state: State
   sharedScratchSpace: Map<number, StackElem[]>
   knowableID: Map<number, ID>
-  tx: Txn // current txn
-  gtxs: Txn[] // all transactions
+  tx: EncTx // current txn
+  gtxs: EncTx[] // all transactions
   args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   pooledApplCost: number // total opcode cost for each application call for single/group tx
@@ -236,7 +236,7 @@ export interface AccountStoreI {
 
 /**
  * https://developer.algorand.org/docs/reference/teal/specification/#oncomplete */
-export enum TxnOnComplete {
+export enum TxOnComplete {
   NoOp = '0',
   OptIn = '1',
   CloseOut = '2',

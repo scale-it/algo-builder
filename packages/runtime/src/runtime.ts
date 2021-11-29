@@ -21,7 +21,7 @@ import {
   ASADeploymentFlags, ASAInfo, AssetHoldingM, BaseTxReceipt, Context,
   DeployedAppTxReceipt,
   DeployedAssetTxReceipt,
-  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxReceipt
+  EncTx, ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, TxReceipt
 } from "./types";
 
 export class Runtime {
@@ -60,7 +60,7 @@ export class Runtime {
     this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
 
     // context for interpreter
-    this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
+    this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
 
     this.round = 2;
     this.timestamp = 1;
@@ -146,7 +146,7 @@ export class Runtime {
    * Validate first and last rounds of transaction using current round
    * @param gtxns transactions
    */
-  validateTxRound (gtxns: Txn[]): void {
+  validateTxRound (gtxns: EncTx[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
       if (Number(txn.fv) >= this.round || txn.lv <= this.round) {
@@ -300,7 +300,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
-  createTxnContext (txnParams: types.ExecParams | types.ExecParams[]): [Txn, Txn[]] {
+  createTxnContext (txnParams: types.ExecParams | types.ExecParams[]): [EncTx, EncTx[]] {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -312,7 +312,7 @@ export class Runtime {
         const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = webTx.mkTransaction(txnParam, mockParams);
         // convert to encoded obj for compatibility
-        const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
+        const encodedTxnObj = tx.get_obj_for_encoding() as EncTx;
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
@@ -322,7 +322,7 @@ export class Runtime {
       const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
       const tx = webTx.mkTransaction(txnParams, mockParams);
 
-      const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
+      const encodedTxnObj = tx.get_obj_for_encoding() as EncTx;
       encodedTxnObj.txID = tx.txID();
       return [encodedTxnObj, [encodedTxnObj]];
     }
