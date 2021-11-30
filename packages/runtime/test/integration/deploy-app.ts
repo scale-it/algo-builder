@@ -2,10 +2,10 @@ import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { AppDeploymentFlags } from "../../src/types";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Contract Account", function () {
@@ -36,8 +36,8 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 
   it("initialize new account for deployed app(s)", function () {
     // create new app
-    const appIdX = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram);
-    const appIdY = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram);
+    const appIdX = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
+    const appIdY = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
 
     assert.isDefined(runtime.getApp(appIdX));
     assert.isDefined(runtime.getApp(appIdY));

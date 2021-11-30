@@ -1,7 +1,4 @@
-const {
-  getProgram
-} = require('@algo-builder/algob');
-const { Runtime } = require('@algo-builder/runtime');
+const { Runtime, getProgram } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 
 const minBalance = 20e6; // 20 ALGOs
@@ -54,7 +51,7 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.assetIndex = this.runtime.addAsset(name, { creator: creator });
+    this.assetIndex = this.runtime.addAsset(name, { creator: creator }).assetID;
   }
 
   deployController (sender, approvalProgram, clearStateProgram) {
@@ -70,16 +67,15 @@ class Context {
     const clearProgram = getProgram(clearStateProgram);
     this.controllerappID = this.runtime.addApp(
       sscFlags, {}, controllerProgram, clearProgram
-    );
+    ).appID;
   }
 
   // Deploy Clawback Lsig and Modify Asset
   deployClawback (sender, clawbackProgram) {
-    const clawbackTeal = getProgram(clawbackProgram, {
+    this.lsig = this.runtime.loadLogic(clawbackProgram, {
       TOKEN_ID: this.assetIndex,
       CONTROLLER_APP_ID: this.controllerappID
     });
-    this.lsig = this.runtime.createLsigAccount(clawbackTeal, []);
 
     fund(this.runtime, this.master, this.lsig.address());
     const asaDef = this.runtime.getAssetDef(this.assetIndex);
@@ -114,7 +110,7 @@ class Context {
     };
     this.permissionsappID = this.runtime.addApp(
       sscFlags, {}, permissionsProgram, clearProgram
-    );
+    ).appID;
 
     // set permissions SSC app_id in controller ssc
     const appArgs = [

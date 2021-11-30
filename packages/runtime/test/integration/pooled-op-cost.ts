@@ -1,10 +1,10 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags } from "../../src/types";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -33,7 +33,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
       localInts: 1
     };
 
-    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram).appID;
 
     appCallParam = {
       type: types.TransactionType.CallApp,

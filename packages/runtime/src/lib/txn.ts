@@ -5,7 +5,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { StackElem, TxField, Txn, TxnType } from "../types";
+import { EncTx, StackElem, TxField, TxnType } from "../types";
 
 export const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -44,7 +44,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
 
 /**
  * Check if given transaction is asset deletion
- * @param txn Txn Object
+ * @param txn EncTx Object
  * Logic:
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
@@ -62,7 +62,7 @@ export function checkIfAssetDeletionTx (txn: Transaction): boolean {
  * @param txns Transaction group
  * @param tealVersion version of TEAL
  */
-export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVersion: number): StackElem {
+export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], tealVersion: number): StackElem {
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
@@ -96,25 +96,25 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
       break;
     }
     case 'NumAppArgs': {
-      const appArg = TxnFields[tealVersion].ApplicationArgs as keyof Txn;
+      const appArg = TxnFields[tealVersion].ApplicationArgs as keyof EncTx;
       const appArgs = tx[appArg] as Buffer[];
       result = appArgs?.length;
       break;
     }
     case 'NumAccounts': {
-      const appAcc = TxnFields[tealVersion].Accounts as keyof Txn;
+      const appAcc = TxnFields[tealVersion].Accounts as keyof EncTx;
       const appAccounts = tx[appAcc] as Buffer[];
       result = appAccounts?.length;
       break;
     }
     case 'NumAssets': {
-      const encAppAsset = TxnFields[tealVersion].Assets as keyof Txn; // 'apas'
+      const encAppAsset = TxnFields[tealVersion].Assets as keyof EncTx; // 'apas'
       const foreignAssetsArr = tx[encAppAsset] as Buffer[];
       result = foreignAssetsArr?.length;
       break;
     }
     case 'NumApplications': {
-      const encApp = TxnFields[tealVersion].Applications as keyof Txn; // 'apfa'
+      const encApp = TxnFields[tealVersion].Applications as keyof EncTx; // 'apfa'
       const foreignAppsArr = tx[encApp] as Buffer[];
       result = foreignAppsArr?.length;
       break;
@@ -127,7 +127,7 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
     }
     default: {
       const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
-      result = tx[s as keyof Txn]; // pk_buffer = tx['rcv']
+      result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
     }
   }
 
@@ -144,18 +144,18 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
  * @param tealVersion version of TEAL
  * @param line line number in TEAL file
  */
-export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
+export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
   tealVersion: number, line: number): StackElem {
   const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-  const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
+  const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
   if (!result) { // handle defaults
     return TxFieldDefaults[txField];
   }
 
   /**
    * handle special case of accounts and applications:
-   * + Txn.Accounts[0] represents sender's account
-   * + Txn.Applications[0] represents current_application_id
+   * + EncTx.Accounts[0] represents sender's account
+   * + EncTx.Applications[0] represents current_application_id
    * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
    */
   if (txField === 'Accounts') {
@@ -171,12 +171,12 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
 
 /**
  * Check if given encoded transaction obj is asset deletion
- * @param txn Encoded Txn Object
+ * @param txn Encoded EncTx Object
  * Logic:
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
-export function isEncTxAssetDeletion (txn: Txn): boolean {
+export function isEncTxAssetDeletion (txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
   (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
   !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
@@ -184,9 +184,9 @@ export function isEncTxAssetDeletion (txn: Txn): boolean {
 
 /**
  * Check if given encoded transaction obj is asset deletion
- * @param txn Encoded Txn Object
+ * @param txn Encoded EncTx Object
  */
-export function isEncTxAssetConfig (txn: Txn): boolean {
+export function isEncTxAssetConfig (txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
   (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
   !isEncTxAssetDeletion(txn); // AND should not be asset deletion

@@ -12,14 +12,36 @@
     * Added application account (a smart contract now has an escrow account). Updated checkpoint structure to store `applicationAccount` while running `algob` scripts.
     * Support Inner Transactions: `Payment`, `AssetTransfer`, `AssetFreeze`, `AssetRevoke`, `AssetDeploy`, `AssetModify`, `AssetDelete`.
     * Support Pooled opcode budget
+    * Txnas, Gtxnas, Gtxnsas, Args, Log (logs are stored in txReceipt)
+* Update all transaction functions (eg. `executeTx`, `addAsset`, `addApp` ..etc) to return a transaction receipt. Add `runtime.getTxReceipt` in `@algo-builder/runtime` to query transaction info.
 + Add Asset Name to `assetDefinition` in `@algo-builder/runtime`.
 + Updated App, Asset counters in runtime from 0, to 8. This means that the newly created App/Asset Index will be 9 (instead of 1).
++ Added `runtime.loadLogic(..)` function (similar to `deployer.loadLogic` API) which simplifies the testing and script flow (we can use the same code in tests and scripts). User _should do_ the following migration:
+    ```js
+    // from
+    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
+    daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
+
+    // to
+    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
+    ```
+    For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
 + Added `WallectConnectSession` class to create & manage wallect connect session. User can use `session.executeTransaction()` to execute algob transactions using wallet connect.
 
 ### Breaking changes
-
 `@algo-builder/runtime`:
 + Renamed `Runtime.getLogicSig` to `Runtime.createLsigAccount` #506.
++ `runtime.addAsset(..)`, `runtime.addApp(..)` return a tx receipt object, which contains the newly created appID/assetID.
+    * Migration: Example code:
+    ```js
+    // from
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram)
+
+    // to
+    const receipt = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = receipt.appID;
+    ```
++ `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.

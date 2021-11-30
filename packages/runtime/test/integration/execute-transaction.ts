@@ -1,9 +1,9 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -34,7 +34,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   function setupAsset (): void {
     // create asset
     assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID;
   }
 
   function setupApp (): void {

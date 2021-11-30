@@ -43,12 +43,18 @@ describe("TEALv5: Inner Transactions", function () {
   const reset = (): void => {
     while (interpreter.stack.length() !== 0) { interpreter.stack.pop(); }
     interpreter.subTxn = undefined;
+    interpreter.runtime.ctx.pooledApplCost = 0;
     interpreter.instructions = [];
     interpreter.innerTxns = [];
     interpreter.instructionIndex = 0;
     interpreter.runtime.ctx.tx = { ...TXN_OBJ, snd: Buffer.from(elonPk) };
     interpreter.runtime.ctx.gtxs = [interpreter.runtime.ctx.tx];
     interpreter.runtime.ctx.isInnerTx = false;
+    // set new tx receipt
+    interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+      txn: TXN_OBJ,
+      txID: TXN_OBJ.txID
+    });
   };
 
   const setUpInterpreter = (): void => {
@@ -61,6 +67,7 @@ describe("TEALv5: Inner Transactions", function () {
   const executeTEAL = (tealCode: string): void => {
     // reset interpreter
     reset();
+
     interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
   };
 
@@ -655,7 +662,7 @@ describe("TEALv5: Inner Transactions", function () {
           { total: 10, decimals: 0, unitName: "TASA" },
           elonAddr,
           { creator: { ...elonAcc.account, name: 'elon' } }
-        );
+        ).assetID;
       }
 
       // passes
@@ -734,7 +741,7 @@ describe("TEALv5: Inner Transactions", function () {
           { total: 11, decimals: 0, unitName: "TASA1" },
           elonAddr,
           { creator: { ...elonAcc.account, name: 'elon' } }
-        );
+        ).assetID;
 
         // not in foreign-assets
         assetID2 = interpreter.runtime.ctx.addASADef(
@@ -742,7 +749,7 @@ describe("TEALv5: Inner Transactions", function () {
           { total: 22, decimals: 0, unitName: "TASA2" },
           elonAddr,
           { creator: { ...elonAcc.account, name: 'elon' } }
-        );
+        ).assetID;
       }
 
       axfer = `
@@ -1082,6 +1089,89 @@ describe("TEALv5: Inner Transactions", function () {
       // verify unfreeze
       johnHolding = interpreter.runtime.getAssetHolding(createdAssetID, johnAddr);
       assert.equal(johnHolding["is-frozen"], false);
+    });
+  });
+
+  describe("Log", () => {
+    it(`should log bytes to current transaction receipt`, function () {
+      const txnInfo = interpreter.runtime.getTxReceipt(TXN_OBJ.txID);
+      assert.isUndefined(txnInfo?.logs); // no logs before
+
+      const log = `#pragma version 5
+        int 1
+        // log 30 times "a"
+        loop:
+        byte "a"
+        log
+        int 1
+        +
+        dup
+        int 30
+        <=
+        bnz loop
+        byte "b"
+        log
+        byte "c"
+        log
+      `;
+
+      assert.doesNotThrow(() => executeTEAL(log));
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
+      assert.isDefined(logs);
+
+      for (let i = 0; i < 30; ++i) { assert.equal(logs[i], "a"); }
+      assert.equal(logs[30], "b");
+      assert.equal(logs[31], "c");
+    });
+
+    it(`should throw error if log count exceeds threshold`, function () {
+      const log = `#pragma version 5
+        int 1
+        // log 33 times "a" (exceeds threshold of 32)
+        loop:
+        byte "a"
+        log
+        int 1
+        +
+        dup
+        int 33
+        <=
+        bnz loop
+        byte "b"
+        log
+        byte "c"
+        log
+      `;
+
+      expectRuntimeError(
+        () => executeTEAL(log),
+        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD
+      );
+    });
+
+    it(`should throw error if logs "length" exceeds threshold`, function () {
+      const log = `#pragma version 5
+        int 1
+        // too long
+        loop:
+        byte "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd"
+        log
+        int 1
+        +
+        dup
+        int 30
+        <=
+        bnz loop
+        byte "b"
+        log
+        byte "c"
+        log
+      `;
+
+      expectRuntimeError(
+        () => executeTEAL(log),
+        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD
+      );
     });
   });
 });

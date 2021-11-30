@@ -1,5 +1,5 @@
-import { convert, getProgram } from '@algo-builder/algob';
-import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { convert } from '@algo-builder/algob';
+import { AccountStore, getProgram, Runtime } from '@algo-builder/runtime';
 import { assert } from 'chai';
 const { types } = require('@algo-builder/web');
 
@@ -7,12 +7,12 @@ const minBalance = 10e6; // 10 ALGO's
 const aliceAddr = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
 const bobAddr = '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ';
 const ACCRED_LEVEL = 'Accred-Level';
-
+const CLAWBACK_ESCROW_PY = 'clawback-escrow.py';
 describe('Test for transferring asset using custom logic', function () {
   const master = new AccountStore(1000e6);
   let alice;
   let bob;
-  let escrow; // initialized later (using runtime.createLsigAccount)
+  let escrow; // initialized later (using runtime.loadLogic)
 
   let runtime;
   let creationFlags;
@@ -36,7 +36,7 @@ describe('Test for transferring asset using custom logic', function () {
     };
 
     /* Create asset + optIn to asset */
-    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } }).assetID;
     assetDef = runtime.getAssetDef(assetId);
     escrow = undefined;
     syncAccounts();
@@ -59,7 +59,7 @@ describe('Test for transferring asset using custom logic', function () {
       'int:2' // set min user level(2) for asset transfer ("Accred-level")
     ];
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     const app = alice.getApp(applicationId);
     const alicePk = convert.addressToPk(alice.address);
@@ -72,8 +72,6 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
-  const getEscrowProg = (assetId, appID) =>
-    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appID });
 
   // Update account state
   function syncAccounts () {
@@ -106,8 +104,8 @@ describe('Test for transferring asset using custom logic', function () {
     assert.isDefined(bobLocalApp);
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -226,8 +224,8 @@ describe('Test for transferring asset using custom logic', function () {
     runtime.optInToApp(bob.address, applicationId, {}, {});
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId); ;
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account
@@ -252,7 +250,7 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   it('should reject transaction if minimum level is not set correctly', () => {
-    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } }).assetID;
     runtime.optIntoASA(assetId, bob.address, {});
 
     /* Create application + optIn to app */
@@ -262,7 +260,7 @@ describe('Test for transferring asset using custom logic', function () {
     ];
 
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const app = alice.getApp(applicationId);
     assert.isDefined(app);
 
@@ -271,8 +269,8 @@ describe('Test for transferring asset using custom logic', function () {
     runtime.optInToApp(bob.address, applicationId, {}, {});
 
     /* Setup Escrow Account */
-    const escrowProg = getEscrowProg(assetId, applicationId);
-    const escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    const escrowLsig = runtime.loadLogic(CLAWBACK_ESCROW_PY,
+      { ASSET_ID: assetId, APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
 
     // sync escrow account

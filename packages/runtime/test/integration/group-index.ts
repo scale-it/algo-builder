@@ -1,8 +1,8 @@
 import { types } from "@algo-builder/web";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from '../../src/index';
-import { getProgram } from "../helpers/files";
 import { useFixture } from '../helpers/integration';
 import { expectRuntimeError } from '../helpers/runtime-errors';
 
@@ -38,11 +38,11 @@ describe('Current Transaction Tests', function () {
 
     // create first application
     applicationId1 = runtime.addApp(
-      { ...creationFlags, sender: creator.account }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, sender: creator.account }, {}, approvalProgram, clearProgram).appID;
 
     // create second application
     applicationId2 = runtime.addApp(
-      { ...creationFlags, sender: creator.account }, {}, getProgram('test2.teal'), clearProgram);
+      { ...creationFlags, sender: creator.account }, {}, getProgram('test2.teal'), clearProgram).appID;
   }
 
   it('Group Index Check', () => {

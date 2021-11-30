@@ -37,7 +37,7 @@ describe("Debugging TEAL code using tealdbg", () => {
   useFixtureProject("config-project");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
-  let txnParam: ExecParams;
+  let txParam: ExecParams;
   let tealDebugger: TealDbgMock;
 
   beforeEach(async () => {
@@ -57,7 +57,7 @@ describe("Debugging TEAL code using tealdbg", () => {
     (sinon.stub(algod.algodClient, "getApplicationByID") as any)
       .returns({ do: async () => mockApplicationResponse }) as ReturnType<algosdk.Algodv2['getApplicationByID']>;
 
-    txnParam = {
+    txParam = {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: generateAccount().addr,
@@ -67,7 +67,7 @@ describe("Debugging TEAL code using tealdbg", () => {
       lsig: mockLsig,
       payFlags: { totalFee: 1000 }
     };
-    tealDebugger = new TealDbgMock(deployer, txnParam);
+    tealDebugger = new TealDbgMock(deployer, txParam);
   });
 
   afterEach(async () => {
@@ -141,7 +141,7 @@ describe("Debugging TEAL code using tealdbg", () => {
   });
 
   it("should throw error if groupIndex is greator than txGroup length", async () => {
-    tealDebugger.execParams = [txnParam, { ...txnParam, payFlags: { note: 'Algrand' } }];
+    tealDebugger.execParams = [txParam, { ...txParam, payFlags: { note: 'Algrand' } }];
 
     try {
       await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 5 });

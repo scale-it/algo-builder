@@ -1,6 +1,6 @@
-import { getProgram } from "@algo-builder/algob";
-import { AccountStore, LogicSig, Runtime } from "@algo-builder/runtime";
+import { AccountStore, Runtime, getProgram } from "@algo-builder/runtime";
 import { types } from "@algo-builder/web";
+import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
 const minBalance = BigInt(1e6);
@@ -12,7 +12,7 @@ describe('Sample Test', function () {
   let fundReceiver: AccountStore;
 
   let runtime: Runtime;
-  let lsig: LogicSig;
+  let lsig: LogicSigAccount;
   const feeCheckProgram = getProgram('fee-check.teal');
 
   this.beforeEach(async function () {
@@ -20,7 +20,7 @@ describe('Sample Test', function () {
     fundReceiver = new AccountStore(minBalance);
     runtime = new Runtime([master, fundReceiver]);
 
-    lsig = runtime.getLogicSig(feeCheckProgram, []);
+    lsig = runtime.createLsigAccount(feeCheckProgram, []);
     lsig.sign(master.account.sk);
   });
 

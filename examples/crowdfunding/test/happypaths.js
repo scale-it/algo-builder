@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -78,8 +79,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     creator.setGlobalState(applicationId, 'FundCloseDate', 20n);
 
     // setup and sync escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    escrowLsig = runtime.createLsigAccount(escrowProg, []);
+    escrowLsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
     escrow = runtime.getAccount(escrowAddress);
 
@@ -103,7 +103,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // create application
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const creatorPk = convert.addressToPk(creator.address);
 
     assert.isDefined(applicationId);

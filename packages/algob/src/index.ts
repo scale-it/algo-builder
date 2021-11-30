@@ -10,7 +10,6 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { Tealdbg } from "./lib/dryrun";
-import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readAppGlobalState, readAppLocalState } from "./lib/status";
@@ -38,7 +37,6 @@ export {
   readAppLocalState,
   signTransactions,
   globalZeroAddress,
-  getProgram,
   types,
   signMultiSig,
   signLogicSigMultiSig,
