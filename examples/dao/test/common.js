@@ -51,8 +51,8 @@ class Context {
   }
 
   deployDAOApp (sender, approvalProgram, clearStateProgram) {
-    const daoApprovalProgram = getProgram(approvalProgram, { ARG_GOV_TOKEN: this.govTokenID });
-    const daoClearProgram = getProgram(clearStateProgram);
+    const daoApprovalProgram = getProgram(approvalProgram, { ARG_GOV_TOKEN: this.govTokenID }, false);
+    const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
     const appCreationFlags = {
       sender: sender.account,
@@ -85,14 +85,14 @@ class Context {
       ARG_DAO_APP_ID: this.daoAppID
     };
     // compile lsig's
-    this.depositLsig = this.runtime.loadLogic('deposit-lsig.py', scInitParam);
+    this.depositLsig = this.runtime.loadLogic('deposit-lsig.py', scInitParam, false);
     this.depositLsigAcc = this.runtime.getAccount(this.depositLsig.address());
 
-    this.daoFundLsig = this.runtime.loadLogic('dao-fund-lsig.py', scInitParam);
+    this.daoFundLsig = this.runtime.loadLogic('dao-fund-lsig.py', scInitParam, false);
     this.daoFundLsigAcc = this.runtime.getAccount(this.daoFundLsig.address());
 
     this.proposalLsig = this.runtime.loadLogic('proposal-lsig.py',
-      { ARG_OWNER: this.proposer.address, ARG_DAO_APP_ID: this.daoAppID });
+      { ARG_OWNER: this.proposer.address, ARG_DAO_APP_ID: this.daoAppID }, false);
     this.proposalLsigAcc = this.runtime.getAccount(this.proposalLsig.address());
 
     // fund lsig's
