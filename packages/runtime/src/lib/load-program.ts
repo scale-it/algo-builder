@@ -9,8 +9,9 @@ import { ASSETS_DIR, PyCompileOp, pyExt, tealExt } from "./pycompile-op";
  * @param fileName filename in /assets. Must end with .teal OR .py
  * @param scInitParam smart contract template parameters, used to set hardcoded values in .py smart contract.
  * (used only when compiling PyTEAL to TEAL)
+ * @param logs only show logs on console when set as true. By default this value is true
  */
-export function getProgram (fileName: string, scInitParam?: SCParams): string {
+export function getProgram (fileName: string, scInitParam?: SCParams, logs: boolean = true): string {
   const filePath = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
   const program = fs.readFileSync(filePath, 'utf8');
 
@@ -20,7 +21,7 @@ export function getProgram (fileName: string, scInitParam?: SCParams): string {
 
   if (fileName.endsWith(pyExt)) {
     const pyOp = new PyCompileOp();
-    return pyOp.ensurePyTEALCompiled(fileName, scInitParam);
+    return pyOp.ensurePyTEALCompiled(fileName, scInitParam, logs);
   }
   return program;
 }
