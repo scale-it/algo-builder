@@ -13,7 +13,7 @@ import { Tealdbg } from "./lib/dryrun";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readAppGlobalState, readAppLocalState } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams, signTransactions } from "./lib/tx";
+import { executeSignedTxnFromFile, executeTransaction, signTransactions } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
 
@@ -27,8 +27,6 @@ export {
   loadAccountsFromEnv,
   executeTransaction,
   executeSignedTxnFromFile,
-  mkTxParams,
-  getSuggestedParams,
   balanceOf,
   printAssets,
   algodCredentialsFromEnv,

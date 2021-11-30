@@ -26,6 +26,7 @@
     daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
     ```
     For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
++ Added `WallectConnectSession` class to create & manage wallect connect session. User can use `session.executeTransaction()` to execute algob transactions using wallet connect.
 
 ### Breaking changes
 `@algo-builder/runtime`:
