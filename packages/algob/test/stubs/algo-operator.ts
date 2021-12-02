@@ -70,7 +70,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scInitParam?: unknown): Promise<rtypes.SSCInfo> {
+    scInitParam?: unknown,
+    appName?: string): Promise<rtypes.SSCInfo> {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,

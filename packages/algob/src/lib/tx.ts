@@ -151,7 +151,7 @@ async function mkTx (
       break;
     }
     case wtypes.TransactionType.DeployApp: {
-      const name = String(txn.approvalProgram) + "-" + String(txn.clearProgram);
+      const name = txn.appName ?? String(txn.approvalProgram) + "-" + String(txn.clearProgram);
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
       const clear = await deployer.ensureCompiled(txn.clearProgram);
@@ -161,7 +161,7 @@ async function mkTx (
       break;
     }
     case wtypes.TransactionType.UpdateApp: {
-      const cpKey = String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
+      const cpKey = txn.appName ?? String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));

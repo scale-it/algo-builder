@@ -81,6 +81,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+    throw new Error("Not implemented");
+  }
+
   getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
@@ -142,7 +146,9 @@ export class FakeDeployer implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: wtypes.TxParams): Promise<rtypes.SSCInfo> {
+    payFlags: wtypes.TxParams,
+    scInitParam?: unknown,
+    appName?: string): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
 
@@ -152,7 +158,8 @@ export class FakeDeployer implements Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.AppOptionalFlags
+    flags: rtypes.AppOptionalFlags,
+    appName?: string
   ): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
