@@ -78,7 +78,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
-3. `sandbox-algod` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
+3. `sandbox-algod-shell` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
 
 4. `sandbox-down` - Bring down the sandbox network i.e stop docker containers running algod, indexer and indexer-db.
 
