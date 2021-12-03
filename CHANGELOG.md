@@ -27,6 +27,8 @@
     ```
     For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
 + Added `WallectConnectSession` class to create & manage wallect connect session. User can use `session.executeTransaction()` to execute algob transactions using wallet connect.
++ Updated `deployer.deployApp()` & `deployer.updateApp()` to take one more optional parameter: `appName`. This will also save in a checkpoint the compiled app by name. Added new funtion `getAppByName(name: string)` to query checkpoint information by app name.
++ Added `deployer.loadLogicFromCache` to load a logic signature from already compiled TEAL codes (stored in `artifacts/cache`, for eg during `deployer.fundLsig`). This avoid re-compilation (and passing `scTmplParams`) each time(s) user wants to load an lsig.
 
 ### Breaking changes
 `@algo-builder/runtime`:
