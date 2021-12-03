@@ -594,10 +594,11 @@ export class Runtime {
    * associated with lsig
    * @param fileName ASC filename
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @param logs only show logs on console when set as true. By default this value is true
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  loadLogic (fileName: string, scTmplParams?: SCParams): LogicSigAccount {
-    const program = getProgram(fileName, scTmplParams);
+  loadLogic (fileName: string, scTmplParams?: SCParams, logs: boolean = true): LogicSigAccount {
+    const program = getProgram(fileName, scTmplParams, logs);
     return this.createLsigAccount(program, []); // args can be set during executeTx
   }
 
