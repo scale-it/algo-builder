@@ -17,13 +17,14 @@ export class PyCompileOp {
    *                   Examples : [ gold.py, asa.py]
    *                   MUST have .py extension
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @param logs only show logs on console when set as true. By default this value is true
    */
-  ensurePyTEALCompiled (filename: string, scTmplParams?: SCParams): string {
+  ensurePyTEALCompiled (filename: string, scTmplParams?: SCParams, logs: boolean = true): string {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    const [replaceParams, param] = this.parseScTmplParam(scTmplParams);
+    const [replaceParams, param] = this.parseScTmplParam(scTmplParams, logs);
     let content = this.compilePyTeal(filename, param);
     if (YAML.stringify({}) !== YAML.stringify(replaceParams)) {
       content = this.replaceTempValues(content, replaceParams);
@@ -35,8 +36,9 @@ export class PyCompileOp {
   /**
    * Parses scTmplParams and returns ReplaceParams and stringify object
    * @param scTmplParams smart contract template parameters
+   * @param logs only show logs on console when set as true. By default this value is true
    */
-  parseScTmplParam (scTmplParams?: SCParams): [ReplaceParams, string | undefined] {
+  parseScTmplParam (scTmplParams?: SCParams, logs: boolean = true): [ReplaceParams, string | undefined] {
     let param: string | undefined;
     const replaceParams: ReplaceParams = {};
     if (scTmplParams === undefined) {
@@ -50,10 +52,13 @@ export class PyCompileOp {
           tmp[key] = scTmplParams[key];
         }
       }
-      console.log("PyTEAL template parameters:", tmp);
+      if (logs) { console.log("PyTEAL template parameters:", tmp); }
       param = YAML.stringify(tmp);
     }
-    console.log("TEAL replacement parameters:", replaceParams);
+    if (logs) {
+      console.log("TEAL replacement parameters:", replaceParams);
+    }
+
     return [replaceParams, param];
   }
 

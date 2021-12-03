@@ -22,11 +22,16 @@
     const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
     daoFundLsig = runtime.createLsigAccount(daoFundLsigProg, []);
 
-    // to
-    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam);
+    // to (mute logs)
+    daoFundLsig = runtime.loadLogic('dao-fund-lsig.py', scInitParam, false);
     ```
     For information about loading checkpoint(s) data using `@algo-builder/web` in a webapp, read [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-web.md#checkpoints).
 + Added `WallectConnectSession` class to create & manage wallect connect session. User can use `session.executeTransaction()` to execute algob transactions using wallet connect.
++ Updated `getProgram`, `loadLogic` to pass an optional argument: `logs (true/false)`. By default logs will be displayed on console during compilation.
+    ```js
+    // logs == false
+    const daoFundLsigProg = getProgram('dao-fund-lsig.py', {}, false);
+    ```
 
 ### Breaking changes
 `@algo-builder/runtime`:
