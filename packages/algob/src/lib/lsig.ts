@@ -1,9 +1,24 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
-import { types as rtypes } from "@algo-builder/runtime";
+import { getPathFromDirRecursive, loadFromYamlFileSilent, types as rtypes } from "@algo-builder/runtime";
 import { Algodv2, LogicSigAccount, MultisigMetadata } from "algosdk";
 
+import { CACHE_DIR } from "../internal/core/project-structure";
 import type { ASCCache, SCParams } from "../types";
 import { CompileOp } from "./compile";
+
+/**
+ * Make logic signature from result
+ * @param result : ASC cache (contains filename, hash, tealcode ..etc)
+ */
+export async function _lsigFromRes (
+  result: ASCCache): Promise<LogicSigAccount> {
+  const program = result.base64ToBytes;
+  const lsigAccount = new LogicSigAccount(program, []);
+  // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
+  // { type: 'buffer', data: <value> } and throws error upon running examples
+  if (lsigAccount.lsig.tag) { lsigAccount.lsig.tag = new Uint8Array(lsigAccount.lsig.tag) as Buffer; }
+  return lsigAccount;
+}
 
 /**
  * Make logic signature from .teal file
@@ -17,12 +32,17 @@ export async function getLsig (
   scTmplParams?: SCParams): Promise<LogicSigAccount> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
-  const program = result.base64ToBytes;
-  const lsigAccount = new LogicSigAccount(program, []);
-  // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
-  // { type: 'buffer', data: <value> } and throws error upon running examples
-  if (lsigAccount.lsig.tag) { lsigAccount.lsig.tag = new Uint8Array(lsigAccount.lsig.tag) as Buffer; }
-  return lsigAccount;
+  return await _lsigFromRes(result);
+}
+
+/**
+ * Make logic signature from "cached" teal code
+ * @param name : ASC filename
+ */
+export async function getLsigFromCache (filename: string): Promise<LogicSigAccount> {
+  const filePath = getPathFromDirRecursive(CACHE_DIR, filename + ".yaml") as string;
+  const result: ASCCache = loadFromYamlFileSilent(filePath);
+  return await _lsigFromRes(result);
 }
 
 /**

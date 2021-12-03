@@ -5,7 +5,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getDummyLsig, getLsig } from "../lib/lsig";
+import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
@@ -179,6 +179,16 @@ class DeployerBasicMode {
    */
   async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
+  }
+
+  /**
+   * Loads logic signature from cache for contract mode. This helps user to avoid
+   * passing template parameters always during loading logic signature.
+   * @param name ASC name
+   * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
+   */
+  async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
+    return await getLsigFromCache(name);
   }
 
   /**

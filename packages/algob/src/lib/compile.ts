@@ -53,7 +53,6 @@ export class CompileOp {
       [teal, thash] = this.readTealAndHash(filePath);
     }
 
-    // const [teal, thash] = this.readTealAndHash(filePath);
     let a = await this.readArtifact(filename);
     if (!force && a !== undefined && a.srcHash === thash) {
       // '\x1b[33m%s\x1b[0m' for yellow color warning
