@@ -78,7 +78,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
-3. `sandbox-algod` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
+3. `sandbox-algod-shell` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
 
 4. `sandbox-down` - Bring down the sandbox network i.e stop docker containers running algod, indexer and indexer-db.
 
@@ -128,9 +128,9 @@ KMD is not started by default (with `make start-private`). You need to run it se
 
 1. `setup-reach`: sets up reach executable file in `~/.algorand-reach` directory, pulls/update reach docker images from [https://hub.docker.com/u/reachsh](https://hub.docker.com/u/reachsh).
 
-2. `remove-reach`: halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `/home/user/algorand-reach`.
+2. `remove-reach`: halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `/home/user/.algorand-reach`.
 
-After setup, if you want to use reach commands directly you can use `~/algorand-reach/reach <command>`. For eg, after `setup-reach`, try running `~/algorand-reach/reach --help` to see a list of available commands.
+After setup, if you want to use reach commands directly you can use `~/.algorand-reach/reach <command>`. For eg, after `setup-reach`, try running `~/.algorand-reach/reach --help` to see a list of available commands.
 
 ## Indexer v2
 

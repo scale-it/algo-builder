@@ -97,16 +97,16 @@ export class CompileOp {
   async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache | PyASCCache> {
     try {
       const co = await this.callCompiler(tealCode);
-      return {
+      const result = {
         filename: filename,
         timestamp: timestampNow(),
         compiled: co.result,
         compiledHash: co.hash,
         srcHash: tealHash,
-        tealCode: filename.endsWith(pyExt) ? tealCode : undefined,
         // compiled base64 converted into bytes
         base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64"))
       };
+      return filename.endsWith(pyExt) ? { ...result, tealCode: tealCode } : result;
     } catch (e) {
       if (types.isRequestError(e)) { throw parseAlgorandError(e, { filename: filename }); }
       throw e;

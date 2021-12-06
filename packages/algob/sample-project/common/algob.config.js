@@ -6,7 +6,7 @@
 // a sufficient ALGO balance.
 
 /**
-   Check our /docs/algob-config.md documentation (https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md) for more configuration options and ways how to
+   Check our /docs/algob-config.md documentation (https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md) for more configuration options and ways how to
   load a private keys:
   + using mnemonic
   + using binary secret key
@@ -18,28 +18,27 @@
 
 // ## ACCOUNTS USING mnemonic ##
 const { mkAccounts, algodCredentialsFromEnv } = require("@algo-builder/algob");
-let accounts = mkAccounts([{
-  // This account is created using `make setup-master-account` command from our
-  // `/infrastructure` directory. It already has many ALGOs
-  name: "master",
-  addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
-  mnemonic: "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
-}]);
+let accounts = mkAccounts([
+  {
+    // This account is created using `make setup-master-account` command from our
+    // `/infrastructure` directory. It already has many ALGOs
+    name: "master",
+    addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+    mnemonic:
+      "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
+  }
+]);
 
 // ## ACCOUNTS loaded from a FILE ##
 // const { loadAccountsFromFileSync } = require("@algo-builder/algob");
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 
-
-
 /// ## Enabling KMD access
 /// Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
 
 // process.env.$KMD_DATA = "/path_to/KMD_DATA";
 // let kmdCred = KMDCredentialsFromEnv();
-
-
 
 // ## Algod Credentials
 // You can set the credentials directly in this file:
@@ -61,7 +60,7 @@ let defaultCfg = {
   // token: {
   //   "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   // },
-  accounts: accounts,
+  accounts: accounts
   // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
   // algob-config.md documentation for details.
   // kmdCfg: kmdCfg,
@@ -72,9 +71,9 @@ let defaultCfg = {
 // purestake testnet config
 let purestakeTestNetCfg = {
   host: "https://testnet-algorand.api.purestake.io/ps2",
-  port: '',
+  port: "",
   token: {
-    'X-API-Key': 'Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG'
+    "X-API-Key": "Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG"
   }
 };
 
@@ -85,14 +84,12 @@ process.env.ALGOD_ADDR = "127.0.0.1:4001";
 process.env.ALGOD_TOKEN = "algod_token";
 let algodCred = algodCredentialsFromEnv();
 
-
 let envCfg = {
- host: algodCred.host,
- port: algodCred.port,
- token: algodCred.token,
- accounts: accounts
-}
-
+  host: algodCred.host,
+  port: algodCred.port,
+  token: algodCred.token,
+  accounts: accounts
+};
 
 module.exports = {
   networks: {
