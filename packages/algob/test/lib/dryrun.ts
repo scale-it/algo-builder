@@ -1,3 +1,4 @@
+import { getProgram } from '@algo-builder/runtime';
 import { types } from '@algo-builder/web';
 import { ExecParams } from "@algo-builder/web/src/types";
 import algosdk, { generateAccount } from "algosdk";
@@ -6,10 +7,11 @@ import * as fs from "fs";
 import { pathExistsSync } from "fs-extra";
 import * as path from "path";
 import sinon from 'sinon';
+import YAML from "yaml";
 
 import { ExecutionMode } from "../../../runtime/src/types";
 import { Tealdbg } from "../../src";
-import { ASSETS_DIR } from "../../src/internal/core/project-structure";
+import { ASSETS_DIR, CACHE_DIR } from "../../src/internal/core/project-structure";
 import { DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
@@ -157,5 +159,27 @@ describe("Debugging TEAL code using tealdbg", () => {
 
     // 2 files should be written: (1. --dryrun-dump and 2. compiled teal code from pyTEAL)
     assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
+  });
+
+  it("should run debugger from cached TEAL code", async () => {
+    const stub = console.info as sinon.SinonStub;
+    stub.reset();
+    const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;
+
+    // write to cache
+    const pathToWrite = path.join(CACHE_DIR, 'gold-asa.py.yaml');
+    fs.writeFileSync(pathToWrite, YAML.stringify({
+      tealCode: getProgram('gold-asa.py')
+    }));
+
+    await tealDebugger.run({ tealFile: 'gold-asa.py' });
+
+    // verify cached console.info is true
+    assert.isTrue((console.info as sinon.SinonStub)
+      .calledWith('\x1b[33m%s\x1b[0m', `Using cached TEAL code for gold-asa.py`));
+
+    // 2 files should be written: (1. --dryrun-dump and 2. cached teal code from pyTEAL)
+    assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
+    fs.rmSync(pathToWrite);
   });
 });
