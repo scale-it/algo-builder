@@ -32,6 +32,7 @@
     // logs == false
     const daoFundLsigProg = getProgram('dao-fund-lsig.py', {}, false);
     ```
++ Updated `TealDbg` method to load already compiled TEAL code from `artifacts/cache`. Compilation is forced only when a) TEAL is not cached OR b) `scInitParam` (template parameters) are passed with `tealFile`.
 
 ### Breaking changes
 `@algo-builder/runtime`:
