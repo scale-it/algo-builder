@@ -168,6 +168,7 @@ export type DeployAppParam = BasicParams & AppOptionalFlags & {
   extraPages?: number
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
+  appName?: string // name of app to store info against in checkpoint
 };
 
 export type UpdateAppParam = BasicParams & AppOptionalFlags & {
@@ -177,6 +178,7 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   newClearProgram: string
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
+  appName?: string // name of app to store info against in checkpoint
 };
 
 export type AppCallsParam = BasicParams & AppOptionalFlags & {

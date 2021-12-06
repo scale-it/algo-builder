@@ -5,7 +5,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getDummyLsig, getLsig } from "../lib/lsig";
+import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
@@ -143,6 +143,14 @@ class DeployerBasicMode {
   }
 
   /**
+   * Loads stateful smart contract info from checkpoint
+   * @param appName name of the app (passed by user during deployment)
+   */
+  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+    return this.checkpoint.getAppfromCPKey(appName);
+  }
+
+  /**
    * Loads a single signed delegated logic signature account from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
@@ -171,6 +179,16 @@ class DeployerBasicMode {
    */
   async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
+  }
+
+  /**
+   * Loads logic signature from cache for contract mode. This helps user to avoid
+   * passing template parameters always during loading logic signature.
+   * @param name ASC name
+   * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
+   */
+  async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
+    return await getLsigFromCache(name);
   }
 
   /**
@@ -636,14 +654,18 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param payFlags Transaction Params
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
+   * @param appName name of the app to deploy. This name (if passed) will be used as
+   * the checkpoint "key", and app information will be stored agaisnt this name
    */
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
-    scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
-    const name = approvalProgram + "-" + clearProgram;
+    scTmplParams?: SCParams,
+    appName?: string): Promise<rtypes.SSCInfo> {
+    const name = appName ?? (approvalProgram + "-" + clearProgram);
+
     this.assertNoAsset(name);
     let sscInfo = {} as rtypes.SSCInfo;
     try {
@@ -657,7 +679,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
 
     this.registerSSCInfo(name, sscInfo);
-
     return sscInfo;
   }
 
@@ -669,6 +690,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
+   * @param appName name of the app to deploy. This name (if passed) will be used as
+   * the checkpoint "key", and app information will be stored agaisnt this name
    */
   async updateApp (
     sender: algosdk.Account,
@@ -676,7 +699,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.AppOptionalFlags
+    flags: rtypes.AppOptionalFlags,
+    appName?: string
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
@@ -687,7 +711,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       appID: appID,
       payFlags: {}
     });
-    const cpKey = newApprovalProgram + "-" + newClearProgram;
+    const cpKey = appName ?? (newApprovalProgram + "-" + newClearProgram);
 
     let sscInfo = {} as rtypes.SSCInfo;
     try {
@@ -787,7 +811,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
-    scInitParam?: unknown): Promise<rtypes.SSCInfo> {
+    scInitParam?: unknown,
+    appName?: string): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
     });
