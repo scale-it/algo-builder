@@ -230,6 +230,86 @@ describe("DeployerDeployMode", () => {
     });
   });
 
+  it("Should save info by app name to checkpoint after App deployment if app name is passed", async () => {
+    const env = mkEnv("network1");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    nestedMap.set(1, {
+      creator: "addr-1-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: 33,
+      timestamp: 1,
+      deleted: false
+    });
+
+    const sscFlags = {
+      sender: deployer.accounts[0],
+      localInts: 1,
+      globalInts: 1,
+      localBytes: 1,
+      globalBytes: 1
+    };
+    const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {}, {}, "my-app");
+    assert.deepEqual(sscInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: 33,
+        timestamp: 1,
+        deleted: false
+      });
+
+    deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["my-app", nestedMap]]), // checkpoint created against "app name"
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+
+    nestedMap.set(2, {
+      creator: "addr-1-get-address-dry-run",
+      applicationAccount: MOCK_APPLICATION_ADDRESS,
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: 33,
+      timestamp: 2,
+      deleted: false
+    });
+
+    const updatedInfo = await deployer.updateApp(
+      deployer.accounts[0], {}, 33, "app", "clear", {}, "my-app");
+    assert.deepEqual(updatedInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: 33,
+        timestamp: 2,
+        deleted: false
+      });
+
+    // should create a nested checkpoint if name is same after update
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["my-app", nestedMap]]), // update app checkpoint created against "same app" name
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+  });
+
   it("Should save overriden asaDef to checkpoint after asset deployment if custom ASA params are passed", async () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());

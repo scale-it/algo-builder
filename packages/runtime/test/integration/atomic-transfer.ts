@@ -1,9 +1,9 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -25,7 +25,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     runtime = new Runtime([john, alice]); // setup test
     // create asset
     assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } });
+      { creator: { ...john.account, name: "john" } }).assetID;
     approvalProgram = getProgram('counter-approval.teal');
     clearProgram = getProgram('clear.teal');
 
@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       globalInts: 32,
       localBytes: 8,
       localInts: 8
-    }, {}, approvalProgram, clearProgram);
+    }, {}, approvalProgram, clearProgram).appID;
     // opt-in to app
     runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice
@@ -101,7 +101,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amount: 1000,
-        assetID: 1,
+        assetID: 9,
         payFlags: { totalFee: 1000 }
       }
     ];

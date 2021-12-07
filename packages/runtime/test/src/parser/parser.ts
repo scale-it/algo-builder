@@ -1,5 +1,6 @@
 import { assert } from "chai";
 
+import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
@@ -23,7 +24,6 @@ import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constan
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
-import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 

@@ -339,6 +339,18 @@ maximun uint128`
     message: "Address %address% is not a valid Algorand address, at line %line%",
     title: "Address not valid",
     description: `Address not valid`
+  },
+  LOGS_COUNT_EXCEEDED_THRESHOLD: {
+    number: 1051,
+    message: "Maximum number of logs exceeded threshold of %maxLogs%, at line %line%",
+    title: "Maximum number of logs exceeded",
+    description: `Maximum number of logs exceeded`
+  },
+  LOGS_LENGTH_EXCEEDED_THRESHOLD: {
+    number: 1052,
+    message: "Maximum length (in bytes) of logs exceeded threshold of %maxLength%, but got %origLength%, at line %line%",
+    title: "Maximum length (in bytes) of logs exceeded",
+    description: `Maximum length (in bytes) of logs exceeded`
   }
 };
 

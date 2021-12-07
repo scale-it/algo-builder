@@ -6,7 +6,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
-import { AccountAddress, RuntimeAccountI, StackElem, Txn } from "../types";
+import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
@@ -43,8 +43,8 @@ const addrTxnFields = new Set([
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 export function setInnerTxField (
-  subTxn: Txn, field: string, val: StackElem,
-  op: Op, interpreter: Interpreter, line: number): Txn {
+  subTxn: EncTx, field: string, val: StackElem,
+  op: Op, interpreter: Interpreter, line: number): EncTx {
   let txValue: bigint | number | string | Uint8Array | undefined;
   if (uintTxnFields.has(field)) {
     txValue = op.assertBigInt(val, line);
@@ -185,7 +185,7 @@ const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
 
 // parse encoded txn obj to execParams (params passed by user in algob)
 /* eslint-disable sonarjs/cognitive-complexity */
-export function parseEncodedTxnToExecParams (tx: Txn,
+export function parseEncodedTxnToExecParams (tx: EncTx,
   interpreter: Interpreter, line: number): types.ExecParams {
   // initial common fields
   const execParams: any = {

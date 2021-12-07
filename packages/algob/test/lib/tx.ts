@@ -636,6 +636,30 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
   });
 
+  it("should deploy application in deploy mode and save info by name", async () => {
+    deployer = new DeployerDeployMode(deployerCfg);
+    const execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {},
+      appName: "dao-app"
+    };
+    await executeTransaction(deployer, execParams);
+
+    // able to retrieve info by "appName"
+    assert.isDefined(deployer.getAppByName("dao-app"));
+
+    // do note that traditional way doesn't work if appName is passed
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+  });
+
   it("should delete application in run mode", async () => {
     deployer = new DeployerDeployMode(deployerCfg);
     let execParams: wtypes.ExecParams = {

@@ -97,7 +97,7 @@ setup-reach:
 # download/update docker images from https://hub.docker.com/u/reachsh
 	$(REACH_PATH)/reach update
 # echo reach version
-	$(REACH_PATH)/reach --version
+	$(REACH_PATH)/reach version
 
 remove-reach:
 	if ! [ -f $(REACH_PATH)/reach ]; then	\

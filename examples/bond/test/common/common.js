@@ -1,4 +1,4 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
@@ -79,7 +79,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     newBondToken,
     asaDef,
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
-  );
+  ).assetID;
 
   optInLsigToBond(runtime, issuerLsig, newBond, managerAcc);
 
@@ -90,8 +90,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.address
   };
-  const dexLsigProgram = getProgram('dex-lsig.py', param);
-  const dexLsig = runtime.createLsigAccount(dexLsigProgram, []);
+  const dexLsig = runtime.loadLogic('dex-lsig.py', param);
   const dexLsigAddress = dexLsig.address();
 
   // fund dex with some minimum balance first

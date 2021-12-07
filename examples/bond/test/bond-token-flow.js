@@ -1,4 +1,4 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -83,7 +83,8 @@ describe('Bond token Tests', function () {
     */
 
     const currentBondIndex = runtime.addAsset(
-      'bond-token-0', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+      'bond-token-0',
+      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 
     const creationFlags = Object.assign({}, flags);
     const creationArgs = [
@@ -97,7 +98,7 @@ describe('Bond token Tests', function () {
 
     // create application
     applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
@@ -106,8 +107,7 @@ describe('Bond token Tests', function () {
       TMPL_OWNER: bondTokenCreator.address,
       TMPL_APP_MANAGER: appManager.address
     };
-    const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
-    lsig = runtime.createLsigAccount(issuerLsigProg, []);
+    lsig = runtime.loadLogic('issuer-lsig.py', scInitParam);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account
@@ -245,8 +245,7 @@ describe('Bond token Tests', function () {
       TMPL_APP_MANAGER: appManager.address,
       TMPL_BOND: bond2
     };
-    const buyLsigProgram = getProgram('buyback-lsig.py', scParam);
-    const buybackLsig = runtime.createLsigAccount(buyLsigProgram, []);
+    const buybackLsig = runtime.loadLogic('buyback-lsig.py', scParam);
 
     // fund dex with some minimum balance first
     runtime.fundLsig(master.account, buybackLsig.address(), minBalance + 10000);

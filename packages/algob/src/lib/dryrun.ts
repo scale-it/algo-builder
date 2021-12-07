@@ -1,4 +1,4 @@
-import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
+import { getPathFromDirRecursive, getProgram, loadFromYamlFileSilent, types as rtypes } from "@algo-builder/runtime";
 import { tx, types as wtypes } from "@algo-builder/web";
 import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
 import { spawn } from "child_process";
@@ -9,8 +9,7 @@ import * as path from 'path';
 import { writeToFile } from "../builtin-tasks/gen-accounts";
 import { ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { DebuggerContext, Deployer } from "../types";
-import { getProgram } from "./load-program";
+import type { DebuggerContext, Deployer, PyASCCache } from "../types";
 import { makeAndSignTx } from "./tx";
 
 export const tealExt = ".teal";
@@ -193,6 +192,7 @@ export class Tealdbg {
    * @param debugCtxParams args passed by user for debugger session
    * @param pathToCache path to --dryrun-dump (msgpack encoded) present in `/cache/dryrun`
    */
+  /* eslint-disable sonarjs/cognitive-complexity */
   private getTealDbgParams (debugCtxParams: DebuggerContext, pathToCache: string): string[] {
     const tealdbgArgs = [];
 
@@ -202,10 +202,29 @@ export class Tealdbg {
     if (file) {
       let pathToFile;
       if (file.endsWith(pyExt)) {
+        let tealFromPyTEAL: string | undefined;
         // note: currently tealdbg only accepts "teal" code, so we need to compile pyTEAL to TEAL first
         // issue: https://github.com/algorand/go-algorand/issues/2538
         pathToFile = path.join(CACHE_DIR, 'dryrun', path.parse(file).name + '.' + timestampNow().toString() + tealExt);
-        const tealFromPyTEAL = getProgram(file, debugCtxParams.scInitParam);
+
+        // load pyCache from "artifacts/cache"
+        if (fs.existsSync(path.join(CACHE_DIR, file + ".yaml"))) {
+          const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml") as string;
+          const pyCache = loadFromYamlFileSilent(pathToPyCache) as PyASCCache;
+          tealFromPyTEAL = pyCache.tealCode;
+        }
+
+        /* Use cached TEAL code if:
+         *  + we already have compiled pyteal code in artifacts/cache
+         *  + template paramteres (scInitParam) are not passed by user
+         * NOTE: if template parameters are passed, recompilation is forced to compile
+         * pyTEAL with the passed params (as the generated TEAL code could differ from cache)
+         */
+        if (tealFromPyTEAL !== undefined && debugCtxParams.scInitParam === undefined) {
+          console.info('\x1b[33m%s\x1b[0m', `Using cached TEAL code for ${file}`);
+        } else {
+          tealFromPyTEAL = getProgram(file, debugCtxParams.scInitParam);
+        }
         this.writeFile(pathToFile, tealFromPyTEAL);
       } else {
         pathToFile = getPathFromDirRecursive(ASSETS_DIR, file) as string;

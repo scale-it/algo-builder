@@ -1,14 +1,14 @@
 from pyteal import *
 
 def app():
-    '''
+    """
     - An app with 2 global variables: `total: int` and `counter: int`.
         - (on app creation), `counter = 0, total = 10`
     - The app update accepts exactly one argument: `n: int`
     - On update call the app verifies that: `n >= 1`,  increments `app.counter += 1` and:
         * when `app.counter % 2 == 0` then update `app.total += n`
         * otherwise, subtract: `app.total -= n`
-    '''
+    """
     total = Bytes("total")
     counter = Bytes("counter")
 
@@ -27,12 +27,14 @@ def app():
         common_checks,
         App.globalPut(total, App.globalGet(total) + Btoi(Txn.application_args[0])),
         App.globalPut(counter, App.globalGet(counter) + Int(1)),
+        Return(Int(1))
     ])
 
     on_fail = Seq([
         common_checks,
         App.globalPut(total, App.globalGet(total) - Btoi(Txn.application_args[0])),
         App.globalPut(counter, App.globalGet(counter) + Int(1)),
+        Return(Int(1))
     ])
 
     on_update = Cond(
@@ -51,4 +53,4 @@ def app():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(app(), Mode.Application))
+    print(compileTeal(app(), Mode.Application, version = 5))

@@ -1,10 +1,10 @@
 import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags, StackElem } from "../../src/types";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -63,7 +63,7 @@ describe("Crowdfunding basic tests", function () {
 
     const johnMinBalance = john.minBalance;
     const appID = runtime.addApp(
-      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
+      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram).appID;
     // verify sender's min balance increased after creating application
     assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);
 

@@ -8,3 +8,5 @@ export {
 } from "./errors/errors";
 export { ERRORS, ErrorDescriptor, ERROR_RANGES } from "./errors/errors-list";
 export { WebMode } from "./lib/web-mode";
+export { WallectConnectSession } from "./lib/wallectconnect-mode";
+export { getSuggestedParams, mkTxParams } from "./lib/api";
