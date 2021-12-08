@@ -80,7 +80,7 @@
     "source-map-support": "^0.5.19",
     "tweetnacl-ts": "^1.0.3",
     "types": "^0.1.0",
-    "zod": "^1.10.2"
+    "zod": "^3.11.6"
   },
   "nyc": {
     "extension": [
