@@ -16,7 +16,7 @@ const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
 
 export class WallectConnectSession {
-  private readonly connector: WalletConnect;
+  readonly connector: WalletConnect;
   private readonly algodClient: algosdk.Algodv2;
   wcAccounts: string[]
 
@@ -40,12 +40,21 @@ export class WallectConnectSession {
   }
 
   /**
+   * Kills a session if already exists, create new session
+   */
+  async forceCreate (): Promise<void> {
+    if (this.connector.connected) {
+      try { await this.close(); } catch (e) {};
+    }
+    return await this.create();
+  }
+
+  /**
    * Create new session
    */
   async create (): Promise<void> {
     if (this.connector.connected) {
       console.warn(`A session is already active`);
-      return;
     }
     await this.connector.createSession();
   }

@@ -42,10 +42,10 @@ export async function mkTxParams (
   if (userParams.flatFee === undefined) {
     s.flatFee = userParams.totalFee !== undefined;
   }
-  s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
+  s.fee = userParams.totalFee || userParams.feePerByte || ALGORAND_MIN_TX_FEE; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 
-  s.firstRound = userParams.firstValid ?? s.firstRound;
-  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
+  s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
     ? s.lastRound
     : Number(userParams.firstValid) + Number(userParams.validRounds);
   return s;
