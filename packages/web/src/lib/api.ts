@@ -22,8 +22,9 @@ export function clientForChain (chain: ChainType): algosdk.Algodv2 {
  */
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
+  const genesisInfo = await algocl.genesis().do();
   // Private chains may have an issue with firstRound
-  if (params.firstRound === 0) {
+  if (!genesisInfo.devmode && params.firstRound === 0) {
     throw new Error("Suggested params returned 0 as firstRound. Ensure that your node progresses.");
   }
   return params;
