@@ -228,13 +228,33 @@ def approval_program():
         Return(Int(1))
     ])
 
+    current_bond_balance_in_buyback = AssetHolding.balance(
+        App.globalGet(Bytes("buyback")), App.globalGet(current_bond)
+    )
+
+    # Only delete if:
+    # + maturity date is passed
+    # + buyback holds all "current_bond" tokens
+    on_delete = Seq([
+        current_bond_balance_in_buyback, # load balance from store
+        Assert(
+            And(
+                basic_checks,
+                current_bond_balance_in_buyback.value() >= App.globalGet(total),
+                # verify maturity date is passed
+                Global.latest_timestamp() > Tmpl.Int("TMPL_MATURITY_DATE")
+            ),
+        ),
+        Return(Int(1))
+    ])
+
     program = Cond(
         # Verfies that the application_id is 0, jumps to on_initialize.
         [Txn.application_id() == Int(0), on_initialize],
         # Verifies Update transaction, rejects it.
         [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))],
         # Verifies delete transaction, rejects it.
-        [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))],
+        [Txn.on_completion() == OnComplete.DeleteApplication, on_delete],
         # Verifies closeout transaction, approves it.
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         # Verifies opt-in transaction, approves it.
