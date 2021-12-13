@@ -1,3 +1,4 @@
+/* eslint sonarjs/no-duplicate-string: 0 */
 const { getProgram } = require('@algo-builder/runtime');
 const { convert } = require('@algo-builder/algob');
 const { Runtime, AccountStore } = require('@algo-builder/runtime');
@@ -6,7 +7,7 @@ const { assert } = require('chai');
 const { ProposalType, Vote } = require('../scripts/run/common/common');
 const {
   now, mkProposalTx, mkDepositVoteTokenTx, mkWithdrawVoteDepositTx,
-  mkClearVoteRecordTx, mkClearProposalTx
+  mkClearVoteRecordTx, mkClearProposalTx, votingStart, votingEnd, executeBefore
 } = require('../scripts/run/common/tx-params');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -173,7 +174,7 @@ describe('DAO test', function () {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
-      amount: 100,
+      amount: 1000,
       assetID: govTokenID,
       payFlags: { totalFee: 1000 }
     };
@@ -186,10 +187,10 @@ describe('DAO test', function () {
     ]);
     syncAccounts();
 
-    assert.equal(proposerA.getAssetHolding(govTokenID).amount, 100);
-    assert.equal(proposerB.getAssetHolding(govTokenID).amount, 100);
-    assert.equal(voterA.getAssetHolding(govTokenID).amount, 100);
-    assert.equal(voterB.getAssetHolding(govTokenID).amount, 100);
+    assert.equal(proposerA.getAssetHolding(govTokenID).amount, 1000);
+    assert.equal(proposerB.getAssetHolding(govTokenID).amount, 1000);
+    assert.equal(voterA.getAssetHolding(govTokenID).amount, 1000);
+    assert.equal(voterB.getAssetHolding(govTokenID).amount, 1000);
   }
 
   it('DAO flow test', () => {
@@ -253,9 +254,9 @@ describe('DAO test', function () {
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
     // empty hash_algo must save sha256
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(now + (1 * 60)));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_end'), BigInt(now + (3 * 60)));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'execute_before'), BigInt(now + (7 * 60)));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_end'), BigInt(votingEnd));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'execute_before'), BigInt(executeBefore));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'type'), BigInt(ProposalType.ALGO_TRANSFER));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'from'), parsing.addressToPk(daoFundLsig.address()));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'recipient'), parsing.addressToPk(proposerA.address));
@@ -300,7 +301,7 @@ describe('DAO test', function () {
     assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 6n + 8n);
 
     /* --------------------  Vote  -------------------- */
-    runtime.setRoundAndTimestamp(10, now + (2 * 60));
+    runtime.setRoundAndTimestamp(10, Math.round((votingStart + votingEnd) / 2));
 
     // call to DAO app by voter (to register deposited votes)
     const registerVoteParam = {
@@ -333,7 +334,7 @@ describe('DAO test', function () {
 
     // verify sender account has p_proposal set
     assert.isDefined(voterA.getLocalState(appID, key));
-    assert.isDefined(voterA.getLocalState(appID, key));
+    assert.isDefined(voterB.getLocalState(appID, key));
 
     // verify voting count
     // + voterA registered 6 "yes" votes
@@ -446,6 +447,376 @@ describe('DAO test', function () {
     assert.isUndefined(voterA.getLocalState(appID, key));
 
     /* --------------------  Clear Proposal  -------------------- */
+
+    // optIn to GovToken by proposalALsig (protected by proposerA account using opt-in lock)
+    const optInTx = [
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: proposerA.account,
+        toAccountAddr: proposalALsig.address(),
+        amountMicroAlgos: 0,
+        payFlags: {}
+      },
+      {
+        type: types.TransactionType.OptInASA,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: proposalALsig.address(),
+        lsig: proposalALsig,
+        assetID: govTokenID,
+        payFlags: {}
+      }
+    ];
+    runtime.executeTx(optInTx);
+    syncAccounts();
+
+    assert.isDefined(proposalALsigAcc.getAssetHolding(govTokenID));
+
+    const clearProposalParam = mkClearProposalTx(
+      appID,
+      govTokenID,
+      depositLsig,
+      proposalALsig,
+      15 // set as deposit in DAO App
+    );
+    runtime.executeTx(clearProposalParam);
+    syncAccounts();
+
+    // verify proposalALsig recieved back deposit of 15 tokens
+    assert.equal(proposalALsigAcc.getAssetHolding(govTokenID).amount, 15n);
+
+    // verify proposal config is deleted from localstate
+    for (
+      const key of ['name', 'url', 'url_hash', 'hash_algo', 'voting_start',
+        'voting_end', 'execute_before', 'type', 'from', 'recipient',
+        'amount', 'yes', 'no', 'abstain']
+    ) {
+      assert.isUndefined(proposalALsigAcc.getLocalState(appID, key));
+    }
+  });
+
+  it('Should not allow to vote again with newly locked tokens', () => {
+    /**
+    * Flow:
+    * + Setup DAO
+    * + Add proposalA
+    * + Lock 100 tokens by voterA (pass)
+    * + Vote by voterA (pass)
+    * + Lock 50 more tokens by voterA (pass)
+    * + VoterA tries to voter again with newly locked tokens (fail)
+    */
+
+    setUpDAO();
+
+    /* --------------------  Add proposal  -------------------- */
+
+    // optIn to DAO by proposalALsig
+    runtime.optInToApp(proposalALsig.address(), appID, {}, {});
+
+    let beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    const addProposalTx = mkProposalTx(
+      appID,
+      govTokenID,
+      proposerA.account,
+      depositLsig,
+      proposalALsig,
+      daoFundLsig
+    );
+
+    // set time (after now)
+    runtime.setRoundAndTimestamp(5, now + 10);
+
+    addProposalTx[1].amount = 15;
+    runtime.executeTx(addProposalTx);
+    syncAccounts();
+
+    // assert proposal config is added
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    // empty hash_algo must save sha256
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_end'), BigInt(votingEnd));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'execute_before'), BigInt(executeBefore));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'type'), BigInt(ProposalType.ALGO_TRANSFER));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'from'), parsing.addressToPk(daoFundLsig.address()));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'recipient'), parsing.addressToPk(proposerA.address));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'amount'), BigInt(2e6));
+
+    // verify deposit recieved in depositLsig
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 15n);
+
+    /* --------------------  Deposit Vote Token (Lock 100 tokens by A)  -------------------- */
+
+    // optIn to DAO by voterA & voterB
+    runtime.optInToApp(voterA.address, appID, {}, {});
+    beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    // lock 100 votes by voterA
+    const depositVoteParamA = mkDepositVoteTokenTx(
+      appID,
+      govTokenID,
+      voterA.account,
+      depositLsig,
+      100
+    );
+    runtime.executeTx(depositVoteParamA);
+    syncAccounts();
+
+    // verify sender.deposit is set
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), 100n);
+    // verify 100 votes deposited
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 100n);
+
+    /* --------------------  Register 100 Votes by A  -------------------- */
+    runtime.setRoundAndTimestamp(10, Math.round((votingStart + votingEnd) / 2));
+
+    // call to DAO app by voter (to register deposited votes)
+    const registerVoteParam = {
+      type: types.TransactionType.CallApp,
+      sign: types.SignType.SecretKey,
+      fromAccount: voterA.account,
+      appID: appID,
+      payFlags: { totalFee: 2000 },
+      appArgs: ['str:register_vote', `str:${Vote.YES}`],
+      accounts: [proposalALsig.address()]
+    };
+    runtime.executeTx(registerVoteParam);
+    syncAccounts();
+
+    // concatination of "p_" & proposalALsig.address
+    const key = new Uint8Array([...parsing.stringToBytes('p_'), ...parsing.addressToPk(proposalALsig.address())]);
+
+    // verify sender account has p_proposal set
+    assert.isDefined(voterA.getLocalState(appID, key));
+
+    // verify voting count
+    assert.equal(proposalALsigAcc.getLocalState(appID, 'yes'), 100n);
+    assert.isUndefined(proposalALsigAcc.getLocalState(appID, 'abstain')); // we didn't vote for "abstain"
+    assert.isUndefined(proposalALsigAcc.getLocalState(appID, 'no')); // we didn't vote for "no"
+
+    /* --------------------  Deposit Vote Token (Lock 50 tokens again by A)  -------------------- */
+    beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    // lock 50 votes by voterA
+    const depositVoteParam = mkDepositVoteTokenTx(
+      appID,
+      govTokenID,
+      voterA.account,
+      depositLsig,
+      50
+    );
+    runtime.executeTx(depositVoteParam);
+    syncAccounts();
+
+    // verify sender.deposit is set
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), 150n); // 100 + 50
+    // verify 50 votes deposited
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 50n);
+
+    /* --------------------  Register 50 Votes by A (fails this time)  -------------------- */
+    assert.throws(
+      () => runtime.executeTx(registerVoteParam),
+      'RUNTIME_ERR1009: TEAL runtime encountered err opcode'
+    );
+  });
+
+  it('Should allow to vote again with newly locked tokens for different proposal', () => {
+    /**
+    * Flow:
+    * + Setup DAO
+    * + Add proposalA
+    * + Add proposalB
+    * + Lock 50 tokens by voterA (pass)
+    * + Vote by voterA (pass)
+    * + Lock 50 more tokens by voterA (pass)
+    * + VoterA tries to vote for proposalB (passes)
+    */
+
+    setUpDAO();
+
+    /* --------------------  Add proposal(s)  -------------------- */
+
+    // optIn to DAO by proposalALsig & proposalBLsig
+    runtime.optInToApp(proposalALsig.address(), appID, {}, {});
+    runtime.optInToApp(proposalBLsig.address(), appID, {}, {});
+
+    let beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    const addProposalATx = mkProposalTx(
+      appID,
+      govTokenID,
+      proposerA.account,
+      depositLsig,
+      proposalALsig,
+      daoFundLsig
+    );
+
+    const addProposalBTx = mkProposalTx(
+      appID,
+      govTokenID,
+      proposerB.account,
+      depositLsig,
+      proposalBLsig,
+      daoFundLsig
+    );
+
+    // set time (after now)
+    runtime.setRoundAndTimestamp(5, now + 10);
+
+    addProposalATx[1].amount = 15;
+    addProposalBTx[1].amount = 15;
+    runtime.executeTx(addProposalATx);
+    runtime.executeTx(addProposalBTx);
+
+    syncAccounts();
+
+    // verify deposit recieved in depositLsig
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 15n + 15n);
+
+    /* --------------------  Deposit Vote Token (Lock 50 tokens by A)  -------------------- */
+
+    // optIn to DAO by voterA & voterB
+    runtime.optInToApp(voterA.address, appID, {}, {});
+    beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    // lock 50 votes by voterA
+    const depositVoteParamA = mkDepositVoteTokenTx(
+      appID,
+      govTokenID,
+      voterA.account,
+      depositLsig,
+      50
+    );
+    runtime.executeTx(depositVoteParamA);
+    syncAccounts();
+
+    // verify sender.deposit is set
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), 50n);
+    // verify 50 votes deposited
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 50n);
+
+    /* --------------------  Register 50 Votes by A  -------------------- */
+    runtime.setRoundAndTimestamp(10, Math.round((votingStart + votingEnd) / 2));
+
+    // call to DAO app by voter (to register deposited votes)
+    const registerVoteParam = {
+      type: types.TransactionType.CallApp,
+      sign: types.SignType.SecretKey,
+      fromAccount: voterA.account,
+      appID: appID,
+      payFlags: { totalFee: 2000 },
+      appArgs: ['str:register_vote', `str:${Vote.ABSTAIN}`],
+      accounts: [proposalALsig.address()]
+    };
+    runtime.executeTx(registerVoteParam);
+    syncAccounts();
+
+    // concatination of "p_" & proposalALsig.address
+    const key = new Uint8Array([...parsing.stringToBytes('p_'), ...parsing.addressToPk(proposalALsig.address())]);
+
+    // verify sender account has p_proposal set
+    assert.isDefined(voterA.getLocalState(appID, key));
+
+    // verify voting count
+    assert.equal(proposalALsigAcc.getLocalState(appID, 'abstain'), 50n);
+    assert.isUndefined(proposalALsigAcc.getLocalState(appID, 'yes')); // we didn't vote for "yes"
+    assert.isUndefined(proposalALsigAcc.getLocalState(appID, 'no')); // we didn't vote for "no"
+
+    /* --------------------  Deposit Vote Token (Lock 50 tokens again by A)  -------------------- */
+    beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    // lock 50 votes by voterA
+    const depositVoteParam = mkDepositVoteTokenTx(
+      appID,
+      govTokenID,
+      voterA.account,
+      depositLsig,
+      50
+    );
+    runtime.executeTx(depositVoteParam);
+    syncAccounts();
+
+    // verify sender.deposit is set
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), 100n); // 50 + 50
+    // verify 50 votes deposited
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 50n);
+
+    /* --------------------  Register 100 Votes by A for proposalB (passes this time)  -------------------- */
+    // call to DAO app by voter (to register deposited votes)
+    const registerVoteParamForProposalB = {
+      ...registerVoteParam,
+      accounts: [proposalBLsig.address()]
+    };
+    runtime.executeTx(registerVoteParamForProposalB);
+    syncAccounts();
+
+    // concatination of "p_" & proposalBLsig.address
+    const proposalBKey = new Uint8Array([...parsing.stringToBytes('p_'), ...parsing.addressToPk(proposalBLsig.address())]);
+
+    // verify sender account has p_proposal set
+    assert.isDefined(voterA.getLocalState(appID, proposalBKey));
+
+    // verify voting count
+    assert.equal(proposalBLsigAcc.getLocalState(appID, 'abstain'), 100n);
+    assert.isUndefined(proposalBLsigAcc.getLocalState(appID, 'yes')); // we didn't vote for "yes"
+    assert.isUndefined(proposalBLsigAcc.getLocalState(appID, 'no')); // we didn't vote for "no"
+  });
+
+  it('Should allow to clear proposal if it is passsed execution', () => {
+    /**
+    * Flow:
+    * + Setup DAO
+    * + Add proposalA
+    * + Clear proposalA (passes if past execution)
+    */
+    setUpDAO();
+
+    /* --------------------  Add proposal  -------------------- */
+
+    // optIn to DAO by proposalALsig
+    runtime.optInToApp(proposalALsig.address(), appID, {}, {});
+
+    const beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
+
+    const addProposalTx = mkProposalTx(
+      appID,
+      govTokenID,
+      proposerA.account,
+      depositLsig,
+      proposalALsig,
+      daoFundLsig
+    );
+
+    // set time (after now)
+    runtime.setRoundAndTimestamp(5, now + 10);
+
+    addProposalTx[1].amount = 15;
+    runtime.executeTx(addProposalTx);
+    syncAccounts();
+
+    // assert proposal config is added
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    // empty hash_algo must save sha256
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_end'), BigInt(votingEnd));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'execute_before'), BigInt(executeBefore));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'type'), BigInt(ProposalType.ALGO_TRANSFER));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'from'), parsing.addressToPk(daoFundLsig.address()));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'recipient'), parsing.addressToPk(proposerA.address));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'amount'), BigInt(2e6));
+
+    // verify deposit recieved in depositLsig
+    assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 15n);
+
+    /* --------------------  Clear Proposal  -------------------- */
+    // set time past executeBefore
+    runtime.setRoundAndTimestamp(5, executeBefore + 10);
 
     // optIn to GovToken by proposalALsig (protected by proposerA account using opt-in lock)
     const optInTx = [
