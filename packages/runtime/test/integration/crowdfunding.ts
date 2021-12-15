@@ -33,7 +33,7 @@ describe("Crowdfunding basic tests", function () {
   it("should fail during create application if 0 args are passed", function () {
     // create new app
     expectRuntimeError(
-      () => runtime.addApp(flags, {}, approvalProgram, clearProgram),
+      () => runtime.deployApp(flags, {}, approvalProgram, clearProgram),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -62,7 +62,7 @@ describe("Crowdfunding basic tests", function () {
     ];
 
     const johnMinBalance = john.minBalance;
-    const appID = runtime.addApp(
+    const appID = runtime.deployApp(
       { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram).appID;
     // verify sender's min balance increased after creating application
     assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);

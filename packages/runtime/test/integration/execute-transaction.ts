@@ -38,8 +38,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   }
 
   function setupApp (): void {
-    // create new app
-    runtime.addApp({
+    // deploy new app
+    runtime.deployApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,

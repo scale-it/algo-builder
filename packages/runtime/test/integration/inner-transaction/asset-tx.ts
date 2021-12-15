@@ -43,7 +43,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   this.beforeEach(() => {
     // reset app (delete + create)
     john.createdApps.delete(appID);
-    appID = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
     // create asset

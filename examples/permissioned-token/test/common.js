@@ -65,7 +65,7 @@ class Context {
     };
     const controllerProgram = getProgram(approvalProgram, { TOKEN_ID: this.assetIndex });
     const clearProgram = getProgram(clearStateProgram);
-    this.controllerappID = this.runtime.addApp(
+    this.controllerappID = this.runtime.deployApp(
       sscFlags, {}, controllerProgram, clearProgram
     ).appID;
   }
@@ -108,7 +108,7 @@ class Context {
       globalBytes: 1,
       appArgs: [`int:${this.controllerappID}`]
     };
-    this.permissionsappID = this.runtime.addApp(
+    this.permissionsappID = this.runtime.deployApp(
       sscFlags, {}, permissionsProgram, clearProgram
     ).appID;
 

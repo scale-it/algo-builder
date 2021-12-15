@@ -459,7 +459,7 @@ export class Runtime {
   }
 
   /**
-   * creates new application and returns application id
+   * deploy a new application and returns application id
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
@@ -468,14 +468,14 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
-  addApp (
+  deployApp (
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
   ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    const txReceipt = this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
+    const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
     this.store = this.ctx.state;
     return txReceipt;
@@ -731,7 +731,7 @@ export class Runtime {
     });
 
     // reset pooled opcode cost for single tx, this is to handle singular functions
-    // which don't "initialize" a new ctx (eg. addApp)
+    // which don't "initialize" a new ctx (eg. deployApp)
     if (this.ctx.gtxs.length === 1) { this.ctx.pooledApplCost = 0; }
     interpreter.execute(program, executionMode, this, debugStack);
 

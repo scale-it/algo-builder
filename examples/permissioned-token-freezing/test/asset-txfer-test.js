@@ -58,7 +58,7 @@ describe('Test for transferring asset using custom logic', function () {
       `int:${assetId}`,
       'int:2' // set min user level(2) for asset transfer ("Accred-level")
     ];
-    applicationId = runtime.addApp(
+    applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     const app = alice.getApp(applicationId);
@@ -259,7 +259,7 @@ describe('Test for transferring asset using custom logic', function () {
       'int:2' // set min user level(2) for asset transfer ("Accred-level")
     ];
 
-    applicationId = runtime.addApp(
+    applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const app = alice.getApp(applicationId);
     assert.isDefined(app);

@@ -245,7 +245,7 @@ export class Ctx implements Context {
   }
 
   /**
-   * creates new application and returns application id
+   * deploy a new application and returns application id
    * @param fromAccountAddr creator account address
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
@@ -256,7 +256,7 @@ export class Ctx implements Context {
    * - approval and clear program must be the TEAL code as string (not compiled code)
    * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  addApp (
+  deployApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
   ): DeployedAppTxReceipt {
@@ -270,7 +270,7 @@ export class Ctx implements Context {
     }
 
     // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
+    const app = senderAcc.deployApp(0, flags, approvalProgram, clearProgram);
     this.assertAccBalAboveMin(senderAcc.address);
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
@@ -699,7 +699,7 @@ export class Ctx implements Context {
           };
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          r = this.addApp(
+          r = this.deployApp(
             fromAccountAddr, flags,
             txParam.approvalProgram,
             txParam.clearProgram,

@@ -32,7 +32,7 @@ describe("App Update Test", function () {
       localInts: 5
     };
 
-    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID;
 
     groupTx = [
       {

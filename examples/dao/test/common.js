@@ -74,7 +74,7 @@ class Context {
       `str:${url}`
     ];
 
-    this.daoAppID = this.runtime.addApp(
+    this.daoAppID = this.runtime.deployApp(
       { ...appCreationFlags, appArgs: daoAppArgs }, {}, daoApprovalProgram, daoClearProgram
     ).appID;
   }

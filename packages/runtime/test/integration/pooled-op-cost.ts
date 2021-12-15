@@ -33,7 +33,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
       localInts: 1
     };
 
-    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID;
 
     appCallParam = {
       type: types.TransactionType.CallApp,

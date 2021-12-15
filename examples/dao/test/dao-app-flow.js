@@ -127,7 +127,7 @@ describe('DAO test', function () {
     const clearProgram = getProgram('dao-app-clear.py');
 
     // create application
-    appID = runtime.addApp(
+    appID = runtime.deployApp(
       { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup lsig accounts

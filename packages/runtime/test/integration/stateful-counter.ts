@@ -28,8 +28,8 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     approvalProgram = getProgram('counter-approval.teal');
     clearProgram = getProgram('clear.teal');
 
-    // create new app
-    txParams.appID = runtime.addApp({
+    // deploy a new app
+    txParams.appID = runtime.deployApp({
       sender: john.account,
       globalBytes: 2,
       globalInts: 2,

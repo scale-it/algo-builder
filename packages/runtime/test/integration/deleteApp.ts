@@ -49,7 +49,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should delete application", function () {
     const initialMinBalance = john.minBalance;
-    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram).appID;
+    const appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID;
     assert.equal(runtime.getAccount(john.address).minBalance,
       initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)));
 
@@ -66,10 +66,10 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should not delete application if logic is rejected", function () {
     const initialMinBalance = john.minBalance;
-    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram).appID; // create app
+    const appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID; // create app
 
-    const minBalanceAfterAddApp = runtime.getAccount(john.address).minBalance;
-    assert.equal(minBalanceAfterAddApp,
+    const minBalanceAfterDeployApp = runtime.getAccount(john.address).minBalance;
+    assert.equal(minBalanceAfterDeployApp,
       initialMinBalance +
         (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)) // min balance should increase
     );
@@ -93,6 +93,6 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     assert.isDefined(res);
 
     // min balance should remain the same (as after adding app), since app deletion wasn't successfull
-    assert.equal(runtime.getAccount(john.address).minBalance, minBalanceAfterAddApp);
+    assert.equal(runtime.getAccount(john.address).minBalance, minBalanceAfterDeployApp);
   });
 });

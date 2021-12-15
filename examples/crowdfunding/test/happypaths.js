@@ -66,7 +66,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     runtime = new Runtime([master, creator, donor, fundReceiver]);
 
     applicationId = 1;
-    creator.addApp(applicationId, creationFlags, approvalProgram, clearProgram);
+    creator.deployApp(applicationId, creationFlags, approvalProgram, clearProgram);
     runtime.store.globalApps.set(applicationId, creator.address);
 
     // set creation args in global state
@@ -101,8 +101,8 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       convert.uint64ToBigEndian(fundCloseTs)
     ];
 
-    // create application
-    applicationId = runtime.addApp(
+    // deploy application
+    applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const creatorPk = convert.addressToPk(creator.address);
 

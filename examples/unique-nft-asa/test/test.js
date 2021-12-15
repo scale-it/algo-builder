@@ -36,7 +36,7 @@ describe('Unique NFT ASA tests', function () {
       globalBytes: 0
     };
 
-    nftAppID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    nftAppID = runtime.deployApp(creationFlags, {}, approvalProgram, clearProgram);
 
     // setup stateless lsig
     const statelessLsigProg = getProgram(

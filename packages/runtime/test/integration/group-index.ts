@@ -36,12 +36,12 @@ describe('Current Transaction Tests', function () {
   function setupApps (): void {
     const creationFlags = Object.assign({}, flags);
 
-    // create first application
-    applicationId1 = runtime.addApp(
+    // deploy first application
+    applicationId1 = runtime.deployApp(
       { ...creationFlags, sender: creator.account }, {}, approvalProgram, clearProgram).appID;
 
-    // create second application
-    applicationId2 = runtime.addApp(
+    // deploy second application
+    applicationId2 = runtime.deployApp(
       { ...creationFlags, sender: creator.account }, {}, getProgram('test2.teal'), clearProgram).appID;
   }
 

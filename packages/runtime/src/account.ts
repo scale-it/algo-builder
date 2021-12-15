@@ -269,7 +269,7 @@ export class AccountStore implements AccountStoreI {
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp (appID: number, params: AppDeploymentFlags,
+  deployApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {

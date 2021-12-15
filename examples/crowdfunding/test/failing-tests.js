@@ -65,7 +65,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     };
 
     // create application
-    applicationId = runtime.addApp(
+    applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup escrow account

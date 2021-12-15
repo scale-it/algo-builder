@@ -93,7 +93,7 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    applicationId = runtime.addApp(
+    applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
     const creatorPk = convert.addressToPk(creator.address);
 
@@ -296,7 +296,7 @@ describe('Crowdfunding Tests', function () {
   it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
-    const applicationId = runtime.addApp(
+    const applicationId = runtime.deployApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
 
     // setup escrow account

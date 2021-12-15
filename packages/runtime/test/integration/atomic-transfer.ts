@@ -29,8 +29,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     approvalProgram = getProgram('counter-approval.teal');
     clearProgram = getProgram('clear.teal');
 
-    // create new app
-    appID = runtime.addApp({
+    // deploy a new app
+    appID = runtime.deployApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,

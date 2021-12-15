@@ -156,7 +156,7 @@ export interface Context {
   ) => DeployedAssetTxReceipt
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
-  addApp: (
+  deployApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
   ) => DeployedAppTxReceipt
@@ -215,7 +215,7 @@ export interface AccountStoreI {
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
-  addApp: (appID: number, params: AppDeploymentFlags,
+  deployApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
