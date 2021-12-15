@@ -30,13 +30,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     clearProgram = getProgram('clear.teal');
 
     // deploy a new app
-    appID = runtime.deployApp({
-      sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
-    }, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      {
+        sender: john.account,
+        globalBytes: 32,
+        globalInts: 32,
+        localBytes: 8,
+        localInts: 8
+      },
+      {}
+    ).appID;
     // opt-in to app
     runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice

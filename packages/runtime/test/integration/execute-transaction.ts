@@ -39,13 +39,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
   function setupApp (): void {
     // deploy new app
-    runtime.deployApp({
-      sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
-    }, {}, approvalProgram, clearProgram);
+    runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      {
+        sender: john.account,
+        globalBytes: 32,
+        globalInts: 32,
+        localBytes: 8,
+        localInts: 8
+      },
+      {}
+    );
   }
 
   it("should execute group of (payment + asset creation) successfully", () => {

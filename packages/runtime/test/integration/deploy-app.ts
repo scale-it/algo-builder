@@ -36,8 +36,8 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 
   it("initialize new account for deployed app(s)", function () {
     // create new app
-    const appIdX = runtime.deployApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
-    const appIdY = runtime.deployApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
+    const appIdX = runtime.deployApp(approvalProgram, clearProgram, appCreationFlags, {}).appID;
+    const appIdY = runtime.deployApp(approvalProgram, clearProgram, appCreationFlags, {}).appID;
 
     assert.isDefined(runtime.getApp(appIdX));
     assert.isDefined(runtime.getApp(appIdY));

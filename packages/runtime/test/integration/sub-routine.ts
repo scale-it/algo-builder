@@ -36,13 +36,13 @@ describe("TEALv4: Sub routine", function () {
 
   it("should pass during create application", function () {
     // this code will pass, because sub-routine is working
-    assert.doesNotThrow(() => runtime.deployApp(flags, {}, approvalProgramPass, clearProgram));
+    assert.doesNotThrow(() => runtime.deployApp(approvalProgramPass, clearProgram, flags, {}));
   });
 
   it("should fail during create application", function () {
     // this fails because in last condition we check if over subroutine section was executed
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, approvalProgramFail, clearProgram),
+      () => runtime.deployApp(approvalProgramFail, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -50,14 +50,14 @@ describe("TEALv4: Sub routine", function () {
   it("should fail during create application", function () {
     // this fails because there is no callsub before retsub(therefore callstack is empty)
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, approvalProgramFail1, clearProgram),
+      () => runtime.deployApp(approvalProgramFail1, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY
     );
   });
 
   it("should calculate correct fibonacci number", () => {
     const fibProg = getProgram('fibonacci.teal');
-    let appID = runtime.deployApp(flags, {}, fibProg, clearProgram).appID;
+    let appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
 
     // 5th fibonacci
     let result = runtime.getGlobalState(appID, 'result');
@@ -65,21 +65,21 @@ describe("TEALv4: Sub routine", function () {
 
     // 6th fibonacci
     flags.appArgs = ['int:6'];
-    appID = runtime.deployApp(flags, {}, fibProg, clearProgram).appID;
+    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 8n);
 
     // 8th fibonacci
     flags.appArgs = ['int:8'];
-    appID = runtime.deployApp(flags, {}, fibProg, clearProgram).appID;
+    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 21n);
 
     // 1st fibonacci
     flags.appArgs = ['int:1'];
-    appID = runtime.deployApp(flags, {}, fibProg, clearProgram).appID;
+    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 1n);
@@ -89,7 +89,7 @@ describe("TEALv4: Sub routine", function () {
     flags.appArgs = ['int:9'];
     const fibProg = getProgram('fibonacci.teal');
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, fibProg, clearProgram),
+      () => runtime.deployApp(fibProg, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
     );
   });

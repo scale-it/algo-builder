@@ -42,7 +42,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
   });
 
   it("should update application", function () {
-    appID = runtime.deployApp(flags, {}, oldApprovalProgram, clearProgram).appID;
+    appID = runtime.deployApp(oldApprovalProgram, clearProgram, flags, {}).appID;
     runtime.optInToApp(creator.address, appID, {}, {});
 
     // check deploy app params
@@ -78,7 +78,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
   it("should not update application if logic is rejected", function () {
     // create app
-    appID = runtime.deployApp(flags, {}, oldApprovalProgram, clearProgram).appID;
+    appID = runtime.deployApp(oldApprovalProgram, clearProgram, flags, {}).appID;
     runtime.optInToApp(creator.address, appID, {}, {});
 
     let app = runtime.getApp(appID);

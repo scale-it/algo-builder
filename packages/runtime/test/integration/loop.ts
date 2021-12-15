@@ -35,13 +35,13 @@ describe("TEALv4: Loops", function () {
 
   it("should pass during create application", function () {
     // this code will pass, because at the end we check if counter is incremented 10 times
-    assert.doesNotThrow(() => runtime.deployApp(flags, {}, approvalProgramPass, clearProgram));
+    assert.doesNotThrow(() => runtime.deployApp(approvalProgramPass, clearProgram, flags, {}));
   });
 
   it("should fail during create application", function () {
     // this fails because in last condition we check if counter value with 10.
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, approvalProgramFail, clearProgram),
+      () => runtime.deployApp(approvalProgramFail, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -49,7 +49,7 @@ describe("TEALv4: Loops", function () {
   it("should fail during create application", function () {
     // this fails because we try to use loops in tealv3
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, approvalProgramFail1, clearProgram),
+      () => runtime.deployApp(approvalProgramFail1, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
     );
   });
@@ -57,6 +57,6 @@ describe("TEALv4: Loops", function () {
   it("should skip b1 & b2 (continuous labels)", () => {
     approvalProgramPass = getProgram('continuous-labels.teal');
     // this code will pass, because at the end we check if counter is incremented 10 times
-    assert.doesNotThrow(() => runtime.deployApp(flags, {}, approvalProgramPass, clearProgram));
+    assert.doesNotThrow(() => runtime.deployApp(approvalProgramPass, clearProgram, flags, {}));
   });
 });

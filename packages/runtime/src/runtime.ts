@@ -460,17 +460,17 @@ export class Runtime {
 
   /**
    * deploy a new application and returns application id
-   * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param flags SSCDeployment flags
+   * @param payFlags Transaction parameters
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   deployApp (
-    flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
     debugStack?: number
   ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);

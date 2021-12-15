@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   it("should opt-in to app successfully and update local state", function () {
     // deploy new app
     approvalProgram = getProgram('accept-optin.teal');
-    appID = runtime.deployApp(creationFlags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(approvalProgram, clearProgram, creationFlags, {}).appID;
 
     // opt-in (should be accepted)
     assert.doesNotThrow(() => runtime.optInToApp(john.address, appID, {}, {}));
@@ -50,7 +50,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   it("should reject opt-in to app", function () {
     // deploy new app
     approvalProgram = getProgram('reject-optin.teal');
-    appID = runtime.deployApp(creationFlags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(approvalProgram, clearProgram, creationFlags, {}).appID;
 
     // verify local state not present BEFORE optin
     assert.isUndefined(alice.appsLocalState.get(appID));

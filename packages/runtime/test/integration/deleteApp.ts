@@ -49,7 +49,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should delete application", function () {
     const initialMinBalance = john.minBalance;
-    const appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID;
+    const appID = runtime.deployApp(approvalProgram, clearProgram, flags, {}).appID;
     assert.equal(runtime.getAccount(john.address).minBalance,
       initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)));
 
@@ -66,7 +66,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should not delete application if logic is rejected", function () {
     const initialMinBalance = john.minBalance;
-    const appID = runtime.deployApp(flags, {}, approvalProgram, clearProgram).appID; // create app
+    const appID = runtime.deployApp(approvalProgram, clearProgram, flags, {}).appID; // create app
 
     const minBalanceAfterDeployApp = runtime.getAccount(john.address).minBalance;
     assert.equal(minBalanceAfterDeployApp,

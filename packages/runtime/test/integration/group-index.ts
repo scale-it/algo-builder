@@ -38,11 +38,19 @@ describe('Current Transaction Tests', function () {
 
     // deploy first application
     applicationId1 = runtime.deployApp(
-      { ...creationFlags, sender: creator.account }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, sender: creator.account },
+      {}
+    ).appID;
 
     // deploy second application
     applicationId2 = runtime.deployApp(
-      { ...creationFlags, sender: creator.account }, {}, getProgram('test2.teal'), clearProgram).appID;
+      getProgram('test2.teal'),
+      clearProgram,
+      { ...creationFlags, sender: creator.account },
+      {}
+    ).appID;
   }
 
   it('Group Index Check', () => {

@@ -29,13 +29,18 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     clearProgram = getProgram('clear.teal');
 
     // deploy a new app
-    txParams.appID = runtime.deployApp({
-      sender: john.account,
-      globalBytes: 2,
-      globalInts: 2,
-      localBytes: 3,
-      localInts: 3
-    }, {}, approvalProgram, clearProgram).appID;
+    txParams.appID = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      {
+        sender: john.account,
+        globalBytes: 2,
+        globalInts: 2,
+        localBytes: 3,
+        localInts: 3
+      },
+      {}
+    ).appID;
 
     // opt-in to the app
     runtime.optInToApp(john.address, txParams.appID, {}, {});

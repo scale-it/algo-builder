@@ -34,13 +34,18 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
     clearProgram = getProgram('clear.teal');
 
     // deploy a new app
-    txnParams.appID = runtime.deployApp({
-      sender: john.account,
-      globalBytes: 2,
-      globalInts: 2,
-      localBytes: 3,
-      localInts: 3
-    }, {}, approvalProgram, clearProgram).appID;
+    txnParams.appID = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      {
+        sender: john.account,
+        globalBytes: 2,
+        globalInts: 2,
+        localBytes: 3,
+        localInts: 3
+      },
+      {}
+    ).appID;
 
     // opt-in to the app
     runtime.optInToApp(john.address, txnParams.appID, {}, {});
@@ -151,7 +156,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 
   it("should fail during create application if pragma version <= 3", function () {
     expectRuntimeError(
-      () => runtime.deployApp(flags, {}, approvalProgramFail, clearProgram),
+      () => runtime.deployApp(approvalProgramFail, clearProgram, flags, {}),
       RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
     );
   });
@@ -159,6 +164,6 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
   it("should pass during create application if pragma version >= 4", function () {
     // same program with teal version == 4. Since cost is calculation during execution,
     // this code will pass.
-    assert.doesNotThrow(() => runtime.deployApp(flags, {}, approvalProgramPass, clearProgram));
+    assert.doesNotThrow(() => runtime.deployApp(approvalProgramPass, clearProgram, flags, {}));
   });
 });
