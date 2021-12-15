@@ -182,7 +182,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   this.beforeEach(() => {
-    assetId = runtime.addAsset('gold',
+    assetId = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
     assetTransferParam.assetID = assetId;
     syncAccounts();
@@ -196,7 +196,7 @@ describe("Algorand Standard Assets", function () {
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
     assetId =
-      runtime.addAsset('gold', { creator: { ...john.account, name: "john" } }).assetID;
+      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetID;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -463,7 +463,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
-    const assetId = runtime.addAsset('silver',
+    const assetId = runtime.deployASA('silver',
       { creator: { ...john.account, name: "john" } }).assetID;
 
     const modFields: types.AssetModFields = {

@@ -112,7 +112,7 @@ describe('DAO test', function () {
     *   b) Call to DAO app by proposalLsig + asset transfer transaction from depositLsig -> proposalLsig
     */
 
-    govTokenID = runtime.addAsset(
+    govTokenID = runtime.deployASA(
       'gov-token', { creator: { ...creator.account, name: 'dao-creator' } }).assetID;
 
     const daoAppArgs = [

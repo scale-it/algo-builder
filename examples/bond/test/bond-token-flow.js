@@ -82,7 +82,7 @@ describe('Bond token Tests', function () {
     * bob can exit all their tokens (12 and 2 respectively).
     */
 
-    const currentBondIndex = runtime.addAsset(
+    const currentBondIndex = runtime.deployASA(
       'bond-token-0',
       { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 

@@ -70,7 +70,7 @@ describe('Bond token failing tests', function () {
   const bondCreator = convert.addressToPk(bondTokenCreator.address);
 
   this.beforeEach(async function () {
-    initialBond = runtime.addAsset(
+    initialBond = runtime.deployASA(
       'bond-token-0',
       { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 

@@ -361,12 +361,12 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime using asa.yaml
+   * Deploy Asset in Runtime using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.addAsset(asa, flags.creator.addr, flags);
+  deployASA (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
@@ -374,7 +374,7 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime without using asa.yaml
+   * Deploy Asset in Runtime without using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */

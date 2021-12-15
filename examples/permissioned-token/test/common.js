@@ -51,7 +51,7 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.assetIndex = this.runtime.addAsset(name, { creator: creator }).assetID;
+    this.assetIndex = this.runtime.deployASA(name, { creator: creator }).assetID;
   }
 
   deployController (sender, approvalProgram, clearStateProgram) {

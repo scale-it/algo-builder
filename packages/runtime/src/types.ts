@@ -148,7 +148,7 @@ export interface Context {
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
-  addAsset: (name: string,
+  deployASA: (name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
   addASADef: (
     name: string, asaDef: types.ASADef,
@@ -219,7 +219,7 @@ export interface AccountStoreI {
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
+  deployASA: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void

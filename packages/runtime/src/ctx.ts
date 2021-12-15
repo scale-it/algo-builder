@@ -168,7 +168,7 @@ export class Ctx implements Context {
    * @param fromAccountAddr account address
    * @param flags asa deployment flags
    */
-  addAsset (
+  deployASA (
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
@@ -192,7 +192,7 @@ export class Ctx implements Context {
     parseASADef(asaDef);
     validateOptInAccNames(this.state.accountNameAddress, asaDef);
     // create asset(with holding) in sender account
-    const asset = senderAcc.addAsset(
+    const asset = senderAcc.deployASA(
       ++this.state.assetCounter, name, asaDef
     );
     this.assertAccBalAboveMin(fromAccountAddr);
@@ -679,7 +679,7 @@ export class Ctx implements Context {
           if (txParam.asaDef) {
             r = this.addASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
           } else {
-            r = this.addAsset(txParam.asaName, fromAccountAddr, flags);
+            r = this.deployASA(txParam.asaName, fromAccountAddr, flags);
           }
           this.knowableID.set(idx, (r as DeployedAssetTxReceipt).assetID);
           break;

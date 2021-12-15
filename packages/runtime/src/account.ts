@@ -172,11 +172,11 @@ export class AccountStore implements AccountStoreI {
   }
 
   /**
-   * Creates Asset in account's state
+   * Deploy Asset in account's state
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
+  deployASA (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });

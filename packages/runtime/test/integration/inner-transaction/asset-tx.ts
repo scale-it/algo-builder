@@ -47,7 +47,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
     // create asset
-    assetID = runtime.addAsset('gold',
+    assetID = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
 
     // fund app (escrow belonging to app) with 10 ALGO
