@@ -657,7 +657,7 @@ describe("TEALv5: Inner Transactions", function () {
       let assetID = 0;
       const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
       if (elonAcc) {
-        assetID = interpreter.runtime.ctx.addASADef(
+        assetID = interpreter.runtime.ctx.deployASADef(
           'test-asa',
           { total: 10, decimals: 0, unitName: "TASA" },
           elonAddr,
@@ -736,7 +736,7 @@ describe("TEALv5: Inner Transactions", function () {
       const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
       if (elonAcc) {
         // in foreign-assets
-        assetID1 = interpreter.runtime.ctx.addASADef(
+        assetID1 = interpreter.runtime.ctx.deployASADef(
           'test-asa-1',
           { total: 11, decimals: 0, unitName: "TASA1" },
           elonAddr,
@@ -744,7 +744,7 @@ describe("TEALv5: Inner Transactions", function () {
         ).assetID;
 
         // not in foreign-assets
-        assetID2 = interpreter.runtime.ctx.addASADef(
+        assetID2 = interpreter.runtime.ctx.deployASADef(
           'test-asa-2',
           { total: 22, decimals: 0, unitName: "TASA2" },
           elonAddr,

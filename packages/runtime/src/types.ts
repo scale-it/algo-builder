@@ -150,7 +150,7 @@ export interface Context {
   processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
   deployASA: (name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
-  addASADef: (
+  deployASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ) => DeployedAssetTxReceipt

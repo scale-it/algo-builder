@@ -163,7 +163,7 @@ export class Ctx implements Context {
   }
 
   /**
-   * Add asset using asa.yaml file
+   * Deploy asset using asa.yaml file
    * @param name asset name
    * @param fromAccountAddr account address
    * @param flags asa deployment flags
@@ -172,19 +172,19 @@ export class Ctx implements Context {
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
-    return this.addASADef(
+    return this.deployASADef(
       name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
     );
   }
 
   /**
-   * Add Asset without using asa.yaml file
+   * Deploy Asset without using asa.yaml file
    * @param name ASA name
    * @param asaDef asset defitions
    * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addASADef (
+  deployASADef (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
@@ -677,7 +677,7 @@ export class Ctx implements Context {
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
           if (txParam.asaDef) {
-            r = this.addASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
+            r = this.deployASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
           } else {
             r = this.deployASA(txParam.asaName, fromAccountAddr, flags);
           }

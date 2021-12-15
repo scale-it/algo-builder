@@ -378,8 +378,8 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);

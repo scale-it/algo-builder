@@ -75,7 +75,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   const getGlobal = (key) => runtime.getGlobalState(appInfo.appID, key);
 
   // Create B_[i+1]
-  const newBond = runtime.addASADef(
+  const newBond = runtime.deployASADef(
     newBondToken,
     asaDef,
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }

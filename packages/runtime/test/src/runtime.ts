@@ -226,7 +226,7 @@ describe("Algorand Standard Assets", function () {
         note: "note"
       }
     };
-    assetId = runtime.addASADef(
+    assetId = runtime.deployASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
     ).assetID;
     syncAccounts();
