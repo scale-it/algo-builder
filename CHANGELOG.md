@@ -36,6 +36,9 @@
 + Added `deployer.loadLogicFromCache` to load a logic signature from already compiled TEAL codes (stored in `artifacts/cache`, for eg during `deployer.fundLsig`). This avoid re-compilation (and passing `scTmplParams`) each time(s) user wants to load an lsig.
 + Updated `TealDbg` method to load already compiled TEAL code from `artifacts/cache`. Compilation is forced only when a) TEAL is not cached OR b) `scInitParam` (template parameters) are passed with `tealFile`.
 
+### Infrastructure
++ Updated private-net setup, sandbox & indexer scripts to run in `dev` mode.
+
 ### Breaking changes
 `@algo-builder/runtime`:
 + Renamed `Runtime.getLogicSig` to `Runtime.createLsigAccount` #506.
