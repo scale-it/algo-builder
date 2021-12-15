@@ -50,7 +50,27 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-
++ Renamed `Runtime.addApp` to `Runtime.deployApp`, `Runtime.addAsset` to `Runtime.deployAsset`, `Runtime.addAssetDef` to `Runtime.deployAssetDef`. 
++ Make order of `Runtime.deloyApp` like `Deloyer.deployApp`.
+    * For instance:
+    ```javascript
+    //from 
+    Runtime.deployApp(
+        flags: AppDeploymentFlags, 
+        payFlags: types.TxParams,
+        approvalProgram: string, 
+        clearProgram: string,
+        debugStack?: number
+    )
+    //to
+    Runtime.deployApp(
+        approvalProgram: string, 
+        clearProgram: string,
+        flags: AppDeploymentFlags, 
+        payFlags: types.TxParams,
+        debugStack?: number
+    )
+    ```
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
 + Fix bug: `runtime.optinToApp` updating state even after opt-in fails. Reported by @patrick
