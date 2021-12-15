@@ -94,7 +94,12 @@ describe('Crowdfunding Tests', function () {
 
     // create application
     applicationId = runtime.deployApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
+
     const creatorPk = convert.addressToPk(creator.address);
 
     // setup escrow account
@@ -296,8 +301,13 @@ describe('Crowdfunding Tests', function () {
   it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
+
     const applicationId = runtime.deployApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
 
     // setup escrow account
     const lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });

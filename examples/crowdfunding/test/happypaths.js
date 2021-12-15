@@ -103,7 +103,12 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // deploy application
     applicationId = runtime.deployApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
+
     const creatorPk = convert.addressToPk(creator.address);
 
     assert.isDefined(applicationId);

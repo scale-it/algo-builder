@@ -86,7 +86,11 @@ describe('Bond token failing tests', function () {
 
     // create application
     applicationId = runtime.deployApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID

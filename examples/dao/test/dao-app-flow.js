@@ -126,9 +126,13 @@ describe('DAO test', function () {
     const approvalProgram = getProgram('dao-app-approval.py', { ARG_GOV_TOKEN: govTokenID });
     const clearProgram = getProgram('dao-app-clear.py');
 
-    // create application
+    // deploy application
     appID = runtime.deployApp(
-      { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram).appID;
+      approvalProgram,
+      clearProgram,
+      { ...appCreationFlags, appArgs: daoAppArgs },
+      {}
+    ).appID;
 
     // setup lsig accounts
     // Initialize issuer lsig with bond-app ID

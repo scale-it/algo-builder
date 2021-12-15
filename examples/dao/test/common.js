@@ -75,7 +75,10 @@ class Context {
     ];
 
     this.daoAppID = this.runtime.deployApp(
-      { ...appCreationFlags, appArgs: daoAppArgs }, {}, daoApprovalProgram, daoClearProgram
+      daoApprovalProgram,
+      daoClearProgram,
+      { ...appCreationFlags, appArgs: daoAppArgs },
+      {}
     ).appID;
   }
 
