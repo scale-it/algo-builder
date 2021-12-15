@@ -47,6 +47,13 @@ function mkASA (): wtypes.ASADef {
   };
 }
 
+function stubAlgodGenesisAndTxParams (algodClient: algosdk.Algodv2): void {
+  sinon.stub(algodClient, "getTransactionParams")
+    .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
+  sinon.stub(algodClient, "genesis")
+    .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+}
+
 describe("Opt-In to ASA", () => {
   useFixtureProject("config-project");
 
@@ -68,10 +75,7 @@ describe("Opt-In to ASA", () => {
       fromAccount: bobAcc,
       assetID: 1
     };
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
     expected = {
       'confirmed-round': 1,
       'asset-index': 1,
@@ -134,10 +138,7 @@ describe("ASA modify fields", () => {
       assetID: 1,
       fields: assetFields
     };
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   afterEach(async () => {
@@ -184,10 +185,7 @@ describe("Delete ASA and SSC", () => {
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
     await deployer.deployASA("silver", { creator: deployer.accounts[0] });
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   afterEach(async () => {
@@ -283,10 +281,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     const deployerCfg = new DeployerConfig(env, algod);
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
 
     // deploy  and delete asset
     const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
@@ -603,10 +598,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     deployerCfg = new DeployerConfig(env, algod);
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerRunMode(deployerCfg);
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   afterEach(async () => {
@@ -718,10 +710,7 @@ describe("Update transaction test in run mode", () => {
     algod = new AlgoOperatorDryRunImpl();
     deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerRunMode(deployerCfg);
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   afterEach(async () => {
@@ -839,10 +828,7 @@ describe("Deploy ASA without asa.yaml", () => {
     const deployerCfg = new DeployerConfig(env, algod);
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   afterEach(async () => {
@@ -887,10 +873,7 @@ describe("SDK Transaction object", () => {
     algod = new AlgoOperatorDryRunImpl();
     const deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerDeployMode(deployerCfg);
-    sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
-    sinon.stub(algod.algodClient, "genesis")
-      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
+    stubAlgodGenesisAndTxParams(algod.algodClient);
   });
 
   it("should sign and send transaction", async () => {
