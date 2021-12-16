@@ -50,7 +50,8 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-+ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated.
++ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated. 
+Please use `runtime.deployASA`, `runtime.deployASADef` and `runtime.deployAdd` instead of the above functions.
 + Update `runtime.deloyApp` to be compatible with `deployer.deployApp`. Example:
     * For instance:
     ```javascript
