@@ -1,32 +1,30 @@
 import algosdk from "algosdk";
 import { expect } from "chai";
-import sinon from 'sinon';
+import sinon from "sinon";
 
 import { DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { balanceOf } from "../../src/lib/status";
 import { Deployer } from "../../src/types";
 import { mkEnv } from "../helpers/params";
-import { useFixtureProject } from "../helpers/project";
 import { mockAccountInformation } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 describe("Status package", () => {
-  useFixtureProject("config-project");
   let deployer: Deployer;
-  let algod: AlgoOperatorDryRunImpl;
+  const algod = new AlgoOperatorDryRunImpl();
+  const env = mkEnv("network1");
+  const deployerCfg = new DeployerConfig(env, algod);
 
-  beforeEach(async () => {
-    const env = mkEnv("network1");
-    algod = new AlgoOperatorDryRunImpl();
-    const deployerCfg = new DeployerConfig(env, algod);
+  before(async () => {
     deployer = new DeployerRunMode(deployerCfg);
 
-    (sinon.stub(algod.algodClient, "accountInformation") as any)
-      .returns({ do: async () => mockAccountInformation }) as ReturnType<algosdk.Algodv2['accountInformation']>;
+    (sinon.stub(algod.algodClient, "accountInformation") as any).returns({
+      do: async () => mockAccountInformation
+    }) as ReturnType<algosdk.Algodv2["accountInformation"]>;
   });
 
-  afterEach(async () => {
+  after(async () => {
     (algod.algodClient.accountInformation as sinon.SinonStub).restore();
   });
 
@@ -38,6 +36,8 @@ describe("Status package", () => {
 
   it("balanceOf should return 0 when account does hold an asset", async () => {
     const otherAssetID = 0;
-    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(0n);
+    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(
+      0n
+    );
   });
 });

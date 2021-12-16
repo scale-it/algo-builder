@@ -1,3 +1,4 @@
+import { status } from "@algo-builder/web";
 import type { modelsv2 } from "algosdk";
 
 import { AccountAddress, Deployer, Key, StateValue } from "../types";
@@ -14,13 +15,9 @@ export async function balanceOf (
   accountAddress: AccountAddress,
   assetID: number
 ): Promise<number|bigint> {
-  const accountInfo = await deployer.algodClient.accountInformation(accountAddress).do();
-  for (const asset of accountInfo.assets) {
-    if (asset['asset-id'] === assetID) {
-      return asset.amount;
-    }
-  }
-  return 0n;
+  const a = await status.getAssetHolding(deployer.algodClient, accountAddress, assetID);
+  if (a === undefined) return 0n;
+  return a.amount;
 };
 
 /**
