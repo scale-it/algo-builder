@@ -50,20 +50,20 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-+ Renamed `Runtime.addApp` to `Runtime.deployApp`, `Runtime.addAsset` to `Runtime.deployAsset`, `Runtime.addAssetDef` to `Runtime.deployAssetDef`. 
-+ Make order of `Runtime.deloyApp` like `Deloyer.deployApp`.
++ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated.
++ Update `runtime.deloyApp` to be compatible with `deployer.deployApp`. Example:
     * For instance:
     ```javascript
-    //from 
-    Runtime.deployApp(
+    // from 
+    runtime.deployApp(
         flags: AppDeploymentFlags, 
         payFlags: types.TxParams,
         approvalProgram: string, 
         clearProgram: string,
         debugStack?: number
     )
-    //to
-    Runtime.deployApp(
+    // to
+    runtime.deployApp(
         approvalProgram: string, 
         clearProgram: string,
         flags: AppDeploymentFlags, 

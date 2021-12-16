@@ -154,6 +154,12 @@ export interface Context {
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ) => DeployedAssetTxReceipt
+  addAsset: (name: string,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
+  addASADef: (
+    name: string, asaDef: types.ASADef,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
+  ) => DeployedAssetTxReceipt
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
   deployApp: (
@@ -220,6 +226,7 @@ export interface AccountStoreI {
   getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
   deployASA: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
+  addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void

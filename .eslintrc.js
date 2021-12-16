@@ -17,7 +17,6 @@ module.exports = {
   },
   rules:  {
     // "ter-indent": [2, {"FunctionDeclaration": {"parameters": "first"}}],
-
     "import/no-extraneous-dependencies": 0,
     "import/prefer-default-export": "off",
     "max-classes-per-file": 0,
@@ -35,6 +34,7 @@ module.exports = {
     "semi": "off",  // required for a proper work
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
-    "sonarjs/cognitive-complexity": ["error", 16]
+    "sonarjs/cognitive-complexity": ["error", 16],
+    "sonarjs/no-identical-functions": 0
   }
 }

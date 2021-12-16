@@ -361,6 +361,20 @@ export class Runtime {
   }
 
   /**
+   * Create Asset in Runtime using asa.yaml
+   * @deprecated `deployASA` should be used instead
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
+    this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
+    return txReceipt;
+  }
+
+  /**
    * Deploy Asset in Runtime using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
@@ -370,6 +384,20 @@ export class Runtime {
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
+    return txReceipt;
+  }
+
+  /**
+   * Create Asset in Runtime without using asa.yaml
+   * @deprecated `deployASADef` should be used instead
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
+    this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
     return txReceipt;
   }
 
@@ -456,6 +484,30 @@ export class Runtime {
     const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
+  }
+
+  /**
+   * create new application and returns application id
+   * @deprecated `deployApp` should be used instead.
+   * @param approvalProgram application approval program
+   * @param clearProgram application clear program
+   * @param flags SSCDeployment flags
+   * @param payFlags Transaction parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
+   * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
+   */
+  addApp (
+    approvalProgram: string, clearProgram: string,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
+    debugStack?: number
+  ): DeployedAppTxReceipt {
+    this.addCtxAppCreateTxn(flags, payFlags);
+    this.ctx.debugStack = debugStack;
+    const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
+
+    this.store = this.ctx.state;
+    return txReceipt;
   }
 
   /**
