@@ -3,7 +3,7 @@ import type { modelsv2 } from "algosdk";
 import { AccountAddress, Deployer, Key, StateValue } from "../types";
 
 /**
- * Returns `account` asset holding of `assetID`. Returns undefined if the account is not
+ * Returns `account` balance of `assetID`. Returns 0 if the account has not
  * opt-in to the given asset id.
  * @param deployer algob deployer
  * @param accountAddress account to return assetholding info
