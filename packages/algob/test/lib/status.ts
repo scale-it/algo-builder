@@ -35,8 +35,9 @@ describe("Status library", () => {
     const amount = mockAccountInformation.assets[0].amount;
     expect(await balanceOf(deployer, mockAccountInformation.address, assetID)).to.equal(amount);
   });
-  it("balanceOf should return 0 when account not hold asset", async () => {
+
+  it("balanceOf should return undefined when asset is invalid", async () => {
     const otherAssetID = 0;
-    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(0);
+    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(undefined);
   });
 });
