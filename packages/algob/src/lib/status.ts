@@ -13,15 +13,14 @@ export async function balanceOf (
   deployer: Deployer,
   accountAddress: AccountAddress,
   assetID: number
-): Promise<modelsv2.AssetHolding | undefined> {
+): Promise<number|bigint> {
   const accountInfo = await deployer.algodClient.accountInformation(accountAddress).do();
   for (const asset of accountInfo.assets) {
     if (asset['asset-id'] === assetID) {
-      console.log("Asset Holding Info:", asset);
-      return asset;
+      return asset.amount;
     }
   }
-  return undefined;
+  return 0;
 };
 
 /**
