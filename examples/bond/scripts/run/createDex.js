@@ -64,11 +64,11 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   console.log('Total issued: ', total);
 
   // balance of old bond tokens in issuer lsig
-  const info = await balanceOf(deployer, issuerLsig.address(), oldBond);
-  console.log('Old balance amount ', info.amount);
+  const amount = await balanceOf(deployer, issuerLsig.address(), oldBond);
+  console.log('Old balance amount ', amount);
   const groupTx = createDexTx(
     managerAcc, appInfo.appID, issuerLsig,
-    dexLsig, creatorAccount, info.amount, newIndex, oldBond,
+    dexLsig, creatorAccount, amount, newIndex, oldBond,
     total, couponValue
   );
 

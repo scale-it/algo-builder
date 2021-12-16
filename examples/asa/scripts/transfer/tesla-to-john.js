@@ -17,7 +17,7 @@ async function run (runtimeEnv, deployer) {
     payFlags: { totalFee: 1000 }
   });
 
-  await balanceOf(deployer, john.addr, teslaAssetID);
+  console.log('Balance: ', await balanceOf(deployer, john.addr, teslaAssetID));
 }
 
 module.exports = { default: run };

@@ -36,7 +36,7 @@ async function transferNFT (deployer, creator, p) {
   await tryExecuteTx(deployer, txGroup);
 
   console.log(`NFT transferred to [${creator.name}:${creator.addr}], p = ${p}`);
-  await balanceOf(deployer, creator.addr, asaInfo.assetIndex); // print ASA Holding
+  console.log('Balance: ', await balanceOf(deployer, creator.addr, asaInfo.assetIndex));
 }
 
 async function run (runtimeEnv, deployer) {
