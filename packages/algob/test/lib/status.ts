@@ -11,7 +11,7 @@ import { useFixtureProject } from "../helpers/project";
 import { mockAccountInformation } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-describe("Status library", () => {
+describe("Status package", () => {
   useFixtureProject("config-project");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
@@ -30,14 +30,14 @@ describe("Status library", () => {
     (algod.algodClient.accountInformation as sinon.SinonStub).restore();
   });
 
-  it("balanceOf should return corrent amount when account hold asset", async () => {
+  it("balanceOf should return corrent amount when account hold an asset", async () => {
     const assetID = mockAccountInformation.assets[0]["asset-id"];
     const amount = mockAccountInformation.assets[0].amount;
     expect(await balanceOf(deployer, mockAccountInformation.address, assetID)).to.equal(amount);
   });
 
-  it("balanceOf should return undefined when asset is invalid", async () => {
+  it("balanceOf should return 0 when account does hold an asset", async () => {
     const otherAssetID = 0;
-    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(undefined);
+    expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(0n);
   });
 });
