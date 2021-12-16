@@ -40,16 +40,6 @@ export class WallectConnectSession {
   }
 
   /**
-   * Kills a session if already exists, create new session
-   */
-  async forceCreate (): Promise<void> {
-    if (this.connector.connected) {
-      try { await this.close(); } catch (e) {};
-    }
-    return await this.create();
-  }
-
-  /**
    * Create new session
    * @param force if true, kills an existing session and creates new one.
    * By default force is false
