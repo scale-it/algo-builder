@@ -55,6 +55,10 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
   ];
 
   console.log('Exiting');
-  await executeTransaction(deployer, exitTx);
+  try {
+    await executeTransaction(deployer, exitTx);
+  } catch (error) {
+    console.log(error.response?.error);
+  }
   console.log('Exited');
 };
