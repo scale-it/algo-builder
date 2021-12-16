@@ -29,7 +29,7 @@ async function run (runtimeEnv, deployer) {
     payFlags: { totalFee: 1000 }
   });
 
-  await balanceOf(deployer, john.addr, gold.assetIndex);
+  console.log('Balance: ', await balanceOf(deployer, john.addr, gold.assetIndex));
 }
 
 module.exports = { default: run };

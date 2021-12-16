@@ -35,7 +35,7 @@ async function updateReserveByAssetConfig (deployer, address) {
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
-  const reserveAssetHolding = await balanceOf(deployer, asaReserveAddr, tesla.assetIndex);
+  const reserveAssetHoldingAmount = await balanceOf(deployer, asaReserveAddr, tesla.assetIndex);
 
   console.log('Asset reserve address before: ', asaReserveAddr);
 
@@ -74,7 +74,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       recipient: address,
       assetID: tesla.assetIndex,
       revocationTarget: asaReserveAddr,
-      amount: reserveAssetHolding.amount, // moving all tokens to new reserve
+      amount: reserveAssetHoldingAmount, // moving all tokens to new reserve
       lsig: clawbackLsig,
       payFlags: { totalFee: 1000 }
     },

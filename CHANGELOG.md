@@ -53,7 +53,7 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-
++ `balanceOf` in `@algo-builder/algob` package now return amount (number) of asset account holding and won't print them. If the account does not hold an asset it will return 0.
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
 + Fix bug: `runtime.optinToApp` updating state even after opt-in fails. Reported by @patrick
