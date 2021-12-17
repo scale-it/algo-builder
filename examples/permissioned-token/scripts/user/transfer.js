@@ -83,7 +83,7 @@ async function transfer (deployer, from, toAddr, amount) {
   await executeTransaction(deployer, txGroup);
 
   console.log(`* ${toAddr}(receiver) asset holding: *`);
-  await balanceOf(deployer, toAddr, tesla.assetIndex);
+  console.log('Balance: ', await balanceOf(deployer, toAddr, tesla.assetIndex));
 
   console.log('* Transfer Successful *');
 }

@@ -1,5 +1,5 @@
 const { types } = require('@algo-builder/web');
-const { ProposalType } = require('./common');
+const { ProposalType, DAOActions, ExampleProposalConfig } = require('./common');
 
 const now = Math.round(new Date().getTime() / 1000);
 
@@ -11,10 +11,10 @@ function mkProposalTx (
   daoAppID, govTokenID, proposerAcc, depositLsig, proposalLsig, daoFundLsig) {
   const proposerAddr = proposerAcc.addr ?? proposerAcc.address;
   const proposalParams = [
-    'str:add_proposal',
-    'str:my-custom-proposal', // name
-    'str:www.myurl.com', // url
-    'str:url-hash', // url_hash
+    DAOActions.addProposal,
+    `str:${ExampleProposalConfig.name}`, // name
+    `str:${ExampleProposalConfig.URL}`, // url
+    `str:${ExampleProposalConfig.URLHash}`, // url_hash
     'str:', // hash_algo (passing null)
     `int:${votingStart}`, // voting_start (now + 1min)
     `int:${votingEnd}`, // voting_end (now + 3min)
@@ -56,7 +56,7 @@ function mkDepositVoteTokenTx (daoAppID, govTokenID, voterAcc, depositLsig, amou
       fromAccount: voterAcc,
       appID: daoAppID,
       payFlags: { totalFee: 1000 },
-      appArgs: ['str:deposit_vote_token']
+      appArgs: [DAOActions.depositVoteToken]
     },
     // tx1: deposit votes (each token == 1 vote)
     {
@@ -80,7 +80,7 @@ function mkWithdrawVoteDepositTx (daoAppID, govTokenID, voterAcc, depositLsig, a
       fromAccount: voterAcc,
       appID: daoAppID,
       payFlags: { totalFee: 2000 },
-      appArgs: ['str:withdraw_vote_deposit']
+      appArgs: [DAOActions.withdrawVoteDeposit]
     },
     // tx1: withdraw votes from deposit_lsig back to voter
     {
@@ -103,7 +103,7 @@ function mkClearVoteRecordTx (daoAppID, voterAcc, proposalAddr) {
     fromAccount: voterAcc,
     appID: daoAppID,
     payFlags: { totalFee: 1000 },
-    appArgs: ['str:clear_vote_record'],
+    appArgs: [DAOActions.clearVoteRecord],
     accounts: [proposalAddr]
   };
 };
@@ -119,7 +119,7 @@ function mkClearProposalTx (
       appID: daoAppID,
       lsig: proposalLsig,
       payFlags: { totalFee: 2000 },
-      appArgs: ['str:clear_proposal']
+      appArgs: [DAOActions.clearProposal]
     },
     // tx1: withdraw deposit from deposit_lsig back to proposalLsig
     {

@@ -24,7 +24,8 @@ async function run (runtimeEnv, deployer) {
   await deployer.optInAccountToASA(asaInfo.assetIndex, 'john', {});
 
   const assetID = asaInfo.assetIndex;
-  await balanceOf(deployer, elon.addr, assetID);
+
+  console.log('Balance: ', await balanceOf(deployer, elon.addr, assetID));
   // await balanceOf(deployer, john.addr, assetID);
 
   console.log('[tesla]: Script execution has finished!');

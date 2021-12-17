@@ -1,6 +1,8 @@
-export * as types from "./types";
 export * as parsing from "./lib/parsing";
+export * as status from "./lib/status";
 export * as tx from "./lib/txn";
+export * as types from "./types";
+
 export { ASADefSchema, ASADefsSchema } from "./types-input";
 export {
   BuilderError,
