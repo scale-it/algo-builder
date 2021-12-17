@@ -188,8 +188,8 @@ export class Ctx implements Context {
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
-    return this.deployASADef(
-      name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
+    return this.deployASA(
+      name, fromAccountAddr, flags
     );
   }
 
@@ -248,36 +248,7 @@ export class Ctx implements Context {
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
-    const senderAcc = this.getAccount(fromAccountAddr);
-    parseASADef(asaDef);
-    validateOptInAccNames(this.state.accountNameAddress, asaDef);
-    // create asset(with holding) in sender account
-    const asset = senderAcc.deployASA(
-      ++this.state.assetCounter, name, asaDef
-    );
-    this.assertAccBalAboveMin(fromAccountAddr);
-    this.runtime.mkAssetCreateTx(name, flags, asset);
-
-    this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
-    this.state.assetNameInfo.set(name, {
-      creator: senderAcc.address,
-      assetIndex: this.state.assetCounter,
-      assetDef: asset,
-      txId: this.tx.txID,
-      confirmedRound: this.runtime.getRound(),
-      deleted: false
-    });
-
-    if (this.isInnerTx) { this.createdAssetID = this.state.assetCounter; }
-
-    // set & return transaction receipt
-    const receipt = {
-      txn: this.tx,
-      txID: this.tx.txID,
-      assetID: this.state.assetCounter
-    };
-    this.state.txReceipts.set(this.tx.txID, receipt);
-    return receipt;
+    return this.deployASADef(name, asaDef, fromAccountAddr, flags);
   }
 
   /**
@@ -390,57 +361,7 @@ export class Ctx implements Context {
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
   ): DeployedAppTxReceipt {
-    const senderAcc = this.getAccount(fromAccountAddr);
-
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.deployApp(0, flags, approvalProgram, clearProgram);
-    this.assertAccBalAboveMin(senderAcc.address);
-    this.state.accounts.set(senderAcc.address, senderAcc);
-    this.state.globalApps.set(app.id, senderAcc.address);
-
-    this.runtime.run(
-      approvalProgram, ExecutionMode.APPLICATION, idx, this.debugStack
-    ); // execute TEAL code with appID = 0
-
-    // create new application in globalApps map
-    this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
-
-    const attributes = this.getApp(0);
-    senderAcc.createdApps.delete(0); // remove zero app from sender's account
-    this.state.globalApps.delete(0); // remove zero app from context
-    senderAcc.createdApps.set(this.state.appCounter, attributes);
-    this.state.appNameInfo.set(
-      approvalProgram + "-" + clearProgram,
-      {
-        creator: senderAcc.address,
-        appID: this.state.appCounter,
-        applicationAccount: getApplicationAddress(this.state.appCounter),
-        txId: this.tx.txID,
-        confirmedRound: this.runtime.getRound(),
-        timestamp: Math.round(+new Date() / 1000),
-        deleted: false
-      }
-    );
-
-    // create new "app account" (an account belonging to smart contract)
-    // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#using-a-smart-contract-as-an-escrow
-    const acc = new AccountStore(0, {
-      addr: getApplicationAddress(this.state.appCounter),
-      sk: new Uint8Array(0)
-    });
-    this.state.accounts.set(acc.address, acc);
-
-    // set & return transaction receipt
-    const receipt = this.state.txReceipts.get(this.tx.txID) as DeployedAppTxReceipt;
-    receipt.appID = this.state.appCounter;
-    return receipt;
+    return this.deployApp(fromAccountAddr, flags, approvalProgram, clearProgram, idx);
   }
 
   /**
