@@ -35,6 +35,7 @@
 + Updated `deployer.deployApp()` & `deployer.updateApp()` to take one more optional parameter: `appName`. This will also save in a checkpoint the compiled app by name. Added new funtion `getAppByName(name: string)` to query checkpoint information by app name.
 + Added `deployer.loadLogicFromCache` to load a logic signature from already compiled TEAL codes (stored in `artifacts/cache`, for eg during `deployer.fundLsig`). This avoid re-compilation (and passing `scTmplParams`) each time(s) user wants to load an lsig.
 + Updated `TealDbg` method to load already compiled TEAL code from `artifacts/cache`. Compilation is forced only when a) TEAL is not cached OR b) `scInitParam` (template parameters) are passed with `tealFile`.
++ Adding `@algo-builder/web.status.getAssetHolding` function which queries account asset holding.
 
 ### Infrastructure
 + Updated private-net setup, sandbox & indexer scripts to run in `dev` mode.
@@ -53,7 +54,8 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-+ `balanceOf` in `@algo-builder/algob` package now return amount (number) of asset account holding and won't print them. If the account does not hold an asset it will return 0.
++ `balanceOf` in `@algo-builder/algob` package now return amount (number) of asset account holding and won't print them. If the account does not hold an asset it will return 0. To query asset holding, please use a new `@algo-builder/web.status.getAssetHolding` function.
+
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
 + Fix bug: `runtime.optinToApp` updating state even after opt-in fails. Reported by @patrick
