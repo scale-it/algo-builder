@@ -204,24 +204,7 @@ export class AccountStore implements AccountStoreI {
    * @param asaDef Asset Definitions
    */
   addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
-    if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
-      throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
-        { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
-    }
-
-    this.minBalance += ASSET_CREATION_FEE;
-    const asset = new Asset(assetId, asaDef, this.address, name);
-    this.createdAssets.set(asset.id, asset.definitions);
-    // set holding in creator account. note: for creator default-frozen is always false
-    // https://developer.algorand.org/docs/reference/rest-apis/algod/v2/#assetparams
-    const assetHolding: AssetHoldingM = {
-      amount: BigInt(asaDef.total), // for creator opt-in amount is total assets
-      'asset-id': assetId,
-      creator: this.address,
-      'is-frozen': false
-    };
-    this.assets.set(assetId, assetHolding);
-    return asset.definitions;
+    return this.deployASA(assetId, name, asaDef);
   }
 
   /**
@@ -288,7 +271,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   /**
-   * Add application in account's state
+   * Deploy application in account's state
    * check maximum account creation limit
    * @param appID application index
    * @param params SSCDeployment Flags
@@ -314,6 +297,21 @@ export class AccountStore implements AccountStoreI {
     const app = new App(appID, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
     return app;
+  }
+
+  /**
+   * Add application in account's state
+   * check maximum account creation limit
+   * @deprecated Please use `deployApp`
+   * @param appID application index
+   * @param params SSCDeployment Flags
+   * @param approvalProgram application approval program
+   * @param clearProgram application clear program
+   * NOTE - approval and clear program must be the TEAL code as string
+   */
+  addApp (appID: number, params: AppDeploymentFlags,
+    approvalProgram: string, clearProgram: string): CreatedAppM {
+    return this.deployApp(appID, params, approvalProgram, clearProgram);
   }
 
   // opt in to application

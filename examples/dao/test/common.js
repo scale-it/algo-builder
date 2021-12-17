@@ -1,4 +1,3 @@
-const { getProgram } = require('@algo-builder/runtime');
 const { Runtime } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { Vote } = require('../scripts/run/common/common');
@@ -50,10 +49,11 @@ class Context {
     this.govTokenID = this.runtime.deployASA(name, { creator: creator }).assetID;
   }
 
-  deployDAOApp (sender, approvalProgram, clearStateProgram) {
-    const daoApprovalProgram = getProgram(approvalProgram, { ARG_GOV_TOKEN: this.govTokenID }, false);
-    const daoClearProgram = getProgram(clearStateProgram, {}, false);
+  deployDAOApp (sender, daoApprovalProgramFileName, daoClearStateProgramFileName) {
+    // const daoApprovalProgram = getProgram(approvalProgram, , false);
+    // const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
+    const daoPlaceholderParam = { ARG_GOV_TOKEN: this.govTokenID };
     const appCreationFlags = {
       sender: sender.account,
       localInts: 9,
@@ -75,10 +75,11 @@ class Context {
     ];
 
     this.daoAppID = this.runtime.deployApp(
-      daoApprovalProgram,
-      daoClearProgram,
+      daoApprovalProgramFileName,
+      daoClearStateProgramFileName,
       { ...appCreationFlags, appArgs: daoAppArgs },
-      {}
+      {},
+      daoPlaceholderParam
     ).appID;
   }
 

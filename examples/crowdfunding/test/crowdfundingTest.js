@@ -20,8 +20,11 @@ describe('Crowdfunding Tests', function () {
   let runtime;
   let flags;
   let applicationId;
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
+  const crowdFundApprovalFileName = 'crowdFundApproval.teal';
+  const crowdFundClearFileName = 'crowdFundClear.teal';
+
+  const crowdFundApprovalProgram = getProgram(crowdFundApprovalFileName);
+  const crowdFundClearProgram = getProgram(crowdFundClearFileName);
 
   this.beforeAll(async function () {
     runtime = new Runtime([master, creator, escrow, donor]);
@@ -94,8 +97,8 @@ describe('Crowdfunding Tests', function () {
 
     // create application
     applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
       { ...creationFlags, appArgs: creationArgs },
       {}
     ).appID;
@@ -129,8 +132,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalProgram,
+      crowdFundClearProgram,
       {}, { appArgs: appArgs });
     const escrowPk = convert.addressToPk(escrowAddress);
 
@@ -303,8 +306,8 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     const applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
       { ...creationFlags, appArgs: creationArgs },
       {}
     ).appID;
@@ -323,8 +326,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
       {}, { appArgs: appArgs });
 
     appArgs = [convert.stringToBytes('claim')];

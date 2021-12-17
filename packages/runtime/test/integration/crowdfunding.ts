@@ -1,7 +1,6 @@
 import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags, StackElem } from "../../src/types";
@@ -13,13 +12,13 @@ describe("Crowdfunding basic tests", function () {
   const john = new AccountStore(10e6);
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let flags: AppDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('crowdfunding.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'crowdfunding.teal';
+    clearProgramFileName = 'clear.teal';
 
     flags = {
       sender: john.account,
@@ -33,7 +32,7 @@ describe("Crowdfunding basic tests", function () {
   it("should fail during create application if 0 args are passed", function () {
     // create new app
     expectRuntimeError(
-      () => runtime.deployApp(approvalProgram, clearProgram, flags, {}),
+      () => runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -63,7 +62,7 @@ describe("Crowdfunding basic tests", function () {
 
     const johnMinBalance = john.minBalance;
     const appID = runtime.deployApp(
-      approvalProgram, clearProgram,
+      approvalProgramFileName, clearProgramFileName,
       { ...validFlags, appArgs: appArgs }, {}
     ).appID;
     // verify sender's min balance increased after creating application

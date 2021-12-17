@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags } from "../../src/types";
@@ -15,15 +14,15 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
   const john = new AccountStore(10e6);
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let flags: AppDeploymentFlags;
   let appID: number;
   let appCallParam: types.AppCallsParam;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('pooled-opcode-budget.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'pooled-opcode-budget.teal';
+    clearProgramFileName = 'clear.teal';
 
     flags = {
       sender: john.account,
@@ -33,7 +32,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
       localInts: 1
     };
 
-    appID = runtime.deployApp(approvalProgram, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}).appID;
 
     appCallParam = {
       type: types.TransactionType.CallApp,

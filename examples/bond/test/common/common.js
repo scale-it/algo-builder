@@ -45,8 +45,12 @@ const placeholderParam = {
   TMPL_NOMINAL_PRICE: 1000,
   TMPL_MATURITY_DATE: Math.round(new Date().getTime() / 1000) + 240
 };
-const approvalProgram = getProgram('bond-dapp-stateful.py', placeholderParam);
-const clearProgram = getProgram('bond-dapp-clear.py');
+
+const approvalProgramFileName = 'bond-dapp-stateful.py';
+const clearProgramFileName = 'bond-dapp-clear.py';
+
+const approvalProgram = getProgram(approvalProgramFileName, placeholderParam);
+const clearProgram = getProgram(clearProgramFileName);
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;
@@ -162,6 +166,9 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
 module.exports = {
   optInLsigToBond,
   createDex,
+  placeholderParam,
+  approvalProgramFileName,
+  clearProgramFileName,
   approvalProgram,
   clearProgram,
   minBalance,

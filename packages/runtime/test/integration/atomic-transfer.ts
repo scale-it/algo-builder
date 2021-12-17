@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -14,8 +13,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   let john: AccountStore;
   let alice: AccountStore;
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let assetId: number;
   let appID: number;
 
@@ -26,13 +25,13 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     // create asset
     assetId = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
 
     // deploy a new app
     appID = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       {
         sender: john.account,
         globalBytes: 32,

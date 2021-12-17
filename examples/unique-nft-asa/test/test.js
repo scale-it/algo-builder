@@ -20,8 +20,8 @@ describe('Unique NFT ASA tests', function () {
   let nftAppID;
   let createNftTxGroup;
   let transferNftTxGroup;
-  const approvalProgram = getProgram('nft-app-approval.py');
-  const clearProgram = getProgram('nft-app-clear.py');
+  const approvalProgramFileName = 'nft-app-approval.py';
+  const clearProgramFileName = 'nft-app-clear.py';
 
   this.beforeEach(async function () {
     creator = new AccountStore(minBalance);
@@ -36,7 +36,7 @@ describe('Unique NFT ASA tests', function () {
       globalBytes: 0
     };
 
-    nftAppID = runtime.deployApp(approvalProgram, clearProgram, creationFlags, {});
+    nftAppID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {});
 
     // setup stateless lsig
     const statelessLsigProg = getProgram(

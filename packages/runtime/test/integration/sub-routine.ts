@@ -1,6 +1,5 @@
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags } from "../../src/types";
@@ -12,17 +11,17 @@ describe("TEALv4: Sub routine", function () {
   const john = new AccountStore(10e6);
 
   let runtime: Runtime;
-  let approvalProgramPass: string;
-  let approvalProgramFail: string;
-  let approvalProgramFail1: string;
-  let clearProgram: string;
+  let approvalProgramPassFileName: string;
+  let approvalProgramFailFileName: string;
+  let approvalProgramFail1FileName: string;
+  let clearProgramFileName: string;
   let flags: AppDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgramPass = getProgram('approval-pass.teal');
-    approvalProgramFail = getProgram('approval-fail.teal');
-    approvalProgramFail1 = getProgram('approval-fail-1.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramPassFileName = 'approval-pass.teal';
+    approvalProgramFailFileName = 'approval-fail.teal';
+    approvalProgramFail1FileName = 'approval-fail-1.teal';
+    clearProgramFileName = 'clear.teal';
 
     flags = {
       sender: john.account,
@@ -36,13 +35,15 @@ describe("TEALv4: Sub routine", function () {
 
   it("should pass during create application", function () {
     // this code will pass, because sub-routine is working
-    assert.doesNotThrow(() => runtime.deployApp(approvalProgramPass, clearProgram, flags, {}));
+    assert.doesNotThrow(
+      () => runtime.deployApp(approvalProgramPassFileName, clearProgramFileName, flags, {})
+    );
   });
 
   it("should fail during create application", function () {
     // this fails because in last condition we check if over subroutine section was executed
     expectRuntimeError(
-      () => runtime.deployApp(approvalProgramFail, clearProgram, flags, {}),
+      () => runtime.deployApp(approvalProgramFailFileName, clearProgramFileName, flags, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -50,14 +51,14 @@ describe("TEALv4: Sub routine", function () {
   it("should fail during create application", function () {
     // this fails because there is no callsub before retsub(therefore callstack is empty)
     expectRuntimeError(
-      () => runtime.deployApp(approvalProgramFail1, clearProgram, flags, {}),
+      () => runtime.deployApp(approvalProgramFail1FileName, clearProgramFileName, flags, {}),
       RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY
     );
   });
 
   it("should calculate correct fibonacci number", () => {
-    const fibProg = getProgram('fibonacci.teal');
-    let appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
+    const fibProgFileName = 'fibonacci.teal';
+    let appID = runtime.deployApp(fibProgFileName, clearProgramFileName, flags, {}).appID;
 
     // 5th fibonacci
     let result = runtime.getGlobalState(appID, 'result');
@@ -65,21 +66,21 @@ describe("TEALv4: Sub routine", function () {
 
     // 6th fibonacci
     flags.appArgs = ['int:6'];
-    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(fibProgFileName, clearProgramFileName, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 8n);
 
     // 8th fibonacci
     flags.appArgs = ['int:8'];
-    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(fibProgFileName, clearProgramFileName, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 21n);
 
     // 1st fibonacci
     flags.appArgs = ['int:1'];
-    appID = runtime.deployApp(fibProg, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(fibProgFileName, clearProgramFileName, flags, {}).appID;
     result = runtime.getGlobalState(appID, 'result');
 
     assert.equal(result, 1n);
@@ -87,9 +88,9 @@ describe("TEALv4: Sub routine", function () {
 
   it("should throw cost exceed error", () => {
     flags.appArgs = ['int:9'];
-    const fibProg = getProgram('fibonacci.teal');
+    const fibProgFileName = 'fibonacci.teal';
     expectRuntimeError(
-      () => runtime.deployApp(fibProg, clearProgram, flags, {}),
+      () => runtime.deployApp(fibProgFileName, clearProgramFileName, flags, {}),
       RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
     );
   });

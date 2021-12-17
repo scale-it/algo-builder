@@ -15,6 +15,8 @@ describe("App Update Test", function () {
   const alice = new AccountStore(minBalance + 1000);
 
   let runtime: Runtime;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let approvalProgram: string;
   let clearProgram: string;
   let appID: number;
@@ -22,8 +24,11 @@ describe("App Update Test", function () {
 
   this.beforeEach(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgram = getProgram('approval_program.py');
-    clearProgram = getProgram('clear_program.teal');
+
+    approvalProgramFileName = 'approval_program.py';
+    clearProgramFileName = 'clear_program.teal';
+    approvalProgram = getProgram(approvalProgramFileName);
+    clearProgram = getProgram(clearProgramFileName);
     const flags = {
       sender: john.account,
       globalBytes: 5,
@@ -32,7 +37,7 @@ describe("App Update Test", function () {
       localInts: 5
     };
 
-    appID = runtime.deployApp(approvalProgram, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}).appID;
 
     groupTx = [
       {

@@ -35,6 +35,5 @@ module.exports = {
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
     "sonarjs/cognitive-complexity": ["error", 16],
-    "sonarjs/no-identical-functions": 0
   }
 }

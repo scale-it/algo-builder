@@ -52,26 +52,7 @@
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
 + `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated. 
 Please use `runtime.deployASA`, `runtime.deployASADef` and `runtime.deployAdd` instead of the above functions.
-+ Update `runtime.deloyApp` to be compatible with `deployer.deployApp`. Example:
-    * For instance:
-    ```javascript
-    // from 
-    runtime.deployApp(
-        flags: AppDeploymentFlags, 
-        payFlags: types.TxParams,
-        approvalProgram: string, 
-        clearProgram: string,
-        debugStack?: number
-    )
-    // to
-    runtime.deployApp(
-        approvalProgram: string, 
-        clearProgram: string,
-        flags: AppDeploymentFlags, 
-        payFlags: types.TxParams,
-        debugStack?: number
-    )
-    ```
++ Update `runtime.deloyApp` to be compatible with `deployer.deployApp`.
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.
 + Fix bug: `runtime.optinToApp` updating state even after opt-in fails. Reported by @patrick

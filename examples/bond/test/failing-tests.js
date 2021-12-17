@@ -5,8 +5,9 @@ const {
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
-  optInLsigToBond, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance, redeem
+  optInLsigToBond, createDex, approvalProgram, clearProgram,
+  minBalance, initialBalance, redeem,
+  approvalProgramFileName, clearProgramFileName, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
 
@@ -84,12 +85,13 @@ describe('Bond token failing tests', function () {
       maxIssuance
     ];
 
-    // create application
+    // deploy application
     applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       { ...creationFlags, appArgs: creationArgs },
-      {}
+      {},
+      placeholderParam
     ).appID;
 
     // setup lsig account

@@ -29,8 +29,11 @@ describe('Crowdfunding Tests - Happy Paths', function () {
   let runtime;
   let creationFlags;
   let applicationId;
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
+  const approvalProgramFileName = 'crowdFundApproval.teal';
+  const clearProgramFileName = 'crowdFundClear.teal';
+
+  const approvalProgram = getProgram(approvalProgramFileName);
+  const clearProgram = getProgram(clearProgramFileName);
 
   this.beforeAll(async function () {
     runtime = new Runtime([master, creator, donor]);
@@ -103,8 +106,8 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // deploy application
     applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       { ...creationFlags, appArgs: creationArgs },
       {}
     ).appID;

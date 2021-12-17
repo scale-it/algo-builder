@@ -2,7 +2,6 @@ import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
-import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
@@ -21,15 +20,15 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
   let appAccount: AccountStoreI; // initialized later
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let appCreationFlags: AppDeploymentFlags;
   let appID: number;
   let appCallParams: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([master, john, elon, bob]); // setup test
-    approvalProgram = getProgram('approval-payment.py');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'approval-payment.py';
+    clearProgramFileName = 'clear.teal';
 
     appCreationFlags = {
       sender: john.account,
@@ -41,7 +40,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
   });
 
   this.beforeEach(() => {
-    appID = runtime.deployApp(approvalProgram, clearProgram, appCreationFlags, {}).appID;
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, appCreationFlags, {}).appID;
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
     // fund app (escrow belonging to app) with 10 ALGO

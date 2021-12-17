@@ -1,6 +1,5 @@
 import { types } from "@algo-builder/web";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from '../../src/index';
 import { useFixture } from '../helpers/integration';
@@ -15,7 +14,7 @@ describe('Current Transaction Tests', function () {
   let runtime: Runtime;
   let master: AccountStore, creator: AccountStore;
   let applicationId1: number, applicationId2: number;
-  let approvalProgram: string, clearProgram: string;
+  let approvalProgramFileName: string, clearProgramFileName: string;
 
   const flags = {
     localInts: 0,
@@ -29,8 +28,8 @@ describe('Current Transaction Tests', function () {
     creator = new AccountStore(initialCreatorBalance);
 
     runtime = new Runtime([master, creator]);
-    approvalProgram = getProgram('test1.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'test1.teal';
+    clearProgramFileName = 'clear.teal';
   });
 
   function setupApps (): void {
@@ -38,16 +37,16 @@ describe('Current Transaction Tests', function () {
 
     // deploy first application
     applicationId1 = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       { ...creationFlags, sender: creator.account },
       {}
     ).appID;
 
     // deploy second application
     applicationId2 = runtime.deployApp(
-      getProgram('test2.teal'),
-      clearProgram,
+      'test2.teal',
+      clearProgramFileName,
       { ...creationFlags, sender: creator.account },
       {}
     ).appID;

@@ -1,4 +1,3 @@
-const { getProgram } = require('@algo-builder/runtime');
 const { convert } = require('@algo-builder/algob');
 const { Runtime, AccountStore } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
@@ -123,15 +122,16 @@ describe('DAO test', function () {
       `str:${url}`
     ];
 
-    const approvalProgram = getProgram('dao-app-approval.py', { ARG_GOV_TOKEN: govTokenID });
-    const clearProgram = getProgram('dao-app-clear.py');
-
+    const approvalFileName = 'dao-app-approval.py';
+    const clearFilename = 'dao-app-clear.py';
+    const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
     // deploy application
     appID = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalFileName,
+      clearFilename,
       { ...appCreationFlags, appArgs: daoAppArgs },
-      {}
+      {},
+      placeholderParam
     ).appID;
 
     // setup lsig accounts

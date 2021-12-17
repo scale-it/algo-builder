@@ -1,5 +1,5 @@
 import { convert } from '@algo-builder/algob';
-import { AccountStore, getProgram, Runtime } from '@algo-builder/runtime';
+import { AccountStore, Runtime } from '@algo-builder/runtime';
 import { assert } from 'chai';
 const { types } = require('@algo-builder/web');
 
@@ -19,8 +19,8 @@ describe('Test for transferring asset using custom logic', function () {
   let applicationId;
   let assetId;
   let assetDef;
-  const approvalProgram = getProgram('poi-approval.teal');
-  const clearProgram = getProgram('poi-clear.teal');
+  const approvalProgramFileName = 'poi-approval.teal';
+  const clearProgramFileName = 'poi-clear.teal';
 
   this.beforeEach(async function () {
     alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
@@ -60,8 +60,8 @@ describe('Test for transferring asset using custom logic', function () {
     ];
 
     applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       { ...creationFlags, appArgs: creationArgs },
       {}
     ).appID;
@@ -265,8 +265,8 @@ describe('Test for transferring asset using custom logic', function () {
     ];
 
     applicationId = runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       { ...creationFlags, appArgs: creationArgs },
       {}
     ).appID;

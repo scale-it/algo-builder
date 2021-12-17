@@ -1,6 +1,5 @@
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { AppDeploymentFlags } from "../../src/types";
@@ -14,13 +13,13 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   const john = new AccountStore(minBalance + fee);
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let appID: number;
   let creationFlags: AppDeploymentFlags;
   this.beforeAll(function () {
     runtime = new Runtime([alice, john]); // setup test
-    clearProgram = getProgram('clear.teal');
+    clearProgramFileName = 'clear.teal';
 
     creationFlags = {
       sender: john.account,
@@ -35,8 +34,8 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
   it("should opt-in to app successfully and update local state", function () {
     // deploy new app
-    approvalProgram = getProgram('accept-optin.teal');
-    appID = runtime.deployApp(approvalProgram, clearProgram, creationFlags, {}).appID;
+    approvalProgramFileName = 'accept-optin.teal';
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}).appID;
 
     // opt-in (should be accepted)
     assert.doesNotThrow(() => runtime.optInToApp(john.address, appID, {}, {}));
@@ -49,8 +48,8 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
   it("should reject opt-in to app", function () {
     // deploy new app
-    approvalProgram = getProgram('reject-optin.teal');
-    appID = runtime.deployApp(approvalProgram, clearProgram, creationFlags, {}).appID;
+    approvalProgramFileName = 'reject-optin.teal';
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}).appID;
 
     // verify local state not present BEFORE optin
     assert.isUndefined(alice.appsLocalState.get(appID));

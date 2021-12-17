@@ -16,6 +16,10 @@ describe("Algorand Smart Contracts - Update Application", function () {
   const alice = new AccountStore(minBalance + 1000);
 
   let runtime: Runtime;
+  let oldApprovalProgramFileName: string;
+  let newApprovalProgramFileName: string;
+  let clearProgramFileName: string;
+
   let oldApprovalProgram: string;
   let newApprovalProgram: string;
   let clearProgram: string;
@@ -29,9 +33,14 @@ describe("Algorand Smart Contracts - Update Application", function () {
   };
   this.beforeAll(async function () {
     runtime = new Runtime([creator, alice]);
-    oldApprovalProgram = getProgram('oldapproval.teal');
-    newApprovalProgram = getProgram('newapproval.teal');
-    clearProgram = getProgram('clear.teal');
+
+    oldApprovalProgramFileName = 'oldapproval.teal';
+    newApprovalProgramFileName = 'newapproval.teal';
+    clearProgramFileName = 'clear.teal';
+
+    oldApprovalProgram = getProgram(oldApprovalProgramFileName);
+    newApprovalProgram = getProgram(newApprovalProgramFileName);
+    clearProgram = getProgram(clearProgramFileName);
   });
 
   it("should fail during update application if app id is not defined", function () {
@@ -42,7 +51,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
   });
 
   it("should update application", function () {
-    appID = runtime.deployApp(oldApprovalProgram, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(oldApprovalProgramFileName, clearProgramFileName, flags, {}).appID;
     runtime.optInToApp(creator.address, appID, {}, {});
 
     // check deploy app params
@@ -78,7 +87,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
   it("should not update application if logic is rejected", function () {
     // create app
-    appID = runtime.deployApp(oldApprovalProgram, clearProgram, flags, {}).appID;
+    appID = runtime.deployApp(oldApprovalProgramFileName, clearProgramFileName, flags, {}).appID;
     runtime.optInToApp(creator.address, appID, {}, {});
 
     let app = runtime.getApp(appID);

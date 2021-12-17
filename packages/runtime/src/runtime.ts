@@ -367,11 +367,7 @@ export class Runtime {
    * @param flags ASA Deployment Flags
    */
   addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
-    this.store = this.ctx.state;
-
-    this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
-    return txReceipt;
+    return this.deployASA(asa, flags);
   }
 
   /**
@@ -394,11 +390,7 @@ export class Runtime {
    * @param flags ASA Deployment Flags
    */
   addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
-    this.store = this.ctx.state;
-
-    this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
-    return txReceipt;
+    return this.deployASADef(asa, asaDef, flags);
   }
 
   /**
@@ -512,8 +504,8 @@ export class Runtime {
 
   /**
    * deploy a new application and returns application id
-   * @param approvalProgram application approval program
-   * @param clearProgram application clear program
+   * @param approvalProgramFileName application approval program filename
+   * @param clearProgramFileName application clear program filename
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param debugStack: if passed then TEAL Stack is logged to console after
@@ -521,12 +513,21 @@ export class Runtime {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   deployApp (
-    approvalProgram: string, clearProgram: string,
-    flags: AppDeploymentFlags, payFlags: types.TxParams,
+    approvalProgramFileName: string,
+    clearProgramFileName: string,
+    flags: AppDeploymentFlags,
+    payFlags: types.TxParams,
+    scTmplParams?: SCParams,
     debugStack?: number
   ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
+    const approvalProgram = getProgram(approvalProgramFileName, scTmplParams);
+
+    // if clearProgramFileName is empty => clearProgram = ""
+    // else load it by getProgram
+    const clearProgram = clearProgramFileName ? getProgram(clearProgramFileName, scTmplParams) : "";
+
     const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
     this.store = this.ctx.state;

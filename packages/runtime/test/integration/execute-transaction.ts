@@ -14,6 +14,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   let john: AccountStore;
   let alice: AccountStore;
   let runtime: Runtime;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let approvalProgram: string;
   let clearProgram: string;
   let assetId: number;
@@ -22,8 +24,12 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     john = new AccountStore(initialBalance, elonMuskAccount);
     alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
+
+    approvalProgram = getProgram(approvalProgramFileName);
+    clearProgram = getProgram(clearProgramFileName);
   });
 
   function syncAccounts (): void {
@@ -40,8 +46,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   function setupApp (): void {
     // deploy new app
     runtime.deployApp(
-      approvalProgram,
-      clearProgram,
+      approvalProgramFileName,
+      clearProgramFileName,
       {
         sender: john.account,
         globalBytes: 32,

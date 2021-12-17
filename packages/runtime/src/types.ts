@@ -166,6 +166,10 @@ export interface Context {
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number
   ) => DeployedAppTxReceipt
+  addApp: (
+    fromAccountAddr: string, flags: AppDeploymentFlags,
+    approvalProgram: string, clearProgram: string, idx: number
+  ) => DeployedAppTxReceipt
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
   updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt
 }
@@ -222,6 +226,8 @@ export interface AccountStoreI {
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   deployApp: (appID: number, params: AppDeploymentFlags,
+    approvalProgram: string, clearProgram: string) => CreatedAppM
+  addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
