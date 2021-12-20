@@ -3,7 +3,6 @@ import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
-import { getProgram } from "../../../src";
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE } from "../../../src/lib/constants";
 import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
@@ -20,16 +19,16 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   let appAccount: AccountStoreI; // initialized later
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let appCreationFlags: AppDeploymentFlags;
   let appID: number;
   let assetID: number;
   let appCallParams: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([master, john, elon, bob]); // setup test
-    approvalProgram = getProgram('approval-asset-tx.py');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'approval-asset-tx.py';
+    clearProgramFileName = 'clear.teal';
 
     appCreationFlags = {
       sender: john.account,
@@ -43,11 +42,11 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   this.beforeEach(() => {
     // reset app (delete + create)
     john.createdApps.delete(appID);
-    appID = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, appCreationFlags, {}).appID;
     appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
     // create asset
-    assetID = runtime.addAsset('gold',
+    assetID = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
 
     // fund app (escrow belonging to app) with 10 ALGO

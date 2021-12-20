@@ -148,17 +148,17 @@ export interface Context {
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
-  addAsset: (name: string,
+  deployASA: (name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
-  addASADef: (
+  deployASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ) => DeployedAssetTxReceipt
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
-  addApp: (
+  deployApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
+    approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
   ) => DeployedAppTxReceipt
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
   updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt

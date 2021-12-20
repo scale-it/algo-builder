@@ -1,10 +1,8 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
-const { getProgram } = require('@algo-builder/runtime');
 const { convert } = require('@algo-builder/algob');
 const { Runtime, AccountStore } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { assert } = require('chai');
-const { ProposalType, Vote } = require('../scripts/run/common/common');
+const { ProposalType, Vote, ExampleProposalConfig, DAOActions } = require('../scripts/run/common/common');
 const {
   now, mkProposalTx, mkDepositVoteTokenTx, mkWithdrawVoteDepositTx,
   mkClearVoteRecordTx, mkClearProposalTx, votingStart, votingEnd, executeBefore
@@ -100,12 +98,17 @@ describe('DAO test', function () {
       `str:${url}`
     ];
 
-    const approvalProgram = getProgram('dao-app-approval.py', { ARG_GOV_TOKEN: govTokenID });
-    const clearProgram = getProgram('dao-app-clear.py');
-
-    // create application
-    appID = runtime.addApp(
-      { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram).appID;
+    const approvalFileName = 'dao-app-approval.py';
+    const clearFilename = 'dao-app-clear.py';
+    const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
+    // deploy application
+    appID = runtime.deployApp(
+      approvalFileName,
+      clearFilename,
+      { ...appCreationFlags, appArgs: daoAppArgs },
+      {},
+      placeholderParam
+    ).appID;
 
     // setup lsig accounts
     // Initialize issuer lsig with bond-app ID
@@ -249,9 +252,9 @@ describe('DAO test', function () {
     syncAccounts();
 
     // assert proposal config is added
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes(ExampleProposalConfig.name));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes(ExampleProposalConfig.URL));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes(ExampleProposalConfig.URLHash));
     // empty hash_algo must save sha256
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));
@@ -316,7 +319,7 @@ describe('DAO test', function () {
     const registerVoteA = {
       ...registerVoteParam,
       fromAccount: voterA.account,
-      appArgs: ['str:register_vote', `str:${Vote.YES}`]
+      appArgs: [DAOActions.registerVote, `str:${Vote.YES}`]
     };
     runtime.executeTx(registerVoteA);
 
@@ -324,7 +327,7 @@ describe('DAO test', function () {
     const registerVoteB = {
       ...registerVoteParam,
       fromAccount: voterB.account,
-      appArgs: ['str:register_vote', `str:${Vote.ABSTAIN}`]
+      appArgs: [DAOActions.registerVote, `str:${Vote.ABSTAIN}`]
     };
     runtime.executeTx(registerVoteB);
     syncAccounts();
@@ -358,7 +361,7 @@ describe('DAO test', function () {
         fromAccount: proposerA.account,
         appID: appID,
         payFlags: { totalFee: 2000 },
-        appArgs: ['str:execute'],
+        appArgs: [DAOActions.execute],
         accounts: [proposalALsig.address()]
       },
       // tx1 as per proposal instructions (set in ./add_proposal.js)
@@ -532,9 +535,9 @@ describe('DAO test', function () {
     syncAccounts();
 
     // assert proposal config is added
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes(ExampleProposalConfig.name));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes(ExampleProposalConfig.URL));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes(ExampleProposalConfig.URLHash));
     // empty hash_algo must save sha256
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));
@@ -580,7 +583,7 @@ describe('DAO test', function () {
       fromAccount: voterA.account,
       appID: appID,
       payFlags: { totalFee: 2000 },
-      appArgs: ['str:register_vote', `str:${Vote.YES}`],
+      appArgs: [DAOActions.registerVote, `str:${Vote.YES}`],
       accounts: [proposalALsig.address()]
     };
     runtime.executeTx(registerVoteParam);
@@ -708,7 +711,7 @@ describe('DAO test', function () {
       fromAccount: voterA.account,
       appID: appID,
       payFlags: { totalFee: 2000 },
-      appArgs: ['str:register_vote', `str:${Vote.ABSTAIN}`],
+      appArgs: [DAOActions.registerVote, `str:${Vote.ABSTAIN}`],
       accounts: [proposalALsig.address()]
     };
     runtime.executeTx(registerVoteParam);
@@ -798,9 +801,9 @@ describe('DAO test', function () {
     syncAccounts();
 
     // assert proposal config is added
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
-    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes(ExampleProposalConfig.name));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes(ExampleProposalConfig.URL));
+    assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes(ExampleProposalConfig.URLHash));
     // empty hash_algo must save sha256
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
     assert.deepEqual(proposalALsigAcc.getLocalState(appID, 'voting_start'), BigInt(votingStart));

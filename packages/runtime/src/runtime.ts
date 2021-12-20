@@ -361,12 +361,22 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime using asa.yaml
+   * Create Asset in Runtime using asa.yaml
+   * @deprecated `deployASA` should be used instead
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
   addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.addAsset(asa, flags.creator.addr, flags);
+    return this.deployASA(asa, flags);
+  }
+
+  /**
+   * Deploy Asset in Runtime using asa.yaml
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  deployASA (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
@@ -374,12 +384,22 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime without using asa.yaml
+   * Create Asset in Runtime without using asa.yaml
+   * @deprecated `deployASADef` should be used instead
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
   addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
-    const txReceipt = this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+    return this.deployASADef(asa, asaDef, flags);
+  }
+
+  /**
+   * Deploy Asset in Runtime without using asa.yaml
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+    const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
     this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
@@ -459,24 +479,54 @@ export class Runtime {
   }
 
   /**
-   * creates new application and returns application id
-   * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
+   * create new application and returns application id
+   * @deprecated `deployApp` should be used instead.
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param flags SSCDeployment flags
+   * @param payFlags Transaction parameters
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
     debugStack?: number
   ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    const txReceipt = this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
+    const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
+    this.store = this.ctx.state;
+    return txReceipt;
+  }
+
+  /**
+   * deploy a new application and returns application id
+   * @param approvalProgram application approval program (TEAL code or program filename)
+   * @param clearProgram application clear program (TEAL code or program filename)
+   * @param flags SSCDeployment flags
+   * @param payFlags Transaction parameters
+   * @param scTmplParams Smart Contract template parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
+   */
+  deployApp (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: AppDeploymentFlags,
+    payFlags: types.TxParams,
+    scTmplParams?: SCParams,
+    debugStack?: number
+  ): DeployedAppTxReceipt {
+    this.addCtxAppCreateTxn(flags, payFlags);
+    this.ctx.debugStack = debugStack;
+
+    const txReceipt = this.ctx.deployApp(
+      flags.sender.addr, flags,
+      approvalProgram, clearProgram, 0, scTmplParams
+    );
     this.store = this.ctx.state;
     return txReceipt;
   }
@@ -731,7 +781,7 @@ export class Runtime {
     });
 
     // reset pooled opcode cost for single tx, this is to handle singular functions
-    // which don't "initialize" a new ctx (eg. addApp)
+    // which don't "initialize" a new ctx (eg. deployApp)
     if (this.ctx.gtxs.length === 1) { this.ctx.pooledApplCost = 0; }
     interpreter.execute(program, executionMode, this, debugStack);
 

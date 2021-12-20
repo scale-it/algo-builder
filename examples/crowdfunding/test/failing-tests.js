@@ -27,9 +27,10 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   let lsig;
   let escrowAddress;
   const rejectMsg = 'RUNTIME_ERR1007: Teal code rejected by logic';
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
-
+  const approvalProgramFileName = 'crowdFundApproval.teal';
+  const clearProgramFileName = 'crowdFundClear.teal';
+  const approvalProgram = getProgram(approvalProgramFileName);
+  const clearProgram = getProgram(clearProgramFileName);
   // Create new runtime and application before each test.
   this.beforeEach(() => {
     runtime = new Runtime([master, creator, donor]);
@@ -64,9 +65,13 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       globalBytes: 3
     };
 
-    // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+    // deploy application
+    applicationId = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
 
     // setup escrow account
     lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });

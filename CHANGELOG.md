@@ -54,6 +54,9 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
++ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated. 
+Please use `runtime.deployASA`, `runtime.deployASADef` and `runtime.deployAdd` instead of the above functions.
++ Update `runtime.deloyApp` to be compatible with `deployer.deployApp`.
 + `balanceOf` in `@algo-builder/algob` package now return amount (number) of asset account holding and won't print them. If the account does not hold an asset it will return 0. To query asset holding, please use a new `@algo-builder/web.status.getAssetHolding` function.
 
 ### Bug Fixes

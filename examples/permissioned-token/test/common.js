@@ -1,4 +1,4 @@
-const { Runtime, getProgram } = require('@algo-builder/runtime');
+const { Runtime } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 
 const minBalance = 20e6; // 20 ALGOs
@@ -51,10 +51,10 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.assetIndex = this.runtime.addAsset(name, { creator: creator }).assetID;
+    this.assetIndex = this.runtime.deployASA(name, { creator: creator }).assetID;
   }
 
-  deployController (sender, approvalProgram, clearStateProgram) {
+  deployController (sender, controllerProgram, clearProgram) {
     const sscFlags = {
       sender: sender.account,
       localInts: 0,
@@ -63,10 +63,9 @@ class Context {
       globalBytes: 0,
       foreignAssets: [this.assetIndex]
     };
-    const controllerProgram = getProgram(approvalProgram, { TOKEN_ID: this.assetIndex });
-    const clearProgram = getProgram(clearStateProgram);
-    this.controllerappID = this.runtime.addApp(
-      sscFlags, {}, controllerProgram, clearProgram
+    this.controllerappID = this.runtime.deployApp(
+      controllerProgram, clearProgram, sscFlags, {},
+      { TOKEN_ID: this.assetIndex }
     ).appID;
   }
 
@@ -96,10 +95,7 @@ class Context {
     this.optInToASA(this.lsig.address());
   }
 
-  deployPermissions (permManager, approvalProgram, clearStateProgram) {
-    const permissionsProgram = getProgram(approvalProgram, { PERM_MANAGER: permManager.address });
-    const clearProgram = getProgram(clearStateProgram);
-
+  deployPermissions (permManager, permissionsProgram, clearProgram) {
     const sscFlags = {
       sender: permManager.account,
       localInts: 1,
@@ -108,8 +104,12 @@ class Context {
       globalBytes: 1,
       appArgs: [`int:${this.controllerappID}`]
     };
-    this.permissionsappID = this.runtime.addApp(
-      sscFlags, {}, permissionsProgram, clearProgram
+    this.permissionsappID = this.runtime.deployApp(
+      permissionsProgram,
+      clearProgram,
+      sscFlags,
+      {},
+      { PERM_MANAGER: permManager.address }
     ).appID;
 
     // set permissions SSC app_id in controller ssc
