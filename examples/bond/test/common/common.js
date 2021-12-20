@@ -167,8 +167,6 @@ module.exports = {
   optInLsigToBond,
   createDex,
   placeholderParam,
-  approvalProgramFileName,
-  clearProgramFileName,
   approvalProgram,
   clearProgram,
   minBalance,

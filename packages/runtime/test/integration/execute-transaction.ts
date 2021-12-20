@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -27,9 +26,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
     approvalProgramFileName = 'counter-approval.teal';
     clearProgramFileName = 'clear.teal';
-
-    approvalProgram = getProgram(approvalProgramFileName);
-    clearProgram = getProgram(clearProgramFileName);
   });
 
   function syncAccounts (): void {
@@ -144,8 +140,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.DeployApp,
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
-        approvalProgram: approvalProgram,
-        clearProgram: clearProgram,
+        approvalProgram: approvalProgramFileName,
+        clearProgram: clearProgramFileName,
         localInts: 1,
         localBytes: 1,
         globalInts: 1,
@@ -190,14 +186,14 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     );
 
     // verify app doesn't exist in map
-    const res = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    const res = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isUndefined(res);
   });
 
   it("Should opt-in to app, through execute transaction", () => {
     setupApp();
     syncAccounts();
-    const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    const appInfo = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isDefined(appInfo);
     const tx: types.ExecParams[] = [
       {

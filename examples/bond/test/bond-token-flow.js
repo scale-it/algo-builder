@@ -8,7 +8,7 @@ const { assert } = require('chai');
 const {
   optInLsigToBond, createDex,
   minBalance, initialBalance,
-  issue, redeem, approvalProgramFileName, clearProgramFileName, placeholderParam
+  issue, redeem, approvalProgram, clearProgram, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
 
@@ -98,8 +98,8 @@ describe('Bond token Tests', function () {
 
     // create application
     applicationId = runtime.deployApp(
-      approvalProgramFileName,
-      clearProgramFileName,
+      approvalProgram,
+      clearProgram,
       { ...creationFlags, appArgs: creationArgs },
       {},
       placeholderParam

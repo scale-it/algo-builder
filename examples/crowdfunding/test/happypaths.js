@@ -69,7 +69,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     runtime = new Runtime([master, creator, donor, fundReceiver]);
 
     applicationId = 1;
-    creator.deployApp(applicationId, creationFlags, approvalProgram, clearProgram);
+    creator.addApp(applicationId, creationFlags, approvalProgram, clearProgram);
     runtime.store.globalApps.set(applicationId, creator.address);
 
     // set creation args in global state

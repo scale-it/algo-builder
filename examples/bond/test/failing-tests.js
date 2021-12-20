@@ -6,8 +6,7 @@ const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
   optInLsigToBond, createDex, approvalProgram, clearProgram,
-  minBalance, initialBalance, redeem,
-  approvalProgramFileName, clearProgramFileName, placeholderParam
+  minBalance, initialBalance, redeem, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
 
@@ -87,8 +86,8 @@ describe('Bond token failing tests', function () {
 
     // deploy application
     applicationId = runtime.deployApp(
-      approvalProgramFileName,
-      clearProgramFileName,
+      approvalProgram,
+      clearProgram,
       { ...creationFlags, appArgs: creationArgs },
       {},
       placeholderParam
