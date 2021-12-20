@@ -1,18 +1,19 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
-import { AccountStore, parseASADef, Runtime } from ".";
+import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
+import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI,
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, EncTx, ExecutionMode,
-  ID, SSCAttributesM, StackElem, State, TxReceipt
+  ID, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -178,22 +179,6 @@ export class Ctx implements Context {
   }
 
   /**
-   * create asset using asa.yaml file
-   * @deprecated `deployASA` should be used instead.
-   * @param name asset name
-   * @param fromAccountAddr account address
-   * @param flags asa deployment flags
-   */
-  addAsset (
-    name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): DeployedAssetTxReceipt {
-    return this.deployASA(
-      name, fromAccountAddr, flags
-    );
-  }
-
-  /**
    * Deploy Asset without using asa.yaml file
    * @param name ASA name
    * @param asaDef asset defitions
@@ -208,7 +193,7 @@ export class Ctx implements Context {
     parseASADef(asaDef);
     validateOptInAccNames(this.state.accountNameAddress, asaDef);
     // create asset(with holding) in sender account
-    const asset = senderAcc.deployASA(
+    const asset = senderAcc.addAsset(
       ++this.state.assetCounter, name, asaDef
     );
     this.assertAccBalAboveMin(fromAccountAddr);
@@ -234,21 +219,6 @@ export class Ctx implements Context {
     };
     this.state.txReceipts.set(this.tx.txID, receipt);
     return receipt;
-  }
-
-  /**
-   * Deploy Asset without using asa.yaml file
-   * @deprecated `deployASADef` should be used instead.
-   * @param name ASA name
-   * @param asaDef asset defitions
-   * @param fromAccountAddr account address of creator
-   * @param flags ASA Deployment Flags
-   */
-  addASADef (
-    name: string, asaDef: types.ASADef,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): DeployedAssetTxReceipt {
-    return this.deployASADef(name, asaDef, fromAccountAddr, flags);
   }
 
   /**
@@ -279,35 +249,44 @@ export class Ctx implements Context {
    * deploy a new application and returns application id
    * @param fromAccountAddr creator account address
    * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
-   * @param approvalProgram application approval program
-   * @param clearProgram application clear program
+   * @param approvalProgram application approval program (TEAL code or program filename)
+   * @param clearProgram application clear program (TEAL code or program filename)
    * @param idx index of transaction in group
-   * NOTE:
-   * - approval and clear program must be the TEAL code as string (not compiled code)
-   * - When creating or opting into an app, the minimum balance grows before the app code runs
+   * @param scTmplParams Smart Contract template parameters
+   * NOTE When creating or opting into an app, the minimum balance grows before the app code runs
    */
   deployApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
+    approvalProgram: string, clearProgram: string, idx: number,
+    scTmplParams?: SCParams
   ): DeployedAppTxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
 
-    if (approvalProgram === "") {
+    const approvalProgTEAL =
+      (approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt))
+        ? getProgram(approvalProgram, scTmplParams)
+        : approvalProgram;
+
+    const clearProgTEAL =
+      (clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt))
+        ? getProgram(clearProgram, scTmplParams)
+        : clearProgram;
+
+    if (approvalProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
-    if (clearProgram === "") {
+    if (clearProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
 
     // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.deployApp(0, flags, approvalProgram, clearProgram);
+    const app = senderAcc.addApp(0, flags, approvalProgTEAL, clearProgTEAL);
     this.assertAccBalAboveMin(senderAcc.address);
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
     this.runtime.run(
-      approvalProgram, ExecutionMode.APPLICATION, idx, this.debugStack
+      approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack
     ); // execute TEAL code with appID = 0
 
     // create new application in globalApps map
@@ -342,26 +321,6 @@ export class Ctx implements Context {
     const receipt = this.state.txReceipts.get(this.tx.txID) as DeployedAppTxReceipt;
     receipt.appID = this.state.appCounter;
     return receipt;
-  }
-
-  /**
-   * deploy a new application and returns application id
-   * @deprecated `deployApp` should be used instead.
-   * @param fromAccountAddr creator account address
-   * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
-   * @param approvalProgram application approval program
-   * @param clearProgram application clear program
-   * @param idx index of transaction in group
-   * NOTE:
-   * - approval and clear program must be the TEAL code as string (not compiled code)
-   * - When creating or opting into an app, the minimum balance grows before the app code runs
-   */
-  addApp (
-    fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
-  ): DeployedAppTxReceipt {
-    return this.deployApp(fromAccountAddr, flags, approvalProgram, clearProgram, idx);
   }
 
   /**

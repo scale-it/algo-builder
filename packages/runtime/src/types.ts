@@ -154,21 +154,11 @@ export interface Context {
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ) => DeployedAssetTxReceipt
-  addAsset: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
-  addASADef: (
-    name: string, asaDef: types.ASADef,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => DeployedAssetTxReceipt
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
   deployApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
-  ) => DeployedAppTxReceipt
-  addApp: (
-    fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
+    approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
   ) => DeployedAppTxReceipt
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
   updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt
@@ -225,13 +215,10 @@ export interface AccountStoreI {
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
-  deployApp: (appID: number, params: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string) => CreatedAppM
   addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  deployASA: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void

@@ -173,10 +173,11 @@ export class AccountStore implements AccountStoreI {
 
   /**
    * Deploy Asset in account's state
+   * @param assetId Asset Index
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  deployASA (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
+  addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -195,16 +196,6 @@ export class AccountStore implements AccountStoreI {
     };
     this.assets.set(assetId, assetHolding);
     return asset.definitions;
-  }
-
-  /**
-   * Create Asset in account's state
-   * @deprecated `deployASA` should be used instead.
-   * @param name Asset Name
-   * @param asaDef Asset Definitions
-   */
-  addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
-    return this.deployASA(assetId, name, asaDef);
   }
 
   /**
@@ -279,7 +270,7 @@ export class AccountStore implements AccountStoreI {
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  deployApp (appID: number, params: AppDeploymentFlags,
+  addApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
@@ -297,21 +288,6 @@ export class AccountStore implements AccountStoreI {
     const app = new App(appID, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
     return app;
-  }
-
-  /**
-   * Add application in account's state
-   * check maximum account creation limit
-   * @deprecated Please use `deployApp`
-   * @param appID application index
-   * @param params SSCDeployment Flags
-   * @param approvalProgram application approval program
-   * @param clearProgram application clear program
-   * NOTE - approval and clear program must be the TEAL code as string
-   */
-  addApp (appID: number, params: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string): CreatedAppM {
-    return this.deployApp(appID, params, approvalProgram, clearProgram);
   }
 
   // opt in to application

@@ -504,17 +504,17 @@ export class Runtime {
 
   /**
    * deploy a new application and returns application id
-   * @param approvalProgramFileName application approval program filename
-   * @param clearProgramFileName application clear program filename
+   * @param approvalProgram application approval program (TEAL code or program filename)
+   * @param clearProgram application clear program (TEAL code or program filename)
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
+   * @param scTmplParams Smart Contract template parameters
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
-   * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   deployApp (
-    approvalProgramFileName: string,
-    clearProgramFileName: string,
+    approvalProgram: string,
+    clearProgram: string,
     flags: AppDeploymentFlags,
     payFlags: types.TxParams,
     scTmplParams?: SCParams,
@@ -522,14 +522,11 @@ export class Runtime {
   ): DeployedAppTxReceipt {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    const approvalProgram = getProgram(approvalProgramFileName, scTmplParams);
 
-    // if clearProgramFileName is empty => clearProgram = ""
-    // else load it by getProgram
-    const clearProgram = clearProgramFileName ? getProgram(clearProgramFileName, scTmplParams) : "";
-
-    const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
-
+    const txReceipt = this.ctx.deployApp(
+      flags.sender.addr, flags,
+      approvalProgram, clearProgram, 0, scTmplParams
+    );
     this.store = this.ctx.state;
     return txReceipt;
   }
