@@ -536,20 +536,32 @@ export class Ctx implements Context {
   /**
    * Update application
    * @param appID application Id
-   * @param approvalProgram new approval program
-   * @param clearProgram new clear program
-   * NOTE - approval and clear program must be the TEAL code as string
+   * @param approvalProgram new approval program (TEAL code or program filename)
+   * @param clearProgram new clear program (TEAL code or program filename)
+   * @param idx index of transaction in group
+   * @param scTmplParams Smart Contract template parameters
    */
   updateApp (
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    idx: number
+    idx: number,
+    scTmplParams?: SCParams
   ): TxReceipt {
-    if (approvalProgram === "") {
+    const approvalProgTEAL =
+      (approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt))
+        ? getProgram(approvalProgram, scTmplParams)
+        : approvalProgram;
+
+    const clearProgTEAL =
+      (clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt))
+        ? getProgram(clearProgram, scTmplParams)
+        : clearProgram;
+
+    if (approvalProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
-    if (clearProgram === "") {
+    if (clearProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
 
@@ -558,8 +570,8 @@ export class Ctx implements Context {
       this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
 
     const updatedApp = this.getApp(appID);
-    updatedApp[APPROVAL_PROGRAM] = approvalProgram;
-    updatedApp["clear-state-program"] = clearProgram;
+    updatedApp[APPROVAL_PROGRAM] = approvalProgTEAL;
+    updatedApp["clear-state-program"] = clearProgTEAL;
     return txReceipt;
   }
 
