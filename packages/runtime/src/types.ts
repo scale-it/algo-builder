@@ -161,7 +161,8 @@ export interface Context {
     approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
   ) => DeployedAppTxReceipt
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
-  updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => TxReceipt
+  updateApp: (appID: number, approvalProgram: string,
+    clearProgram: string, idx: number, scTmplParams?: SCParams) => TxReceipt
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

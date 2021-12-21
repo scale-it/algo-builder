@@ -286,7 +286,7 @@ describe("DeployerDeployMode", () => {
     });
 
     const updatedInfo = await deployer.updateApp(
-      deployer.accounts[0], {}, 33, "app", "clear", {}, "my-app");
+      deployer.accounts[0], {}, 33, "app", "clear", {}, {}, "my-app");
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",

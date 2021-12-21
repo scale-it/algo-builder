@@ -551,6 +551,8 @@ export interface Deployer {
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    * @param appName name of the app to deploy. This name (if passed) will be used as
    * the checkpoint "key", and app information will be stored agaisnt this name
    */
@@ -561,6 +563,7 @@ export interface Deployer {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
+    scTmplParams?: SCParams,
     appName?: string
   ) => Promise<rtypes.SSCInfo>
 

@@ -602,13 +602,12 @@ export class Runtime {
    * Update application
    * @param senderAddr sender address
    * @param appID application Id
-   * @param approvalProgram new approval program
-   * @param clearProgram new clear program
+   * @param approvalProgram new approval program (TEAL code or program filename)
+   * @param clearProgram new clear program (TEAL code or program filename)
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
-   * NOTE - approval and clear program must be the TEAL code as string
    */
   updateApp (
     senderAddr: string,
@@ -617,11 +616,12 @@ export class Runtime {
     clearProgram: string,
     payFlags: types.TxParams,
     flags: AppOptionalFlags,
+    scTmplParams?: SCParams,
     debugStack?: number
   ): TxReceipt {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0);
+    const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;

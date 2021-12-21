@@ -54,10 +54,12 @@
     const appID = receipt.appID;
     ```
 + `getProgram` is moved to `@algo-builder/runtime` from `@algo-builder/algob`.
-+ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated. 
++ `runtime.addAsset`, `runtime.addAssetDef` and `runtime.addApp` are deprecated.
 Please use `runtime.deployASA`, `runtime.deployASADef` and `runtime.deployAdd` instead of the above functions.
 + Update `runtime.deloyApp` to be compatible with `deployer.deployApp`.
 + `balanceOf` in `@algo-builder/algob` package now return amount (number) of asset account holding and won't print them. If the account does not hold an asset it will return 0. To query asset holding, please use a new `@algo-builder/web.status.getAssetHolding` function.
++ Updated `deployer.deployApp` to pass `scTmplParams` (smart contract template parameters).
+
 
 ### Bug Fixes
 +  Fix bug substring3 opcode pop wrong order [/#505](https://github.com/scale-it/algo-builder/pull/505), contribution: @vuvth.

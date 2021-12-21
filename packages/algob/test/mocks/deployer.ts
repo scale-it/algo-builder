@@ -8,7 +8,8 @@ import type {
   Deployer,
   FundASCFlags,
   LogicSig,
-  LsigInfo
+  LsigInfo,
+  SCParams
 } from "../../src/types";
 
 export class FakeDeployer implements Deployer {
@@ -159,6 +160,7 @@ export class FakeDeployer implements Deployer {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
+    scTmplParams?: SCParams,
     appName?: string
   ): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
