@@ -32,6 +32,7 @@ def approval_program(TOKEN_ID):
     on_deployment = Seq([
         assetManager, # load asset manager from store
         Assert(And(
+            Global.group_size() == Int(1),
             no_rekey_addr,
 
             Txn.assets.length() == Int(1),
@@ -69,6 +70,7 @@ def approval_program(TOKEN_ID):
     kill_token = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.assets.length() == Int(1),
             Txn.assets[0] == Int(TOKEN_ID), # verify if token index is correct
             Txn.type_enum() == TxnType.ApplicationCall,
@@ -90,6 +92,7 @@ def approval_program(TOKEN_ID):
     set_permission_contract = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.application_args.length() == Int(2),
             Txn.assets.length() == Int(1),
             Txn.assets[0] == Int(TOKEN_ID),
@@ -153,6 +156,7 @@ def approval_program(TOKEN_ID):
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
 
             verify_basic_calls,
+            Global.group_size() >= Int(3),
             Txn.sender() == assetManager.value(), # force_transfer is only allowed by asset manager
         )),
         Return(
@@ -172,6 +176,7 @@ def approval_program(TOKEN_ID):
 
     handle_optin = Seq([
         Assert(And(
+            Global.group_size() == Int(1),
             Txn.application_args.length() == Int(0),
             Txn.group_index() == Int(0)
         )),

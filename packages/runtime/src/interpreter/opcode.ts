@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { GlobalFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
+import { GlobalFields, ITxArrFields, ITxnFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -90,6 +90,25 @@ export class Op {
     return a;
   }
 
+  assertUInt8 (a: unknown, line: number): number {
+    if (typeof a === "undefined" || typeof a !== "bigint") {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: "uint64",
+        actual: typeof a,
+        line: line
+      });
+    }
+    if (a >= 2 << 7) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: "uint8 {0..255}",
+        actual: a,
+        line: line
+      });
+    }
+
+    return Number(a);
+  }
+
   /**
    * asserts if given variable type is bytes
    * @param b variable
@@ -153,12 +172,12 @@ export class Op {
 
   /**
    * Returns substring from given string (if it exists)
+   * @param byteString given string as bytes
    * @param start starting index
    * @param end ending index
-   * @param byteString given string as bytes
    * @param line line number in TEAL file
    */
-  subString (start: bigint, end: bigint, byteString: Uint8Array, line: number): Uint8Array {
+  subString (byteString: Uint8Array, start: bigint, end: bigint, line: number): Uint8Array {
     if (end < start) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.SUBSTRING_END_BEFORE_START, { line: line });
     }
@@ -196,6 +215,32 @@ export class Op {
   }
 
   /**
+   * asserts if known itxn field is passed
+   * @param str itxn field
+   * @param tealVersion version of TEAL
+   * @param line line number in TEAL file
+   */
+  assertITxFieldDefined (str: string, tealVersion: number, line: number): void {
+    if (TxnFields[tealVersion][str] === undefined && ITxnFields[tealVersion][str] === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
+        { field: str, version: tealVersion, line: line });
+    }
+  }
+
+  /**
+   * asserts if known itxn field of type array is passed
+   * @param str itxn field
+   * @param tealVersion version of TEAL
+   * @param line line number in TEAL file
+   */
+  assertITxArrFieldDefined (str: string, tealVersion: number, line: number): void {
+    if (!TxArrFields[tealVersion].has(str) && !ITxArrFields[tealVersion].has(str)) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG,
+        { opcode: str, version: tealVersion, line: line });
+    }
+  }
+
+  /**
    * asserts if known global field is passed
    * @param str global field
    * @param tealVersion version of TEAL
@@ -220,5 +265,24 @@ export class Op {
       stack.push(0n);
     }
     return stack;
+  }
+
+  /**
+   * Returns range of bytes from A starting at S up to but not including S+L,
+   * If S or S+L is larger than the array length, throw error
+   * @param array Uint8array
+   * @param start starting point in array
+   * @param length length of substring
+   */
+  opExtractImpl (array: Uint8Array, start: number, length: number): Uint8Array {
+    const end = start + length;
+    if (start > array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR, { given: start, length: array.length });
+    }
+    if (end > array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR, { given: end, length: array.length });
+    }
+
+    return array.slice(start, end);
   }
 }

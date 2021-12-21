@@ -5,7 +5,6 @@ import { assert } from "chai";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -19,14 +18,14 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   let john: AccountStore;
   let bob: AccountStore;
   let runtime: Runtime;
-  let txnParams: types.AlgoTransferParam;
+  let txParams: types.AlgoTransferParam;
 
   this.beforeAll(async function () {
     john = new AccountStore(initialJohnHolding);
     bob = new AccountStore(initialBobHolding);
     runtime = new Runtime([john, bob]);
 
-    txnParams = {
+    txParams = {
       type: types.TransactionType.TransferAlgo, // payment
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
@@ -49,11 +48,11 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     assert.equal(bob.balance(), initialBobHolding);
 
     // make delegated logic signature
-    const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
+    const lsig = runtime.loadLogic('basic.teal');
     lsig.sign(john.account.sk);
 
     runtime.executeTx({
-      ...txnParams,
+      ...txParams,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.address,
       lsig: lsig
@@ -67,11 +66,11 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
-    const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
+    const lsig = runtime.loadLogic('incorrect-logic.teal');
     lsig.sign(john.account.sk);
 
     const invalidParam = {
-      ...txnParams,
+      ...txParams,
       lsig: lsig,
       amountMicroAlgos: 50n
     };

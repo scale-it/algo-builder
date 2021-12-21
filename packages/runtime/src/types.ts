@@ -21,7 +21,7 @@ export type AppArgs = Array<string | number>;
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
 
-export interface Txn extends EncodedTransaction {
+export interface EncTx extends EncodedTransaction {
   txID: string
 }
 
@@ -69,6 +69,23 @@ export interface AccountsMap {
  * (where we use maps instead of arrays in sdk structures). */
 export type RuntimeAccountMap = Map<string, AccountAddress>;
 
+export interface BaseTxReceipt {
+  txn: EncTx
+  txID: string
+  gas?: number
+  logs?: string[]
+}
+
+export interface DeployedAssetTxReceipt extends BaseTxReceipt {
+  assetID: number
+}
+
+export interface DeployedAppTxReceipt extends BaseTxReceipt {
+  appID: number
+}
+
+export type TxReceipt = BaseTxReceipt | DeployedAppTxReceipt | DeployedAssetTxReceipt;
+
 export interface State {
   accounts: Map<string, AccountStoreI>
   accountNameAddress: Map<string, AccountAddress>
@@ -78,6 +95,7 @@ export interface State {
   appNameInfo: Map<string, SSCInfo>
   appCounter: number
   assetCounter: number
+  txReceipts: Map<string, TxReceipt> // map of {txID: txReceipt}
 }
 
 export interface DeployedAssetInfo {
@@ -96,6 +114,7 @@ export interface ASAInfo extends DeployedAssetInfo {
 // Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
+  applicationAccount: string
   timestamp: number
 }
 
@@ -104,10 +123,14 @@ export interface Context {
   state: State
   sharedScratchSpace: Map<number, StackElem[]>
   knowableID: Map<number, ID>
-  tx: Txn // current txn
-  gtxs: Txn[] // all transactions
+  tx: EncTx // current txn
+  gtxs: EncTx[] // all transactions
   args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
+  pooledApplCost: number // total opcode cost for each application call for single/group tx
+  // inner transaction props
+  isInnerTx: boolean // true if "ctx" is switched to an inner transaction
+  createdAssetID: number // Asset ID allocated by the creation of an ASA (for an inner-tx)
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
@@ -124,21 +147,22 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: types.ExecParams[]) => void
-  addAsset: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
-  addASADef: (
+  processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
+  deployASA: (name: string,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
+  deployASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => number
+  ) => DeployedAssetTxReceipt
   optIntoASA: (
-    assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
-  addApp: (
+    assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
+  deployApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
-  ) => number
-  optInToApp: (accountAddr: string, appID: number, idx: number) => void
-  updateApp: (appID: number, approvalProgram: string, clearProgram: string, idx: number) => void
+    approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
+  ) => DeployedAppTxReceipt
+  optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
+  updateApp: (appID: number, approvalProgram: string,
+    clearProgram: string, idx: number, scTmplParams?: SCParams) => TxReceipt
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)
@@ -213,7 +237,7 @@ export interface AccountStoreI {
 
 /**
  * https://developer.algorand.org/docs/reference/teal/specification/#oncomplete */
-export enum TxnOnComplete {
+export enum TxOnComplete {
   NoOp = '0',
   OptIn = '1',
   CloseOut = '2',
@@ -237,6 +261,7 @@ export interface AppDeploymentFlags extends AppOptionalFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
 }
 
 /**
@@ -297,4 +322,13 @@ export enum DecodingMode {
   SAFE = 'safe',
   MIXED = 'mixed',
   BIGINT = 'bigint'
+}
+
+// used for pyTEALOps
+export interface SCParams {
+  [key: string]: string | bigint
+}
+
+export interface ReplaceParams {
+  [key: string]: string
 }

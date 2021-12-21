@@ -52,7 +52,7 @@ async function issue (deployer, address, amount) {
   await executeTransaction(deployer, issuanceParams);
 
   console.log(`* ${address} asset holding: *`);
-  await balanceOf(deployer, address, tesla.assetIndex); // print asset holding
+  console.log(await balanceOf(deployer, address, tesla.assetIndex));
 
   const supply = await totalSupply(deployer, tesla.assetIndex);
   console.log(`Total Supply of token 'tesla': ${supply}`);

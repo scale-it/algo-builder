@@ -1,16 +1,16 @@
-import { encodeAddress, modelsv2 } from "algosdk";
+import { decodeAddress, encodeAddress, getApplicationAddress, isValidAddress, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Runtime } from "../index";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { ALGORAND_MAX_APP_ARGS_LEN, ALGORAND_MAX_TX_ACCOUNTS_LEN, ALGORAND_MAX_TX_ARRAY_LEN, DEFAULT_STACK_ELEM, MaxTEALVersion } from "../lib/constants";
+import { ALGORAND_MAX_APP_ARGS_LEN, ALGORAND_MAX_TX_ACCOUNTS_LEN, ALGORAND_MAX_TX_ARRAY_LEN, DEFAULT_STACK_ELEM, MaxAppProgramCost, MaxTEALVersion } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
 import {
-  AccountStoreI, ExecutionMode, Operator, SSCAttributesM,
-  StackElem, TEALStack
+  AccountStoreI, EncTx, ExecutionMode, Operator, SSCAttributesM,
+  StackElem, TEALStack, TxReceipt
 } from "../types";
 import { Op } from "./opcode";
 import { Label } from "./opcode-list";
@@ -41,6 +41,8 @@ export class Interpreter {
   // It is used to provide sub routine functionality
   callStack: Stack<number>;
   labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
+  subTxn: EncTx | undefined; // "current" inner transaction
+  innerTxns: EncTx[]; // executed inner transactions
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -59,6 +61,8 @@ export class Interpreter {
     this.runtime = <Runtime>{};
     this.callStack = new Stack<number>();
     this.labelMap = new Map<string, number>();
+    this.subTxn = undefined;
+    this.innerTxns = [];
   }
 
   /**
@@ -92,6 +96,7 @@ export class Interpreter {
    */
   private _getAccountFromAddr (accountPk: Uint8Array, line: number): AccountStoreI {
     const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
+    const appID = this.runtime.ctx.tx.apid ?? 0;
     if (this.tealVersion <= 3) {
       // address can only be passed directly since tealv4
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
@@ -103,9 +108,19 @@ export class Interpreter {
 
     // address must still be present in tx.Accounts OR should be equal to Txn.Sender
     const pkBuffer = Buffer.from(accountPk);
+    const addr = encodeAddress(pkBuffer);
+    if (!isValidAddress(addr)) { // invalid address
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID, {
+        address: addr,
+        line: line
+      });
+    }
+
     if (
-      txAccounts?.find(buff => compareArray(Uint8Array.from(buff), accountPk)) ??
-      compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd))
+      txAccounts?.find(buff => compareArray(Uint8Array.from(buff), accountPk)) !== undefined ||
+      compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
+      // since tealv5, currentApplicationAddress is also allowed (directly)
+      compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey)
     ) {
       const address = encodeAddress(pkBuffer);
       const account = this.runtime.ctx.state.accounts.get(address);
@@ -135,7 +150,7 @@ export class Interpreter {
         account = this.runtime.ctx.state.accounts.get(address);
       } else {
         const accIndex = accountRef - 1n;
-        checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat as Buffer[], line);
+        checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
         let pkBuffer;
         if (this.runtime.ctx.tx.apat) {
           pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
@@ -410,6 +425,7 @@ export class Interpreter {
     debugStack?: number): StackElem | undefined {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
+
     this.mapLabelWithIndexes();
     if (mode === ExecutionMode.APPLICATION) { this.assertValidTxArray(); }
 
@@ -417,10 +433,23 @@ export class Interpreter {
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
+      const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as TxReceipt;
 
       // for teal version >= 4, cost is calculated dynamically at the time of execution
+      // for teal version < 4, cost is handled statically during parsing
       dynamicCost += this.lineToCost[instruction.line];
-      if (this.tealVersion >= 4) { assertMaxCost(dynamicCost, mode); }
+      if (this.tealVersion < 4) { txReceipt.gas = this.gas; }
+      if (this.tealVersion >= 4) {
+        if (mode === ExecutionMode.SIGNATURE) {
+          assertMaxCost(dynamicCost, mode);
+          txReceipt.gas = dynamicCost;
+        } else {
+          this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+          const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
+          assertMaxCost(this.runtime.ctx.pooledApplCost, ExecutionMode.APPLICATION, maxPooledApplCost);
+          txReceipt.gas = this.runtime.ctx.pooledApplCost;
+        }
+      }
 
       this.printStack(instruction, debugStack);
       this.instructionIndex++;

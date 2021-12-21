@@ -4,7 +4,6 @@ import { assert } from "chai";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { AppDeploymentFlags, StackElem } from "../../src/types";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -13,13 +12,13 @@ describe("Crowdfunding basic tests", function () {
   const john = new AccountStore(10e6);
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let flags: AppDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('crowdfunding.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'crowdfunding.teal';
+    clearProgramFileName = 'clear.teal';
 
     flags = {
       sender: john.account,
@@ -33,7 +32,7 @@ describe("Crowdfunding basic tests", function () {
   it("should fail during create application if 0 args are passed", function () {
     // create new app
     expectRuntimeError(
-      () => runtime.addApp(flags, {}, approvalProgram, clearProgram),
+      () => runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -62,8 +61,10 @@ describe("Crowdfunding basic tests", function () {
     ];
 
     const johnMinBalance = john.minBalance;
-    const appID = runtime.addApp(
-      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
+    const appID = runtime.deployApp(
+      approvalProgramFileName, clearProgramFileName,
+      { ...validFlags, appArgs: appArgs }, {}
+    ).appID;
     // verify sender's min balance increased after creating application
     assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);
 

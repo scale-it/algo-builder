@@ -3,7 +3,6 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -14,8 +13,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   let john: AccountStore;
   let alice: AccountStore;
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let assetId: number;
   let appID: number;
 
@@ -24,19 +23,24 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
     // create asset
-    assetId = runtime.addAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    assetId = runtime.deployASA('gold',
+      { creator: { ...john.account, name: "john" } }).assetID;
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
 
-    // create new app
-    appID = runtime.addApp({
-      sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
-    }, {}, approvalProgram, clearProgram);
+    // deploy a new app
+    appID = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      {
+        sender: john.account,
+        globalBytes: 32,
+        globalInts: 32,
+        localBytes: 8,
+        localInts: 8
+      },
+      {}
+    ).appID;
     // opt-in to app
     runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice
@@ -101,7 +105,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amount: 1000,
-        assetID: 1,
+        assetID: 9,
         payFlags: { totalFee: 1000 }
       }
     ];

@@ -134,6 +134,10 @@ export interface Config {
   mocha?: Mocha.MochaOptions
 }
 
+export interface TaskTestConfig extends Config {
+  testFiles: string[]
+}
+
 export interface ResolvedConfig extends Config {
   paths?: ProjectPaths
   networks: Networks
@@ -528,13 +532,16 @@ export interface Deployer {
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
+   * @appName name of the app to deploy. This name (if passed) will be used as
+   * the checkpoint "key", and app information will be stored agaisnt this name
    */
   deployApp: (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
-    scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
+    scTmplParams?: SCParams,
+    appName?: string) => Promise<rtypes.SSCInfo>
 
   /**
    * Update programs(approval, clear) for a stateful smart contract.
@@ -544,6 +551,10 @@ export interface Deployer {
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   * @param appName name of the app to deploy. This name (if passed) will be used as
+   * the checkpoint "key", and app information will be stored agaisnt this name
    */
   updateApp: (
     sender: algosdk.Account,
@@ -551,7 +562,9 @@ export interface Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.AppOptionalFlags
+    flags: rtypes.AppOptionalFlags,
+    scTmplParams?: SCParams,
+    appName?: string
   ) => Promise<rtypes.SSCInfo>
 
   /**
@@ -623,6 +636,11 @@ export interface Deployer {
   getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
+   * Queries a stateful smart contract info from checkpoint name
+   * passed by user during deployment */
+  getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+
+  /**
    * Queries a delegated logic signature from checkpoint. */
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
@@ -681,10 +699,6 @@ export interface StrMap {
 
 export interface SCParams {
   [key: string]: string | bigint
-}
-
-export interface ReplaceParams {
-  [key: string]: string
 }
 
 export interface AnyMap {

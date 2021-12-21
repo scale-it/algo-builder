@@ -1,3 +1,4 @@
+import { getProgram } from '@algo-builder/runtime';
 import { types } from '@algo-builder/web';
 import { ExecParams } from "@algo-builder/web/src/types";
 import algosdk, { generateAccount } from "algosdk";
@@ -6,16 +7,17 @@ import * as fs from "fs";
 import { pathExistsSync } from "fs-extra";
 import * as path from "path";
 import sinon from 'sinon';
+import YAML from "yaml";
 
 import { ExecutionMode } from "../../../runtime/src/types";
 import { Tealdbg } from "../../src";
-import { ASSETS_DIR } from "../../src/internal/core/project-structure";
+import { ASSETS_DIR, CACHE_DIR } from "../../src/internal/core/project-structure";
 import { DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
-import { mockAccountInformation, mockApplicationResponse, mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
+import { mockAccountInformation, mockApplicationResponse, mockDryRunResponse, mockGenesisInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 class TealDbgMock extends Tealdbg {
@@ -37,7 +39,7 @@ describe("Debugging TEAL code using tealdbg", () => {
   useFixtureProject("config-project");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
-  let txnParam: ExecParams;
+  let txParam: ExecParams;
   let tealDebugger: TealDbgMock;
 
   beforeEach(async () => {
@@ -47,6 +49,8 @@ describe("Debugging TEAL code using tealdbg", () => {
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
       .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
+    sinon.stub(algod.algodClient, "genesis")
+      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
 
     (sinon.stub(algod.algodClient, "dryrun") as any)
       .returns({ do: async () => mockDryRunResponse }) as ReturnType<algosdk.Algodv2['dryrun']>;
@@ -57,7 +61,7 @@ describe("Debugging TEAL code using tealdbg", () => {
     (sinon.stub(algod.algodClient, "getApplicationByID") as any)
       .returns({ do: async () => mockApplicationResponse }) as ReturnType<algosdk.Algodv2['getApplicationByID']>;
 
-    txnParam = {
+    txParam = {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: generateAccount().addr,
@@ -67,7 +71,7 @@ describe("Debugging TEAL code using tealdbg", () => {
       lsig: mockLsig,
       payFlags: { totalFee: 1000 }
     };
-    tealDebugger = new TealDbgMock(deployer, txnParam);
+    tealDebugger = new TealDbgMock(deployer, txParam);
   });
 
   afterEach(async () => {
@@ -75,6 +79,7 @@ describe("Debugging TEAL code using tealdbg", () => {
     (algod.algodClient.dryrun as sinon.SinonStub).restore();
     (algod.algodClient.accountInformation as sinon.SinonStub).restore();
     (algod.algodClient.getApplicationByID as sinon.SinonStub).restore();
+    (algod.algodClient.genesis as sinon.SinonStub).restore();
   });
 
   it("dump dryrunResponse in assets/<file>", async () => {
@@ -141,7 +146,7 @@ describe("Debugging TEAL code using tealdbg", () => {
   });
 
   it("should throw error if groupIndex is greator than txGroup length", async () => {
-    tealDebugger.execParams = [txnParam, { ...txnParam, payFlags: { note: 'Algrand' } }];
+    tealDebugger.execParams = [txParam, { ...txParam, payFlags: { note: 'Algrand' } }];
 
     try {
       await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 5 });
@@ -157,5 +162,27 @@ describe("Debugging TEAL code using tealdbg", () => {
 
     // 2 files should be written: (1. --dryrun-dump and 2. compiled teal code from pyTEAL)
     assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
+  });
+
+  it("should run debugger from cached TEAL code", async () => {
+    const stub = console.info as sinon.SinonStub;
+    stub.reset();
+    const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;
+
+    // write to cache
+    const pathToWrite = path.join(CACHE_DIR, 'gold-asa.py.yaml');
+    fs.writeFileSync(pathToWrite, YAML.stringify({
+      tealCode: getProgram('gold-asa.py')
+    }));
+
+    await tealDebugger.run({ tealFile: 'gold-asa.py' });
+
+    // verify cached console.info is true
+    assert.isTrue((console.info as sinon.SinonStub)
+      .calledWith('\x1b[33m%s\x1b[0m', `Using cached TEAL code for gold-asa.py`));
+
+    // 2 files should be written: (1. --dryrun-dump and 2. cached teal code from pyTEAL)
+    assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
+    fs.rmSync(pathToWrite);
   });
 });

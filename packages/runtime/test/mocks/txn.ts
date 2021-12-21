@@ -17,7 +17,7 @@ export const johnAddr = johnAccount.addr;
  */
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),
-  rcv: Buffer.from(addr.publicKey),
+  rcv: Buffer.from(decodeAddress(johnAddr).publicKey),
   arcv: Buffer.from(addr.publicKey),
   fee: 1000,
   amt: 20200,
@@ -53,7 +53,7 @@ export const TXN_OBJ = {
   fadd: Buffer.from(addr.publicKey),
   faid: 202,
   afrz: false,
-  apid: 1201,
+  apid: 1828,
   apan: 0,
   apap: Buffer.from("approval"),
   apsu: Buffer.from("clear"),
@@ -73,5 +73,7 @@ export const TXN_OBJ = {
   },
   txID: 'transaction-id',
   rekey: Buffer.from(addr.publicKey),
-  grp: Buffer.from('group')
+  grp: Buffer.from('group'),
+  apep: 1,
+  nonpart: true
 };

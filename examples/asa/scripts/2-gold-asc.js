@@ -1,5 +1,5 @@
-const { executeTransaction, balanceOf, getSuggestedParams, signTransactions } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+const { executeTransaction, balanceOf, signTransactions } = require('@algo-builder/algob');
+const { types, getSuggestedParams } = require('@algo-builder/web');
 const { mkParam } = require('./transfer/common');
 const { makeAssetTransferTxnWithSuggestedParams } = require('algosdk');
 
@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
   await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 });
-  await balanceOf(deployer, lsig.address(), goldAssetID);
+  console.log('Balance: ', await balanceOf(deployer, lsig.address(), goldAssetID));
 
   console.log(`Funding contract ${lsig.address()} with ASA gold`);
   const tx = makeAssetTransferTxnWithSuggestedParams(

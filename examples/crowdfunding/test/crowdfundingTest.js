@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -19,8 +20,11 @@ describe('Crowdfunding Tests', function () {
   let runtime;
   let flags;
   let applicationId;
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
+  const crowdFundApprovalFileName = 'crowdFundApproval.teal';
+  const crowdFundClearFileName = 'crowdFundClear.teal';
+
+  const crowdFundApprovalProgram = getProgram(crowdFundApprovalFileName);
+  const crowdFundClearProgram = getProgram(crowdFundClearFileName);
 
   this.beforeAll(async function () {
     runtime = new Runtime([master, creator, escrow, donor]);
@@ -92,13 +96,17 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    applicationId = runtime.deployApp(
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
+
     const creatorPk = convert.addressToPk(creator.address);
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    const lsig = runtime.getLogicSig(escrowProg, []);
+    const lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = lsig.address();
 
     // sync escrow account
@@ -124,8 +132,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalProgram,
+      crowdFundClearProgram,
       {}, { appArgs: appArgs });
     const escrowPk = convert.addressToPk(escrowAddress);
 
@@ -296,12 +304,16 @@ describe('Crowdfunding Tests', function () {
   it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
-    const applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+
+    const applicationId = runtime.deployApp(
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    const lsig = runtime.getLogicSig(escrowProg, []);
+    const lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = lsig.address();
 
     // sync escrow account
@@ -314,8 +326,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      approvalProgram,
-      clearProgram,
+      crowdFundApprovalFileName,
+      crowdFundClearFileName,
       {}, { appArgs: appArgs });
 
     appArgs = [convert.stringToBytes('claim')];

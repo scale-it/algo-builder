@@ -99,6 +99,7 @@ export function validateASADefs (
   asaDefs: types.ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): types.ASADefs {
   for (const name in asaDefs) {
     asaDefs[name] = parseASADef(asaDefs[name], filename);
+    asaDefs[name].name = name; // save asa name in def as well
     validateOptInAccNames(accounts, asaDefs[name], filename);
   }
   return asaDefs;

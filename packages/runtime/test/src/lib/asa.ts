@@ -30,6 +30,7 @@ describe("ASA parser", () => {
     const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
+        name: "A1",
         total: 1,
         decimals: 0,
         unitName: 'ASA',
@@ -63,6 +64,7 @@ describe("ASA parser", () => {
     const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
+        name: "A1",
         clawback: "clawback",
         decimals: 12,
         defaultFrozen: true,

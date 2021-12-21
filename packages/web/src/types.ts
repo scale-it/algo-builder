@@ -1,6 +1,8 @@
+import { IClientMeta } from '@walletconnect/types';
 import { Account as AccountSDK, LogicSigAccount, Transaction } from 'algosdk';
 import * as z from 'zod';
 
+import { WalletMultisigMetadata, WalletTransaction } from './algo-signer-types';
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
@@ -59,6 +61,7 @@ export interface AppDeploymentFlags extends AppOptionalFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
 }
 
 /**
@@ -162,8 +165,10 @@ export type DeployAppParam = BasicParams & AppOptionalFlags & {
   localBytes: number
   globalInts: number
   globalBytes: number
+  extraPages?: number
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
+  appName?: string // name of app to store info against in checkpoint
 };
 
 export type UpdateAppParam = BasicParams & AppOptionalFlags & {
@@ -173,6 +178,7 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   newClearProgram: string
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
+  appName?: string // name of app to store info against in checkpoint
 };
 
 export type AppCallsParam = BasicParams & AppOptionalFlags & {
@@ -288,4 +294,45 @@ export function isSDKTransactionAndSign (object: unknown): object is Transaction
   if (object === undefined || object === null) { return false; }
   const res = isSDKTransaction((object as TransactionAndSign).transaction);
   return Object.prototype.hasOwnProperty.call(object, "sign") && res;
+}
+
+/* Wallet Connect types */
+
+export enum ChainType {
+  MainNet = "MainNet",
+  TestNet = "TestNet"
+}
+
+export interface SessionConnectResponse {
+  wcPeerId: string
+  wcPeerMeta?: IClientMeta
+  wcAccounts: string[]
+}
+
+export interface SessionUpdateResponse {
+  wcAccounts: string[]
+}
+
+export interface SessionDisconnectResponse {
+  message?: string
+}
+
+export interface SignTxnOpts {
+  /**
+     * Optional message explaining the reason of the group of
+     * transactions.
+     */
+  message?: string
+
+  // other options may be present, but are not standard
+}
+
+export type SignTxnParams = [WalletTransaction[], SignTxnOpts?];
+
+export interface TransactionInGroup {
+  txn: Transaction
+  shouldSign?: boolean
+  signers?: string | string[]
+  msig?: WalletMultisigMetadata
+  message?: string
 }

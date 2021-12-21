@@ -1,8 +1,7 @@
-import * as z from 'zod';
-import { ZodErrorCode, ZodSuberror } from "zod/lib/src/ZodError";
+import { z } from 'zod';
 
-function parseZodSubError (e: ZodSuberror, indent: number): string {
-  if (e.code === ZodErrorCode.invalid_union) {
+function parseZodSubError (e: z.ZodIssueOptionalMessage, indent: number): string {
+  if (e.code === z.ZodIssueCode.invalid_union) {
     return e.unionErrors
       .map(ue => parseZodErrorInternal(ue, indent + 2))
       .join("");

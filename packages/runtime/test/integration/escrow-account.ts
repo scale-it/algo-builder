@@ -6,7 +6,6 @@ import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { LogicSigAccount } from "../../src/logicsig";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { johnAccount } from "../mocks/account";
@@ -36,7 +35,7 @@ describe("Logic Signature: Escrow Account", function () {
 
   this.beforeAll(function () {
     runtime = new Runtime([john, admin]); // setup runtime
-    lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+    lsig = runtime.loadLogic('escrow.teal');
     escrow = runtime.getAccount(lsig.address());
     paymentTxParams = {
       type: types.TransactionType.TransferAlgo,

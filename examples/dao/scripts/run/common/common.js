@@ -53,9 +53,27 @@ const Vote = {
   ABSTAIN: 'abstain'
 };
 
+const DAOActions = {
+  addProposal: 'str:add_proposal',
+  depositVoteToken: 'str:deposit_vote_token',
+  registerVote: 'str:register_vote',
+  execute: 'str:execute',
+  withdrawVoteDeposit: 'str:withdraw_vote_deposit',
+  clearVoteRecord: 'str:clear_vote_record',
+  clearProposal: 'str:clear_proposal'
+};
+
+const ExampleProposalConfig = {
+  name: 'my-custom-proposal',
+  URL: 'www.myurl.com',
+  URLHash: 'url-hash'
+};
+
 module.exports = {
   fundAccount,
   ProposalType,
   Vote,
+  DAOActions,
+  ExampleProposalConfig,
   tryExecuteTx
 };

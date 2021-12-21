@@ -236,7 +236,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.foreignAssets,
         note,
         execParams.lease,
-        execParams.payFlags.rekeyTo
+        execParams.payFlags.rekeyTo,
+        execParams.extraPages
       );
       return updateTxFee(execParams.payFlags, tx);
     }

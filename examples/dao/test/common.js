@@ -1,4 +1,3 @@
-const { getProgram } = require('@algo-builder/algob');
 const { Runtime } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { Vote } = require('../scripts/run/common/common');
@@ -47,13 +46,14 @@ class Context {
   }
 
   deployASA (name, creator) {
-    this.govTokenID = this.runtime.addAsset(name, { creator: creator });
+    this.govTokenID = this.runtime.deployASA(name, { creator: creator }).assetID;
   }
 
-  deployDAOApp (sender, approvalProgram, clearStateProgram) {
-    const daoApprovalProgram = getProgram(approvalProgram, { ARG_GOV_TOKEN: this.govTokenID });
-    const daoClearProgram = getProgram(clearStateProgram);
+  deployDAOApp (sender, daoApprovalProgramFileName, daoClearStateProgramFileName) {
+    // const daoApprovalProgram = getProgram(approvalProgram, , false);
+    // const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
+    const daoPlaceholderParam = { ARG_GOV_TOKEN: this.govTokenID };
     const appCreationFlags = {
       sender: sender.account,
       localInts: 9,
@@ -74,9 +74,13 @@ class Context {
       `str:${url}`
     ];
 
-    this.daoAppID = this.runtime.addApp(
-      { ...appCreationFlags, appArgs: daoAppArgs }, {}, daoApprovalProgram, daoClearProgram
-    );
+    this.daoAppID = this.runtime.deployApp(
+      daoApprovalProgramFileName,
+      daoClearStateProgramFileName,
+      { ...appCreationFlags, appArgs: daoAppArgs },
+      {},
+      daoPlaceholderParam
+    ).appID;
   }
 
   setUpLsig () {
@@ -85,17 +89,14 @@ class Context {
       ARG_DAO_APP_ID: this.daoAppID
     };
     // compile lsig's
-    const depositLsigProg = getProgram('deposit-lsig.py', scInitParam);
-    this.depositLsig = this.runtime.getLogicSig(depositLsigProg, []);
+    this.depositLsig = this.runtime.loadLogic('deposit-lsig.py', scInitParam, false);
     this.depositLsigAcc = this.runtime.getAccount(this.depositLsig.address());
 
-    const daoFundLsigProg = getProgram('dao-fund-lsig.py', scInitParam);
-    this.daoFundLsig = this.runtime.getLogicSig(daoFundLsigProg, []);
+    this.daoFundLsig = this.runtime.loadLogic('dao-fund-lsig.py', scInitParam, false);
     this.daoFundLsigAcc = this.runtime.getAccount(this.daoFundLsig.address());
 
-    const proposalLsigProg = getProgram('proposal-lsig.py',
-      { ARG_OWNER: this.proposer.address, ARG_DAO_APP_ID: this.daoAppID });
-    this.proposalLsig = this.runtime.getLogicSig(proposalLsigProg, []);
+    this.proposalLsig = this.runtime.loadLogic('proposal-lsig.py',
+      { ARG_OWNER: this.proposer.address, ARG_DAO_APP_ID: this.daoAppID }, false);
     this.proposalLsigAcc = this.runtime.getAccount(this.proposalLsig.address());
 
     // fund lsig's

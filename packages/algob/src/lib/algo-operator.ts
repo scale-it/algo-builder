@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { BuilderError, ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import { BuilderError, ERRORS, mkTxParams, tx as webTx, types as wtypes } from "@algo-builder/web";
+import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -48,7 +48,8 @@ export interface AlgoOperator {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
-    txWriter: txWriter
+    txWriter: txWriter,
+    scTmplParams?: SCParams
   ) => Promise<rtypes.SSCInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
@@ -99,6 +100,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     let lastround = response["last-round"];
     while (true) {
       const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
+      if (pendingInfo["pool-error"]) {
+        throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+      }
       if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
         return pendingInfo as ConfirmedTxInfo;
       }
@@ -157,7 +161,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async optInAccountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account, flags: wtypes.TxParams
   ): Promise<void> {
-    const txParams = await tx.mkTxParams(this.algodClient, flags);
+    const txParams = await mkTxParams(this.algodClient, flags);
     await this._optInAccountToASA(asaName, assetIndex, account, txParams, flags);
   }
 
@@ -165,7 +169,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     asaName: string, assetIndex: number, lsig: LogicSigAccount, flags: wtypes.TxParams
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
-    const txParams = await tx.mkTxParams(this.algodClient, flags);
+    const txParams = await mkTxParams(this.algodClient, flags);
 
     const optInLsigToASATx = tx.makeASAOptInTx(lsig.address(), assetIndex, txParams, flags);
     const rawLsigSignedTx = algosdk.signLogicSigTransactionObject(optInLsigToASATx, lsig).blob;
@@ -177,7 +181,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
-    const txParams = await tx.mkTxParams(this.algodClient, flags);
+    const txParams = await mkTxParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForOptInTx(
       asaName,
       txParams,
@@ -235,7 +239,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     txWriter: txWriter): Promise<rtypes.ASAInfo> {
     const message = 'Deploying ASA: ' + name;
     console.log(message);
-    const txParams = await tx.mkTxParams(this.algodClient, flags);
+    const txParams = await mkTxParams(this.algodClient, flags);
     const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
@@ -270,7 +274,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const lsig = await getLsig(name, this.algodClient, scTmplParams);
     const contractAddress = lsig.address();
 
-    const params = await tx.mkTxParams(this.algodClient, payFlags);
+    const params = await mkTxParams(this.algodClient, payFlags);
     let message = "Funding Contract: " + String(contractAddress);
     console.log(message);
 
@@ -308,7 +312,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
-    const params = await tx.mkTxParams(this.algodClient, payFlags);
+    const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
@@ -328,6 +332,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       localBytes: flags.localBytes,
       globalInts: flags.globalInts,
       globalBytes: flags.globalBytes,
+      extraPages: flags.extraPages,
       accounts: flags.accounts,
       foreignApps: flags.foreignApps,
       foreignAssets: flags.foreignAssets,
@@ -354,6 +359,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: Number(appId),
+      applicationAccount: getApplicationAddress(Number(appId)),
       timestamp: Math.round(+new Date() / 1000),
       deleted: false
     };
@@ -367,6 +373,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
+   * @param txWriter - transaction log writer
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    */
   async updateApp (
     sender: algosdk.Account,
@@ -375,13 +384,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
-    txWriter: txWriter
+    txWriter: txWriter,
+    scTmplParams?: SCParams
   ): Promise<rtypes.SSCInfo> {
-    const params = await tx.mkTxParams(this.algodClient, payFlags);
+    const params = await mkTxParams(this.algodClient, payFlags);
 
-    const app = await this.ensureCompiled(newApprovalProgram, false);
+    const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-    const clear = await this.ensureCompiled(newClearProgram, false);
+    const clear = await this.ensureCompiled(newClearProgram, false, scTmplParams);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
     const execParam: wtypes.ExecParams = {
@@ -419,6 +429,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: appID,
+      applicationAccount: getApplicationAddress(appID),
       timestamp: Math.round(+new Date() / 1000),
       deleted: false
     };
@@ -437,7 +448,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     appID: number,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
-    const params = await tx.mkTxParams(this.algodClient, payFlags);
+    const params = await mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.SecretKey,
@@ -469,7 +480,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppOptionalFlags
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);// eslint-disable-line @typescript-eslint/restrict-template-expressions
-    const params = await tx.mkTxParams(this.algodClient, payFlags);
+    const params = await mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,

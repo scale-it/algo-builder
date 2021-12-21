@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -26,9 +27,10 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   let lsig;
   let escrowAddress;
   const rejectMsg = 'RUNTIME_ERR1007: Teal code rejected by logic';
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
-
+  const approvalProgramFileName = 'crowdFundApproval.teal';
+  const clearProgramFileName = 'crowdFundClear.teal';
+  const approvalProgram = getProgram(approvalProgramFileName);
+  const clearProgram = getProgram(clearProgramFileName);
   // Create new runtime and application before each test.
   this.beforeEach(() => {
     runtime = new Runtime([master, creator, donor]);
@@ -63,13 +65,16 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       globalBytes: 3
     };
 
-    // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    // deploy application
+    applicationId = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
 
     // setup escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    lsig = runtime.getLogicSig(escrowProg, []);
+    lsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     escrowAddress = lsig.address();
 
     // sync escrow account
@@ -279,8 +284,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // set donation to greater than goal
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
-    const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
-    const wrongLsig = runtime.getLogicSig(escrowProg, []);
+    const wrongLsig = runtime.loadLogic('wrongEscrow.teal', { APP_ID: applicationId });
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
@@ -409,7 +413,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   // uncomment when
   // https://github.com/algorand/js-algorand-sdk/commit/b18e3beab8004d7e53a5370334b8e9f5c7699146#diff-75520b02c557ab3f0b89e5f03029db31af2f0dc79e5215d3e221ed9ea59fe441
   // commit is released
-  /* it('should fail if ReKeyTo is not zeroAddress in transaction', () => {
+  /* it('should fail if ReKeyTo is not ZERO_ADDRESS in transaction', () => {
     updateAndOptIn();
     // set donation to greater than goal
     donateTxGroup[1].amountMicroAlgos = goal + 1000;

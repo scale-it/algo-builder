@@ -4,20 +4,22 @@ import { Interpreter } from "../interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
-  ByteZero, Callsub, Concat, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress,
+  ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress,
   EcdsaPkRecover, EcdsaVerify, Ed25519verify,
-  EqualTo, Err, Exp, Expw, Gaid, Gaids, GetAssetDef, GetAssetHolding,
+  EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
+  ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxnas, Gtxns, Gtxnsa, Gtxnsas, Int, Intc, Intcblock, Itob,
+  ITxn, ITxna, ITxnBegin, ITxnField, ITxnSubmit,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, Log, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256,
-  Sha512_256, Shl, Shr, Sqrt, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -207,10 +209,36 @@ opCodeMap[4] = {
 opCodeMap[5] = {
   ...opCodeMap[4],
 
+  cover: Cover,
+  uncover: Uncover,
+
+  loads: Loads,
+  stores: Stores,
   // ECDSA
   ecdsa_verify: EcdsaVerify,
   ecdsa_pk_decompress: EcdsaPkDecompress,
-  ecdsa_pk_recover: EcdsaPkRecover
+  ecdsa_pk_recover: EcdsaPkRecover,
+
+  // Extract opcodes
+  extract: Extract,
+  extract3: Extract3,
+  extract_uint16: ExtractUint16,
+  extract_uint32: ExtractUint32,
+  extract_uint64: ExtractUint64,
+
+  // Inner Transaction Ops
+  itxn_begin: ITxnBegin,
+  itxn_field: ITxnField,
+  itxn_submit: ITxnSubmit,
+  itxn: ITxn,
+  itxna: ITxna,
+
+  // gtxn, other ops
+  txnas: Txnas,
+  gtxnas: Gtxnas,
+  gtxnsas: Gtxnsas,
+  args: Args,
+  log: Log
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -221,7 +249,8 @@ const interpreterReqList = new Set([
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
-  "gaid", "gaids"
+  "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log"
 ]);
 
 /**
@@ -380,8 +409,14 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   return new opCodeMap[tealVersion][opCode](words, counter);
 }
 
-// verify max cost of TEAL code is within consensus parameters
-export function assertMaxCost (gas: number, mode: ExecutionMode): void {
+/**
+ * verify max cost of TEAL code is within consensus parameters
+ * @param gas total cost consumed by the TEAL code (can be dynamic or static)
+ * @param mode Execution mode - Signature (stateless) OR Application (stateful)
+ * @param maxPooledApplCost Since AVM 1.0, opcode cost for APPLICATION mode can be pooled accross
+ * multiple transactions. If passed, gas is evaluated against maxPooledApplCost
+ */
+export function assertMaxCost (gas: number, mode: ExecutionMode, maxPooledApplCost?: number): void {
   if (mode === ExecutionMode.SIGNATURE) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
@@ -392,11 +427,11 @@ export function assertMaxCost (gas: number, mode: ExecutionMode): void {
       });
     }
   } else {
-    if (gas > MaxAppProgramCost) {
+    if (gas > (maxPooledApplCost ?? MaxAppProgramCost)) {
       // check max cost (for stateful)
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
         cost: gas,
-        maxcost: MaxAppProgramCost,
+        maxcost: maxPooledApplCost ?? MaxAppProgramCost,
         mode: 'Stateful'
       });
     }

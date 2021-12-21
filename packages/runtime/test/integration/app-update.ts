@@ -1,10 +1,10 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -15,6 +15,8 @@ describe("App Update Test", function () {
   const alice = new AccountStore(minBalance + 1000);
 
   let runtime: Runtime;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let approvalProgram: string;
   let clearProgram: string;
   let appID: number;
@@ -22,8 +24,11 @@ describe("App Update Test", function () {
 
   this.beforeEach(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgram = getProgram('approval_program.teal');
-    clearProgram = getProgram('clear_program.teal');
+
+    approvalProgramFileName = 'approval_program.py';
+    clearProgramFileName = 'clear_program.teal';
+    approvalProgram = getProgram(approvalProgramFileName);
+    clearProgram = getProgram(clearProgramFileName);
     const flags = {
       sender: john.account,
       globalBytes: 5,
@@ -32,7 +37,7 @@ describe("App Update Test", function () {
       localInts: 5
     };
 
-    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}).appID;
 
     groupTx = [
       {

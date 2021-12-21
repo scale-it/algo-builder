@@ -1,7 +1,7 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import { encodeAddress, modelsv2, Transaction } from "algosdk";
+import { encodeAddress, getApplicationAddress, modelsv2, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -239,7 +239,7 @@ export async function registerCheckpoints (
         const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
           const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
-          if (txn.appOnComplete === Number(rtypes.TxnOnComplete.DeleteApplication) && temp) {
+          if (txn.appOnComplete === Number(rtypes.TxOnComplete.DeleteApplication) && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
             deployer.logTx("Deleting SSC: " + String(txn.appIndex), txConfirmation);
@@ -251,6 +251,7 @@ export async function registerCheckpoints (
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             appID: Number(txConfirmation['application-index']),
+            applicationAccount: getApplicationAddress(Number(txConfirmation['application-index'])),
             confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
             deleted: false

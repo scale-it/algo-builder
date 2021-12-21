@@ -2,8 +2,9 @@ import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import * as fs from "fs";
 
-import { executeDeployTask as executeDeployTaskNoCLI, loadFilenames } from "../../src/builtin-tasks/deploy";
+import { executeDeployTask as executeDeployTaskNoCLI } from "../../src/builtin-tasks/deploy";
 import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
+import { loadFilenames } from '../../src/internal/util/files';
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";

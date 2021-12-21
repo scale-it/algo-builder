@@ -1,12 +1,12 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
-  optInLsigToBond, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance, redeem
+  optInLsigToBond, createDex, approvalProgram, clearProgram,
+  minBalance, initialBalance, redeem, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
 
@@ -70,8 +70,9 @@ describe('Bond token failing tests', function () {
   const bondCreator = convert.addressToPk(bondTokenCreator.address);
 
   this.beforeEach(async function () {
-    initialBond = runtime.addAsset(
-      'bond-token-0', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+    initialBond = runtime.deployASA(
+      'bond-token-0',
+      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 
     const creationFlags = Object.assign({}, flags);
     const creationArgs = [
@@ -83,9 +84,14 @@ describe('Bond token failing tests', function () {
       maxIssuance
     ];
 
-    // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    // deploy application
+    applicationId = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {},
+      placeholderParam
+    ).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
@@ -94,13 +100,11 @@ describe('Bond token failing tests', function () {
       TMPL_OWNER: bondTokenCreator.address,
       TMPL_APP_MANAGER: appManager.address
     };
-    const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
-    lsig = runtime.getLogicSig(issuerLsigProg, []);
+    lsig = runtime.loadLogic('issuer-lsig.py', scInitParam);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account
     issuerAddress = runtime.getAccount(issuerLsigAddress);
-    console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
     runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
@@ -274,7 +278,6 @@ describe('Bond token failing tests', function () {
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
-    console.log('Dex 1 Address: ', dexLsig1.address());
 
     assert.throws(() => redeem(runtime, elon, 1, 20, dexLsig1), RUNTIME_ERR1402);
   });

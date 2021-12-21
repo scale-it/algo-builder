@@ -1,5 +1,6 @@
 import { assert } from "chai";
 
+import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
@@ -7,22 +8,22 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
+  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
   EcdsaVerify,
-  Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
+  Ed25519verify, EqualTo, Err, Exp, Expw,
+  Extract, Extract3, ExtractUint16, ExtractUint32, ExtractUint64, Gaid, Gaids,
   GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna,
-  Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
-  LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob, ITxnBegin, ITxnField,
+  ITxnSubmit, Keccak256, Label, Len, LessThan,
+  LessThanEqualTo, Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
   Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
-  Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
-import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -533,6 +534,10 @@ describe("Parser", function () {
       expected = new Global(["CreatorAddress"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["global", "GroupID"], 1, interpreter);
+      expected = new Global(["GroupID"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -580,6 +585,19 @@ describe("Parser", function () {
       expectRuntimeError(
         () => opcodeFromSentence(["asset_params_get", "AssetTotal", "123"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      expectRuntimeError(
+        () => opcodeFromSentence(["asset_params_get", "AssetCreator", "123"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+      );
+    });
+
+    it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", () => {
+      interpreter.tealVersion = 4;
+      expectRuntimeError(
+        () => opcodeFromSentence(["asset_params_get", "AssetCreator"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD
       );
     });
 
@@ -1045,6 +1063,68 @@ describe("Parser", function () {
       });
     });
 
+    describe("should return correct opcodes for tealv5 ops", () => {
+      it("extract", () => {
+        const res = opcodeFromSentence(["extract", "1", "2"], 1, interpreter);
+        const expected = new Extract(["1", "2"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract3", () => {
+        const res = opcodeFromSentence(["extract3"], 1, interpreter);
+        const expected = new Extract3([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract3", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint16", () => {
+        const res = opcodeFromSentence(["extract_uint16"], 1, interpreter);
+        const expected = new ExtractUint16([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint16", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint32", () => {
+        const res = opcodeFromSentence(["extract_uint32"], 1, interpreter);
+        const expected = new ExtractUint32([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint32", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("extract_uint64", () => {
+        const res = opcodeFromSentence(["extract_uint64"], 1, interpreter);
+        const expected = new ExtractUint64([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["extract_uint64", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
     describe("Tealv5: ECDSA opcodes", () => {
       it("ecdsa_verify", () => {
         const res = opcodeFromSentence(["ecdsa_verify", "0"], 1, interpreter);
@@ -1078,6 +1158,98 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["ecdsa_pk_recover"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("should return correct opcodes for tealv5 ops", () => {
+      it("loads", () => {
+        const res = opcodeFromSentence(['loads'], 1, interpreter);
+        const expected = new Loads([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["loads", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("stores", () => {
+        const res = opcodeFromSentence(['stores'], 1, interpreter);
+        const expected = new Stores([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["stores", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("cover", () => {
+        const res = opcodeFromSentence(["cover", "1"], 1, interpreter);
+        const expected = new Cover(["1"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["cover", "1", "2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("uncover", () => {
+        const res = opcodeFromSentence(["uncover", "1"], 1, interpreter);
+        const expected = new Uncover(["1"], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["uncover", "1", "2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_begin", () => {
+        const res = opcodeFromSentence(["itxn_begin"], 1, interpreter);
+        const expected = new ITxnBegin([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_begin", "exxtra"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_field f", () => {
+        let res = opcodeFromSentence(["itxn_field", "Sender"], 1, interpreter);
+        let expected = new ITxnField(["Sender"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["itxn_field", "FreezeAsset"], 1, interpreter);
+        expected = new ITxnField(["FreezeAsset"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["itxn_field", "ConfigAssetTotal"], 1, interpreter);
+        expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_field", "Sender", "Fee"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("itxn_submit", () => {
+        const res = opcodeFromSentence(["itxn_submit"], 1, interpreter);
+        const expected = new ITxnSubmit([], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["itxn_submit", "exxtra"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });

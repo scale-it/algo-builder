@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
-import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
+import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -11,18 +11,21 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
+  ALGORAND_MAX_LOGS_COUNT, ALGORAND_MAX_LOGS_LENGTH,
   AssetParamMap, GlobalFields, MathOp,
-  MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
+  MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
+  MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
-  MaxTEALVersion, TxArrFields
+  MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
+import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import { DecodingMode, EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
+import { DecodingMode, EncodingType, StackElem, TEALStack, TxnType, TxOnComplete, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -196,7 +199,8 @@ export class Mul extends Op {
 // pushes argument[N] from argument array to stack
 // push to stack [...stack, bytes]
 export class Arg extends Op {
-  readonly _arg?: Uint8Array;
+  index: number;
+  readonly interpreter: Interpreter;
   readonly line: number;
 
   /**
@@ -212,15 +216,15 @@ export class Arg extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0], this.line);
 
-    const index = Number(args[0]);
-    this.checkIndexBound(index, interpreter.runtime.ctx.args as Uint8Array[], this.line);
-
-    this._arg = interpreter.runtime.ctx.args ? interpreter.runtime.ctx.args[index] : undefined;
+    this.index = Number(args[0]);
+    this.interpreter = interpreter;
   }
 
   execute (stack: TEALStack): void {
-    const last = this.assertBytes(this._arg, this.line);
-    stack.push(last);
+    this.checkIndexBound(
+      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+    const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
+    stack.push(argN);
   }
 }
 
@@ -494,10 +498,10 @@ export class Store extends Op {
   }
 }
 
-// copy last value from scratch space to the stack
+// copy ith value from scratch space to the stack
 // push to stack [...stack, bigint/bytes]
 export class Load extends Op {
-  readonly index: number;
+  index: number;
   readonly interpreter: Interpreter;
   readonly line: number;
 
@@ -1152,19 +1156,19 @@ export class Substring extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const byteString = this.assertBytes(stack.pop(), this.line);
-    const start = this.assertUint8(this.start, this.line);
     const end = this.assertUint8(this.end, this.line);
+    const start = this.assertUint8(this.start, this.line);
+    const byteString = this.assertBytes(stack.pop(), this.line);
 
-    const subString = this.subString(start, end, byteString, this.line);
+    const subString = this.subString(byteString, start, end, this.line);
     stack.push(subString);
   }
 }
 
-// pop last byte string A and two integers B and C.
-// Extract last range of bytes from A starting at B up to
-// but not including C, push the substring result. If C < B,
-// or either is larger than the string length, the program fails
+// pop a byte-array A and two integers B and C.
+// Extract a range of bytes from A starting at B up to but not including C,
+// push the substring result. If C < B, or either is larger than the array length,
+// the program fails
 // push to stack [...stack, substring]
 export class Substring3 extends Op {
   readonly line: number;
@@ -1180,11 +1184,11 @@ export class Substring3 extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const byteString = this.assertBytes(stack.pop(), this.line);
     const end = this.assertBigInt(stack.pop(), this.line);
     const start = this.assertBigInt(stack.pop(), this.line);
+    const byteString = this.assertBytes(stack.pop(), this.line);
 
-    const subString = this.subString(start, end, byteString, this.line);
+    const subString = this.subString(byteString, start, end, this.line);
     stack.push(subString);
   }
 }
@@ -1305,9 +1309,9 @@ export class Gtxn extends Op {
  */
 export class Txna extends Op {
   readonly field: string;
-  readonly idx: number;
   readonly interpreter: Interpreter;
   readonly line: number;
+  idx: number;
 
   /**
    * Sets `field` and `idx` values according to arguments passed.
@@ -1345,9 +1349,9 @@ export class Txna extends Op {
  */
 export class Gtxna extends Op {
   readonly field: string;
-  readonly idx: number; // array index
   readonly interpreter: Interpreter;
   readonly line: number;
+  idx: number; // array index
   protected txIdx: number; // transaction group index
 
   /**
@@ -1609,6 +1613,15 @@ export class Global extends Op {
         const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
+        break;
+      }
+      case 'GroupID': {
+        result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
+        break;
+      }
+      case 'CurrentApplicationAddress': {
+        const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+        result = decodeAddress(getApplicationAddress(appID)).publicKey;
         break;
       }
       default: {
@@ -2058,8 +2071,12 @@ export class GetAssetDef extends Op {
     this.line = line;
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
-    if (AssetParamMap[args[0]] === undefined) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0], line: line });
+    if (AssetParamMap[interpreter.tealVersion][args[0]] === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
+        field: args[0],
+        line: line,
+        tealV: interpreter.tealVersion
+      });
     }
 
     this.field = args[0];
@@ -2077,7 +2094,7 @@ export class GetAssetDef extends Op {
       stack.push(0n);
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof modelsv2.AssetParams;
+      const s = AssetParamMap[this.interpreter.tealVersion][this.field] as keyof modelsv2.AssetParams;
 
       switch (this.field) {
         case "AssetTotal":
@@ -2123,10 +2140,10 @@ export class Int extends Op {
     assertLen(args.length, 1, line);
 
     let uint64;
-    const intConst = TxnOnComplete[args[0] as keyof typeof TxnOnComplete] ||
+    const intConst = TxOnComplete[args[0] as keyof typeof TxOnComplete] ||
       TxnType[args[0] as keyof typeof TxnType];
 
-    // check if string is keyof TxnOnComplete or TxnType
+    // check if string is keyof TxOnComplete or TxnType
     if (intConst !== undefined) {
       uint64 = BigInt(intConst);
     } else {
@@ -3309,6 +3326,151 @@ export class Gaids extends Gaid {
   }
 }
 
+// Pops: ... stack, []byte
+// Pushes: []byte
+// pop a byte-array A. Op code parameters:
+// * S: number in 0..255, start index
+// * L: number in 0..255, length
+//  extracts a range of bytes from A starting at S up to but not including S+L,
+// push the substring result. If L is 0, then extract to the end of the string.
+// If S or S+L is larger than the array length, the program fails
+export class Extract extends Op {
+  readonly line: number;
+  readonly start: number;
+  length: number;
+
+  /**
+   * Asserts 2 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, line);
+    this.start = Number(args[0]);
+    this.length = Number(args[1]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    // if length is 0, take bytes from start index to the end
+    if (this.length === 0) {
+      this.length = array.length - this.start;
+    }
+
+    stack.push(this.opExtractImpl(array, this.start, this.length));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 S}, {uint64 L}
+// Pushes: []byte
+// pop a byte-array A and two integers S and L (both in 0..255).
+// Extract a range of bytes from A starting at S up to but not including S+L,
+// push the substring result. If S+L is larger than the array length, the program fails
+export class Extract3 extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const length = this.assertUInt8(stack.pop(), this.line);
+    const start = this.assertUInt8(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    stack.push(this.opExtractImpl(array, start, length));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 S}
+// Pushes: uint64
+// Op code parameters:
+// * N: number in {2,4,8}, length
+// Base class to implement the extract_uint16, extract_uint32 and extract_uint64 op codes
+// for N equal 2, 4, 8 respectively.
+// pop a byte-array A and integer S (in 0..255). Extracts a range of bytes
+// from A starting at S up to but not including B+N,
+// convert bytes as big endian and push the uint(N*8) result.
+// If B+N is larger than the array length, the program fails
+class ExtractUintN extends Op {
+  readonly line: number;
+  extractBytes = 2;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+    // this.extractBytes = 2;
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const start = this.assertUInt8(stack.pop(), this.line);
+    const array = this.assertBytes(stack.pop(), this.line);
+
+    const sliced = this.opExtractImpl(array, start, this.extractBytes); // extract n bytes
+    stack.push(bigEndianBytesToBigInt(sliced));
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes
+// from A starting at B up to but not including B+2,
+// convert bytes as big endian and push the uint64 result.
+// If B+2 is larger than the array length, the program fails
+export class ExtractUint16 extends ExtractUintN {
+  extractBytes = 2;
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes
+// from A starting at B up to but not including B+4, convert
+// bytes as big endian and push the uint64 result.
+// If B+4 is larger than the array length, the program fails
+export class ExtractUint32 extends ExtractUintN {
+  extractBytes = 4;
+
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {[]byte A}, {uint64 B}
+// Pushes: uint64
+// pop a byte-array A and integer B. Extract a range of bytes from
+// A starting at B up to but not including B+8, convert bytes as
+// big endian and push the uint64 result. If B+8 is larger than
+// the array length, the program fails
+export class ExtractUint64 extends ExtractUintN {
+  extractBytes = 8;
+
+  execute (stack: TEALStack): void {
+    super.execute(stack);
+  }
+}
+
 // Pops: ... stack, {[]byte A}, {[]byte B}, {[]byte C}, {[]byte D}, {[]byte E}
 // Pushes: uint64
 // for (data A, signature B, C and pubkey D, E) verify the signature of the
@@ -3447,5 +3609,626 @@ export class EcdsaPkRecover extends Op {
 
     stack.push(x.toBuffer());
     stack.push(y.toBuffer());
+  }
+}
+
+// Pops: ...stack, any
+// Pushes: any
+// remove top of stack, and place it deeper in the stack such that
+// N elements are above it. Fails if stack depth <= N.
+export class Cover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const top = stack.pop();
+    const temp = [];
+    for (let count = 1; count <= this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    stack.push(top);
+    for (let i = this.nthInStack - 1; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+  }
+}
+
+// Pops: ... stack, any
+// Pushes: any
+// remove the value at depth N in the stack and shift above items down
+// so the Nth deep value is on top of the stack. Fails if stack depth <= N.
+export class Uncover extends Op {
+  readonly line: number;
+  readonly nthInStack: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [N]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    this.nthInStack = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
+
+    const temp = [];
+    for (let count = 1; count < this.nthInStack; ++count) {
+      temp.push(stack.pop());
+    }
+    const deepValue = stack.pop();
+    for (let i = this.nthInStack - 2; i >= 0; --i) {
+      stack.push(temp[i]);
+    }
+    stack.push(deepValue);
+  }
+}
+
+// Pops: ... stack, uint64
+// Pushes: any
+// copy a value from the Xth scratch space to the stack.
+// All scratch spaces are 0 at program start.
+export class Loads extends Load {
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    this.index = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Pops: ... stack, {uint64 A}, {any B}
+// Pushes: None
+// pop indexes A and B. store B to the Ath scratch space
+export class Stores extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const value = stack.pop();
+    const index = this.assertBigInt(stack.pop(), this.line);
+    this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
+    this.interpreter.scratch[Number(index)] = value;
+  }
+}
+
+// Pops: None
+// Pushes: None
+// Begin preparation of a new inner transaction
+export class ITxnBegin extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (typeof this.interpreter.subTxn !== "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, { line: this.line });
+    }
+
+    if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
+          line: this.line,
+          len: this.interpreter.innerTxns.length + 1,
+          max: MAX_INNER_TRANSACTIONS
+        });
+    }
+
+    // get app, assert it exists
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+    this.interpreter.runtime.assertAppDefined(
+      appID, this.interpreter.getApp(appID, this.line), this.line
+    );
+
+    // get application's account
+    const address = getApplicationAddress(appID);
+    const applicationAccount = this.interpreter.runtime.assertAccountDefined(
+      address,
+      this.interpreter.runtime.ctx.state.accounts.get(address),
+      this.line
+    );
+
+    // calculate feeCredit(extra fee) accross all txns
+    let totalFee = 0;
+    for (const t of this.interpreter.runtime.ctx.gtxs) {
+      totalFee += (t.fee ?? 0);
+    };
+    for (const t of this.interpreter.innerTxns) {
+      totalFee += (t.fee ?? 0);
+    }
+
+    const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length;
+    const feeCredit = (totalFee - (ALGORAND_MIN_TX_FEE * totalTxCnt));
+
+    let txFee;
+    if (feeCredit >= ALGORAND_MIN_TX_FEE) {
+      txFee = 0; // we have enough fee in pool
+    } else {
+      const diff = feeCredit - ALGORAND_MIN_TX_FEE;
+      txFee = (diff >= 0) ? diff : ALGORAND_MIN_TX_FEE;
+    }
+
+    const txnParams = {
+      // set sender, fee, fv, lv
+      snd: Buffer.from(
+        algosdk.decodeAddress(
+          applicationAccount.address
+        ).publicKey
+      ),
+      fee: txFee,
+      fv: this.interpreter.runtime.ctx.tx.fv,
+      lv: this.interpreter.runtime.ctx.tx.lv,
+      // to avoid type hack
+      gen: this.interpreter.runtime.ctx.tx.gen,
+      gh: this.interpreter.runtime.ctx.tx.gh,
+      txID: "",
+      type: ""
+    };
+
+    this.interpreter.subTxn = txnParams;
+  }
+}
+
+// Set field F of the current inner transaction to X(last value fetched from stack)
+// itxn_field fails if X is of the wrong type for F, including a byte array
+// of the wrong size for use as an address when F is an address field.
+// itxn_field also fails if X is an account or asset that does not appear in txn.Accounts
+// or txn.ForeignAssets of the top-level transaction.
+// (Setting addresses in asset creation are exempted from this requirement.)
+// pops from stack [...stack, any]
+// push to stack [...stack, none]
+export class ITxnField extends Op {
+  readonly field: string;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Set transaction field according to arguments passed
+   * @param args Expected arguments: [transaction field]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+    assertLen(args.length, 1, line);
+    this.field = args[0]; // field
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const valToSet: StackElem = stack.pop();
+
+    if (typeof this.interpreter.subTxn === "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, { line: this.line });
+    }
+
+    const updatedSubTx =
+      setInnerTxField(this.interpreter.subTxn, this.field, valToSet, this, this.interpreter, this.line);
+
+    this.interpreter.subTxn = updatedSubTx;
+  }
+}
+
+// Pops: None
+// Pushes: None
+// Execute the current inner transaction.
+export class ITxnSubmit extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores index number according to arguments passed
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, this.line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (typeof this.interpreter.subTxn === "undefined") {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, { line: this.line });
+    }
+
+    // calculate fee accross all txns
+    let totalFee = 0;
+    for (const t of this.interpreter.runtime.ctx.gtxs) {
+      totalFee += (t.fee ?? 0);
+    };
+    for (const t of this.interpreter.innerTxns) {
+      totalFee += (t.fee ?? 0);
+    }
+    totalFee += (this.interpreter.subTxn.fee ?? 0);
+    const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length + 1;
+
+    // fee too less accross pool
+    const feeBal = (totalFee - (ALGORAND_MIN_TX_FEE * totalTxCnt));
+    if (feeBal < 0) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
+          required: ALGORAND_MIN_TX_FEE * totalTxCnt,
+          collected: totalFee
+        }
+      );
+    }
+
+    // get execution txn params (parsed from encoded sdk txn obj)
+    const execParams = parseEncodedTxnToExecParams(this.interpreter.subTxn, this.interpreter, this.line);
+    const baseCurrTx = this.interpreter.runtime.ctx.tx;
+    const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
+
+    // execute innner transaction
+    this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
+    this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
+    this.interpreter.runtime.ctx.isInnerTx = true;
+    this.interpreter.runtime.ctx.processTransactions([execParams]);
+
+    // update current txns to base (top-level) after innerTx execution
+    this.interpreter.runtime.ctx.tx = baseCurrTx;
+    this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+
+    // save executed tx, reset current tx
+    this.interpreter.runtime.ctx.isInnerTx = false;
+    this.interpreter.innerTxns.push(this.interpreter.subTxn);
+    this.interpreter.subTxn = undefined;
+  }
+}
+
+// push field F of the last inner transaction to stack
+// push to stack [...stack, transaction field]
+export class ITxn extends Op {
+  readonly field: string;
+  readonly idx: number | undefined;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Set transaction field according to arguments passed
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.idx = undefined;
+
+    this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+    if (TxArrFields[interpreter.tealVersion].has(args[0])) { // eg. itxn Accounts 1
+      assertLen(args.length, 2, line);
+      assertOnlyDigits(args[1], line);
+      this.idx = Number(args[1]);
+    } else {
+      assertLen(args.length, 1, line);
+    }
+    this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+
+    this.field = args[0]; // field
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (this.interpreter.innerTxns.length === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE,
+        { version: this.interpreter.tealVersion, line: this.line });
+    }
+
+    let result;
+    const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+
+    switch (this.field) {
+      case 'Logs': {
+        // TODO handle this after log opcode is implemented
+        // https://www.pivotaltracker.com/story/show/179855820
+        result = 0n;
+        break;
+      }
+      case 'NumLogs': {
+        // TODO handle this after log opcode is implemented
+        result = 0n;
+        break;
+      }
+      case 'CreatedAssetID': {
+        result = BigInt(this.interpreter.runtime.ctx.createdAssetID);
+        break;
+      }
+      case 'CreatedApplicationID': {
+        result = 0n; // can we create an app in inner-tx?
+        break;
+      }
+      default: {
+        // similarly as Txn Op
+        if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
+          result = txAppArg(this.field, tx, this.idx, this,
+            this.interpreter.tealVersion, this.line);
+        } else {
+          result = txnSpecbyField(this.field, tx, [tx], this.interpreter.tealVersion);
+        }
+
+        break;
+      }
+    }
+
+    stack.push(result);
+  }
+}
+
+export class ITxna extends Op {
+  readonly field: string;
+  readonly idx: number;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Sets `field` and `idx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field, transaction field array index]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[1], line);
+    this.assertITxArrFieldDefined(args[0], interpreter.tealVersion, line);
+
+    this.field = args[0]; // field
+    this.idx = Number(args[1]);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    if (this.interpreter.innerTxns.length === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE,
+        { version: this.interpreter.tealVersion, line: this.line });
+    }
+
+    const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+    const result = txAppArg(this.field, tx, this.idx, this,
+      this.interpreter.tealVersion, this.line);
+    stack.push(result);
+  }
+}
+
+/**
+ * txnas F:
+ * push Xth value of the array field F of the current transaction
+ * pops from stack: [...stack, uint64]
+ * pushes to stack: [...stack, transaction field]
+ */
+export class Txnas extends Txna {
+  /**
+   * Sets `field`, `txIdx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In txnas & gtxnas opcodes, index is fetched from top of stack.
+    // eg. [ int 1; txnas Accounts; ], [ txna Accounts 1].
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 1, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * gtxnas T F:
+ * push Xth value of the array field F from the Tth transaction in the current group
+ * pops from stack: [...stack, uint64]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnas extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field) and
+   * `txIdx`(Transaction Group Index) values according to arguments passed.
+   * @param args Expected arguments: [transaction group index, transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In txnas & gtxnas opcodes, index is fetched from top of stack.
+    // eg. [ int 1; gtxnas 0 Accounts; ], [ gtxna 0 Accounts 1].
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 2, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * gtxnsas F:
+ * pop an index A and an index B. push Bth value of the array
+ * field F from the Ath transaction in the current group
+ * pops from stack: [...stack, {uint64 A}, {uint64 B}]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnsas extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field)
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value.
+    // In gtxnsas opcode, {tx-index, index of array field} is fetched from top of stack.
+    // eg. [ int 0; int 1; gtxnsas Accounts; ], [ gtxna 0 Accounts 1].
+    super(["100", args[0], "100"], line, interpreter);
+    assertLen(args.length, 1, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const arrFieldIdx = this.assertBigInt(stack.pop(), this.line);
+    const txIdxInGrp = this.assertBigInt(stack.pop(), this.line);
+    this.idx = Number(arrFieldIdx);
+    this.txIdx = Number(txIdxInGrp);
+    super.execute(stack);
+  }
+}
+
+// pushes Arg[N] from LogicSig argument array to stack
+// Pops: ... stack, uint64
+// push to stack [...stack, bytes]
+export class Args extends Arg {
+  /**
+   * Gets the argument value from interpreter.args array.
+   * store the value in _arg variable
+   * @param args Expected arguments: none
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super([...args, "100"], line, interpreter);
+    assertLen(args.length, 0, line);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.index = Number(top);
+    super.execute(stack);
+  }
+}
+
+// Write bytes to log state of the current application
+// pops to stack [...stack, bytes]
+// Pushes: None
+export class Log extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.interpreter = interpreter;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const logByte = this.assertBytes(stack.pop(), this.line);
+    const txID = this.interpreter.runtime.ctx.tx.txID;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+
+    // max no. of logs exceeded
+    if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
+          maxLogs: ALGORAND_MAX_LOGS_COUNT,
+          line: this.line
+        }
+      );
+    }
+
+    // max "length" of logs exceeded
+    const length = txReceipt.logs.join("").length + logByte.length;
+    if (length > ALGORAND_MAX_LOGS_LENGTH) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
+          maxLength: ALGORAND_MAX_LOGS_LENGTH,
+          origLength: length,
+          line: this.line
+        }
+      );
+    }
+
+    txReceipt.logs.push(convertToString(logByte));
   }
 }

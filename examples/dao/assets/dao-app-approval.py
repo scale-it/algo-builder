@@ -156,7 +156,12 @@ def approval_program(ARG_GOV_TOKEN):
     # Saves deposit lsig account addresses in app global state
     # Expected arguments: [deposit_lsig]
     add_deposit_accounts = Seq([
-        Assert(Global.creator_address() == Txn.sender()),
+        Assert(
+            And(
+                Global.group_size() == Int(1),
+                Global.creator_address() == Txn.sender()
+            )
+        ),
         App.globalPut(deposit_lsig, Txn.application_args[1]),
         Return(Int(1))
     ])
@@ -171,7 +176,12 @@ def approval_program(ARG_GOV_TOKEN):
         Assert(App.localGet(Int(0), Bytes("type")) == Int(0)),
         # Verify deposit to deposit_lsig equals global.deposit
         verify_deposit(Int(1), App.globalGet(deposit_lsig)),
-        Assert(Gtxn[1].asset_amount() == App.globalGet(deposit)),
+        Assert(
+            And(
+                Gtxn[1].rekey_to() == Global.zero_address(),
+                Gtxn[1].asset_amount() == App.globalGet(deposit)
+            )
+        ),
 
         # if everything goes well, start recording proposal info
         App.localPut(Int(0), Bytes("name"), Txn.application_args[1]),
@@ -437,6 +447,11 @@ def approval_program(ARG_GOV_TOKEN):
         Return(Int(1))
     ])
 
+    handle_closeout_or_optin = Seq([
+        Assert(Global.group_size() == Int(1)),
+        Return(Int(1))
+    ])
+
     program = Cond(
         # Verfies that the application_id is 0, jumps to on_initialize.
         [Txn.application_id() == Int(0), on_initialize],
@@ -454,7 +469,7 @@ def approval_program(ARG_GOV_TOKEN):
                 Txn.on_completion() == OnComplete.CloseOut,
                 Txn.on_completion() == OnComplete.OptIn
             ),
-            Return(Int(1))
+            handle_closeout_or_optin
         ],
         # Verifies add accounts call, jumps to add_deposit_accounts branch.
         [Txn.application_args[0] == Bytes("add_deposit_accounts"), add_deposit_accounts],

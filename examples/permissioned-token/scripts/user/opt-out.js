@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
    */
   await optOut(deployer, elon);
 
-  await balanceOf(deployer, elon.addr, tesla.assetIndex); // prints nothing
+  console.log('Balance: ', await balanceOf(deployer, elon.addr, tesla.assetIndex)); // prints nothing
 }
 
 module.exports = { default: run, optOut: optOut };

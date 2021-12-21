@@ -1,4 +1,4 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
@@ -45,8 +45,12 @@ const placeholderParam = {
   TMPL_NOMINAL_PRICE: 1000,
   TMPL_MATURITY_DATE: Math.round(new Date().getTime() / 1000) + 240
 };
-const approvalProgram = getProgram('bond-dapp-stateful.py', placeholderParam);
-const clearProgram = getProgram('bond-dapp-clear.py');
+
+const approvalProgramFileName = 'bond-dapp-stateful.py';
+const clearProgramFileName = 'bond-dapp-clear.py';
+
+const approvalProgram = getProgram(approvalProgramFileName, placeholderParam);
+const clearProgram = getProgram(clearProgramFileName);
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;
@@ -75,11 +79,11 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   const getGlobal = (key) => runtime.getGlobalState(appInfo.appID, key);
 
   // Create B_[i+1]
-  const newBond = runtime.addASADef(
+  const newBond = runtime.deployASADef(
     newBondToken,
     asaDef,
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
-  );
+  ).assetID;
 
   optInLsigToBond(runtime, issuerLsig, newBond, managerAcc);
 
@@ -90,8 +94,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.address
   };
-  const dexLsigProgram = getProgram('dex-lsig.py', param);
-  const dexLsig = runtime.getLogicSig(dexLsigProgram, []);
+  const dexLsig = runtime.loadLogic('dex-lsig.py', param);
   const dexLsigAddress = dexLsig.address();
 
   // fund dex with some minimum balance first
@@ -163,6 +166,7 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
 module.exports = {
   optInLsigToBond,
   createDex,
+  placeholderParam,
   approvalProgram,
   clearProgram,
   minBalance,

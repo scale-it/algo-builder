@@ -35,7 +35,7 @@ const ChainType = z.object({
   throwOnCallFailures: z.boolean().optional(),
   loggingEnabled: z.boolean().optional(),
   initialDate: z.string().optional()
-}).nonstrict();
+}).passthrough();
 
 const HttpHeaders = z.record(z.string());
 
@@ -48,20 +48,20 @@ const KmdWallet = z.object({
   name: z.string(),
   password: z.string(),
   accounts: z.array(KmdAccount)
-}).nonstrict();
+}).passthrough();
 
 const KmdCfg = z.object({
   host: z.string(),
   port: z.union([z.number(), z.string()]),
   token: z.union([z.string(), KMDTokenHeaderType, CustomTokenHeaderType]),
   wallets: z.array(KmdWallet)
-}).nonstrict();
+}).passthrough();
 
 const IndexerCfg = z.object({
   host: z.string(),
   port: z.union([z.number(), z.string()]),
   token: z.union([z.string(), IndexerTokenHeaderType, CustomTokenHeaderType])
-}).nonstrict();
+}).passthrough();
 
 const HttpNetworkType = z.object({
   accounts: z.array(AccountType).optional(),
@@ -73,7 +73,7 @@ const HttpNetworkType = z.object({
   httpHeaders: HttpHeaders.optional(),
   kmdCfg: KmdCfg.optional(),
   indexerCfg: IndexerCfg.optional()
-}).nonstrict();
+}).passthrough();
 
 const NetworkType = z.union([ChainType, HttpNetworkType]);
 
@@ -85,13 +85,12 @@ const ProjectPaths = z.object({
   artifacts: z.string().optional(),
   sources: z.string().optional(),
   tests: z.string().optional()
-}).nonstrict(); ;
+}).passthrough();
 
 const Config = z.object({
   networks: NetworksType.optional(),
   paths: ProjectPaths.optional()
-}
-).nonstrict(); ;
+}).passthrough();
 
 /**
  * Validates the config, throwing a BuilderError if invalid.

@@ -583,7 +583,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       assert.notEqual(asaManager.address, bob.address);
       assert.throws(() =>
         ctx.runtime.executeTx(txGroup),
-        `RUNTIME_ERR1504: Only Manager account ${asaManager.address} can modify asset`
+        `RUNTIME_ERR1504: Only Manager account ${asaManager.address} can modify or destroy asset`
       );
     });
   });
@@ -636,7 +636,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // fails because paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1]]),
-      REJECTED_BY_LOGIC
+      RUNTIME_ERR1009
       );
 
       // fails because controller is not called (rejected by clawback)
@@ -760,7 +760,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('should reject if asset index is incorrect even if manager is same', () => {
       // deploy new asset with same manager(alice) as original one
       const newAssetId =
-        ctx.runtime.addAsset('tesla', { creator: { ...ctx.alice.account, name: 'alice' } });
+        ctx.runtime.deployASA('tesla', { creator: { ...ctx.alice.account, name: 'alice' } }).assetID;
 
       setPermissionsParams.foreignAssets = [newAssetId];
       assert.throws(() =>

@@ -31,9 +31,14 @@ export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
 // the assets and application arrays combined and totaled with the accounts array can not exceed 8
 export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
+export const MAX_INNER_TRANSACTIONS = 16;
+export const ALGORAND_MAX_LOGS_COUNT = 32;
+export const ALGORAND_MAX_LOGS_LENGTH = 1024;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
-export const MAX_ALGORAND_ACCOUNT_APPS = 10;
+export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
+
+export const MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS = 50;
 
 // for byteslice arithmetic ops, inputs are limited to 64 bytes,
 // but ouput can be upto 128 bytes (eg. when using b+ OR b*)
@@ -41,7 +46,8 @@ export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
-const zeroAddress = new Uint8Array(32);
+export const ZERO_ADDRESS = new Uint8Array(32);
+export const ZERO_ADDRESS_STR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 
@@ -122,11 +128,26 @@ TxnFields[3] = {
 };
 
 TxnFields[4] = {
-  ...TxnFields[3]
+  ...TxnFields[3],
+  ExtraProgramPages: 'apep'
 };
 
 TxnFields[5] = {
-  ...TxnFields[4]
+  ...TxnFields[4],
+  Nonparticipation: 'nonpart'
+};
+
+export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
+  1: {},
+  2: {},
+  3: {},
+  4: {},
+  5: {
+    Logs: null,
+    NumLogs: null,
+    CreatedAssetID: null,
+    CreatedApplicationID: null
+  }
 };
 
 // transaction fields of type array
@@ -135,21 +156,29 @@ export const TxArrFields: {[key: number]: Set<string>} = {
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
-TxArrFields[4] = TxArrFields[3];
-TxArrFields[5] = TxArrFields[4];
+TxArrFields[5] = TxArrFields[4] = TxArrFields[3];
+
+// itxn fields of type array
+export const ITxArrFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set(['Logs'])
+};
 
 export const TxFieldDefaults: {[key: string]: any} = {
-  Sender: zeroAddress,
+  Sender: ZERO_ADDRESS,
   Fee: zeroUint64,
   FirstValid: zeroUint64,
   LastValid: zeroUint64,
   Note: zeroByte,
   Lease: zeroByte,
-  Receiver: zeroAddress,
+  Receiver: ZERO_ADDRESS,
   Amount: zeroUint64,
-  CloseRemainderTo: zeroAddress,
-  VotePK: zeroAddress,
-  SelectionPK: zeroAddress,
+  CloseRemainderTo: ZERO_ADDRESS,
+  VotePK: ZERO_ADDRESS,
+  SelectionPK: ZERO_ADDRESS,
   VoteFirst: zeroUint64,
   VoteLast: zeroUint64,
   VoteKeyDilution: zeroUint64,
@@ -157,9 +186,9 @@ export const TxFieldDefaults: {[key: string]: any} = {
   TypeEnum: zeroUint64,
   XferAsset: zeroUint64,
   AssetAmount: zeroUint64,
-  AssetSender: zeroAddress,
-  AssetReceiver: zeroAddress,
-  AssetCloseTo: zeroAddress,
+  AssetSender: ZERO_ADDRESS,
+  AssetReceiver: ZERO_ADDRESS,
+  AssetCloseTo: ZERO_ADDRESS,
   GroupIndex: zeroUint64,
   ApplicationID: zeroUint64,
   OnCompletion: zeroUint64,
@@ -169,7 +198,7 @@ export const TxFieldDefaults: {[key: string]: any} = {
   NumAccounts: zeroUint64,
   ApprovalProgram: zeroByte,
   ClearStateProgram: zeroByte,
-  RekeyTo: zeroAddress,
+  RekeyTo: ZERO_ADDRESS,
   ConfigAsset: zeroUint64,
   ConfigAssetTotal: zeroUint64,
   ConfigAssetDecimals: zeroUint64,
@@ -178,12 +207,12 @@ export const TxFieldDefaults: {[key: string]: any} = {
   ConfigAssetName: zeroByte,
   ConfigAssetURL: zeroByte,
   ConfigAssetMetadataHash: zeroByte,
-  ConfigAssetManager: zeroAddress,
-  ConfigAssetReserve: zeroAddress,
-  ConfigAssetFreeze: zeroAddress,
-  ConfigAssetClawback: zeroAddress,
+  ConfigAssetManager: ZERO_ADDRESS,
+  ConfigAssetReserve: ZERO_ADDRESS,
+  ConfigAssetFreeze: ZERO_ADDRESS,
+  ConfigAssetClawback: ZERO_ADDRESS,
   FreezeAsset: zeroUint64,
-  FreezeAssetAccount: zeroAddress,
+  FreezeAssetAccount: ZERO_ADDRESS,
   FreezeAssetFrozen: zeroUint64,
   Assets: zeroByte,
   NumAssets: zeroUint64,
@@ -192,21 +221,32 @@ export const TxFieldDefaults: {[key: string]: any} = {
   GlobalNumUint: zeroUint64,
   GlobalNumByteSlice: zeroUint64,
   LocalNumUint: zeroUint64,
-  LocalNumByteSlice: zeroUint64
+  LocalNumByteSlice: zeroUint64,
+  ExtraProgramPages: zeroUint64,
+  Nonparticipation: zeroUint64
 };
 
-export const AssetParamMap: {[key: string]: string} = {
-  AssetTotal: 'total', // Total number of units of this asset
-  AssetDecimals: 'decimals', // See AssetDef.Decimals
-  AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
-  AssetUnitName: 'unitName', // Asset unit name
-  AssetName: 'name', // Asset name
-  AssetURL: 'url', // URL with additional info about the asset
-  AssetMetadataHash: 'metadataHash', // Arbitrary commitment
-  AssetManager: 'manager', // Manager commitment
-  AssetReserve: 'reserve', // Reserve address
-  AssetFreeze: 'freeze', // Freeze address
-  AssetClawback: 'clawback' // Clawback address
+export const AssetParamMap: {[key: number]: {[key: string]: string}} = {
+  1: {
+    AssetTotal: 'total', // Total number of units of this asset
+    AssetDecimals: 'decimals', // See AssetDef.Decimals
+    AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
+    AssetUnitName: 'unitName', // Asset unit name
+    AssetName: 'name', // Asset name
+    AssetURL: 'url', // URL with additional info about the asset
+    AssetMetadataHash: 'metadataHash', // Arbitrary commitment
+    AssetManager: 'manager', // Manager commitment
+    AssetReserve: 'reserve', // Reserve address
+    AssetFreeze: 'freeze', // Freeze address
+    AssetClawback: 'clawback' // Clawback address
+  }
+};
+
+AssetParamMap[4] = AssetParamMap[3] = AssetParamMap[2] = AssetParamMap[1];
+
+AssetParamMap[5] = {
+  ...AssetParamMap[4],
+  AssetCreator: 'creator'
 };
 
 export const reDigit = /^\d+$/;
@@ -235,7 +275,7 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
     MinTxnFee: ALGORAND_MIN_TX_FEE,
     MinBalance: 10000,
     MaxTxnLife: 1000,
-    ZeroAddress: zeroAddress,
+    ZeroAddress: ZERO_ADDRESS,
     GroupSize: null
   }
 };
@@ -264,7 +304,9 @@ GlobalFields[4] = {
 
 // global fields supported by tealv5
 GlobalFields[5] = {
-  ...GlobalFields[4]
+  ...GlobalFields[4],
+  GroupID: null,
+  CurrentApplicationAddress: null
 };
 
 // creating map for opcodes whose cost is other than 1
@@ -312,7 +354,10 @@ OpGasCost[4] = {
  * teal v5
  */
 OpGasCost[5] = {
-  ...OpGasCost[4]
+  ...OpGasCost[4],
+  ecdsa_verify: 1700,
+  ecdsa_pk_decompress: 650,
+  ecdsa_pk_recover: 2000
 };
 
 export const enum MathOp {
@@ -334,4 +379,26 @@ export const enum MathOp {
   BitwiseAnd,
   BitwiseXor,
   BitwiseInvert
+}
+
+// tealv5 supported types (typeEnum -> type mapping)
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
+export const TxnTypeMap: {[key: string]: string} = {
+  1: 'pay',
+  3: 'acfg', // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
+  4: 'axfer', // TransferAsset OR RevokeAsset,
+  5: 'afrz'
+};
+
+/**
+ * https://developer.algorand.org/docs/get-details/dapps/avm/teal/specification/#typeenum-constants
+ */
+export enum TransactionTypeEnum {
+  UNKNOWN = "unknown",
+  PAYMENT = "pay",
+  KEY_REGISTRATION = "keyreg",
+  ASSET_CONFIG = "acfg",
+  ASSET_TRANSFER = "axfer",
+  ASSET_FREEZE = "afrz",
+  APPLICATION_CALL = "appl",
 }

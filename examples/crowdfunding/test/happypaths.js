@@ -1,4 +1,5 @@
-const { getProgram, convert } = require('@algo-builder/algob');
+const { getProgram } = require('@algo-builder/runtime');
+const { convert } = require('@algo-builder/algob');
 const {
   Runtime, AccountStore
 } = require('@algo-builder/runtime');
@@ -28,8 +29,11 @@ describe('Crowdfunding Tests - Happy Paths', function () {
   let runtime;
   let creationFlags;
   let applicationId;
-  const approvalProgram = getProgram('crowdFundApproval.teal');
-  const clearProgram = getProgram('crowdFundClear.teal');
+  const approvalProgramFileName = 'crowdFundApproval.teal';
+  const clearProgramFileName = 'crowdFundClear.teal';
+
+  const approvalProgram = getProgram(approvalProgramFileName);
+  const clearProgram = getProgram(clearProgramFileName);
 
   this.beforeAll(async function () {
     runtime = new Runtime([master, creator, donor]);
@@ -78,8 +82,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     creator.setGlobalState(applicationId, 'FundCloseDate', 20n);
 
     // setup and sync escrow account
-    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-    escrowLsig = runtime.getLogicSig(escrowProg, []);
+    escrowLsig = runtime.loadLogic('crowdFundEscrow.py', { APP_ID: applicationId });
     const escrowAddress = escrowLsig.address();
     escrow = runtime.getAccount(escrowAddress);
 
@@ -101,9 +104,14 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       convert.uint64ToBigEndian(fundCloseTs)
     ];
 
-    // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    // deploy application
+    applicationId = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      { ...creationFlags, appArgs: creationArgs },
+      {}
+    ).appID;
+
     const creatorPk = convert.addressToPk(creator.address);
 
     assert.isDefined(applicationId);
