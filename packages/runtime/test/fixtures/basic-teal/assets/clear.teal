@@ -1,0 +1,4 @@
+#pragma version 5
+// default clear program
+int 1
+return
