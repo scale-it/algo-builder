@@ -5,8 +5,8 @@ const {
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
-  optInLsigToBond, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance, redeem
+  optInLsigToBond, createDex, approvalProgram, clearProgram,
+  minBalance, initialBalance, redeem, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
 
@@ -70,7 +70,7 @@ describe('Bond token failing tests', function () {
   const bondCreator = convert.addressToPk(bondTokenCreator.address);
 
   this.beforeEach(async function () {
-    initialBond = runtime.addAsset(
+    initialBond = runtime.deployASA(
       'bond-token-0',
       { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 
@@ -84,9 +84,14 @@ describe('Bond token failing tests', function () {
       maxIssuance
     ];
 
-    // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+    // deploy application
+    applicationId = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {},
+      placeholderParam
+    ).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID

@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -14,6 +13,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   let john: AccountStore;
   let alice: AccountStore;
   let runtime: Runtime;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let approvalProgram: string;
   let clearProgram: string;
   let assetId: number;
@@ -22,8 +23,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     john = new AccountStore(initialBalance, elonMuskAccount);
     alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
   });
 
   function syncAccounts (): void {
@@ -33,19 +35,24 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
   function setupAsset (): void {
     // create asset
-    assetId = runtime.addAsset('gold',
+    assetId = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
   }
 
   function setupApp (): void {
-    // create new app
-    runtime.addApp({
-      sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
-    }, {}, approvalProgram, clearProgram);
+    // deploy new app
+    runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      {
+        sender: john.account,
+        globalBytes: 32,
+        globalInts: 32,
+        localBytes: 8,
+        localInts: 8
+      },
+      {}
+    );
   }
 
   it("should execute group of (payment + asset creation) successfully", () => {
@@ -133,8 +140,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.DeployApp,
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
-        approvalProgram: approvalProgram,
-        clearProgram: clearProgram,
+        approvalProgram: approvalProgramFileName,
+        clearProgram: clearProgramFileName,
         localInts: 1,
         localBytes: 1,
         globalInts: 1,
@@ -179,14 +186,14 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     );
 
     // verify app doesn't exist in map
-    const res = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    const res = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isUndefined(res);
   });
 
   it("Should opt-in to app, through execute transaction", () => {
     setupApp();
     syncAccounts();
-    const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    const appInfo = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isDefined(appInfo);
     const tx: types.ExecParams[] = [
       {

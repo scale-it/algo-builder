@@ -88,7 +88,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   await executeTransaction(deployer, forceTxGroup);
 
   console.log(`* ${toAddr}(receiver) asset holding: *`);
-  await balanceOf(deployer, toAddr, tesla.assetIndex);
+  console.log(await balanceOf(deployer, toAddr, tesla.assetIndex));
 
   console.log('* Transfer Successful *');
 }

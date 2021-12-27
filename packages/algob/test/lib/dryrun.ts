@@ -17,7 +17,7 @@ import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
-import { mockAccountInformation, mockApplicationResponse, mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
+import { mockAccountInformation, mockApplicationResponse, mockDryRunResponse, mockGenesisInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 class TealDbgMock extends Tealdbg {
@@ -49,6 +49,8 @@ describe("Debugging TEAL code using tealdbg", () => {
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
       .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
+    sinon.stub(algod.algodClient, "genesis")
+      .returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2['genesis']>);
 
     (sinon.stub(algod.algodClient, "dryrun") as any)
       .returns({ do: async () => mockDryRunResponse }) as ReturnType<algosdk.Algodv2['dryrun']>;
@@ -77,6 +79,7 @@ describe("Debugging TEAL code using tealdbg", () => {
     (algod.algodClient.dryrun as sinon.SinonStub).restore();
     (algod.algodClient.accountInformation as sinon.SinonStub).restore();
     (algod.algodClient.getApplicationByID as sinon.SinonStub).restore();
+    (algod.algodClient.genesis as sinon.SinonStub).restore();
   });
 
   it("dump dryrunResponse in assets/<file>", async () => {

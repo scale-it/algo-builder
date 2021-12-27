@@ -53,7 +53,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction PASS - As according to .teal logic, asset amount should be <= 100
   await executeTransaction(deployer, assetTxParam);
   // print assetHolding of bob
-  await balanceOf(deployer, bob.addr, assetID);
+  console.log('Balance: ', await balanceOf(deployer, bob.addr, assetID));
 
   // Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
   const invalidTxParams = Object.assign({}, assetTxParam);

@@ -15,13 +15,18 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
   let john = new AccountStore(minBalance + fee);
 
   let runtime: Runtime;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let approvalProgram: string;
   let clearProgram: string;
   let appCreationFlags: AppDeploymentFlags;
   this.beforeAll(function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
+
+    approvalProgram = getProgram(approvalProgramFileName);
+    clearProgram = getProgram(clearProgramFileName);
 
     appCreationFlags = {
       sender: john.account,
@@ -35,9 +40,20 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
   const syncAccount = (): void => { john = runtime.getAccount(john.address); };
 
   it("initialize new account for deployed app(s)", function () {
-    // create new app
-    const appIdX = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
-    const appIdY = runtime.addApp(appCreationFlags, {}, approvalProgram, clearProgram).appID;
+    // deploy new app
+    const appIdX = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      appCreationFlags,
+      {}
+    ).appID;
+
+    const appIdY = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      appCreationFlags,
+      {}
+    ).appID;
 
     assert.isDefined(runtime.getApp(appIdX));
     assert.isDefined(runtime.getApp(appIdY));

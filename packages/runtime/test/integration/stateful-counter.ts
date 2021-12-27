@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { useFixture } from "../helpers/integration";
@@ -21,21 +20,26 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   };
 
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   this.beforeAll(function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
 
-    // create new app
-    txParams.appID = runtime.addApp({
-      sender: john.account,
-      globalBytes: 2,
-      globalInts: 2,
-      localBytes: 3,
-      localInts: 3
-    }, {}, approvalProgram, clearProgram).appID;
+    // deploy a new app
+    txParams.appID = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      {
+        sender: john.account,
+        globalBytes: 2,
+        globalInts: 2,
+        localBytes: 3,
+        localInts: 3
+      },
+      {}
+    ).appID;
 
     // opt-in to the app
     runtime.optInToApp(john.address, txParams.appID, {}, {});

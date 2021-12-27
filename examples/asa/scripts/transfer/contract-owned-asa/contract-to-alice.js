@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
 
   await executeTransaction(deployer, txGroup);
   // print assetHolding of alice
-  await balanceOf(deployer, alice.addr, assetID);
+  console.log('Alice assetHolding balance: ', await balanceOf(deployer, alice.addr, assetID));
 
   try {
     // tx FAIL: trying to receive asset from another account

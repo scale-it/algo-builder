@@ -24,6 +24,7 @@ create-private-net:
 	@goal network create -r ./node_data -n private -t private-net-template.json
 	@echo '{ "GossipFanout": 0, "EndpointAddress": "127.0.0.1:4001", "DNSBootstrapID": "", "EnableProfiler": true, "NetAddress": "127.0.0.1:0", "EnableDeveloperAPI": true }' > ./node_data/PrimaryNode/config.json
 	@echo 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' > ./node_data/PrimaryNode/algod.token
+	@echo '127.0.0.1:4001' > ./node_data/PrimaryNode/algod-listen.net
 	echo 'PrimaryNode config and access token set.'
 
 status-private-net:
@@ -65,7 +66,7 @@ sandbox-up:
 	(cd $(SANDBOX_PATH); git reset --hard; git pull;)
 # override .yml with custom config (custom token and port for private network)
 	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
-	$(SANDBOX_PATH)/sandbox up -v
+	$(SANDBOX_PATH)/sandbox up dev -v
 
 sandbox-down:
 # stops docker containers for algod, indexer and indexer-db
@@ -155,7 +156,7 @@ start-indexer:
 		wget $(INDEXER_LINUX_TAR_URL) -P $(INDEXER_PATH); \
 		cd $(INDEXER_PATH); tar -xf $(INDEXER_LINUX_TAR_NAME) -C $(INDEXER_PATH); fi
 # Start indexer by providing database connection info and path to algod node
-	$(INDEXER_PATH)/algorand-indexer_linux_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode
+	$(INDEXER_PATH)/algorand-indexer_linux_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode --dev-mode
 
 recreate-indexer: recreate-indexer-db start-indexer
 
