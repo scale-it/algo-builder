@@ -6,8 +6,6 @@ layout: splash
 
 [TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a stack based language that executes inside Algorand transactions to program logic signatures and smart contracts. `@algo-builder/runtime` provides a TypeScript and JavaScript, lightweight runtime and TEAL interpreter to test Algorand transactions, ASA and Smart Contracts.
 
-**NOTE:** TEAL can not modify nor create transactions.
-
 ## How it works
 
 The `@algo-builder/runtime` (TypeScript Algorand runtime) package has 4 major components:
@@ -21,7 +19,7 @@ The `@algo-builder/runtime` (TypeScript Algorand runtime) package has 4 major co
 ## Block Rounds/Height
 
 In Algorand blockchain, transaction processing is divided into rounds. At each round blockchain creates a block with transactions which update the state. All transactions in the same block have the same transaction time and block height.
-In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately.
+In Algo Builder Runtime, we don't have blocks. All transactions are processed immediately.
 However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract processing.
 
 The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user to set in when designing a test flow. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round and timestamp using `runtime.getRound()` and `runtime.getTimestamp()` respectively. <br />
@@ -29,7 +27,7 @@ Example:
 
     runtime.setRoundAndTimestamp(5, 10); // set current block round to 5 and timestamp to 10
 
-This means that current block round is set to 5 and transaction will pass only if its' first valid round is less or equal 5 and the last valid round is greater than 5.
+This means that current block round is set to 5 and transaction will pass only if it's first valid round is less or equal 5 and the last valid round is greater than 5.
 Note: Block round and timestamp remains same until user will change it again.
 
 
@@ -83,7 +81,7 @@ In this section we will describe the flow of testing smart contracts in runtime:
   const john = new AccountStore(initialMicroAlgo);
   const bob = new AccountStore(initialMicroAlgo);
   ```
-  `initialAlgo` is the amount of ALGO set for the created account. It's recommended to have at least 1 ALGO (1000000 micro ALGO) to cover transaction fees and to maintain minimum account balance.
+  `initialMicroAlgo` is the amount of ALGO set for the created account. It's recommended to have at least 1 ALGO (1000000 micro ALGO) to cover transaction fees and to maintain minimum account balance.
   Note: User can initialize & use accounts by name in runtime, similar to algob.
   Ex:
   ```js
@@ -102,8 +100,8 @@ In this section we will describe the flow of testing smart contracts in runtime:
   runtime.setRoundAndTimestamp(20, 100);
   ```
 
-- **Create Apps/Assets**. At this point our runtime is ready. Now we can create apps and assets, and begin testing our smart contracts (present in your current directory's `asset` folder). To create a stateful application (smart contract), use `runtime.addApp()` funtcion. Similarly to create a new asset use `runtime.addAsset()` function.
-- **Create and Execute Transactions**. We can create transactions to test our smart contracts. You create a tranaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...) as you would do it in algob: either using the JS SDK, or one of the high level algob functions. To execute tranasction use `runtime.executeTx()` funtion.
+- **Create Apps/Assets**. At this point our runtime is ready. Now we can create apps and assets, and begin testing our smart contracts (present in your current directory's `asset` folder). To create a stateful application (smart contract), use `runtime.deployApp()` funtcion. Similarly to create a new asset use `runtime.deployAsset()` function.
+- **Create and Execute Transactions**. We can create transactions to test our smart contracts. You create a transaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...) as you would do it in algob: either using the JS SDK, or one of the high level algob functions. To execute tranasction use `runtime.executeTx()` funtion.
 - **Update/Refresh State**. After a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. In algob examples we use `syncAccounts()` closure (see [example](https://github.com/scale-it/algo-builder/blob/6743acd/examples/restricted-assets/test/asset-txfer-test.js#L80)) closure which will reassign accounts to their latest state.
 - **Verify State**: Now, we can verify if the `global state` and `local state` as well as accounts are correctly updated. We use `runtime.getGlobalState()` and `runtime.getLocalState()` to check the state and directly inspect account objects (after the `syncAccounts` is made).
 
@@ -125,7 +123,7 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
 #### Escrow Account
 
-Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
+Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract (smart signature) logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 The logic signature accepts only ALGO payment transaction where amount is <= 100 AND receiver is `john` AND fee <= 10000.
 
 - First let's prepare the runtime and state: initialize accounts, get a logic signature for escrow and set up runtime:
@@ -138,8 +136,7 @@ The logic signature accepts only ALGO payment transaction where amount is <= 100
   // admin is an account used to fund escrow
   let admin = new AccountStore(1e12);
   let john = new AccountStore(initialJohnHolding);
-  const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
-  let escrow = runtime.getAccount(lsig.address());
+  const escrow = runtime.loadLogic('escrow.teal', []);
   const runtime = new Runtime([john]); // setup runtime
   ```
 
@@ -208,7 +205,7 @@ Full example with above tests is available in our [escrow-account.ts](https://gi
 
 Let's try to execute a transaction where a user (`john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
 
-  - As before we start with preparing the runtime. We use `runtime.getLogicSig(getProgram('escrow.teal'), [])` to create a logic signature.
+  - As before we start with preparing the runtime. We use `runtime.loadLogic('escrow.teal', [])` to create and load logic signature.
 
   ```javascript
   let john = new AccountStore(initialJohnHolding);
@@ -235,7 +232,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
     assert.equal(bob.balance(), initialBobHolding);
 
     // get delegated logic signature
-    const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
+    const lsig = runtime.loadLogic('basic.teal', []);
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
 
@@ -253,7 +250,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
   it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
-    const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
+    const lsig = runtime.loadLogic('incorrect-logic.teal', []);
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
 
@@ -277,9 +274,9 @@ Full example with the above tests is available in our [basic-teal](https://githu
 
 Now, we will execute a transaction with an app call (stateful TEAL). The app is a simple smart contract which increments a global and local "counter" during each application call. Teal code can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/stateful/assets/counter-approval.teal)
 
-- Similar to the previous test, we need to setup accounts and initialize runtime. Now, for stateful smart contract, we also need to create a new application in user account and opt-in (to call the stateful smart contract later). User can use `runtime.addApp()` and `runtime.optInToApp()` for app setup.
+- Similar to the previous test, we need to setup accounts and initialize runtime. Now, for stateful smart contract, we also need to create a new application in user account and opt-in (to call the stateful smart contract later). User can use `runtime.deployApp()` and `runtime.optInToApp()` for app setup.
   ```javascript
-  const john = new AccountStoreImpl(1000);
+  const john = new AccountStore(1000);
   let runtime: Runtime;
   let program: string;
 
@@ -287,25 +284,27 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
     type: TransactionType.CallApp,
     sign: SignType.SecretKey,
     fromAccount: john.account,
-    appID: 0,
+    appId: 0,
     payFlags: { totalFee: fee }
   };
 
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    program = getProgram('counter-approval.teal');
 
     // create new app
-    txnParams.appID = await runtime.addApp({
+    txnParams.appId = await runtime.deployApp(
+    'counter-approval.teal',
+    'clear-program',
+    {
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
       localBytes: 8,
       localInts: 8
-    }, {}, program).appID;
+    }, {}).appID;
 
     // opt-in to the app
-    await runtime.optInToApp(txnParams.appID, john.address, {}, {}, program);
+    await runtime.optInToApp(txnParams.appId, john.address, {}, {});
   });
   ```
 
@@ -342,7 +341,7 @@ When the `debugStack: number` parameter is set, a TEAL stack is printed to a con
 - Use `beforeEach`, `afterEach`, `beforeAll`, `afterAll` functions to setup and clean shared resources in your tests.
 - Sync your accounts' before checking their state.
 
-## What we support now
+## What we support
 
 Currently, `runtime` supports:
 
@@ -377,5 +376,6 @@ TEAL files used for the below tests can be found in `/test/fixtures` in [runtime
 + [Escrow Account Test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts)
 + [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
 + Complex TEAL test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
++ [DAO Tests](https://github.com/scale-it/algo-builder/tree/master/examples/dao/test)
 
 See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) and [Interesting Test Suites](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#interesting-test-suites) for more interesting test suites.
