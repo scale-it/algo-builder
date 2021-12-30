@@ -27,7 +27,7 @@ Example:
 
     runtime.setRoundAndTimestamp(5, 10); // set current block round to 5 and timestamp to 10
 
-This means that current block round is set to 5 and transaction will pass only if it's first valid round is less or equal 5 and the last valid round is greater than 5.
+This means that current block round is set to 5 and transaction will pass only if its first valid round is less or equal 5 and the last valid round is greater than 5.
 Note: Block round and timestamp remains same until user will change it again.
 
 
