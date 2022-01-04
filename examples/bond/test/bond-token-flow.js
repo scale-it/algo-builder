@@ -6,9 +6,9 @@ const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const {
-  optInLsigToBond, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance,
-  issue, redeem
+  optInLsigToBond, createDex,
+  minBalance, initialBalance,
+  issue, redeem, approvalProgram, clearProgram, placeholderParam
 } = require('./common/common');
 const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
 
@@ -82,7 +82,7 @@ describe('Bond token Tests', function () {
     * bob can exit all their tokens (12 and 2 respectively).
     */
 
-    const currentBondIndex = runtime.addAsset(
+    const currentBondIndex = runtime.deployASA(
       'bond-token-0',
       { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
 
@@ -97,8 +97,13 @@ describe('Bond token Tests', function () {
     ];
 
     // create application
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram).appID;
+    applicationId = runtime.deployApp(
+      approvalProgram,
+      clearProgram,
+      { ...creationFlags, appArgs: creationArgs },
+      {},
+      placeholderParam
+    ).appID;
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID

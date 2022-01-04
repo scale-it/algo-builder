@@ -48,7 +48,8 @@ export interface AlgoOperator {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
-    txWriter: txWriter
+    txWriter: txWriter,
+    scTmplParams?: SCParams
   ) => Promise<rtypes.SSCInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
@@ -372,6 +373,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
+   * @param txWriter - transaction log writer
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    */
   async updateApp (
     sender: algosdk.Account,
@@ -380,13 +384,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
-    txWriter: txWriter
+    txWriter: txWriter,
+    scTmplParams?: SCParams
   ): Promise<rtypes.SSCInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
-    const app = await this.ensureCompiled(newApprovalProgram, false);
+    const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-    const clear = await this.ensureCompiled(newClearProgram, false);
+    const clear = await this.ensureCompiled(newClearProgram, false, scTmplParams);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
     const execParam: wtypes.ExecParams = {

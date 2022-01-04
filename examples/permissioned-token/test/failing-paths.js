@@ -760,7 +760,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('should reject if asset index is incorrect even if manager is same', () => {
       // deploy new asset with same manager(alice) as original one
       const newAssetId =
-        ctx.runtime.addAsset('tesla', { creator: { ...ctx.alice.account, name: 'alice' } }).assetID;
+        ctx.runtime.deployASA('tesla', { creator: { ...ctx.alice.account, name: 'alice' } }).assetID;
 
       setPermissionsParams.foreignAssets = [newAssetId];
       assert.throws(() =>

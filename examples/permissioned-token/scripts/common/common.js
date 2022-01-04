@@ -51,8 +51,8 @@ exports.optInAccountToApp = async function (deployer, account, appID, payflags, 
 // returns totalSupply of asset (0 after deployment, will increase with each issuance transaction)
 exports.totalSupply = async function (deployer, assetIndex) {
   const asaDef = (await deployer.getAssetByID(assetIndex)).params;
-  const reserveAssetHolding = await balanceOf(deployer, asaDef.reserve, assetIndex);
-  return BigInt(asaDef.total) - BigInt(reserveAssetHolding.amount);
+  const reserveAssetHoldingAmount = await balanceOf(deployer, asaDef.reserve, assetIndex);
+  return BigInt(asaDef.total) - BigInt(reserveAssetHoldingAmount);
 };
 
 function getClawbackParams (deployer) {

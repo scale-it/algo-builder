@@ -1,7 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram } from "../../src";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -14,8 +13,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   let john: AccountStore;
   let alice: AccountStore;
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   let assetId: number;
   let appID: number;
 
@@ -24,19 +23,24 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
     // create asset
-    assetId = runtime.addAsset('gold',
+    assetId = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
 
-    // create new app
-    appID = runtime.addApp({
-      sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
-    }, {}, approvalProgram, clearProgram).appID;
+    // deploy a new app
+    appID = runtime.deployApp(
+      approvalProgramFileName,
+      clearProgramFileName,
+      {
+        sender: john.account,
+        globalBytes: 32,
+        globalInts: 32,
+        localBytes: 8,
+        localInts: 8
+      },
+      {}
+    ).appID;
     // opt-in to app
     runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice

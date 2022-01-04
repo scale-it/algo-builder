@@ -387,6 +387,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
     if (opCodeMap[tealVersion][opCode.slice(0, opCode.length - 1)] !== undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_LABEL, { line: counter }); // eg. `int:` is invalid label as `int` is an opcode
     }
+    interpreter.lineToCost[counter] = 0;
     return new Label([opCode], counter);
   }
 

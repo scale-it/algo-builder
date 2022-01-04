@@ -1,6 +1,6 @@
 # Creating a private-net (local development network)
 
-This directory (`/infrastructure`) provides an example setup for a private-net, which you can use for local testing. It creates a single node, fully functional Algorand blockchain with:
+This directory (`/infrastructure`) provides an example setup for a private-net in `dev` mode, which you can use for local testing. It creates a single node, fully functional Algorand blockchain with:
 
 * one wallet: `Wallet1`
 * one address full of Algos (100% of total supply). We call that account a `master-account`.
@@ -56,7 +56,7 @@ To recreate the private net (stop the current instance, remove all data and re-s
 
 ### Quick start (using Sandbox)
 
-This is a guide to quickly start a local node using docker and make scripts.
+This is a guide to quickly start a local node (in `dev` mode) using docker and make scripts.
 
 Algorand sandbox is a popular tool among developers to quickly setup up an algorand environment (`algod`, `indexer`, `indexer-db`) using docker. Here user don't need to explicitly setup an algorand node.
 Note: make sure to have [Docker](https://docs.docker.com/compose/install/) installed (with non root privilages). Steps:
@@ -74,7 +74,7 @@ If you want to create a local network without using our scripts then you can fol
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
 *NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
-1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups the network (this might take a while).
+1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups the network in dev mode (this might take a while).
 
 2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
@@ -136,7 +136,7 @@ After setup, if you want to use reach commands directly you can use `~/.algorand
 
 The [Indexer](https://developer.algorand.org/articles/introducing-algorands-v2-indexer/) is a standalone service that reads committed blocks from the Algorand blockchain and maintains a database of transactions and accounts that are searchable and indexed.
 
-By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on local or either in a docker container).
+By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on local or either in a docker container) with dev mode flag (`--dev-mode`).
 
 ### Installation with docker
 **Prerequisite:** Make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages).

@@ -69,7 +69,7 @@ async function cease (deployer, address, amount) {
   await executeTransaction(deployer, ceaseTxGroup);
 
   console.log(`* ${address} asset holding after cease: *`);
-  await balanceOf(deployer, address, tesla.assetIndex);
+  console.log(await balanceOf(deployer, address, tesla.assetIndex));
 
   console.log('* Cease Successful *');
 }

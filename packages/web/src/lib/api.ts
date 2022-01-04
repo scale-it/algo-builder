@@ -22,8 +22,9 @@ export function clientForChain (chain: ChainType): algosdk.Algodv2 {
  */
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
+  const genesisInfo = await algocl.genesis().do();
   // Private chains may have an issue with firstRound
-  if (params.firstRound === 0) {
+  if (!genesisInfo.devmode && params.firstRound === 0) {
     throw new Error("Suggested params returned 0 as firstRound. Ensure that your node progresses.");
   }
   return params;
@@ -42,10 +43,10 @@ export async function mkTxParams (
   if (userParams.flatFee === undefined) {
     s.flatFee = userParams.totalFee !== undefined;
   }
-  s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
+  s.fee = userParams.totalFee || userParams.feePerByte || ALGORAND_MIN_TX_FEE; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 
-  s.firstRound = userParams.firstValid ?? s.firstRound;
-  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
+  s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
     ? s.lastRound
     : Number(userParams.firstValid) + Number(userParams.validRounds);
   return s;

@@ -17,7 +17,6 @@ module.exports = {
   },
   rules:  {
     // "ter-indent": [2, {"FunctionDeclaration": {"parameters": "first"}}],
-
     "import/no-extraneous-dependencies": 0,
     "import/prefer-default-export": "off",
     "max-classes-per-file": 0,

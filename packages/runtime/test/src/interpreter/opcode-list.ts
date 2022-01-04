@@ -4343,7 +4343,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push raised min_balance to stack after creating asset", () => {
-      interpreter.runtime.addAsset('gold',
+      interpreter.runtime.deployASA('gold',
         { creator: { ...elon.account, name: "elon" } }); // create asset
       elon = interpreter.runtime.getAccount(elon.address); // sync
 

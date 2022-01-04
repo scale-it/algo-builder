@@ -3,7 +3,6 @@ import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
-import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
@@ -182,7 +181,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   this.beforeEach(() => {
-    assetId = runtime.addAsset('gold',
+    assetId = runtime.deployASA('gold',
       { creator: { ...john.account, name: "john" } }).assetID;
     assetTransferParam.assetID = assetId;
     syncAccounts();
@@ -196,7 +195,7 @@ describe("Algorand Standard Assets", function () {
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
     assetId =
-      runtime.addAsset('gold', { creator: { ...john.account, name: "john" } }).assetID;
+      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetID;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -226,7 +225,7 @@ describe("Algorand Standard Assets", function () {
         note: "note"
       }
     };
-    assetId = runtime.addASADef(
+    assetId = runtime.deployASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
     ).assetID;
     syncAccounts();
@@ -463,7 +462,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
-    const assetId = runtime.addAsset('silver',
+    const assetId = runtime.deployASA('silver',
       { creator: { ...john.account, name: "john" } }).assetID;
 
     const modFields: types.AssetModFields = {
@@ -720,12 +719,12 @@ describe("Stateful Smart Contracts", function () {
   useFixture('stateful');
   const john = new AccountStore(minBalance);
   let runtime: Runtime;
-  let approvalProgram: string;
-  let clearProgram: string;
+  let approvalProgramFileName: string;
+  let clearProgramFileName: string;
   this.beforeEach(() => {
     runtime = new Runtime([john]);
-    approvalProgram = getProgram('counter-approval.teal');
-    clearProgram = getProgram('clear.teal');
+    approvalProgramFileName = 'counter-approval.teal';
+    clearProgramFileName = 'clear.teal';
   });
   const creationFlags = {
     sender: john.account,
@@ -736,40 +735,40 @@ describe("Stateful Smart Contracts", function () {
   };
 
   it("Should not create application if approval program is empty", () => {
-    approvalProgram = "";
+    approvalProgramFileName = "empty-app.teal";
 
     expectRuntimeError(
-      () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
+      () => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
     );
   });
 
   it("Should not create application if clear program is empty", () => {
-    clearProgram = "";
+    clearProgramFileName = "empty-app.teal";
 
     expectRuntimeError(
-      () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
+      () => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
   });
 
   it("Should create application", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID;
+    const appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}).appID;
 
     const app = runtime.getApp(appID);
     assert.isDefined(app);
   });
 
   it("Should not update application if approval or clear program is empty", () => {
-    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram).appID;
+    const appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}).appID;
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appID, "", clearProgram, {}, {}),
+      () => runtime.updateApp(john.address, appID, "", clearProgramFileName, {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
     );
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appID, approvalProgram, "", {}, {}),
+      () => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
   });

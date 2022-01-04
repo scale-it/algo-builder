@@ -201,7 +201,8 @@ export class AccountStore implements AccountStoreI {
   }
 
   /**
-   * Creates Asset in account's state
+   * Deploy Asset in account's state
+   * @param assetId Asset Index
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
@@ -290,7 +291,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   /**
-   * Add application in account's state
+   * Deploy application in account's state
    * check maximum account creation limit
    * @param appID application index
    * @param params SSCDeployment Flags

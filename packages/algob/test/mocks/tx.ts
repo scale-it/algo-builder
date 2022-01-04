@@ -7,6 +7,22 @@ export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080)
 
 export const MOCK_APPLICATION_ADDRESS = getApplicationAddress(1);
 
+export const mockGenesisInfo: any = {
+  alloc: [
+    {
+      addr: '7777777777777777777777777777777777777777777777777774MSJUVU',
+      comment: 'RewardsPool',
+      state: []
+    }
+  ],
+  // devmode: true,
+  fees: 'A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE',
+  id: 'v1',
+  network: 'private',
+  proto: 'https://github.com/algorandfoundation/specs/tree/bc36005dbd776e6d1eaf0c560619bb183215645c',
+  rwd: '7777777777777777777777777777777777777777777777777774MSJUVU'
+};
+
 export const mockSuggestedParam: SuggestedParams = {
   flatFee: false,
   fee: 100,

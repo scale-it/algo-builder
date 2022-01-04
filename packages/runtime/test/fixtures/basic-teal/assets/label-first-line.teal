@@ -1,0 +1,26 @@
+#pragma version 5
+
+txn ApplicationID
+bz creation
+
+loop:
+load 0
+int 10
+<
+bz break
+
+load 0
+int 1
++
+store 0
+
+b loop
+
+break:
+
+int 1
+return
+
+creation:
+int 1
+return

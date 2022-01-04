@@ -1,19 +1,20 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
-import { AccountStore, parseASADef, Runtime } from ".";
+import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
+import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI,
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, EncTx, ExecutionMode,
-  ID, SSCAttributesM, StackElem, State, TxReceipt
+  ID, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -169,28 +170,28 @@ export class Ctx implements Context {
   }
 
   /**
-   * Add asset using asa.yaml file
+   * Deploy asset using asa.yaml file
    * @param name asset name
    * @param fromAccountAddr account address
    * @param flags asa deployment flags
    */
-  addAsset (
+  deployASA (
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
-    return this.addASADef(
+    return this.deployASADef(
       name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
     );
   }
 
   /**
-   * Add Asset without using asa.yaml file
+   * Deploy Asset without using asa.yaml file
    * @param name ASA name
    * @param asaDef asset defitions
    * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addASADef (
+  deployASADef (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): DeployedAssetTxReceipt {
@@ -251,38 +252,47 @@ export class Ctx implements Context {
   }
 
   /**
-   * creates new application and returns application id
+   * deploy a new application and returns application id
    * @param fromAccountAddr creator account address
    * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
-   * @param approvalProgram application approval program
-   * @param clearProgram application clear program
+   * @param approvalProgram application approval program (TEAL code or program filename)
+   * @param clearProgram application clear program (TEAL code or program filename)
    * @param idx index of transaction in group
-   * NOTE:
-   * - approval and clear program must be the TEAL code as string (not compiled code)
-   * - When creating or opting into an app, the minimum balance grows before the app code runs
+   * @param scTmplParams Smart Contract template parameters
+   * NOTE When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  addApp (
+  deployApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number
+    approvalProgram: string, clearProgram: string, idx: number,
+    scTmplParams?: SCParams
   ): DeployedAppTxReceipt {
     const senderAcc = this.getAccount(fromAccountAddr);
 
-    if (approvalProgram === "") {
+    const approvalProgTEAL =
+      (approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt))
+        ? getProgram(approvalProgram, scTmplParams)
+        : approvalProgram;
+
+    const clearProgTEAL =
+      (clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt))
+        ? getProgram(clearProgram, scTmplParams)
+        : clearProgram;
+
+    if (approvalProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
-    if (clearProgram === "") {
+    if (clearProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
 
     // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
+    const app = senderAcc.addApp(0, flags, approvalProgTEAL, clearProgTEAL);
     this.assertAccBalAboveMin(senderAcc.address);
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
     this.runtime.run(
-      approvalProgram, ExecutionMode.APPLICATION, idx, this.debugStack
+      approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack
     ); // execute TEAL code with appID = 0
 
     // create new application in globalApps map
@@ -533,20 +543,32 @@ export class Ctx implements Context {
   /**
    * Update application
    * @param appID application Id
-   * @param approvalProgram new approval program
-   * @param clearProgram new clear program
-   * NOTE - approval and clear program must be the TEAL code as string
+   * @param approvalProgram new approval program (TEAL code or program filename)
+   * @param clearProgram new clear program (TEAL code or program filename)
+   * @param idx index of transaction in group
+   * @param scTmplParams Smart Contract template parameters
    */
   updateApp (
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    idx: number
+    idx: number,
+    scTmplParams?: SCParams
   ): TxReceipt {
-    if (approvalProgram === "") {
+    const approvalProgTEAL =
+      (approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt))
+        ? getProgram(approvalProgram, scTmplParams)
+        : approvalProgram;
+
+    const clearProgTEAL =
+      (clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt))
+        ? getProgram(clearProgram, scTmplParams)
+        : clearProgram;
+
+    if (approvalProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
-    if (clearProgram === "") {
+    if (clearProgTEAL === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
 
@@ -555,8 +577,8 @@ export class Ctx implements Context {
       this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
 
     const updatedApp = this.getApp(appID);
-    updatedApp[APPROVAL_PROGRAM] = approvalProgram;
-    updatedApp["clear-state-program"] = clearProgram;
+    updatedApp[APPROVAL_PROGRAM] = approvalProgTEAL;
+    updatedApp["clear-state-program"] = clearProgTEAL;
     return txReceipt;
   }
 
@@ -686,9 +708,9 @@ export class Ctx implements Context {
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
           if (txParam.asaDef) {
-            r = this.addASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
+            r = this.deployASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
           } else {
-            r = this.addAsset(txParam.asaName, fromAccountAddr, flags);
+            r = this.deployASA(txParam.asaName, fromAccountAddr, flags);
           }
           this.knowableID.set(idx, (r as DeployedAssetTxReceipt).assetID);
           break;
@@ -708,7 +730,7 @@ export class Ctx implements Context {
           };
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          r = this.addApp(
+          r = this.deployApp(
             fromAccountAddr, flags,
             txParam.approvalProgram,
             txParam.clearProgram,
