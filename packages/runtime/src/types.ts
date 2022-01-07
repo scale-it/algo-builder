@@ -198,11 +198,10 @@ export interface CreatedAppM {
 
 export interface RuntimeAccountI extends AccountSDK {
   name?: string
-  spend: RuntimeAccountI
+  spend: types.AccountAddress
 
-  rekeyTo: (authAccount: RuntimeAccountI) => void
-  getSpend: () => RuntimeAccountI
-  equal: (otherAccount: RuntimeAccountI | AccountSDK) => boolean
+  rekeyTo: (authAccountAddress: types.AccountAddress) => void
+  getSpend: () => types.AccountAddress
 }
 
 // represent account used in tests and by the context
@@ -219,7 +218,7 @@ export interface AccountStoreI {
   account: RuntimeAccountI
 
   balance: () => bigint
-  rekey: (authAccount: AccountStoreI) => void
+  rekeyTo: (authAccountAddress: types.AccountAddress) => void
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,

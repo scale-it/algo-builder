@@ -29,25 +29,21 @@ export class RuntimeAccount implements RuntimeAccountI {
   sk: Uint8Array // signing key (private key or lsig)
   addr: string
   name?: string;
-  spend: RuntimeAccountI;
+  spend: types.AccountAddress;
 
   constructor (account: AccountSDK, name?: string) {
     this.sk = account.sk;
     this.addr = account.addr;
     this.name = name;
-    this.spend = this;
+    this.spend = account.addr;
   }
 
-  rekeyTo (authAccount: RuntimeAccountI): void {
-    this.spend = authAccount;
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
+    this.spend = authAccountAddress;
   }
 
-  getSpend (): RuntimeAccountI {
+  getSpend (): types.AccountAddress {
     return this.spend;
-  }
-
-  equal (otherAccount: RuntimeAccountI | AccountSDK): boolean {
-    return compareArray(this.sk, otherAccount.sk) && this.addr === otherAccount.addr;
   }
 }
 
@@ -89,8 +85,8 @@ export class AccountStore implements AccountStoreI {
     return this.amount;
   }
 
-  rekey (authAccount: AccountStoreI): void {
-    this.account.rekeyTo(authAccount.account);
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
+    this.account.rekeyTo(authAccountAddress);
   }
 
   /**

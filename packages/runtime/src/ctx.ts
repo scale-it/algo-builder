@@ -156,8 +156,8 @@ export class Ctx implements Context {
     this.assertAccBalAboveMin(fromAccount.address);
 
     if (txParam.payFlags.rekeyTo) {
-      const authAccount = this.getAccount(txParam.payFlags.rekeyTo);
-      fromAccount.rekey(authAccount);
+      const spend = txParam.payFlags.rekeyTo;
+      fromAccount.rekeyTo(spend);
     }
 
     if (txParam.payFlags.closeRemainderTo) {

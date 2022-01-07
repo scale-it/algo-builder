@@ -650,12 +650,12 @@ export class Runtime {
   validateAccountSignature (txParam: types.ExecParams): void {
     const fromAccountAddr = webTx.getFromAddress(txParam);
     const from = this.getAccount(fromAccountAddr);
-    const signAccount = txParam.fromAccount;
+    const signerAccount = txParam.fromAccount;
 
-    if (signAccount) {
-      // if spend account of fromAccountAddr is different with signAccount
+    if (signerAccount) {
+      // if spend account of fromAccountAddr different with signerAccount
       // then throw error.
-      if (!from.account.getSpend().equal(signAccount)) {
+      if (from.account.getSpend() !== signerAccount.addr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
       }
     } else {
