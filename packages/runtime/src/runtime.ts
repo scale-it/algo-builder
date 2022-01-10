@@ -729,10 +729,18 @@ export class Runtime {
 
       // signature validation
       const fromAccountAddr = webTx.getFromAddress(txnParam);
-      const result = txnParam.lsig.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      const lsigAccountAddr = txnParam.lsig.address();
+
+      const signerAddr = (txnParam.lsig.isDelegated()) ? fromAccountAddr : lsigAccountAddr;
+
+      if (this.getAccount(fromAccountAddr).account.getSpend() !== signerAddr) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
+      }
+
+      const result = txnParam.lsig.lsig.verify(decodeAddress(signerAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
-          { address: fromAccountAddr });
+          { address: signerAddr });
       }
       // logic validation
       const program = convertToString(txnParam.lsig.lsig.logic);

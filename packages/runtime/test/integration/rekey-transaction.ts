@@ -7,11 +7,12 @@ import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
+// default initial balance
 const baseBalance = 1e8;
-
+// default fee
 const fee = 1000;
 
-describe("Re-keying transition", function () {
+describe("Re-keying transaction", function () {
   let alice: AccountStore;
   let bob: AccountStore;
   let runtime: Runtime;
@@ -57,7 +58,8 @@ describe("Re-keying transition", function () {
     });
 
     it("Should transfer ALGO by spend account", function () {
-      // fetch new data
+      syncAccounts();
+      // balance before rekey
       const aliceBalanceBefore = alice.balance();
       const bobBalanceBefore = bob.balance();
 
@@ -78,11 +80,13 @@ describe("Re-keying transition", function () {
       syncAccounts();
       const aliceBalanceAfter = alice.balance();
       const bobBalanceAfter = bob.balance();
+
+      // transaction fee paid by `from account` not `signer`
       assert.equal(aliceBalanceBefore, aliceBalanceAfter + amount + BigInt(fee));
       assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
     });
 
-    it("Should fail if signer is not spend account", function () {
+    it("Should fail because signer is not spend account", function () {
       txnParams = {
         type: types.TransactionType.TransferAlgo, // payment
         sign: types.SignType.SecretKey,
@@ -90,7 +94,7 @@ describe("Re-keying transition", function () {
         fromAccountAddr: alice.address,
         toAccountAddr: bob.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: fee, rekeyTo: bob.address }
+        payFlags: { totalFee: fee }
       };
 
       expectRuntimeError(
@@ -125,5 +129,45 @@ describe("Re-keying transition", function () {
       assert.isNotNull(alice.account.spend);
       assert.equal(alice.account.getSpend(), lsig.address());
     });
+
+    it("Should have transfer permission", () => {
+      txnParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 1000n,
+        lsig: lsig,
+        payFlags: { totalFee: fee }
+      };
+      runtime.executeTx(txnParams);
+    });
+
+    it("Should failed if lsig is not spend account", () => {
+      const anotherLsig = runtime.loadLogic('another-basic.teal');
+
+      txnParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 1000n,
+        lsig: anotherLsig,
+        payFlags: { totalFee: fee }
+      };
+
+      expectRuntimeError(
+        () => runtime.executeTx(txnParams),
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+      );
+    });
+  });
+
+  describe("Re-keying from lsig to lsig", function () {
+    this.beforeEach(() => {
+
+    });
+  });
+  describe("Re-keying from lsig to account", function () {
   });
 });
