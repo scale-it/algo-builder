@@ -1,5 +1,4 @@
-import { getProgram } from '@algo-builder/algob';
-import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { AccountStore, getProgram, Runtime } from '@algo-builder/runtime';
 import { parsing, types } from '@algo-builder/web';
 import { assert } from 'chai';
 
@@ -12,7 +11,7 @@ describe('Unique NFT ASA tests', function () {
   const master = new AccountStore(1000e6);
   let creator;
   let bob;
-  let statelessLsig; // initialized later (using runtime.getLogicSig)
+  let statelessLsig; // initialized later (using runtime.createLsigAccount)
   let statelessLsigAcc; //
 
   let runtime;
@@ -36,14 +35,14 @@ describe('Unique NFT ASA tests', function () {
       globalBytes: 0
     };
 
-    nftAppID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {});
+    nftAppID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}).appID;
 
     // setup stateless lsig
     const statelessLsigProg = getProgram(
       'stateless.py',
       { ARG_P: p, ARG_NFT_APP_ID: nftAppID }
     );
-    statelessLsig = runtime.getLogicSig(statelessLsigProg, []);
+    statelessLsig = runtime.createLsigAccount(statelessLsigProg, []);
     statelessLsigAcc = runtime.getAccount(statelessLsig.address());
     runtime.fundLsig(master.account, statelessLsig.address(), minBalance + 10000);
     syncAccounts();

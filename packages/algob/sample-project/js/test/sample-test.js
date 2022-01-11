@@ -20,7 +20,7 @@ describe('Sample Test', function () {
     fundReceiver = new AccountStore(minBalance);
     runtime = new Runtime([master, fundReceiver]);
 
-    lsig = runtime.getLogicSig(feeCheckProgram);
+    lsig = runtime.createLsigAccount(feeCheckProgram);
     lsig.sign(master.account.sk);
   });
 
