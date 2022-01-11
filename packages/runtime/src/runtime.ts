@@ -736,19 +736,20 @@ export class Runtime {
 
       const signerAddr = (txnParam.lsig.isDelegated()) ? fromAccountAddr : lsigAccountAddr;
 
-      const spendAddr = this.getAccount(fromAccountAddr).getSpendAddr();
+      const result = txnParam.lsig.lsig.verify(decodeAddress(signerAddr).publicKey);
+      if (!result) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+          { address: signerAddr });
+      }
+
       // verify spend account
+      const spendAddr = this.getAccount(fromAccountAddr).getSpendAddr();
       if (spendAddr !== signerAddr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
           { spend: spendAddr, signer: signerAddr }
         );
       }
 
-      const result = txnParam.lsig.lsig.verify(decodeAddress(signerAddr).publicKey);
-      if (!result) {
-        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
-          { address: signerAddr });
-      }
       // logic validation
       const program = convertToString(txnParam.lsig.lsig.logic);
       if (program === "") {
