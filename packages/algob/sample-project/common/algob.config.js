@@ -25,8 +25,8 @@ let accounts = mkAccounts([
     name: "master",
     addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     mnemonic:
-      "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
-  }
+      "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital",
+  },
 ]);
 
 // ## ACCOUNTS loaded from a FILE ##
@@ -35,7 +35,7 @@ let accounts = mkAccounts([
 // accounts = accounts.concat(accFromFile);
 
 /// ## Enabling KMD access
-/// Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
+/// Please check https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md#credentials for more details and more methods.
 
 // process.env.$KMD_DATA = "/path_to/KMD_DATA";
 // let kmdCred = KMDCredentialsFromEnv();
@@ -60,7 +60,7 @@ let defaultCfg = {
   // token: {
   //   "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   // },
-  accounts: accounts
+  accounts: accounts,
   // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
   // algob-config.md documentation for details.
   // kmdCfg: kmdCfg,
@@ -73,8 +73,8 @@ let purestakeTestNetCfg = {
   host: "https://testnet-algorand.api.purestake.io/ps2",
   port: "",
   token: {
-    "X-API-Key": "Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG"
-  }
+    "X-API-Key": "Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG",
+  },
 };
 
 // You can also use Environment variables to get Algod credentials
@@ -88,13 +88,13 @@ let envCfg = {
   host: algodCred.host,
   port: algodCred.port,
   token: algodCred.token,
-  accounts: accounts
+  accounts: accounts,
 };
 
 module.exports = {
   networks: {
     default: defaultCfg,
     prod: envCfg,
-    purestake: purestakeTestNetCfg
-  }
+    purestake: purestakeTestNetCfg,
+  },
 };
