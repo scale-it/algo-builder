@@ -219,6 +219,7 @@ export interface AccountStoreI {
 
   balance: () => bigint
   rekeyTo: (authAccountAddress: types.AccountAddress) => void
+  getSpendAddr: () => AccountAddress
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,

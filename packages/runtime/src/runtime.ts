@@ -655,7 +655,7 @@ export class Runtime {
     if (signerAccount) {
       // if spend account of fromAccountAddr different with signerAccount
       // then throw error.
-      if (from.account.getSpend() !== signerAccount.addr) {
+      if (from.getSpendAddr() !== signerAccount.addr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
       }
     } else {
@@ -733,7 +733,8 @@ export class Runtime {
 
       const signerAddr = (txnParam.lsig.isDelegated()) ? fromAccountAddr : lsigAccountAddr;
 
-      if (this.getAccount(fromAccountAddr).account.getSpend() !== signerAddr) {
+      // verify spend account
+      if (this.getAccount(fromAccountAddr).getSpendAddr() !== signerAddr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT);
       }
 

@@ -4,7 +4,6 @@ import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algos
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { checkAndSetASAFields } from "./lib/asa";
-import { compareArray } from "./lib/compare";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
   ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_ASSETS,
@@ -15,6 +14,7 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
+  AccountAddress,
   AccountStoreI, AppDeploymentFlags, AppLocalStateM,
   AssetHoldingM, CreatedAppM, RuntimeAccountI,
   SSCAttributesM, StackElem
@@ -38,12 +38,14 @@ export class RuntimeAccount implements RuntimeAccountI {
     this.spend = account.addr;
   }
 
+  // rekey to authAccountAddress
   rekeyTo (authAccountAddress: types.AccountAddress): void {
     this.spend = authAccountAddress;
   }
 
+  // get spend address, return this.address if spend not exist.
   getSpend (): types.AccountAddress {
-    return this.spend;
+    return (this.spend) ? this.spend : this.addr;
   }
 }
 
@@ -85,8 +87,14 @@ export class AccountStore implements AccountStoreI {
     return this.amount;
   }
 
+  // change spend account
   rekeyTo (authAccountAddress: types.AccountAddress): void {
     this.account.rekeyTo(authAccountAddress);
+  }
+
+  // get spend address of this account
+  getSpendAddr (): AccountAddress {
+    return this.account.getSpend();
   }
 
   /**
