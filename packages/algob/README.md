@@ -10,16 +10,17 @@ Please read the main [README](https://github.com/scale-it/algo-builder/blob/mast
 
 The best way to find a type, function or something related to a use case is by using the **search field** at the **top** of this page.
 
-
 ## Important links
 
-+ [Home Page](https://scale-it.github.io/algo-builder)
-+ [Runtime API Docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
-+ [User Docs](https://scale-it.github.io/algo-builder/guide/README)
+- [Home Page](https://scale-it.github.io/algo-builder)
+- [Runtime API Docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
+- [User Docs](https://scale-it.github.io/algo-builder/guide/README)
 
 ## Using algob
 
 `algob` can be included as a library using `yarn add @algo-builder/algob` and then import it using `import * from '@algo-builder/algob'` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
+
+For a webapp, you should use [@algo-builder/web](https://algobuilder.dev/api/web/index.html) package.
 
 ### Command line usage
 
@@ -33,8 +34,6 @@ View version
 
 Launch a node project console
 `algob console`
-
-
 
 ## Contributing
 

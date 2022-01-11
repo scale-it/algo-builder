@@ -2,7 +2,9 @@
 
 `@algo-builder/web` package allows you to interact with contracts easily. It is designed to be used with web dapps as well as scripts and user programs.
 
-This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](algobuilder.dev/api/web/classes/web.html#waitForConfirmation), [`executeTransaction`]((algobuilder.dev/api/web/classes/web.html#executeTransaction)), [`signTransaction`]((algobuilder.dev/api/web/classes/web.html#signTransaction)), etc. These functions help sending transactions and building dapps.
+This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](algobuilder.dev/api/web/classes/web.html#waitForConfirmation), [`executeTransaction`](<(algobuilder.dev/api/web/classes/web.html#executeTransaction)>), [`signTransaction`](<(algobuilder.dev/api/web/classes/web.html#signTransaction)>), etc. These functions help sending transactions and building dapps.
+
+You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/docs/algocomponents/algobutton) to easily integrate with web wallets.
 
 ### Relation to algob
 
@@ -12,9 +14,9 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 ## Important links
 
-+ [Home Page](https://scale-it.github.io/algo-builder)
-+ [Web API Docs](https://scale-it.github.io/algo-builder/api/web/index.html)
-+ [User Docs](https://scale-it.github.io/algo-builder/guide/README)
+- [Home Page](https://scale-it.github.io/algo-builder)
+- [Web API Docs](https://scale-it.github.io/algo-builder/api/web/index.html)
+- [User Docs](https://scale-it.github.io/algo-builder/guide/README)
 
 ## Using Web
 
