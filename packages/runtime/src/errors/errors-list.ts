@@ -453,9 +453,9 @@ export const runtimeGeneralErrors = {
   },
   INVALID_AUTH_ACCOUNT: {
     number: 1316,
-    message: "Invalid auth account!",
-    title: "Invalid auth account.",
-    description: "Invalid auth account"
+    message: "Should have been authorized by %spend% but was actually authorized by %signer%",
+    title: "Invalid spend account.",
+    description: "Invalid spend account"
   }
 };
 

@@ -15,6 +15,10 @@ const fee = 1000;
 // defaunt amount use for transfer
 const amount = 1000n;
 
+function rekeyMessageError (spend: string, signer: string): string {
+  return `Should have been authorized by ${spend} but was actually authorized by ${signer}`;
+}
+
 describe("Re-keying transactions", function () {
   useFixture('basic-teal');
 
@@ -130,7 +134,8 @@ describe("Re-keying transactions", function () {
 
       expectRuntimeError(
         () => runtime.executeTx(txParam),
-        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+        rekeyMessageError(alice.getSpendAddr(), alice.address)
       );
     });
   });
@@ -197,7 +202,8 @@ describe("Re-keying transactions", function () {
 
       expectRuntimeError(
         () => runtime.executeTx(txParam),
-        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+        rekeyMessageError(alice.getSpendAddr(), cloneLsigAccount.address)
       );
     });
   });
@@ -265,7 +271,8 @@ describe("Re-keying transactions", function () {
 
       expectRuntimeError(
         () => runtime.executeTx(txParam),
-        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+        rekeyMessageError(lsigAccount.getSpendAddr(), lsigAccount.address)
       );
     });
   });
@@ -333,7 +340,8 @@ describe("Re-keying transactions", function () {
 
       expectRuntimeError(
         () => runtime.executeTx(txParam),
-        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+        rekeyMessageError(lsigAccount.getSpendAddr(), alice.address)
       );
     });
   });
