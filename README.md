@@ -1,52 +1,48 @@
-# Algo Builder
+<img src="/docs/media/logo-website.png" height="200" title="Algo Builder" />
 
 The Algo Builder project is composed from the following packages:
 
-+ `algob`: framework to automate development of Algorand Assets and Smart Contracts.
-+ `types/algosdk`: TypeScript typings for algosdk-js.
-+ `runtime`: light algorand runtime and TEAL interpreter.
+- `algob`: framework to automate development of Algorand Assets and Smart Contracts.
+- `types/algosdk`: TypeScript typings for algosdk-js.
+- `runtime`: light algorand runtime and TEAL interpreter.
 
 ## Objectives
 
 Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
 
-+ REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
-+ integrated testing framework,
-+ helpful boilerplates allowing developers to focus on use-cases rather than code organization, examples
-+ algorand private net
-+ templates/examples and guides to easily onboard developers
+- REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
+- integrated testing framework,
+- helpful boilerplates allowing developers to focus on use-cases rather than code organization, examples
+- algorand private net
+- templates/examples and guides to easily onboard developers
 
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
-
 ## Documentation
 
-* [Landing Page](https://scale-it.github.io/algo-builder)
-* [User Guide](https://scale-it.github.io/algo-builder/guide/README)
-* [API docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
-* [Runtime API docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
-
+- [Landing Page](https://scale-it.github.io/algo-builder)
+- [User Guide](https://scale-it.github.io/algo-builder/guide/README)
+- [API docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
+- [Runtime API docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
 
 ### Templates
 
-* [Smart Contracts](https://github.com/scale-it/algo-builder/tree/master/examples)
-* [dapps](https://github.com/scale-it/algo-builder-templates)  (webapps integrated with smart contracts)
-
+- [Smart Contracts](https://github.com/scale-it/algo-builder/tree/master/examples)
+- [dapps](https://github.com/scale-it/algo-builder-templates) (webapps integrated with smart contracts)
 
 ## Requirements
 
-+ Node 12+
-+ Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
-    NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
-+ Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
-+ Yarn `v1.22+` or NPM `v6.0+**
+- Node 12+
+- Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
+  NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
+- Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
+- Yarn `v1.22+` or NPM `v6.0+\*\*
 
 ### Installation
 
 #### Pre requirements
 
-Make sure your `yarn global bin` directory is in your `$PATH**.
-
+Make sure your `yarn global bin` directory is in your `$PATH\*\*.
 
 #### Installation from master
 
@@ -64,6 +60,7 @@ yarn link
 ##### Upgrading
 
 If you use installation from master, don't forget to **pull the latest changes** to not to miss the updates:
+
 ```
 cd path/to/algo-builder
 git pull -p
@@ -75,16 +72,14 @@ yarn build
 
 To install `algob` globally in your system you can use:
 
-+ Using Yarn: `yarn global add @algo-builder/algob`
-+ Using NPM: `npm install -g @algo-builder/algob`
-
+- Using Yarn: `yarn global add @algo-builder/algob`
+- Using NPM: `npm install -g @algo-builder/algob`
 
 ### Algorand Node requirements
 
-+ algod v2.1.6-stable or higher
+- algod v2.1.6-stable or higher
 
 Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true` option set in the `<node_data>/config.json`. This is required to compile smart contracts using REST / SDK.
-
 
 ### PyTeal
 
@@ -107,63 +102,60 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 
     pip3 install pyteal
 
-
 # Usage
-
 
 ## Quick start
 
 ### Create a blockchain
 
-+ Use [Private Net Quick Start](/infrastructure/README.md).
-+ Or install a node with any other network.
-+ Remember to set `"EnableDeveloperAPI": true` in the node config.json
+- Use [Private Net Quick Start](/infrastructure/README.md).
+- Or install a node with any other network.
+- Remember to set `"EnableDeveloperAPI": true` in the node config.json
 
 ### Create an algob project
 
-1. Create a new yarn/npm project:
+1.  Create a new yarn/npm project:
 
         mkdir my_new_project
         cd my_new_project
         yarn init
 
-1. Install algob in the project (unless you already installed it globally) and initialize the workspace.
+1.  Install algob in the project (unless you already installed it globally) and initialize the workspace.
 
         yarn add @algo-builder/algob
         yarn run algob init .
 
     The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/guide/README](docs/guide#project-initialization) for more information.
 
-1. Verify if it was installed correctly:
+1.  Verify if it was installed correctly:
 
         yarn run algob help
 
-1. Update the `algob.config.js` file. Make sure you have access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
-    * set correct host address, port and token (if you are using the private-net, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
-    * Note: If you are using `private-net` from `infrastructure`, you don't need to update the network config because they are already configured.
-    * you can define multiple networks.
-    * update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
-    * Note: If you follow `infrastructure` instructions, you don't need to do this step as well because command will fund the master account.
+1.  Update the `algob.config.js` file. Make sure you have access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
 
-1. Add assets and smart-contracts in the `assets` directory.
-1. Add deployment scripts in `scripts` directory.
-1. Run `yarn run algob deploy` to compile and deploy everything.
-1. Run `yarn run algob run scriptPath/scriptName` to run script.
-1. To run `algob` on different network (by default the `default` network is used) use
+    - set correct host address, port and token (if you are using the private-net, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
+    - Note: If you are using `private-net` from `infrastructure`, you don't need to update the network config because they are already configured.
+    - you can define multiple networks.
+    - update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
+    - Note: If you follow `infrastructure` instructions, you don't need to do this step as well because command will fund the master account.
+
+1.  Add assets and smart-contracts in the `assets` directory.
+1.  Add deployment scripts in `scripts` directory.
+1.  Run `yarn run algob deploy` to compile and deploy everything.
+1.  Run `yarn run algob run scriptPath/scriptName` to run script.
+1.  To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>
-
 
 ### Examples
 
 Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
 
-+ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
-+ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
-+ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
-+ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
-+ Check other examples as well.
-
+- Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
+- Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
+- Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
+- Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
+- Check other examples as well.
 
 ## Using algob with a TypeScript project
 
@@ -181,7 +173,6 @@ Using the `algob unbox-template` command, the developers can get a pre-built dAp
 
 Detailed description about the templates can be found [here](https://github.com/scale-it/algo-builder-templates#algo-builder-templates).
 
-
 # Contributing
 
 ### Development
@@ -190,19 +181,18 @@ The project development is open and you can observer a progress through [Pivotal
 
 ### Branch policy
 
-+ The active branch is `develop` - all ongoing work is merged into the `develop` branch.
-+ `master` is the release branch - `develop` is merged into `master` during the release.
-+ Hot fixes are cherry picked to `master`.
-
+- The active branch is `develop` - all ongoing work is merged into the `develop` branch.
+- `master` is the release branch - `develop` is merged into `master` during the release.
+- Hot fixes are cherry picked to `master`.
 
 ## Working with monorepo
 
 We use **yarn workspaces** to manage all sub packages. here is a list of commands which are helpful in a development workflow
 
-* `yarn workspaces info`
-* `yarn workspaces list`
-* `yarn workspaces <package-name> <command>`, eg: `yarn workspaces mypkg1 run build` or  `yarn workspaces mypkg1 run add --dev react`
-* `yarn add algosdk` -- will add `algosdk` to all sub projects (workspaces)
+- `yarn workspaces info`
+- `yarn workspaces list`
+- `yarn workspaces <package-name> <command>`, eg: `yarn workspaces mypkg1 run build` or `yarn workspaces mypkg1 run add --dev react`
+- `yarn add algosdk` -- will add `algosdk` to all sub projects (workspaces)
 
 `yarn` does not add dependencies to node_modules directories in either of your packages  –  only at the root level, i.e., yarn hoists all dependencies to the root level. yarn leverages symlinks to point to the different packages. Thereby, yarn includes the dependencies only once in the project.
 
@@ -215,23 +205,27 @@ Each package has rich test suites. Whenever you add something new make sure you 
 Restarting tests by hand is a bit more time consuming. We are using `mocha` framework to execute tests. It has a very useful feature: `mocha --watch` -- which will monitor for all file changes and re-execute tests when a file changed without adding a time overhead to start node and load all TypeScript modules.
 
 To execute tests in a workspace (eg `packages/runtime`) run:
+
 ```
 cd packages/runtime
 yarn run test
 ```
 
 To execute and watch tests in a workspace (eg `packages/runtime`) run:
+
 ```
 cd packages/runtime
 yarn run test -w
 ```
 
 To execute tests in all workspaces, run the following from the root directory:
+
 ```
 yarn run test
 ```
 
 To execute and watch tests in all workspaces, run the following from the root directory. Note: it will spawn multiple processes in the same terminal session. So if you want to stop the all processes you can either call `pkill -f mocha` or kill the terminal session.
+
 ```
 yarn run test:watch
 ```

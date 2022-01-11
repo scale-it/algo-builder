@@ -9,9 +9,9 @@ This package implements a light version of Algorand runtime. It allows to execut
 
 ## Documentation
 
-+ [Home Page](https://scale-it.github.io/algo-builder)
-+ [Algob API Docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
-+ [User Docs](https://scale-it.github.io/algo-builder/guide/README)
+- [Home Page](https://scale-it.github.io/algo-builder)
+- [Algob API Docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
+- [User Docs](https://scale-it.github.io/algo-builder/guide/README)
 
 ## Usage
 
@@ -27,29 +27,26 @@ Please read more about usage of `runtime` from [here](https://scale-it.github.io
 - Stateless TEAL - Approve/Reject logic.
 - Stateful TEAL - Update and verify global/local states if teal logic is correct.
 - Transactions to
-  + [`create` an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#create)
-  + [`opt-in` to application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#opt-in)
-  + [`call` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#call-noop)
-  + [`update` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#update)
-  + [`delete` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#delete)
-  + [`closeout` from an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#close-out)
-  + [`clearState` of application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#clear-state)
-  + [`create` an asset](https://developer.algorand.org/docs/features/transactions/#create-an-asset)
-  + [`opt-in` to asset](https://developer.algorand.org/docs/features/transactions/#asset-transfer-transaction)
-  + [`transfer` an asset](https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction)
+
+  - [`create` an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#create)
+  - [`opt-in` to application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#opt-in)
+  - [`call` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#call-noop)
+  - [`update` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#update)
+  - [`delete` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#delete)
+  - [`closeout` from an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#close-out)
+  - [`clearState` of application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#clear-state)
+  - [`create` an asset](https://developer.algorand.org/docs/features/transactions/#create-an-asset)
+  - [`opt-in` to asset](https://developer.algorand.org/docs/features/transactions/#asset-transfer-transaction)
+  - [`transfer` an asset](https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction)
 
 - Full transaction processing for type `payment`, `application call`
 - Asset related transactions:
-    - [Asset Destroy](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
-    - [Asset Revoke](https://developer.algorand.org/docs/reference/transactions/#asset-clawback-transaction)
-    - [Asset Freeze](https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction)
-    - [Asset Configuration](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
+  - [Asset Destroy](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
+  - [Asset Revoke](https://developer.algorand.org/docs/reference/transactions/#asset-clawback-transaction)
+  - [Asset Freeze](https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction)
+  - [Asset Configuration](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
 
 STATUS: production ready.
-
-## Coming Soon
-
-TEAL v3 Support
 
 ## Contributing
 
