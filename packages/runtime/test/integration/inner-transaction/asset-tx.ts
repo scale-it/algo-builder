@@ -16,6 +16,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
   let john = new AccountStore(minBalance + fee);
   let elon = new AccountStore(minBalance + fee);
   let bob = new AccountStore(minBalance + fee);
+  const charlie = new AccountStore(minBalance + fee); // random account - not exist in runtime env.
   let appAccount: AccountStoreI; // initialized later
 
   let runtime: Runtime;
@@ -347,11 +348,12 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     // assert ASA defined
     assert.isDefined(runtime.getAssetDef(assetID));
 
+    // charlie is random address and not external address on application
     const txParams = {
       ...appCallParams,
       appArgs: ['str:modify_asa'],
       foreignAssets: [assetID],
-      accounts: [elon.address, bob.address]
+      accounts: [elon.address, charlie.address]
     };
     runtime.executeTx(txParams);
     syncAccounts();

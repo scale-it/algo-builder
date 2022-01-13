@@ -390,7 +390,7 @@ describe("TEALv5: Inner Transactions", function () {
         byte "pay"
         itxn_field Sender
       `;
-      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
 
       tealCode = `
         itxn_begin
@@ -404,33 +404,35 @@ describe("TEALv5: Inner Transactions", function () {
         byte ""
         itxn_field CloseRemainderTo
       `;
-      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
 
       tealCode = `
         itxn_begin
         byte ""
         itxn_field AssetSender
       `;
-      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
     });
 
-    it(`should fail: invalid ref, not an account`, function () {
-      // can't really tell if it's an addres, so 32 bytes gets further
+    it('should pass: teal understand 32 bytes value is address', () => {
       tealCode = `
         itxn_begin
         byte "01234567890123456789012345678901"
         itxn_field AssetReceiver
+        int 1
       `;
-      expectRuntimeError(() => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT);
 
+      assert.doesNotThrow(() => executeTEAL(tealCode));
+    });
+
+    it(`should fail: invalid ref, not an account`, function () {
       // but a b32 string rep is not an account
       tealCode = `
         itxn_begin
         byte "GAYTEMZUGU3DOOBZGAYTEMZUGU3DOOBZGAYTEMZUGU3DOOBZGAYZIZD42E"
         itxn_field AssetCloseTo
       `;
-      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
     });
 
     it(`should fail: not a uint64`, function () {

@@ -1,4 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import { encodeAddress, isValidAddress } from "algosdk";
+
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { GlobalFields, ITxArrFields, ITxnFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
@@ -131,6 +133,20 @@ export class Op {
       });
     }
     return b;
+  }
+
+  /**
+   * asserts if given variable type is address
+   * @param a - value to assert (should in bytes)
+   * @param line - line number in TEAL file
+   */
+  assertAddress (a: unknown, line: number): Uint8Array {
+    const bytes = this.assertBytes(a, line);
+    const addr = encodeAddress(bytes);
+    if (!isValidAddress(addr)) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_ADDR, { addr: a, line: line });
+    }
+    return bytes;
   }
 
   /**
