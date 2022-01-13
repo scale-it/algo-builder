@@ -65,8 +65,7 @@ export function setInnerTxField (
   }
 
   if (addrTxnFields.has(field)) {
-    const assertedAddr = op.assertAddress(val, line);
-    txValue = assertedAddr;
+    txValue = op.assertAddress(val, line);
   }
 
   const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
@@ -186,7 +185,6 @@ const _getASAConfigAddr = (addr?: Uint8Array): string => {
   if (addr) {
     return encodeAddress(addr);
   }
-  // if addr not declare return ""
   return "";
 };
 

@@ -384,6 +384,32 @@ describe("TEALv5: Inner Transactions", function () {
   });
 
   describe("TestFieldTypes", function () {
+    it('should pass: teal understand 32 bytes value is address', () => {
+      tealCode = `
+        itxn_begin
+        byte "01234567890123456789012345678901"
+        itxn_field AssetReceiver
+        int 1
+      `;
+
+      assert.doesNotThrow(() => executeTEAL(tealCode));
+    });
+
+    it("should pass: use random address with asa config transaction", () => {
+      const ConfigAddresses = ['ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'];
+      ConfigAddresses.forEach((configAddress) => {
+        tealCode = `
+          itxn_begin           
+          addr KW5MRCMF4ICRW32EQFHJJQXF6O6DIXHD4URTXPD657B6QTQA3LWZSLJEUY
+          itxn_field ${configAddress}
+          int acfg
+          itxn_field TypeEnum
+          int 1
+        `;
+        assert.doesNotThrow(() => executeTEAL(tealCode));
+      });
+    });
+
     it(`should fail: not an address`, function () {
       tealCode = `
         itxn_begin
@@ -412,17 +438,6 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_field AssetSender
       `;
       expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
-    });
-
-    it('should pass: teal understand 32 bytes value is address', () => {
-      tealCode = `
-        itxn_begin
-        byte "01234567890123456789012345678901"
-        itxn_field AssetReceiver
-        int 1
-      `;
-
-      assert.doesNotThrow(() => executeTEAL(tealCode));
     });
 
     it(`should fail: invalid ref, not an account`, function () {
