@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+- Fixbug ItxnField not allow random address. Reported by @patrick
+
 ## v3.0.0 2021-12-22
 
 ### Improvements
