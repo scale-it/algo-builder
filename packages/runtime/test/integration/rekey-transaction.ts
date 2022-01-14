@@ -25,6 +25,7 @@ describe("Re-keying transactions", function () {
   let master: AccountStore;
   let alice: AccountStore;
   let bob: AccountStore;
+  let john: AccountStore;
   let lsigAccount: AccountStore;
   let cloneLsigAccount: AccountStore;
 
@@ -39,6 +40,7 @@ describe("Re-keying transactions", function () {
   function syncAccounts (): void {
     alice = runtime.getAccount(alice.address);
     bob = runtime.getAccount(bob.address);
+    john = runtime.getAccount(john.address);
     lsigAccount = runtime.getAccount(lsig.address());
     cloneLsigAccount = runtime.getAccount(cloneLsig.address());
   }
@@ -48,9 +50,9 @@ describe("Re-keying transactions", function () {
     master = new AccountStore(baseBalance);
     alice = new AccountStore(baseBalance);
     bob = new AccountStore(baseBalance);
-
+    john = new AccountStore(baseBalance);
     // init runtime
-    runtime = new Runtime([alice, bob, master]);
+    runtime = new Runtime([alice, bob, john, master]);
 
     // lsig
     lsig = runtime.loadLogic('basic.teal');
@@ -64,10 +66,10 @@ describe("Re-keying transactions", function () {
   });
 
   it("Validate spend address after init", () => {
-    assert.equal(alice.getSpendAddr(), alice.address);
-    assert.equal(bob.getSpendAddr(), bob.address);
-    assert.equal(lsigAccount.getSpendAddr(), lsigAccount.address);
-    assert.equal(cloneLsigAccount.getSpendAddr(), cloneLsigAccount.address);
+    assert.equal(alice.getSpendAddress(), alice.address);
+    assert.equal(bob.getSpendAddress(), bob.address);
+    assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
+    assert.equal(cloneLsigAccount.getSpendAddress(), cloneLsigAccount.address);
   });
 
   describe("Account to account", function () {
@@ -90,7 +92,7 @@ describe("Re-keying transactions", function () {
 
     it("Spend address of alice account should changed to bob account", function () {
       assert.isNotNull(alice.account.spend);
-      assert.equal(alice.getSpendAddr(), bob.address);
+      assert.equal(alice.getSpendAddress(), bob.address);
     });
 
     it("Should transfer ALGO by spend account", function () {
@@ -135,8 +137,50 @@ describe("Re-keying transactions", function () {
       expectRuntimeError(
         () => runtime.executeTx(txParam),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
-        rekeyMessageError(alice.getSpendAddr(), alice.address)
+        rekeyMessageError(alice.getSpendAddress(), alice.address)
       );
+    });
+
+    describe("Rekey an already rekeyed account", function () {
+      this.beforeEach(() => {
+        txParam = {
+          type: types.TransactionType.TransferAlgo,
+          sign: types.SignType.SecretKey,
+          fromAccount: bob.account,
+          fromAccountAddr: alice.address,
+          toAccountAddr: bob.address,
+          amountMicroAlgos: amount,
+          payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
+        };
+
+        runtime.executeTx(txParam);
+        syncAccounts();
+      });
+
+      it("Check spend key", function () {
+        assert.equal(alice.getSpendAddress(), lsigAccount.address);
+      });
+    });
+
+    describe("Rekey again back to orginal account", function () {
+      this.beforeEach(() => {
+        txParam = {
+          type: types.TransactionType.TransferAlgo,
+          sign: types.SignType.SecretKey,
+          fromAccount: bob.account,
+          fromAccountAddr: alice.address,
+          toAccountAddr: bob.address,
+          amountMicroAlgos: amount,
+          payFlags: { totalFee: fee, rekeyTo: alice.address }
+        };
+
+        runtime.executeTx(txParam);
+        syncAccounts();
+      });
+
+      it("Check spend key", function () {
+        assert.equal(alice.getSpendAddress(), alice.address);
+      });
     });
   });
 
@@ -158,7 +202,7 @@ describe("Re-keying transactions", function () {
 
     it("spend address of alice account should be lsig address", () => {
       assert.isNotNull(alice.account.spend);
-      assert.equal(alice.getSpendAddr(), lsigAccount.address);
+      assert.equal(alice.getSpendAddress(), lsigAccount.address);
     });
 
     it("Transfer ALGO by valid spend account", () => {
@@ -203,7 +247,25 @@ describe("Re-keying transactions", function () {
       expectRuntimeError(
         () => runtime.executeTx(txParam),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
-        rekeyMessageError(alice.getSpendAddr(), cloneLsigAccount.address)
+        rekeyMessageError(alice.getSpendAddress(), cloneLsigAccount.address)
+      );
+    });
+
+    it("Should failed: when use another account", () => {
+      txParam = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: amount,
+        payFlags: { totalFee: fee }
+      };
+
+      expectRuntimeError(
+        () => runtime.executeTx(txParam),
+        RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+        rekeyMessageError(alice.getSpendAddress(), john.address)
       );
     });
   });
@@ -228,7 +290,7 @@ describe("Re-keying transactions", function () {
 
     it("Spend address of lsig should be cloneLsig address", () => {
       assert.isNotNull(lsigAccount.account.spend);
-      assert.equal(lsigAccount.getSpendAddr(), cloneLsigAccount.address);
+      assert.equal(lsigAccount.getSpendAddress(), cloneLsigAccount.address);
     });
 
     it("Transfer ALGO by valid spend account", () => {
@@ -272,10 +334,11 @@ describe("Re-keying transactions", function () {
       expectRuntimeError(
         () => runtime.executeTx(txParam),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
-        rekeyMessageError(lsigAccount.getSpendAddr(), lsigAccount.address)
+        rekeyMessageError(lsigAccount.getSpendAddress(), lsigAccount.address)
       );
     });
   });
+
   describe("Lsig to account", function () {
     this.beforeEach(() => {
       // create rekey transaction
@@ -297,7 +360,7 @@ describe("Re-keying transactions", function () {
 
     it("Spend address of lsig should change to bob", () => {
       assert.isNotNull(lsigAccount.account.spend);
-      assert.equal(lsigAccount.getSpendAddr(), bob.address);
+      assert.equal(lsigAccount.getSpendAddress(), bob.address);
     });
 
     it("Transfer ALGO by spend account", () => {
@@ -341,7 +404,7 @@ describe("Re-keying transactions", function () {
       expectRuntimeError(
         () => runtime.executeTx(txParam),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
-        rekeyMessageError(lsigAccount.getSpendAddr(), alice.address)
+        rekeyMessageError(lsigAccount.getSpendAddress(), alice.address)
       );
     });
   });

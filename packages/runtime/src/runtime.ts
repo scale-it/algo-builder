@@ -655,9 +655,9 @@ export class Runtime {
     if (signerAccount) {
       // if spend account of fromAccountAddr different with signerAccount
       // then throw error.
-      if (from.getSpendAddr() !== signerAccount.addr) {
+      if (from.getSpendAddress() !== signerAccount.addr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT, {
-          spend: from.getSpendAddr(),
+          spend: from.getSpendAddress(),
           signer: signerAccount.addr
         });
       }
@@ -743,7 +743,7 @@ export class Runtime {
       }
 
       // verify spend account
-      const spendAddr = this.getAccount(fromAccountAddr).getSpendAddr();
+      const spendAddr = this.getAccount(fromAccountAddr).getSpendAddress();
       if (spendAddr !== signerAddr) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
           { spend: spendAddr, signer: signerAddr }

@@ -26,9 +26,12 @@ const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
 export class RuntimeAccount implements RuntimeAccountI {
-  sk: Uint8Array // signing key (private key or lsig)
-  addr: string
+  readonly sk: Uint8Array // signing key (private key or lsig)
+  readonly addr: string
   name?: string;
+
+  // spend is the authorized address of account
+  // any transaction from account object should be signed by `spend` address
   spend: types.AccountAddress;
 
   constructor (account: AccountSDK, name?: string) {
@@ -44,7 +47,7 @@ export class RuntimeAccount implements RuntimeAccountI {
   }
 
   // get spend address, return this.address if spend not exist.
-  getSpend (): types.AccountAddress {
+  getSpendAddress (): types.AccountAddress {
     return (this.spend) ? this.spend : this.addr;
   }
 }
@@ -93,8 +96,8 @@ export class AccountStore implements AccountStoreI {
   }
 
   // get spend address of this account
-  getSpendAddr (): AccountAddress {
-    return this.account.getSpend();
+  getSpendAddress (): AccountAddress {
+    return this.account.getSpendAddress();
   }
 
   /**
