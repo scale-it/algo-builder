@@ -409,7 +409,12 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     const txParams = {
       ...appCallParams,
-      appArgs: ['str:deploy_asa_with_app_args', `str:asa_name`, `str:ipfs://ABCDEF`]
+      appArgs: [
+        'str:deploy_asa_with_app_args',
+        'str:asa_name',
+        'str:ipfs://ABCDEF',
+        `addr:${charlie.address}`
+      ]
     };
     runtime.executeTx(txParams);
     syncAccounts();
@@ -428,9 +433,9 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     assert.equal(asaDef.unitName, "TEST");
     assert.equal(asaDef.url, "ipfs://ABCDEF");
     assert.equal(asaDef.manager, appAccount.address);
-    assert.equal(asaDef.reserve, appAccount.address);
-    assert.equal(asaDef.freeze, appAccount.address);
-    assert.equal(asaDef.clawback, appAccount.address);
+    assert.equal(asaDef.reserve, charlie.address);
+    assert.equal(asaDef.freeze, charlie.address);
+    assert.equal(asaDef.clawback, charlie.address);
 
     // verify ASA holding is set in creator account
     const creatorASAHolding = runtime.getAssetHolding(Number(createdAsaID), appAccount.address);
