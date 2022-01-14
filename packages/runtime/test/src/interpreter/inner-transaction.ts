@@ -440,7 +440,7 @@ describe("TEALv5: Inner Transactions", function () {
       expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
     });
 
-    it(`should fail: invalid ref, not an account`, function () {
+    it(`should fail: invalid ref, not a valid account address`, function () {
       // but a b32 string rep is not an account
       tealCode = `
         itxn_begin
@@ -448,6 +448,22 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_field AssetCloseTo
       `;
       expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
+
+      // b31 => not vaild account
+      tealCode = `
+        itxn_begin
+        byte "0123456789012345678901234567890"
+        itxn_field AssetCloseTo
+      `;
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
+
+      // int number =>  invaild type (should be bytes)
+      tealCode = `
+        itxn_begin
+        int 9
+        itxn_field AssetCloseTo
+      `;
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
     });
 
     it(`should fail: not a uint64`, function () {

@@ -140,7 +140,7 @@ export class Op {
    * @param a - value to assert (should in bytes)
    * @param line - line number in TEAL file
    */
-  assertAddress (a: unknown, line: number): Uint8Array {
+  assertAlgorandAddress (a: unknown, line: number): Uint8Array {
     const bytes = this.assertBytes(a, line);
     const addr = encodeAddress(bytes);
     if (!isValidAddress(addr)) {

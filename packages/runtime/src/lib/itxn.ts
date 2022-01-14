@@ -65,7 +65,7 @@ export function setInnerTxField (
   }
 
   if (addrTxnFields.has(field)) {
-    txValue = op.assertAddress(val, line);
+    txValue = op.assertAlgorandAddress(val, line);
   }
 
   const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
