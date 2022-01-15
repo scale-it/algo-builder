@@ -155,11 +155,6 @@ export class Ctx implements Context {
     toAccount.amount += BigInt(txParam.amountMicroAlgos); // add 'x' algo to receiver
     this.assertAccBalAboveMin(fromAccount.address);
 
-    if (txParam.payFlags.rekeyTo) {
-      const spend = txParam.payFlags.rekeyTo;
-      fromAccount.rekeyTo(spend);
-    }
-
     if (txParam.payFlags.closeRemainderTo) {
       const closeRemToAcc = this.getAccount(txParam.payFlags.closeRemainderTo);
 
@@ -582,6 +577,16 @@ export class Ctx implements Context {
     return txReceipt;
   }
 
+  rekeyTo (txParam: types.ExecParams): void {
+    // get from account
+    const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
+    // apply rekey
+    if (txParam.payFlags.rekeyTo) {
+      const spend = txParam.payFlags.rekeyTo;
+      fromAccount.rekeyTo(spend);
+    }
+  }
+
   /**
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
@@ -746,6 +751,9 @@ export class Ctx implements Context {
           break;
         }
       }
+
+      // rekey will apply after pass all logic
+      this.rekeyTo(txParam);
 
       if (r) { txReceipts.push(r); }
     });
