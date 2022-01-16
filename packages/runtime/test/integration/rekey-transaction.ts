@@ -34,7 +34,7 @@ describe("Re-keying transactions", function () {
 
   let runtime: Runtime;
 
-  let txParam: types.AlgoTransferParam;
+  let txParams: types.ExecParams;
 
   // fetch basic account informaton
   function syncAccounts (): void {
@@ -74,7 +74,7 @@ describe("Re-keying transactions", function () {
 
   describe("Account to account", function () {
     this.beforeEach(() => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
@@ -86,7 +86,7 @@ describe("Re-keying transactions", function () {
         }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
       syncAccounts();
     });
 
@@ -102,7 +102,7 @@ describe("Re-keying transactions", function () {
       const bobBalanceBefore = bob.balance();
 
       // transfer ALGO by spend account
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: bob.account,
@@ -112,7 +112,7 @@ describe("Re-keying transactions", function () {
         payFlags: { totalFee: fee }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
 
       // check balance of alice and bob after transfer
       syncAccounts();
@@ -125,7 +125,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("Should fail because signer account is invalid spend address", function () {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
@@ -135,7 +135,7 @@ describe("Re-keying transactions", function () {
       };
 
       expectRuntimeError(
-        () => runtime.executeTx(txParam),
+        () => runtime.executeTx(txParams),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), alice.address)
       );
@@ -143,7 +143,7 @@ describe("Re-keying transactions", function () {
 
     describe("Rekey an already rekeyed account", function () {
       this.beforeEach(() => {
-        txParam = {
+        txParams = {
           type: types.TransactionType.TransferAlgo,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
@@ -153,7 +153,7 @@ describe("Re-keying transactions", function () {
           payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
         };
 
-        runtime.executeTx(txParam);
+        runtime.executeTx(txParams);
         syncAccounts();
       });
 
@@ -164,7 +164,7 @@ describe("Re-keying transactions", function () {
 
     describe("Rekey again back to orginal account", function () {
       this.beforeEach(() => {
-        txParam = {
+        txParams = {
           type: types.TransactionType.TransferAlgo,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
@@ -174,7 +174,7 @@ describe("Re-keying transactions", function () {
           payFlags: { totalFee: fee, rekeyTo: alice.address }
         };
 
-        runtime.executeTx(txParam);
+        runtime.executeTx(txParams);
         syncAccounts();
       });
 
@@ -187,7 +187,7 @@ describe("Re-keying transactions", function () {
   describe("Account to Lsig", function () {
     this.beforeEach(() => {
       // create rekey transaction
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
@@ -196,7 +196,7 @@ describe("Re-keying transactions", function () {
         payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
       syncAccounts();
     });
 
@@ -211,7 +211,7 @@ describe("Re-keying transactions", function () {
       const bobBalanceBefore = bob.balance();
 
       // transfer ALGO use lsig
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: alice.address,
@@ -221,7 +221,7 @@ describe("Re-keying transactions", function () {
         payFlags: { totalFee: fee }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
 
       // check balance of alice and bob after transfer
       syncAccounts();
@@ -234,7 +234,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("Should failed because cloneLsig is invalid spend address of alice account", () => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: alice.address,
@@ -245,14 +245,14 @@ describe("Re-keying transactions", function () {
       };
 
       expectRuntimeError(
-        () => runtime.executeTx(txParam),
+        () => runtime.executeTx(txParams),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), cloneLsigAccount.address)
       );
     });
 
     it("Should failed: when use another account", () => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -263,7 +263,7 @@ describe("Re-keying transactions", function () {
       };
 
       expectRuntimeError(
-        () => runtime.executeTx(txParam),
+        () => runtime.executeTx(txParams),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), john.address)
       );
@@ -272,7 +272,7 @@ describe("Re-keying transactions", function () {
 
   describe("Lsig to Lsig", function () {
     this.beforeEach(() => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: lsig.address(),
@@ -284,7 +284,7 @@ describe("Re-keying transactions", function () {
           rekeyTo: cloneLsigAccount.address
         }
       };
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
       syncAccounts();
     });
 
@@ -298,7 +298,7 @@ describe("Re-keying transactions", function () {
       const lsigBalanceBefore = lsigAccount.balance();
       const aliceBalanceBefore = alice.balance();
       // transfer ALGO use lsig
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: lsigAccount.address,
@@ -308,7 +308,7 @@ describe("Re-keying transactions", function () {
         payFlags: { totalFee: fee }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
 
       // check balance of alice and bob after transfer
       syncAccounts();
@@ -321,7 +321,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("Should failed if signer is invalid spend account", () => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: lsigAccount.address,
@@ -332,7 +332,7 @@ describe("Re-keying transactions", function () {
       };
 
       expectRuntimeError(
-        () => runtime.executeTx(txParam),
+        () => runtime.executeTx(txParams),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(lsigAccount.getSpendAddress(), lsigAccount.address)
       );
@@ -342,7 +342,7 @@ describe("Re-keying transactions", function () {
   describe("Lsig to account", function () {
     this.beforeEach(() => {
       // create rekey transaction
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         fromAccountAddr: lsig.address(),
@@ -354,7 +354,7 @@ describe("Re-keying transactions", function () {
           rekeyTo: bob.address
         }
       };
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
       syncAccounts();
     });
 
@@ -368,7 +368,7 @@ describe("Re-keying transactions", function () {
       const lsigBalanceBefore = lsigAccount.balance();
       const aliceBalanceBefore = alice.balance();
       // transfer ALGO use lsig
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: bob.account,
@@ -378,7 +378,7 @@ describe("Re-keying transactions", function () {
         payFlags: { totalFee: fee }
       };
 
-      runtime.executeTx(txParam);
+      runtime.executeTx(txParams);
 
       // check balance of alice and bob after transfer
       syncAccounts();
@@ -391,7 +391,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("Should failed if alice is invalid spend address of lsig address", () => {
-      txParam = {
+      txParams = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
@@ -402,10 +402,45 @@ describe("Re-keying transactions", function () {
       };
 
       expectRuntimeError(
-        () => runtime.executeTx(txParam),
+        () => runtime.executeTx(txParams),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(lsigAccount.getSpendAddress(), alice.address)
       );
+
+      assert.equal(lsigAccount.getSpendAddress(), bob.address);
+    });
+  });
+
+  describe("Rekey by another Tx type", function () {
+    this.beforeEach(() => {
+      const ASAReceipt = runtime.deployASADef("gold",
+        {
+          total: 100000n,
+          decimals: 0
+        },
+        {
+          creator: alice.account
+        });
+
+      // rekey account
+      txParams = {
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: alice.address,
+        assetID: ASAReceipt.assetID,
+        amount: 0n,
+        payFlags: {
+          totalFee: 1000,
+          rekeyTo: bob.address
+        }
+      };
+      runtime.executeTx(txParams);
+      syncAccounts();
+    });
+
+    it("Check spend address", () => {
+      assert.equal(alice.getSpendAddress(), bob.address);
     });
   });
 });

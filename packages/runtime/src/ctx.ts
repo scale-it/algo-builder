@@ -577,6 +577,7 @@ export class Ctx implements Context {
     return txReceipt;
   }
 
+  // apply rekey config on from account
   rekeyTo (txParam: types.ExecParams): void {
     // get from account
     const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
@@ -752,7 +753,7 @@ export class Ctx implements Context {
         }
       }
 
-      // rekey will apply after pass all logic
+      // apply rekey after pass all logic
       this.rekeyTo(txParam);
 
       if (r) { txReceipts.push(r); }
