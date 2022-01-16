@@ -419,7 +419,7 @@ describe("Re-keying transactions", function () {
           decimals: 0
         },
         {
-          creator: alice.account
+          creator: { name: "alice", ...alice.account }
         });
 
       // rekey account

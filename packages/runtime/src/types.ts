@@ -309,7 +309,7 @@ export interface AnyMap {
 export interface Account extends AccountSDK {
   // from AccountSDK: addr: string;
   //                  sk: Uint8Array
-  name?: string
+  name: string
 }
 
 export interface ASADeploymentFlags extends types.TxParams {
