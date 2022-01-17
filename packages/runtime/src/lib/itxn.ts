@@ -31,10 +31,13 @@ const byteTxnFields = new Set([
   'ConfigAssetMetadataHash', 'ConfigAssetURL'
 ]);
 
-const addrTxnFields = new Set([
+const acfgAddrTxnFields = new Set([
+  'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+]);
+
+const otherTxnFields = new Set([
   'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
-  'AssetReceiver', 'FreezeAssetAccount', 'ConfigAssetManager',
-  'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+  'AssetReceiver', 'FreezeAssetAccount'
 ]);
 
 /**
@@ -64,7 +67,14 @@ export function setInnerTxField (
     txValue = convertToString(assertedVal);
   }
 
-  if (addrTxnFields.has(field)) {
+  if (otherTxnFields.has(field)) {
+    const assertedVal = op.assertBytes(val, line);
+    const accountState = interpreter.getAccount(assertedVal, line);
+    txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
+  }
+
+  // if address use for acfg we only check address is valid
+  if (acfgAddrTxnFields.has(field)) {
     txValue = op.assertAlgorandAddress(val, line);
   }
 
