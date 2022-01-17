@@ -579,13 +579,10 @@ export class Ctx implements Context {
 
   // apply rekey config on from account
   rekeyTo (txParam: types.ExecParams): void {
-    // get from account
+    if (!txParam.payFlags.rekeyTo) return;
     const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
     // apply rekey
-    if (txParam.payFlags.rekeyTo) {
-      const spend = txParam.payFlags.rekeyTo;
-      fromAccount.rekeyTo(spend);
-    }
+    fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
   }
 
   /**
