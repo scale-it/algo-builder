@@ -67,7 +67,9 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.amount,
         note,
         execParams.assetID as number,
-        suggestedParams);
+        suggestedParams,
+        execParams.payFlags.rekeyTo
+      );
       return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.ModifyAsset: {
@@ -80,7 +82,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fields.freeze !== "" ? execParams.fields.freeze : undefined,
         execParams.fields.clawback !== "" ? execParams.fields.clawback : undefined,
         suggestedParams,
-        false
+        false,
+        execParams.payFlags.rekeyTo
       );
       return updateTxFee(execParams.payFlags, tx);
     }
@@ -91,7 +94,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID as number,
         execParams.freezeTarget,
         execParams.freezeState,
-        suggestedParams
+        suggestedParams,
+        execParams.payFlags.rekeyTo
       );
       return updateTxFee(execParams.payFlags, tx);
     }
@@ -104,7 +108,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.amount,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         execParams.assetID as number,
-        suggestedParams
+        suggestedParams,
+        execParams.payFlags.rekeyTo
       );
       return updateTxFee(execParams.payFlags, tx);
     }
@@ -113,7 +118,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         execParams.assetID as number,
-        suggestedParams
+        suggestedParams,
+        execParams.payFlags.rekeyTo
       );
       return updateTxFee(execParams.payFlags, tx);
     }
@@ -206,7 +212,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           execParams.asaName,
           execParams.asaDef.url,
           execParams.asaDef.metadataHash,
-          suggestedParams
+          suggestedParams,
+          execParams.payFlags.rekeyTo
         );
         return updateTxFee(execParams.payFlags, tx);
       } else {
@@ -282,7 +289,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         0,
         note,
         execParams.assetID as number,
-        suggestedParams
+        suggestedParams,
+        execParams.payFlags.rekeyTo
       );
       return updateTxFee(execParams.payFlags, tx);
     }

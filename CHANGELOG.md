@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improvements
+
+- Support rekeying in `@algo-builder/runtime`
+
 ### Bug Fixes
 
 - `Runtime` env is enforcing address use in ItxnField already `exist`. However, those addresses used in `acfg` or create asset transactions the addresses use for config may not exist. We fixed it in this [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick

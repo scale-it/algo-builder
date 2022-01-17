@@ -307,7 +307,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       }
     ];
 
-    assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1301: logic signature validation failed.');
+    assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1316: Should have been authorized');
   });
 
   it('should fail if escrow address is not updated in app', () => {

@@ -2,6 +2,7 @@ import { tx as webTx, types } from "@algo-builder/web";
 import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
 import { AccountStore, getProgram, parseASADef, Runtime } from ".";
+import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
@@ -309,12 +310,13 @@ export class Ctx implements Context {
       }
     );
 
-    // create new "app account" (an account belonging to smart contract)
-    // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#using-a-smart-contract-as-an-escrow
-    const acc = new AccountStore(0, {
-      addr: getApplicationAddress(this.state.appCounter),
-      sk: new Uint8Array(0)
-    });
+    const acc = new AccountStore(
+      0,
+      new RuntimeAccount({
+        addr: getApplicationAddress(this.state.appCounter),
+        sk: new Uint8Array(0)
+      })
+    );
     this.state.accounts.set(acc.address, acc);
 
     // set & return transaction receipt
@@ -575,6 +577,14 @@ export class Ctx implements Context {
     return txReceipt;
   }
 
+  // apply rekey config on from account
+  rekeyTo (txParam: types.ExecParams): void {
+    if (!txParam.payFlags.rekeyTo) return;
+    const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
+    // apply rekey
+    fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
+  }
+
   /**
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
@@ -598,6 +608,8 @@ export class Ctx implements Context {
         this.tx = this.gtxs[idx]; // update current tx to index of stateless
         r = this.runtime.validateLsigAndRun(txParam, this.debugStack);
         this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
+      } else if (txParam.sign === types.SignType.SecretKey) {
+        this.runtime.validateAccountSignature(txParam);
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
@@ -737,6 +749,9 @@ export class Ctx implements Context {
           break;
         }
       }
+
+      // apply rekey after pass all logic
+      this.rekeyTo(txParam);
 
       if (r) { txReceipts.push(r); }
     });

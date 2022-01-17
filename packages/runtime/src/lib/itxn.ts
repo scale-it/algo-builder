@@ -6,7 +6,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
-import { AccountAddress, EncTx, RuntimeAccount, StackElem } from "../types";
+import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
@@ -165,7 +165,7 @@ export function setInnerTxField (
 }
 
 const _getRuntimeAccount = (publickey: Buffer | undefined,
-  interpreter: Interpreter, line: number): RuntimeAccount | undefined => {
+  interpreter: Interpreter, line: number): RuntimeAccountI | undefined => {
   if (publickey === undefined) { return undefined; }
   const address = encodeAddress(Uint8Array.from(publickey));
   const runtimeAcc = interpreter.runtime.assertAccountDefined(

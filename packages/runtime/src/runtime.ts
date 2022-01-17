@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore } from "./account";
+import { AccountStore, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -20,7 +20,7 @@ import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
   DeployedAppTxReceipt, DeployedAssetTxReceipt,
-  EncTx, ExecutionMode, RuntimeAccount, SCParams, SSCAttributesM, SSCInfo,
+  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, SSCInfo,
   StackElem, State, TxReceipt
 } from "./types";
 
@@ -290,8 +290,10 @@ export class Runtime {
     }
 
     // add fee sink (fees + rewards collected are accumulated in this account)
-    const feeSink = new AccountStore(ALGORAND_ACCOUNT_MIN_BALANCE,
-      { addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) });
+    const feeSink = new AccountStore(
+      ALGORAND_ACCOUNT_MIN_BALANCE,
+      new RuntimeAccount({ addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) })
+    );
     this.store.accounts.set(feeSink.address, feeSink);
   }
 
@@ -640,6 +642,32 @@ export class Runtime {
   }
 
   /**
+   * Validate signature for Algorand account on transaction params.
+   * Include check spending account when creating a transaction from Algorand account
+   * Throw RuntimeError if signature is invalid.
+   * @param txParam transaction parameters.
+   */
+  validateAccountSignature (txParam: types.ExecParams): void {
+    const fromAccountAddr = webTx.getFromAddress(txParam);
+    const from = this.getAccount(fromAccountAddr);
+    const signerAccount = txParam.fromAccount;
+
+    if (signerAccount) {
+      // if spend account of fromAccountAddr different with signerAccount
+      // then throw error.
+      if (from.getSpendAddress() !== signerAccount.addr) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT, {
+          spend: from.getSpendAddress(),
+          signer: signerAccount.addr
+        });
+      }
+    } else {
+      // throw error if your don't provide account `signature`.
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
+    }
+  }
+
+  /**
    * Loads logic signature for contract mode, creates a new runtime account
    * associated with lsig
    * @param fileName ASC filename
@@ -678,7 +706,7 @@ export class Runtime {
    * @param to to address
    * @param amount amount of algo in microalgos
    */
-  fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): TxReceipt {
+  fundLsig (from: RuntimeAccountI, to: AccountAddress, amount: number): TxReceipt {
     const fundParam: types.ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -704,11 +732,24 @@ export class Runtime {
 
       // signature validation
       const fromAccountAddr = webTx.getFromAddress(txnParam);
-      const result = txnParam.lsig.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      const lsigAccountAddr = txnParam.lsig.address();
+
+      const signerAddr = (txnParam.lsig.isDelegated()) ? fromAccountAddr : lsigAccountAddr;
+
+      const result = txnParam.lsig.lsig.verify(decodeAddress(signerAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
-          { address: fromAccountAddr });
+          { address: signerAddr });
       }
+
+      // verify spend account
+      const spendAddr = this.getAccount(fromAccountAddr).getSpendAddress();
+      if (spendAddr !== signerAddr) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
+          { spend: spendAddr, signer: signerAddr }
+        );
+      }
+
       // logic validation
       const program = convertToString(txnParam.lsig.lsig.logic);
       if (program === "") {

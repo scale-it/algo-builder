@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { Address, generateAccount, modelsv2 } from "algosdk";
+import { Account as AccountSDK, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -14,8 +14,9 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
+  AccountAddress,
   AccountStoreI, AppDeploymentFlags, AppLocalStateM,
-  AssetHoldingM, CreatedAppM, RuntimeAccount,
+  AssetHoldingM, CreatedAppM, RuntimeAccountI,
   SSCAttributesM, StackElem
 } from "./types";
 
@@ -24,8 +25,35 @@ const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
+export class RuntimeAccount implements RuntimeAccountI {
+  readonly sk: Uint8Array // signing key (private key or lsig)
+  readonly addr: string
+  name?: string;
+
+  // spend is the authorized address of account
+  // any transaction from account object should be signed by `spend` address
+  spend: types.AccountAddress;
+
+  constructor (account: AccountSDK, name?: string) {
+    this.sk = account.sk;
+    this.addr = account.addr;
+    this.name = name;
+    this.spend = account.addr;
+  }
+
+  // rekey to authAccountAddress
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
+    this.spend = authAccountAddress;
+  }
+
+  // get spend address, return this.address if spend not exist.
+  getSpendAddress (): types.AccountAddress {
+    return (this.spend) ? this.spend : this.addr;
+  }
+}
+
 export class AccountStore implements AccountStoreI {
-  readonly account: RuntimeAccount;
+  readonly account: RuntimeAccountI;
   readonly address: string;
   minBalance: number; // required minimum balance for account
   assets: Map<number, AssetHoldingM>;
@@ -35,21 +63,19 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
-  constructor (balance: number | bigint, account?: RuntimeAccount | string) {
+  constructor (balance: number | bigint, account?: AccountSDK | string) {
     if (typeof account === 'string') {
-      this.account = generateAccount();
-      this.account.name = account;
-      this.address = this.account.addr;
+      // create new account with name
+      this.account = new RuntimeAccount(generateAccount(), account);
     } else if (account) {
-      // set config if account is passed by user
-      this.account = account;
-      this.address = account.addr;
+      // create new account with AccountSDK data
+      this.account = new RuntimeAccount(account);
     } else {
-      // generate new account if not passed by user
-      this.account = generateAccount();
-      this.address = this.account.addr;
+      // create new account because user passed nothing.
+      this.account = new RuntimeAccount(generateAccount());
     }
 
+    this.address = this.account.addr;
     this.assets = new Map<number, AssetHoldingM>();
     this.amount = BigInt(balance);
     this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
@@ -62,6 +88,16 @@ export class AccountStore implements AccountStoreI {
   // returns account balance in microAlgos
   balance (): bigint {
     return this.amount;
+  }
+
+  // change spend account
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
+    this.account.rekeyTo(authAccountAddress);
+  }
+
+  // get spend address of this account
+  getSpendAddress (): AccountAddress {
+    return this.account.getSpendAddress();
   }
 
   /**
@@ -429,7 +465,7 @@ export interface BaseModel {
 export class BaseModelI implements BaseModel {
   attribute_map: Record<string, string>;
 
-  public constructor () {
+  public constructor() {
     this.attribute_map = {};
   }
   _is_primitive(val: any): val is string | boolean | number | bigint {
