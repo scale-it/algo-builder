@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improvements
+
+- Support rekeying in `@algo-builder/runtime`
+
 ## v3.0.0 2021-12-22
 
 ### Improvements

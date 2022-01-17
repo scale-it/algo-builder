@@ -1,5 +1,4 @@
 import { status } from "@algo-builder/web";
-import type { modelsv2 } from "algosdk";
 
 import { AccountAddress, Deployer, Key, StateValue } from "../types";
 

@@ -196,8 +196,12 @@ export interface CreatedAppM {
   attributes: SSCAttributesM
 }
 
-export interface RuntimeAccount extends AccountSDK {
+export interface RuntimeAccountI extends AccountSDK {
   name?: string
+  spend: types.AccountAddress
+
+  rekeyTo: (authAccountAddress: types.AccountAddress) => void
+  getSpendAddress: () => types.AccountAddress
 }
 
 // represent account used in tests and by the context
@@ -211,9 +215,11 @@ export interface AccountStoreI {
   appsTotalSchema: modelsv2.ApplicationStateSchema
   createdApps: Map<number, SSCAttributesM>
   createdAssets: Map<number, modelsv2.AssetParams>
-  account: RuntimeAccount
+  account: RuntimeAccountI
 
   balance: () => bigint
+  rekeyTo: (authAccountAddress: types.AccountAddress) => void
+  getSpendAddress: () => AccountAddress
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,

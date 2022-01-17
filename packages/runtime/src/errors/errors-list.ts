@@ -1,4 +1,3 @@
-
 export const RUNTIME_ERROR_PREFIX = "RUNTIME_ERR";
 
 export interface ErrorDescriptor {
@@ -451,6 +450,12 @@ export const runtimeGeneralErrors = {
     message: "Attempt to create too many inner transactions, max is %max%, got: %len%, at line %line%",
     title: "Max inner transactions exceeded",
     description: `Inner transaction in a single call cannot be more than %max%`
+  },
+  INVALID_AUTH_ACCOUNT: {
+    number: 1316,
+    message: "Should have been authorized by %spend% but was actually authorized by %signer%",
+    title: "Invalid spend account.",
+    description: "Invalid spend account"
   }
 };
 
