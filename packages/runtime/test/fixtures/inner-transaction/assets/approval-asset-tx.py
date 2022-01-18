@@ -188,9 +188,9 @@ def approval_program():
                 TxnField.config_asset_default_frozen: Int(1),
                 TxnField.config_asset_url: Txn.application_args[2],
                 TxnField.config_asset_manager: Global.current_application_address(),
-                TxnField.config_asset_reserve: Global.current_application_address(),
-                TxnField.config_asset_freeze: Global.current_application_address(),
-                TxnField.config_asset_clawback: Global.current_application_address(),
+                TxnField.config_asset_reserve: Txn.application_args[3],
+                TxnField.config_asset_freeze: Txn.application_args[3],
+                TxnField.config_asset_clawback: Txn.application_args[3],
             }
         ),
         InnerTxnBuilder.Submit(),

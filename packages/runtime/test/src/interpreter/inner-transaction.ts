@@ -384,6 +384,35 @@ describe("TEALv5: Inner Transactions", function () {
   });
 
   describe("TestFieldTypes", function () {
+    const ConfigAddresses = ['ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'];
+
+    it('should pass: teal understand 32 bytes value is address with acfg address', () => {
+      ConfigAddresses.forEach((configAddr) => {
+        tealCode = `
+        itxn_begin
+        byte "01234567890123456789012345678901"
+        itxn_field ${configAddr}
+        int 1
+      `;
+
+        assert.doesNotThrow(() => executeTEAL(tealCode));
+      });
+    });
+
+    it("should pass: use random address with asa config transaction with acfg address", () => {
+      ConfigAddresses.forEach((configAddress) => {
+        tealCode = `
+          itxn_begin           
+          addr KW5MRCMF4ICRW32EQFHJJQXF6O6DIXHD4URTXPD657B6QTQA3LWZSLJEUY
+          itxn_field ${configAddress}
+          int acfg
+          itxn_field TypeEnum
+          int 1
+        `;
+        assert.doesNotThrow(() => executeTEAL(tealCode));
+      });
+    });
+
     it(`should fail: not an address`, function () {
       tealCode = `
         itxn_begin
@@ -414,16 +443,7 @@ describe("TEALv5: Inner Transactions", function () {
       expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
     });
 
-    it(`should fail: invalid ref, not an account`, function () {
-      // can't really tell if it's an addres, so 32 bytes gets further
-      tealCode = `
-        itxn_begin
-        byte "01234567890123456789012345678901"
-        itxn_field AssetReceiver
-      `;
-      expectRuntimeError(() => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT);
-
+    it(`should fail: invalid ref, not a valid account address`, function () {
       // but a b32 string rep is not an account
       tealCode = `
         itxn_begin
@@ -431,6 +451,22 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_field AssetCloseTo
       `;
       expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+
+      // b31 => not vaild account
+      tealCode = `
+        itxn_begin
+        byte "0123456789012345678901234567890"
+        itxn_field AssetCloseTo
+      `;
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ADDR_NOT_VALID);
+
+      // int number =>  invaild type (should be bytes)
+      tealCode = `
+        itxn_begin
+        int 9
+        itxn_field AssetCloseTo
+      `;
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
     });
 
     it(`should fail: not a uint64`, function () {

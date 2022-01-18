@@ -31,10 +31,13 @@ const byteTxnFields = new Set([
   'ConfigAssetMetadataHash', 'ConfigAssetURL'
 ]);
 
-const addrTxnFields = new Set([
+const acfgAddrTxnFields = new Set([
+  'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+]);
+
+const otherAddrTxnFields = new Set([
   'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
-  'AssetReceiver', 'FreezeAssetAccount', 'ConfigAssetManager',
-  'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+  'AssetReceiver', 'FreezeAssetAccount'
 ]);
 
 /**
@@ -64,10 +67,15 @@ export function setInnerTxField (
     txValue = convertToString(assertedVal);
   }
 
-  if (addrTxnFields.has(field)) {
+  if (otherAddrTxnFields.has(field)) {
     const assertedVal = op.assertBytes(val, line);
     const accountState = interpreter.getAccount(assertedVal, line);
     txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
+  }
+
+  // if address use for acfg we only check address is valid
+  if (acfgAddrTxnFields.has(field)) {
+    txValue = op.assertAlgorandAddress(val, line);
   }
 
   const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
@@ -183,6 +191,13 @@ const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
   return _getRuntimeAccount(publickey, interpreter, line)?.addr;
 };
 
+const _getASAConfigAddr = (addr?: Uint8Array): string => {
+  if (addr) {
+    return encodeAddress(addr);
+  }
+  return "";
+};
+
 // parse encoded txn obj to execParams (params passed by user in algob)
 /* eslint-disable sonarjs/cognitive-complexity */
 export function parseEncodedTxnToExecParams (tx: EncTx,
@@ -240,10 +255,10 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
         execParams.type = types.TransactionType.ModifyAsset;
         execParams.assetID = tx.caid;
         execParams.fields = {
-          manager: _getRuntimeAccountAddr(tx.apar?.m, interpreter, line) ?? "",
-          reserve: _getRuntimeAccountAddr(tx.apar?.r, interpreter, line) ?? "",
-          clawback: _getRuntimeAccountAddr(tx.apar?.c, interpreter, line) ?? "",
-          freeze: _getRuntimeAccountAddr(tx.apar?.f, interpreter, line) ?? ""
+          manager: _getASAConfigAddr(tx.apar?.m),
+          reserve: _getASAConfigAddr(tx.apar?.r),
+          clawback: _getASAConfigAddr(tx.apar?.c),
+          freeze: _getASAConfigAddr(tx.apar?.f)
         };
       } else { // if not delete or modify, it's ASA deployment
         execParams.type = types.TransactionType.DeployASA;
@@ -256,10 +271,10 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
           unitName: tx.apar?.un,
           url: tx.apar?.au,
           metadataHash: tx.apar?.am,
-          manager: _getRuntimeAccountAddr(tx.apar?.m, interpreter, line),
-          reserve: _getRuntimeAccountAddr(tx.apar?.r, interpreter, line),
-          clawback: _getRuntimeAccountAddr(tx.apar?.c, interpreter, line),
-          freeze: _getRuntimeAccountAddr(tx.apar?.f, interpreter, line)
+          manager: _getASAConfigAddr(tx.apar?.m),
+          reserve: _getASAConfigAddr(tx.apar?.r),
+          clawback: _getASAConfigAddr(tx.apar?.c),
+          freeze: _getASAConfigAddr(tx.apar?.f)
         };
       }
       break;
