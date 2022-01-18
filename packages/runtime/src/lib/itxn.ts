@@ -35,7 +35,7 @@ const acfgAddrTxnFields = new Set([
   'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
 ]);
 
-const otherTxnFields = new Set([
+const otherAddrTxnFields = new Set([
   'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
   'AssetReceiver', 'FreezeAssetAccount'
 ]);
@@ -67,7 +67,7 @@ export function setInnerTxField (
     txValue = convertToString(assertedVal);
   }
 
-  if (otherTxnFields.has(field)) {
+  if (otherAddrTxnFields.has(field)) {
     const assertedVal = op.assertBytes(val, line);
     const accountState = interpreter.getAccount(assertedVal, line);
     txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
