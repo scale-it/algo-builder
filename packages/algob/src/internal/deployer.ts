@@ -2,6 +2,7 @@ import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } f
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
+import { cloneDeep } from "lodash";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -157,8 +158,10 @@ class DeployerBasicMode {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
-    const lsigAccount = getDummyLsig();
-    Object.assign(lsigAccount, result);
+
+    const lsigAccount = Object.assign(getDummyLsig(), result);
+    lsigAccount.lsig = Object.assign(getDummyLsig().lsig, result.lsig);
+
     if (lsigAccount.lsig.sig) { lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig); };
     return lsigAccount;
   }
@@ -595,7 +598,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     name: string, scTmplParams?: SCParams, signer?: rtypes.Account
   ): Promise<LsigInfo> {
     this.assertNoAsset(name);
-    let lsigInfo = {} as any;
+    let lsigInfo = {} as LsigInfo;
     try {
       const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
       if (signer) {
