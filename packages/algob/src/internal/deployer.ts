@@ -598,7 +598,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     name: string, scTmplParams?: SCParams, signer?: rtypes.Account
   ): Promise<LsigInfo> {
     this.assertNoAsset(name);
-    let lsigInfo = {} as LsigInfo;
+    let lsigInfo = {} as any;
     try {
       const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
       if (signer) {
