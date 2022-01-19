@@ -662,6 +662,14 @@ export interface Deployer {
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 
   /**
+   * Returns program compiled info: bytecode (compiled program) and it's hash.
+   * @param name ASC name
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
+   */
+  getCompiledASCInfo: (name: string, scTmplParams?: SCParams) => Promise<ASCCache>
+
+  /**
    * Checks if checkpoint is deleted for a particular transaction
    * if checkpoint exists and is marked as deleted,
    * throw error(except for opt-out transactions), else pass
