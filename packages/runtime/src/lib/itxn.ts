@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { decodeAddress, encodeAddress } from "algosdk";
+import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -202,10 +202,15 @@ const _getASAConfigAddr = (addr?: Uint8Array): string => {
 /* eslint-disable sonarjs/cognitive-complexity */
 export function parseEncodedTxnToExecParams (tx: EncTx,
   interpreter: Interpreter, line: number): types.ExecParams {
+  // signer is the contract
+  const appID = interpreter.runtime.ctx.tx.apid ?? 0;
+  const applicationAccount = getApplicationAddress(appID);
+
   // initial common fields
   const execParams: any = {
     sign: types.SignType.SecretKey,
-    fromAccount: _getRuntimeAccount(tx.snd, interpreter, line), // sender is the contract
+    fromAccount: { addr: applicationAccount, sk: Buffer.from([]) }, // signer is the contract
+    fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,
       firstValid: tx.fv
