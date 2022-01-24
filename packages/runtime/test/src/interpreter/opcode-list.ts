@@ -5560,17 +5560,69 @@ describe("Teal Opcodes", function () {
       );
     });
 
+    it("uncover: n = 1", () => {
+      push(stack, 4); // stack state = [1, 2, 3, 4]
+      const op = new Uncover(['1'], 1);
+
+      // move top to below 1 element
+      op.execute(stack);
+
+      // stack state = [1, 2, 4, 3]
+      assert.equal(stack.length(), 4);
+
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("uncover: n = 0 - stack state should not change", () => {
+      push(stack, 4); // stack state = [1, 2, 3, 4]
+
+      const op = new Uncover(['0'], 1);
+      op.execute(stack);
+
+      // stack state = [1, 2, 3, 4]
+      assert.equal(stack.length(), 4);
+
+      assert.equal(stack.pop(), 4n);
+      assert.equal(stack.pop(), 3n);
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("uncover: push bytes and apply 'uncover 1'", () => {
+      push(stack, 3); // stack state = [1, 2, 3]
+      stack.push(parsing.stringToBytes("Hello world")); // stack state = [1, 2, 3, "Hello world"]
+
+      const op = new Uncover(['1'], 1);
+
+      // move top to below 1 element
+      op.execute(stack);
+
+      // stack state = [1, 2, "Hello world", 3]
+      assert.equal(stack.length(), 4);
+
+      assert.equal(stack.pop(), 3n);
+      assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello world"));
+      assert.equal(stack.pop(), 2n);
+      assert.equal(stack.pop(), 1n);
+    });
+
     it("uncover: move Nth value to top", () => {
-      push(stack, 4);
+      push(stack, 4); // stack state = [1, 2, 3, 4]
 
       const op = new Uncover(['3'], 1);
       // move top below 2 elements
       op.execute(stack);
 
-      assert.equal(stack.pop(), 2n);
+      // stack state = [2, 3, 4, 1]
+      assert.equal(stack.length(), 4);
+
+      assert.equal(stack.pop(), 1n);
       assert.equal(stack.pop(), 4n);
       assert.equal(stack.pop(), 3n);
-      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), 2n);
     });
 
     it("uncover: should throw error is length of stack is not enough", () => {
