@@ -4,16 +4,22 @@
 
 ### Improvements
 
-- Support rekeying in `@algo-builder/runtime`
 - Added following functions in `deployer` API
   * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).
   * `getDeployedASC`: returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
 
+## v3.1.0 2022-01-24
+
+### Improvements
+
+- Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
+- Added integration to `tealer` tool into pipenv.
+
 ### Bug Fixes
 
-- `Runtime` env is enforcing address use in ItxnField already `exist`. However, those addresses used in `acfg` or create asset transactions the addresses use for config may not exist. We fixed it in this [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
-
-- Fixbug can't get LogicSigAccount `deployer.getDelegatedLsig`
+- `Runtime` wrongly required that an address used in `acfg` ItxnField refers to an existing account. However, addresses used in `acfg` or create asset transactions may refer to a not existing account. [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
+- Can't get LogicSigAccount from `deployer.getDelegatedLsig`.
+- `uncover` opcode push/pop wrong order.
 
 ## v3.0.0 2021-12-22
 
