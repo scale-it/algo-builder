@@ -121,7 +121,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  async getCompiledASCInfo (name: string,
+  async getCompiledASC (name: string,
     scTmplParams?: SCParams): Promise<ASCCache> {
     throw new Error("Not implemented");
   }

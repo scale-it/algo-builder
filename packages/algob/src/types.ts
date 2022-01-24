@@ -667,7 +667,7 @@ export interface Deployer {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
    */
-  getCompiledASCInfo: (name: string, scTmplParams?: SCParams) => Promise<ASCCache>
+  getCompiledASC: (name: string, scTmplParams?: SCParams) => Promise<ASCCache>
 
   /**
    * Checks if checkpoint is deleted for a particular transaction

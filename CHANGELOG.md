@@ -5,7 +5,7 @@
 ### Improvements
 
 - Support rekeying in `@algo-builder/runtime`
-- Added `getCompiledASCInfo` function in `deployer` API, which returns contract info after compilation (eg. bytecode, bytecode hash, timestamp etc).
+- Added `getCompiledASC` function in `deployer` API, which returns contract info after compilation (eg. bytecode, bytecode hash, timestamp etc).
 
 ### Bug Fixes
 

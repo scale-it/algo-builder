@@ -201,7 +201,7 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
    */
-  async getCompiledASCInfo (name: string,
+  async getCompiledASC (name: string,
     scTmplParams?: SCParams): Promise<ASCCache> {
     return await getBytecodeAndHash(name, this.algoOp.algodClient, scTmplParams);
   }
