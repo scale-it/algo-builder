@@ -10,7 +10,10 @@
 ### Bug Fixes
 
 - `Runtime` env is enforcing address use in ItxnField already `exist`. However, those addresses used in `acfg` or create asset transactions the addresses use for config may not exist. We fixed it in this [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
-- Fixbug can't get LogicSigAccount `deployer.getDelegatedLsig`
+
+- Can't get LogicSigAccount from `deployer.getDelegatedLsig`.
+
+- `uncover` opcode push/pop wrong order.
 
 ## v3.0.0 2021-12-22
 
