@@ -5,6 +5,7 @@
 ### Improvements
 
 - Support rekeying in `@algo-builder/runtime`
+- Added integration to `tealer` tool into pipenv.
 
 ### Bug Fixes
 

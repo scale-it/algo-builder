@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pyteal = "~=0.9.1"
 pyyaml = "*"
+tealer = {editable = true, ref = "dev", git = "https://github.com/crytic/tealer.git"}
 
 [dev-packages]
 
