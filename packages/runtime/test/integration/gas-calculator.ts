@@ -1,8 +1,7 @@
-import { types as rtypes } from '@algo-builder/runtime';
 import { types } from "@algo-builder/web";
 import { expect } from "chai";
 
-import { AccountStore, Runtime } from "../../src/index";
+import { AccountStore, Runtime, types as rtypes } from "../../src/index";
 import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
@@ -18,8 +17,8 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
   let appCallParam: types.AppCallsParam;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    approvalProgramFileName = 'label-first-line.teal';
-    clearProgramFileName = 'clear.teal';
+    approvalProgramFileName = "label-first-line.teal";
+    clearProgramFileName = "clear.teal";
 
     flags = {
       sender: john.account,

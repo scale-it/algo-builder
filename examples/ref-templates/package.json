@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "chai": "^4.2.0"
+    "chai": "^4.3.4"
   },
   "dependencies": {
-    "algosdk": "^1.12.0"
+    "algosdk": "^1.13.0"
   },
   "scripts": {
     "algob": "algob",

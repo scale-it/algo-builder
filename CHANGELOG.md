@@ -8,12 +8,15 @@
 
 - Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
 - Added integration to `tealer` tool into pipenv.
+- updated sample-project (the one after `algob init`)
 
 ### Bug Fixes
 
 - `Runtime` wrongly required that an address used in `acfg` ItxnField refers to an existing account. However, addresses used in `acfg` or create asset transactions may refer to a not existing account. [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
 - Can't get LogicSigAccount from `deployer.getDelegatedLsig`.
 - `uncover` opcode push/pop wrong order.
+- example/nft: fixed script (related to api breaking change).
+- problem with calculating gas when a program starts with label (#547)
 
 ## v3.0.0 2021-12-22
 
