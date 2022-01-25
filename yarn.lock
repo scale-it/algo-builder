@@ -5,7 +5,7 @@ __metadata:
   version: 5
   cacheKey: 8
 
-"@algo-builder/algob@workspace:packages/algob":
+"@algo-builder/algob@workspace:*, @algo-builder/algob@workspace:packages/algob":
   version: 0.0.0-use.local
   resolution: "@algo-builder/algob@workspace:packages/algob"
   dependencies:
@@ -28,7 +28,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.1.0
     algosdk: ^1.13.0
     chai: ^4.3.4
-    chalk: ^5.0.0
+    chalk: ^4.0.0
     cross-env: ^7.0.3
     debug: ^4.3.3
     deep-equal: ^2.0.5
@@ -95,7 +95,6 @@ __metadata:
     hi-base32: ^0.5.1
     js-sha256: ^0.9.0
     js-sha512: ^0.8.0
-    lint-staged: ^12.3.1
     lodash.clonedeep: ^4.5.0
     mocha: ^9.2.0
     murmurhash: ^2.0.0
@@ -1337,6 +1336,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "algorand-bond@workspace:examples/bond"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -1879,13 +1879,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "chalk@npm:5.0.0"
-  checksum: 6eba7c518b9aa5fe882ae6d14a1ffa58c418d72a3faa7f72af56641f1bbef51b645fca1d6e05d42357b7d3c846cd504c0b7b64d12309cdd07867e3b4411e0d01
-  languageName: node
-  linkType: hard
-
 "check-error@npm:^1.0.2":
   version: 1.0.2
   resolution: "check-error@npm:1.0.2"
@@ -2188,6 +2181,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "crowdfunding-application@workspace:examples/crowdfunding"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -2196,6 +2190,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dao@workspace:examples/dao"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -3050,6 +3045,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "example-asa@workspace:examples/asa"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
     chai: ^4.3.4
   languageName: unknown
@@ -3059,6 +3055,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "example-multisig@workspace:examples/multisig"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -3835,6 +3832,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "htlc-pyteal@workspace:examples/htlc-pyteal-ts"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -5161,6 +5159,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nft-pyteal@workspace:examples/nft"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -5642,6 +5641,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "permissioned-token-freezing@workspace:examples/permissioned-token-freezing"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -5650,6 +5650,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "permissioned-token@workspace:examples/permissioned-token"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -5658,6 +5659,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "permissioned-voting-pyteal@workspace:examples/permissioned-voting"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -5893,6 +5895,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "ref-templates@workspace:examples/ref-templates"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
     chai: ^4.3.4
   languageName: unknown
@@ -6192,6 +6195,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "signed-txn-example@workspace:examples/signed-txn"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
     chai: ^4.3.4
   languageName: unknown
@@ -6380,6 +6384,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "stateful-counter@workspace:examples/stateful-counter"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft
@@ -6994,6 +6999,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "unique-nft-asa@workspace:examples/unique-nft-asa"
   dependencies:
+    "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
   languageName: unknown
   linkType: soft

@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "chai": "^4.3.4"
-  },
   "dependencies": {
     "algosdk": "^1.13.0"
+  },
+  "devDependencies": {
+    "@algo-builder/algob": "workspace:*",
+    "chai": "^4.3.4"
   },
   "scripts": {
     "algob": "algob",

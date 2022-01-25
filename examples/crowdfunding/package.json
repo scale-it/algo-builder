@@ -6,6 +6,9 @@
   "dependencies": {
     "algosdk": "^1.13.0"
   },
+  "devDependencies": {
+    "@algo-builder/algob": "workspace:*"
+  },
   "scripts": {
     "algob": "algob",
     "lint": "eslint --ext .js,.ts scripts",
