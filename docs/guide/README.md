@@ -57,6 +57,8 @@ yarn build
 cd your_project
 # or start new project with algob init
 yarn link ~/path/to/algo-builder/packages/algob
+yarn link ~/path/to/algo-builder/packages/web
+yarn link ~/path/to/algo-builder/packages/runtime
 ```
 
 #### Setting up the system $PATH
