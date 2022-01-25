@@ -11,7 +11,7 @@ export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
-export const MaxTEALVersion = 5;
+export const MaxTEALVersion = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
@@ -137,6 +137,8 @@ TxnFields[5] = {
   Nonparticipation: 'nonpart'
 };
 
+TxnFields[6] = TxnFields[5];
+
 export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
   1: {},
   2: {},
@@ -150,13 +152,15 @@ export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = 
   }
 };
 
+ITxnFields[6] = ITxnFields[5];
+
 // transaction fields of type array
 export const TxArrFields: {[key: number]: Set<string>} = {
   1: new Set(),
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
-TxArrFields[5] = TxArrFields[4] = TxArrFields[3];
+TxArrFields[6] = TxArrFields[5] = TxArrFields[4] = TxArrFields[3];
 
 // itxn fields of type array
 export const ITxArrFields: {[key: number]: Set<string>} = {
@@ -166,6 +170,8 @@ export const ITxArrFields: {[key: number]: Set<string>} = {
   4: new Set(),
   5: new Set(['Logs'])
 };
+
+ITxnFields[6] = ITxnFields[5];
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: ZERO_ADDRESS,
@@ -249,6 +255,8 @@ AssetParamMap[5] = {
   AssetCreator: 'creator'
 };
 
+AssetParamMap[6] = AssetParamMap[5];
+
 export const reDigit = /^\d+$/;
 
 /** is Base64 regex
@@ -309,6 +317,9 @@ GlobalFields[5] = {
   CurrentApplicationAddress: null
 };
 
+// global fields supported vy tealv6
+GlobalFields[6] = GlobalFields[5];
+
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
   // v1 opcodes cost
@@ -359,6 +370,8 @@ OpGasCost[5] = {
   ecdsa_pk_decompress: 650,
   ecdsa_pk_recover: 2000
 };
+
+OpGasCost[6] = OpGasCost[5];
 
 export const enum MathOp {
   // arithmetic
