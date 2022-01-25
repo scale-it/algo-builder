@@ -5,6 +5,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
+import { CompileOp, getBytecodeAndHash } from "../lib/compile";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
@@ -191,6 +192,25 @@ class DeployerBasicMode {
    */
   async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
     return await getLsigFromCache(name);
+  }
+
+  /**
+   * Complies program in real time, and returns compiled info (bytecode, hash, filename etc).
+   * @param name ASC name
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async getCompiledASC (name: string,
+    scTmplParams?: SCParams): Promise<ASCCache> {
+    return await getBytecodeAndHash(name, this.algoOp.algodClient, scTmplParams);
+  }
+
+  /**
+   * Returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
+   * @param name ASC file name
+   */
+  async getDeployedASC (name: string): Promise<ASCCache | undefined> {
+    const op = new CompileOp(this.algoOp.algodClient);
+    return await op.readArtifact(name);
   }
 
   /**

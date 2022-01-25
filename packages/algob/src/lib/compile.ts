@@ -117,3 +117,18 @@ export class CompileOp {
     fs.writeFileSync(filename, content);
   }
 }
+
+/**
+ * Retuns compiled program info (bytecode, hash, filename etc)
+ * @param name : ASC filename
+ * @param algodClient : algodClient
+ * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+ */
+export async function getBytecodeAndHash (
+  name: string,
+  algodClient: Algodv2,
+  scTmplParams?: SCParams): Promise<ASCCache> {
+  const compileOp = new CompileOp(algodClient);
+  const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
+  return result;
+}

@@ -2,10 +2,16 @@
 
 ## Unreleased
 
+### Improvements
+
+- Added following functions in `deployer` API
+  * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).
+  * `getDeployedASC`: returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
+
 ## v3.1.0 2022-01-25
 
 In this release we migrated to yarn v3. It speed up package management a lot.
-We use node-modules node linker, because this is required  
+We use node-modules node linker, because this is required
 `npm` or `yarn v1` still works, but to have the best experience with `algob`,
 you should install and use yarn v3:
 
