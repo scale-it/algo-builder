@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v3.1.0 2022-01-24
+## v3.1.0 2022-01-25
 
 In this release we migrated to yarn v3. It speed up package management a lot.
 We use node-modules node linker, because this is required  
@@ -20,6 +20,7 @@ yarn install
 - Added integration to `tealer` tool into pipenv.
 - updated sample-project (the one after `algob init`)
 - migrate to use yarn v3
+- updated dependencies to the latest version (notably: algosdk, typescirpt, eslint, mocha)
 
 ### Bug Fixes
 
