@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2-beta
         with:
-          node-version: "14"
-      #          cache: "yarn"
+          node-version: "16"
+          cache: "yarn"
       - name: Set yarn version
         run: yarn set version stable
       - name: Yarn version check
@@ -42,5 +42,5 @@ jobs:
         run: python -m pip install pipenv
       - run: pipenv sync
 
-      - name: Execute tests
+      - name: Execute all tests
         run: pipenv run yarn test
