@@ -21,6 +21,7 @@ yarn install
 - updated sample-project (the one after `algob init`)
 - migrate to use yarn v3
 - updated dependencies to the latest version (notably: algosdk, typescirpt, eslint, mocha)
+- Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 
 ### Bug Fixes
 
