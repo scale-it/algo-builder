@@ -4,11 +4,22 @@
 
 ## v3.1.0 2022-01-24
 
+In this release we migrated to yarn v3. It speed up package management a lot.
+We use node-modules node linker, because this is required  
+`npm` or `yarn v1` still works, but to have the best experience with `algob`,
+you should install and use yarn v3:
+
+```
+yarn set version stable
+yarn install
+```
+
 ### Improvements
 
 - Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
 - Added integration to `tealer` tool into pipenv.
 - updated sample-project (the one after `algob init`)
+- migrate to use yarn v3
 
 ### Bug Fixes
 

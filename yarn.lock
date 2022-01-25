@@ -1319,6 +1319,7 @@ __metadata:
     eslint-plugin-standard: ^5.0.0
     husky: ^7.0.4
     lint-staged: ^12.3.1
+    mocha: ^9.2.0
     typescript: ^4.5.5
   peerDependencies:
     lodash: ^4.17.19
@@ -1338,6 +1339,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -2183,6 +2186,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -2192,6 +2197,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -3047,7 +3054,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
-    chai: ^4.3.4
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -3057,6 +3065,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -3834,6 +3844,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -5161,6 +5173,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -5643,6 +5657,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -5652,6 +5668,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -5661,6 +5679,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -5897,7 +5917,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
-    chai: ^4.3.4
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -6197,7 +6218,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
-    chai: ^4.3.4
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -6386,6 +6408,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
@@ -7001,6 +7025,8 @@ __metadata:
   dependencies:
     "@algo-builder/algob": "workspace:*"
     algosdk: ^1.13.0
+    eslint: ^8.7.0
+    mocha: ^9.2.0
   languageName: unknown
   linkType: soft
 
