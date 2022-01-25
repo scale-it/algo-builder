@@ -8,18 +8,33 @@
   * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).
   * `getDeployedASC`: returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
 
-## v3.1.0 2022-01-24
+## v3.1.0 2022-01-25
+
+In this release we migrated to yarn v3. It speed up package management a lot.
+We use node-modules node linker, because this is required
+`npm` or `yarn v1` still works, but to have the best experience with `algob`,
+you should install and use yarn v3:
+
+```
+yarn set version stable
+yarn install
+```
 
 ### Improvements
 
 - Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
 - Added integration to `tealer` tool into pipenv.
+- updated sample-project (the one after `algob init`)
+- migrate to use yarn v3
+- updated dependencies to the latest version (notably: algosdk, typescirpt, eslint, mocha)
 
 ### Bug Fixes
 
 - `Runtime` wrongly required that an address used in `acfg` ItxnField refers to an existing account. However, addresses used in `acfg` or create asset transactions may refer to a not existing account. [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
 - Can't get LogicSigAccount from `deployer.getDelegatedLsig`.
 - `uncover` opcode push/pop wrong order.
+- example/nft: fixed script (related to api breaking change).
+- problem with calculating gas when a program starts with label (#547)
 
 ## v3.0.0 2021-12-22
 

@@ -2,7 +2,6 @@ import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } f
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
-import { cloneDeep } from "lodash";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";

@@ -4,7 +4,12 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "algosdk": "^1.12.0"
+    "algosdk": "^1.13.0"
+  },
+  "devDependencies": {
+    "@algo-builder/algob": "workspace:*",
+    "eslint": "^8.7.0",
+    "mocha": "^9.2.0"
   },
   "scripts": {
     "algob": "algob",

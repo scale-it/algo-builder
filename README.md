@@ -32,11 +32,11 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ## Requirements
 
-- Node 12+
+- Node 14+
 - Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
   NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 - Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
-- Yarn `v1.22+` or NPM `v6.0+\*\*
+- Yarn `v3.1+` or NPM `v8.0+` (note: all our examples use yarn v3 workspace to link to the project algob build).
 
 ### Installation
 
@@ -54,7 +54,6 @@ cd algo-builder
 yarn install
 yarn build
 cd packages/algob
-yarn link
 ```
 
 ##### Upgrading
