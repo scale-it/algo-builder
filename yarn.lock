@@ -1338,6 +1338,8 @@ __metadata:
   resolution: "algorand-bond@workspace:examples/bond"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -2185,6 +2187,8 @@ __metadata:
   resolution: "crowdfunding-application@workspace:examples/crowdfunding"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -2196,6 +2200,8 @@ __metadata:
   resolution: "dao@workspace:examples/dao"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -3053,6 +3059,8 @@ __metadata:
   resolution: "example-asa@workspace:examples/asa"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -3064,6 +3072,8 @@ __metadata:
   resolution: "example-multisig@workspace:examples/multisig"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -3843,6 +3853,8 @@ __metadata:
   resolution: "htlc-pyteal@workspace:examples/htlc-pyteal-ts"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -5172,6 +5184,8 @@ __metadata:
   resolution: "nft-pyteal@workspace:examples/nft"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -5656,6 +5670,8 @@ __metadata:
   resolution: "permissioned-token-freezing@workspace:examples/permissioned-token-freezing"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -5667,6 +5683,8 @@ __metadata:
   resolution: "permissioned-token@workspace:examples/permissioned-token"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -5678,6 +5696,8 @@ __metadata:
   resolution: "permissioned-voting-pyteal@workspace:examples/permissioned-voting"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -5916,6 +5936,8 @@ __metadata:
   resolution: "ref-templates@workspace:examples/ref-templates"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -6217,6 +6239,8 @@ __metadata:
   resolution: "signed-txn-example@workspace:examples/signed-txn"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -6407,6 +6431,8 @@ __metadata:
   resolution: "stateful-counter@workspace:examples/stateful-counter"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
@@ -7024,6 +7050,8 @@ __metadata:
   resolution: "unique-nft-asa@workspace:examples/unique-nft-asa"
   dependencies:
     "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.0
     eslint: ^8.7.0
     mocha: ^9.2.0
