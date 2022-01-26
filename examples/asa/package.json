@@ -4,6 +4,9 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@algo-builder/algob": "workspace:*",
+    "@algo-builder/runtime": "workspace:*",
+    "@algo-builder/web": "workspace:*",
     "algosdk": "^1.13.0"
   },
   "devDependencies": {
@@ -15,7 +18,7 @@
     "algob": "algob",
     "lint": "eslint --ext .js,.ts scripts",
     "lint:fix": "eslint --fix --ext .js,.ts scripts",
-    "test": "echo ok",
+    "test": "echo test asa: ok",
     "build:docs": "echo ok",
     "build": "echo ok"
   },
