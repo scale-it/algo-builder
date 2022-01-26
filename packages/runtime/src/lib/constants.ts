@@ -255,26 +255,16 @@ export const AssetParamMap: {[key: number]: {[key: string]: string}} = {
   }
 };
 
-AssetParamMap[2] = {
-  ...AssetParamMap[1]
-};
-
-AssetParamMap[3] = {
-  ...AssetParamMap[2]
-};
-
-AssetParamMap[4] = {
-  ...AssetParamMap[3]
-};
+AssetParamMap[2] = {...AssetParamMap[1]};
+AssetParamMap[3] = {...AssetParamMap[2]};
+AssetParamMap[4] = {...AssetParamMap[3]};
 
 AssetParamMap[5] = {
   ...AssetParamMap[4],
   AssetCreator: 'creator'
 };
 
-AssetParamMap[6] = {
-  ...AssetParamMap[5]
-};
+AssetParamMap[6] = {...AssetParamMap[5]};
 
 export const reDigit = /^\d+$/;
 
@@ -337,9 +327,7 @@ GlobalFields[5] = {
 };
 
 // global fields supported in tealv6
-GlobalFields[6] = {
-  ...GlobalFields[5]
-};
+GlobalFields[6] = {...GlobalFields[5]};
 
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
@@ -392,9 +380,7 @@ OpGasCost[5] = {
   ecdsa_pk_recover: 2000
 };
 
-OpGasCost[6] = {
-  ...OpGasCost[5]
-};
+OpGasCost[6] = {...OpGasCost[5]};
 
 export const enum MathOp {
   // arithmetic
