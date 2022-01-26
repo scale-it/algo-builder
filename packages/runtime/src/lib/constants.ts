@@ -137,7 +137,9 @@ TxnFields[5] = {
   Nonparticipation: 'nonpart'
 };
 
-TxnFields[6] = TxnFields[5];
+TxnFields[6] = {
+  ...TxnFields[5]
+};
 
 export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
   1: {},
@@ -152,7 +154,9 @@ export const ITxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = 
   }
 };
 
-ITxnFields[6] = ITxnFields[5];
+ITxnFields[6] = {
+  ...ITxnFields[5]
+};
 
 // transaction fields of type array
 export const TxArrFields: {[key: number]: Set<string>} = {
@@ -160,7 +164,17 @@ export const TxArrFields: {[key: number]: Set<string>} = {
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
-TxArrFields[6] = TxArrFields[5] = TxArrFields[4] = TxArrFields[3];
+TxArrFields[4] = {
+  ...TxArrFields[3]
+};
+
+TxArrFields[5] = {
+  ...TxArrFields[4]
+};
+
+TxArrFields[6] = {
+  ...TxArrFields[5]
+};
 
 // itxn fields of type array
 export const ITxArrFields: {[key: number]: Set<string>} = {
@@ -171,7 +185,9 @@ export const ITxArrFields: {[key: number]: Set<string>} = {
   5: new Set(['Logs'])
 };
 
-ITxnFields[6] = ITxnFields[5];
+ITxArrFields[6] = {
+  ...ITxArrFields[5]
+};
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: ZERO_ADDRESS,
@@ -248,14 +264,26 @@ export const AssetParamMap: {[key: number]: {[key: string]: string}} = {
   }
 };
 
-AssetParamMap[4] = AssetParamMap[3] = AssetParamMap[2] = AssetParamMap[1];
+AssetParamMap[2] = {
+  ...AssetParamMap[1]
+};
+
+AssetParamMap[3] = {
+  ...AssetParamMap[2]
+};
+
+AssetParamMap[4] = {
+  ...AssetParamMap[3]
+};
 
 AssetParamMap[5] = {
   ...AssetParamMap[4],
   AssetCreator: 'creator'
 };
 
-AssetParamMap[6] = AssetParamMap[5];
+AssetParamMap[6] = {
+  ...AssetParamMap[5]
+};
 
 export const reDigit = /^\d+$/;
 
@@ -317,8 +345,10 @@ GlobalFields[5] = {
   CurrentApplicationAddress: null
 };
 
-// global fields supported vy tealv6
-GlobalFields[6] = GlobalFields[5];
+// global fields supported in tealv6
+GlobalFields[6] = {
+  ...GlobalFields[5]
+};
 
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
@@ -371,7 +401,9 @@ OpGasCost[5] = {
   ecdsa_pk_recover: 2000
 };
 
-OpGasCost[6] = OpGasCost[5];
+OpGasCost[6] = {
+  ...OpGasCost[5]
+};
 
 export const enum MathOp {
   // arithmetic
