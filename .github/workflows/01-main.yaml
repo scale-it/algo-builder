@@ -24,8 +24,6 @@ jobs:
         with:
           node-version: "16"
           cache: "yarn"
-      - name: Set yarn version
-        run: yarn set version stable
       - name: Yarn version check
         run: yarn --version
       - name: Install dependencies
