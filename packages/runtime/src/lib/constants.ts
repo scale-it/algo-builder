@@ -250,11 +250,8 @@ AssetParamMap[5] = {
 };
 
 export const reDigit = /^\d+$/;
-
 export const reDec = /^(0|[1-9]\d*)$/;
-
 export const reHex = /^0x[0-9a-fA-F]+$/;
-
 export const reOct = /^0[0-8]+$/;
 
 /** is Base64 regex

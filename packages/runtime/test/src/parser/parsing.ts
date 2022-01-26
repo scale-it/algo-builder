@@ -84,17 +84,17 @@ describe("Get Encoding for Byte Data", () => {
   });
 });
 
-describe("assertNumber", function () {
+describe("assertNumber test cases", function () {
   it("should pass with hex and dec", () => {
     const hexValue = "0xaa3C3";
-    assert.deepEqual(assertNumber(hexValue, 1), hexValue);
+    assert.equal(assertNumber(hexValue, 1), hexValue);
     const decValue = "343434";
-    assert.deepEqual(assertNumber(decValue, 1), decValue);
+    assert.equal(assertNumber(decValue, 1), decValue);
   });
 
   it("should return right format for OCT", () => {
     const oct = "01234";
-    assert.deepEqual(assertNumber(oct, 1), "0o1234");
+    assert.equal(assertNumber(oct, 1), "0o1234");
   });
 
   it("should failed if input invalid", () => {
