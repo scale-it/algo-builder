@@ -60,13 +60,23 @@ setup-master-account:
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
 	@goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
 
-sandbox-up:
+sandbox-up-dev:
+# start algod dev version
 # clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
 	[ -d $(SANDBOX_PATH) ] || git clone $(REMOTE_REPO) $(SANDBOX_PATH)
 	(cd $(SANDBOX_PATH); git reset --hard; git pull;)
 # override .yml with custom config (custom token and port for private network)
 	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
 	$(SANDBOX_PATH)/sandbox up dev -v
+
+sandbox-up:
+# start algod stable version
+# clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
+	[ -d $(SANDBOX_PATH) ] || git clone $(REMOTE_REPO) $(SANDBOX_PATH)
+	(cd $(SANDBOX_PATH); git reset --hard; git pull;)
+# override .yml with custom config (custom token and port for private network)
+	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
+	$(SANDBOX_PATH)/sandbox up -v
 
 sandbox-down:
 # stops docker containers for algod, indexer and indexer-db
@@ -75,6 +85,10 @@ sandbox-down:
 sandbox-clean:
 # clean up env (removing stopped docker containers, images)
 	$(SANDBOX_PATH)/sandbox clean
+
+sandbox-reset:
+# reset the containers to their initial state.
+	$(SANDBOX_PATH)/sandbox reset
 
 sandbox-algod-shell:
 # Opens algod container bash shell

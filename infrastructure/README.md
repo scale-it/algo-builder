@@ -79,15 +79,19 @@ If you want to create a local network without using our scripts then you can fol
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
 *NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
-1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups the network in dev mode (this might take a while).
+1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups the network in dev mode (this might take a while). This command will build a stable version of algod.
 
-2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
+2. `sandbox-up-dev` - Same with `sandbox-up` but build an algod dev version instead.
 
-3. `sandbox-algod-shell` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
+3. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
-4. `sandbox-down` - Bring down the sandbox network i.e stop docker containers running algod, indexer and indexer-db.
+4. `sandbox-algod-shell` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
 
-5. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
+5. `sandbox-down` - Bring down the sandbox network i.e stop docker containers running algod, indexer and indexer-db.
+
+6. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
+
+7. `sanbox-reset` - Rlseset the containers to their initial state.
 
 **To be noted :**
 - To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
