@@ -1,4 +1,5 @@
 import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from "algosdk";
+import cloneDeep from "lodash.clonedeep";
 
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
@@ -164,17 +165,9 @@ export const TxArrFields: {[key: number]: Set<string>} = {
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
-TxArrFields[4] = {
-  ...TxArrFields[3]
-};
-
-TxArrFields[5] = {
-  ...TxArrFields[4]
-};
-
-TxArrFields[6] = {
-  ...TxArrFields[5]
-};
+TxArrFields[4] = cloneDeep(TxArrFields[3]);
+TxArrFields[5] = cloneDeep(TxArrFields[4]);
+TxArrFields[6] = cloneDeep(TxArrFields[5]);
 
 // itxn fields of type array
 export const ITxArrFields: {[key: number]: Set<string>} = {
@@ -185,9 +178,7 @@ export const ITxArrFields: {[key: number]: Set<string>} = {
   5: new Set(['Logs'])
 };
 
-ITxArrFields[6] = {
-  ...ITxArrFields[5]
-};
+ITxArrFields[6] = cloneDeep(ITxArrFields[5]);
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: ZERO_ADDRESS,

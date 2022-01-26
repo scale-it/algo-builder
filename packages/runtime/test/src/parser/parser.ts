@@ -1374,6 +1374,14 @@ describe("Parser", function () {
       );
     });
 
+    it("Should failed if declare pragma greater than 6", () => {
+      const fileWithPragmaInvalid = "test-pragma-invalid.teal";
+      expectRuntimeError(
+        () => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
+        RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+      );
+    });
+
     it("Should return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
       let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
