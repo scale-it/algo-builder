@@ -375,6 +375,14 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
     });
 
+    it("should work when int arg is zero", () => {
+      const value = "0";
+      const res = opcodeFromSentence(["int", value], 1, interpreter);
+      const expected = new Int([value], 1);
+
+      assert.deepEqual(res, expected);
+    });
+
     it("should throw error for wrong field length for 'int'", () => {
       expectRuntimeError(
         () => opcodeFromSentence(["int"], 1, interpreter),
