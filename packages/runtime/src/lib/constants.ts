@@ -251,6 +251,12 @@ AssetParamMap[5] = {
 
 export const reDigit = /^\d+$/;
 
+export const reDec = /^[1-9]\d*$/;
+
+export const reHex = /^0x[0-9a-fA-F]+$/;
+
+export const reOct = /^0[0-8]+$/;
+
 /** is Base64 regex
  * ^                          # Start of input
  * ([0-9a-zA-Z+/]{4})*        # Groups of 4 valid characters decode
