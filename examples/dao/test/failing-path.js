@@ -90,6 +90,12 @@ describe('DAO - Failing Paths', function () {
       assert.throws(() => ctx.executeTx(addProposalTx), APP_NOT_FOUND);
     });
 
+    it('should fail if group size is incorrect', () => {
+      assert.throws(() => ctx.executeTx([
+        addProposalTx[0], addProposalTx[1], addProposalTx[0]
+      ]), RUNTIME_ERR1009);
+    });
+
     it('should fail if votingEnd < votingStart', () => {
       ctx.optInToDAOApp(ctx.proposalLsig.address()); // opt-in
       ctx.syncAccounts();
@@ -132,7 +138,7 @@ describe('DAO - Failing Paths', function () {
     });
 
     it('should fail if gov tokens deposit transaction is not present', () => {
-      assert.throws(() => ctx.executeTx({ ...addProposalTx[0] }), INDEX_OUT_OF_BOUND_ERR);
+      assert.throws(() => ctx.executeTx({ ...addProposalTx[0] }), RUNTIME_ERR1009);
     });
 
     it('should fail if gov tokens deposit is not equal to DAO.deposit', () => {

@@ -173,7 +173,12 @@ def approval_program(ARG_GOV_TOKEN):
     add_proposal = Seq([
         # When recording a proposal, we fail if there is a proposal recorded in the account
         # User should call close_proposal use-case to remove a not active proposal record and withdraw deposit.
-        Assert(App.localGet(Int(0), Bytes("type")) == Int(0)),
+        Assert(
+            And(
+                Global.group_size() == Int(2),
+                App.localGet(Int(0), Bytes("type")) == Int(0),
+            )
+        ),
         # Verify deposit to deposit_lsig equals global.deposit
         verify_deposit(Int(1), App.globalGet(deposit_lsig)),
         Assert(
