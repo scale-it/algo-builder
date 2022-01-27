@@ -241,6 +241,10 @@ opCodeMap[5] = {
   log: Log
 };
 
+opCodeMap[6] = {
+  ...opCodeMap[5]
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
