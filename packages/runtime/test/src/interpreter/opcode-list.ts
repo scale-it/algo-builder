@@ -12,7 +12,7 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, ByteAdd, ByteBitwiseAnd,
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
@@ -2261,7 +2261,7 @@ describe("Teal Opcodes", function () {
         op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
         op.execute(stack);
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
+        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid), stack.pop());
 
         op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
         op.execute(stack);
@@ -2923,9 +2923,9 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const appID = interpreter.runtime.ctx.tx.apid;
-        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
+        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 
-        value = acc.getLocalState(appID as number, 'New-Key');
+        value = acc.getLocalState(appID, 'New-Key');
         assert.isDefined(value);
         assert.deepEqual(value, parsing.stringToBytes('New-Val'));
 
@@ -2937,7 +2937,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        value = acc.getLocalState(appID as number, 'New-Key-1');
+        value = acc.getLocalState(appID, 'New-Key-1');
         assert.isDefined(value);
         assert.deepEqual(value, 2222n);
       });
@@ -3050,8 +3050,8 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const appID = interpreter.runtime.ctx.tx.apid;
-        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
-        let value = acc.getLocalState(appID as number, 'Local-Key');
+        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
+        let value = acc.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -3061,8 +3061,8 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as AccountStoreI;
-        value = acc.getLocalState(appID as number, 'Local-Key');
+        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr);
+        value = acc.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
     });
@@ -4214,7 +4214,7 @@ describe("Teal Opcodes", function () {
       let op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx0.fee as number), stack.pop());
+      assert.equal(BigInt(tx0.fee), stack.pop());
 
       stack.push(0n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -4226,7 +4226,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx1.fee as number), stack.pop());
+      assert.equal(BigInt(tx1.fee), stack.pop());
 
       stack.push(1n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -5873,6 +5873,40 @@ describe("Teal Opcodes", function () {
           RUNTIME_ERRORS.TEAL.INVALID_TYPE
         );
       });
+    });
+  });
+
+  describe("BitLen opcode", function () {
+    let stack: Stack<StackElem>;
+    let interpreter: Interpreter;
+    this.beforeEach(() => {
+      stack = new Stack();
+      interpreter = new Interpreter();
+    });
+
+    it("should work with number", () => {
+      stack.push(8n);
+      const op = new BitLen([], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 4n);
+    });
+
+    it("shoud work with a shore byte array", () => {
+      const byte = "abcd";
+      const op = new BitLen([], 1, interpreter);
+
+      stack.push(parsing.stringToBytes(byte));
+      op.execute(stack);
+      assert.equal(stack.pop(), 31n);
+    });
+
+    it("shoud work with a long byte array", () => {
+      const byte = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+      const op = new BitLen([], 1, interpreter);
+
+      stack.push(parsing.stringToBytes(byte));
+      op.execute(stack);
+      assert.equal(stack.pop(), 623n);
     });
   });
 });
