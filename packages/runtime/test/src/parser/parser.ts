@@ -443,8 +443,30 @@ describe("Parser", function () {
       );
     });
 
+    it("can use prefix 0x(hex) with 'int'", () => {
+      const valueInHex = "0x02";
+      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
+      const expected = new Int(["2"], 1);
+      assert.deepEqual(res, expected);
+    });
+
+    it("can use prefix 0(oct) with 'int'", () => {
+      const valueInHex = "010";
+      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
+      const expected = new Int(["8"], 1);
+      assert.deepEqual(res, expected);
+    });
+
     it("should return correct opcode object for 'int'", () => {
       const value = "812546821";
+      const res = opcodeFromSentence(["int", value], 1, interpreter);
+      const expected = new Int([value], 1);
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should work when int arg is zero", () => {
+      const value = "0";
       const res = opcodeFromSentence(["int", value], 1, interpreter);
       const expected = new Int([value], 1);
 
@@ -464,8 +486,21 @@ describe("Parser", function () {
         RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
 
+      // for dec format
       expectRuntimeError(
         () => opcodeFromSentence(["int", String(MAX_UINT64 + 5n)], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      // for hex format
+      expectRuntimeError(
+        () => opcodeFromSentence(["int", "0x" + (MAX_UINT64 + 5n).toString(16)], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      // for oct format
+      expectRuntimeError(
+        () => opcodeFromSentence(["int", "0" + (MAX_UINT64 + 5n).toString(8)], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
 
