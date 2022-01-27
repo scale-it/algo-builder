@@ -7,6 +7,12 @@
 - Added following functions in `deployer` API
   * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).
   * `getDeployedASC`: returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
+- Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
+
+
+### Bug Fixes
+
+- Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
 
 ## v3.1.0 2022-01-25
 
@@ -27,7 +33,6 @@ yarn install
 - updated sample-project (the one after `algob init`)
 - migrate to use yarn v3
 - updated dependencies to the latest version (notably: algosdk, typescirpt, eslint, mocha)
-- Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 
 ### Bug Fixes
 

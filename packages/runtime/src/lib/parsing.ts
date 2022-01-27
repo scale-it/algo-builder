@@ -22,7 +22,7 @@ export function assertOnlyDigits (val: string, line: number): void {
 }
 
 /**
- * assert if string is valid number respesent.
+ * assert if string is valid algorand number respesentation (octal / hex / unsigned int).
  * return val if format is correct
  * @param val : string
  */
