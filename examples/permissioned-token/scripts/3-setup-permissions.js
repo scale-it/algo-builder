@@ -1,8 +1,7 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const accounts = require('./common/accounts');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from './common/accounts';
 
 /**
  * Deploy Permissions smart contract

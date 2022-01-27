@@ -1,8 +1,7 @@
-const {
-  executeTransaction, readAppGlobalState, balanceOf
-} = require('@algo-builder/algob');
-const { asaDef, fundAccount, tokenMap, optInTx, couponValue, createDexTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
+import { balanceOf, executeTransaction, readAppGlobalState } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { asaDef, couponValue, createDexTx, fundAccount, optInTx, tokenMap } from './common/common.js';
 
 /**
  * This function creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens.

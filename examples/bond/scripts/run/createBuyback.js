@@ -1,8 +1,7 @@
-const {
-  executeTransaction, convert
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { tokenMap, optInTx, fundAccount } = require('./common/common');
+import { convert, executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { fundAccount, optInTx, tokenMap } from './common/common';
 
 /**
  * This function creates buyback lsig and store it's address in bond-dapp(stateful contract)

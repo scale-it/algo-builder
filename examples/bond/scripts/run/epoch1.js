@@ -1,9 +1,8 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { accounts } = require('./common/accounts.js');
-const { issuePrice, tokenMap, buyTxNode } = require('./common/common.js');
-const { redeem } = require('./redeem.js');
+import { executeTransaction } from '@algo-builder/algob';
+
+import { accounts } from './common/accounts.js';
+import { buyTxNode, issuePrice, tokenMap } from './common/common.js';
+import { redeem } from './redeem.js';
 
 /**
  * In this function Elon redeems his 8 bonds, and

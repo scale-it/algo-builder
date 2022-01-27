@@ -2,9 +2,10 @@
  * Description:
  * This file creates a new NFT and transfers 1 NFT from A to B
 */
-const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
-const { convert } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { convert } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction, printGlobalNFT, printLocalNFT } from './common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

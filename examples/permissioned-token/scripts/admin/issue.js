@@ -1,9 +1,8 @@
-const {
-  balanceOf
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { getClawback, executeTransaction, fundAccount, totalSupply } = require('../common/common');
-const accounts = require('../common/accounts');
+import { balanceOf } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
+import { executeTransaction, fundAccount, getClawback, totalSupply } from '../common/common';
 
 /**
  * Issue tokens using the issuer account.

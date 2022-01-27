@@ -1,16 +1,10 @@
-const { convert } = require('@algo-builder/algob');
-const {
-  Runtime, AccountStore
-} = require('@algo-builder/runtime');
-const { types } = require('@algo-builder/web');
-const { assert } = require('chai');
+import { convert } from '@algo-builder/algob';
+import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
+import { assert } from 'chai';
 
-const {
-  optInLsigToBond, createDex,
-  minBalance, initialBalance,
-  issue, redeem, approvalProgram, clearProgram, placeholderParam
-} = require('./common/common');
-const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
+import { buyTxRuntime, issueTx } from '../scripts/run/common/common';
+import { approvalProgram, clearProgram, createDex, initialBalance, issue, minBalance, optInLsigToBond, placeholderParam, redeem } from './common/common';
 
 /**
  * Test for the scenario described in Readme.md

@@ -1,13 +1,10 @@
-const { AccountStore } = require('@algo-builder/runtime');
-const { types, parsing } = require('@algo-builder/web');
-const { assert } = require('chai');
-const { Context, initialBalance, minSupport, deposit } = require('./common');
-const { ProposalType, Vote } = require('../scripts/run/common/common');
-const {
-  mkProposalTx, mkDepositVoteTokenTx, votingStart,
-  votingEnd, executeBefore, mkWithdrawVoteDepositTx,
-  mkClearVoteRecordTx, mkClearProposalTx
-} = require('../scripts/run/common/tx-params');
+import { AccountStore } from '@algo-builder/runtime';
+import { parsing, types } from '@algo-builder/web';
+import { assert } from 'chai';
+
+import { ProposalType, Vote } from '../scripts/run/common/common';
+import { executeBefore, mkClearProposalTx, mkClearVoteRecordTx, mkDepositVoteTokenTx, mkProposalTx, mkWithdrawVoteDepositTx, votingEnd, votingStart } from '../scripts/run/common/tx-params';
+import { Context, deposit, initialBalance, minSupport } from './common';
 
 describe('DAO - Happy Paths', function () {
   let master, creator, proposer, voterA, voterB;

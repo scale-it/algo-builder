@@ -1,8 +1,7 @@
-const {
-  executeTransaction, convert
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { optInTx } = require('./run/common/common.js');
+import { convert, executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { optInTx } from './run/common/common.js';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

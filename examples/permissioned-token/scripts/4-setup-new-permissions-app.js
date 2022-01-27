@@ -1,5 +1,5 @@
-const accounts = require('./common/accounts');
-const { fundAccount } = require('./common/common');
+import accounts from './common/accounts';
+import { fundAccount } from './common/common';
 
 /**
  * Deploy a second Permissions smart contract.

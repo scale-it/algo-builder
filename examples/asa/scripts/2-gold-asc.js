@@ -1,7 +1,8 @@
-const { executeTransaction, balanceOf, signTransactions } = require('@algo-builder/algob');
-const { types, getSuggestedParams } = require('@algo-builder/web');
-const { mkParam } = require('./transfer/common');
-const { makeAssetTransferTxnWithSuggestedParams } = require('algosdk');
+import { balanceOf, executeTransaction, signTransactions } from '@algo-builder/algob';
+import { getSuggestedParams, types } from '@algo-builder/web';
+import { makeAssetTransferTxnWithSuggestedParams } from 'algosdk';
+
+import { mkParam } from './transfer/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

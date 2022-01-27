@@ -1,9 +1,8 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { fundAccount, optInAccountToApp } = require('../common/common');
-const { types } = require('@algo-builder/web');
-const accounts = require('../common/accounts');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
+import { fundAccount, optInAccountToApp } from '../common/common';
 
 const clearStateProgram = 'clear_state_program.py';
 

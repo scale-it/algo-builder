@@ -1,5 +1,5 @@
-const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { balanceOf, executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
 
 async function run (runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get('tesla').assetIndex;

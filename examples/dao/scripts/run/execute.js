@@ -1,6 +1,7 @@
-const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
-const { accounts, getDAOFundLsig, getProposalLsig } = require('./common/accounts.js');
+import { types } from '@algo-builder/web';
+
+import { accounts, getDAOFundLsig, getProposalLsig } from './common/accounts.js';
+import { tryExecuteTx } from './common/common.js';
 
 // Executes a proposal
 async function execute (deployer, account, proposalAddr) {

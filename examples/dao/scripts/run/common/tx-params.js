@@ -1,5 +1,6 @@
-const { types } = require('@algo-builder/web');
-const { ProposalType, DAOActions, ExampleProposalConfig } = require('./common');
+import { types } from '@algo-builder/web';
+
+import { DAOActions, ExampleProposalConfig, ProposalType } from './common';
 
 const now = Math.round(new Date().getTime() / 1000);
 

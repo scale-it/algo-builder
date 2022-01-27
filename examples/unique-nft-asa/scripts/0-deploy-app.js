@@ -1,4 +1,4 @@
-const { fundAccount, accounts, p } = require('./run/common/common.js');
+import { accounts, fundAccount, p } from './run/common/common.js';
 
 async function run (runtimeEnv, deployer) {
   const { creator } = accounts(deployer);

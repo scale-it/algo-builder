@@ -1,8 +1,6 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
+import { executeTransaction } from '@algo-builder/algob';
 
-const { issueTx } = require('./common/common');
+import { issueTx } from './common/common';
 /**
  * In this function tokens are issued to issuer from token creator.
  * @param deployer deployer

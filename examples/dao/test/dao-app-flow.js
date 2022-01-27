@@ -1,12 +1,10 @@
-const { convert } = require('@algo-builder/algob');
-const { Runtime, AccountStore } = require('@algo-builder/runtime');
-const { types, parsing } = require('@algo-builder/web');
-const { assert } = require('chai');
-const { ProposalType, Vote, ExampleProposalConfig, DAOActions } = require('../scripts/run/common/common');
-const {
-  now, mkProposalTx, mkDepositVoteTokenTx, mkWithdrawVoteDepositTx,
-  mkClearVoteRecordTx, mkClearProposalTx, votingStart, votingEnd, executeBefore
-} = require('../scripts/run/common/tx-params');
+import { convert } from '@algo-builder/algob';
+import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { parsing, types } from '@algo-builder/web';
+import { assert } from 'chai';
+
+import { DAOActions, ExampleProposalConfig, ProposalType, Vote } from '../scripts/run/common/common';
+import { executeBefore, mkClearProposalTx, mkClearVoteRecordTx, mkDepositVoteTokenTx, mkProposalTx, mkWithdrawVoteDepositTx, now, votingEnd, votingStart } from '../scripts/run/common/tx-params';
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;

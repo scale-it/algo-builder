@@ -1,5 +1,6 @@
-const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { mkParam } = require('./transfer/common');
+import { balanceOf, executeTransaction } from '@algo-builder/algob';
+
+import { mkParam } from './transfer/common';
 
 /*
   Create "tesla" Algorand Standard Asset (ASA)

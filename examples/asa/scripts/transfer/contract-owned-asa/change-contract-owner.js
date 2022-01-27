@@ -3,9 +3,10 @@
  * This file demonstrates how to change owner of ASA owned by
  * smart contract account(stateless).
  */
-const { executeTransaction, convert } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { mkParam } = require('../common');
+import { convert, executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { mkParam } from '../common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

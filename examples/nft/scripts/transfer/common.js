@@ -1,4 +1,4 @@
-const { executeTransaction, readAppGlobalState, readAppLocalState } = require('@algo-builder/algob');
+import { executeTransaction, readAppGlobalState, readAppLocalState } from '@algo-builder/algob';
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {

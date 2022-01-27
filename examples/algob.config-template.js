@@ -8,7 +8,7 @@
    load a private keys.
 */
 
-const { mkAccounts } = require("@algo-builder/algob");
+import { mkAccounts } from "@algo-builder/algob";
 let accounts = mkAccounts([
   {
     name: "master-account",

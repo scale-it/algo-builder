@@ -1,6 +1,7 @@
-const { types } = require('@algo-builder/web');
-const { balanceOf } = require('@algo-builder/algob');
-const { accounts, tryExecuteTx, p } = require('./common/common.js');
+import { balanceOf } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { accounts, p, tryExecuteTx } from './common/common.js';
 
 async function transferNFT (deployer, creator, p) {
   const nftAppInfo = deployer.getApp('nft-app-approval.py', 'nft-app-clear.py');

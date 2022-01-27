@@ -1,7 +1,8 @@
-const { fundAccount, executeTransaction, optInAccountToApp } = require('../common/common');
-const { whitelist } = require('./whitelist');
-const { types } = require('@algo-builder/web');
-const accounts = require('../common/accounts');
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
+import { executeTransaction, fundAccount, optInAccountToApp } from '../common/common';
+import { whitelist } from './whitelist';
 
 /**
  * Only current perm_manager can update permissions_manager to a new address.

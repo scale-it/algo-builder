@@ -1,10 +1,7 @@
-const { getProgram } = require('@algo-builder/runtime');
-const { convert } = require('@algo-builder/algob');
-const {
-  Runtime, AccountStore
-} = require('@algo-builder/runtime');
-const { types } = require('@algo-builder/web');
-const { assert } = require('chai');
+import { convert } from '@algo-builder/algob';
+import { AccountStore, getProgram, Runtime } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
+import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's
 const initialDonorBalance = minBalance + 60e6;

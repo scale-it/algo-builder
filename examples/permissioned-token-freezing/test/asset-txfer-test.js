@@ -1,7 +1,7 @@
 import { convert } from '@algo-builder/algob';
 import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
 import { assert } from 'chai';
-const { types } = require('@algo-builder/web');
 
 const minBalance = 10e6; // 10 ALGO's
 const aliceAddr = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';

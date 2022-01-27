@@ -1,6 +1,7 @@
-const { executeTransaction, mkTxnParams } = require('./common/common');
-const { globalZeroAddress, convert } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { convert, globalZeroAddress } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction, mkTxnParams } from './common/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

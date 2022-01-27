@@ -1,8 +1,8 @@
-const { getProgram } = require('@algo-builder/runtime');
-const { types } = require('@algo-builder/web');
-const { assert } = require('chai');
+import { getProgram } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
+import { assert } from 'chai';
 
-const { createDexTx, redeemCouponTx } = require('../../scripts/run/common/common');
+import { createDexTx, redeemCouponTx } from '../../scripts/run/common/common';
 
 const bondToken = 'bond-token-';
 const asaDef = {

@@ -1,8 +1,7 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { tokenMap, nominalPrice } = require('./common/common');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { nominalPrice, tokenMap } from './common/common';
 
 /**
  * In this function buyer exits from all their bonds in exchange of algos

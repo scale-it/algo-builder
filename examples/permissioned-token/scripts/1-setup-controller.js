@@ -1,4 +1,4 @@
-const accounts = require('./common/accounts');
+import accounts from './common/accounts';
 
 /**
  * Deploy Controller Smart Contract (only ASA manager can do that)

@@ -1,14 +1,10 @@
-const { convert } = require('@algo-builder/algob');
-const {
-  Runtime, AccountStore
-} = require('@algo-builder/runtime');
-const { types } = require('@algo-builder/web');
-const { assert } = require('chai');
-const {
-  optInLsigToBond, createDex, approvalProgram, clearProgram,
-  minBalance, initialBalance, redeem, placeholderParam
-} = require('./common/common');
-const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
+import { convert } from '@algo-builder/algob';
+import { AccountStore, Runtime } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
+import { assert } from 'chai';
+
+import { buyTx, buyTxRuntime, issueTx, redeemCouponTx } from '../scripts/run/common/common';
+import { approvalProgram, clearProgram, createDex, initialBalance, minBalance, optInLsigToBond, placeholderParam, redeem } from './common/common';
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';

@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from "fs";
 
 // check if local config in /examples exists if yes then use it, otherwise use a template
 // config provided by this repository.

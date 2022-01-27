@@ -1,9 +1,8 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const accounts = require('./common/accounts');
-const { getClawbackParams, getClawback } = require('./common/common');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from './common/accounts';
+import { getClawback, getClawbackParams } from './common/common';
 
 /**
  * Compile and set clawback logic sig (escrow) with template parameters:

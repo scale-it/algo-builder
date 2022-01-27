@@ -1,4 +1,4 @@
-const { printAssets } = require('@algo-builder/algob');
+import { printAssets } from '@algo-builder/algob';
 
 async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');

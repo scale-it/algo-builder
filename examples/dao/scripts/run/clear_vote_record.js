@@ -1,6 +1,6 @@
-const { tryExecuteTx } = require('./common/common.js');
-const { accounts, getProposalLsig } = require('./common/accounts.js');
-const { mkClearVoteRecordTx } = require('./common/tx-params.js');
+import { accounts, getProposalLsig } from './common/accounts.js';
+import { tryExecuteTx } from './common/common.js';
+import { mkClearVoteRecordTx } from './common/tx-params.js';
 
 async function clearVoteRecord (deployer, voterAcc, proposalAddr) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');

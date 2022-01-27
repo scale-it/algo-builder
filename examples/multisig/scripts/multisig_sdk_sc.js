@@ -3,9 +3,10 @@
  * This script demonstrates how to
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
-const { executeTransaction } = require('./common/common');
-const { createMsigAddress, signLogicSigMultiSig } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { createMsigAddress, signLogicSigMultiSig } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction } from './common/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

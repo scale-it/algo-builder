@@ -1,6 +1,7 @@
-const { readAppGlobalState } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { executeTransaction } = require('./common');
+import { readAppGlobalState } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction } from './common';
 
 async function run (runtimeEnv, deployer) {
   const votingAdminAccount = deployer.accountsByName.get('john');

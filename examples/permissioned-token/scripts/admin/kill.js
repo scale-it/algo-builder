@@ -1,7 +1,8 @@
-const { types } = require('@algo-builder/web');
-const { issue } = require('./issue');
-const { executeTransaction, fundAccount } = require('../common/common');
-const accounts = require('../common/accounts');
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
+import { executeTransaction, fundAccount } from '../common/common';
+import { issue } from './issue';
 
 async function kill (deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);

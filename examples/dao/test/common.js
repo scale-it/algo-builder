@@ -1,9 +1,8 @@
-const { Runtime } = require('@algo-builder/runtime');
-const { types, parsing } = require('@algo-builder/web');
-const { Vote } = require('../scripts/run/common/common');
-const {
-  votingStart, votingEnd, executeBefore
-} = require('../scripts/run/common/tx-params');
+import { Runtime } from '@algo-builder/runtime';
+import { parsing, types } from '@algo-builder/web';
+
+import { Vote } from '../scripts/run/common/common';
+import { executeBefore, votingEnd, votingStart } from '../scripts/run/common/tx-params';
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;

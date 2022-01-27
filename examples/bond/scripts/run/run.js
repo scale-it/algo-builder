@@ -1,12 +1,12 @@
-const { accounts } = require('./common/accounts.js');
-const { fundAccount, getAssetID, tokenMap } = require('./common/common.js');
-const { createBuyback } = require('./createBuyback.js');
-const { createDex } = require('./createDex.js');
-const { epoch0 } = require('./epoch0.js');
-const { epoch1 } = require('./epoch1.js');
-const { exitBuyer } = require('./exit.js');
-const { issue } = require('./issue.js');
-const { redeem } = require('./redeem.js');
+import { accounts } from './common/accounts.js';
+import { fundAccount, getAssetID, tokenMap } from './common/common.js';
+import { createBuyback } from './createBuyback.js';
+import { createDex } from './createDex.js';
+import { epoch0 } from './epoch0.js';
+import { epoch1 } from './epoch1.js';
+import { exitBuyer } from './exit.js';
+import { issue } from './issue.js';
+import { redeem } from './redeem.js';
 
 /**
  * In a run script example we present the following scenario:

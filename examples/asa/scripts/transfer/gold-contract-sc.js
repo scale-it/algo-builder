@@ -7,9 +7,10 @@
  *  + fee is <= 1000
  *  + we don't do any rekey, closeRemainderTo
 */
-const { types } = require('@algo-builder/web');
-const { balanceOf } = require('@algo-builder/algob');
-const { executeTransaction } = require('./common');
+import { balanceOf } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction } from './common';
 
 async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');

@@ -1,9 +1,8 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { accounts } = require('./common/accounts.js');
-const { issuePrice, buyTxNode } = require('./common/common.js');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { accounts } from './common/accounts.js';
+import { buyTxNode, issuePrice } from './common/common.js';
 
 /**
  * In this function: Elon buys 10 bonds and

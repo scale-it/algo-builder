@@ -4,9 +4,10 @@
  *  signed by multisig account with a threshold of 2
     User saves the signed logic in assets/ which is extracted and used here.
 */
-const { executeTransaction } = require('./common/common');
-const { createMsigAddress } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { createMsigAddress } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { executeTransaction } from './common/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

@@ -1,6 +1,7 @@
-const { tryExecuteTx, Vote } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
-const { accounts, getProposalLsig } = require('./common/accounts.js');
+import { types } from '@algo-builder/web';
+
+import { accounts, getProposalLsig } from './common/accounts.js';
+import { tryExecuteTx, Vote } from './common/common.js';
 
 async function registerVote (deployer, voterAcc, proposalAddr, voteType) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');

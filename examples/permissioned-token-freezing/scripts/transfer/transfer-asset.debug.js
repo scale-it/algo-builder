@@ -2,8 +2,8 @@
  * In this script we will try to debug a transaction group composed as:
  * (stateful application call + stateless tx + transfer algo)
  */
-const { Tealdbg } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { Tealdbg } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
 
 async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');

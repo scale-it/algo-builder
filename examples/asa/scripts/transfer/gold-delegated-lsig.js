@@ -3,8 +3,9 @@
  * This file demonstrates the example to transfer Algorand Standard Assets(ASA) & MicroAlgos
  * using delegated lsig (between 2 user accounts).
 */
-const { executeTransaction } = require('./common');
-const { types } = require('@algo-builder/web');
+import { types } from '@algo-builder/web';
+
+import { executeTransaction } from './common';
 
 async function run (runtimeEnv, deployer) {
   const goldOwner = deployer.accountsByName.get('alice');

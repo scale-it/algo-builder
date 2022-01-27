@@ -1,5 +1,5 @@
-const { fundAccount, totalSupply } = require('./common/common');
-const accounts = require('./common/accounts');
+import accounts from './common/accounts';
+import { fundAccount, totalSupply } from './common/common';
 
 /**
  * NOTE: this function is for demonstration purpose only

@@ -1,9 +1,8 @@
-const {
-  balanceOf
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { getClawback, executeTransaction } = require('../common/common');
-const accounts = require('../common/accounts');
+import { balanceOf } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
+import { executeTransaction, getClawback } from '../common/common';
 
 // here instead of updating the asset reserve by modifyAsset tx,
 // we use rekey transaction for the reserve account.

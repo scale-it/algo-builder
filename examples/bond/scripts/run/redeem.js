@@ -1,7 +1,6 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { tokenMap, couponValue, redeemCouponTx } = require('./common/common.js');
+import { executeTransaction } from '@algo-builder/algob';
+
+import { couponValue, redeemCouponTx, tokenMap } from './common/common.js';
 
 /**
  * Redeem old tokens, get coupon_value + new bond tokens

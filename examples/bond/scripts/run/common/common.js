@@ -1,8 +1,7 @@
-const {
-  executeTransaction, readAppGlobalState
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { accounts } = require('./accounts');
+import { executeTransaction, readAppGlobalState } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { accounts } from './accounts';
 
 const issuePrice = 1000;
 const couponValue = 20;

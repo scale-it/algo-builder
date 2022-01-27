@@ -1,6 +1,6 @@
-const { tryExecuteTx } = require('./common/common.js');
-const { accounts, getDepositLsig } = require('./common/accounts.js');
-const { mkDepositVoteTokenTx } = require('./common/tx-params.js');
+import { accounts, getDepositLsig } from './common/accounts.js';
+import { tryExecuteTx } from './common/common.js';
+import { mkDepositVoteTokenTx } from './common/tx-params.js';
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');

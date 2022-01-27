@@ -4,9 +4,10 @@
  * Standard Assets(ASA) & MicroAlgos using delegated lsig (between 2 user accounts).
  * You can run it using `algob run scripts/transfer/gold-delegated-lsig.debug.js`
 */
-const { types } = require('@algo-builder/web');
-const { Tealdbg } = require('@algo-builder/algob');
-const { mkParam } = require('./common');
+import { Tealdbg } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { mkParam } from './common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

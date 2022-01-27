@@ -1,4 +1,4 @@
-const { executeTransaction, mkTxnParams } = require('./common/common');
+import { executeTransaction, mkTxnParams } from './common/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

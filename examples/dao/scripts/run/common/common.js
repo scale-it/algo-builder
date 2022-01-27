@@ -1,7 +1,5 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
 
 async function tryExecuteTx (deployer, txnParams) {
   try {

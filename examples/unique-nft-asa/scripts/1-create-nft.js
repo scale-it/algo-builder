@@ -1,5 +1,6 @@
-const { types } = require('@algo-builder/web');
-const { accounts, tryExecuteTx, p } = require('./run/common/common.js');
+import { types } from '@algo-builder/web';
+
+import { accounts, p, tryExecuteTx } from './run/common/common.js';
 
 async function createNFT (deployer, creator, p) {
   const nftAppInfo = deployer.getApp('nft-app-approval.py', 'nft-app-clear.py');

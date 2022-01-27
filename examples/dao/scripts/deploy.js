@@ -1,7 +1,7 @@
-const { types } = require('@algo-builder/web');
-const { fundAccount, tryExecuteTx } = require('./run/common/common.js');
+import { types } from '@algo-builder/web';
 
-const { accounts, getDepositLsig, getDAOFundLsig } = require('./run/common/accounts');
+import { accounts, getDAOFundLsig, getDepositLsig } from './run/common/accounts';
+import { fundAccount, tryExecuteTx } from './run/common/common.js';
 
 async function run (runtimeEnv, deployer) {
   const { creator, proposer, voterA, voterB } = accounts(deployer);

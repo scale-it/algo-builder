@@ -1,11 +1,9 @@
-const {
-  balanceOf, executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const { issue } = require('../admin/issue');
-const { whitelist } = require('../permissions/whitelist');
+import { balanceOf, executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
 
-const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
+import { issue } from '../admin/issue';
+import { fundAccount, getClawback, optInAccountToApp } from '../common/common';
+import { whitelist } from '../permissions/whitelist';
 const clearStateProgram = 'clear_state_program.py';
 
 /**

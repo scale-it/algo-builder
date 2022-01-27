@@ -1,7 +1,8 @@
-const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
-const { getDepositLsig, getProposalLsig, accounts } = require('./common/accounts.js');
-const { mkClearProposalTx } = require('./common/tx-params.js');
+import { types } from '@algo-builder/web';
+
+import { accounts, getDepositLsig, getProposalLsig } from './common/accounts.js';
+import { tryExecuteTx } from './common/common.js';
+import { mkClearProposalTx } from './common/tx-params.js';
 
 async function clearProposal (deployer, proposalLsig, depositAmt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');

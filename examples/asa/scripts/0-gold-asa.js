@@ -1,7 +1,7 @@
-const crypto = require('crypto');
+import { balanceOf, executeTransaction } from '@algo-builder/algob';
+import crypto from 'crypto';
 
-const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { mkParam } = require('./transfer/common');
+import { mkParam } from './transfer/common';
 /*
   Create "gold" Algorand Standard Asset (ASA).
   Accounts are loaded from config.

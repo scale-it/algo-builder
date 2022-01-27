@@ -1,6 +1,6 @@
-const { fundAccount, tryExecuteTx } = require('./common/common.js');
-const { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } = require('./common/accounts.js');
-const { mkProposalTx } = require('./common/tx-params.js');
+import { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } from './common/accounts.js';
+import { fundAccount, tryExecuteTx } from './common/common.js';
+import { mkProposalTx } from './common/tx-params.js';
 
 async function addProposal (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);

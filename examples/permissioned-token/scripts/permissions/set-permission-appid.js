@@ -1,8 +1,7 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const accounts = require('../common/accounts');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import accounts from '../common/accounts';
 
 async function run (runtimeEnv, deployer) {
   const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');

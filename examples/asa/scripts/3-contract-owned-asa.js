@@ -7,9 +7,10 @@
  * - Create contract account (with ssc app_id embedded/passed as a template param)
  * - Deploy ASA using both contracts
  */
-const { executeTransaction } = require('@algo-builder/algob');
-const { mkParam } = require('./transfer/common');
-const { types } = require('@algo-builder/web');
+import { executeTransaction } from '@algo-builder/algob';
+import { types } from '@algo-builder/web';
+
+import { mkParam } from './transfer/common';
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

@@ -1,8 +1,9 @@
-const { AccountStore } = require('@algo-builder/runtime');
-const { types } = require('@algo-builder/web');
-const { encodeAddress } = require('algosdk');
-const { assert } = require('chai');
-const { Context } = require('./common');
+import { AccountStore } from '@algo-builder/runtime';
+import { types } from '@algo-builder/web';
+import { encodeAddress } from 'algosdk';
+import { assert } from 'chai';
+
+import { Context } from './common';
 
 const minBalance = 20e6; // 20 ALGOs
 const ALICE_ADDRESS = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
