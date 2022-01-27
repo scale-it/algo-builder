@@ -38,8 +38,6 @@ module.exports = {
 
     "no-unused-vars": unusedVarsCfg,
     "@typescript-eslint/no-unused-vars": unusedVarsCfg,
-
-    "@typescript-eslint/consistent-type-assertions": "off",
     "@typescript-eslint/promise-function-async": "off",
     "@typescript-eslint/no-dynamic-delete": "off",
     "@typescript-eslint/quotes": "off",
