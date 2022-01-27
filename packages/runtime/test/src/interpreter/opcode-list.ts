@@ -2261,7 +2261,7 @@ describe("Teal Opcodes", function () {
         op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
         op.execute(stack);
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid), stack.pop());
+        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
         op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
         op.execute(stack);
@@ -2925,7 +2925,7 @@ describe("Teal Opcodes", function () {
         const appID = interpreter.runtime.ctx.tx.apid;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 
-        value = acc.getLocalState(appID, 'New-Key');
+        value = acc?.getLocalState(appID as number, 'New-Key');
         assert.isDefined(value);
         assert.deepEqual(value, parsing.stringToBytes('New-Val'));
 
@@ -2937,7 +2937,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        value = acc.getLocalState(appID, 'New-Key-1');
+        value = acc?.getLocalState(appID as number, 'New-Key-1');
         assert.isDefined(value);
         assert.deepEqual(value, 2222n);
       });
@@ -3051,7 +3051,7 @@ describe("Teal Opcodes", function () {
 
         const appID = interpreter.runtime.ctx.tx.apid;
         let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
-        let value = acc.getLocalState(appID, 'Local-Key');
+        let value = acc?.getLocalState(appID as number, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -3062,7 +3062,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         acc = interpreter.runtime.ctx.state.accounts.get(johnAddr);
-        value = acc.getLocalState(appID, 'Local-Key');
+        value = acc?.getLocalState(appID as number, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
     });
@@ -4214,7 +4214,7 @@ describe("Teal Opcodes", function () {
       let op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx0.fee), stack.pop());
+      assert.equal(BigInt(tx0.fee as number), stack.pop());
 
       stack.push(0n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -4226,7 +4226,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx1.fee), stack.pop());
+      assert.equal(BigInt(tx1.fee as number), stack.pop());
 
       stack.push(1n);
       op = new Gtxns(["Amount"], 1, interpreter);
