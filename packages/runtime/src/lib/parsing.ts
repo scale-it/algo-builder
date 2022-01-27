@@ -4,7 +4,7 @@ import * as base32 from "hi-base32";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { EncodingType } from "../types";
-import { reBase32, reBase64, reDigit } from "./constants";
+import { reBase32, reBase64, reDec, reDigit, reHex, reOct } from "./constants";
 
 /**
  * assert if string contains digits only
@@ -19,6 +19,26 @@ export function assertOnlyDigits (val: string, line: number): void {
       line: line
     });
   }
+}
+
+/**
+ * assert if string is valid algorand number respesentation (octal / hex / unsigned int).
+ * return val if format is correct
+ * @param val : string
+ */
+export function assertNumber (val: string, line: number): string {
+  if (reOct.test(val)) {
+    // typescript use 0o postfix instade of 0 postfix for oct format.
+    return "0o".concat(val.substring(1));
+  }
+
+  if (reDec.test(val) || reHex.test(val)) return val;
+
+  throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+    expected: "unsigned integer (upto 64 bit)",
+    actual: val,
+    line: line
+  });
 }
 
 /**

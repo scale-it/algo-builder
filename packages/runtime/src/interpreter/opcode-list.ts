@@ -20,7 +20,7 @@ import {
 } from "../lib/constants";
 import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
 import {
-  assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
+  assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
@@ -2147,8 +2147,8 @@ export class Int extends Op {
     if (intConst !== undefined) {
       uint64 = BigInt(intConst);
     } else {
-      assertOnlyDigits(args[0], line);
-      uint64 = BigInt(args[0]);
+      const val = assertNumber(args[0], line);
+      uint64 = BigInt(val);
     }
 
     this.checkOverflow(uint64, line, MAX_UINT64);
