@@ -4,7 +4,7 @@ import { Interpreter } from "../interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, AppParamsGet, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
@@ -21,7 +21,7 @@ import {
   Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../interpreter/opcode-list";
-import { AppParamMap, LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
+import { AppParamDefined, LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode, Operator } from "../types";
 
@@ -239,7 +239,7 @@ opCodeMap[5] = {
   gtxnsas: Gtxnsas,
   args: Args,
   log: Log,
-  app_params_get: AppParamMap
+  app_params_get: AppParamsGet
 };
 
 opCodeMap[6] = {

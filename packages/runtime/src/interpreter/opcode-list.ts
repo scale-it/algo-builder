@@ -12,7 +12,7 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
   ALGORAND_MAX_LOGS_COUNT, ALGORAND_MAX_LOGS_LENGTH,
-  AppParamMap,
+  AppParamDefined,
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
   MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
@@ -4240,7 +4240,6 @@ export class Log extends Op {
 // stack = [..., any]
 // push to stack = [..., bitlen]
 export class BitLen extends Op {
-  readonly interpreter: Interpreter;
   readonly line: number;
 
   /**
@@ -4249,10 +4248,9 @@ export class BitLen extends Op {
    * @param line line number in TEAL file
    * @param interpreter interpreter object
   */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
-    this.interpreter = interpreter;
     assertLen(args.length, 0, line);
   };
 
@@ -4293,7 +4291,7 @@ export class AppParamsGet extends Op {
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
 
-    if (!AppParamMap[interpreter.tealVersion].has(args[0])) {
+    if (!AppParamDefined[interpreter.tealVersion].has(args[0])) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
         field: args[0],
         line: line,

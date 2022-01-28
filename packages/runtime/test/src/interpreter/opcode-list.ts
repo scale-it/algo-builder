@@ -29,11 +29,11 @@ import {
   Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store, Stores,
   Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../../../src/interpreter/opcode-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, AppParamMap, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, AppParamDefined, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { AccountStoreI, EncodingType, EncTx as EncodedTx, SSCAttributesM, StackElem, TxReceipt } from "../../../src/types";
+import { AccountStoreI, EncodingType, EncTx as EncodedTx, SSCAttributesM, StackElem } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
@@ -5886,14 +5886,14 @@ describe("Teal Opcodes", function () {
 
     it("should work with number", () => {
       stack.push(8n);
-      const op = new BitLen([], 1, interpreter);
+      const op = new BitLen([], 1);
       op.execute(stack);
       assert.equal(stack.pop(), 4n);
     });
 
     it("shoud work with a shore byte array", () => {
       const byte = "abcd";
-      const op = new BitLen([], 1, interpreter);
+      const op = new BitLen([], 1);
 
       stack.push(parsing.stringToBytes(byte));
       op.execute(stack);
@@ -5902,7 +5902,7 @@ describe("Teal Opcodes", function () {
 
     it("shoud work with a long byte array", () => {
       const byte = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-      const op = new BitLen([], 1, interpreter);
+      const op = new BitLen([], 1);
 
       stack.push(parsing.stringToBytes(byte));
       op.execute(stack);
