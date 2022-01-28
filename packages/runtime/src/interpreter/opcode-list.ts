@@ -12,6 +12,7 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
   ALGORAND_MAX_LOGS_COUNT, ALGORAND_MAX_LOGS_LENGTH,
+  AppParamMap,
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
   MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
@@ -222,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1611,7 +1612,7 @@ export class Global extends Op {
       }
       case 'CreatorAddress': {
         const appID = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appID as number, this.line);
+        const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -4206,7 +4207,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
@@ -4275,3 +4276,78 @@ export class BitLen extends Op {
     stack.push(BigInt(bitlen));
   }
 }
+
+export class AppParamsGet extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+  readonly field: string;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.interpreter = interpreter;
+    assertLen(args.length, 1, line);
+
+    if (!AppParamMap[interpreter.tealVersion].has(args[0])) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
+        field: args[0],
+        line: line,
+        tealV: interpreter.tealVersion
+      });
+    }
+
+    this.field = args[0];
+  }
+
+  execute (stack: Stack<StackElem>): void {
+    this.assertMinStackLen(stack, 1, this.line);
+
+    const appID = this.assertBigInt(stack.pop(), this.line);
+
+    if (this.interpreter.runtime.ctx.state.globalApps.has(Number(appID))) {
+      let value: StackElem = 0n;
+      const appDef = this.interpreter.getApp(Number(appID), this.line);
+      switch (this.field) {
+        case "AppApprovalProgram":
+          value = parsing.stringToBytes(appDef["approval-program"]);
+          break;
+        case "AppClearStateProgram":
+          value = parsing.stringToBytes(appDef["clear-state-program"]);
+          break;
+        case "AppGlobalNumUint":
+          value = BigInt(appDef["global-state-schema"].numUint);
+          break;
+        case "AppGlobalNumByteSlice":
+          value = BigInt(appDef["global-state-schema"].numByteSlice);
+          break;
+        case "AppLocalNumUint":
+          value = BigInt(appDef["local-state-schema"].numUint);
+          break;
+        case "AppLocalNumByteSlice":
+          value = BigInt(appDef["local-state-schema"].numByteSlice);
+          break;
+        case "AppExtraProgramPages":
+          // only return default number extra program pages in runtime
+          // should fix it in future.
+          value = 1n;
+          break;
+        case "AppCreator":
+          value = decodeAddress(appDef.creator).publicKey;
+          break;
+        case "AppAddress":
+          value = decodeAddress(getApplicationAddress(appID)).publicKey;
+      };
+
+      stack.push(value);
+      stack.push(1n);
+    } else {
+      stack.push(0n);
+      stack.push(0n);
+    }
+  };
+};

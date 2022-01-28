@@ -266,6 +266,24 @@ AssetParamMap[5] = {
 
 AssetParamMap[6] = { ...AssetParamMap[5] };
 
+export const AppParamMap: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    "AppApprovalProgram",
+    "AppClearStateProgram",
+    "AppGlobalNumUint",
+    "AppGlobalNumByteSlice",
+    "AppLocalNumUint",
+    "AppLocalNumByteSlice",
+    "AppExtraProgramPages",
+    "AppCreator",
+    "AppAddress"
+  ])
+};
+
 export const reDigit = /^\d+$/;
 export const reDec = /^(0|[1-9]\d*)$/;
 export const reHex = /^0x[0-9a-fA-F]+$/;

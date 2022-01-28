@@ -21,7 +21,7 @@ import {
   Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../interpreter/opcode-list";
-import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
+import { AppParamMap, LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode, Operator } from "../types";
 
@@ -238,7 +238,8 @@ opCodeMap[5] = {
   gtxnas: Gtxnas,
   gtxnsas: Gtxnsas,
   args: Args,
-  log: Log
+  log: Log,
+  app_params_get: AppParamMap
 };
 
 opCodeMap[6] = {
@@ -254,7 +255,7 @@ const interpreterReqList = new Set([
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
   "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
-  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log"
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'bitlen', 'app_params_get'
 ]);
 
 /**
