@@ -5,6 +5,7 @@ Algo Builder team maintains this repository of of verified smart contract templa
 ## Templates
 
 - [JS] [asa](./asa): a project that demonstrates how to create and manage Algorand Standard Assets (ASA).
+- [JS] [bond](./bond): fixed interest rate token, modelled based on corporate bonds. 
 - [JS] [crowdfunding](./crowdfunding): crowdfunding smart contract based on [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/).
 - [JS] [DAO](./dao): template to create, manage and participate in a DAO.
 - [JS] [multisig](./multisig): demonstration of creating a logic signature (lsig) signed by multiple accounts.
@@ -14,6 +15,8 @@ Algo Builder team maintains this repository of of verified smart contract templa
 - [JS] [permissioned token](./permissioned-token): main template for creating Permissioned Tokens.
 - [JS] [ref-templates](./ref-templates): best practices and templates using the Algorand reference smart contracts.
 - [JS] [signed-txn](./signed-txn): demonstrates loading a serialized transaction from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it in `algob`.
+- [JS] [unique-nft](./unique-nft-asa) example of an ASA generation process based on a guaranteed unique parameter.
+
 - [TS] [htlc](./htlc-pyteal-ts): a Hash-Time-Lock-Contract Example using PyTeal. In this project we transpile TypeScript files to JavaScript using `algob`.
 
 ## Interesting Test Suites
