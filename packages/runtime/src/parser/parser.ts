@@ -21,7 +21,7 @@ import {
   Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Shl, Shr, Sqrt, Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../interpreter/opcode-list";
-import { AppParamDefined, LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
+import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode, Operator } from "../types";
 
