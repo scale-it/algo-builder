@@ -8,7 +8,7 @@
   * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).
   * `getDeployedASC`: returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
 - Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
-
+- Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially update template params, now we fail with an exception.
 
 ### Bug Fixes
 
