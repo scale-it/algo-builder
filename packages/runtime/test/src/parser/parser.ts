@@ -1712,7 +1712,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
+        new Pragma(["version", "5"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),
@@ -1724,7 +1724,9 @@ describe("Parser", function () {
         new AppLocalPut([], 13, interpreter),
         new AppGlobalPut([], 14, interpreter),
         new AppLocalDel([], 15, interpreter),
-        new AppGlobalDel([], 16, interpreter)
+        new AppGlobalDel([], 16, interpreter),
+        new Int(["10"], 17),
+        new AppParamsGet(["AppCreator"], 18, interpreter)
       ];
 
       assert.deepEqual(res, expected);
@@ -1841,7 +1843,7 @@ describe("Parser", function () {
       interpreter.gas = 0;
       file = "test-stateful.teal";
       parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
-      assert.equal(interpreter.gas, 12);
+      assert.equal(interpreter.gas, 14);
     });
 
     it("Should throw error if total cost exceeds 20000", async () => {

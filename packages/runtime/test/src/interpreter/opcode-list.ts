@@ -2261,7 +2261,7 @@ describe("Teal Opcodes", function () {
         op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
         op.execute(stack);
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid), stack.pop());
+        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
         op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
         op.execute(stack);
@@ -2922,7 +2922,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const appID = interpreter.runtime.ctx.tx.apid;
+        const appID = interpreter.runtime.ctx.tx.apid as number;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 
         value = acc?.getLocalState(appID, 'New-Key');
@@ -3049,7 +3049,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        const appID = interpreter.runtime.ctx.tx.apid;
+        const appID = interpreter.runtime.ctx.tx.apid as number;
         let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
         let value = acc?.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
@@ -4214,7 +4214,7 @@ describe("Teal Opcodes", function () {
       let op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx0.fee), stack.pop());
+      assert.equal(BigInt(tx0.fee as number), stack.pop());
 
       stack.push(0n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -4226,7 +4226,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx1.fee), stack.pop());
+      assert.equal(BigInt(tx1.fee as number), stack.pop());
 
       stack.push(1n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -5886,6 +5886,7 @@ describe("Teal Opcodes", function () {
       const numbers = [0n, 1n, 2n, 4n, 5n, 8n];
       const expecteds = [0n, 1n, 2n, 3n, 3n, 4n];
       numbers.forEach((num, index) => {
+        stack.push(num);
         const op = new BitLen([], 1);
         op.execute(stack);
         assert.equal(stack.pop(), expecteds[index]);
