@@ -5878,33 +5878,34 @@ describe("Teal Opcodes", function () {
 
   describe("BitLen opcode", function () {
     let stack: Stack<StackElem>;
-    let interpreter: Interpreter;
     this.beforeEach(() => {
       stack = new Stack();
-      interpreter = new Interpreter();
     });
 
     it("should work with number", () => {
-      stack.push(8n);
-      const op = new BitLen([], 1);
-      op.execute(stack);
-      assert.equal(stack.pop(), 4n);
+      const numbers = [0n, 1n, 2n, 4n, 5n, 8n];
+      const expecteds = [0n, 1n, 2n, 3n, 3n, 4n];
+      numbers.forEach((num, index) => {
+        const op = new BitLen([], 1);
+        op.execute(stack);
+        assert.equal(stack.pop(), expecteds[index]);
+      });
     });
 
-    it("shoud work with a shore byte array", () => {
-      const byte = "abcd";
+    it("shoud work with any short byte array", () => {
+      const bytes = "abcd";
       const op = new BitLen([], 1);
 
-      stack.push(parsing.stringToBytes(byte));
+      stack.push(parsing.stringToBytes(bytes));
       op.execute(stack);
       assert.equal(stack.pop(), 31n);
     });
 
     it("shoud work with a long byte array", () => {
-      const byte = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+      const bytes = "f".repeat(78);
       const op = new BitLen([], 1);
 
-      stack.push(parsing.stringToBytes(byte));
+      stack.push(parsing.stringToBytes(bytes));
       op.execute(stack);
       assert.equal(stack.pop(), 623n);
     });
