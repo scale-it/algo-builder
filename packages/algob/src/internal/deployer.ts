@@ -1,4 +1,9 @@
-import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
+import {
+  overrideASADef,
+  parseASADef,
+  types as rtypes,
+  validateOptInAccNames
+} from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
@@ -43,7 +48,10 @@ class DeployerBasicMode {
     this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
-    this.checkpoint = new CheckpointFunctionsImpl(deployerCfg.cpData, deployerCfg.runtimeEnv.network.name);
+    this.checkpoint = new CheckpointFunctionsImpl(
+      deployerCfg.cpData,
+      deployerCfg.runtimeEnv.network.name
+    );
     this.indexerClient = deployerCfg.indexerClient;
   }
 
@@ -58,10 +66,9 @@ class DeployerBasicMode {
   getASAInfo (name: string): rtypes.ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
-          assetName: name
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
+        assetName: name
+      });
     }
     return found;
   }
@@ -69,10 +76,9 @@ class DeployerBasicMode {
   private _getAccount (name: string): rtypes.Account {
     const found = this.accountsByName.get(name);
     if (!found) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
-          assetName: name
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
+        assetName: name
+      });
     }
     return found;
   }
@@ -155,21 +161,25 @@ class DeployerBasicMode {
    * Loads a single signed delegated logic signature account from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
+    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
     const result = resultMap.get(lsigName)?.lsig;
-    if (result === undefined) { return undefined; }
+    if (result === undefined) {
+      return undefined;
+    }
 
     const lsigAccount = Object.assign(getDummyLsig(), result);
     lsigAccount.lsig = Object.assign(getDummyLsig().lsig, result.lsig);
 
-    if (lsigAccount.lsig.sig) { lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig); };
+    if (lsigAccount.lsig.sig) {
+      lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig);
+    }
     return lsigAccount;
   }
 
   /**
    * Loads a logic signature account from checkpoint
    * @param lsigName logic signature name
-  */
+   */
   getContractLsig (lsigName: string): LogicSigAccount | undefined {
     return this.getDelegatedLsig(lsigName);
   }
@@ -199,8 +209,7 @@ class DeployerBasicMode {
    * @param name ASC name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async getCompiledASC (name: string,
-    scTmplParams?: SCParams): Promise<ASCCache> {
+  async getCompiledASC (name: string, scTmplParams?: SCParams): Promise<ASCCache> {
     return await getBytecodeAndHash(name, this.algoOp.algodClient, scTmplParams);
   }
 
@@ -219,11 +228,13 @@ class DeployerBasicMode {
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string): Promise<LogicSig> {
-    if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
+    if (name.endsWith(blsigExt)) {
+      return await loadBinaryLsig(name);
+    }
 
     const lsig = (await getLsig(name, this.algoOp.algodClient)).lsig; // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsig.msig = {} as EncodedMultisig, msig);
+    Object.assign((lsig.msig = {} as EncodedMultisig), msig);
     return lsig;
   }
 
@@ -231,9 +242,7 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (
-    rawTxns: Uint8Array | Uint8Array[]
-  ): Promise<ConfirmedTxInfo> {
+  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -244,7 +253,11 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAccountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
+  async optInAccountToASA (
+    asa: string,
+    accountName: string,
+    flags: wtypes.TxParams
+  ): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.SecretKey,
@@ -252,25 +265,16 @@ class DeployerBasicMode {
       assetID: asa,
       payFlags: {}
     });
+    let asaId = 0;
     try {
-      const asaId = this.getASAInfo(asa).assetIndex;
-      await this.algoOp.optInAccountToASA(
-        asa,
-        asaId,
-        this._getAccount(accountName),
-        flags);
+      asaId = this.getASAInfo(asa).assetIndex;
     } catch (error) {
-      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
       if (!Number(asa)) {
         throw Error("Please provide a valid Number to be used as ASA ID");
       }
-      const asaId = Number(asa);
-      await this.algoOp.optInAccountToASA(
-        asa,
-        asaId,
-        this._getAccount(accountName),
-        flags);
+      asaId = Number(asa);
     }
+    await this.algoOp.optInAccountToASA(asa, asaId, this._getAccount(accountName), flags);
   }
 
   /**
@@ -280,7 +284,11 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams): Promise<void> {
+  async optInLsigToASA (
+    asa: string,
+    lsig: LogicSigAccount,
+    flags: wtypes.TxParams
+  ): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
@@ -289,17 +297,16 @@ class DeployerBasicMode {
       assetID: asa,
       payFlags: {}
     });
+    let asaId = 0;
     try {
-      const asaId = this.getASAInfo(asa).assetIndex;
-      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+      asaId = this.getASAInfo(asa).assetIndex;
     } catch (error) {
-      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
       if (!Number(asa)) {
         throw Error("Please provide a valid Number to be used as ASA ID");
       }
-      const asaId = Number(asa);
-      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+      asaId = Number(asa);
     }
+    await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
   }
 
   /**
@@ -314,7 +321,8 @@ class DeployerBasicMode {
     sender: rtypes.Account,
     appID: number,
     payFlags: wtypes.TxParams,
-    flags: rtypes.AppOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags
+  ): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.SecretKey,
@@ -337,7 +345,8 @@ class DeployerBasicMode {
     appID: number,
     lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
-    flags: rtypes.AppOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags
+  ): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
@@ -356,7 +365,11 @@ class DeployerBasicMode {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
+  async ensureCompiled (
+    name: string,
+    force?: boolean,
+    scTmplParams?: SCParams
+  ): Promise<ASCCache> {
     return await this.algoOp.ensureCompiled(name, force, scTmplParams);
   }
 
@@ -378,10 +391,9 @@ class DeployerBasicMode {
       res = key ? this.asa.get(key) : undefined;
     }
     if (res?.deleted === true) {
-      throw new BuilderError(
-        ERRORS.GENERAL.ASSET_DELETED, {
-          asset: asset
-        });
+      throw new BuilderError(ERRORS.GENERAL.ASSET_DELETED, {
+        asset: asset
+      });
     }
   }
 
@@ -397,11 +409,10 @@ class DeployerBasicMode {
   private assertAppExist (appID: number): void {
     const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
     const res = key ? this.checkpoint.getAppfromCPKey(key) : undefined;
-    if (res?.deleted === true) {
-      throw new BuilderError(
-        ERRORS.GENERAL.APP_DELETED, {
-          app: appID
-        });
+    if (res?.deleted) {
+      throw new BuilderError(ERRORS.GENERAL.APP_DELETED, {
+        app: appID
+      });
     }
   }
 
@@ -470,10 +481,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       return;
     }
     if (found) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT, {
-          metadataKey: key
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT, {
+        metadataKey: key
+      });
     }
     this.cpData.putMetadata(this.networkName, key, value);
   }
@@ -485,10 +495,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
       this.persistCP();
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
-          assetName: name
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+        assetName: name
+      });
     }
   }
 
@@ -535,10 +544,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     if (asaDef === undefined) {
       this.persistCP();
 
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
-          asaName: name
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
+        asaName: name
+      });
     }
     return await this.deployASADef(name, asaDef, flags);
   }
@@ -560,7 +568,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     let asaInfo = {} as rtypes.ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
-        name, asaDef, flags, this.accountsByName, this.txWriter);
+        name,
+        asaDef,
+        flags,
+        this.accountsByName,
+        this.txWriter
+      );
     } catch (error) {
       this.persistCP();
 
@@ -576,7 +589,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         asaDef,
         flags,
         this.accountsByName,
-        asaInfo.assetIndex);
+        asaInfo.assetIndex
+      );
     } catch (error) {
       this.persistCP();
 
@@ -594,8 +608,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param payFlags - as per SPEC
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: wtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
+  async fundLsig (
+    name: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams,
+    scTmplParams?: SCParams
+  ): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
@@ -614,7 +632,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * contract(optional in case of contract account)
    */
   async _mkLsig (
-    name: string, scTmplParams?: SCParams, signer?: rtypes.Account
+    name: string,
+    scTmplParams?: SCParams,
+    signer?: rtypes.Account
   ): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
@@ -654,8 +674,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    *     (used only when compiling PyTEAL to TEAL)
    */
   async mkDelegatedLsig (
-    name: string, signer: rtypes.Account,
-    scTmplParams?: SCParams): Promise<LsigInfo> {
+    name: string,
+    signer: rtypes.Account,
+    scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
     return await this._mkLsig(name, scTmplParams, signer);
   }
 
@@ -685,14 +707,21 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams,
-    appName?: string): Promise<rtypes.SSCInfo> {
-    const name = appName ?? (approvalProgram + "-" + clearProgram);
+    appName?: string
+  ): Promise<rtypes.SSCInfo> {
+    const name = appName ?? approvalProgram + "-" + clearProgram;
 
     this.assertNoAsset(name);
     let sscInfo = {} as rtypes.SSCInfo;
     try {
       sscInfo = await this.algoOp.deployApp(
-        approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
+        approvalProgram,
+        clearProgram,
+        flags,
+        payFlags,
+        this.txWriter,
+        scTmplParams
+      );
     } catch (error) {
       this.persistCP();
 
@@ -736,12 +765,20 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       appID: appID,
       payFlags: {}
     });
-    const cpKey = appName ?? (newApprovalProgram + "-" + newClearProgram);
+    const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
 
     let sscInfo = {} as rtypes.SSCInfo;
     try {
-      sscInfo = await this.algoOp.updateApp(sender, payFlags, appID,
-        newApprovalProgram, newClearProgram, flags, this.txWriter, scTmplParams);
+      sscInfo = await this.algoOp.updateApp(
+        sender,
+        payFlags,
+        appID,
+        newApprovalProgram,
+        newClearProgram,
+        flags,
+        this.txWriter,
+        scTmplParams
+      );
     } catch (error) {
       this.persistCP();
 
@@ -770,10 +807,9 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 
   assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
-          assetName: name
-        });
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+        assetName: name
+      });
     }
   }
 
@@ -817,15 +853,22 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async fundLsig (_name: string, _flags: FundASCFlags,
-    _payFlags: wtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
+  async fundLsig (
+    _name: string,
+    _flags: FundASCFlags,
+    _payFlags: wtypes.TxParams,
+    _scInitParams?: unknown
+  ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
-  async mkDelegatedLsig (_name: string, _signer: rtypes.Account,
-    _scInitParams?: unknown): Promise<LsigInfo> {
+  async mkDelegatedLsig (
+    _name: string,
+    _signer: rtypes.Account,
+    _scInitParams?: unknown
+  ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });
@@ -837,7 +880,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string
+  ): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
     });
@@ -874,9 +918,14 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
       payFlags: {}
     });
     return await this.algoOp.updateApp(
-      sender, payFlags, appID,
-      newApprovalProgram, newClearProgram,
-      flags, this.txWriter, scTmplParams
+      sender,
+      payFlags,
+      appID,
+      newApprovalProgram,
+      newClearProgram,
+      flags,
+      this.txWriter,
+      scTmplParams
     );
   }
 }
