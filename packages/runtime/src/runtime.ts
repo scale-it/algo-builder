@@ -23,6 +23,7 @@ import {
   EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, SSCInfo,
   StackElem, State, TxReceipt
 } from "./types";
+import type { Algodv2 } from "algosdk";
 
 export class Runtime {
   /**
@@ -38,8 +39,9 @@ export class Runtime {
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;
+  algocl: Algodv2 | undefined;
 
-  constructor (accounts: AccountStoreI[]) {
+  constructor (accounts: AccountStoreI[], algocl?: Algodv2) {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
@@ -61,6 +63,9 @@ export class Runtime {
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
+
+    // initialize algodv2 client
+    this.algocl = algocl;
 
     this.round = 2;
     this.timestamp = 1;
