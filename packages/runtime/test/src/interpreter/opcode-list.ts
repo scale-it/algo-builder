@@ -6043,9 +6043,17 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt(appID));
         expectRuntimeError(
           () => new AppParamsGet(["AppCreator"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
         );
       });
+    });
+
+    it("should fail when arguments invalid", () => {
+      stack.push(BigInt(appID));
+      expectRuntimeError(
+        () => new AppParamsGet(["AppCreatorInvalid"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
+      );
     });
   });
 });

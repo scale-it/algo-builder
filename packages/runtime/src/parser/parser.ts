@@ -255,7 +255,7 @@ const interpreterReqList = new Set([
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
   "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
-  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'bitlen', 'app_params_get'
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'app_params_get'
 ]);
 
 /**

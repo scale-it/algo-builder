@@ -4295,7 +4295,7 @@ export class AppParamsGet extends Op {
     assertLen(args.length, 1, line);
 
     if (!AppParamDefined[interpreter.tealVersion].has(args[0])) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD, {
         field: args[0],
         line: line,
         tealV: interpreter.tealVersion
