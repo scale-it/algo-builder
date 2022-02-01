@@ -20,7 +20,7 @@ __metadata:
     "@types/glob": ^7.1.2
     "@types/mocha": ^9.0.0
     "@types/murmurhash": 0.0.1
-    "@types/node": ^17.0.14
+    "@types/node": 15.12.5
     "@types/semver": ^7.2.0
     "@types/sinon": ^9.0.4
     "@types/tmp": ^0.2.0
@@ -69,7 +69,7 @@ __metadata:
     "@types/lodash.clonedeep": ^4.5.6
     "@types/mocha": ^9.0.0
     "@types/murmurhash": 0.0.1
-    "@types/node": ^17.0.14
+    "@types/node": ~15.12.5
     "@types/sinon": ^9.0.4
     algosdk: ^1.13.0
     chai: ^4.3.4
@@ -101,7 +101,7 @@ __metadata:
     "@json-rpc-tools/utils": ^1.7.6
     "@types/chai": ^4.2.22
     "@types/mocha": ^9.0.0
-    "@types/node": ^17.0.14
+    "@types/node": 15.12.5
     "@types/sinon": ^9.0.4
     "@walletconnect/client": ^1.6.6
     "@walletconnect/types": ^1.7.1
@@ -112,6 +112,7 @@ __metadata:
     mocha: ^9.2.0
     nyc: ^15.1.0
     sinon: ^12.0.1
+    ts-node: ^10.4.0
     typedoc: ^0.22.11
     typescript: ^4.5.5
     zod: ^3.11.6
@@ -788,10 +789,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^17.0.14":
-  version: 17.0.14
-  resolution: "@types/node@npm:17.0.14"
-  checksum: cc059ce29686bad5890685f45741826a1a7d1d27382464f6d5fa00b72ba239f6f5b8245a7fa5a56c23ce928030dc76b165a4ab0b86dc078f05b44597d8fe1a46
+"@types/node@npm:15.12.5, @types/node@npm:~15.12.5":
+  version: 15.12.5
+  resolution: "@types/node@npm:15.12.5"
+  checksum: 4550941a5db67f21bf1c54b2f76ef6fb56ced08583b6049fceef5972ef73791225c41b9a30ce36f496fded284dd736973b5e2107f4bd036d41f35550e3af3450
   languageName: node
   linkType: hard
 
