@@ -213,7 +213,7 @@ class DeployerBasicMode {
     force?: boolean,
     scTmplParams?: SCParams
   ): Promise<ASCCache> {
-    return this.compileASC(name, force, scTmplParams);
+    return this.compileASC(name, scTmplParams, force);
   }
 
   /**
