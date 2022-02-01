@@ -1,5 +1,5 @@
-import { getPathFromDirRecursive, PyCompileOp } from "@algo-builder/runtime";
-import { parseAlgorandError, types } from "@algo-builder/web";
+import { ERRORS, getPathFromDirRecursive, PyCompileOp } from "@algo-builder/runtime";
+import { BuilderError, parseAlgorandError, types } from "@algo-builder/web";
 import type { Algodv2, modelsv2 } from "algosdk";
 import * as fs from 'fs';
 import * as murmurhash from 'murmurhash';
@@ -34,14 +34,18 @@ export class CompileOp {
    */
   async ensureCompiled (filename: string, force?: boolean, scTmplParams?: SCParams):
   Promise<ASCCache | PyASCCache> {
-    const filePath = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
-
+    if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt) && !filename.endsWith(pyExt)) {
+      throw new Error(`filename "${filename}" must end with "${tealExt}" or "${lsigExt}" or "${pyExt}"`); // TODO: convert to buildererror
+    }
     if (force === undefined) {
       force = false;
     }
 
-    if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt) && !filename.endsWith(pyExt)) {
-      throw new Error(`filename "${filename}" must end with "${tealExt}" or "${lsigExt}" or "${pyExt}"`); // TODO: convert to buildererror
+    const filePath = getPathFromDirRecursive(ASSETS_DIR, filename);
+    if (filePath === undefined) {
+      throw new BuilderError(ERRORS.GENERAL.FILE_NOT_FOUND_IN_DIR, {
+        directory: ASSETS_DIR, file: filename
+      });
     }
 
     let teal: string;
@@ -116,19 +120,4 @@ export class CompileOp {
   writeFile (filename: string, content: string): void {
     fs.writeFileSync(filename, content);
   }
-}
-
-/**
- * Retuns compiled program info (bytecode, hash, filename etc)
- * @param name : ASC filename
- * @param algodClient : algodClient
- * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
- */
-export async function getBytecodeAndHash (
-  name: string,
-  algodClient: Algodv2,
-  scTmplParams?: SCParams): Promise<ASCCache> {
-  const compileOp = new CompileOp(algodClient);
-  const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
-  return result;
 }

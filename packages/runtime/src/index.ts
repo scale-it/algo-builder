@@ -1,5 +1,5 @@
 import { AccountStore } from "./account";
-import * as ERRORS from "./errors/errors-list";
+import ERRORS from "./errors/errors-list";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
 import { getProgram } from "./lib//load-program";

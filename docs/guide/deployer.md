@@ -170,11 +170,11 @@ You can learn more about Stateless Smart Contracts [here](https://developer.algo
 
 #### Compile contracts
 
-You can use the deployer API to compile smart contracts and get the contract's bytecode, hash, compilation timestamp etc:
-  * `getCompiledASC`: compiles a contract in real time, returns info after compilation (eg. bytecode, bytecode hash, timestamp etc).Eg.
+You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
+  * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:
   ```js
-  const info = await deployer.getCompiledASC('buyback-lsig.py', { ARG_DAO_APP_ID: 23 });
+  const info = await deployer.compileASC('buyback-lsig.py', { ARG_DAO_APP_ID: 23 }, false);
   const bytecode = info.compiled;
   ```
 
-  * `getDeployedASC`: Similar to above, but instead of compiling in real time, it returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name. 

@@ -10,7 +10,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { CompileOp, getBytecodeAndHash } from "../lib/compile";
+import { CompileOp } from "../lib/compile";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
@@ -205,21 +205,36 @@ class DeployerBasicMode {
   }
 
   /**
-   * Complies program in real time, and returns compiled info (bytecode, hash, filename etc).
-   * @param name ASC name
-   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * Alias to `this.compileASC` with last two parameters being swapped.
+   * Deprecated: this function will be removed in the next release.
    */
-  async getCompiledASC (name: string, scTmplParams?: SCParams): Promise<ASCCache> {
-    return await getBytecodeAndHash(name, this.algoOp.algodClient, scTmplParams);
+  ensureCompiled (
+    name: string,
+    force?: boolean,
+    scTmplParams?: SCParams
+  ): Promise<ASCCache> {
+    return this.compileASC(name, scTmplParams, force);
   }
 
   /**
-   * Returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
-   * @param name ASC file name
+   * Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
    */
-  async getDeployedASC (name: string): Promise<ASCCache | undefined> {
+  compileASC (name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
+    return this.algoOp.ensureCompiled(name, force, scTmplParams);
+  }
+
+  /**
+   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
+   * TODO: beta support - this will change
+   * @param name ASC name used during deployment
+   */
+  getDeployedASC (name: string): Promise<ASCCache | undefined> {
     const op = new CompileOp(this.algoOp.algodClient);
-    return await op.readArtifact(name);
+    return op.readArtifact(name);
   }
 
   /**
@@ -242,8 +257,8 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    return await this.algoOp.sendAndWait(rawTxns);
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+    return this.algoOp.sendAndWait(rawTxns);
   }
 
   /**
@@ -253,7 +268,7 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAccountToASA (
+  optInAccountToASA (
     asa: string,
     accountName: string,
     flags: wtypes.TxParams
@@ -274,7 +289,7 @@ class DeployerBasicMode {
       }
       asaId = Number(asa);
     }
-    await this.algoOp.optInAccountToASA(asa, asaId, this._getAccount(accountName), flags);
+    return this.algoOp.optInAccountToASA(asa, asaId, this._getAccount(accountName), flags);
   }
 
   /**
@@ -284,7 +299,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (
+  optInLsigToASA (
     asa: string,
     lsig: LogicSigAccount,
     flags: wtypes.TxParams
@@ -306,7 +321,7 @@ class DeployerBasicMode {
       }
       asaId = Number(asa);
     }
-    await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+    return this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
   }
 
   /**
@@ -317,7 +332,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInAccountToApp (
+  optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
     payFlags: wtypes.TxParams,
@@ -330,7 +345,7 @@ class DeployerBasicMode {
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInAccountToApp(sender, appID, payFlags, flags);
+    return this.algoOp.optInAccountToApp(sender, appID, payFlags, flags);
   }
 
   /**
@@ -341,7 +356,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInLsigToApp (
+  optInLsigToApp (
     appID: number,
     lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
@@ -355,22 +370,7 @@ class DeployerBasicMode {
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInLsigToApp(appID, lsig, payFlags, flags);
-  }
-
-  /**
-   * Returns ASCCache (with compiled code)
-   * @param name: Smart Contract filename (must be present in assets folder)
-   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
-   * @param scTmplParams: scTmplParams: Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   */
-  async ensureCompiled (
-    name: string,
-    force?: boolean,
-    scTmplParams?: SCParams
-  ): Promise<ASCCache> {
-    return await this.algoOp.ensureCompiled(name, force, scTmplParams);
+    return this.algoOp.optInLsigToApp(appID, lsig, payFlags, flags);
   }
 
   /**
@@ -699,7 +699,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    * @param appName name of the app to deploy. This name (if passed) will be used as
-   * the checkpoint "key", and app information will be stored agaisnt this name
+   * the checkpoint "key", and app information will be associated with this name
    */
   async deployApp (
     approvalProgram: string,
@@ -744,7 +744,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    * @param appName name of the app to deploy. This name (if passed) will be used as
-   * the checkpoint "key", and app information will be stored agaisnt this name
+   * the checkpoint "key", and app information will be associated with this name
    */
   async updateApp (
     sender: algosdk.Account,
