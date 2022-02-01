@@ -345,6 +345,12 @@ maximun uint128`
     message: "Maximum length (in bytes) of logs exceeded threshold of %maxLength%, but got %origLength%, at line %line%",
     title: "Maximum length (in bytes) of logs exceeded",
     description: `Maximum length (in bytes) of logs exceeded`
+  },
+  UNKNOWN_APP_FIELD: {
+    number: 1053,
+    message: "App Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
+    title: "App Field Error at line %line%",
+    description: `App field unknown`
   }
 };
 

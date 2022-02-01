@@ -1,18 +1,18 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
-import { decodeAddress, generateAccount, signBytes } from "algosdk";
+import { decodeAddress, encodeAddress, generateAccount, getApplicationAddress, signBytes } from "algosdk";
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
 
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { Runtime } from "../../../src/index";
+import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, AppParamsGet, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, ByteAdd, ByteBitwiseAnd,
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
@@ -33,7 +33,7 @@ import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, M
 import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { AccountStoreI, EncodingType, EncTx as EncodedTx, StackElem } from "../../../src/types";
+import { AccountStoreI, EncodingType, EncTx as EncodedTx, SSCAttributesM, StackElem } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
@@ -2922,10 +2922,10 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const appID = interpreter.runtime.ctx.tx.apid;
-        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
+        const appID = interpreter.runtime.ctx.tx.apid as number;
+        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 
-        value = acc.getLocalState(appID as number, 'New-Key');
+        value = acc?.getLocalState(appID, 'New-Key');
         assert.isDefined(value);
         assert.deepEqual(value, parsing.stringToBytes('New-Val'));
 
@@ -2937,7 +2937,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        value = acc.getLocalState(appID as number, 'New-Key-1');
+        value = acc?.getLocalState(appID, 'New-Key-1');
         assert.isDefined(value);
         assert.deepEqual(value, 2222n);
       });
@@ -3049,9 +3049,9 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        const appID = interpreter.runtime.ctx.tx.apid;
-        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
-        let value = acc.getLocalState(appID as number, 'Local-Key');
+        const appID = interpreter.runtime.ctx.tx.apid as number;
+        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
+        let value = acc?.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -3061,8 +3061,8 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as AccountStoreI;
-        value = acc.getLocalState(appID as number, 'Local-Key');
+        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr);
+        value = acc?.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
     });
@@ -5873,6 +5873,187 @@ describe("Teal Opcodes", function () {
           RUNTIME_ERRORS.TEAL.INVALID_TYPE
         );
       });
+    });
+  });
+
+  describe("BitLen opcode", function () {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => {
+      stack = new Stack();
+    });
+
+    it("should work with number", () => {
+      const numbers = [0n, 1n, 2n, 4n, 5n, 8n];
+      const expecteds = [0n, 1n, 2n, 3n, 3n, 4n];
+      numbers.forEach((num, index) => {
+        stack.push(num);
+        const op = new BitLen([], 1);
+        op.execute(stack);
+        assert.equal(stack.pop(), expecteds[index]);
+      });
+    });
+
+    it("shoud work with any short byte array", () => {
+      const bytes = "abcd";
+      const op = new BitLen([], 1);
+
+      stack.push(parsing.stringToBytes(bytes));
+      op.execute(stack);
+      assert.equal(stack.pop(), 31n);
+    });
+
+    it("shoud work with a long byte array", () => {
+      const bytes = "f".repeat(78);
+      const op = new BitLen([], 1);
+
+      stack.push(parsing.stringToBytes(bytes));
+      op.execute(stack);
+      assert.equal(stack.pop(), 623n);
+    });
+  });
+
+  describe("TEALv5: app_params_get", function () {
+    useFixture('stateful');
+    let appInfo: SSCAttributesM;
+    let appID: number;
+    let alan: AccountStoreI;
+    let runtime: Runtime;
+    let interpreter: Interpreter;
+    let stack: Stack<StackElem>;
+
+    this.beforeEach(() => {
+      alan = new AccountStore(1e9);
+      runtime = new Runtime([alan]);
+      appID = runtime.deployApp(
+        "counter-approval.teal",
+        "clear.teal",
+        {
+          sender: alan.account,
+          globalInts: 1,
+          globalBytes: 2,
+          localInts: 3,
+          localBytes: 4
+        },
+        {}
+      ).appID;
+
+      appInfo = runtime.getApp(appID);
+
+      // initial "context" for interpreter
+      interpreter = new Interpreter();
+      interpreter.tealVersion = 5;
+      interpreter.runtime = runtime;
+
+      stack = new Stack();
+    });
+
+    it("should return AppApprovalProgram", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppApprovalProgram"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram('counter-approval.teal')));
+    });
+
+    it("should return AppClearStateProgram", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppClearStateProgram"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram('clear.teal')));
+    });
+
+    it("should return AppGlobalNumUint", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppGlobalNumUint"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numUint));
+    });
+
+    it("should return AppGlobalNumByteSlice", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppGlobalNumByteSlice"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numByteSlice));
+    });
+
+    it("should return AppLocalNumUint", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppLocalNumUint"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numUint));
+    });
+
+    it("should return AppLocalNumByteSlice", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppLocalNumByteSlice"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numByteSlice));
+    });
+
+    it("should return AppExtraProgramPages", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppExtraProgramPages"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), 1n);
+    });
+
+    it("should return AppCreator", () => {
+      stack.push(BigInt(appID));
+      const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(encodeAddress(stack.pop() as Uint8Array), alan.address);
+    });
+
+    it("should return AppAddress", () => {
+      const op = new AppParamsGet(["AppAddress"], 1, interpreter);
+      stack.push(BigInt(appID));
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(encodeAddress(stack.pop() as Uint8Array), getApplicationAddress(appID));
+    });
+
+    it("return '0,0' when app is undefined", () => {
+      stack.push(10n);
+      const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("Should fail number element in stack less than 1", () => {
+      assert.equal(stack.length(), 0);
+      const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should fail when teal version is less than 5", () => {
+      const versions = [1, 2, 3, 4];
+      versions.forEach(version => {
+        interpreter.tealVersion = version;
+        stack.push(BigInt(appID));
+        expectRuntimeError(
+          () => new AppParamsGet(["AppCreator"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
+        );
+      });
+    });
+
+    it("should fail when arguments invalid", () => {
+      stack.push(BigInt(appID));
+      expectRuntimeError(
+        () => new AppParamsGet(["AppCreatorInvalid"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
+      );
     });
   });
 });

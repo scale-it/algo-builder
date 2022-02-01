@@ -17,9 +17,11 @@ import {
   AppLocalGetEx,
   AppLocalPut,
   AppOptedIn,
+  AppParamsGet,
   Arg,
   Assert,
   Balance,
+  BitLen,
   BitwiseAnd,
   BitwiseNot,
   BitwiseOr,
@@ -110,7 +112,7 @@ import {
   Txna,
   Uncover
 } from "../../../src/interpreter/opcode-list";
-import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
+import { AppParamDefined, MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
@@ -1197,6 +1199,17 @@ describe("Parser", function () {
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
+
+      it("bitlen", () => {
+        const res = opcodeFromSentence(["bitlen"], 1, interpreter);
+        const expected = new BitLen([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["bitlen", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
     });
 
     describe("should return correct opcodes for tealv5 ops", () => {
@@ -1386,6 +1399,19 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["itxn_submit", "exxtra"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("app_get_params i", () => {
+        const appParams = AppParamDefined[interpreter.tealVersion];
+        appParams.forEach((appParam: string) => {
+          const res = opcodeFromSentence(["app_params_get", appParam], 1, interpreter);
+          const expected = new AppParamsGet([appParam], 1, interpreter);
+          assert.deepEqual(res, expected);
+        });
+        expectRuntimeError(
+          () => opcodeFromSentence(["app_params_get", "unknow", "hello"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
@@ -1686,7 +1712,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
+        new Pragma(["version", "5"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),
@@ -1698,7 +1724,9 @@ describe("Parser", function () {
         new AppLocalPut([], 13, interpreter),
         new AppGlobalPut([], 14, interpreter),
         new AppLocalDel([], 15, interpreter),
-        new AppGlobalDel([], 16, interpreter)
+        new AppGlobalDel([], 16, interpreter),
+        new Int(["10"], 17),
+        new AppParamsGet(["AppCreator"], 18, interpreter)
       ];
 
       assert.deepEqual(res, expected);
@@ -1815,7 +1843,7 @@ describe("Parser", function () {
       interpreter.gas = 0;
       file = "test-stateful.teal";
       parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
-      assert.equal(interpreter.gas, 12);
+      assert.equal(interpreter.gas, 14);
     });
 
     it("Should throw error if total cost exceeds 20000", async () => {
