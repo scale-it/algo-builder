@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { getEncoding, parseBinaryStrToBigInt } from "../../../src/lib/parsing";
+import { assertNumber, getEncoding, parseBinaryStrToBigInt } from "../../../src/lib/parsing";
 import { EncodingType } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -81,6 +81,39 @@ describe("Get Encoding for Byte Data", () => {
       () => getEncoding(["base32", "AJSHKJ-#"], 1),
       RUNTIME_ERRORS.TEAL.INVALID_BASE32
     );
+  });
+});
+
+describe("assertNumber test cases", function () {
+  it("should pass with hex and dec", () => {
+    const hexValue = "0xaa3C3";
+    assert.equal(assertNumber(hexValue, 1), hexValue);
+    const decValue = "343434";
+    assert.equal(assertNumber(decValue, 1), decValue);
+  });
+
+  it("should return right format for OCT", () => {
+    const oct = "01234";
+    assert.equal(assertNumber(oct, 1), "0o1234");
+  });
+
+  it("should failed if input invalid", () => {
+    const failedDatas = [
+      "0xg",
+      "3e",
+      "0e",
+      "00x3",
+      "gg",
+      "  ",
+      "0999",
+      "1234h3"
+    ];
+    failedDatas.forEach(data => {
+      expectRuntimeError(
+        () => assertNumber(data, 1),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
   });
 });
 

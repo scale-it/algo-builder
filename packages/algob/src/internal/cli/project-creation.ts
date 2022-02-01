@@ -17,14 +17,6 @@ const SAMPLE_TS_PROJECT_DEPENDENCIES = [
   ...SAMPLE_PROJECT_DEPENDENCIES, "@types/chai", "@types/node", "typescript", "ts-node"
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function removeProjectDirIfPresent (projectRoot: string, dirName: string): Promise<void> {
-  const dirPath = path.join(projectRoot, dirName);
-  if (await fsExtra.pathExists(dirPath)) {
-    await fsExtra.remove(dirPath);
-  }
-}
-
 export async function printWelcomeMessage (): Promise<void> {
   const packageJson = await getPackageJson();
 

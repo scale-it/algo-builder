@@ -4,23 +4,115 @@ import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
-  AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover,
+  Add,
+  Addr,
+  Addw,
+  And,
+  AppGlobalDel,
+  AppGlobalGet,
+  AppGlobalGetEx,
+  AppGlobalPut,
+  AppLocalDel,
+  AppLocalGet,
+  AppLocalGetEx,
+  AppLocalPut,
+  AppOptedIn,
+  AppParamsGet,
+  Arg,
+  Assert,
+  Balance,
+  BitLen,
+  BitwiseAnd,
+  BitwiseNot,
+  BitwiseOr,
+  BitwiseXor,
+  Branch,
+  BranchIfNotZero,
+  BranchIfZero,
+  Btoi,
+  Byte,
+  Bytec,
+  Callsub,
+  Concat,
+  Cover,
+  Dig,
+  Div,
+  DivModw,
+  Dup,
+  Dup2,
+  EcdsaPkDecompress,
+  EcdsaPkRecover,
   EcdsaVerify,
-  Ed25519verify, EqualTo, Err, Exp, Expw,
-  Extract, Extract3, ExtractUint16, ExtractUint32, ExtractUint64, Gaid, Gaids,
-  GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob, ITxnBegin, ITxnField,
-  ITxnSubmit, Keccak256, Label, Len, LessThan,
-  LessThanEqualTo, Load, Loads, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
-  Or, Pop, Pragma, PushBytes, PushInt, Retsub,
-  Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
-  Store, Stores, Sub, Substring, Substring3, Swap, Txn, Txna, Uncover
+  Ed25519verify,
+  EqualTo,
+  Err,
+  Exp,
+  Expw,
+  Extract,
+  Extract3,
+  ExtractUint16,
+  ExtractUint32,
+  ExtractUint64,
+  Gaid,
+  Gaids,
+  GetAssetDef,
+  GetAssetHolding,
+  GetBit,
+  GetByte,
+  Gload,
+  Gloads,
+  Global,
+  GreaterThan,
+  GreaterThanEqualTo,
+  Gtxn,
+  Gtxna,
+  Gtxns,
+  Gtxnsa,
+  Int,
+  Intc,
+  Itob,
+  ITxnBegin,
+  ITxnField,
+  ITxnSubmit,
+  Keccak256,
+  Label,
+  Len,
+  LessThan,
+  LessThanEqualTo,
+  Load,
+  Loads,
+  MinBalance,
+  Mod,
+  Mul,
+  Mulw,
+  Not,
+  NotEqualTo,
+  Or,
+  Pop,
+  Pragma,
+  PushBytes,
+  PushInt,
+  Retsub,
+  Return,
+  Select,
+  SetBit,
+  SetByte,
+  Sha256,
+  Sha512_256,
+  Shl,
+  Shr,
+  Sqrt,
+  Store,
+  Stores,
+  Sub,
+  Substring,
+  Substring3,
+  Swap,
+  Txn,
+  Txna,
+  Uncover
 } from "../../../src/interpreter/opcode-list";
-import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
+import { AppParamDefined, MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
@@ -101,12 +193,12 @@ describe("Parser", function () {
 
     it("should return correct words for byte string literal", () => {
       let res = wordsFromLine('byte "STRING LITERAL"');
-      let expected = ["byte", "\"STRING LITERAL\""];
+      let expected = ["byte", '"STRING LITERAL"'];
 
       assert.deepEqual(res, expected);
 
       res = wordsFromLine('byte "STRING \\"NESTED STRING\\" END"');
-      expected = ["byte", "\"STRING \\\"NESTED STRING\\\" END\""];
+      expected = ["byte", '"STRING \\"NESTED STRING\\" END"'];
 
       assert.deepEqual(res, expected);
     });
@@ -182,8 +274,8 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      res = wordsFromLine("base64 \"ab cd\"");
-      expected = ["base64", "\"ab cd\""];
+      res = wordsFromLine('base64 "ab cd"');
+      expected = ["base64", '"ab cd"'];
 
       assert.deepEqual(res, expected);
     });
@@ -353,8 +445,30 @@ describe("Parser", function () {
       );
     });
 
+    it("can use prefix 0x(hex) with 'int'", () => {
+      const valueInHex = "0x02";
+      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
+      const expected = new Int(["2"], 1);
+      assert.deepEqual(res, expected);
+    });
+
+    it("can use prefix 0(oct) with 'int'", () => {
+      const valueInHex = "010";
+      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
+      const expected = new Int(["8"], 1);
+      assert.deepEqual(res, expected);
+    });
+
     it("should return correct opcode object for 'int'", () => {
       const value = "812546821";
+      const res = opcodeFromSentence(["int", value], 1, interpreter);
+      const expected = new Int([value], 1);
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should work when int arg is zero", () => {
+      const value = "0";
       const res = opcodeFromSentence(["int", value], 1, interpreter);
       const expected = new Int([value], 1);
 
@@ -374,8 +488,21 @@ describe("Parser", function () {
         RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
 
+      // for dec format
       expectRuntimeError(
         () => opcodeFromSentence(["int", String(MAX_UINT64 + 5n)], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      // for hex format
+      expectRuntimeError(
+        () => opcodeFromSentence(["int", "0x" + (MAX_UINT64 + 5n).toString(16)], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      // for oct format
+      expectRuntimeError(
+        () => opcodeFromSentence(["int", "0" + (MAX_UINT64 + 5n).toString(8)], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
 
@@ -574,7 +701,12 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
 
       expectRuntimeError(
-        () => opcodeFromSentence(["asset_holding_get", "AssetBalance", "AssetFrozen"], 1, interpreter),
+        () =>
+          opcodeFromSentence(
+            ["asset_holding_get", "AssetBalance", "AssetFrozen"],
+            1,
+            interpreter
+          ),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
@@ -706,7 +838,8 @@ describe("Parser", function () {
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
 
-        expectRuntimeError( // Int Constants(eg. NoOp) works with int x
+        expectRuntimeError(
+          // Int Constants(eg. NoOp) works with int x
           () => opcodeFromSentence(["pushint", "NoOp"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.INVALID_TYPE
         );
@@ -728,7 +861,12 @@ describe("Parser", function () {
         );
 
         expectRuntimeError(
-          () => opcodeFromSentence(["pushbytes", `0x250001000192CD0000002F6D6E742F72`], 1, interpreter),
+          () =>
+            opcodeFromSentence(
+              ["pushbytes", `0x250001000192CD0000002F6D6E742F72`],
+              1,
+              interpreter
+            ),
           RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE
         );
       });
@@ -1061,6 +1199,17 @@ describe("Parser", function () {
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
+
+      it("bitlen", () => {
+        const res = opcodeFromSentence(["bitlen"], 1, interpreter);
+        const expected = new BitLen([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["bitlen", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
     });
 
     describe("should return correct opcodes for tealv5 ops", () => {
@@ -1165,7 +1314,7 @@ describe("Parser", function () {
 
     describe("should return correct opcodes for tealv5 ops", () => {
       it("loads", () => {
-        const res = opcodeFromSentence(['loads'], 1, interpreter);
+        const res = opcodeFromSentence(["loads"], 1, interpreter);
         const expected = new Loads([], 1, interpreter);
 
         assert.deepEqual(res, expected);
@@ -1177,7 +1326,7 @@ describe("Parser", function () {
       });
 
       it("stores", () => {
-        const res = opcodeFromSentence(['stores'], 1, interpreter);
+        const res = opcodeFromSentence(["stores"], 1, interpreter);
         const expected = new Stores([], 1, interpreter);
 
         assert.deepEqual(res, expected);
@@ -1253,6 +1402,19 @@ describe("Parser", function () {
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
+
+      it("app_get_params i", () => {
+        const appParams = AppParamDefined[interpreter.tealVersion];
+        appParams.forEach((appParam: string) => {
+          const res = opcodeFromSentence(["app_params_get", appParam], 1, interpreter);
+          const expected = new AppParamsGet([appParam], 1, interpreter);
+          assert.deepEqual(res, expected);
+        });
+        expectRuntimeError(
+          () => opcodeFromSentence(["app_params_get", "unknow", "hello"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
     });
   });
 
@@ -1266,6 +1428,21 @@ describe("Parser", function () {
       interpreter.tealVersion = 2;
     });
 
+    it("Supported pragma version 6", () => {
+      const fileWithPragmav6 = "test-pragma-v6.teal";
+      assert.doesNotThrow(() =>
+        parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
+      );
+    });
+
+    it("Should failed if declare pragma greater than 6", () => {
+      const fileWithPragmaInvalid = "test-pragma-invalid.teal";
+      expectRuntimeError(
+        () => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
+        RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+      );
+    });
+
     it("Should return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
       let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
@@ -1273,8 +1450,12 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "4"], 1, interpreter), new Int(["1"], 2),
-        new Int(["3"], 3), new Add([], 4)];
+      const expect = [
+        new Pragma(["version", "4"], 1, interpreter),
+        new Int(["1"], 2),
+        new Int(["3"], 3),
+        new Add([], 4)
+      ];
       res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
 
       assert.deepEqual(res, expect);
@@ -1351,10 +1532,14 @@ describe("Parser", function () {
       const byte32 = "MFRGGZDFMY======";
 
       const expected = [
-        new Byte(["b64", byte64], 1), new Byte(["b64", byte64], 2),
-        new Byte(["b64", byte64], 3), new Byte(["b64", byte64], 4),
-        new Byte(["b32", byte32], 5), new Byte(["b32", byte32], 6),
-        new Byte(["b32", byte32], 7), new Byte(["b32", byte32], 8)
+        new Byte(["b64", byte64], 1),
+        new Byte(["b64", byte64], 2),
+        new Byte(["b64", byte64], 3),
+        new Byte(["b64", byte64], 4),
+        new Byte(["b32", byte32], 5),
+        new Byte(["b32", byte32], 6),
+        new Byte(["b32", byte32], 7),
+        new Byte(["b32", byte32], 8)
       ];
 
       assert.deepEqual(res, expected);
@@ -1527,7 +1712,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
+        new Pragma(["version", "5"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),
@@ -1539,7 +1724,9 @@ describe("Parser", function () {
         new AppLocalPut([], 13, interpreter),
         new AppGlobalPut([], 14, interpreter),
         new AppLocalDel([], 15, interpreter),
-        new AppGlobalDel([], 16, interpreter)
+        new AppGlobalDel([], 16, interpreter),
+        new Int(["10"], 17),
+        new AppParamsGet(["AppCreator"], 18, interpreter)
       ];
 
       assert.deepEqual(res, expected);
@@ -1656,7 +1843,7 @@ describe("Parser", function () {
       interpreter.gas = 0;
       file = "test-stateful.teal";
       parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
-      assert.equal(interpreter.gas, 12);
+      assert.equal(interpreter.gas, 14);
     });
 
     it("Should throw error if total cost exceeds 20000", async () => {

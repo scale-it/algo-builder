@@ -1,14 +1,8 @@
-export const RUNTIME_ERROR_PREFIX = "RUNTIME_ERR";
-
 export interface ErrorDescriptor {
   number: number
   message: string
   title: string
   description: string
-}
-
-export function getRuntimeErrorCode (error: ErrorDescriptor): string {
-  return `${RUNTIME_ERROR_PREFIX}${error.number}`;
 }
 
 export const RUNTIME_ERROR_RANGES = {
@@ -20,7 +14,7 @@ export const RUNTIME_ERROR_RANGES = {
 
 export const PARSE_ERROR = "Parse Error";
 
-export const tealErrors = {
+const tealErrors = {
   ASSERT_STACK_LENGTH: {
     number: 1000,
     message: "Length of stack is less than min length required for current op at line %line%",
@@ -351,10 +345,16 @@ maximun uint128`
     message: "Maximum length (in bytes) of logs exceeded threshold of %maxLength%, but got %origLength%, at line %line%",
     title: "Maximum length (in bytes) of logs exceeded",
     description: `Maximum length (in bytes) of logs exceeded`
+  },
+  UNKNOWN_APP_FIELD: {
+    number: 1053,
+    message: "App Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
+    title: "App Field Error at line %line%",
+    description: `App field unknown`
   }
 };
 
-export const runtimeGeneralErrors = {
+const runtimeGeneralErrors = {
   LOGIC_SIGNATURE_NOT_FOUND: {
     number: 1300,
     message: "logic signature not found",
@@ -459,7 +459,7 @@ export const runtimeGeneralErrors = {
   }
 };
 
-export const transactionErrors = {
+const transactionErrors = {
   TRANSACTION_TYPE_ERROR: {
     number: 1400,
     message: "Error. Transaction Type %transaction% is Unknown",
@@ -505,7 +505,7 @@ export const transactionErrors = {
   }
 };
 
-export const runtimeAsaErrors = {
+const runtimeAsaErrors = {
   PARAM_PARSE_ERROR: {
     number: 1500,
     message: `Invalid ASA definition: '%source%'.
@@ -590,3 +590,5 @@ export const RUNTIME_ERRORS: {
   TRANSACTION: transactionErrors,
   ASA: runtimeAsaErrors
 };
+
+export default RUNTIME_ERRORS;

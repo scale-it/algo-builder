@@ -653,13 +653,26 @@ export interface Deployer {
   loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
-   * Returns ASCCache (with compiled code)
-   * @name  Smart Contract filename (must be present in assets folder)
-   * @force  if force is true file will be compiled for sure, even if it's checkpoint exist
-   * @scTmplParams  scTmplParams: Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
+   * Alias to `this.compileASC`
+   * Deprecated: this function will be removed in the next release.
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
+
+  /**
+   * Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
+   */
+  compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
+
+  /**
+   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
+   * TODO: beta support - this will change
+   * @param name ASC name used during deployment
+   */
+  getDeployedASC: (name: string) => Promise<ASCCache | undefined>
 
   /**
    * Checks if checkpoint is deleted for a particular transaction

@@ -48,6 +48,7 @@ build/Release
 /packages/*/node_modules
 /packages/algob/sample-project/node_modules
 jspm_packages/
+.yarn/
 
 # TypeScript v1 declaration files
 typings/

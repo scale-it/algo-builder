@@ -166,3 +166,15 @@ For opting in to App, `deployer` supports the following methods:
   ```
 
 You can learn more about Stateless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
+
+
+#### Compile contracts
+
+You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
+  * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:
+  ```js
+  const info = await deployer.compileASC('buyback-lsig.py', { ARG_DAO_APP_ID: 23 }, false);
+  const bytecode = info.compiled;
+  ```
+
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name. 

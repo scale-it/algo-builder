@@ -13,7 +13,7 @@ import type {
 } from "../../src/types";
 
 export class FakeDeployer implements Deployer {
-  asa = new Map<string, rtypes. ASAInfo>();
+  asa = new Map<string, rtypes.ASAInfo>();
   ssc = new Map<string, rtypes.SSCInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
@@ -121,6 +121,19 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
+  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
+    throw new Error("Not implemented");
+  }
+
+  async compileASC (name: string,
+    scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
+    throw new Error("Not implemented");
+  }
+
+  async getDeployedASC (name: string): Promise<ASCCache | undefined> {
+    throw new Error("Not implemented");
+  }
+
   async deployASADef (
     name: string,
     asaDef: wtypes.ASADef,
@@ -163,10 +176,6 @@ export class FakeDeployer implements Deployer {
     scTmplParams?: SCParams,
     appName?: string
   ): Promise<rtypes.SSCInfo> {
-    throw new Error("Not implemented");
-  }
-
-  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
     throw new Error("Not implemented");
   }
 

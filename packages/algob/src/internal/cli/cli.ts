@@ -54,11 +54,15 @@ function printErrRecur (error: BuilderError): void {
 }
 
 function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
-  if (error === undefined) { return; }
+  if (error === undefined) {
+    return;
+  }
   if (showStackTraces) {
     printErrRecur(error);
   } else {
-    console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
+    console.error(
+      `For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`
+    );
   }
 }
 
@@ -86,9 +90,7 @@ export async function gatherArguments (): Promise<RuntimeArgsAndPackageJson> {
 
   ensureValidNodeVersion(packageJson);
 
-  const envVariableArguments = getEnvRuntimeArgs(
-    ALGOB_PARAM_DEFINITIONS,
-    process.env);
+  const envVariableArguments = getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, process.env);
 
   const argumentsParser = new ArgumentsParser();
   const {
@@ -144,10 +146,7 @@ export async function loadEnvironmentAndArgs (
     taskArguments = { task: taskName };
     taskName = TASK_HELP;
   } else {
-    taskArguments = argumentsParser.parseTaskArguments(
-      taskDefinitions[taskName],
-      unparsedCLAs
-    );
+    taskArguments = argumentsParser.parseTaskArguments(taskDefinitions[taskName], unparsedCLAs);
   }
 
   // we can't do it earlier because we above we need to check the special case with `--help`
@@ -158,12 +157,7 @@ export async function loadEnvironmentAndArgs (
     throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, { task: origTaskName });
   }
 
-  const env = new Environment(
-    config,
-    runtimeArgs,
-    taskDefinitions,
-    envExtenders,
-    !isSetup);
+  const env = new Environment(config, runtimeArgs, taskDefinitions, envExtenders, !isSetup);
 
   ctx.setRuntimeEnv(env);
 
@@ -198,12 +192,11 @@ async function main (): Promise<void> {
       return;
     }
 
-    const {
-      env,
-      taskName,
-      taskArguments
-    } = await loadEnvironmentAndArgs(
-      maybeTaskName, runtimeArgs, argumentsParser, unparsedCLAs
+    const { env, taskName, taskArguments } = await loadEnvironmentAndArgs(
+      maybeTaskName,
+      runtimeArgs,
+      argumentsParser,
+      unparsedCLAs
     );
 
     // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
@@ -213,7 +206,9 @@ async function main (): Promise<void> {
     try {
       await env.run(taskName, taskArguments);
     } catch (e) {
-      if (!checkAlgorandUnauthorized(e, env.network)) { throw e; }
+      if (!checkAlgorandUnauthorized(e, env.network)) {
+        throw e;
+      }
     }
 
     // const tAfterRun = new Date().getTime();
@@ -240,7 +235,9 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    if (error instanceof BuilderError) { printStackTraces(showStackTraces, error); }
+    if (error instanceof BuilderError) {
+      printStackTraces(showStackTraces, error);
+    }
 
     process.exit(1);
   }

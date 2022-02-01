@@ -1,7 +1,12 @@
 import { applyErrorMessageTemplate } from "@algo-builder/web";
 
 import { AnyMap } from "../types";
-import { ErrorDescriptor, getRuntimeErrorCode } from "./errors-list";
+import { ErrorDescriptor } from "./errors-list";
+
+export const RUNTIME_ERROR_PREFIX = "RUNTIME_ERR";
+function getRuntimeErrorCode (error: ErrorDescriptor): string {
+  return `${RUNTIME_ERROR_PREFIX}${error.number}`;
+}
 
 export class RuntimeError extends Error {
   public static isRuntimeError(other: any): other is RuntimeError { // eslint-disable-line

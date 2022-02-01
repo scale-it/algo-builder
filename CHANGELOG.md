@@ -4,13 +4,44 @@
 
 ### Improvements
 
-- Support rekeying in `@algo-builder/runtime`
+- Added following functions in `deployer` API
+  * `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
+  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object.
+- Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
+- Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially updated template params, now we fail with an exception.
 
 ### Bug Fixes
 
-- `Runtime` env is enforcing address use in ItxnField already `exist`. However, those addresses used in `acfg` or create asset transactions the addresses use for config may not exist. We fixed it in this [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
+- Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
+- Add missing opcode `bitlen` and `app_params_get`.
 
-- Fixbug can't get LogicSigAccount `deployer.getDelegatedLsig`
+## v3.1.0 2022-01-25
+
+In this release we migrated to yarn v3. It speed up package management a lot.
+We use node-modules node linker, because this is required
+`npm` or `yarn v1` still works, but to have the best experience with `algob`,
+you should install and use yarn v3:
+
+```
+yarn set version stable
+yarn install
+```
+
+### Improvements
+
+- Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
+- Added integration to `tealer` tool into pipenv.
+- updated sample-project (the one after `algob init`)
+- migrate to use yarn v3
+- updated dependencies to the latest version (notably: algosdk, typescirpt, eslint, mocha)
+
+### Bug Fixes
+
+- `Runtime` wrongly required that an address used in `acfg` ItxnField refers to an existing account. However, addresses used in `acfg` or create asset transactions may refer to a not existing account. [PR](https://github.com/scale-it/algo-builder/pull/550). Reported by @patrick
+- Can't get LogicSigAccount from `deployer.getDelegatedLsig`.
+- `uncover` opcode push/pop wrong order.
+- example/nft: fixed script (related to api breaking change).
+- problem with calculating gas when a program starts with label (#547)
 
 ## v3.0.0 2021-12-22
 

@@ -1,0 +1,6 @@
+{
+  "include": [
+    "../packages",
+    "../@types"
+  ]
+}

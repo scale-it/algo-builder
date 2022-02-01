@@ -4,7 +4,7 @@ import { Interpreter } from "../interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Args, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, AppParamsGet, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
@@ -197,7 +197,7 @@ opCodeMap[4] = {
   shl: Shl,
   shr: Shr,
   sqrt: Sqrt,
-
+  bitlen: BitLen,
   // Knowable creatable asset
   gaid: Gaid,
   gaids: Gaids
@@ -238,7 +238,12 @@ opCodeMap[5] = {
   gtxnas: Gtxnas,
   gtxnsas: Gtxnsas,
   args: Args,
-  log: Log
+  log: Log,
+  app_params_get: AppParamsGet
+};
+
+opCodeMap[6] = {
+  ...opCodeMap[5]
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -250,7 +255,7 @@ const interpreterReqList = new Set([
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
   "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
-  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log"
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'app_params_get'
 ]);
 
 /**
