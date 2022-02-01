@@ -2,10 +2,10 @@ from pyteal import *
 
 def approval_program():
     """
-    A stateful app to test inner transactions (asset transfer + asset clawback)
+    A stateful app to test inner transactions (payment with rekey account to contract)
     """
 
-    transfer_asa = Seq([
+    transfer_algo = Seq([
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(
             {
@@ -40,7 +40,7 @@ def approval_program():
             ),
             Return(Int(1))
         ],
-        [Txn.application_args[0] == Bytes("transfer_algo"), transfer_asa],
+        [Txn.application_args[0] == Bytes("transfer_algo"), transfer_algo],
     )
 
     return program
