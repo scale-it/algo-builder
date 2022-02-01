@@ -73,7 +73,7 @@
     "@types/glob": "^7.1.2",
     "@types/mocha": "^9.0.0",
     "@types/murmurhash": "0.0.1",
-    "@types/node": "^17.0.8",
+    "@types/node": "^17.0.14",
     "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
     "@types/tmp": "^0.2.0",
