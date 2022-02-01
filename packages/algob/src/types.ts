@@ -653,24 +653,23 @@ export interface Deployer {
   loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
-   * Returns ASCCache (with compiled code)
-   * @name  Smart Contract filename (must be present in assets folder)
-   * @force  if force is true file will be compiled for sure, even if it's checkpoint exist
-   * @scTmplParams  scTmplParams: Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
+   * Alias to `this.compileASC`
+   * Deprecated: this function will be removed in the next release.
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 
   /**
-   * Returns program compiled info: bytecode (compiled program) and it's hash.
-   * @param name ASC name
-   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
    */
-  getCompiledASC: (name: string, scTmplParams?: SCParams) => Promise<ASCCache>
+  compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
 
   /**
-   * Returns cached program (in artifacts/cache) compiled info(bytecode, hash, filename etc).
-   * @param name ASC file name
+   * Returns cached program (from artifacts/cache) `ASCCache` object by deployment name.
+   * @param name ASC name used during deployment
    */
   getDeployedASC: (name: string) => Promise<ASCCache | undefined>
 
