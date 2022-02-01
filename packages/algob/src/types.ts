@@ -668,7 +668,8 @@ export interface Deployer {
   compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by deployment name.
+   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
+   * TODO: beta support - this will change
    * @param name ASC name used during deployment
    */
   getDeployedASC: (name: string) => Promise<ASCCache | undefined>
