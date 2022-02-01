@@ -29,9 +29,7 @@ describe("Rekey to application", function () {
   let john: AccountStore;
 
   let runtime: Runtime;
-
   let appInfo: DeployedAppTxReceipt;
-
   let txnParams: types.ExecParams;
 
   function syncAccounts (): void {

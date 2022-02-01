@@ -204,12 +204,12 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
   interpreter: Interpreter, line: number): types.ExecParams {
   // signer is the contract
   const appID = interpreter.runtime.ctx.tx.apid ?? 0;
-  const applicationAccount = getApplicationAddress(appID);
+  const appAddress = getApplicationAddress(appID);
 
   // initial common fields
   const execParams: any = {
     sign: types.SignType.SecretKey,
-    fromAccount: { addr: applicationAccount, sk: Buffer.from([]) }, // signer is the contract
+    fromAccount: { addr: appAddress, sk: Buffer.from([]) }, // signer is the contract
     fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,
@@ -221,15 +221,15 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
     case 'pay': {
       execParams.type = types.TransactionType.TransferAlgo;
       execParams.toAccountAddr =
-        _getRuntimeAccountAddr(tx.rcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
+        _getRuntimeAccountAddr(tx.rcv, interpreter, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = tx.amt ?? 0n;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close as Buffer, interpreter, line);
+      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close, interpreter, line);
       break;
     }
     case 'afrz': {
       execParams.type = types.TransactionType.FreezeAsset;
       execParams.assetID = tx.faid;
-      execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd as Buffer, interpreter, line);
+      execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd, interpreter, line);
       execParams.freezeState = BigInt(tx.afrz ?? 0n) === 1n;
       break;
     }
@@ -237,17 +237,17 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       if (tx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
         execParams.type = types.TransactionType.RevokeAsset;
         execParams.recipient =
-          _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
+          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
         execParams.revocationTarget = _getRuntimeAccountAddr(tx.asnd, interpreter, line);
       } else { // asset transfer
         execParams.type = types.TransactionType.TransferAsset;
         execParams.toAccountAddr =
-          _getRuntimeAccountAddr(tx.arcv as Buffer, interpreter, line) ?? ZERO_ADDRESS_STR;
+          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
       }
       // set common fields (asset amount, index, closeRemTo)
       execParams.amount = tx.aamt ?? 0n;
       execParams.assetID = tx.xaid ?? 0;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose as Buffer, interpreter, line);
+      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose, interpreter, line);
       break;
     }
     case 'acfg': { // can be asset modification, destroy, or deployment(create)
