@@ -14,6 +14,7 @@
 
 - Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
 - Add missing opcode `bitlen` and `app_params_get`.
+- The sender is always application address. 
 
 ## v3.1.0 2022-01-25
 

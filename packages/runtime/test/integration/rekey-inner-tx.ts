@@ -20,6 +20,10 @@ function rekeyMessageError (spend: string, signer: string): string {
   return `Should have been authorized by ${spend} but was actually authorized by ${signer}`;
 }
 
+/**
+ * @TODO add test case rekey appl to account
+ * https://www.pivotaltracker.com/n/projects/2452320/stories/180976984
+ */
 describe("Rekey to application", function () {
   useFixture("inner-transaction");
 
