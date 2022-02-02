@@ -14,7 +14,7 @@
 
 - Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
 - Add missing opcode `bitlen` and `app_params_get`.
-- The sender is always application address. 
+- In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in  [#569](https://github.com/scale-it/algo-builder/pull/569).
 
 ## v3.1.0 2022-01-25
 

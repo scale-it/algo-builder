@@ -21,10 +21,10 @@ function rekeyMessageError (spend: string, signer: string): string {
 }
 
 /**
- * @TODO add test case rekey appl to account
+ * @TODO add test cases when rekey appl to account
  * https://www.pivotaltracker.com/n/projects/2452320/stories/180976984
  */
-describe("Rekey to application", function () {
+describe("Rekey transaction and inner transaction", function () {
   useFixture("inner-transaction");
 
   let master: AccountStore;
