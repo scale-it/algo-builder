@@ -32,7 +32,7 @@ export interface AlgoOperator {
     name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<rtypes.ASAInfo>
-  fundLsig: (name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+  fundLsig: (lsig: string | LogicSigAccount, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deployApp: (
     approvalProgram: string,
@@ -259,21 +259,23 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Sends Algos to ASC account (Contract Account)
-   * @param name     - ASC filename
+   * @param lsig     - Logic Signature account (lsig or filename)
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
-    name: string,
+    lsig: string | LogicSigAccount,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<LsigInfo> {
-    const lsig = await getLsig(name, this.algodClient, scTmplParams);
-    const contractAddress = lsig.address();
+    if (typeof lsig === "string") {
+      lsig = await getLsig(lsig, this.algodClient, scTmplParams);
+    }
 
+    const contractAddress = lsig.address();
     const params = await mkTxParams(this.algodClient, payFlags);
     let message = "Funding Contract: " + String(contractAddress);
     console.log(message);

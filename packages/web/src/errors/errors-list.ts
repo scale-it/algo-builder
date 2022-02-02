@@ -183,7 +183,13 @@ Please check algob output for more details.`
     message: `Exec params length is zero'.`,
     title: "Invalid parameter",
     description: `Empty list is not supported.`
-  }
+  },
+  LSIG_NOT_FOUND_IN_CP: {
+    number: 19,
+    message: `Logic signature(name = %lsigName%) not found in checkpoint`,
+    title: "Lsig not found",
+    description: "Lsig not found"
+  },
 };
 
 export const networkErrors = {
