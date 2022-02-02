@@ -478,6 +478,33 @@ describe("DeployerDeployMode", () => {
     await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
   });
 
+  it("Should crash on fundLsigByName if lsig is not present in checkpoint", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    await expectBuilderErrorAsync(
+      async () => await deployer.fundLsigByName("AwesomeLsig",
+        { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP,
+      "Logic signature(name = AwesomeLsig) not found in checkpoint"
+    );
+  });
+
+  it("Should not crash on fundLsigByName if lsig is present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "AlgoLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerCfg.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerCfg);
+    // passes
+    await deployer.fundLsigByName("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+  });
+
   it("Should return empty ASA map on no CP", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     assert.deepEqual(deployer.asa, new Map());

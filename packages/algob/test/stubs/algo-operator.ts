@@ -55,7 +55,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+    lsig: LogicSigAccount | string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
