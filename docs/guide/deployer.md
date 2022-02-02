@@ -177,4 +177,53 @@ You can use the deployer API to compile smart contracts (ASC) and get the contra
   const bytecode = info.compiled;
   ```
 
-  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name. 
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name.
+
+
+#### Checkpoint names
+
+Storing data in checkpoint against your own names can be very useful. For example, you don't need to pass smart contract template parameters every time while getting app info, or loading a logic signature. Currently, we support naming for apps (Algorand stateful application) and logic signatures.
+
+##### App Name
+
+You can pass `appName` in `deployer.deployApp` while deploying your application. The app metadata in checkpoint will be stored against "appName". Eg.
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+  'dao-app-approval.py',
+  'dao-app-clear.py',
+  {
+    sender: creator,
+    localInts: 9,
+    localBytes: 7,
+    globalInts: 4,
+    globalBytes: 2,
+    appArgs: appArgs
+  }, {}, {}, "DAO App"); // app name passed here
+
+  // now during querying, you only need this app name
+  const appInfo = deployer.getAppByName("DAO App");
+```
+
+#### Lsig Name
+
+Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsig` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
+```js
+const bob = deployer.accountsByName.get('bob');
+// store delegatedLsig
+await deployer.mkDelegatedLsig('file.py', bob, { ARG_DAO_APP: 1 }, "DLsig");
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsigByName("DLsig");
+```
+
+Similarly for contract lsig:
+```js
+// store contract lsig
+await deployer.mkContractLsig('file.py', { ARG_DAO_APP: 1 }, "CLsig");
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsigByName("CLsig");
+```
+
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogic`.
