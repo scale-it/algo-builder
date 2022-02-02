@@ -158,11 +158,20 @@ class DeployerBasicMode {
   }
 
   /**
-   * Loads a single signed delegated logic signature account from checkpoint
+   * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
+   * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    */
-  getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
+  getLsigByName (lsigName: string): LogicSigAccount | undefined {
+    return this.getDelegatedLsig(lsigName) ?? this.getContractLsig(lsigName);
+  }
+
+  /**
+   * Loads a single signed delegated logic signature account from checkpoint
+   * @param lsigFileName logic signature file name
+   */
+  getDelegatedLsig (lsigFileName: string): LogicSigAccount | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
-    const result = resultMap.get(lsigName)?.lsig;
+    const result = resultMap.get(lsigFileName)?.lsig;
     if (result === undefined) {
       return undefined;
     }
@@ -178,10 +187,10 @@ class DeployerBasicMode {
 
   /**
    * Loads a logic signature account from checkpoint
-   * @param lsigName logic signature name
+   * @param lsigFileName logic signature file name
    */
-  getContractLsig (lsigName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsig(lsigName);
+  getContractLsig (lsigFileName: string): LogicSigAccount | undefined {
+    return this.getDelegatedLsig(lsigFileName);
   }
 
   /**
@@ -199,6 +208,9 @@ class DeployerBasicMode {
    * passing template parameters always during loading logic signature.
    * @param name ASC name
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
+   * Deprecated: this function will be removed in the next release. Use mkContractLsig to
+   * store lsig info in checkpoint (against lsigName), and query it in scripts using
+   * getLsigByName
    */
   async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
     return await getLsigFromCache(name);
@@ -465,6 +477,20 @@ class DeployerBasicMode {
       this._assertCpNotDeleted(execParams);
     }
   }
+
+  /**
+   * Checks if checkpoint for lsig exists (against lsig name)
+   * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   */
+  assertLsigExistsInCP (lsigName: string): LogicSigAccount {
+    const lsig = this.getLsigByName(lsigName);
+    if (lsig === undefined) {
+      throw new BuilderError(ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP, {
+        lsigName: lsigName
+      });
+    }
+    return lsig;
+  }
 }
 
 /**
@@ -603,19 +629,41 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
   /**
    * This function will send Algos to ASC account in "Contract Mode"
-   * @param name     - ASC filename
+   * @param fileName     - ASC filename
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
-    name: string,
+    fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
+      await this.algoOp.fundLsig(fileName, flags, payFlags, this.txWriter, scTmplParams);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  /**
+   * This function will send Algos to ASC account in "Contract Mode". Takes lsig name
+   * as input
+   * @param lsigName - name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async fundLsigByName (
+    lsigName: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams
+  ): Promise<void> {
+    try {
+      const lsig = this.assertLsigExistsInCP(lsigName);
+      await this.algoOp.fundLsig(lsig, flags, payFlags, this.txWriter);
     } catch (error) {
       console.log(error);
       throw error;
@@ -630,16 +678,19 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    *     (used only when compiling PyTEAL to TEAL)
    * @param signer: Signer Account which will sign the smart
    * contract(optional in case of contract account)
+   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
    */
   async _mkLsig (
-    name: string,
+    fileName: string,
     scTmplParams?: SCParams,
-    signer?: rtypes.Account
+    signer?: rtypes.Account,
+    lsigName?: string
   ): Promise<LsigInfo> {
-    this.assertNoAsset(name);
+    const cpLsigName = lsigName ?? fileName;
+    this.assertNoAsset(cpLsigName);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
+      const lsig = await getLsig(fileName, this.algoOp.algodClient, scTmplParams);
       if (signer) {
         lsig.sign(signer.sk);
         lsigInfo = {
@@ -660,7 +711,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       console.log(error);
       throw error;
     }
-    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+    this.cpData.registerLsig(this.networkName, cpLsigName, lsigInfo);
     return lsigInfo;
   }
 
@@ -672,22 +723,29 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param signer: Signer Account which will sign the smart contract
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
+   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
    */
   async mkDelegatedLsig (
-    name: string,
+    fileName: string,
     signer: rtypes.Account,
-    scTmplParams?: SCParams
+    scTmplParams?: SCParams,
+    lsigName?: string
   ): Promise<LsigInfo> {
-    return await this._mkLsig(name, scTmplParams, signer);
+    return await this._mkLsig(fileName, scTmplParams, signer, lsigName);
   }
 
   /**
    * Stores logic signature info in checkpoint for contract mode
-   * @param name ASC name
+   * @param fileName ASC file name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
    */
-  async mkContractLsig (name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
-    return await this._mkLsig(name, scTmplParams);
+  async mkContractLsig (
+    fileName: string,
+    scTmplParams?: SCParams,
+    lsigName?: string
+  ): Promise<LsigInfo> {
+    return await this._mkLsig(fileName, scTmplParams, undefined, lsigName);
   }
 
   /**
@@ -854,13 +912,23 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   async fundLsig (
-    _name: string,
+    _fileName: string,
     _flags: FundASCFlags,
     _payFlags: wtypes.TxParams,
     _scInitParams?: unknown
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
+    });
+  }
+
+  async fundLsigByName (
+    _lsigName: string,
+    _flags: FundASCFlags,
+    _payFlags: wtypes.TxParams,
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "fundLsigByName"
     });
   }
 

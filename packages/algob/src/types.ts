@@ -499,16 +499,29 @@ export interface Deployer {
 
   /**
    * Funds logic signature account (Contract Account).
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @fileName  Stateless Smart Contract filename (must be present in assets folder)
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   fundLsig: (
-    name: string,
+    fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
+  ) => void
+
+  /**
+   * This function will send Algos to ASC account in "Contract Mode".
+   * Takes lsig name as input
+   * @param lsigName - name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   */
+  fundLsigByName: (
+    lsigName: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams
   ) => void
 
   /**
@@ -639,6 +652,12 @@ export interface Deployer {
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
   getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+
+  /**
+   * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
+   * @param lsigName name of the lsig (passed during mkContractLsig/mkDelegatedLsig)
+   */
+  getLsigByName: (lsigName: string) => LogicSigAccount | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
