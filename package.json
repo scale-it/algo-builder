@@ -1,6 +1,7 @@
 {
   "name": "algo-builder",
   "description": "Framework to automate development of Algorand Assets and Smart Contracts.",
+  "homepage": "https://algobuilder.dev",
   "repository": "https://github.com/scale-it/algo-builder.git",
   "packageManager": "yarn@3.1.1",
   "license": "Apache-2.0",

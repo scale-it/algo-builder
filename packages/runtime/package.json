@@ -2,6 +2,7 @@
   "name": "@algo-builder/runtime",
   "version": "3.2.0",
   "license": "Apache-2.0",
+  "homepage": "https://algobuilder.dev",
   "repository": "https://github.com/scale-it/algo-builder.git",
   "description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
   "keywords": [
