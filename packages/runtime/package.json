@@ -1,20 +1,6 @@
 {
   "name": "@algo-builder/runtime",
-  "version": "3.1.0",
-  "contributors": [
-    {
-      "name": "Robert Zaremba",
-      "url": "https://github.com/robert-zaremba"
-    },
-    {
-      "name": "Amit Yadav",
-      "url": "https://github.com/amityadav0"
-    },
-    {
-      "name": "Ratik Jindal",
-      "url": "https://github.com/ratik21"
-    }
-  ],
+  "version": "3.2.0",
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algo-builder.git",
   "description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
