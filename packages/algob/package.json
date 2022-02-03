@@ -94,7 +94,7 @@
   "dependencies": {
     "@algo-builder/runtime": "workspace:*",
     "@algo-builder/web": "workspace:*",
-    "algosdk": "^1.13.0",
+    "algosdk": "^1.13.1",
     "chalk": "^4.0.0",
     "debug": "^4.3.3",
     "deep-equal": "^2.0.5",

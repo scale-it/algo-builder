@@ -25,6 +25,9 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 - Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 - Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially updated template params, now we fail with an exception.
 
+Dependencies:
+- Updated `algosdk` to `v1.13.1`
+
 ### Bug Fixes
 
 - Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
