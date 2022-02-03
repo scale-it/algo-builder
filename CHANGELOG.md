@@ -1,8 +1,23 @@
+<!--
+Guidelines:
++ provide short description which is easy to understand both to project managers and developers,
++ be very precise about breaking changes,
++ mark deprecated API,
++ provide link to documentation wheneve needed,
++ if relevant, you can also provide a link to a pull request.
+
+Organize change log in the following section (in that order):
+Features, Bug Fixes, Breaking Changes, Deprecated
+-->
+
+
 # CHANGELOG
 
 ## Unreleased
 
-### Improvements
+## v3.2.0 2022-02-03
+
+### Features
 
 - Added following functions in `deployer` API
   * `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
@@ -28,7 +43,7 @@ yarn set version stable
 yarn install
 ```
 
-### Improvements
+### Features
 
 - Beta support for rekeying transactions in `@algo-builder/runtime` / testing.
 - Added integration to `tealer` tool into pipenv.
@@ -46,7 +61,7 @@ yarn install
 
 ## v3.0.0 2021-12-22
 
-### Improvements
+### Features
 
 - TEALv5 support in `@algo-builder/runtime` [AVM 1.0](https://developer.algorand.org/articles/discover-avm-10/):
   - Cover, Uncover opcodes
@@ -125,7 +140,7 @@ yarn install
 
 ## v2.1.0 2021-10-22
 
-### Improvements
+### Features
 
 - Upgrade indexer version
 - TEALv5 support (part1) in `@algo-builder/runtime`:
@@ -152,7 +167,7 @@ yarn install
 
 ## v2.0.0 2021-09-30
 
-### Improvements
+### Features
 
 - Added shared space between contracts
 - Added tealv4 opcodes (`gload` and `gloads`)
@@ -211,7 +226,7 @@ yarn install
 
 ## v1.2.0 2021-08-09
 
-### Improvements
+### Features
 
 - Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Re export `mkTransaction`, `errors` in algob and runtime from `@algo-builder/web` for backward compatibility.
 - Added `algob init --typescript` flag to initialize a typescript project. Usage: `algob init <location> --typescript`.
@@ -289,7 +304,7 @@ Tutorials:
 
 ## v1.1.1 2021-07-12
 
-### Improvements
+### Features
 
 - updated `algob test` command to run mocha in typescript project as well.
 
@@ -299,7 +314,7 @@ Tutorials:
 
 ## v1.1.1 2021-07-12
 
-### Improvements
+### Features
 
 - Updated `algob test` command to run mocha in typescript project as well.
 
@@ -327,7 +342,7 @@ Highlights:
 * For External support of parameters user should replace TMPL\_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
 * Rename `appId` to `appID` in all places. (previously some of SSC params were taking `appId` and other were taking `appID`, this was inconsistent)
 
-### Improvements
+### Features
 
 - Replaced dependency `find-up` with `findup-sync` in `algob`.
 - Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
@@ -350,7 +365,7 @@ _ Asset creator should not be able to close it's holding to another account.
 
 ## v1.0.2 2021-05-18
 
-### Improvements
+### Features
 
 - Update how error is displayed to a user
 - Add Update stateful smart contracts using execute transaction in runtime
@@ -385,7 +400,7 @@ New website: https://scale-it.github.io/algo-builder
     await executeTransaction(deployer, txnParams);
     ```
 
-### Improvements
+### Features
 
 - Added more tests for the [crowdfunding example project](/examples/crowdfunding) using `@algo-builder/runtime`- Happy paths and Failing paths.
 - Integrated user documentation with `jekyll`.
