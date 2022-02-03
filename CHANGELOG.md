@@ -34,6 +34,12 @@ Dependencies:
 - Add missing opcode `bitlen` and `app_params_get`.
 - In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in  [#569](https://github.com/scale-it/algo-builder/pull/569).
 
+### Notes
+
+We continue to use yarn v3. Please share your feedback about it. Hope this improved your workflow.
+
+**Full Changelog**: https://github.com/scale-it/algo-builder/compare/v3.1.0...v3.2.0
+
 ## v3.1.0 2022-01-25
 
 In this release we migrated to yarn v3. It speed up package management a lot.
