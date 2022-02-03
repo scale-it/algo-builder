@@ -1,4 +1,4 @@
-# @algo-builder/web
+# [Algo Builder Web](https://algobuilder.dev/)
 
 `@algo-builder/web` package allows you to interact with contracts easily. It is designed to be used with web dapps as well as scripts and user programs.
 
@@ -14,9 +14,9 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 ## Important links
 
-- [Home Page](https://scale-it.github.io/algo-builder)
-- [Web API Docs](https://scale-it.github.io/algo-builder/api/web/index.html)
-- [User Docs](https://scale-it.github.io/algo-builder/guide/README)
+- [Home Page](https://algobuilder.dev/)
+- [Web API Docs](https://algobuilder.dev/api/web/index.html)
+- [User Docs](https://algobuilder.dev/guide/README)
 
 ## Using Web
 
