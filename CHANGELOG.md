@@ -6,7 +6,10 @@
 
 - Added following functions in `deployer` API
   * `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object.
+  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object from app/lsig name.
+  * `getLsigByName`: returns lsig info stored in checkpoint by name
+  * `fundLsigByName`: funds logic signature by name.
+- Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig by name.
 - Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 - Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially updated template params, now we fail with an exception.
 
