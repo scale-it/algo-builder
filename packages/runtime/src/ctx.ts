@@ -306,7 +306,10 @@ export class Ctx implements Context {
         txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
         timestamp: Math.round(+new Date() / 1000),
-        deleted: false
+        deleted: false,
+        // we don't have access to bytecode in runtime
+        approvalFile: approvalProgram,
+        clearFile: clearProgram
       }
     );
 

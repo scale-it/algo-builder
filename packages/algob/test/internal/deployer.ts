@@ -163,7 +163,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -182,7 +184,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -203,7 +207,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
@@ -215,7 +221,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
@@ -242,7 +250,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -261,7 +271,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -282,7 +294,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(
@@ -295,7 +309,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
@@ -420,7 +436,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       })
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
