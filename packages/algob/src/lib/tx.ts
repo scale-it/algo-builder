@@ -294,13 +294,14 @@ export async function executeTransaction (
     ? transactions as wtypes.ExecParams[]
     : transactions as wtypes.ExecParams;
 
+  const execParams = Array.isArray(transactions) ? transactions : [transactions];
   deployer.assertCPNotDeleted(transactions);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
     const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
-    if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
+    if (deployer.isDeployMode) { await registerCheckpoints(deployer, execParams, txns, txIdxMap); }
     return confirmedTx;
   } catch (error) {
     if (deployer.isDeployMode) { deployer.persistCP(); }
