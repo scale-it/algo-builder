@@ -12,7 +12,7 @@ const baseBalance = 20e9;
 // default fee
 const fee = 1000;
 
-// defaunt amount use for transfer
+// default amount use for transfer
 const amount = 1000n;
 
 function rekeyMessageError (spend: string, signer: string): string {

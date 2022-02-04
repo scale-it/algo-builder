@@ -4,26 +4,25 @@ The Algo Builder project is composed from the following packages:
 
 - `algob`: framework to automate development of Algorand Assets and Smart Contracts.
 - `types/algosdk`: TypeScript typings for algosdk-js.
-- `runtime`: light algorand runtime and TEAL interpreter.
+- `runtime`: light Algorand runtime and TEAL interpreter.
 
 ## Objectives
 
-Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
+Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and salable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
 
 - REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 - integrated testing framework,
 - helpful boilerplates allowing developers to focus on use-cases rather than code organization, examples
-- algorand private net
+- Algorand private net
 - templates/examples and guides to easily onboard developers
 
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
 ## Documentation
 
-- [Landing Page](https://scale-it.github.io/algo-builder)
-- [User Guide](https://scale-it.github.io/algo-builder/guide/README)
-- [API docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
-- [Runtime API docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
+- [Home Page](https://algobuilder.dev/)
+- [User Docs](https://algobuilder.dev/guide/README)
+- [GitHub](https://github.com/scale-it/algo-builder)
 
 ### Templates
 
