@@ -343,6 +343,7 @@ export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
   lsig: LogicSigAccount
+  file?: string
 }
 
 /**
@@ -687,11 +688,10 @@ export interface Deployer {
   compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
+   * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+   * @param name App/Lsig name used during deployment
    */
-  getDeployedASC: (name: string) => Promise<ASCCache | undefined>
+  getDeployedASC: (name: string) => Promise<ASCCache | AppCache | undefined>
 
   /**
    * Checks if checkpoint is deleted for a particular transaction
@@ -712,6 +712,11 @@ export interface ASCCache {
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
   base64ToBytes: Uint8Array // compiled base64 in bytes
+}
+
+export interface AppCache {
+  approval: ASCCache | undefined
+  clear: ASCCache | undefined
 }
 
 export interface PyASCCache extends ASCCache {
