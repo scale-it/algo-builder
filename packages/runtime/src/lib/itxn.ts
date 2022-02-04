@@ -72,6 +72,10 @@ export function setInnerTxField (
     const accountState = interpreter.getAccount(assertedVal, line);
     txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
   }
+  // begin supported RekeyTo form teal version 6
+  if (field === 'RekeyTo' && interpreter.tealVersion >= 6) {
+    txValue = op.assertAlgorandAddress(val, line);
+  }
 
   // if address use for acfg we only check address is valid
   if (acfgAddrTxnFields.has(field)) {
@@ -198,6 +202,11 @@ const _getASAConfigAddr = (addr?: Uint8Array): string => {
   return "";
 };
 
+const _getAddress = (addr?: Uint8Array): string | undefined => {
+  if (addr) { return encodeAddress(addr); }
+  return undefined;
+};
+
 // parse encoded txn obj to execParams (params passed by user in algob)
 /* eslint-disable sonarjs/cognitive-complexity */
 export function parseEncodedTxnToExecParams (tx: EncTx,
@@ -224,6 +233,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
         _getRuntimeAccountAddr(tx.rcv, interpreter, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = tx.amt ?? 0n;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close, interpreter, line);
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'afrz': {
@@ -231,6 +241,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.assetID = tx.faid;
       execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd, interpreter, line);
       execParams.freezeState = BigInt(tx.afrz ?? 0n) === 1n;
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'axfer': {
@@ -248,6 +259,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.amount = tx.aamt ?? 0n;
       execParams.assetID = tx.xaid ?? 0;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose, interpreter, line);
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'acfg': { // can be asset modification, destroy, or deployment(create)
@@ -282,6 +294,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
           freeze: _getASAConfigAddr(tx.apar?.f)
         };
       }
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     default: {
