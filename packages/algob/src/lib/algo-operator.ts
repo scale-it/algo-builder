@@ -1,6 +1,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, mkTxParams, tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
+import { clearLine } from "readline";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -289,7 +290,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const signedTxn = t.signTxn(flags.funder.sk);
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
-    message = message.concat("\nLsig: " + name);
+    message = message.concat("\nLsig: " + lsig.address());
     txWriter.push(message, confirmedTxn);
     return {
       creator: flags.funder.addr,
@@ -363,7 +364,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       appID: Number(appId),
       applicationAccount: getApplicationAddress(Number(appId)),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: approvalProgram,
+      clearFile: clearProgram
     };
   }
 
@@ -433,7 +436,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       appID: appID,
       applicationAccount: getApplicationAddress(appID),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: newApprovalProgram,
+      clearFile: newClearProgram
     };
   }
 

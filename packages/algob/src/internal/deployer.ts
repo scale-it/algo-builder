@@ -15,6 +15,7 @@ import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
+  AppCache,
   ASCCache,
   CheckpointFunctions,
   CheckpointRepo,
@@ -240,13 +241,31 @@ class DeployerBasicMode {
   }
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
+   * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+   * @param name App/Lsig name used during deployment
    */
-  getDeployedASC (name: string): Promise<ASCCache | undefined> {
+  async getDeployedASC (name: string): Promise<ASCCache | AppCache | undefined> {
     const op = new CompileOp(this.algoOp.algodClient);
-    return op.readArtifact(name);
+
+    // app
+    const app = this.getAppByName(name);
+    if (app !== undefined) {
+      const approvalCache = await op.readArtifact(app.approvalFile);
+      const clearCache = await op.readArtifact(app.clearFile);
+      return {
+        approval: approvalCache,
+        clear: clearCache
+      }
+    }
+
+    // lsig
+    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
+    const lsigInfo = resultMap.get(name);
+    if (lsigInfo && lsigInfo.file) {
+      return op.readArtifact(lsigInfo.file);
+    }
+
+    return undefined;
   }
 
   /**
@@ -696,13 +715,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         lsigInfo = {
           creator: signer.addr,
           contractAddress: lsig.address(),
-          lsig: lsig
+          lsig: lsig,
+          file: fileName
         };
       } else {
         lsigInfo = {
           creator: lsig.address(),
           contractAddress: lsig.address(),
-          lsig: lsig
+          lsig: lsig,
+          file: fileName
         };
       }
     } catch (error) {
@@ -711,6 +732,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       console.log(error);
       throw error;
     }
+
     this.cpData.registerLsig(this.networkName, cpLsigName, lsigInfo);
     return lsigInfo;
   }
