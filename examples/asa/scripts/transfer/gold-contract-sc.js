@@ -17,7 +17,7 @@ async function run (runtimeEnv, deployer) {
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account
-  const lsig = await deployer.getLsigByName("Gold_C_Lsig");
+  const lsig = await deployer.getLsigByName('Gold_C_Lsig');
   const senderAddress = lsig.address();
 
   const algoTxParam = {

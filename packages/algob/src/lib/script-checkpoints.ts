@@ -28,7 +28,7 @@ export function toCheckpointFileName (scriptName: string): string {
 }
 
 export function toScriptFileName (filename: string): string {
-  filename = filename.replace(artifactsPath + path.sep, '');
+  filename = filename.replace(artifactsPath + String(path.sep), '');
   filename = filename.slice(0, -(checkpointFileSuffix.length));
   return filename;
 }
@@ -257,8 +257,8 @@ export async function registerCheckpoints (
             confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
             deleted: false,
-            approvalFile:  (execParams[idx] as any).approvalProgram,
-            clearFile: (execParams[idx] as any).clearProgram,
+            approvalFile: (execParams[idx] as any).approvalProgram,
+            clearFile: (execParams[idx] as any).clearProgram
           };
           const val = deployer.checkpoint.getAppfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {

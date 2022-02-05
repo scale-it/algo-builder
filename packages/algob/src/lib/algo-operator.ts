@@ -1,7 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, mkTxParams, tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
-import { clearLine } from "readline";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -129,7 +128,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    const assets = accountInfo.assets as modelsv2.AssetHolding[];
+    const assets = accountInfo.assets;
     return BigInt(accountInfo.amount) - BigInt((assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 

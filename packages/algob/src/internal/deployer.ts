@@ -255,14 +255,14 @@ class DeployerBasicMode {
       return {
         approval: approvalCache,
         clear: clearCache
-      }
+      };
     }
 
     // lsig
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
     const lsigInfo = resultMap.get(name);
-    if (lsigInfo && lsigInfo.file) {
-      return op.readArtifact(lsigInfo.file);
+    if (lsigInfo?.file) {
+      return await op.readArtifact(lsigInfo.file);
     }
 
     return undefined;
@@ -947,7 +947,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   async fundLsigByName (
     _lsigName: string,
     _flags: FundASCFlags,
-    _payFlags: wtypes.TxParams,
+    _payFlags: wtypes.TxParams
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsigByName"
