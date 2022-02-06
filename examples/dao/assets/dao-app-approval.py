@@ -19,6 +19,13 @@ def approval_program(ARG_GOV_TOKEN):
         clear_proposal          clears proposal record and returns back the deposit
     """
 
+    # check no rekeying, close remainder to, asset close to for a txn
+    def basic_checks(txn: Txn): return And(
+        txn.rekey_to() == Global.zero_address(),
+        txn.close_remainder_to() == Global.zero_address(),
+        txn.asset_close_to() == Global.zero_address()
+    )
+
     # Verfies deposit of gov_token to an address for a transaction. Args:
     # * tx_index (index of deposit transaction)
     # * receiver (receiver of gov_token)
@@ -281,7 +288,11 @@ def approval_program(ARG_GOV_TOKEN):
     # * foreignAssets: [gov_token_id]
     withdraw_vote_deposit = Seq([
         Assert(
-            Global.latest_timestamp() > App.localGet(Txn.sender(), Bytes("deposit_lock")),
+            And(
+                Global.group_size() == Int(1),
+                basic_checks(Txn),
+                Global.latest_timestamp() > App.localGet(Txn.sender(), Bytes("deposit_lock")),
+            )
         ),
         # Withdraw vote tokens from app account to user
         InnerTxnBuilder.Begin(),
@@ -428,7 +439,13 @@ def approval_program(ARG_GOV_TOKEN):
         compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
         proposal_id,
         # assert that there is a recorded proposal
-        Assert(proposal_id.hasValue() == Int(1)),
+        Assert(
+            And(
+                proposal_id.hasValue() == Int(1),
+                Global.group_size() == Int(1),
+                basic_checks(Txn)
+            )
+        ),
         Assert(
             And(
                 # Assert amount of withdrawal is proposal.deposit & receiver is sender
