@@ -89,7 +89,7 @@ class Context {
     const fundAppParameters = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: this.master,
+      fromAccount: this.master.account,
       toAccountAddr: getApplicationAddress(this.daoAppID),
       amountMicroAlgos: minBalance + 2e6,
       payFlags: { totalFee: 1000 }
@@ -196,7 +196,7 @@ class Context {
     this.syncAccounts();
   }
 
-  depositVoteToken (voterAcc, depositLsig, amount) {
+  depositVoteToken (voterAcc, amount) {
     const senderDeposit = voterAcc.getLocalState(this.daoAppID, 'deposit') ?? 0n;
     voterAcc.setLocalState(this.daoAppID, 'deposit', senderDeposit + BigInt(amount));
     this.syncAccounts();

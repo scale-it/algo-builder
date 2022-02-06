@@ -2,7 +2,7 @@ const { AccountStore } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const { Context, initialBalance, minSupport, deposit } = require('./common');
-const { ProposalType, Vote } = require('../scripts/run/common/common');
+const { ProposalType, Vote, DAOActions } = require('../scripts/run/common/common');
 const { mkProposalTx, mkDepositVoteTokenTx, votingStart, votingEnd, executeBefore, mkWithdrawVoteDepositTx, mkClearVoteRecordTx, mkClearProposalTx } = require('../scripts/run/common/tx-params');
 
 const now = Math.round(new Date().getTime() / 1000);
@@ -14,7 +14,7 @@ const APP_NOT_FOUND = 'RUNTIME_ERR1306: Application Index 9 not found or is inva
 
 describe('DAO - Failing Paths', function () {
   let master, creator, proposer, voterA, voterB;
-  let depositAcc, daoFundLsigAcc, proposalLsigAcc;
+  let daoFundLsigAcc, proposalLsigAcc;
   let ctx;
 
   function setUpCtx () {
@@ -23,34 +23,38 @@ describe('DAO - Failing Paths', function () {
     proposer = new AccountStore(initialBalance);
     voterA = new AccountStore(initialBalance);
     voterB = new AccountStore(initialBalance);
-    depositAcc = new AccountStore(initialBalance); // runtime.account of depositLsig.address()
     daoFundLsigAcc = new AccountStore(initialBalance);
     proposalLsigAcc = new AccountStore(initialBalance);
 
     ctx = new Context(
       master, creator, proposer, voterA, voterB,
-      depositAcc, daoFundLsigAcc, proposalLsigAcc
+      daoFundLsigAcc, proposalLsigAcc
     );
   }
 
   describe('SetUp', function () {
     this.beforeAll(setUpCtx);
 
-    it('should reject set_deposit in DAO if sender !== creator', () => {
-      // add deposit_lsig address to DAO
-      const addAccountsTx = {
+    it('should reject optin_gov_token in DAO if asa ID or fees is incorrect', () => {
+      const optInToGovASAParam = {
         type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
-        fromAccount: ctx.voterA.account,
+        fromAccount: ctx.creator.account,
         appID: ctx.daoAppID,
-        payFlags: {},
-        appArgs: [
-          'str:add_deposit_accounts',
-          `addr:${ctx.depositLsig.address()}`
-        ]
+        payFlags: { totalFee: 2000 },
+        foreignAssets: [ctx.govTokenID],
+        appArgs: ['str:optin_gov_token']
       };
 
-      assert.throws(() => ctx.executeTx(addAccountsTx), RUNTIME_ERR1009);
+      // asaID invalid
+      assert.throws(() => ctx.executeTx({
+        ...optInToGovASAParam, foreignAssets: [88]
+      }), RUNTIME_ERR1009);
+
+      // fees invalid (contract should not pay)
+      assert.throws(() => ctx.executeTx({
+        ...optInToGovASAParam, payFlags: { totalFee: 1000 }
+      }), 'Fee required 2000 is greater than fee collected 1000');
     });
   });
 
@@ -78,7 +82,6 @@ describe('DAO - Failing Paths', function () {
         ctx.daoAppID,
         ctx.govTokenID,
         ctx.proposer.account,
-        ctx.depositLsig,
         ctx.proposalLsig,
         ctx.daoFundLsig
       );
@@ -162,16 +165,16 @@ describe('DAO - Failing Paths', function () {
       ctx.addProposal();
     });
 
-    const _depositVoteToken = (from, lsig, amount) => {
+    const _depositVoteToken = (from, amount) => {
       const depositVoteTx = mkDepositVoteTokenTx(
-        ctx.daoAppID, ctx.govTokenID, from, lsig, amount
+        ctx.daoAppID, ctx.govTokenID, from, amount
       );
       ctx.executeTx(depositVoteTx);
     };
 
     it('should fail if voterAccount is not optedIn to DAO App', () => {
       assert.throws(
-        () => _depositVoteToken(ctx.voterA.account, ctx.depositLsig, 6),
+        () => _depositVoteToken(ctx.voterA.account, 6),
         APP_NOT_FOUND
       );
     });
@@ -185,7 +188,6 @@ describe('DAO - Failing Paths', function () {
         ctx.daoAppID,
         ctx.govTokenID,
         ctx.voterA.account,
-        ctx.depositLsig,
         6
       );
       assert.throws(
@@ -194,9 +196,15 @@ describe('DAO - Failing Paths', function () {
       );
     });
 
-    it('should fail if receiver is not depositLsig', () => {
+    it('should fail if receiver is not depositAcc', () => {
+      const txP = mkDepositVoteTokenTx(
+        ctx.daoAppID, ctx.govTokenID, ctx.voterA.account, 6
+      );
       assert.throws(
-        () => _depositVoteToken(ctx.voterA.account, ctx.daoFundLsig, 6),
+        () => ctx.executeTx([
+          { ...txP[0] },
+          { ...txP[1], toAccountAddr: ctx.daoFundLsig.address() }
+        ]),
         RUNTIME_ERR1009
       );
     });
@@ -224,7 +232,7 @@ describe('DAO - Failing Paths', function () {
         () =>
           ctx.executeTx({
             ...registerVoteParam,
-            accounts: [ctx.depositLsig.address()] // different address passed
+            accounts: [ctx.depositAcc.address] // different address passed
           }),
         RUNTIME_ERR1009
       );
@@ -240,13 +248,13 @@ describe('DAO - Failing Paths', function () {
 
     it('should fail if a user votes again for the same proposal (double voting)', () => {
       // user deposits gov tokens for voting (OK)
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 6);
+      ctx.depositVoteToken(ctx.voterA, 6);
 
       // user votes (OK)
       ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterA.account });
 
       // user deposits again (OK)
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, 4);
+      ctx.depositVoteToken(ctx.voterA, 4);
 
       // user tries to vote again after depositing more tokens (FAIL)
       assert.throws(
@@ -260,7 +268,7 @@ describe('DAO - Failing Paths', function () {
       ctx.runtime.setRoundAndTimestamp(10, now + 30);
 
       // deposit votes by voterB
-      ctx.depositVoteToken(ctx.voterB, ctx.depositLsig, 8);
+      ctx.depositVoteToken(ctx.voterB, 8);
 
       assert.throws(
         () => ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterB.account }),
@@ -342,7 +350,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject execution if proposal.yes < min_support', () => {
       // register votes by A (< min_support)
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport - 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport - 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       assert.throws(
@@ -353,11 +361,11 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject execution if proposal.yes > min_support, but vote.no > vote.yes', () => {
       // register 2 more votes by A (> min_support)
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       // register votes by voterB (where NO votes > YES votes by voterA)
-      ctx.depositVoteToken(ctx.voterB, ctx.depositLsig, minSupport + 5);
+      ctx.depositVoteToken(ctx.voterB, minSupport + 5);
       ctx.vote(ctx.voterB, Vote.NO, ctx.proposalLsigAcc);
 
       assert.throws(
@@ -368,7 +376,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject execution if proposal already executed', () => {
       // register yes votes
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       // set executed == true
@@ -382,7 +390,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject execution if 2nd transaction not included', () => {
       // register yes votes
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       assert.throws(
@@ -393,7 +401,7 @@ describe('DAO - Failing Paths', function () {
 
     it('should reject execution if 2nd transaction is not per proposal instructions', () => {
       // register yes votes
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       // amount is wrong
@@ -443,11 +451,11 @@ describe('DAO - Failing Paths', function () {
       ctx.addProposal();
 
       // deposit & register yes votes (by A)
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
 
       // deposit & register yes votes (by B)
-      ctx.depositVoteToken(ctx.voterB, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterB, minSupport + 1);
       ctx.vote(ctx.voterB, Vote.YES, ctx.proposalLsigAcc);
 
       // execute proposal
@@ -457,7 +465,7 @@ describe('DAO - Failing Paths', function () {
     let withdrawVoteDepositTx;
     this.beforeEach(() => {
       withdrawVoteDepositTx = mkWithdrawVoteDepositTx(
-        ctx.daoAppID, ctx.govTokenID, ctx.voterA.account, ctx.depositLsig, 5
+        ctx.daoAppID, ctx.govTokenID, ctx.voterA.account, 5
       );
 
       // set current time after voting over
@@ -474,30 +482,29 @@ describe('DAO - Failing Paths', function () {
       );
     });
 
-    it('should reject withdrawal if fees is not paid by tx0', () => {
+    it('should reject withdrawal if total fees is not paid by sender', () => {
       assert.throws(
-        () => ctx.executeTx([
-          { ...withdrawVoteDepositTx[0] },
-          { ...withdrawVoteDepositTx[1], payFlags: { totalFee: 1000 } }
-        ]),
-        RUNTIME_ERR1009
+        () => ctx.executeTx(
+          { ...withdrawVoteDepositTx, payFlags: { totalFee: 1000 } }
+        ),
+        'Fee required 2000 is greater than fee collected 1000'
       );
     });
 
-    it('should reject withdrawal if 2nd transaction not included', () => {
+    it('should reject withdrawal if groupsize not valid', () => {
       assert.throws(
-        () => ctx.executeTx({ ...withdrawVoteDepositTx[0] }),
-        INDEX_OUT_OF_BOUND_ERR
+        () => ctx.executeTx([{ ...withdrawVoteDepositTx }, { ...withdrawVoteDepositTx }]),
+        RUNTIME_ERR1009
       );
     });
 
     it('should reject withdrawal trying to withdraw more than deposited', () => {
       const origDeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
       assert.throws(
-        () => ctx.executeTx([
-          { ...withdrawVoteDepositTx[0] },
-          { ...withdrawVoteDepositTx[1], amount: origDeposit + 5n }
-        ]),
+        () => ctx.executeTx({
+          ...withdrawVoteDepositTx,
+          appArgs: [DAOActions.withdrawVoteDeposit, `int:${origDeposit + 5n}`]
+        }),
         INTEGER_UNDERFLOW_ERR // -ve value handled by TEAL
       );
     });
@@ -506,37 +513,37 @@ describe('DAO - Failing Paths', function () {
       const origDeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
       // we use voterB for withdrawal here
       withdrawVoteDepositTx = mkWithdrawVoteDepositTx(
-        ctx.daoAppID, ctx.govTokenID, ctx.voterB.account, ctx.depositLsig, 5
+        ctx.daoAppID, ctx.govTokenID, ctx.voterB.account, 5
       );
 
       // withdraw 1 gov token
-      ctx.executeTx([
-        { ...withdrawVoteDepositTx[0] },
-        { ...withdrawVoteDepositTx[1], amount: 1n }
-      ]);
+      ctx.executeTx({
+        ...withdrawVoteDepositTx,
+        appArgs: [DAOActions.withdrawVoteDeposit, `int:${1n}`]
+      });
 
       // withdraw (origDeposit - 1) gov tokens (PASSES)
-      ctx.executeTx([
-        { ...withdrawVoteDepositTx[0] },
-        { ...withdrawVoteDepositTx[1], amount: origDeposit - 1n }
-      ]);
+      ctx.executeTx({
+        ...withdrawVoteDepositTx,
+        appArgs: [DAOActions.withdrawVoteDeposit, `int:${origDeposit - 1n}`]
+      });
     });
 
     it('should reject on overflow in partial withdrawals', () => {
       const origDeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
 
       // withdraw 1 gov token
-      ctx.executeTx([
-        { ...withdrawVoteDepositTx[0] },
-        { ...withdrawVoteDepositTx[1], amount: 2n }
-      ]);
+      ctx.executeTx({
+        ...withdrawVoteDepositTx,
+        appArgs: [DAOActions.withdrawVoteDeposit, `int:${2n}`]
+      });
 
       // trying to withdraw (origDeposit - 1) gov tokens (FAILS, as total amount exceeds origDeposit)
       assert.throws(
-        () => ctx.executeTx([
-          { ...withdrawVoteDepositTx[0] },
-          { ...withdrawVoteDepositTx[1], amount: origDeposit - 1n }
-        ]),
+        () => ctx.executeTx({
+          ...withdrawVoteDepositTx,
+          appArgs: [DAOActions.withdrawVoteDeposit, `int:${origDeposit - 1n}`]
+        }),
         INTEGER_UNDERFLOW_ERR // -ve value handled by TEAL
       );
     });
@@ -557,7 +564,7 @@ describe('DAO - Failing Paths', function () {
       ctx.addProposal();
 
       // deposit & register yes votes
-      ctx.depositVoteToken(ctx.voterA, ctx.depositLsig, minSupport + 1);
+      ctx.depositVoteToken(ctx.voterA, minSupport + 1);
       ctx.vote(ctx.voterA, Vote.YES, ctx.proposalLsigAcc);
     });
 
@@ -620,9 +627,7 @@ describe('DAO - Failing Paths', function () {
       clearProposalTx = mkClearProposalTx(
         ctx.daoAppID,
         ctx.govTokenID,
-        ctx.depositLsig,
-        ctx.proposalLsig,
-        deposit
+        ctx.proposalLsig
       );
     });
 
@@ -633,34 +638,21 @@ describe('DAO - Failing Paths', function () {
       );
     });
 
-    it('should reject clear_proposal if deposit amount is invalid', () => {
-      ctx.addProposal();
-
+    it('should reject clear_proposal if group size is invalid', () => {
       assert.throws(
         () => ctx.executeTx([
-          { ...clearProposalTx[0] },
-          { ...clearProposalTx[1], amount: deposit - 5 }
+          { ...clearProposalTx },
+          { ...clearProposalTx }
         ]),
         RUNTIME_ERR1009
       );
     });
 
-    it('should reject clear_proposal if sender of tx0 is not receiver of govTokens in tx1', () => {
+    it('should reject clear_proposal if fees not enough', () => {
       assert.throws(
-        () => ctx.executeTx([
-          { ...clearProposalTx[0] },
-          { ...clearProposalTx[1], toAccountAddr: ctx.daoFundLsig.address() }
-        ]),
-        RUNTIME_ERR1009
-      );
-    });
-
-    it('should reject clear_proposal if tx1(asset_transfer).fee !== 0', () => {
-      assert.throws(
-        () => ctx.executeTx([
-          { ...clearProposalTx[0] },
-          { ...clearProposalTx[1], payFlags: { totalFee: 1000 } }
-        ]),
+        () => ctx.executeTx(
+          { ...clearProposalTx, payFlags: { totalFee: 1000 } }
+        ),
         RUNTIME_ERR1009
       );
     });
