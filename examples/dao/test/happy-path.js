@@ -11,7 +11,7 @@ const {
 
 describe('DAO - Happy Paths', function () {
   let master, creator, proposer, voterA, voterB;
-  let depositLsigAcc, daoFundLsigAcc, proposalLsigAcc;
+  let depositAcc, daoFundLsigAcc, proposalLsigAcc;
   let ctx;
 
   function setUpCtx () {
@@ -20,13 +20,13 @@ describe('DAO - Happy Paths', function () {
     proposer = new AccountStore(initialBalance);
     voterA = new AccountStore(initialBalance);
     voterB = new AccountStore(initialBalance);
-    depositLsigAcc = new AccountStore(initialBalance); // runtime.account of depositLsig.address()
+    depositAcc = new AccountStore(initialBalance); // runtime.account of depositLsig.address()
     daoFundLsigAcc = new AccountStore(initialBalance);
     proposalLsigAcc = new AccountStore(initialBalance);
 
     ctx = new Context(
       master, creator, proposer, voterA, voterB,
-      depositLsigAcc, daoFundLsigAcc, proposalLsigAcc
+      depositAcc, daoFundLsigAcc, proposalLsigAcc
     );
   }
 
@@ -168,7 +168,7 @@ describe('DAO - Happy Paths', function () {
     };
 
     it('should accept token deposit', () => {
-      const beforeBal = ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount;
+      const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
 
       _depositVoteToken(ctx.voterA.account, ctx.depositLsig, 6);
 
@@ -176,11 +176,11 @@ describe('DAO - Happy Paths', function () {
       assert.deepEqual(ctx.voterA.getLocalState(ctx.daoAppID, 'deposit'), 6n);
 
       // verify deposit
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n);
+      assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n);
     });
 
     it('should accept multiple token deposit by same & different accounts', () => {
-      const beforeBal = ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount;
+      const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
       const initialADeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
 
       // deposit 6 votes by A
@@ -188,25 +188,25 @@ describe('DAO - Happy Paths', function () {
 
       // verify local state & deposit
       assert.deepEqual(ctx.voterA.getLocalState(ctx.daoAppID, 'deposit'), initialADeposit + 6n);
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n);
+      assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n);
 
       // deposit 4 votes by A again
       _depositVoteToken(ctx.voterA.account, ctx.depositLsig, 4);
 
       // verify local state & deposit
       assert.deepEqual(ctx.voterA.getLocalState(ctx.daoAppID, 'deposit'), initialADeposit + 6n + 4n);
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n + 4n);
+      assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n + 4n);
 
       // deposit 5 votes by B
       _depositVoteToken(ctx.voterB.account, ctx.depositLsig, 5);
 
       // verify local state & deposit
       assert.deepEqual(ctx.voterB.getLocalState(ctx.daoAppID, 'deposit'), 5n);
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n + 4n + 5n);
+      assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n + 4n + 5n);
     });
 
     it('should allow token deposit by any "from" account', () => {
-      const beforeBal = ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount;
+      const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
       const initialADeposit = ctx.voterA.getLocalState(ctx.daoAppID, 'deposit');
 
       const depositVoteTx = mkDepositVoteTokenTx(
@@ -221,7 +221,7 @@ describe('DAO - Happy Paths', function () {
 
       // verify local state & deposit
       assert.deepEqual(ctx.voterA.getLocalState(ctx.daoAppID, 'deposit'), initialADeposit + 5n);
-      assert.deepEqual(ctx.depositLsigAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 5n);
+      assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 5n);
     });
   });
 

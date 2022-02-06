@@ -14,7 +14,7 @@ const APP_NOT_FOUND = 'RUNTIME_ERR1306: Application Index 9 not found or is inva
 
 describe('DAO - Failing Paths', function () {
   let master, creator, proposer, voterA, voterB;
-  let depositLsigAcc, daoFundLsigAcc, proposalLsigAcc;
+  let depositAcc, daoFundLsigAcc, proposalLsigAcc;
   let ctx;
 
   function setUpCtx () {
@@ -23,13 +23,13 @@ describe('DAO - Failing Paths', function () {
     proposer = new AccountStore(initialBalance);
     voterA = new AccountStore(initialBalance);
     voterB = new AccountStore(initialBalance);
-    depositLsigAcc = new AccountStore(initialBalance); // runtime.account of depositLsig.address()
+    depositAcc = new AccountStore(initialBalance); // runtime.account of depositLsig.address()
     daoFundLsigAcc = new AccountStore(initialBalance);
     proposalLsigAcc = new AccountStore(initialBalance);
 
     ctx = new Context(
       master, creator, proposer, voterA, voterB,
-      depositLsigAcc, daoFundLsigAcc, proposalLsigAcc
+      depositAcc, daoFundLsigAcc, proposalLsigAcc
     );
   }
 
