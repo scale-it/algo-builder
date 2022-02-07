@@ -15,6 +15,11 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### Features
+
+- Used app account instead of `deposit_lsig` in `examples/dao`
+
+
 ## v3.2.0 2022-02-03
 
 ### Features
