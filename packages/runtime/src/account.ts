@@ -63,6 +63,12 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
+  /** Creates a new Algorand state account.
+   * @balance: initial Algo balance (in micro Algo)
+   * @account: algo-sdk Account type or string. If strirng is provided then it is used
+   *   as an account name.  If algo-sdk Account is not used than a random account is generated
+   *   (with an associated private key)
+   * */
   constructor (balance: number | bigint, account?: AccountSDK | string) {
     if (typeof account === 'string') {
       // create new account with name

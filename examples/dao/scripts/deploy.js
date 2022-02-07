@@ -1,7 +1,8 @@
 const { types } = require('@algo-builder/web');
 const { fundAccount, tryExecuteTx } = require('./run/common/common.js');
 
-const { accounts, getDepositLsig, getDAOFundLsig } = require('./run/common/accounts');
+const { accounts, getDAOFundLsig } = require('./run/common/accounts');
+const { getApplicationAddress } = require('algosdk');
 
 async function run (runtimeEnv, deployer) {
   const { creator, proposer, voterA, voterB } = accounts(deployer);
@@ -41,12 +42,33 @@ async function run (runtimeEnv, deployer) {
     }, {}, templateParam);
   console.log(daoAppInfo);
 
+  // Fund application account with some ALGO(5)
+  const fundAppParameters = {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: creator,
+    toAccountAddr: getApplicationAddress(daoAppInfo.appID),
+    amountMicroAlgos: 15e6,
+    payFlags: { totalFee: 1000 }
+  };
+
+  console.log(`Funding DAO App (ID = ${daoAppInfo.appID})`);
+  await tryExecuteTx(deployer, fundAppParameters);
+
+  // opt in deposit account (dao app account) to gov_token asa
+  const optInToGovASAParam = {
+    type: types.TransactionType.CallApp,
+    sign: types.SignType.SecretKey,
+    fromAccount: creator,
+    appID: daoAppInfo.appID,
+    payFlags: { totalFee: 2000 },
+    foreignAssets: [govToken.assetIndex],
+    appArgs: ['str:optin_gov_token']
+  };
+  await tryExecuteTx(deployer, optInToGovASAParam);
+
   // fund lsig's
   await Promise.all([
-    deployer.fundLsig('deposit-lsig.py',
-      { funder: creator, fundingMicroAlgo: 1e6 }, {}, // 1 algo
-      { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
-
     deployer.fundLsig('dao-fund-lsig.py',
       { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
       { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
@@ -56,25 +78,9 @@ async function run (runtimeEnv, deployer) {
       { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID })
   ]);
 
-  console.log('* Adding vote_deposit_lsig to DAO *');
-  const depositLsig = await getDepositLsig(deployer);
-  const daoFundLsig = await getDAOFundLsig(deployer);
-  const addAccountsTx = {
-    type: types.TransactionType.CallApp,
-    sign: types.SignType.SecretKey,
-    fromAccount: creator,
-    appID: daoAppInfo.appID,
-    payFlags: {},
-    appArgs: [
-      'str:add_deposit_accounts',
-      `addr:${depositLsig.address()}`
-    ]
-  };
-  await tryExecuteTx(deployer, addAccountsTx);
-
   console.log('* ASA distribution (Gov tokens) *');
+  const daoFundLsig = await getDAOFundLsig(deployer);
   await Promise.all([
-    deployer.optInLsigToASA(govToken.assetIndex, depositLsig, { totalFee: 1000 }),
     deployer.optInLsigToASA(govToken.assetIndex, daoFundLsig, { totalFee: 1000 }),
     deployer.optInAccountToASA(govToken.assetIndex, proposer.name, {}),
     deployer.optInAccountToASA(govToken.assetIndex, voterA.name, {}),
