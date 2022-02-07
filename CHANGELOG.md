@@ -15,6 +15,10 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### Features
+
+- Enable transfer ALGO to implicit account. Added method `Runtime.updateAccountSecretKey` to update account `sk` of implicit account. 
+
 ## v3.2.0 2022-02-03
 
 ### Features

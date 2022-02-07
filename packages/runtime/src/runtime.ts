@@ -767,7 +767,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
+      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -840,6 +840,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
+    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
   }
 }
