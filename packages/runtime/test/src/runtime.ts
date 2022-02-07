@@ -1,5 +1,6 @@
 import { types } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
+import { AccountAddress, AlgoTransferParam } from "@algo-builder/web/build/types";
+import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -7,12 +8,68 @@ import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
+import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
 const minBalance = BigInt(1e7);
+
+describe("Transfer algo to implicit account", function () {
+  const amount = minBalance;
+  let runtime: Runtime;
+  let alice: AccountStoreI;
+  let externalRuntimeAccount: AccountStoreI;
+  let externalAccount: algosdk.Account;
+  this.beforeEach(function () {
+    alice = new AccountStore(minBalance * 10n);
+    externalAccount = new AccountStore(0).account;
+
+    runtime = new Runtime([alice]);
+
+    const transferAlgoTx: AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: externalAccount.addr,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: 1000
+      }
+    };
+
+    runtime.executeTx(transferAlgoTx);
+    // update sk for account
+    runtime.updateAccountSecretKey(externalAccount.addr, externalAccount.sk);
+
+    // query new external account in runtime.
+    externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
+  });
+
+  it("Sk should updated", () => {
+    assert.deepEqual(externalRuntimeAccount.account.sk, externalAccount.sk);
+  });
+
+  it("Balance of toAccountAddr should updated", () => {
+    assert.equal(externalRuntimeAccount.amount, amount);
+  });
+
+  it("Can create transaction from external account", () => {
+    const transferAlgoTx: AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: externalRuntimeAccount.account,
+      toAccountAddr: alice.address,
+      amountMicroAlgos: 1000n,
+      payFlags: {
+        totalFee: 1000
+      }
+    };
+
+    assert.doesNotThrow(() => runtime.executeTx(transferAlgoTx));
+  });
+});
 
 describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
@@ -279,13 +336,13 @@ describe("Algorand Standard Assets", function () {
 
     const johnAssetHolding = john.getAssetHolding(assetId);
     assert.isDefined(johnAssetHolding);
-    assert.equal(johnAssetHolding?.amount as bigint, 5912599999515n);
+    assert.equal(johnAssetHolding?.amount, 5912599999515n);
 
     // opt-in for alice
     runtime.optIntoASA(assetId, alice.address, {});
     const aliceAssetHolding = alice.getAssetHolding(assetId);
     assert.isDefined(aliceAssetHolding);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
   });
 
   it("should opt-in to asset using asset transfer transaction", () => {
@@ -307,7 +364,7 @@ describe("Algorand Standard Assets", function () {
     syncAccounts();
 
     const aliceAssetHolding = alice.getAssetHolding(assetId);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
     // verfiy min balance is also raised
     assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
   });
@@ -338,8 +395,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -395,8 +452,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
