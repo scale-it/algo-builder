@@ -1,5 +1,6 @@
 import { types } from "@algo-builder/web";
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
+import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -11,34 +12,77 @@ import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
 // requires their type as number
-const numberTxnFields = new Set([
-  'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
-  'ConfigAssetDefaultFrozen'
-]);
+const numberTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
+    'ConfigAssetDefaultFrozen'
+  ])
+};
+numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 
-const uintTxnFields = new Set([
-  'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
-]);
+const uintTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
+  ])
+};
+uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
-const assetIDFields = new Set([
-  'XferAsset', 'FreezeAsset', 'ConfigAsset'
-]);
+const assetIDFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'XferAsset', 'FreezeAsset', 'ConfigAsset'
+  ])
+};
 
-const byteTxnFields = new Set([
-  'Type', 'ConfigAssetName', 'ConfigAssetUnitName',
-  'ConfigAssetMetadataHash', 'ConfigAssetURL'
-]);
+assetIDFields[6] = cloneDeep(assetIDFields[5]);
 
-const acfgAddrTxnFields = new Set([
-  'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
-]);
+const byteTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Type', 'ConfigAssetName', 'ConfigAssetUnitName',
+    'ConfigAssetMetadataHash', 'ConfigAssetURL'
+  ])
+};
 
-const otherAddrTxnFields = new Set([
-  'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
-  'AssetReceiver', 'FreezeAssetAccount'
-]);
+byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+
+const acfgAddrTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+  ])
+};
+acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
+
+const otherAddrTxnFields: {[key: number]: Set<string>} = {
+  5: new Set([
+    'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
+    'AssetReceiver', 'FreezeAssetAccount'
+  ])
+};
+
+otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
+// add new inner transaction fields support in teal v6.
+['RekeyTo'].forEach((field) => otherAddrTxnFields[6].add(field));
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -49,36 +93,34 @@ export function setInnerTxField (
   subTxn: EncTx, field: string, val: StackElem,
   op: Op, interpreter: Interpreter, line: number): EncTx {
   let txValue: bigint | number | string | Uint8Array | undefined;
-  if (uintTxnFields.has(field)) {
+  const tealVersion = interpreter.tealVersion;
+
+  if (uintTxnFields[tealVersion].has(field)) {
     txValue = op.assertBigInt(val, line);
   }
 
-  if (numberTxnFields.has(field)) {
+  if (numberTxnFields[tealVersion].has(field)) {
     txValue = Number(op.assertBigInt(val, line));
   }
 
-  if (assetIDFields.has(field)) {
+  if (assetIDFields[tealVersion].has(field)) {
     const id = op.assertBigInt(val, line);
     txValue = interpreter.getAssetIDByReference(Number(id), false, line, op);
   }
 
-  if (byteTxnFields.has(field)) {
+  if (byteTxnFields[tealVersion].has(field)) {
     const assertedVal = op.assertBytes(val, line);
     txValue = convertToString(assertedVal);
   }
 
-  if (otherAddrTxnFields.has(field)) {
+  if (otherAddrTxnFields[tealVersion].has(field)) {
     const assertedVal = op.assertBytes(val, line);
     const accountState = interpreter.getAccount(assertedVal, line);
     txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
   }
-  // begin supported RekeyTo form teal version 6
-  if (field === 'RekeyTo' && interpreter.tealVersion >= 6) {
-    txValue = op.assertAlgorandAddress(val, line);
-  }
 
   // if address use for acfg we only check address is valid
-  if (acfgAddrTxnFields.has(field)) {
+  if (acfgAddrTxnFields[tealVersion].has(field)) {
     txValue = op.assertAlgorandAddress(val, line);
   }
 

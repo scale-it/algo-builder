@@ -19,6 +19,7 @@ describe("Algorand Smart Contracts(TEALv6) - Inner Transactions[Rekey applicatio
   let appCreationFlags: AppDeploymentFlags;
   let appID: number;
   let appCallParams: types.ExecParams;
+
   this.beforeAll(function () {
     runtime = new Runtime([master]); // setup test
     approvalProgramFileName = 'approval-rekey.teal';
