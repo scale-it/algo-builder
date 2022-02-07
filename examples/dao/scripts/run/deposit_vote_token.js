@@ -1,11 +1,10 @@
 const { tryExecuteTx } = require('./common/common.js');
-const { accounts, getDepositLsig } = require('./common/accounts.js');
+const { accounts } = require('./common/accounts.js');
 const { mkDepositVoteTokenTx } = require('./common/tx-params.js');
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
   const govToken = deployer.asa.get('gov-token');
-  const depositLsig = await getDepositLsig(deployer);
 
   // opt-in to App by voterAcc
   try {
@@ -19,7 +18,6 @@ async function depositVote (deployer, voterAcc, amt) {
     daoAppInfo.appID,
     govToken.assetIndex,
     voterAcc,
-    depositLsig,
     amt
   );
 
