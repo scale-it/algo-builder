@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
@@ -141,46 +142,63 @@ describe("Re-keying transactions", function () {
       );
     });
 
-    describe("Rekey an already rekeyed account", function () {
-      this.beforeEach(() => {
-        txParams = {
-          type: types.TransactionType.TransferAlgo,
-          sign: types.SignType.SecretKey,
-          fromAccount: bob.account,
-          fromAccountAddr: alice.address,
-          toAccountAddr: bob.address,
-          amountMicroAlgos: amount,
-          payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
-        };
+    it("Can rekey account again", () => {
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: bob.account,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: amount,
+        payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
+      };
 
-        runtime.executeTx(txParams);
-        syncAccounts();
-      });
-
-      it("Check spend key", function () {
-        assert.equal(alice.getSpendAddress(), lsigAccount.address);
-      });
+      runtime.executeTx(txParams);
+      syncAccounts();
+      // check spend address
+      assert.equal(alice.getSpendAddress(), lsigAccount.address);
     });
 
-    describe("Rekey again back to orginal account", function () {
-      this.beforeEach(() => {
-        txParams = {
-          type: types.TransactionType.TransferAlgo,
-          sign: types.SignType.SecretKey,
-          fromAccount: bob.account,
-          fromAccountAddr: alice.address,
-          toAccountAddr: bob.address,
-          amountMicroAlgos: amount,
-          payFlags: { totalFee: fee, rekeyTo: alice.address }
-        };
+    it("Can Rekey again back to orginal account", () => {
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: bob.account,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: amount,
+        payFlags: { totalFee: fee, rekeyTo: alice.address }
+      };
 
-        runtime.executeTx(txParams);
-        syncAccounts();
-      });
+      runtime.executeTx(txParams);
+      syncAccounts();
+      // check spend address
+      assert.equal(alice.getSpendAddress(), alice.address);
+    });
 
-      it("Check spend key", function () {
-        assert.equal(alice.getSpendAddress(), alice.address);
-      });
+    it("close account should remove spend/auth address", () => {
+      const aliceBalanceBefore = alice.balance();
+      const bobBalanceBefore = bob.balance();
+
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: bob.account,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: bob.address
+        }
+      };
+      runtime.executeTx(txParams);
+      syncAccounts();
+
+      // check account state after clsoe
+      assert.equal(alice.balance(), 0n);
+      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(fee));
+      assert.equal(alice.getSpendAddress(), alice.address);
     });
   });
 
@@ -268,6 +286,33 @@ describe("Re-keying transactions", function () {
         rekeyMessageError(alice.getSpendAddress(), john.address)
       );
     });
+
+    it("close account should remove spend/auth address", () => {
+      const aliceBalanceBefore = alice.balance();
+      const bobBalanceBefore = bob.balance();
+
+      // close alice account to bob
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: alice.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0n,
+        lsig: lsig,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: bob.address
+        }
+      };
+
+      runtime.executeTx(txParams);
+      syncAccounts();
+
+      // check account state after close
+      assert.equal(alice.balance(), 0n);
+      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(fee));
+      assert.equal(alice.getSpendAddress(), alice.address);
+    });
   });
 
   describe("Lsig to Lsig", function () {
@@ -336,6 +381,33 @@ describe("Re-keying transactions", function () {
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(lsigAccount.getSpendAddress(), lsigAccount.address)
       );
+    });
+
+    it("close account should remove spend/auth address", () => {
+      const lsigAccountBalanceBefore = lsigAccount.balance();
+      const aliceBalanceBefore = alice.balance();
+
+      // close lsig account to alice
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: lsigAccount.address,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0n,
+        lsig: cloneLsig,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: alice.address
+        }
+      };
+
+      runtime.executeTx(txParams);
+      syncAccounts();
+
+      // check account state after close
+      assert.equal(lsigAccount.balance(), 0n);
+      assert.equal(alice.balance(), lsigAccountBalanceBefore + aliceBalanceBefore - BigInt(fee));
+      assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
     });
   });
 
@@ -408,6 +480,33 @@ describe("Re-keying transactions", function () {
       );
 
       assert.equal(lsigAccount.getSpendAddress(), bob.address);
+    });
+
+    it("close account should remove auth/spend address", () => {
+      // balance before rekey
+      const lsigBalanceBefore = lsigAccount.balance();
+      const aliceBalanceBefore = alice.balance();
+      // transfer ALGO use lsig
+      txParams = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: bob.account,
+        fromAccountAddr: lsigAccount.address,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 0n,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: alice.address
+        }
+      };
+
+      runtime.executeTx(txParams);
+
+      // check account state after close
+      syncAccounts();
+      assert.equal(lsigAccount.balance(), 0n);
+      assert.equal(alice.balance(), lsigBalanceBefore + aliceBalanceBefore - BigInt(fee));
+      assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
     });
   });
 
