@@ -388,8 +388,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -445,8 +445,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
