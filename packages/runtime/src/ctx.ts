@@ -156,6 +156,7 @@ export class Ctx implements Context {
     this.assertAccBalAboveMin(fromAccount.address);
 
     if (txParam.payFlags.closeRemainderTo) {
+      this.verifyCloseRemainderTo(txParam);
       const closeRemToAcc = this.getAccount(txParam.payFlags.closeRemainderTo);
 
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
@@ -375,12 +376,23 @@ export class Ctx implements Context {
   }
 
   /**
+  * Verify closeRemainderTo field is different with fromAccountAddr
+  * @param txParam transaction param
+  */
+  verifyCloseRemainderTo (txParam: types.ExecParams): void {
+    if (!txParam.payFlags.closeRemainderTo) return;
+    if (txParam.payFlags.closeRemainderTo === webTx.getFromAddress(txParam)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO);
+    }
+  }
+
+  /**
    * Deduct transaction fee from sender account.
    * @param sender Sender address
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee: bigint = BigInt(this.gtxs[index].fee as number);
+    let fee: bigint = BigInt(this.gtxs[index].fee);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
       fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
@@ -413,6 +425,8 @@ export class Ctx implements Context {
     toAssetHolding.amount += BigInt(txParam.amount);
 
     if (txParam.payFlags.closeRemainderTo) {
+      this.verifyCloseRemainderTo(txParam);
+
       const closeToAddr = txParam.payFlags.closeRemainderTo;
       if (fromAccountAddr === fromAssetHolding.creator) {
         throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR);
@@ -749,7 +763,11 @@ export class Ctx implements Context {
           break;
         }
       }
-
+      // if closeRemainderTo field occur in txParam
+      // we will change rekeyTo field to webTx.getFromAddress(txParam)
+      if (txParam.payFlags.closeRemainderTo) {
+        txParam.payFlags.rekeyTo = webTx.getFromAddress(txParam);
+      }
       // apply rekey after pass all logic
       this.rekeyTo(txParam);
 
