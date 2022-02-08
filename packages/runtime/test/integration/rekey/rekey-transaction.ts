@@ -48,6 +48,7 @@ describe("Re-keying transactions", function () {
     cloneLsigAccount = runtime.getAccount(cloneLsig.address());
   }
 
+  // create transfe algo transaction from lsig
   function mkTxAlgoTransferFromLsig (
     runtime: Runtime,
     lsig: LogicSigAccount,
@@ -70,6 +71,7 @@ describe("Re-keying transactions", function () {
     syncAccounts();
   }
 
+  // create algo transfer transaction from normal account(use secret key)
   function mkTxAlgoTransferFromAccount (
     runtime: Runtime,
     signer: AccountStoreI,
@@ -91,6 +93,7 @@ describe("Re-keying transactions", function () {
     syncAccounts();
   };
 
+  // rekey normal account
   function rekeyFromAccount (
     runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, to: AccountStoreI
   ): void {
@@ -103,6 +106,7 @@ describe("Re-keying transactions", function () {
     );
   }
 
+  // rekey lsig account
   function rekeyFromLsig (
     runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, to: AccountStoreI
   ): void {
@@ -115,6 +119,7 @@ describe("Re-keying transactions", function () {
     );
   }
 
+  // close Account when auth/spend is account
   function closeWithAccount (
     runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, closeTo: AccountStoreI
   ): void {
@@ -127,6 +132,7 @@ describe("Re-keying transactions", function () {
     );
   }
 
+  // close Account when auth/spend is lsig
   function closeWithLsig (
     runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, closeTo: AccountStoreI
   ): void {
@@ -139,6 +145,7 @@ describe("Re-keying transactions", function () {
     );
   }
 
+  // verify transfer algo when auth/spend address is normal account
   function verifyTransferAlgoAuthByAccount (
     runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, to: AccountStoreI, algoAmount: bigint
   ): void {
@@ -162,6 +169,7 @@ describe("Re-keying transactions", function () {
     assert.equal(toAccountBalanceBefore + algoAmount, toAccountBalanceAfter);
   }
 
+  // verify transfer algo when auth/spend address is lsig
   function verifyTransferAlgoAuthByLsig (
     runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, to: AccountStoreI, amount: bigint
   ): void {
@@ -183,6 +191,46 @@ describe("Re-keying transactions", function () {
     // transaction fee paid by `from account` not `signer`
     assert.equal(fromAccountBalanceBefore, fromAccountBalanceAfter + amount + BigInt(FEE));
     assert.equal(toAccountBalanceBefore + amount, toAccountBalanceAfter);
+  }
+
+  // verify close account when auth/spend address is normal account
+  function verifyCloseByAccount (
+    runtime: Runtime,
+    signer: AccountStoreI,
+    from: AccountStoreI,
+    closeTo: AccountStoreI
+  ): void {
+    const fromBalanceBefore = from.balance();
+    const closeToBalanceBefore = closeTo.balance();
+
+    closeWithAccount(runtime, signer, from, closeTo);
+    // sync account
+    from = runtime.getAccount(from.address);
+    closeTo = runtime.getAccount(closeTo.address);
+    // check account state after clsoe
+    assert.equal(from.balance(), 0n);
+    assert.equal(closeTo.balance(), fromBalanceBefore + closeToBalanceBefore - BigInt(FEE));
+    assert.equal(from.getSpendAddress(), from.address);
+  }
+
+  // verify close account when auth/spend address is lsig
+  function verifyCloseByLsig (
+    runtime: Runtime,
+    lsig: LogicSigAccount,
+    from: AccountStoreI,
+    closeTo: AccountStoreI
+  ): void {
+    const fromBalanceBefore = from.balance();
+    const closeToBalanceBefore = closeTo.balance();
+
+    closeWithLsig(runtime, lsig, from, closeTo);
+    // sync account
+    from = runtime.getAccount(from.address);
+    closeTo = runtime.getAccount(closeTo.address);
+    // check account state after clsoe
+    assert.equal(from.balance(), 0n);
+    assert.equal(closeTo.balance(), fromBalanceBefore + closeToBalanceBefore - BigInt(FEE));
+    assert.equal(from.getSpendAddress(), from.address);
   }
 
   this.beforeEach(() => {
@@ -248,14 +296,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove spend/auth address", () => {
-      const aliceBalanceBefore = alice.balance();
-      const bobBalanceBefore = bob.balance();
-
-      closeWithAccount(runtime, bob, alice, bob);
-      // check account state after clsoe
-      assert.equal(alice.balance(), 0n);
-      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(FEE));
-      assert.equal(alice.getSpendAddress(), alice.address);
+      verifyCloseByAccount(runtime, bob, alice, bob);
     });
   });
 
@@ -291,16 +332,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove spend/auth address", () => {
-      const aliceBalanceBefore = alice.balance();
-      const bobBalanceBefore = bob.balance();
-
-      // close alice account to bob
-      closeWithLsig(runtime, lsig, alice, bob);
-
-      // check account state after close
-      assert.equal(alice.balance(), 0n);
-      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(FEE));
-      assert.equal(alice.getSpendAddress(), alice.address);
+      verifyCloseByLsig(runtime, lsig, alice, bob);
     });
   });
 
@@ -327,15 +359,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove spend/auth address", () => {
-      const lsigAccountBalanceBefore = lsigAccount.balance();
-      const aliceBalanceBefore = alice.balance();
-
-      // close lsig account to alice
-      closeWithLsig(runtime, cloneLsig, lsigAccount, alice);
-      // check account state after close
-      assert.equal(lsigAccount.balance(), 0n);
-      assert.equal(alice.balance(), lsigAccountBalanceBefore + aliceBalanceBefore - BigInt(FEE));
-      assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
+      verifyCloseByLsig(runtime, cloneLsig, lsigAccount, alice);
     });
   });
 
@@ -367,16 +391,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove auth/spend address", () => {
-      // balance before close
-      const lsigBalanceBefore = lsigAccount.balance();
-      const aliceBalanceBefore = alice.balance();
-
-      closeWithAccount(runtime, bob, lsigAccount, alice);
-      // check account state after close
-      syncAccounts();
-      assert.equal(lsigAccount.balance(), 0n);
-      assert.equal(alice.balance(), lsigBalanceBefore + aliceBalanceBefore - BigInt(FEE));
-      assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
+      verifyCloseByAccount(runtime, bob, lsigAccount, alice);
     });
   });
 
