@@ -40,15 +40,8 @@ describe("Transfer algo to implicit account", function () {
     };
 
     runtime.executeTx(transferAlgoTx);
-    // update sk for account
-    runtime.updateAccountSecretKey(externalAccount.addr, externalAccount.sk);
-
     // query new external account in runtime.
     externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
-  });
-
-  it("Sk should updated", () => {
-    assert.deepEqual(externalRuntimeAccount.account.sk, externalAccount.sk);
   });
 
   it("Balance of toAccountAddr should updated", () => {
@@ -395,8 +388,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -452,8 +445,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 

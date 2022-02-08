@@ -380,7 +380,7 @@ export class Ctx implements Context {
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee: bigint = BigInt(this.gtxs[index].fee as number);
+    let fee: bigint = BigInt(this.gtxs[index].fee);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
       fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
@@ -615,8 +615,8 @@ export class Ctx implements Context {
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txParam.type) {
         case types.TransactionType.TransferAlgo: {
-          // if to account not exist in runtime env
-          // then we will create it
+          // if toAccountAddre doesn't exist in runtime env
+          // then we will add it to runtime env.
           if (this.state.accounts.get(txParam.toAccountAddr) === undefined) {
             this.state.accounts.set(
               txParam.toAccountAddr,

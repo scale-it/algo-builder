@@ -203,17 +203,6 @@ export class Runtime {
   }
 
   /**
-   * Update sk for account.
-   * @param address account address
-   * @param sk secret key of account
-   */
-  updateAccountSecretKey (address: string, sk: Uint8Array): void {
-    const account = this.getAccount(address);
-    account.account.sk = sk;
-    this.store.accounts.set(address, account);
-  }
-
-  /**
    * Fetches global state value for key present in creator's global state
    * for given appID, returns undefined otherwise
    * @param appID: current application id
@@ -767,7 +756,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -840,6 +829,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
   }
 }
