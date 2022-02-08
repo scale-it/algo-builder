@@ -7,11 +7,6 @@ const _appInitParams = (deployer) => {
   };
 };
 
-// returns deposit_lsig
-async function getDepositLsig (deployer) {
-  return await deployer.loadLogic('deposit-lsig.py', _appInitParams(deployer));
-};
-
 // returns vote_deposit lsig
 async function getDAOFundLsig (deployer) {
   return await deployer.loadLogic('dao-fund-lsig.py', _appInitParams(deployer));
@@ -39,7 +34,6 @@ function accounts (deployer) {
 };
 
 module.exports = {
-  getDepositLsig,
   getDAOFundLsig,
   getProposalLsig,
   accounts

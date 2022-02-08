@@ -16,11 +16,18 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 ## Unreleased
 
 ### Features
+
+- Used app account instead of `deposit_lsig` in `examples/dao`
+- Support RekeyTo field in the inner transaction for TEAL v6.
 - Added following functions in `deployer` API
   * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
   * `getLsigByName`: returns lsig info stored in checkpoint by name
   * `fundLsigByName`: funds logic signature by name.
 - Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
+
+### Infrastructure
+
+-  Support for run command `setup-master-account` and `sandbox-setup-master-account` more than one time.
 
 ## v3.2.0 2022-02-03
 
