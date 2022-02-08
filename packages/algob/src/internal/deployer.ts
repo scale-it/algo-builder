@@ -498,7 +498,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Checks if checkpoint for lsig exists (against lsig name)
+   * Asserts that there is a checkpoint with given lsig name.
    * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    */
   assertLsigExistsInCP (lsigName: string): LogicSigAccount {

@@ -177,7 +177,7 @@ You can use the deployer API to compile smart contracts (ASC) and get the contra
   const bytecode = info.compiled;
   ```
 
-  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app/lsig name.
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app or lsig name.
   ```js
   // lsig
   const info = await deployer.getDeployedASC('MyApp');

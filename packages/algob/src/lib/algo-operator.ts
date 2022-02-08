@@ -259,7 +259,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Sends Algos to ASC account (Contract Account)
-   * @param lsig     - Logic Signature account (lsig or filename)
+   * @param lsig     - Logic Signature (LogicSigAccount or filename with smart contract code)
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
