@@ -21,18 +21,21 @@ describe("Transfer Algo Transaction", function () {
 
   let alice: AccountStoreI;
   let bob: AccountStoreI;
+  let alan: AccountStoreI;
 
   let runtime: Runtime;
 
   function syncAccounts (): void {
     alice = runtime.getAccount(alice.address);
     bob = runtime.getAccount(bob.address);
+    alan = runtime.getAccount(alan.address);
   }
 
   this.beforeEach(() => {
     alice = new AccountStore(minBalance);
     bob = new AccountStore(minBalance);
-    runtime = new Runtime([alice, bob]);
+    alan = new AccountStore(minBalance);
+    runtime = new Runtime([alice, bob, alan]);
   });
 
   it("Transfer ALGO from alice to bob", () => {
@@ -78,6 +81,32 @@ describe("Transfer Algo Transaction", function () {
     syncAccounts();
     assert.equal(alice.balance(), 0n);
     assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+  });
+
+  it("should ignore rekey when use with closeRemainderTo", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
+      payFlags: {
+        totalFee: fee,
+        closeRemainderTo: bob.address,
+        rekeyTo: alan.address
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+    // spend/auth address of alice not changed.
+    assert.equal(alice.getSpendAddress(), alice.address);
   });
 
   it("should throw error if closeRemainderTo is fromAccountAddr", () => {
