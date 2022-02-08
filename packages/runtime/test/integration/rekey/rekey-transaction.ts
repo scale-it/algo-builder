@@ -2,19 +2,21 @@
 import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
+import { Address } from "cluster";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
+import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 // default initial balance
 const baseBalance = 20e9;
 // default fee
-const fee = 1000;
+const FEE = 1000;
 
 // default amount use for transfer
-const amount = 1000n;
+const DEFAULT_AMOUNT = 1000n;
 
 function rekeyMessageError (spend: string, signer: string): string {
   return `Should have been authorized by ${spend} but was actually authorized by ${signer}`;
@@ -23,12 +25,12 @@ function rekeyMessageError (spend: string, signer: string): string {
 describe("Re-keying transactions", function () {
   useFixture('basic-teal');
 
-  let master: AccountStore;
-  let alice: AccountStore;
-  let bob: AccountStore;
-  let john: AccountStore;
-  let lsigAccount: AccountStore;
-  let cloneLsigAccount: AccountStore;
+  let master: AccountStoreI;
+  let alice: AccountStoreI;
+  let bob: AccountStoreI;
+  let john: AccountStoreI;
+  let lsigAccount: AccountStoreI;
+  let cloneLsigAccount: AccountStoreI;
 
   let lsig: LogicSigAccount;
   let cloneLsig: LogicSigAccount;
@@ -44,6 +46,143 @@ describe("Re-keying transactions", function () {
     john = runtime.getAccount(john.address);
     lsigAccount = runtime.getAccount(lsig.address());
     cloneLsigAccount = runtime.getAccount(cloneLsig.address());
+  }
+
+  function mkTxAlgoTransferFromLsig (
+    runtime: Runtime,
+    lsig: LogicSigAccount,
+    from: AccountStoreI,
+    to: AccountStoreI,
+    amount: bigint | number,
+    payFlags: types.TxParams
+  ): void {
+    const txParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
+      lsig: lsig,
+      fromAccountAddr: from.address,
+      toAccountAddr: to.address,
+      amountMicroAlgos: amount,
+      payFlags: payFlags
+    };
+
+    runtime.executeTx(txParam);
+    syncAccounts();
+  }
+
+  function mkTxAlgoTransferFromAccount (
+    runtime: Runtime,
+    signer: AccountStoreI,
+    from: AccountStoreI,
+    to: AccountStoreI,
+    algoAmount: bigint,
+    payFlags: types.TxParams
+  ): void {
+    const txParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: signer.account,
+      fromAccountAddr: from.address,
+      toAccountAddr: to.address,
+      amountMicroAlgos: algoAmount,
+      payFlags: payFlags
+    };
+    runtime.executeTx(txParam);
+    syncAccounts();
+  };
+
+  function rekeyFromAccount (
+    runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, to: AccountStoreI
+  ): void {
+    mkTxAlgoTransferFromAccount(
+      runtime, signer, from, from, 0n,
+      {
+        totalFee: FEE,
+        rekeyTo: to.address
+      }
+    );
+  }
+
+  function rekeyFromLsig (
+    runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, to: AccountStoreI
+  ): void {
+    mkTxAlgoTransferFromLsig(
+      runtime, lsig, from, from, 0n,
+      {
+        totalFee: FEE,
+        rekeyTo: to.address
+      }
+    );
+  }
+
+  function closeWithAccount (
+    runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, closeTo: AccountStoreI
+  ): void {
+    mkTxAlgoTransferFromAccount(
+      runtime, signer, from, from, 0n,
+      {
+        totalFee: FEE,
+        closeRemainderTo: closeTo.address
+      }
+    );
+  }
+
+  function closeWithLsig (
+    runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, closeTo: AccountStoreI
+  ): void {
+    mkTxAlgoTransferFromLsig(
+      runtime, lsig, from, from, 0n,
+      {
+        totalFee: FEE,
+        closeRemainderTo: closeTo.address
+      }
+    );
+  }
+
+  function verifyTransferAlgoAuthByAccount (
+    runtime: Runtime, signer: AccountStoreI, from: AccountStoreI, to: AccountStoreI, algoAmount: bigint
+  ): void {
+    // balance before rekey
+    const fromAccountBalanceBefore = from.balance();
+    const toAccountBalanceBefore = to.balance();
+
+    // transfer ALGO by spend account
+    mkTxAlgoTransferFromAccount(
+      runtime, signer, from, to, algoAmount,
+      {
+        totalFee: FEE
+      }
+    );
+
+    const fromAccountBalanceAfter = runtime.getAccount(from.address).balance();
+    const toAccountBalanceAfter = runtime.getAccount(to.address).balance();
+
+    // transaction fee paid by `from account` not `signer`
+    assert.equal(fromAccountBalanceBefore, fromAccountBalanceAfter + algoAmount + BigInt(FEE));
+    assert.equal(toAccountBalanceBefore + algoAmount, toAccountBalanceAfter);
+  }
+
+  function verifyTransferAlgoAuthByLsig (
+    runtime: Runtime, lsig: LogicSigAccount, from: AccountStoreI, to: AccountStoreI, amount: bigint
+  ): void {
+    // balance before rekey
+    const fromAccountBalanceBefore = from.balance();
+    const toAccountBalanceBefore = to.balance();
+
+    // transfer ALGO by spend account
+    mkTxAlgoTransferFromLsig(
+      runtime, lsig, from, to, amount,
+      {
+        totalFee: FEE
+      }
+    );
+
+    const fromAccountBalanceAfter = runtime.getAccount(from.address).balance();
+    const toAccountBalanceAfter = runtime.getAccount(to.address).balance();
+
+    // transaction fee paid by `from account` not `signer`
+    assert.equal(fromAccountBalanceBefore, fromAccountBalanceAfter + amount + BigInt(FEE));
+    assert.equal(toAccountBalanceBefore + amount, toAccountBalanceAfter);
   }
 
   this.beforeEach(() => {
@@ -75,20 +214,7 @@ describe("Re-keying transactions", function () {
 
   describe("Account to account", function () {
     this.beforeEach(() => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: 0,
-        payFlags: {
-          totalFee: fee,
-          rekeyTo: bob.address
-        }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromAccount(runtime, alice, alice, bob);
     });
 
     it("Spend address of alice account should changed to bob account", function () {
@@ -97,81 +223,26 @@ describe("Re-keying transactions", function () {
     });
 
     it("Should transfer ALGO by spend account", function () {
-      syncAccounts();
       // balance before rekey
-      const aliceBalanceBefore = alice.balance();
-      const bobBalanceBefore = bob.balance();
-
-      // transfer ALGO by spend account
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee }
-      };
-
-      runtime.executeTx(txParams);
-
-      // check balance of alice and bob after transfer
-      syncAccounts();
-      const aliceBalanceAfter = alice.balance();
-      const bobBalanceAfter = bob.balance();
-
-      // transaction fee paid by `from account` not `signer`
-      assert.equal(aliceBalanceBefore, aliceBalanceAfter + amount + BigInt(fee));
-      assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
+      verifyTransferAlgoAuthByAccount(runtime, bob, alice, bob, DEFAULT_AMOUNT);
     });
 
     it("Should fail because signer account is invalid spend address", function () {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee }
-      };
-
       expectRuntimeError(
-        () => runtime.executeTx(txParams),
+        () => mkTxAlgoTransferFromAccount(runtime, alice, alice, bob, DEFAULT_AMOUNT, { totalFee: FEE }),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), alice.address)
       );
     });
 
     it("Can rekey account again", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromAccount(runtime, bob, alice, lsigAccount);
       // check spend address
       assert.equal(alice.getSpendAddress(), lsigAccount.address);
     });
 
     it("Can Rekey again back to orginal account", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee, rekeyTo: alice.address }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromAccount(runtime, bob, alice, alice);
       // check spend address
       assert.equal(alice.getSpendAddress(), alice.address);
     });
@@ -180,24 +251,10 @@ describe("Re-keying transactions", function () {
       const aliceBalanceBefore = alice.balance();
       const bobBalanceBefore = bob.balance();
 
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: 0,
-        payFlags: {
-          totalFee: fee,
-          closeRemainderTo: bob.address
-        }
-      };
-      runtime.executeTx(txParams);
-      syncAccounts();
-
+      closeWithAccount(runtime, bob, alice, bob);
       // check account state after clsoe
       assert.equal(alice.balance(), 0n);
-      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(fee));
+      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(FEE));
       assert.equal(alice.getSpendAddress(), alice.address);
     });
   });
@@ -205,17 +262,7 @@ describe("Re-keying transactions", function () {
   describe("Account to Lsig", function () {
     this.beforeEach(() => {
       // create rekey transaction
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: 0,
-        payFlags: { totalFee: fee, rekeyTo: lsigAccount.address }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromAccount(runtime, alice, alice, lsigAccount);
     });
 
     it("spend address of alice account should be lsig address", () => {
@@ -224,64 +271,20 @@ describe("Re-keying transactions", function () {
     });
 
     it("Transfer ALGO by valid spend account", () => {
-      // balance before rekey
-      const aliceBalanceBefore = alice.balance();
-      const bobBalanceBefore = bob.balance();
-
-      // transfer ALGO use lsig
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        lsig: lsig,
-        payFlags: { totalFee: fee }
-      };
-
-      runtime.executeTx(txParams);
-
-      // check balance of alice and bob after transfer
-      syncAccounts();
-      const aliceBalanceAfter = alice.balance();
-      const bobBalanceAfter = bob.balance();
-
-      // transaction fee will paid by `from account` not `signer account`
-      assert.equal(aliceBalanceBefore, aliceBalanceAfter + amount + BigInt(fee));
-      assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
+      verifyTransferAlgoAuthByLsig(runtime, lsig, alice, bob, DEFAULT_AMOUNT);
     });
 
     it("Should failed because cloneLsig is invalid spend address of alice account", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        lsig: cloneLsig,
-        payFlags: { totalFee: fee }
-      };
-
       expectRuntimeError(
-        () => runtime.executeTx(txParams),
+        () => mkTxAlgoTransferFromLsig(runtime, cloneLsig, alice, bob, DEFAULT_AMOUNT, { totalFee: FEE }),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), cloneLsigAccount.address)
       );
     });
 
     it("Should failed: when use another account", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: john.account,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee }
-      };
-
       expectRuntimeError(
-        () => runtime.executeTx(txParams),
+        () => mkTxAlgoTransferFromAccount(runtime, john, alice, bob, DEFAULT_AMOUNT, { totalFee: FEE }),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(alice.getSpendAddress(), john.address)
       );
@@ -292,45 +295,18 @@ describe("Re-keying transactions", function () {
       const bobBalanceBefore = bob.balance();
 
       // close alice account to bob
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: alice.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: 0n,
-        lsig: lsig,
-        payFlags: {
-          totalFee: fee,
-          closeRemainderTo: bob.address
-        }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
+      closeWithLsig(runtime, lsig, alice, bob);
 
       // check account state after close
       assert.equal(alice.balance(), 0n);
-      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(fee));
+      assert.equal(bob.balance(), aliceBalanceBefore + bobBalanceBefore - BigInt(FEE));
       assert.equal(alice.getSpendAddress(), alice.address);
     });
   });
 
   describe("Lsig to Lsig", function () {
     this.beforeEach(() => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsig.address(),
-        toAccountAddr: lsig.address(),
-        amountMicroAlgos: 0,
-        lsig: lsig,
-        payFlags: {
-          totalFee: fee,
-          rekeyTo: cloneLsigAccount.address
-        }
-      };
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromLsig(runtime, lsig, lsigAccount, cloneLsigAccount);
     });
 
     it("Spend address of lsig should be cloneLsig address", () => {
@@ -339,45 +315,12 @@ describe("Re-keying transactions", function () {
     });
 
     it("Transfer ALGO by valid spend account", () => {
-      // balance before rekey
-      const lsigBalanceBefore = lsigAccount.balance();
-      const aliceBalanceBefore = alice.balance();
-      // transfer ALGO use lsig
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: amount,
-        lsig: cloneLsig,
-        payFlags: { totalFee: fee }
-      };
-
-      runtime.executeTx(txParams);
-
-      // check balance of alice and bob after transfer
-      syncAccounts();
-      const lsigBalanceAfter = lsigAccount.balance();
-      const aliceBalanceAfter = alice.balance();
-
-      // transaction fee will paid by `from account` not `signer account`
-      assert.equal(lsigBalanceBefore, lsigBalanceAfter + amount + BigInt(fee));
-      assert.equal(aliceBalanceBefore + amount, aliceBalanceAfter);
+      verifyTransferAlgoAuthByLsig(runtime, cloneLsig, lsigAccount, alice, DEFAULT_AMOUNT);
     });
 
     it("Should failed if signer is invalid spend account", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: amount,
-        lsig: lsig,
-        payFlags: { totalFee: fee }
-      };
-
       expectRuntimeError(
-        () => runtime.executeTx(txParams),
+        () => mkTxAlgoTransferFromLsig(runtime, lsig, lsigAccount, alice, DEFAULT_AMOUNT, { totalFee: FEE }),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(lsigAccount.getSpendAddress(), lsigAccount.address)
       );
@@ -388,25 +331,10 @@ describe("Re-keying transactions", function () {
       const aliceBalanceBefore = alice.balance();
 
       // close lsig account to alice
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: bob.address,
-        amountMicroAlgos: 0n,
-        lsig: cloneLsig,
-        payFlags: {
-          totalFee: fee,
-          closeRemainderTo: alice.address
-        }
-      };
-
-      runtime.executeTx(txParams);
-      syncAccounts();
-
+      closeWithLsig(runtime, cloneLsig, lsigAccount, alice);
       // check account state after close
       assert.equal(lsigAccount.balance(), 0n);
-      assert.equal(alice.balance(), lsigAccountBalanceBefore + aliceBalanceBefore - BigInt(fee));
+      assert.equal(alice.balance(), lsigAccountBalanceBefore + aliceBalanceBefore - BigInt(FEE));
       assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
     });
   });
@@ -414,20 +342,7 @@ describe("Re-keying transactions", function () {
   describe("Lsig to account", function () {
     this.beforeEach(() => {
       // create rekey transaction
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsig.address(),
-        toAccountAddr: lsig.address(),
-        amountMicroAlgos: 0,
-        lsig: lsig,
-        payFlags: {
-          totalFee: fee,
-          rekeyTo: bob.address
-        }
-      };
-      runtime.executeTx(txParams);
-      syncAccounts();
+      rekeyFromLsig(runtime, lsig, lsigAccount, bob);
     });
 
     it("Spend address of lsig should change to bob", () => {
@@ -436,45 +351,14 @@ describe("Re-keying transactions", function () {
     });
 
     it("Transfer ALGO by spend account", () => {
-      // balance before rekey
-      const lsigBalanceBefore = lsigAccount.balance();
-      const aliceBalanceBefore = alice.balance();
-      // transfer ALGO use lsig
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee }
-      };
-
-      runtime.executeTx(txParams);
-
-      // check balance of alice and bob after transfer
-      syncAccounts();
-      const lsigBalanceAfter = lsigAccount.balance();
-      const aliceBalanceAfter = alice.balance();
-
-      // transaction fee will paid by `from account` not `signer account`
-      assert.equal(lsigBalanceBefore, lsigBalanceAfter + amount + BigInt(fee));
-      assert.equal(aliceBalanceBefore + amount, aliceBalanceAfter);
+      verifyTransferAlgoAuthByAccount(runtime, bob, lsigAccount, alice, DEFAULT_AMOUNT);
     });
 
     it("Should failed if alice is invalid spend address of lsig address", () => {
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: amount,
-        payFlags: { totalFee: fee }
-      };
-
       expectRuntimeError(
-        () => runtime.executeTx(txParams),
+        () => mkTxAlgoTransferFromAccount(
+          runtime, alice, lsigAccount, alice, DEFAULT_AMOUNT, { totalFee: FEE }
+        ),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
         rekeyMessageError(lsigAccount.getSpendAddress(), alice.address)
       );
@@ -483,29 +367,15 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove auth/spend address", () => {
-      // balance before rekey
+      // balance before close
       const lsigBalanceBefore = lsigAccount.balance();
       const aliceBalanceBefore = alice.balance();
-      // transfer ALGO use lsig
-      txParams = {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        fromAccountAddr: lsigAccount.address,
-        toAccountAddr: alice.address,
-        amountMicroAlgos: 0n,
-        payFlags: {
-          totalFee: fee,
-          closeRemainderTo: alice.address
-        }
-      };
 
-      runtime.executeTx(txParams);
-
+      closeWithAccount(runtime, bob, lsigAccount, alice);
       // check account state after close
       syncAccounts();
       assert.equal(lsigAccount.balance(), 0n);
-      assert.equal(alice.balance(), lsigBalanceBefore + aliceBalanceBefore - BigInt(fee));
+      assert.equal(alice.balance(), lsigBalanceBefore + aliceBalanceBefore - BigInt(FEE));
       assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
     });
   });
