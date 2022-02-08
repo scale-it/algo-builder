@@ -15,6 +15,15 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### Features 
+
+- Used app account instead of `deposit_lsig` in `examples/dao`
+- Support RekeyTo field in the inner transaction for TEAL v6.
+
+### Infrastructure
+
+-  Support for run command `setup-master-account` and `sandbox-setup-master-account` more than one time.
+
 ## v3.2.0 2022-02-03
 
 ### Features

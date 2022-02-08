@@ -15,6 +15,90 @@ import { elonMuskAccount } from "../mocks/account";
 const programName = "basic.teal";
 const minBalance = BigInt(1e7);
 
+describe("Transfer Algo Transaction", function () {
+  const amount = 1000;
+  const fee = 1000;
+
+  let alice: AccountStoreI;
+  let bob: AccountStoreI;
+
+  let runtime: Runtime;
+
+  function syncAccounts() : void {
+    alice = runtime.getAccount(alice.address);
+    bob = runtime.getAccount(bob.address);
+  }
+
+  this.beforeEach(() => {
+    alice = new AccountStore(minBalance);
+    bob = new AccountStore(minBalance);
+    runtime = new Runtime([alice, bob]);
+  });
+
+  it("Transfer ALGO from alice to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  });
+
+  it("close alice acount to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
+      payFlags: {
+        totalFee: fee,
+        closeRemainderTo: bob.address
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0n,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: alice.address
+        }
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
+  });
+});
+
 describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
   const john = new AccountStore(minBalance);
@@ -339,8 +423,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -396,8 +480,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
