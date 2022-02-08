@@ -7,6 +7,7 @@ import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
+import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -279,13 +280,13 @@ describe("Algorand Standard Assets", function () {
 
     const johnAssetHolding = john.getAssetHolding(assetId);
     assert.isDefined(johnAssetHolding);
-    assert.equal(johnAssetHolding?.amount as bigint, 5912599999515n);
+    assert.equal(johnAssetHolding?.amount, 5912599999515n);
 
     // opt-in for alice
     runtime.optIntoASA(assetId, alice.address, {});
     const aliceAssetHolding = alice.getAssetHolding(assetId);
     assert.isDefined(aliceAssetHolding);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
   });
 
   it("should opt-in to asset using asset transfer transaction", () => {
@@ -307,7 +308,7 @@ describe("Algorand Standard Assets", function () {
     syncAccounts();
 
     const aliceAssetHolding = alice.getAssetHolding(assetId);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
     // verfiy min balance is also raised
     assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
   });
@@ -338,8 +339,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -395,8 +396,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -412,6 +413,31 @@ describe("Algorand Standard Assets", function () {
     assert.isUndefined(alice.getAssetHolding(assetId));
     assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
     assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    // transfer few assets to alice
+    runtime.executeTx({
+      ...assetTransferParam,
+      toAccountAddr: alice.address,
+      amount: 30n
+    });
+
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        ...assetTransferParam,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: alice.address,
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // transfer all assets of alice => john (using closeRemTo)
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
   });
 
   it("should throw error if trying to close asset holding of asset creator account", () => {

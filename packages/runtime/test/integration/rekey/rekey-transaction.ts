@@ -2,10 +2,10 @@ import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { AccountStore, Runtime } from "../../src/index";
-import { useFixture } from "../helpers/integration";
-import { expectRuntimeError } from "../helpers/runtime-errors";
+import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
+import { AccountStore, Runtime } from "../../../src/index";
+import { useFixture } from "../../helpers/integration";
+import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 // default initial balance
 const baseBalance = 20e9;
