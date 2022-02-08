@@ -674,7 +674,7 @@ export interface Deployer {
 
   /**
    * Alias to `this.compileASC`
-   * Deprecated: this function will be removed in the next release.
+   * @deprecated this function will be removed in the next release.
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 

@@ -168,28 +168,9 @@ For opting in to App, `deployer` supports the following methods:
 You can learn more about Stateless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
 
 
-#### Compile contracts
-
-You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
-  * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:
-  ```js
-  const info = await deployer.compileASC('buyback-lsig.py', { ARG_DAO_APP_ID: 23 }, false);
-  const bytecode = info.compiled;
-  ```
-
-  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app or lsig name.
-  ```js
-  // lsig
-  const info = await deployer.getDeployedASC('MyApp');
-  const [approvalInfo, clearInfo] = [info.approval, info.clear];
-
-  const lsigInfo = await deployer.getDeployedASC('MyLsig');
-  ```
-
-
 #### Checkpoint names
 
-Storing data in checkpoint against your own names can be very useful. For example, you don't need to pass smart contract template parameters every time while getting app info, or loading a logic signature. Currently, we support naming for apps (Algorand stateful application) and logic signatures.
+Storing data in [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.html) against your own names can be very useful. For example, you don't need to pass smart contract template parameters every time while getting app info, or loading a logic signature. Currently, we support naming for apps (Algorand stateful application) and logic signatures.
 
 ##### App Name
 
@@ -234,3 +215,22 @@ const lsigInfo = deployer.getLsigByName("CLsig");
 ```
 
 **NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogic`.
+
+
+#### Compile contracts
+
+You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
+  * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:
+  ```js
+  const info = await deployer.compileASC('buyback-lsig.py', { ARG_DAO_APP_ID: 23 }, false);
+  const bytecode = info.compiled;
+  ```
+
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app or lsig name.
+  ```js
+  // lsig
+  const info = await deployer.getDeployedASC('MyApp');
+  const [approvalInfo, clearInfo] = [info.approval, info.clear];
+
+  const lsigInfo = await deployer.getDeployedASC('MyLsig');
+  ```

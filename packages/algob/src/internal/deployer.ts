@@ -209,7 +209,7 @@ class DeployerBasicMode {
    * passing template parameters always during loading logic signature.
    * @param name ASC name
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
-   * Deprecated: this function will be removed in the next release. Use mkContractLsig to
+   * @deprecated this function will be removed in the next release. Use mkContractLsig to
    * store lsig info in checkpoint (against lsigName), and query it in scripts using
    * getLsigByName
    */
@@ -219,7 +219,7 @@ class DeployerBasicMode {
 
   /**
    * Alias to `this.compileASC` with last two parameters being swapped.
-   * Deprecated: this function will be removed in the next release.
+   * @deprecated this function will be removed in the next release.
    */
   ensureCompiled (
     name: string,
@@ -673,7 +673,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param lsigName - name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
-   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsigByName (
     lsigName: string,
