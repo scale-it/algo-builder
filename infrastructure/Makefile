@@ -54,7 +54,7 @@ account-list:
 
 setup-master-account:
 # Create an account with WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE address:
-	goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" -d $(ALGORAND_DATA)
+	goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" -d $(ALGORAND_DATA) || true
 # Send lot of ALGO from a primary account to the "master" account we created above
 	@$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
@@ -96,7 +96,7 @@ sandbox-algod-shell:
 
 sandbox-setup-master-account:
 # similar to setup-master-account but with sandbox, goal commands are executed using the ./sandbox file
-	$(SANDBOX_PATH)/sandbox goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
+	$(SANDBOX_PATH)/sandbox goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" || true
 	@$(eval list=$(shell $(SANDBOX_PATH)/sandbox goal account list))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
 	$(SANDBOX_PATH)/sandbox goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE

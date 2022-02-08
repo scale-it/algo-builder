@@ -7,7 +7,7 @@ async function tryExecuteTx (deployer, txnParams) {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {
-    console.error('Transaction Failed', e.response ? e.response.error : e);
+    console.error('Transaction Failed', e.response ? e.response.body : e);
   }
 };
 
@@ -29,7 +29,7 @@ async function fundAccount (deployer, accounts) {
       sign: types.SignType.SecretKey,
       fromAccount: master,
       toAccountAddr: a.addr,
-      amountMicroAlgos: 20e6,
+      amountMicroAlgos: 30e6,
       payFlags: { totalFee: 1000, note: 'funding account' }
     });
   }
