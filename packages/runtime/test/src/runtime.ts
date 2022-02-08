@@ -24,7 +24,7 @@ describe("Transfer Algo Transaction", function () {
 
   let runtime: Runtime;
 
-  function syncAccounts() : void {
+  function syncAccounts (): void {
     alice = runtime.getAccount(alice.address);
     bob = runtime.getAccount(bob.address);
   }
