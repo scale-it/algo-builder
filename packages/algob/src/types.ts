@@ -388,7 +388,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, rtypes.ASAInfo>
-  ssc: Map<string, Map<Timestamp, rtypes.AppInfo>>
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
