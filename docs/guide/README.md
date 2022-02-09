@@ -136,14 +136,21 @@ This will create a directory `my-project` and put multiple files into it.
 
 In the `my-project` folder you'll have following items:
 
+- `infrastructure/`: Directory for initial infrastructure commands. For more details please read `infrastructure/README.md`.
 - `assets/`: Directory for assets and contracts files
 - `scripts/`: Directory for scripts to deploy and run your assets and contracts
 - `tests/`: Directory for test files for testing your assets and contracts
 - `algob.config.js`: Algob configuration file
 
+You can initial project without `infrastructure\` folder by use command:
+
+```bash
+algob init my-project --no-infrastructure
+```
+
 A `sample-project` is provided for your reference.
 
-Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
+Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/js/README.md)
 
 **NOTE**:
 a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.
