@@ -15,7 +15,7 @@ export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
 export const MaxTEALVersion = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
-// minimum balance costs (in microalgos) for ssc schema
+// minimum balance costs (in microalgos) for app schema
 export const APPLICATION_BASE_FEE = 0.1e6; // base fee for creating or opt-in to application
 export const ASSET_CREATION_FEE = 0.1e6; // creation fee for asset
 export const SSC_VALUE_UINT = 28500; // cost for value as uint64

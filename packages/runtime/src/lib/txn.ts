@@ -162,7 +162,7 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
     if (idx === 0) { return parseToStackElem(tx.snd, txField); }
     idx--; // if not sender, then reduce index by 1
   } else if (txField === 'Applications') {
-    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during ssc deploy tx.app_id is 0
+    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during app deploy tx.app_id is 0
     idx--;
   }
   op.checkIndexBound(idx, result, line);

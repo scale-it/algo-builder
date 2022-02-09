@@ -1,6 +1,6 @@
 #pragma version 4
 // check if application is being created
-// This ssc only allows creator to close out
+// This app only allows creator to close out
 int 0
 txn ApplicationID
 ==
