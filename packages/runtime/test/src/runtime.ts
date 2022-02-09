@@ -16,51 +16,158 @@ import { elonMuskAccount } from "../mocks/account";
 const programName = "basic.teal";
 const minBalance = BigInt(1e7);
 
-describe("Transfer algo to implicit account", function () {
+describe("Transfer Algo Transaction", function () {
   const amount = minBalance;
-  let runtime: Runtime;
+  const fee = 1000;
+
   let alice: AccountStoreI;
-  let externalRuntimeAccount: AccountStoreI;
-  let externalAccount: algosdk.Account;
-  this.beforeEach(function () {
+  let bob: AccountStoreI;
+  let alan: AccountStoreI;
+
+  let runtime: Runtime;
+
+  function syncAccounts (): void {
+    alice = runtime.getAccount(alice.address);
+    bob = runtime.getAccount(bob.address);
+    alan = runtime.getAccount(alan.address);
+  }
+
+  this.beforeEach(() => {
     alice = new AccountStore(minBalance * 10n);
-    externalAccount = new AccountStore(0).account;
+    bob = new AccountStore(minBalance * 10n);
+    alan = new AccountStore(minBalance * 10n);
+    runtime = new Runtime([alice, bob, alan]);
+  });
 
-    runtime = new Runtime([alice]);
+  it("Transfer ALGO from alice to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
 
-    const transferAlgoTx: AlgoTransferParam = {
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
-      toAccountAddr: externalAccount.addr,
+      toAccountAddr: bob.address,
       amountMicroAlgos: amount,
       payFlags: {
-        totalFee: 1000
+        totalFee: fee
       }
     };
 
-    runtime.executeTx(transferAlgoTx);
-    // query new external account in runtime.
-    externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
+    runtime.executeTx(ALGOTransferTxParam);
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
   });
 
-  it("Balance of toAccountAddr should updated", () => {
-    assert.equal(externalRuntimeAccount.amount, amount);
-  });
+  it("close alice acount to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
 
-  it("Can create transaction from external account", () => {
-    const transferAlgoTx: AlgoTransferParam = {
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: externalRuntimeAccount.account,
-      toAccountAddr: alice.address,
-      amountMicroAlgos: 1000n,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
       payFlags: {
-        totalFee: 1000
+        totalFee: fee,
+        closeRemainderTo: bob.address
       }
     };
 
-    assert.doesNotThrow(() => runtime.executeTx(transferAlgoTx));
+    runtime.executeTx(ALGOTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+  });
+
+  it("should ignore rekey when use with closeRemainderTo", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
+      payFlags: {
+        totalFee: fee,
+        closeRemainderTo: bob.address,
+        rekeyTo: alan.address
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+    // spend/auth address of alice not changed.
+    assert.equal(alice.getSpendAddress(), alice.address);
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0n,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: alice.address
+        }
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
+  });
+
+  describe("Transfer algo to implicit account", function () {
+    let externalRuntimeAccount: AccountStoreI;
+    let externalAccount: algosdk.Account;
+    this.beforeEach(function () {
+      externalAccount = new AccountStore(0).account;
+
+      const transferAlgoTx: AlgoTransferParam = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: externalAccount.addr,
+        amountMicroAlgos: amount,
+        payFlags: {
+          totalFee: 1000
+        }
+      };
+
+      runtime.executeTx(transferAlgoTx);
+      // query new external account in runtime.
+      externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
+    });
+
+    it("Balance of toAccountAddr should updated", () => {
+      assert.equal(externalRuntimeAccount.amount, amount);
+    });
+
+    it("Can create transaction from external account", () => {
+      const transferAlgoTx: AlgoTransferParam = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: externalRuntimeAccount.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 1000n,
+        payFlags: {
+          totalFee: 1000
+        }
+      };
+
+      assert.doesNotThrow(() => runtime.executeTx(transferAlgoTx));
+    });
   });
 });
 
@@ -462,6 +569,31 @@ describe("Algorand Standard Assets", function () {
     assert.isUndefined(alice.getAssetHolding(assetId));
     assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
     assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    // transfer few assets to alice
+    runtime.executeTx({
+      ...assetTransferParam,
+      toAccountAddr: alice.address,
+      amount: 30n
+    });
+
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        ...assetTransferParam,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: alice.address,
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // transfer all assets of alice => john (using closeRemTo)
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
   });
 
   it("should throw error if trying to close asset holding of asset creator account", () => {

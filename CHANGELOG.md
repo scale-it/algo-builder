@@ -21,6 +21,11 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
 
+### Bug fixes
+
+- Return error when closeRemainderTo and fromAccountAddr is the same.
+- When close account should remove auth/spend address. Fixed in  [#575](https://github.com/scale-it/algo-builder/pull/575).
+
 ### Infrastructure
 
 -  Support for run command `setup-master-account` and `sandbox-setup-master-account` more than one time.

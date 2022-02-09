@@ -456,6 +456,12 @@ const runtimeGeneralErrors = {
     message: "Should have been authorized by %spend% but was actually authorized by %signer%",
     title: "Invalid spend account.",
     description: "Invalid spend account"
+  },
+  INVALID_CLOSE_REMAINDER_TO: {
+    number: 1507,
+    message: "Transaction cannot close account to its sender",
+    title: "Transaction cannot close account to its sender.",
+    description: "Transaction cannot close account to its sender"
   }
 };
 
