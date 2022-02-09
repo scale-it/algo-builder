@@ -155,10 +155,7 @@ describe("Re-keying transactions", function () {
 
     // transfer ALGO by spend account
     mkTxAlgoTransferFromAccount(
-      runtime, signer, from, to, algoAmount,
-      {
-        totalFee: FEE
-      }
+      runtime, signer, from, to, algoAmount, { totalFee: FEE }
     );
 
     const fromAccountBalanceAfter = runtime.getAccount(from.address).balance();
@@ -179,10 +176,7 @@ describe("Re-keying transactions", function () {
 
     // transfer ALGO by spend account
     mkTxAlgoTransferFromLsig(
-      runtime, lsig, from, to, amount,
-      {
-        totalFee: FEE
-      }
+      runtime, lsig, from, to, amount, { totalFee: FEE }
     );
 
     const fromAccountBalanceAfter = runtime.getAccount(from.address).balance();
@@ -194,6 +188,7 @@ describe("Re-keying transactions", function () {
   }
 
   // verify close account when auth/spend address is normal account
+  // close `from` account to `closeTo` account
   function verifyCloseByAccount (
     runtime: Runtime,
     signer: AccountStoreI,
@@ -214,6 +209,7 @@ describe("Re-keying transactions", function () {
   }
 
   // verify close account when auth/spend address is lsig
+  // close `from` account to `closeTo` account
   function verifyCloseByLsig (
     runtime: Runtime,
     lsig: LogicSigAccount,
@@ -253,7 +249,7 @@ describe("Re-keying transactions", function () {
     syncAccounts();
   });
 
-  it("Validate spend address after init", () => {
+  it("Validate account state before apply rekey transaciton", () => {
     assert.equal(alice.getSpendAddress(), alice.address);
     assert.equal(bob.getSpendAddress(), bob.address);
     assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
@@ -296,6 +292,7 @@ describe("Re-keying transactions", function () {
     });
 
     it("close account should remove spend/auth address", () => {
+      // close account alice to bob
       verifyCloseByAccount(runtime, bob, alice, bob);
     });
   });
