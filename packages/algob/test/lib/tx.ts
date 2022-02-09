@@ -232,7 +232,7 @@ describe("Delete ASA and SSC", () => {
     await executeTransaction(deployer, execParams);
   });
 
-  it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
+  it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
     const flags: types.AppDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,

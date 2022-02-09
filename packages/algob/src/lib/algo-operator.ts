@@ -40,7 +40,7 @@ export interface AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
+    scTmplParams?: SCParams) => Promise<rtypes.AppInfo>
   updateApp: (
     sender: algosdk.Account,
     payFlags: wtypes.TxParams,
@@ -50,7 +50,7 @@ export interface AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ) => Promise<rtypes.SSCInfo>
+  ) => Promise<rtypes.AppInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
   optInAccountToASA: (
@@ -311,7 +311,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
+    scTmplParams?: SCParams): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
@@ -386,7 +386,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);

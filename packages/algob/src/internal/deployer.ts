@@ -145,7 +145,7 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getApp (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
     return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
   }
 
@@ -153,7 +153,7 @@ class DeployerBasicMode {
    * Loads stateful smart contract info from checkpoint
    * @param appName name of the app (passed by user during deployment)
    */
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+  getAppByName (appName: string): rtypes.AppInfo | undefined {
     return this.checkpoint.getAppfromCPKey(appName);
   }
 
@@ -399,7 +399,7 @@ class DeployerBasicMode {
 
   /**
    * Asserts App is defined in a checkpoint by app id.
-   * First: search for SSCInfo in checkpoints
+   * First: search for AppInfo in checkpoints
    * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
    * If deleted boolean is true throw error
    * else, pass
@@ -518,7 +518,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Register SSC Info in checkpoints
    */
-  registerSSCInfo (sscName: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (sscName: string, sscInfo: rtypes.AppInfo): void {
     this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
@@ -708,11 +708,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     const name = appName ?? approvalProgram + "-" + clearProgram;
 
     this.assertNoAsset(name);
-    let sscInfo = {} as rtypes.SSCInfo;
+    let sscInfo = {} as rtypes.AppInfo;
     try {
       sscInfo = await this.algoOp.deployApp(
         approvalProgram,
@@ -755,7 +755,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
@@ -767,7 +767,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     });
     const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
 
-    let sscInfo = {} as rtypes.SSCInfo;
+    let sscInfo = {} as rtypes.AppInfo;
     try {
       sscInfo = await this.algoOp.updateApp(
         sender,
@@ -819,7 +819,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.AppInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
     });
@@ -881,7 +881,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     payFlags: wtypes.TxParams,
     scInitParam?: unknown,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
     });
@@ -907,7 +907,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
