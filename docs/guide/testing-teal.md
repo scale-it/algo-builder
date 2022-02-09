@@ -123,7 +123,7 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
 #### Escrow Account
 
-Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract (smart signature) logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
+Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a smart signature logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 The logic signature accepts only ALGO payment transaction where amount is <= 100 AND receiver is `john` AND fee <= 10000.
 
 - First let's prepare the runtime and state: initialize accounts, get a logic signature for escrow and set up runtime:
@@ -203,7 +203,7 @@ Full example with above tests is available in our [escrow-account.ts](https://gi
 
 #### Delegated Signature Account
 
-Let's try to execute a transaction where a user (`john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
+Let's try to execute a transaction where a user (`john`) will use delegated signature based on a smart signatures logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
 
   - As before we start with preparing the runtime. We use `runtime.loadLogic('escrow.teal', [])` to create and load logic signature.
 

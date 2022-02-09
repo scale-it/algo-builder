@@ -66,7 +66,7 @@ export interface Networks {
 export interface KmdWallet {
   name: string
   password: string
-  accounts: Array<{name: string, address: string}> // both are obligatory
+  accounts: Array<{ name: string, address: string }> // both are obligatory
 }
 
 export interface KmdCfg {
@@ -254,7 +254,7 @@ export interface RuntimeArgs {
 
 export type ParamDefinitions = {
   [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
-  RuntimeArgs[param]
+    RuntimeArgs[param]
   >;
 };
 
@@ -338,7 +338,7 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-// stateless smart contract deployment information (log)
+// logic signature deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -499,7 +499,7 @@ export interface Deployer {
 
   /**
    * Funds logic signature account (Contract Account).
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @name  Logic Signature filename (must be present in assets folder)
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
@@ -513,7 +513,7 @@ export interface Deployer {
 
   /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @name  Logic Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)

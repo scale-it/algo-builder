@@ -12,7 +12,7 @@ These scripts contain logic to transfer assets to `john-account` but other accou
 
 Balances can be queried by executing `algob run scripts/query/john-balances.js`.
 
-This example also includes stateless smart contracts in (`assets/` directory) that showcase the two different modes of operation (contract & signature delegation):
+This example also includes logic signatures in (`assets/` directory) that showcase the two different modes of operation (contract & signature delegation):
 - [`2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/teal/2-gold-contract-asc.teal): A lsig in contract mode which approves the transaction if:
     - Transaction type is pay or axfer
     - Algo amount AND asset amount is <= 100.

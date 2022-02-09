@@ -40,7 +40,7 @@ class DeployerBasicMode {
   readonly indexerClient: algosdk.Indexer | undefined;
   checkpoint: CheckpointFunctions;
 
-  constructor (deployerCfg: DeployerConfig) {
+  constructor(deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
     this.cpData = deployerCfg.cpData;
     this.loadedAsaDefs = deployerCfg.asaDefs;
@@ -55,7 +55,7 @@ class DeployerBasicMode {
     this.indexerClient = deployerCfg.indexerClient;
   }
 
-  protected get networkName (): string {
+  protected get networkName(): string {
     return this.runtimeEnv.network.name;
   }
 
@@ -63,7 +63,7 @@ class DeployerBasicMode {
    * Queries ASA Info from asset name
    * @param name asset name
    */
-  getASAInfo (name: string): rtypes.ASAInfo {
+  getASAInfo(name: string): rtypes.ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
       throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
@@ -73,7 +73,7 @@ class DeployerBasicMode {
     return found;
   }
 
-  private _getAccount (name: string): rtypes.Account {
+  private _getAccount(name: string): rtypes.Account {
     const found = this.accountsByName.get(name);
     if (!found) {
       throw new BuilderError(ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
@@ -88,7 +88,7 @@ class DeployerBasicMode {
    * @param name Asset name
    * @param asaParams Asa parameters if user wants to override existing asa definition
    */
-  getASADef (name: string, asaParams?: Partial<wtypes.ASADef>): wtypes.ASADef {
+  getASADef(name: string, asaParams?: Partial<wtypes.ASADef>): wtypes.ASADef {
     return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
   }
 
@@ -96,23 +96,23 @@ class DeployerBasicMode {
    * Returns checkpoint metadata
    * @param key key for the map
    */
-  getCheckpointKV (key: string): string | undefined {
+  getCheckpointKV(key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
 
-  isDefined (name: string): boolean {
+  isDefined(name: string): boolean {
     return this.cpData.isDefined(this.networkName, name);
   }
 
-  get asa (): Map<string, rtypes.ASAInfo> {
+  get asa(): Map<string, rtypes.ASAInfo> {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
-  get algodClient (): algosdk.Algodv2 {
+  get algodClient(): algosdk.Algodv2 {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
+  async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -121,11 +121,11 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
+  async getAssetByID(assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 
-  log (msg: string, obj: any): void {
+  log(msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
   }
 
@@ -135,7 +135,7 @@ class DeployerBasicMode {
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @param asaName asset name in asa.yaml
    */
-  loadASADef (asaName: string): wtypes.ASADef | undefined {
+  loadASADef(asaName: string): wtypes.ASADef | undefined {
     const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
     return asaMap.get(asaName)?.assetDef;
   }
@@ -145,7 +145,7 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getApp (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
+  getApp(nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
     return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
   }
 
@@ -153,14 +153,14 @@ class DeployerBasicMode {
    * Loads stateful smart contract info from checkpoint
    * @param appName name of the app (passed by user during deployment)
    */
-  getAppByName (appName: string): rtypes.AppInfo | undefined {
+  getAppByName(appName: string): rtypes.AppInfo | undefined {
     return this.checkpoint.getAppfromCPKey(appName);
   }
 
   /**
    * Loads a single signed delegated logic signature account from checkpoint
    */
-  getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
+  getDelegatedLsig(lsigName: string): LogicSigAccount | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) {
@@ -180,7 +180,7 @@ class DeployerBasicMode {
    * Loads a logic signature account from checkpoint
    * @param lsigName logic signature name
    */
-  getContractLsig (lsigName: string): LogicSigAccount | undefined {
+  getContractLsig(lsigName: string): LogicSigAccount | undefined {
     return this.getDelegatedLsig(lsigName);
   }
 
@@ -190,7 +190,7 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
+  async loadLogic(name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
@@ -200,7 +200,7 @@ class DeployerBasicMode {
    * @param name ASC name
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
    */
-  async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
+  async loadLogicFromCache(name: string): Promise<LogicSigAccount> {
     return await getLsigFromCache(name);
   }
 
@@ -208,7 +208,7 @@ class DeployerBasicMode {
    * Alias to `this.compileASC` with last two parameters being swapped.
    * Deprecated: this function will be removed in the next release.
    */
-  ensureCompiled (
+  ensureCompiled(
     name: string,
     force?: boolean,
     scTmplParams?: SCParams
@@ -223,7 +223,7 @@ class DeployerBasicMode {
    *     (used only when compiling PyTEAL to TEAL)
    * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
    */
-  compileASC (name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
+  compileASC(name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
     return this.algoOp.ensureCompiled(name, force, scTmplParams);
   }
 
@@ -232,7 +232,7 @@ class DeployerBasicMode {
    * TODO: beta support - this will change
    * @param name ASC name used during deployment
    */
-  getDeployedASC (name: string): Promise<ASCCache | undefined> {
+  getDeployedASC(name: string): Promise<ASCCache | undefined> {
     const op = new CompileOp(this.algoOp.algodClient);
     return op.readArtifact(name);
   }
@@ -242,7 +242,7 @@ class DeployerBasicMode {
    * @param name filename
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string): Promise<LogicSig> {
+  async loadMultiSig(name: string): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) {
       return await loadBinaryLsig(name);
     }
@@ -257,7 +257,7 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+  sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     return this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -268,7 +268,7 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  optInAccountToASA (
+  optInAccountToASA(
     asa: string,
     accountName: string,
     flags: wtypes.TxParams
@@ -299,7 +299,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  optInLsigToASA (
+  optInLsigToASA(
     asa: string,
     lsig: LogicSigAccount,
     flags: wtypes.TxParams
@@ -332,7 +332,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInAccountToApp (
+  optInAccountToApp(
     sender: rtypes.Account,
     appID: number,
     payFlags: wtypes.TxParams,
@@ -356,7 +356,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInLsigToApp (
+  optInLsigToApp(
     appID: number,
     lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
@@ -382,7 +382,7 @@ class DeployerBasicMode {
    * Case 2: If it doesn't exist, pass
    * @param asset asset index or asset name
    */
-  private assertASAExist (asset: string | number): void {
+  private assertASAExist(asset: string | number): void {
     let key, res;
     if (typeof asset === "string") {
       res = this.asa.get(asset);
@@ -406,7 +406,7 @@ class DeployerBasicMode {
    * Case 2: If it doesn't exist, pass
    * @param appID Application index
    */
-  private assertAppExist (appID: number): void {
+  private assertAppExist(appID: number): void {
     const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
     const res = key ? this.checkpoint.getAppfromCPKey(key) : undefined;
     if (res?.deleted) {
@@ -420,7 +420,7 @@ class DeployerBasicMode {
    * Group transactions into asa and app, check for cp deletion
    * @param txn Transaction execution parameter
    */
-  private _assertCpNotDeleted (txn: wtypes.ExecParams): void {
+  private _assertCpNotDeleted(txn: wtypes.ExecParams): void {
     switch (txn.type) {
       case wtypes.TransactionType.ModifyAsset:
       case wtypes.TransactionType.FreezeAsset:
@@ -456,7 +456,7 @@ class DeployerBasicMode {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted (execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
+  assertCPNotDeleted(execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
     if (Array.isArray(execParams)) {
       for (const txn of execParams) {
         this._assertCpNotDeleted(txn);
@@ -471,11 +471,11 @@ class DeployerBasicMode {
  * This class is what user interacts with in deploy task
  */
 export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
-  get isDeployMode (): boolean {
+  get isDeployMode(): boolean {
     return true;
   }
 
-  addCheckpointKV (key: string, value: string): void {
+  addCheckpointKV(key: string, value: string): void {
     const found = this.cpData.getMetadata(this.networkName, key);
     if (found === value) {
       return;
@@ -492,7 +492,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Asserts if asset is not already present in checkpoint
    * @param name Asset name
    */
-  assertNoAsset (name: string): void {
+  assertNoAsset(name: string): void {
     if (this.isDefined(name)) {
       this.persistCP();
       throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
@@ -504,28 +504,28 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Persist checkpoint till current call.
    */
-  persistCP (): void {
+  persistCP(): void {
     persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
   }
 
   /**
    * Register ASA Info in checkpoints
    */
-  registerASAInfo (asaName: string, asaInfo: rtypes.ASAInfo): void {
+  registerASAInfo(asaName: string, asaInfo: rtypes.ASAInfo): void {
     this.cpData.registerASA(this.networkName, asaName, asaInfo);
   }
 
   /**
    * Register SSC Info in checkpoints
    */
-  registerSSCInfo (sscName: string, sscInfo: rtypes.AppInfo): void {
+  registerSSCInfo(sscName: string, sscInfo: rtypes.AppInfo): void {
     this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
+  logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
     this.txWriter.push(message, txConfirmation);
   }
 
@@ -534,7 +534,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags
    */
-  async deployASA (
+  async deployASA(
     name: string,
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<wtypes.ASADef>
@@ -557,7 +557,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @asaDef ASA definitions
    * @flags deployment flags
    */
-  async deployASADef (
+  async deployASADef(
     name: string,
     asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags
@@ -608,7 +608,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param payFlags - as per SPEC
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async fundLsig (
+  async fundLsig(
     name: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
@@ -625,13 +625,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
-   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param name: Logic Signature filename (must be present in assets folder)
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    * @param signer: Signer Account which will sign the smart
    * contract(optional in case of contract account)
    */
-  async _mkLsig (
+  async _mkLsig(
     name: string,
     scTmplParams?: SCParams,
     signer?: rtypes.Account
@@ -668,12 +668,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
-   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param name: Logic Signature filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async mkDelegatedLsig (
+  async mkDelegatedLsig(
     name: string,
     signer: rtypes.Account,
     scTmplParams?: SCParams
@@ -686,7 +686,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param name ASC name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async mkContractLsig (name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
+  async mkContractLsig(name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
     return await this._mkLsig(name, scTmplParams);
   }
 
@@ -701,7 +701,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param appName name of the app to deploy. This name (if passed) will be used as
    * the checkpoint "key", and app information will be associated with this name
    */
-  async deployApp (
+  async deployApp(
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
@@ -746,7 +746,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param appName name of the app to deploy. This name (if passed) will be used as
    * the checkpoint "key", and app information will be associated with this name
    */
-  async updateApp (
+  async updateApp(
     sender: algosdk.Account,
     payFlags: wtypes.TxParams,
     appID: number,
@@ -795,17 +795,17 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
  * This class is what user interacts with in run task mode
  */
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
-  get isDeployMode (): boolean {
+  get isDeployMode(): boolean {
     return false;
   }
 
-  persistCP (): void {
+  persistCP(): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "persistCP"
     });
   }
 
-  assertNoAsset (name: string): void {
+  assertNoAsset(name: string): void {
     if (this.isDefined(name)) {
       throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
         assetName: name
@@ -813,37 +813,37 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     }
   }
 
-  registerASAInfo (name: string, asaInfo: rtypes.ASAInfo): void {
+  registerASAInfo(name: string, asaInfo: rtypes.ASAInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerASAInfo"
     });
   }
 
-  registerSSCInfo (name: string, sscInfo: rtypes.AppInfo): void {
+  registerSSCInfo(name: string, sscInfo: rtypes.AppInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
     });
   }
 
-  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
+  logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });
   }
 
-  addCheckpointKV (_key: string, _value: string): void {
+  addCheckpointKV(_key: string, _value: string): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "addCheckpointKV"
     });
   }
 
-  async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
+  async deployASA(_name: string, _flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
   }
 
-  async deployASADef (
+  async deployASADef(
     name: string,
     asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags
@@ -853,7 +853,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async fundLsig (
+  async fundLsig(
     _name: string,
     _flags: FundASCFlags,
     _payFlags: wtypes.TxParams,
@@ -864,7 +864,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async mkDelegatedLsig (
+  async mkDelegatedLsig(
     _name: string,
     _signer: rtypes.Account,
     _scInitParams?: unknown
@@ -874,7 +874,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async deployApp (
+  async deployApp(
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
@@ -899,7 +899,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async updateApp (
+  async updateApp(
     sender: algosdk.Account,
     payFlags: wtypes.TxParams,
     appID: number,
