@@ -75,7 +75,7 @@ Below we describe different use cases implemented by the smart contract suite. W
 
 1. [*transfer(fromAccount, toAddress, amount)*](/examples/permissioned-token/scripts/user/transfer.js) -
   Every transfer between non-reserve accounts has to pass permissions check to assure token compliance.
-  Since all tokens are frozen, only clawback can transfer tokens. Since clawback is a stateless smart contract, a logic signature is required. The lsig validates the transfer only if the transfer transaction is accompanied with other transactions (it assures correct transaction group composition).
+  Since all tokens are frozen, only clawback can transfer tokens. Clawback is set to a Smart Signatures account so Logic Signature is required for signing transactions. The lsig validates the transfer only if the transfer transaction is accompanied with other transactions (it assures correct transaction group composition).
    A group of 4 (or more if there are more than 1 permissions contract) transactions is required:
 
    - *tx1*: Call to controller smart contract with  `app-arg = str:transfer` signed by *fromAccount* (asset sender).
