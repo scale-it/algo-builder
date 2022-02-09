@@ -629,6 +629,15 @@ export class Ctx implements Context {
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txParam.type) {
         case types.TransactionType.TransferAlgo: {
+          // if toAccountAddre doesn't exist in runtime env
+          // then we will add it to runtime env.
+          if (this.state.accounts.get(txParam.toAccountAddr) === undefined) {
+            this.state.accounts.set(
+              txParam.toAccountAddr,
+              new AccountStore(0, { addr: txParam.toAccountAddr, sk: new Uint8Array(0) })
+            );
+          }
+
           r = this.transferAlgo(txParam);
           break;
         }

@@ -18,7 +18,8 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 ### Features 
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
-- Support RekeyTo field in the inner transaction for TEAL v6.
+- Support `RekeyTo` field in the inner transaction for TEAL v6.
+- Enable transfer ALGO to implicit account.
 
 ### Bug fixes
 
