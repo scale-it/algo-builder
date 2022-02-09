@@ -41,7 +41,7 @@ function copy (directory: string, location: string): void {
   });
 }
 
-function copySampleProject (location: string, isTSProject: boolean): void {
+function copySampleProject (location: string, isTSProject: boolean, isNonInfrastucture: boolean): void {
   const packageRoot = getPackageRoot();
   const sampleProjDir = path.join(packageRoot, "sample-project");
   if (fsExtra.pathExistsSync(`./${location}/algob.config.js`)) {
@@ -49,10 +49,15 @@ function copySampleProject (location: string, isTSProject: boolean): void {
       clashingFile: location
     });
   }
-  console.log(chalk.greenBright("Initializing new workspace in " + path.join(process.cwd(), location)));
+  console.log(chalk.greenBright("Initializing new workspace in " + (path.join(process.cwd(), location) as string)));
 
   // copy common files first
   copy(path.join(sampleProjDir, "common"), location);
+
+  // copy infrastructure folder depending of --no-infrastructure flag
+  if (!isNonInfrastucture) {
+    copy(path.join(sampleProjDir, "infrastructure"), path.join(location, "infrastructure"));
+  }
 
   const projectDir =
     isTSProject ? path.join(sampleProjDir, "ts") : path.join(sampleProjDir, "js");
@@ -87,10 +92,12 @@ async function printPluginInstallationInstructions (): Promise<void> {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-export async function createProject (location: string, isTSProject: boolean): PromiseAny {
+export async function createProject (
+  location: string, isTSProject: boolean, isNonInfrastructure: boolean
+): PromiseAny {
   await printWelcomeMessage();
 
-  copySampleProject(location, isTSProject);
+  copySampleProject(location, isTSProject, isNonInfrastructure);
 
   let shouldShowInstallationInstructions = true;
 
@@ -154,7 +161,8 @@ export function createConfirmationPrompt (name: string, message: string) { // es
       return input;
     },
     format (): string {
-      const that = this as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const that = this as any;
       const value = that.value === true ? "y" : "n";
 
       if (that.state.submitted === true) {
