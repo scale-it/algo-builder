@@ -99,9 +99,9 @@ export interface AppOptionalFlags {
 /**
  * Transaction execution parameters (on blockchain OR runtime) */
 export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
-  ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
-  DestroyAssetParam | DeployASAParam | DeployAppParam |
-  OptInASAParam | UpdateAppParam;
+ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
+DestroyAssetParam | DeployASAParam | DeployAppParam |
+OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -261,13 +261,13 @@ export interface FileError extends Error {
 }
 
 // This function is used to check if given objects implements `FileError` interface
-export function isFileError(object: unknown): object is FileError {
+export function isFileError (object: unknown): object is FileError {
   return Object.prototype.hasOwnProperty.call(object, "errno");
 }
 
 // This function is used to check if given objects implements `RequestError` interface
 // https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
-export function isRequestError(object: unknown): object is RequestError {
+export function isRequestError (object: unknown): object is RequestError {
   const res = Object.prototype.hasOwnProperty.call(object, "response.statusCode") &&
     Object.prototype.hasOwnProperty.call(object, "response.text") &&
     Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
@@ -276,7 +276,7 @@ export function isRequestError(object: unknown): object is RequestError {
 }
 
 // This function checks if given object implements `Transaction` class
-export function isSDKTransaction(object: unknown): object is Transaction {
+export function isSDKTransaction (object: unknown): object is Transaction {
   if (object === undefined || object === null) { return false; }
   const props = [
     "tag", "from", "fee", "firstRound", "lastRound",
@@ -290,7 +290,7 @@ export function isSDKTransaction(object: unknown): object is Transaction {
 }
 
 // This function checks if given object implements `Transaction` class and has Sign
-export function isSDKTransactionAndSign(object: unknown): object is TransactionAndSign {
+export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
   if (object === undefined || object === null) { return false; }
   const res = isSDKTransaction((object as TransactionAndSign).transaction);
   return Object.prototype.hasOwnProperty.call(object, "sign") && res;

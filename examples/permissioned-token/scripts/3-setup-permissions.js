@@ -1,33 +1,33 @@
-const { executeTransaction } = require("@algo-builder/algob");
-const { types } = require("@algo-builder/web");
-const accounts = require("./common/accounts");
+const { executeTransaction } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/web');
+const accounts = require('./common/accounts');
 
 /**
  * Deploy Permissions smart contract
  * and link it to the controller (using the controller  add_permission argument)
  */
-async function setupPermissionsApp(runtimeEnv, deployer) {
-  const controllerAppInfo = deployer.getApp("controller.py", "clear_state_program.py");
+async function setupPermissionsApp (runtimeEnv, deployer) {
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
-  const tesla = deployer.asa.get("tesla");
+  const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
   const controllerappID = controllerAppInfo.appID;
 
   const templateParam = {
-    PERM_MANAGER: owner.addr, // setting permission manager to the owner account
+    PERM_MANAGER: owner.addr // setting permission manager to the owner account
   };
 
   /** Deploy Permissions(rules) smart contract **/
-  console.log("\n** Deploying smart contract: permissions **");
+  console.log('\n** Deploying smart contract: permissions **');
   const permissionAppInfo = await deployer.deployApp(
-    "permissions.py", // approval program
-    "clear_state_program.py", // clear program
+    'permissions.py', // approval program
+    'clear_state_program.py', // clear program
     {
       sender: owner,
       localInts: 1, // 1 to store whitelisted status in local state
       localBytes: 0,
       globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
-      globalBytes: 1, // to store permissions manager
+      globalBytes: 1 // to store permissions manager
     },
     {},
     templateParam
@@ -44,9 +44,9 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
    *   as well.
    * + Currently only 1 permissions app is supported.
    */
-  console.log("\n** Linking permissions smart contract to the controller **");
+  console.log('\n** Linking permissions smart contract to the controller **');
   try {
-    const appArgs = ["str:set_permission", `int:${permissionAppInfo.appID}`];
+    const appArgs = ['str:set_permission', `int:${permissionAppInfo.appID}`];
 
     await executeTransaction(deployer, {
       type: types.TransactionType.CallApp,
@@ -55,10 +55,10 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
       appArgs: appArgs,
-      foreignAssets: [tesla.assetIndex], // controller sc verifies if correct token is being used + asa.manager is correct one
+      foreignAssets: [tesla.assetIndex] // controller sc verifies if correct token is being used + asa.manager is correct one
     });
   } catch (e) {
-    console.log("Error occurred", e.response.error);
+    console.log('Error occurred', e.response.error);
   }
 }
 

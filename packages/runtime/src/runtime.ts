@@ -17,11 +17,11 @@ import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
+  AccountAddress, AccountStoreI, AppDeploymentFlags, AppInfo,
+  AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
   DeployedAppTxReceipt, DeployedAssetTxReceipt,
-  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, AppInfo,
-  StackElem, State, TxReceipt
+  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 export class Runtime {
