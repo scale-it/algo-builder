@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     syncAccounts();
   });
 
-  function syncAccounts (): void {
+  function syncAccounts(): void {
     john = runtime.getAccount(john.address);
     alice = runtime.getAccount(alice.address);
   }
@@ -127,7 +127,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.equal(alice.balance(), initialBalance);
   });
 
-  it("should execute payment and app call", () => {
+  it("should execute payment and ssc call", () => {
     const txGroup: types.ExecParams[] = [
       {
         type: types.TransactionType.CallApp,
@@ -387,7 +387,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.isDefined(john.getLocalState(appID, key));
   });
 
-  it("should fail asset payment, and algo payment if app call fails", () => {
+  it("should fail asset payment, and algo payment if ssc call fails", () => {
     // close out from app
     runtime.executeTx({
       type: types.TransactionType.ClearApp,

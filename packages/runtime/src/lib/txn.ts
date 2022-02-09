@@ -28,7 +28,7 @@ const globalAndLocalNumTxnFields = new Set([
 
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
-export function parseToStackElem (a: unknown, field: TxField): StackElem {
+export function parseToStackElem(a: unknown, field: TxField): StackElem {
   if (Buffer.isBuffer(a)) {
     return new Uint8Array(a);
   }
@@ -49,10 +49,10 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
-export function checkIfAssetDeletionTx (txn: Transaction): boolean {
+export function checkIfAssetDeletionTx(txn: Transaction): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.assetIndex > 0) && // assetIndex should not be 0
-  !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
+    (txn.assetIndex > 0) && // assetIndex should not be 0
+    !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
 }
 
 /**
@@ -62,7 +62,7 @@ export function checkIfAssetDeletionTx (txn: Transaction): boolean {
  * @param txns Transaction group
  * @param tealVersion version of TEAL
  */
-export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], tealVersion: number): StackElem {
+export function txnSpecbyField(txField: string, tx: EncTx, gtxns: EncTx[], tealVersion: number): StackElem {
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
@@ -144,7 +144,7 @@ export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], teal
  * @param tealVersion version of TEAL
  * @param line line number in TEAL file
  */
-export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
+export function txAppArg(txField: TxField, tx: EncTx, idx: number, op: Op,
   tealVersion: number, line: number): StackElem {
   const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
   const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
@@ -162,7 +162,7 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
     if (idx === 0) { return parseToStackElem(tx.snd, txField); }
     idx--; // if not sender, then reduce index by 1
   } else if (txField === 'Applications') {
-    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during app deploy tx.app_id is 0
+    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during ssc deploy tx.app_id is 0
     idx--;
   }
   op.checkIndexBound(idx, result, line);
@@ -176,18 +176,18 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
-export function isEncTxAssetDeletion (txn: EncTx): boolean {
+export function isEncTxAssetDeletion(txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
-  !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
+    (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
+    !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
 
 /**
  * Check if given encoded transaction obj is asset deletion
  * @param txn Encoded EncTx Object
  */
-export function isEncTxAssetConfig (txn: EncTx): boolean {
+export function isEncTxAssetConfig(txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
-  !isEncTxAssetDeletion(txn); // AND should not be asset deletion
+    (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
+    !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }

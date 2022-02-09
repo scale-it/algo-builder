@@ -27,7 +27,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   };
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    approvalProgramFileName = 'close-clear-app.teal';
+    approvalProgramFileName = 'close-clear-ssc.teal';
     clearProgramFileName = 'clear.teal';
 
     closeOutParams = {
