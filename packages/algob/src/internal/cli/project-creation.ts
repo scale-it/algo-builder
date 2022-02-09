@@ -49,7 +49,7 @@ function copySampleProject (location: string, isTSProject: boolean, isNonInfrast
       clashingFile: location
     });
   }
-  console.log(chalk.greenBright("Initializing new workspace in " + (path.join(process.cwd(), location) as string)));
+  console.log(chalk.greenBright("Initializing new workspace in " + path.join(process.cwd(), location)));
 
   // copy common files first
   copy(path.join(sampleProjDir, "common"), location);
