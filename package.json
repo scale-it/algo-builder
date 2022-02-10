@@ -24,7 +24,9 @@
     "lint": "yarn workspaces foreach -p run lint",
     "lint:fix": "yarn workspaces foreach -p run lint:fix",
     "coverage": "yarn workspaces foreach -p run coverage",
-    "prepare": "husky install"
+    "prepare": "husky install",
+
+    "algob": "yarn workspace @algo-builder/algob algob"
   },
   "peerDependencies": {
     "lodash": "^4.17.19"
