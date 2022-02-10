@@ -75,7 +75,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     case TransactionType.ModifyAsset: {
       const tx = algosdk.makeAssetConfigTxnWithSuggestedParams(
         fromAccountAddr,
-        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        note,
         execParams.assetID as number,
         execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
         execParams.fields.reserve !== "" ? execParams.fields.reserve : undefined,
@@ -90,7 +90,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     case TransactionType.FreezeAsset: {
       const tx = algosdk.makeAssetFreezeTxnWithSuggestedParams(
         fromAccountAddr,
-        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        note,
         execParams.assetID as number,
         execParams.freezeTarget,
         execParams.freezeState,
@@ -106,7 +106,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.closeRemainderTo,
         execParams.revocationTarget,
         execParams.amount,
-        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        note,
         execParams.assetID as number,
         suggestedParams,
         execParams.payFlags.rekeyTo
@@ -116,7 +116,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     case TransactionType.DestroyAsset: {
       const tx = algosdk.makeAssetDestroyTxnWithSuggestedParams(
         fromAccountAddr,
-        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        note,
         execParams.assetID as number,
         suggestedParams,
         execParams.payFlags.rekeyTo
@@ -231,8 +231,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg,
+        execParams.clearProg,
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -253,8 +253,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg,
+        execParams.clearProg,
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -291,6 +291,21 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID as number,
         suggestedParams,
         execParams.payFlags.rekeyTo
+      );
+      return updateTxFee(execParams.payFlags, tx);
+    }
+    case TransactionType.KeyRegistration: {
+      const tx = algosdk.makeKeyRegistrationTxnWithSuggestedParams(
+        fromAccountAddr,
+        note,
+        execParams.voteKey,
+        execParams.selectionKey,
+        execParams.voteFirst,
+        execParams.voteLast,
+        execParams.voteKeyDilution,
+        suggestedParams,
+        execParams.payFlags.rekeyTo,
+        execParams.nonParticipation
       );
       return updateTxFee(execParams.payFlags, tx);
     }
