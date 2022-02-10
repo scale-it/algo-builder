@@ -28,7 +28,6 @@ layout: splash
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
-
 ## Requirements
 
 - Node 14+
@@ -47,7 +46,7 @@ Follow our [infrastructure guide](https://github.com/scale-it/algo-builder/tree/
 
 ### Connecting to an external Algorand Node
 
-Instead of using a local node, you can connect to an external one by setting the network configuration in the [`algob.config.js`](guide/algob-config) file. More about the project setup and config file is described in the Quick Start section below.
+Instead of using a local node, you can connect to an external one by setting the network configuration in the [`algob.config.js`](./algob-config.md) file. More about the project setup and config file is described in the Quick Start section below.
 
 ### PyTeal
 
@@ -79,9 +78,10 @@ Check the _requirements_ section above first._
 
 ### Create a blockchain
 
-- Use [Private Net Quick Start](/infrastructure/README.md).
-- Or install a node with any other network.
-- Remember to set `"EnableDeveloperAPI": true` in the node config.json
+- Use [Private Net Quick Start](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md).
+- Or install a node in your own way.
+  - Remember to set `"EnableDeveloperAPI": true` in the node config.json
+- Or use any of the existing network providers.
 
 ### Create an algob project 
 
@@ -98,7 +98,7 @@ Check the _requirements_ section above first._
         yarn add @algo-builder/algob
         yarn run algob init .
 
-    The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/guide/README](docs/guide#project-initialization) for more information.
+    The `init` command expects a directory where to initialize the workspace and creates sample project files there.
 
 1.  Verify if it was installed correctly:
 
@@ -142,7 +142,7 @@ Simply add `algob` as a dependency to your Node project:
 
 Then you can add `"algob": "algob"` into the package.json scripts section and use it with `yarn run algob`.
 
-Finally you need to create [`algob.config.js`](https://algobuilder.dev/guide/algob-config.html) file.
+Finally you need to create [`algob.config.js`]((./algob-config.md) file.
 
 ### Installation from master
 
