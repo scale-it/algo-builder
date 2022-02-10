@@ -3,7 +3,7 @@
 The Algo Builder project is composed from the following packages:
 
 - `algob`: framework to automate development of Algorand Assets and Smart Contracts.
-- `types/algosdk`: TypeScript typings for algosdk-js.
+- `web`: a package to interact with contracts from react app/frontend app.
 - `runtime`: light Algorand runtime and TEAL interpreter.
 
 ## Objectives
@@ -139,11 +139,11 @@ Simply add `algob` as a dependency to your Node project:
 
 Then you can add `"algob": "algob"` into the package.json scripts section and use it with `yarn run algob`.
 
-Finally you need to create [`algob.config.js`](docs/algob-config) file.
+Finally you need to create [`algob.config.js`](https://algobuilder.dev/guide/algob-config.html) file.
 
 ### Installation from master
 
-We recommend cloning our GitHub _master_ branch if you want to play with [templates](https://github.com/scale-it/algo-builder-templates) and [examples](https://github.com/scale-it/algo-builder/tree/master/examples) (all our example smart contracts are tested against _master_). The master branch corresponds to the latest released version. All examples are linked to the 
+We recommend cloning our GitHub _master_ branch if you want to play with [templates](https://github.com/scale-it/algo-builder-templates) and [examples](https://github.com/scale-it/algo-builder/tree/master/examples) (all our example smart contracts are tested against _master_). The master branch corresponds to the latest released version. All examples are part of the `yarn workspace` in the repository. So when you run `yarn build` in the repository root, you will be able to run algob in examples using `yarn algob ...` (inside the example directory).
 
 ```
 git clone https://github.com/scale-it/algo-builder.git
