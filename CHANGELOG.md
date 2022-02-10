@@ -24,6 +24,13 @@ Features, Bug Fixes, Breaking Changes, Deprecated
   * `getLsigByName`: returns lsig info stored in checkpoint by name
   * `fundLsigByName`: funds logic signature by name.
 - Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
+- Support `RekeyTo` field in the inner transaction for TEAL v6.
+- Enable transfer ALGO to implicit account.
+
+### Bug fixes
+
+- Return error when closeRemainderTo and fromAccountAddr is the same.
+- When close account should remove auth/spend address. Fixed in  [#575](https://github.com/scale-it/algo-builder/pull/575).
 
 ### Infrastructure
 

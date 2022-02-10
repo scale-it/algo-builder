@@ -344,9 +344,9 @@ export class Runtime {
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName as string,
+      asaDef.unitName,
       name,
-      asaDef.url as string,
+      asaDef.url,
       typeof asaDef.metadataHash !== "undefined" && typeof asaDef.metadataHash !== 'string'
         ? Buffer.from(asaDef.metadataHash).toString('base64')
         : asaDef.metadataHash,
@@ -756,7 +756,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -829,6 +829,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
   }
 }
