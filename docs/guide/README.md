@@ -151,7 +151,7 @@ The `infrastructure/`: directory with network infrastructure scripts (copy of [i
 
 A `sample-project` is provided for your reference.
 
-Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/js/README.md)
+Further information about the `sample-project` can be found in sample project [README](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/js/README.md) file.
 
 **NOTE**:
 a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.

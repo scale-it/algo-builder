@@ -21,7 +21,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 - Support RekeyTo field in the inner transaction for TEAL v6.
 - You can copies an algob project with `infrastructure/`(with a copy of network setup scripts from master) by adding the `infrastructure` flag.  Example:
 
-```base
+```bash
   algob init --infrastructure
 ```
 
