@@ -237,6 +237,7 @@ Read more about [checkpoints](https://algobuilder.dev/guide/execution-checkpoint
 
 - Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
 - Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
-- Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
-- Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
+- For the beginners we suggest to look firstly at the [examples/ref-templates](https://github.com/scale-it/algo-builder/tree/master/examples/ref-templates) to see how the reference templates are implemented.
+- Then go to [examples/asa](https://github.com/scale-it/algo-builder/tree/master/examples/asa) to learn how you can easily manage and deploy ASA with `algob`.
+- For a good overview on how you can create unit tests see [examples/dao](https://github.com/scale-it/algo-builder/tree/master/examples/dao).
 - Check other examples as well.
