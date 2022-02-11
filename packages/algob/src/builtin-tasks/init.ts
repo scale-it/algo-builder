@@ -10,11 +10,11 @@ export default function (): void {
       "Initializes a new typescript project in the given directory"
     )
     .addFlag(
-      "noInfrastructure",
+      "infrastructure",
       'Initializes a new project without infrastructure folder'
     )
-    .setAction(async ({ newProjectLocation, typescript, noInfrastructure }:
-    { newProjectLocation: string, typescript: boolean, noInfrastructure: boolean }, _) => {
-      await createProject(newProjectLocation, typescript, noInfrastructure);
+    .setAction(async ({ newProjectLocation, typescript, infrastructure }:
+    { newProjectLocation: string, typescript: boolean, infrastructure: boolean }, _) => {
+      await createProject(newProjectLocation, typescript, infrastructure);
     });
 }

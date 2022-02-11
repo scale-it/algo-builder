@@ -19,10 +19,10 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
 - Support RekeyTo field in the inner transaction for TEAL v6.
-- Default add `infrastructure/` folder when initial algob project. You can create algob project without `infrastructure/` by use `--no-infrastructure` flag.  Example:
+- You can copies an algob project with `infrastructure/`(with a copy of network setup scripts from master) by adding the `infrastructure` flag.  Example:
 
 ```base
-  algob init --no-infrastructure
+  algob init --infrastructure
 ```
 
 ### Infrastructure

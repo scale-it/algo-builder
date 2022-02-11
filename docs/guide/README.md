@@ -136,17 +136,18 @@ This will create a directory `my-project` and put multiple files into it.
 
 In the `my-project` folder you'll have following items:
 
-- `infrastructure/`: Directory for initial infrastructure commands. For more details please read `infrastructure/README.md`.
 - `assets/`: Directory for assets and contracts files
 - `scripts/`: Directory for scripts to deploy and run your assets and contracts
 - `tests/`: Directory for test files for testing your assets and contracts
 - `algob.config.js`: Algob configuration file
 
-You can initial project without `infrastructure\` folder by use command:
+You can initialize project with `infrastructure/` folder by adding `--infrastructure` flag:
 
 ```bash
-algob init my-project --no-infrastructure
+algob init my-project --infrastructure
 ```
+
+The `infrastructure/`: directory with network infrastructure scripts (copy of [infrastructure directory](https://github.com/scale-it/algo-builder/tree/master/infrastructure) in our repository).
 
 A `sample-project` is provided for your reference.
 

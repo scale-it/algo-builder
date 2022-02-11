@@ -18,7 +18,7 @@ describe("Init project", () => {
 
   it("should init project in an empty folder(javascript) with infrastructure folder", async () => {
     const location = "test-project";
-    await createProject(location, false, false);
+    await createProject(location, false, true);
 
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.js`));
@@ -27,7 +27,7 @@ describe("Init project", () => {
 
   it("should init project in an empty folder(javascript) without infrastructure folder", async () => {
     const location = "test-project";
-    await createProject(location, false, true);
+    await createProject(location, false, false);
 
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.js`));
@@ -36,7 +36,7 @@ describe("Init project", () => {
 
   it("should init project in a empty folder(typescript) with infrastructure folder", async () => {
     const location = "test-project";
-    await createProject(location, true, false);
+    await createProject(location, true, true);
 
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
@@ -46,7 +46,7 @@ describe("Init project", () => {
 
   it("should init project in a empty folder(typescript) without infrastructure folder", async () => {
     const location = "test-project";
-    await createProject(location, true, true);
+    await createProject(location, true, false);
 
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
