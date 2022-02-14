@@ -147,7 +147,7 @@ For opting in to App, `deployer` supports the following methods:
 
   Contract accounts can be also be used to deploy ASAs.
 
-   Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Logic Signatures(lsig). In the file `scripts/deploy.ts`, you will find:
+   Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Smart Signatures (lsig). In the file `scripts/deploy.ts`, you will find:
 
   ```
   await deployer.fundLsig('htlc.py',
