@@ -26,6 +26,12 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 - Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
+- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.
+Example:
+
+```bash
+  algob init --infrastructure
+```
 
 ### Bug fixes
 

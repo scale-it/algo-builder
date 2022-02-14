@@ -4,10 +4,10 @@ layout: splash
 
 # algob config
 
-Algo Builder project must have an `algob.config.js` file present in a root directory.
-The config is used to list available algorand networks and instructions how to connect to them.
+Algo Builder project must have an `algob.config.js` file present in a root directory. You can use the [sample file](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/common/algob.config.js).
+The config is used to list available algorand networks, accounts and how to connect to them.
 
-A network object can specify following entries:
+A network object specifs the following entries:
 
 + `accounts` - list of `algosdk.Account` objects (required)
 + `host` (string, required, can be with http or https prefix)
