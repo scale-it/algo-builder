@@ -254,7 +254,7 @@ export interface RuntimeArgs {
 
 export type ParamDefinitions = {
   [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
-    RuntimeArgs[param]
+  RuntimeArgs[param]
   >;
 };
 
