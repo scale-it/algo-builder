@@ -139,7 +139,7 @@ For opting in to App, `deployer` supports the following methods:
     };
   ```
 
-#### Logic Signatures
+#### Smart Signatures
 
 - *Contract Mode:*
 
