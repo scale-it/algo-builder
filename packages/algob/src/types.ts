@@ -651,7 +651,7 @@ export interface Deployer {
   /**
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
-  getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+  getApp: (appName: string) => rtypes.SSCInfo | undefined
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)

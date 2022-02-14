@@ -154,7 +154,7 @@ class DeployerBasicMode {
    * Loads stateful smart contract info from checkpoint
    * @param appName name of the app (passed by user during deployment)
    */
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+  getApp (appName: string): rtypes.SSCInfo | undefined {
     return this.checkpoint.getAppfromCPKey(appName);
   }
 
@@ -248,7 +248,7 @@ class DeployerBasicMode {
     const op = new CompileOp(this.algoOp.algodClient);
 
     // app
-    const app = this.getAppByName(name);
+    const app = this.getApp(name);
     if (app !== undefined) {
       const approvalCache = await op.readArtifact(app.approvalFile);
       const clearCache = await op.readArtifact(app.clearFile);

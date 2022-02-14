@@ -661,7 +661,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // able to retrieve info by "appName"
-    assert.isDefined(deployer.getAppByName("dao-app"));
+    assert.isDefined(deployer.getApp("dao-app"));
 
     // do note that traditional way doesn't work if appName is passed
     assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));

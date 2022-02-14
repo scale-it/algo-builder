@@ -82,7 +82,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+  getApp (appName: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
