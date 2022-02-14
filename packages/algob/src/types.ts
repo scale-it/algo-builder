@@ -499,7 +499,7 @@ export interface Deployer {
 
   /**
    * Funds logic signature account (Contract Account).
-   * @name  Logic Signature filename (must be present in assets folder)
+   * @name  Smart Signature filename (must be present in assets folder)
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
@@ -513,7 +513,7 @@ export interface Deployer {
 
   /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Logic Signature filename (must be present in assets folder)
+   * @name  Smart Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)

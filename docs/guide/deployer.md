@@ -157,7 +157,7 @@ For opting in to App, `deployer` supports the following methods:
 
 - *Delegated Signature Mode*:
 
-  Logic Signatures can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
+  Smart Signatures can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
 
   Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
