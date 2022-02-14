@@ -657,7 +657,7 @@ export interface Deployer {
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
    * @param lsigName name of the smart signture (passed during mkContractLsig/mkDelegatedLsig)
    */
-  getLsigByName: (lsigName: string) => LogicSigAccount | undefined
+  getLsig: (lsigName: string) => LogicSigAccount | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */

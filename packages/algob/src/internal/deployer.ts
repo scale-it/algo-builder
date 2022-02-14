@@ -162,7 +162,7 @@ class DeployerBasicMode {
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
    * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    */
-  getLsigByName (lsigName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount | undefined {
     return this.getDelegatedLsigByFile(lsigName) ?? this.getContractLsigByFile(lsigName);
   }
 
@@ -211,7 +211,7 @@ class DeployerBasicMode {
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
    * @deprecated this function will be removed in the next release. Use mkContractLsig to
    * store lsig info in checkpoint (against lsigName), and query it in scripts using
-   * getLsigByName
+   * getLsig
    */
   async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
     return await getLsigFromCache(name);
@@ -502,7 +502,7 @@ class DeployerBasicMode {
    * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    */
   assertLsigExistsInCP (lsigName: string): LogicSigAccount {
-    const lsig = this.getLsigByName(lsigName);
+    const lsig = this.getLsig(lsigName);
     if (lsig === undefined) {
       throw new BuilderError(ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP, {
         lsigName: lsigName

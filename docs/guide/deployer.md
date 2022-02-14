@@ -202,7 +202,7 @@ const bob = deployer.accountsByName.get('bob');
 await deployer.mkDelegatedLsig('file.py', bob, { ARG_DAO_APP: 1 }, "DLsig");
 
 // now during querying, you only need this lsig name
-const lsigInfo = deployer.getLsigByName("DLsig");
+const lsigInfo = deployer.getLsig("DLsig");
 ```
 
 Similarly for contract lsig:
@@ -211,10 +211,10 @@ Similarly for contract lsig:
 await deployer.mkContractLsig('file.py', { ARG_DAO_APP: 1 }, "CLsig");
 
 // now during querying, you only need this lsig name
-const lsigInfo = deployer.getLsigByName("CLsig");
+const lsigInfo = deployer.getLsig("CLsig");
 ```
 
-**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogicByFile`.
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsig(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogicByFile`.
 
 
 #### Compile contracts

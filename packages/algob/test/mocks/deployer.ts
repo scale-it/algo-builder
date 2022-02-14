@@ -86,7 +86,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getLsigByName (lsigName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount | undefined {
     throw new Error("Not implemented");
   }
 
