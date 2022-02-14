@@ -41,7 +41,7 @@ function copy (directory: string, location: string): void {
   });
 }
 
-function copySampleProject (location: string, isTSProject: boolean, isUseInfrastucture: boolean): void {
+function copySampleProject (location: string, isTSProject: boolean, withInfrastucture: boolean): void {
   const packageRoot = getPackageRoot();
   const sampleProjDir = path.join(packageRoot, "sample-project");
   if (fsExtra.pathExistsSync(`./${location}/algob.config.js`)) {
@@ -56,7 +56,7 @@ function copySampleProject (location: string, isTSProject: boolean, isUseInfrast
   copy(path.join(sampleProjDir, "common"), location);
 
   // copy infrastructure folder depending of --no-infrastructure flag
-  if (isUseInfrastucture) {
+  if (withInfrastucture) {
     copy(path.join(sampleProjDir, "infrastructure"), path.join(location, "infrastructure"));
   }
 
