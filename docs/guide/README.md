@@ -141,13 +141,11 @@ In the `my-project` folder you'll have following items:
 - `tests/`: Directory for test files for testing your assets and contracts
 - `algob.config.js`: Algob configuration file
 
-You can initialize project with `infrastructure/` folder by adding `--infrastructure` flag:
+You can initialize project with `infrastructure/` folder by adding `--infrastructure` flag. It will contain scripts to setup a private network - a copy the `/infrastructure` directory from our repository.
 
 ```bash
 algob init my-project --infrastructure
 ```
-
-The `infrastructure/`: directory with network infrastructure scripts (copy of [infrastructure directory](https://github.com/scale-it/algo-builder/tree/master/infrastructure) in our repository).
 
 A `sample-project` is provided for your reference.
 

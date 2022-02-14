@@ -19,7 +19,8 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
 - Support RekeyTo field in the inner transaction for TEAL v6.
-- You can copies an algob project with `infrastructure/`(with a copy of network setup scripts from master) by adding the `infrastructure` flag.  Example:
+- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.  
+Example:
 
 ```bash
   algob init --infrastructure

@@ -49,6 +49,7 @@ function copySampleProject (location: string, isTSProject: boolean, isUseInfrast
       clashingFile: location
     });
   }
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   console.log(chalk.greenBright("Initializing new workspace in " + path.join(process.cwd(), location)));
 
   // copy common files first
@@ -93,11 +94,11 @@ async function printPluginInstallationInstructions (): Promise<void> {
 }
 
 export async function createProject (
-  location: string, isTSProject: boolean, isUseInfrastructure: boolean
+  location: string, isTSProject: boolean, withInfrastucture: boolean
 ): PromiseAny {
   await printWelcomeMessage();
 
-  copySampleProject(location, isTSProject, isUseInfrastructure);
+  copySampleProject(location, isTSProject, withInfrastucture);
 
   let shouldShowInstallationInstructions = true;
 
