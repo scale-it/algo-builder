@@ -770,18 +770,20 @@ describe("Update transaction test in run mode", () => {
     assert.isDefined(appInfo);
 
     deployer = new DeployerRunMode(deployerCfg);
-    execParams = {
-      type: wtypes.TransactionType.UpdateApp,
-      sign: wtypes.SignType.SecretKey,
-      fromAccount: bobAcc,
-      appID: appInfo?.appID,
-      newApprovalProgram: "approval.teal",
-      newClearProgram: "clear.teal",
-      payFlags: {}
-    };
+    if (appInfo?.appID) {
+      execParams = {
+        type: wtypes.TransactionType.UpdateApp,
+        sign: wtypes.SignType.SecretKey,
+        fromAccount: bobAcc,
+        appID: appInfo.appID,
+        newApprovalProgram: "approval.teal",
+        newClearProgram: "clear.teal",
+        payFlags: {}
+      };
 
-    await executeTransaction(deployer, execParams);
-    assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
+      await executeTransaction(deployer, execParams);
+      assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
+    }
   });
 
   it("deploy in run mode, update in deploy mode", async () => {
