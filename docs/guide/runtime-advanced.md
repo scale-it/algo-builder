@@ -9,9 +9,10 @@ layout: splash
 - Account to any account.
 - Smart Signature account to any account.
 - Application to any account. We use inner transaction to rekey application.
+
 Example: 
 
-We can rekey John account to Bob follow suing the following transaction parms.
+We can rekey John account to Bob follow suing the following transaction params.
 ```js
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
