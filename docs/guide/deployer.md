@@ -170,11 +170,11 @@ You can learn more about Stateless Smart Contracts [here](https://developer.algo
 
 #### Checkpoint names
 
-Storing data in [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.html) against your own names can be very useful. For example, you don't need to pass smart contract template parameters every time while getting app info, or loading a logic signature. Currently, we support naming for apps (Algorand stateful application) and logic signatures.
+Algob creates [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.html) and associates them with a name. This is a very useful feature. For example, you don't need to pass smart contract template parameters every time when getting app info, or loading a logic signature. Since `algob v4.0`, we support naming for apps (Algorand stateful smart contracts) and smart signatures.
 
 ##### App Name
 
-You can pass `appName` in `deployer.deployApp` while deploying your application. The app metadata in checkpoint will be stored against "appName". Eg.
+`deployer.deployApp` requires `appName` when deploying an application. The app metadata in checkpoint will be stored against "appName". Eg.
 ```js
 // deployment
 const daoAppInfo = await deployer.deployApp(
