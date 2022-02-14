@@ -1,6 +1,6 @@
 const _appInitParams = (deployer) => {
   const govToken = deployer.asa.get('gov-token');
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
   return {
     ARG_GOV_TOKEN: govToken.assetIndex,
     ARG_DAO_APP_ID: daoAppInfo.appID
@@ -15,7 +15,7 @@ async function getDAOFundLsig (deployer) {
 // returns proposal lsig
 async function getProposalLsig (deployer) {
   const proposerAcc = accounts(deployer).proposer;
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
   return await deployer.loadLogic('proposal-lsig.py',
     { ARG_OWNER: proposerAcc.addr, ARG_DAO_APP_ID: daoAppInfo.appID });
 };

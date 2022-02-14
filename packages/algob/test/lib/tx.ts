@@ -251,7 +251,7 @@ describe("Delete ASA and SSC", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getApp("approval.teal", "clear.teal");
+    const res = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(res);
     if (res) assert.equal(res.deleted, true);
   });
@@ -640,7 +640,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 
   it("should deploy application in deploy mode and save info by name", async () => {
@@ -664,7 +664,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.isDefined(deployer.getAppByName("dao-app"));
 
     // do note that traditional way doesn't work if appName is passed
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 
   it("should delete application in run mode", async () => {
@@ -694,7 +694,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getApp("approval.teal", "clear.teal");
+    const res = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(res);
     assert.equal(res?.deleted, false);
   });
@@ -734,7 +734,7 @@ describe("Update transaction test in run mode", () => {
     const appInfo = await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
 
     execParams = {
       type: wtypes.TransactionType.UpdateApp,
@@ -748,7 +748,7 @@ describe("Update transaction test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 
   it("deploy in deploy mode, update in run mode", async () => {
@@ -766,7 +766,7 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     await executeTransaction(deployer, execParams);
-    const appInfo = deployer.getApp("approval.teal", "clear.teal");
+    const appInfo = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(appInfo);
 
     deployer = new DeployerRunMode(deployerCfg);
@@ -774,14 +774,14 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo?.appID as number,
+      appID: appInfo?.appID,
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}
     };
 
     await executeTransaction(deployer, execParams);
-    assert.deepEqual(appInfo, deployer.getApp("approval.teal", "clear.teal"));
+    assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 
   it("deploy in run mode, update in deploy mode", async () => {
@@ -798,7 +798,7 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     const appInfo = await executeTransaction(deployer, execParams);
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
 
     deployer = new DeployerDeployMode(deployerCfg);
     execParams = {
@@ -813,7 +813,7 @@ describe("Update transaction test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
     // checkpoint is stored for the update
-    assert.isDefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isDefined(deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 });
 

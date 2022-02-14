@@ -146,7 +146,7 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getAppByFile (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
     return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
   }
 

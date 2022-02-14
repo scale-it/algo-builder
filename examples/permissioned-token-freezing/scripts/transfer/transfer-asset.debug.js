@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   // NOTE: set min asset level first using ./set-clear-level.js
-  const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+  const appInfo = deployer.getAppByFile('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
   const escrowParams = {

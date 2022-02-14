@@ -5,13 +5,13 @@ const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 async function run (runtimeEnv, deployer) {
-  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
   const controllerappID = controllerAppInfo.appID;
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
 
   // get new permissions smart contract info
-  const newPermissionsAppInfo = deployer.getApp('permissions_new.teal', 'clear_state_program.py');
+  const newPermissionsAppInfo = deployer.getAppByFile('permissions_new.teal', 'clear_state_program.py');
 
   console.log(`\n** Setting new permissions smart contract(id = ${newPermissionsAppInfo.appID}) **`);
   try {

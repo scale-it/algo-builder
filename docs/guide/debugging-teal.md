@@ -204,7 +204,7 @@ For more details, check the project [README](https://github.com/scale-it/algo-bu
 Setting up transaction group:
 ```js
 // load app, asset info from checkpoint
-const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+const appInfo = deployer.getAppByFile('poi-approval.teal', 'poi-clear.teal');
 const assetInfo = deployer.asa.get('gold');
 
 // load logic signature

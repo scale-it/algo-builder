@@ -3,7 +3,7 @@ const { accounts, getProposalLsig } = require('./common/accounts.js');
 const { mkClearVoteRecordTx } = require('./common/tx-params.js');
 
 async function clearVoteRecord (deployer, voterAcc, proposalAddr) {
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
 
   console.log(`* Clearing vote record of ${voterAcc.addr} from proposal ${proposalAddr} *`);
   const clearVoteParams = mkClearVoteRecordTx(

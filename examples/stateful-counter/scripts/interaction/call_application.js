@@ -5,7 +5,7 @@ async function run (runtimeEnv, deployer) {
   const creatorAccount = deployer.accountsByName.get('alice');
 
   // Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getApp('approval_program.teal', 'clear_program.teal');
+  const appInfo = deployer.getAppByFile('approval_program.teal', 'clear_program.teal');
   const applicationID = appInfo.appID;
   console.log('Application Id ', applicationID);
 

@@ -17,7 +17,7 @@ exports.epoch1 = async function (deployer) {
   await redeem(deployer, account.elon, account.manager, 1, 8);
   console.log('Elon redeemed 8 bonds from dex_1');
 
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: account.creator.addr,

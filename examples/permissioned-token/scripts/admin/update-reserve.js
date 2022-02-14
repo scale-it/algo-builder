@@ -31,7 +31,7 @@ async function updateReserveByAssetConfig (deployer, address) {
   // fetch old asset reserve from network by assetId
   const tesla = deployer.asa.get('tesla');
   const asaReserveAddr = (await deployer.getAssetByID(tesla.assetIndex)).params.reserve;
-  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();

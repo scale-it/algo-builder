@@ -57,7 +57,7 @@ exports.totalSupply = async function (deployer, assetIndex) {
 
 function getClawbackParams (deployer) {
   const tesla = deployer.asa.get('tesla');
-  const controllerInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
   return {
     TOKEN_ID: tesla.assetIndex,
     CONTROLLER_APP_ID: controllerInfo.appID

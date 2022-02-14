@@ -16,8 +16,8 @@ const clearStateProgram = 'clear_state_program.py';
  */
 async function transfer (deployer, from, toAddr, amount) {
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getApp('controller.py', clearStateProgram);
-  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const controllerAppInfo = deployer.getAppByFile('controller.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -91,7 +91,7 @@ async function transfer (deployer, from, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   // alice is set-up as the permissions manager during deploy
   const permissionsManager = deployer.accountsByName.get('alice');
-  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
 
   /*
    * Transfer some tokens b/w 2 non-reserve accounts

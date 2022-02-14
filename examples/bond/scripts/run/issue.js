@@ -11,7 +11,7 @@ exports.issue = async function (deployer) {
   const creatorAccount = deployer.accountsByName.get('john');
   const managerAcc = deployer.accountsByName.get('alice');
 
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,

@@ -5,7 +5,7 @@ const { accounts, getDAOFundLsig, getProposalLsig } = require('./common/accounts
 // Executes a proposal
 async function execute (deployer, account, proposalAddr) {
   const daoFundLsig = await getDAOFundLsig(deployer);
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
 
   console.log(`* Execute proposal by ${account.addr} *`);
   const executeParams = [

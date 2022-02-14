@@ -19,7 +19,7 @@ const clearStateProgram = 'clear_state_program.py';
 async function cease (deployer, address, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getApp('controller.py', clearStateProgram);
+  const controllerAppInfo = deployer.getAppByFile('controller.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -77,7 +77,7 @@ async function cease (deployer, address, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
 
   // fund owner and bob
   const bob = deployer.accountsByName.get('bob');

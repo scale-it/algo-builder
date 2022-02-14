@@ -8,7 +8,7 @@ async function addProposal (runtimeEnv, deployer) {
   // fund account
   await fundAccount(deployer, proposer);
 
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
   const proposalLsig = await getProposalLsig(deployer);
   try {
     await deployer.optInLsigToApp(daoAppInfo.appID, proposalLsig, {}, {});

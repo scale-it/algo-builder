@@ -646,7 +646,7 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getAppByFile: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a stateful smart contract info from checkpoint name

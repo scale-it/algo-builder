@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: 'Funding' }));
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getApp('5-contract-asa-stateful.py', '5-clear.py');
+  const appInfo = deployer.getAppByFile('5-contract-asa-stateful.py', '5-clear.py');
   const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */

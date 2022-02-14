@@ -4,7 +4,7 @@ const { getProposalLsig, accounts } = require('./common/accounts.js');
 const { mkClearProposalTx } = require('./common/tx-params.js');
 
 async function clearProposal (deployer, proposalLsig, depositAmt) {
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
   const govToken = deployer.asa.get('gov-token');
 
   console.log(`* Clearing proposal_lsig record ${proposalLsig.address()} *`);

@@ -12,7 +12,7 @@ const { issuePrice, buyTxNode } = require('./common/common.js');
  */
 exports.epoch0 = async function (deployer) {
   const account = await accounts(deployer);
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: account.creator.addr,

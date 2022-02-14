@@ -9,7 +9,7 @@ const accounts = require('./common/accounts');
  * and link it to the controller (using the controller  add_permission argument)
  */
 async function setupPermissionsApp (runtimeEnv, deployer) {
-  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
 
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);

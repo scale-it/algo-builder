@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   });
 
-  const appInfo = deployer.getApp('crowdFundApproval.teal', 'crowdFundClear.teal');
+  const appInfo = deployer.getAppByFile('crowdFundApproval.teal', 'crowdFundClear.teal');
   const lsig = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   const escrowAccountAddress = lsig.address();
 

@@ -3,7 +3,7 @@ const { balanceOf } = require('@algo-builder/algob');
 const { accounts, tryExecuteTx, p } = require('./common/common.js');
 
 async function transferNFT (deployer, creator, p) {
-  const nftAppInfo = deployer.getApp('nft-app-approval.py', 'nft-app-clear.py');
+  const nftAppInfo = deployer.getAppByFile('nft-app-approval.py', 'nft-app-clear.py');
   const asaInfo = deployer.asa.get('nft-asa');
   const statelessPrimeLsig = await deployer.loadLogic('stateless.py', {
     ARG_P: p,
