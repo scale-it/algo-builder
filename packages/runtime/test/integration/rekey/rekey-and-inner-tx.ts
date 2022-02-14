@@ -123,7 +123,7 @@ describe("Rekey transaction and inner transaction ", function () {
       const aliceBalanceAfter = alice.amount;
       const bobBalanceAfter = bob.amount;
 
-      // alice account not change
+      // alice account didn't change
       assert.equal(aliceBalanceBefore, aliceBalanceAfter);
       // include fee and amount use for inner transaction
       assert.equal(applBalanceBefore, applBalanceAfter + amount + BigInt(fee));
@@ -143,7 +143,7 @@ describe("Rekey transaction and inner transaction ", function () {
           totalFee: fee
         }
       };
-      // should failed
+      // should fail
       expectRuntimeError(
         () => runtime.executeTx(tranferAlgoTx),
         RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,

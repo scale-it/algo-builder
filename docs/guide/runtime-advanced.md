@@ -4,16 +4,14 @@ layout: splash
 
 # Rekeying transaction
 
-- You should read about Algorand rekeying, [here](https://developer.algorand.org/docs/get-details/accounts/rekey/). 
-- `Runtime` supported a rekeying transaction. You can use field `rekeyTo` in `payFlags` to rekey from account to another address. 
-- We can rekeying:
-    - Account to any account.
-    - Logic account to any account.
-    - Application to any account. We use inner transaction to rekey application.
-
+- Read first about [Algorand rekeying](https://developer.algorand.org/docs/get-details/accounts/rekey/). 
+`Runtime` supports a rekey transaction. You can use field `rekeyTo` in `payFlags` to rekey:
+- Account to any account.
+- Smart Signature account to any account.
+- Application to any account. We use inner transaction to rekey application.
 Example: 
 
-- We can rekey join account to bob follow below config.
+We can rekey John account to Bob follow suing the following transaction parms.
 ```js
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
@@ -26,7 +24,7 @@ Example:
     } 
 ```
 
-- We can rekey logic signature (lsig) to bob.
+- We can rekey smart signature (lsig) to Bob.
 
 ```js
 {
@@ -42,4 +40,4 @@ Example:
 }
 ```
 
-You can check how to use rekeying transaction at  [here](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/rekey-transaction.ts).
+You can check how to use rekeying transaction in the [source code](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/rekey/rekey-transaction.ts).
