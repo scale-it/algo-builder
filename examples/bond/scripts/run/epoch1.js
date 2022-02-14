@@ -23,7 +23,7 @@ exports.epoch1 = async function (deployer) {
     TMPL_OWNER: account.creator.addr,
     TMPL_APP_MANAGER: account.manager.addr
   };
-  const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
+  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
   const bondToken = tokenMap.get('bond-token-1');
   await deployer.optInAccountToASA(bondToken, 'bob', { totalFee: 1000 });
   await deployer.optInAccountToASA(bondToken, 'elon-musk', { totalFee: 1000 });

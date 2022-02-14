@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
   });
 
   const appInfo = deployer.getAppByFile('crowdFundApproval.teal', 'crowdFundClear.teal');
-  const lsig = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
+  const lsig = await deployer.loadLogicByFile('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   const escrowAccountAddress = lsig.address();
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)

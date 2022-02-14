@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getAppByFile('crowdFundApproval.teal', 'crowdFundClear.teal');
 
   // Get Escrow Account Address
-  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
+  const escrowAccount = await deployer.loadLogicByFile('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   console.log('Escrow Address: ', escrowAccount.address());
 
   const txGroup = [

@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 
-  const contract = await deployer.loadLogic('htlc.py');
+  const contract = await deployer.loadLogicByFile('htlc.py');
   const contractAddress = contract.address();
 
   txnParams.fromAccountAddr = contractAddress;

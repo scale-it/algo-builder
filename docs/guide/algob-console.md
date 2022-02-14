@@ -201,11 +201,11 @@ Similar example can be found in `/scrips/transfer/tesla-to-john.js` (tesla ASA).
 ## Transfer Algos according to ASC logic (Contract Account)
 
 Here we will transfer some `algos` from a stateless smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
-+ We will first load the logic signature (using `deployer.loadLogic(<file_name>.teal)` and get it's address(`lsig.address()`).
++ We will first load the logic signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`).
 + This address will be the sender(contract account mode) and receiver will be `john`.
 + Finally, we will transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
 ```
-lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
+lsig = await deployer.loadLogicByFile("2-gold-contract-asc.teal");
 sender = lsig.address();
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97818537-e3740300-1cc8-11eb-81cd-a64e80106cf7.png)

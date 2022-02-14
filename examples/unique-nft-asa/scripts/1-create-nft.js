@@ -3,7 +3,7 @@ const { accounts, tryExecuteTx, p } = require('./run/common/common.js');
 
 async function createNFT (deployer, creator, p) {
   const nftAppInfo = deployer.getAppByFile('nft-app-approval.py', 'nft-app-clear.py');
-  const statelessPrimeLsig = await deployer.loadLogic('stateless.py', {
+  const statelessPrimeLsig = await deployer.loadLogicByFile('stateless.py', {
     ARG_P: p,
     ARG_NFT_APP_ID: nftAppInfo.appID
   });

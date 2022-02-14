@@ -53,7 +53,7 @@ async function run (runtimeEnv, deployer) {
   console.log(appInfo);
 
   // Get Escrow Account Address
-  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
+  const escrowAccount = await deployer.loadLogicByFile('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   console.log('Escrow Account Address:', escrowAccount.address());
 
   // Update application with escrow account

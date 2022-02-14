@@ -67,4 +67,4 @@ function getClawbackParams (deployer) {
 exports.getClawbackParams = getClawbackParams;
 
 exports.getClawback = async (deployer) =>
-  deployer.loadLogic('clawback.py', getClawbackParams(deployer));
+  deployer.loadLogicByFile('clawback.py', getClawbackParams(deployer));

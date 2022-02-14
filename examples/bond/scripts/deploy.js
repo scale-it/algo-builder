@@ -65,7 +65,7 @@ async function run (runtimeEnv, deployer) {
     TMPL_OWNER: creatorAccount.addr,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
+  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
 
   algoTxnParams.toAccountAddr = issuerLsig.address();
   await executeTransaction(deployer, algoTxnParams);

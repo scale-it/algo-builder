@@ -214,7 +214,7 @@ await deployer.mkContractLsig('file.py', { ARG_DAO_APP: 1 }, "CLsig");
 const lsigInfo = deployer.getLsigByName("CLsig");
 ```
 
-**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogic`.
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogicByFile`.
 
 
 #### Compile contracts

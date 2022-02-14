@@ -669,7 +669,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
+  loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
    * Alias to `this.compileASC`

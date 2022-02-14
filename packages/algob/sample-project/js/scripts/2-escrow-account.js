@@ -13,7 +13,7 @@ async function run (runtimeEnv, deployer) {
   };
   await deployer.fundLsig('escrow.py',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { fee: 1000 }, templateParams);
-  const escrow = await deployer.loadLogic('escrow.py', templateParams);
+  const escrow = await deployer.loadLogicByFile('escrow.py', templateParams);
 
   await deployer.addCheckpointKV('User Checkpoint Escrow', `Fund Escrow Account: ${escrow.address()}`);
   console.log('Escrow account script execution finished!');

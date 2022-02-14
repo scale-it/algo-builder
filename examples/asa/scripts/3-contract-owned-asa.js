@@ -33,7 +33,7 @@ async function run (runtimeEnv, deployer) {
   console.log(appInfo);
 
   // Get Statless Account Address
-  const statelessAccount = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
+  const statelessAccount = await deployer.loadLogicByFile('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
   console.log('stateless Account Address:', statelessAccount.address());
 
   await executeTransaction(deployer, mkParam(masterAccount, statelessAccount.address(), 200e6, { note: 'funding account' }));

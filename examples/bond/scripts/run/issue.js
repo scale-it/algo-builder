@@ -17,7 +17,7 @@ exports.issue = async function (deployer) {
     TMPL_OWNER: creatorAccount.addr,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
+  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
   const asaInfo = deployer.getASAInfo('bond-token-0');
   const groupTx = issueTx(creatorAccount, issuerLsig, appInfo.appID, asaInfo.assetIndex);
 

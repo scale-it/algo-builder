@@ -16,7 +16,7 @@ async function run (
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
-  const lsig = await deployer.loadLogic('htlc.py', scTmplParams);
+  const lsig = await deployer.loadLogicByFile('htlc.py', scTmplParams);
   const sender = lsig.address();
 
   const txnParams: rtypes.AlgoTransferParam = {

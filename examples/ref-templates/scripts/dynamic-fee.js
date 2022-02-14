@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
     { funder: masterAccount, fundingMicroAlgo: 100000000 },
     { closeRemainderTo: masterAccount.addr }, scInitParam);
 
-  const contract = await deployer.loadLogic(contractName, scInitParam);
+  const contract = await deployer.loadLogicByFile(contractName, scInitParam);
   const escrow = contract.address(); // contract account
 
   await deployer.mkDelegatedLsig(contractName, masterAccount, scInitParam); // sign contract

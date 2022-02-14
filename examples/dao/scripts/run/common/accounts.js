@@ -9,14 +9,14 @@ const _appInitParams = (deployer) => {
 
 // returns vote_deposit lsig
 async function getDAOFundLsig (deployer) {
-  return await deployer.loadLogic('dao-fund-lsig.py', _appInitParams(deployer));
+  return await deployer.loadLogicByFile('dao-fund-lsig.py', _appInitParams(deployer));
 };
 
 // returns proposal lsig
 async function getProposalLsig (deployer) {
   const proposerAcc = accounts(deployer).proposer;
   const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
-  return await deployer.loadLogic('proposal-lsig.py',
+  return await deployer.loadLogicByFile('proposal-lsig.py',
     { ARG_OWNER: proposerAcc.addr, ARG_DAO_APP_ID: daoAppInfo.appID });
 };
 

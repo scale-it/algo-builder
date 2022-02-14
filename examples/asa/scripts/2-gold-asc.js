@@ -22,7 +22,7 @@ async function run (runtimeEnv, deployer) {
   console.log(ascInfoGoldDelegated);
 
   /* Contract opt-in for ASA gold + fund contract with ASA gold */
-  const lsig = await deployer.loadLogic('2-gold-contract-asc.teal');
+  const lsig = await deployer.loadLogicByFile('2-gold-contract-asc.teal');
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
   await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 });

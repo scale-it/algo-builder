@@ -106,7 +106,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
+  async loadLogicByFile (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
     throw new Error("Not implemented");
   }
 

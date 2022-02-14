@@ -20,7 +20,7 @@ async function run (runtimeEnv, deployer) {
 
   // Get AppInfo and AssetID from checkpoints.
   const appInfo = deployer.getAppByFile('5-contract-asa-stateful.py', '5-clear.py');
-  const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
+  const lsig = await deployer.loadLogicByFile('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */
   const assetID = deployer.asa.get('platinum').assetIndex;

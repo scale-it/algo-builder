@@ -25,7 +25,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
     TMPL_OWNER: creatorAccount.addr,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
+  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
   console.log('Issuer address: ', issuerLsig.address());
   const newBondToken = 'bond-token-' + String(i);
   const deployTx = {
@@ -52,7 +52,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const dexLsig = await deployer.loadLogic('dex-lsig.py', lsigParams);
+  const dexLsig = await deployer.loadLogicByFile('dex-lsig.py', lsigParams);
 
   await fundAccount(deployer, dexLsig.address());
 

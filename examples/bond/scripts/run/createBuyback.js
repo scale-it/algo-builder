@@ -19,7 +19,7 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
     TMPL_APP_MANAGER: managerAcc.addr,
     TMPL_BOND: bondToken
   };
-  const buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  const buybackLsig = await deployer.loadLogicByFile('buyback-lsig.py', scInitParam);
   await fundAccount(deployer, buybackLsig.address());
 
   const buybackTx = {

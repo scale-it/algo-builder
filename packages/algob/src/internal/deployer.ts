@@ -200,7 +200,7 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
+  async loadLogicByFile (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
