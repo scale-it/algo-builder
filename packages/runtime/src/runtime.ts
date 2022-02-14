@@ -344,9 +344,9 @@ export class Runtime {
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName as string,
+      asaDef.unitName,
       name,
-      asaDef.url as string,
+      asaDef.url,
       typeof asaDef.metadataHash !== "undefined" && typeof asaDef.metadataHash !== 'string'
         ? Buffer.from(asaDef.metadataHash).toString('base64')
         : asaDef.metadataHash,

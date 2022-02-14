@@ -1,9 +1,11 @@
 main:
   - title: "Home"
     url: /
-  - title: "Quick-Start"
-    url: https://github.com/scale-it/algo-builder#installation
   - title: "Guide"
     url: /guide/README
-  - title: "API"
-    url: https://scale-it.github.io/algo-builder/api/algob/index.html
+  - title: "Algob API"
+    url: https://algobuilder.dev/api/algob/index.html
+  - title: "Runtime API"
+    url: https://algobuilder.dev/api/runtime/index.html
+  - title: "Web API"
+    url: https://algobuilder.dev/api/web/index.html

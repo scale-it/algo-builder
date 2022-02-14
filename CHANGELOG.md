@@ -19,12 +19,18 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
 - Support RekeyTo field in the inner transaction for TEAL v6.
-- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.  
+- Enable transfer ALGO to implicit account.
+- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.
 Example:
 
 ```bash
   algob init --infrastructure
 ```
+
+### Bug fixes
+
+- Return error when closeRemainderTo and fromAccountAddr is the same.
+- When close account should remove auth/spend address. Fixed in  [#575](https://github.com/scale-it/algo-builder/pull/575).
 
 ### Infrastructure
 
