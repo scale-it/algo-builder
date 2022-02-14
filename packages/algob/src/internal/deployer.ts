@@ -163,14 +163,14 @@ class DeployerBasicMode {
    * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
    */
   getLsigByName (lsigName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsig(lsigName) ?? this.getContractLsig(lsigName);
+    return this.getDelegatedLsigByFile(lsigName) ?? this.getContractLsigByFile(lsigName);
   }
 
   /**
    * Loads a single signed delegated logic signature account from checkpoint
    * @param lsigFileName logic signature file name
    */
-  getDelegatedLsig (lsigFileName: string): LogicSigAccount | undefined {
+  getDelegatedLsigByFile (lsigFileName: string): LogicSigAccount | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
     const result = resultMap.get(lsigFileName)?.lsig;
     if (result === undefined) {
@@ -190,8 +190,8 @@ class DeployerBasicMode {
    * Loads a logic signature account from checkpoint
    * @param lsigFileName logic signature file name
    */
-  getContractLsig (lsigFileName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsig(lsigFileName);
+  getContractLsigByFile (lsigFileName: string): LogicSigAccount | undefined {
+    return this.getDelegatedLsigByFile(lsigFileName);
   }
 
   /**

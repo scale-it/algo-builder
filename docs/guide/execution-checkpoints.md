@@ -77,22 +77,22 @@ While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is 
 ## Checkpoint storage for logic signature(Lsig)
 
 - For logic signature in contract mode: You may use `addLsigCheckpoint` function to store lsigInfo in checkpoint.
-- To load logic signature in contract mode: You may use `getContractLsig` function.
+- To load logic signature in contract mode: You may use `deployer.getAppByFile` function.
 - Ex:
 ```js
 // store checkpoint
 deployer.mkContractLsig(contractName);
 // load checkpoint
-deployer.getContractLsig(contractName);
+deployer.deployer.getAppByFile(contractName);
 ```
 - For delegated logic signature `algob` stores checkpoints automatically.
-- To load delegated logic signature you may use `getDelegatedLsig` function.
+- To load delegated logic signature you may use `getDelegatedLsigByFile` function.
 - Ex:
 ```js
 // store checkpoint
 deployer.mkDelegatedLsig(contractName);
 // load checkpoint
-deployer.getDelegatedLsig(contractName);
+deployer.getDelegatedLsigByFile(contractName);
 ```
 
 ## Checkpoint storage `delete` boolean

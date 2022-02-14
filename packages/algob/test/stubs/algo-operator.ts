@@ -17,7 +17,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return mockAlgod;
   };
 
-  getDelegatedLsig (lsig: string): Object | undefined {
+  getDelegatedLsigByFile (lsig: string): Object | undefined {
     throw new Error("Not implemented");
   }
 

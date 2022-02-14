@@ -413,7 +413,7 @@ describe("DeployerDeployMode", () => {
     };
 
     deployerCfg.cpData.merge(cp1, "12s");
-    const result = deployer.getDelegatedLsig("MY_LSIG");
+    const result = deployer.getDelegatedLsigByFile("MY_LSIG");
     assert.deepEqual(logicSig, result);
   });
 

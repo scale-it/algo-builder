@@ -284,12 +284,12 @@ Code can be found in `/scripts/transfer/gold-contract-sc.js`
 Here, we will first transfer some Algorand Standard Assets(ASA) from `goldOwner` (delegating authority in this case) to `john` according to asc `/assets/4-gold-asa.teal`.
 `goldOwner` is the delegating authority here, as during deployment (`algob deploy`) the smart contract's logic signature was signed by this account (check `/scripts/2-gold-asc.js`).
 
-Logic signature (stored in checkpoint) is retreived using `deployer.getDelegatedLsig('<file_name>.teal'`).
+Logic signature (stored in checkpoint) is retreived using `deployer.getDelegatedLsigByFile('<file_name>.teal'`).
 Assets are transferred using `algob.executeTransaction({ type: TransactionType.TransferAsset, ...})`.
 
 Retreive lsig & assetId from checkpoint:
 ```bash
-algob> lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+algob> lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
 LogicSig {
   tag: [
      80, 114, 111,

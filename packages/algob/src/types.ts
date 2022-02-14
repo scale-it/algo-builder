@@ -661,7 +661,7 @@ export interface Deployer {
 
   /**
    * Queries a delegated logic signature from checkpoint. */
-  getDelegatedLsig: (lsigName: string) => Object | undefined
+  getDelegatedLsigByFile: (lsigName: string) => Object | undefined
 
   /**
    * Loads contract mode logic signature (TEAL or PyTEAL)

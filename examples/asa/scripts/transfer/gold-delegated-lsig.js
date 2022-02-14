@@ -12,7 +12,7 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
-  const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+  const lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
   let txnParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
@@ -38,7 +38,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParam);
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
-  const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
+  const logicSignature = deployer.getDelegatedLsigByFile('3-gold-delegated-asc.teal');
 
   txnParam = {
     type: types.TransactionType.TransferAlgo,
