@@ -505,7 +505,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  fundLsig: (
+  fundLsigByFile: (
     fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,

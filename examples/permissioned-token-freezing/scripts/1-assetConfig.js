@@ -16,7 +16,7 @@ async function run (runtimeEnv, deployer) {
     APP_ID: appInfo.appID
   };
 
-  await deployer.fundLsig('clawback-escrow.py',
+  await deployer.fundLsigByFile('clawback-escrow.py',
     { funder: creator, fundingMicroAlgo: 1e6 }, {}, escrowParams); // sending 1 Algo
 
   const escrowLsig = await deployer.loadLogicByFile('clawback-escrow.py', escrowParams);

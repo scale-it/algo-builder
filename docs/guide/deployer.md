@@ -150,10 +150,10 @@ For opting in to App, `deployer` supports the following methods:
    Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
 
   ```
-  await deployer.fundLsig('htlc.py',
+  await deployer.fundLsigByFile('htlc.py',
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
   ```
-  `fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsig` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
+  `fundLsigByFile` funds the contract account (compiled hash of the smart contract). The function `fundLsigByFile` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
 
 - *Delegated Signature Mode*:
 

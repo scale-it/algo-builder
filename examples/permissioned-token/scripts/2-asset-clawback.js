@@ -32,7 +32,7 @@ async function setupClawback (runtimeEnv, deployer) {
     const [_, multsigaddr] = createMsigAddress(1, 2, addrs); // use multsigaddr in TOKEN_RESERVE
   */
 
-  await deployer.fundLsig('clawback.py',
+  await deployer.fundLsigByFile('clawback.py',
     { funder: owner, fundingMicroAlgo: 5e6 }, {}, clawbackParams);
 
   console.log('\n** Updating asset clawback to lsig **');

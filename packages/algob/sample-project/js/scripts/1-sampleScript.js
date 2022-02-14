@@ -1,6 +1,6 @@
 async function run (runtimeEnv, deployer) {
   console.log('Sample script for ASC has started execution!');
-  await deployer.fundLsig('fee-check.teal',
+  await deployer.fundLsigByFile('fee-check.teal',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, {});
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');

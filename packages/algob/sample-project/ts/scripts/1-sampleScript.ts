@@ -3,7 +3,7 @@ import * as algob from "@algo-builder/algob";
 async function run (
   runtimeEnv: algob.types.RuntimeEnv, deployer: algob.types.Deployer): Promise<void> {
   console.log('Sample script for ASC has started execution!');
-  await deployer.fundLsig('fee-check.teal',
+  await deployer.fundLsigByFile('fee-check.teal',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, {});
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');

@@ -28,7 +28,7 @@ Please follow the main [README#PyTeal](https://github.com/scale-it/algo-builder#
 If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code prior to the address knowledge.
 - If we have to deploy same contract multiple times with only difference of initialization variables, we will have to change the variables in PyTeal code everytime we deploy it.
 - To solve this problem we have introduced a support for passing `external parameters`.
-- Deployer functions(`loadLogic`, `fundLsig`, `deployApp`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
+- Deployer functions(`loadLogic`, `fundLsigByFile`, `deployApp`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Changing parameters will change a generated TEAL code. Hence it the Delegated Signature or Smart Contract address will be different and we may need to redeploy it.
 
 ### Usage
@@ -73,7 +73,7 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 
 #### In scripts
 
-To use this feature in scripts, you can pass an external parameter object (using `loadLogic`, `fundLsig`..):
+To use this feature in scripts, you can pass an external parameter object (using `loadLogic`, `fundLsigByFile`..):
    ```js
     scInitParam = {
       ARG_AMT: 700000,

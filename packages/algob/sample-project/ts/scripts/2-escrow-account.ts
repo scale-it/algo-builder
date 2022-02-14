@@ -2,7 +2,7 @@
  * In this script we will fund an escrow contract. The escrow contract
  * ensures the payment is made out(from the escrow) to a specific receiver only.
  * This receiver address is hardcoded in the smart contract, and can be passed
- * dynamically to the contract using fundLsig function (passed as a template parameter)
+ * dynamically to the contract using fundLsigByFile function (passed as a template parameter)
  */
 import * as algob from "@algo-builder/algob";
 
@@ -14,7 +14,7 @@ async function run (
   const templateParams = {
     RECEIVER_ADDRESS: 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY'
   };
-  await deployer.fundLsig('escrow.py',
+  await deployer.fundLsigByFile('escrow.py',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { totalFee: 1000 }, templateParams);
   const escrow = await deployer.loadLogicByFile('escrow.py', templateParams);
 

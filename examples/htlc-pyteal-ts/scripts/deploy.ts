@@ -34,7 +34,7 @@ async function run (
   console.log('hash of the secret:', scTmplParams.hash_image);
   // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 
-  await deployer.fundLsig('htlc.py',
+  await deployer.fundLsigByFile('htlc.py',
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, scTmplParams);
 
   // Add user checkpoint

@@ -653,7 +653,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param payFlags - as per SPEC
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async fundLsig (
+  async fundLsigByFile (
     fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
@@ -932,14 +932,14 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async fundLsig (
+  async fundLsigByFile (
     _fileName: string,
     _flags: FundASCFlags,
     _payFlags: wtypes.TxParams,
     _scInitParams?: unknown
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "fundLsig"
+      methodName: "fundLsigByFile"
     });
   }
 

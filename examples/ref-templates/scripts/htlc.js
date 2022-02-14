@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
   // setup a contract account and send 1 ALGO from master
-  await deployer.fundLsig('htlc.py', {
+  await deployer.fundLsigByFile('htlc.py', {
     funder: masterAccount,
     fundingMicroAlgo: 1e6 // 1 Algo
   },
