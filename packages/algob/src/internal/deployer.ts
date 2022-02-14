@@ -674,7 +674,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
-  async fundLsigByName (
+  async fundLsig (
     lsigName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams
@@ -943,13 +943,13 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async fundLsigByName (
+  async fundLsig (
     _lsigName: string,
     _flags: FundASCFlags,
     _payFlags: wtypes.TxParams
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "fundLsigByName"
+      methodName: "fundLsig"
     });
   }
 

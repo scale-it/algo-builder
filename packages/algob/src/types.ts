@@ -518,7 +518,7 @@ export interface Deployer {
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
-  fundLsigByName: (
+  fundLsig: (
     lsigName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams

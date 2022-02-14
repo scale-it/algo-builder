@@ -155,7 +155,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async fundLsigByName (lsigName: string, flags: FundASCFlags,
+  async fundLsig (lsigName: string, flags: FundASCFlags,
     payFlags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
