@@ -670,7 +670,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * This function will send Algos to ASC account in "Contract Mode". Takes lsig name
    * as input
-   * @param lsigName - name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param lsigName - name of the smart signature (passed by user during mkContractLsig/mkDelegatedLsig)
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
@@ -744,7 +744,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param signer: Signer Account which will sign the smart contract
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
-   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
+   * @param lsigName name of smart signature (if passed, checkpoint info will be stored against this name)
    */
   async mkDelegatedLsig (
     fileName: string,

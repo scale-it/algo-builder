@@ -193,7 +193,7 @@ const daoAppInfo = await deployer.deployApp(
   const appInfo = deployer.getAppByName("DAO App");
 ```
 
-#### Lsig Name
+#### Smart Signature Name
 
 Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsig` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
 ```js
