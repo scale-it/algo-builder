@@ -28,7 +28,7 @@ export function toCheckpointFileName (scriptName: string): string {
 }
 
 export function toScriptFileName (filename: string): string {
-  filename = filename.replace(artifactsPath + path.sep, '');
+  filename = filename.replace(artifactsPath + String(path.sep), '');
   filename = filename.slice(0, -(checkpointFileSuffix.length));
   return filename;
 }
@@ -195,13 +195,15 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 /**
  * Register checkpoints for ASA and SSC
  * @param deployer Deployer object
- * @param txns transaction array
+ * @param execParams user transaction(s) input
+ * @param txns SDK transaction array
  * @param txIdxMap transaction map: to match transaction order
  * transaction index mapped to [asset name, asset definition]
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 export async function registerCheckpoints (
   deployer: Deployer,
+  execParams: wtypes.ExecParams[],
   txns: Transaction[],
   txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<void> {
@@ -254,7 +256,9 @@ export async function registerCheckpoints (
             applicationAccount: getApplicationAddress(Number(txConfirmation['application-index'])),
             confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
-            deleted: false
+            deleted: false,
+            approvalFile: (execParams[idx] as any).approvalProgram,
+            clearFile: (execParams[idx] as any).clearProgram
           };
           const val = deployer.checkpoint.getAppfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {

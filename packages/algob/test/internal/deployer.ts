@@ -163,7 +163,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -182,7 +184,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -203,7 +207,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
@@ -215,7 +221,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
@@ -242,7 +250,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -261,7 +271,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -282,7 +294,9 @@ describe("DeployerDeployMode", () => {
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(
@@ -295,7 +309,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
@@ -420,7 +436,9 @@ describe("DeployerDeployMode", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       })
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
@@ -476,6 +494,33 @@ describe("DeployerDeployMode", () => {
   it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+  });
+
+  it("Should crash on fundLsigByName if lsig is not present in checkpoint", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    await expectBuilderErrorAsync(
+      async () => await deployer.fundLsigByName("AwesomeLsig",
+        { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP,
+      "Logic signature(name = AwesomeLsig) not found in checkpoint"
+    );
+  });
+
+  it("Should not crash on fundLsigByName if lsig is present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "AlgoLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerCfg.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerCfg);
+    // passes
+    await deployer.fundLsigByName("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
   });
 
   it("Should return empty ASA map on no CP", async () => {

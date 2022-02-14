@@ -86,6 +86,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  getLsigByName (lsigName: string): LogicSigAccount | undefined {
+    throw new Error("Not implemented");
+  }
+
   getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
@@ -148,6 +152,11 @@ export class FakeDeployer implements Deployer {
 
   async fundLsig (name: string, flags: FundASCFlags,
     payFlags: wtypes.TxParams, scInitParam?: unknown): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  async fundLsigByName (lsigName: string, flags: FundASCFlags,
+    payFlags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 

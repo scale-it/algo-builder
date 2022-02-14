@@ -755,8 +755,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -816,10 +815,11 @@ export class Runtime {
     indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
     // set new tx receipt
-    this.ctx.state.txReceipts.set(this.ctx.tx.txID, {
+    const txReceipt = {
       txn: this.ctx.tx,
       txID: this.ctx.tx.txID
-    });
+    };
+    this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
 
     // reset pooled opcode cost for single tx, this is to handle singular functions
     // which don't "initialize" a new ctx (eg. deployApp)
@@ -829,6 +829,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return txReceipt;
   }
 }

@@ -85,7 +85,9 @@ describe("Checkpoint", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     netCheckpoint.asa.set("asa1", {
       creator: "123",
@@ -215,7 +217,9 @@ describe("Checkpoint", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap1.set(2, {
@@ -225,7 +229,9 @@ describe("Checkpoint", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     cp1.ssc.set("SSC1", nestedMap);
     appendToCheckpoint(checkpoints, "network12345", cp1);
@@ -265,7 +271,9 @@ describe("Checkpoint", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     cp.asa.set(
       "My ASA",
@@ -448,7 +456,9 @@ describe("CheckpointRepoImpl", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     const cpData = new CheckpointRepoImpl()
       .registerSSC("network1", "SSC name", {
@@ -458,7 +468,9 @@ describe("CheckpointRepoImpl", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -615,7 +627,9 @@ describe("CheckpointRepoImpl", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     nestedMap1.set(1, {
       creator: "SSC creator1",
@@ -624,7 +638,9 @@ describe("CheckpointRepoImpl", () => {
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
     const cp1: Checkpoints = {
       network1: {
@@ -722,7 +738,9 @@ describe("CheckpointRepoImpl", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
@@ -745,7 +763,9 @@ describe("CheckpointRepoImpl", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
       assert.deepEqual(cpData.allCPs, {
         network1: {
@@ -856,7 +876,9 @@ describe("CheckpointRepoImpl", () => {
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "SSC name"));

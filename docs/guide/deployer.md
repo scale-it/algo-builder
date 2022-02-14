@@ -168,6 +168,55 @@ For opting in to App, `deployer` supports the following methods:
 You can learn more about Stateless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
 
 
+#### Checkpoint names
+
+Algob creates [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.html) and associates them with a name. This is a very useful feature. For example, you don't need to pass smart contract template parameters every time when getting app info, or loading a logic signature. Since `algob v4.0`, we support naming for apps (Algorand stateful smart contracts) and smart signatures.
+
+##### App Name
+
+`deployer.deployApp` requires `appName` when deploying an application. The app metadata in checkpoint will be stored against "appName". Eg.
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+  'dao-app-approval.py',
+  'dao-app-clear.py',
+  {
+    sender: creator,
+    localInts: 9,
+    localBytes: 7,
+    globalInts: 4,
+    globalBytes: 2,
+    appArgs: appArgs
+  }, {}, {}, "DAO App"); // app name passed here
+
+  // now during querying, you only need this app name
+  const appInfo = deployer.getAppByName("DAO App");
+```
+
+#### Smart Signature Name
+
+Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsig` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
+```js
+const bob = deployer.accountsByName.get('bob');
+// store delegatedLsig
+await deployer.mkDelegatedLsig('file.py', bob, { ARG_DAO_APP: 1 }, "DLsig");
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsigByName("DLsig");
+```
+
+Similarly for contract lsig:
+```js
+// store contract lsig
+await deployer.mkContractLsig('file.py', { ARG_DAO_APP: 1 }, "CLsig");
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsigByName("CLsig");
+```
+
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogic`.
+
+
 #### Compile contracts
 
 You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
@@ -177,4 +226,11 @@ You can use the deployer API to compile smart contracts (ASC) and get the contra
   const bytecode = info.compiled;
   ```
 
-  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name. 
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app or lsig name.
+  ```js
+  // lsig
+  const info = await deployer.getDeployedASC('MyApp');
+  const [approvalInfo, clearInfo] = [info.approval, info.clear];
+
+  const lsigInfo = await deployer.getDeployedASC('MyLsig');
+  ```
