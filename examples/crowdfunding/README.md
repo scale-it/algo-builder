@@ -4,7 +4,7 @@ This project demonstrates how to create a Crowdfunding Stateful Smart Contract A
 To create this type of application on Algorand, there are five steps that must be supported:
 
 - Create the Fund - Anyone should be able to create a fund, setting a begin, end, and closeout dates. The creator and receiver should also be stored. Only creator can modify or delete the smart contract.
-    - Update: we need to create an escrow account (contract account - managed through logic signature). It will hold all donations. The escrow account needs to know the crowdfund app ID. So we firstly need to create the app, then we create an escrow account and finally we update the app by setting the escrow address.
+    - Update: we need to create an escrow account (contract account - managed through smart signature). It will hold all donations. The escrow account needs to know the crowdfund app ID. So we firstly need to create the app, then we create an escrow account and finally we update the app by setting the escrow address.
 We create and update the fund using `scripts/createApp.js`
 
 - Donate - Donations are accepted only between `start` and `end` date. The escrow account holds all donations.

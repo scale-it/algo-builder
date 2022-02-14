@@ -254,7 +254,7 @@ export interface RuntimeArgs {
 
 export type ParamDefinitions = {
   [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
-  RuntimeArgs[param]
+    RuntimeArgs[param]
   >;
 };
 
@@ -338,7 +338,7 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-// logic signature deployment information (log)
+// smart signature deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
