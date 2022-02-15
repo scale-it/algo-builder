@@ -17,33 +17,24 @@ const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
  */
 describe('Bond token Tests', function () {
   const master = new AccountStore(1000e6);
-  let appManager = new AccountStore(initialBalance);
-  let bondTokenCreator = new AccountStore(initialBalance);
+  let appManager;
+  let bondTokenCreator;
   let issuerAddress = new AccountStore(minBalance);
-  let elon = new AccountStore(initialBalance);
-  let bob = new AccountStore(initialBalance);
-  let dex1 = new AccountStore(initialBalance);
-  let dex2 = new AccountStore(initialBalance);
+  let elon;
+  let bob;
+  let dex1;
+  let dex2;
 
-  let runtime;
+  let runtime = new Runtime([master, issuerAddress]);
+
+  [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
+
   let flags;
   let applicationId;
   let issuerLsigAddress;
   let lsig;
 
-  // TODO: use runtime default accounts
-  // let accs = []; // accounts
-
   this.beforeAll(async function () {
-    runtime = new Runtime([
-      appManager, bondTokenCreator,
-      issuerAddress, master, elon,
-      bob, dex1, dex2
-    ]);
-
-    // TODO:
-    // [  ]
-
     flags = {
       sender: appManager.account,
       localInts: 1,
@@ -57,17 +48,9 @@ describe('Bond token Tests', function () {
 
   // fetch latest account state
   function syncAccounts () {
-    appManager = runtime.getAccount(appManager.address);
-    bondTokenCreator = runtime.getAccount(bondTokenCreator.address);
     issuerAddress = runtime.getAccount(issuerAddress.address);
-    elon = runtime.getAccount(elon.address);
-    dex1 = runtime.getAccount(dex1.address);
-    dex2 = runtime.getAccount(dex2.address);
-    bob = runtime.getAccount(bob.address);
-    // instead of above, let's use default accounts
-    // get the latest version from runtime
-    // TODO: [appManger, .] = runtime.defaultAccounts()
-  }
+    [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
+    }
 
   // Bond-Dapp initialization parameters
   const appManagerPk = convert.addressToPk(appManager.address);

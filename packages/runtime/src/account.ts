@@ -34,7 +34,7 @@ export class RuntimeAccount implements RuntimeAccountI {
   // any transaction from account object should be signed by `spend` address
   spend: types.AccountAddress;
 
-  constructor(account: AccountSDK, name?: string) {
+  constructor (account: AccountSDK, name?: string) {
     this.sk = account.sk;
     this.addr = account.addr;
     this.name = name;
@@ -42,12 +42,12 @@ export class RuntimeAccount implements RuntimeAccountI {
   }
 
   // rekey to authAccountAddress
-  rekeyTo(authAccountAddress: types.AccountAddress): void {
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
     this.spend = authAccountAddress;
   }
 
   // get spend address, return this.address if spend not exist.
-  getSpendAddress(): types.AccountAddress {
+  getSpendAddress (): types.AccountAddress {
     return (this.spend) ? this.spend : this.addr;
   }
 }
@@ -69,7 +69,7 @@ export class AccountStore implements AccountStoreI {
    *   as an account name.  If algo-sdk Account is not used than a random account is generated
    *   (with an associated private key)
    * */
-  constructor(balance: number | bigint, account?: AccountSDK | string) {
+  constructor (balance: number | bigint, account?: AccountSDK | string) {
     if (typeof account === 'string') {
       // create new account with name
       this.account = new RuntimeAccount(generateAccount(), account);
@@ -92,17 +92,17 @@ export class AccountStore implements AccountStoreI {
   }
 
   // returns account balance in microAlgos
-  balance(): bigint {
+  balance (): bigint {
     return this.amount;
   }
 
   // change spend account
-  rekeyTo(authAccountAddress: types.AccountAddress): void {
+  rekeyTo (authAccountAddress: types.AccountAddress): void {
     this.account.rekeyTo(authAccountAddress);
   }
 
   // get spend address of this account
-  getSpendAddress(): AccountAddress {
+  getSpendAddress (): AccountAddress {
     return this.account.getSpendAddress();
   }
 
@@ -112,7 +112,7 @@ export class AccountStore implements AccountStoreI {
    * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getLocalState(appID: number, key: Uint8Array | string): StackElem | undefined {
+  getLocalState (appID: number, key: Uint8Array | string): StackElem | undefined {
     const localState = this.appsLocalState;
     const data = localState.get(appID)?.[StateMap]; // can be undefined (eg. app opted in)
     const localKey = keyToBytes(key);
@@ -129,7 +129,7 @@ export class AccountStore implements AccountStoreI {
    * Note: if user is accessing this function directly through runtime,
    * then line number is unknown
    */
-  setLocalState(appID: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
+  setLocalState (appID: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
     const lineNumber = line ?? 'unknown';
     const localState = this.appsLocalState.get(appID);
     const localApp = localState?.[StateMap];
@@ -153,7 +153,7 @@ export class AccountStore implements AccountStoreI {
    * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState(appID: number, key: Uint8Array | string): StackElem | undefined {
+  getGlobalState (appID: number, key: Uint8Array | string): StackElem | undefined {
     const app = this.getApp(appID);
     if (!app) return undefined;
     const appGlobalState = app[globalState];
@@ -168,7 +168,7 @@ export class AccountStore implements AccountStoreI {
    * @param key: app global state key
    * @param value: value associated with a key
    */
-  setGlobalState(appID: number, key: Uint8Array | string, value: StackElem, line?: number): void {
+  setGlobalState (appID: number, key: Uint8Array | string, value: StackElem, line?: number): void {
     const app = this.getApp(appID);
     if (app === undefined) throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: line ?? 'unknown' });
     const appGlobalState = app[globalState];
@@ -184,7 +184,7 @@ export class AccountStore implements AccountStoreI {
    * Returns undefined if app is not found.
    * @param appID application index
    */
-  getApp(appID: number): SSCAttributesM | undefined {
+  getApp (appID: number): SSCAttributesM | undefined {
     return this.createdApps.get(appID);
   }
 
@@ -193,7 +193,7 @@ export class AccountStore implements AccountStoreI {
    * Returns undefined if app is not found.
    * @param appID application index
    */
-  getAppFromLocal(appID: number): AppLocalStateM | undefined {
+  getAppFromLocal (appID: number): AppLocalStateM | undefined {
     return this.appsLocalState.get(appID);
   }
 
@@ -201,7 +201,7 @@ export class AccountStore implements AccountStoreI {
    * Queries asset definition by assetId
    * @param assetId asset index
    */
-  getAssetDef(assetId: number): modelsv2.AssetParams | undefined {
+  getAssetDef (assetId: number): modelsv2.AssetParams | undefined {
     return this.createdAssets.get(assetId);
   }
 
@@ -209,7 +209,7 @@ export class AccountStore implements AccountStoreI {
    * Queries asset holding by assetId
    * @param assetId asset index
    */
-  getAssetHolding(assetId: number): AssetHoldingM | undefined {
+  getAssetHolding (assetId: number): AssetHoldingM | undefined {
     return this.assets.get(assetId);
   }
 
@@ -219,7 +219,7 @@ export class AccountStore implements AccountStoreI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset(assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
+  addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -245,7 +245,7 @@ export class AccountStore implements AccountStoreI {
    * @param assetId Asset Index
    * @param fields Fields for modification
    */
-  modifyAsset(assetId: number, fields: types.AssetModFields): void {
+  modifyAsset (assetId: number, fields: types.AssetModFields): void {
     const asset = this.getAssetDef(assetId);
     if (asset === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
@@ -258,7 +258,7 @@ export class AccountStore implements AccountStoreI {
    * removes asset holding from account
    * @param assetId asset index
    */
-  closeAsset(assetId: number): void {
+  closeAsset (assetId: number): void {
     /**
      * NOTE: We don't throw error/warning here if asset holding is not found, because this code
      * will not be executed if asset holding doesn't exist (as need to empty this.account to closeRemTo
@@ -276,7 +276,7 @@ export class AccountStore implements AccountStoreI {
    * @param assetId Asset Index
    * @state new freeze state
    */
-  setFreezeState(assetId: number, state: boolean): void {
+  setFreezeState (assetId: number, state: boolean): void {
     const holding = this.assets.get(assetId);
     if (holding === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN,
@@ -289,7 +289,7 @@ export class AccountStore implements AccountStoreI {
    * Destroys asset
    * @param assetId Asset Index
    */
-  destroyAsset(assetId: number): void {
+  destroyAsset (assetId: number): void {
     const holding = this.assets.get(assetId);
     const asset = this.getAssetDef(assetId);
     if (holding === undefined || asset === undefined) {
@@ -312,7 +312,7 @@ export class AccountStore implements AccountStoreI {
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp(appID: number, params: AppDeploymentFlags,
+  addApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
@@ -333,7 +333,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   // opt in to application
-  optInToApp(appID: number, appParams: SSCAttributesM): void {
+  optInToApp (appID: number, appParams: SSCAttributesM): void {
     const localState = this.appsLocalState.get(appID); // fetch local state from account
     if (localState) {
       throw new Error(`${this.address} is already opted in to app ${appID}`);
@@ -360,7 +360,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   // opt-in to asset
-  optInToASA(assetIndex: number, assetHolding: AssetHoldingM): void {
+  optInToASA (assetIndex: number, assetHolding: AssetHoldingM): void {
     const accAssetHolding = this.assets.get(assetIndex); // fetch asset holding of account
     if (accAssetHolding) {
       console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
@@ -376,7 +376,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   // delete application from account's global state (createdApps)
-  deleteApp(appID: number): void {
+  deleteApp (appID: number): void {
     const app = this.createdApps.get(appID);
     if (!app) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
@@ -392,7 +392,7 @@ export class AccountStore implements AccountStoreI {
   }
 
   // close(delete) application from account's local state (appsLocalState)
-  closeApp(appID: number): void {
+  closeApp (appID: number): void {
     const localApp = this.appsLocalState.get(appID);
     if (!localApp) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
@@ -414,7 +414,7 @@ class App {
   readonly attributes: SSCAttributesM;
 
   // NOTE - approval and clear program must be the TEAL code as string
-  constructor(appID: number, params: AppDeploymentFlags,
+  constructor (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
     this.id = appID;
     const base: BaseModel = new BaseModelI();
@@ -434,7 +434,7 @@ class Asset {
   readonly id: number;
   readonly definitions: modelsv2.AssetParams;
 
-  constructor(assetId: number, def: types.ASADef, creator: string, assetName: string) {
+  constructor (assetId: number, def: types.ASADef, creator: string, assetName: string) {
     this.id = assetId;
     const base: BaseModel = new BaseModelI();
     this.definitions = {
@@ -497,95 +497,95 @@ export class BaseModelI implements BaseModel {
 export const defaultSDKAccounts = {
   alice: {
     addr: 'PGULB7GWBUYTL7OTKA4QPFWAXWOC4VFMF3VOLS4BOKWH4RNR26Y35J32ZI',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       253, 135, 164, 87, 131, 97, 35, 35, 62, 165, 40,
       193, 119, 96, 152, 236, 218, 70, 137, 4, 158, 6,
       11, 87, 173, 60, 37, 109, 53, 193, 73, 177, 121,
       168, 176, 252, 214, 13, 49, 53, 253, 211, 80, 57,
       7, 150, 192, 189, 156, 46, 84, 172, 46, 234, 229,
       203, 129, 114, 172, 126, 69, 177, 215, 177
-    ]
+    ])
   },
   bob: {
     addr: 'L4GMOPCKAB2FMJ7RWAREWZURDCJU3YWEPNTLHPD2WHQICFGHAG2KPCD57Y',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       148, 79, 187, 213, 57, 176, 56, 132, 106, 179, 248,
       237, 104, 127, 209, 144, 49, 22, 65, 134, 0, 167,
       237, 128, 17, 17, 163, 77, 119, 110, 133, 183, 95,
       12, 199, 60, 74, 0, 116, 86, 39, 241, 176, 34,
       75, 102, 145, 24, 147, 77, 226, 196, 123, 102, 179,
       188, 122, 177, 224, 129, 20, 199, 1, 180
-    ]
+    ])
   },
   carlos: {
     addr: 'YUFEPZ4BPFTD6RERL25T5JFIC44NWOAGUBOFE3G73RDKG64ONLHQ6DGDY4',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       120, 26, 48, 177, 69, 236, 14, 67, 86, 40, 59,
       126, 57, 42, 43, 98, 250, 238, 188, 161, 54, 85,
       23, 99, 143, 10, 154, 201, 42, 108, 137, 236, 197,
       10, 71, 231, 129, 121, 102, 63, 68, 145, 94, 187,
       62, 164, 168, 23, 56, 219, 56, 6, 160, 92, 82,
       108, 223, 220, 70, 163, 123, 142, 106, 207
-    ]
+    ])
   },
   david: {
     addr: 'URJ6KFE6X3VRKEONCCF22PKEPJIV3ICIZDWY7HVQ6P5AR4XN6IK6UZLNQI',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       199, 222, 194, 229, 151, 226, 34, 10, 55, 247, 96,
       194, 188, 248, 160, 77, 187, 213, 151, 2, 208, 253,
       118, 55, 180, 219, 162, 31, 41, 62, 69, 63, 164,
       83, 229, 20, 158, 190, 235, 21, 17, 205, 16, 139,
       173, 61, 68, 122, 81, 93, 160, 72, 200, 237, 143,
       158, 176, 243, 250, 8, 242, 237, 242, 21
-    ]
+    ])
   },
   eve: {
     addr: 'ZINQHBWHYKQQQKSAPQ6UD2XICPPZZNOYBL5CX6ZY563WCCVFAM4UYI2TYU',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       108, 42, 43, 112, 178, 186, 247, 130, 60, 47, 170,
       34, 111, 171, 165, 115, 217, 28, 169, 95, 20, 80,
       30, 2, 251, 195, 37, 202, 161, 245, 57, 52, 202,
       27, 3, 134, 199, 194, 161, 8, 42, 64, 124, 61,
       65, 234, 232, 19, 223, 156, 181, 216, 10, 250, 43,
       251, 56, 239, 183, 97, 10, 165, 3, 57
-    ]
+    ])
   },
   frank: {
     addr: '54ZDLRR7EDYSGVAIIWB65JBGVK3T2XTFYJBNZJ7C26DIG5E3C45NFNEOKI',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       206, 240, 249, 166, 85, 75, 93, 81, 34, 97, 209,
       30, 175, 98, 11, 151, 46, 240, 137, 27, 49, 192,
       221, 161, 52, 176, 249, 216, 88, 233, 170, 75, 239,
       50, 53, 198, 63, 32, 241, 35, 84, 8, 69, 131,
       238, 164, 38, 170, 183, 61, 94, 101, 194, 66, 220,
       167, 226, 215, 134, 131, 116, 155, 23, 58
-    ]
+    ])
   },
   grace: {
     addr: 'IIX4QQBRTTWLGPC5AZV2KZ6KSDHDQ7U33V3C2RVIDUOD73OEAAIWL34BZ4',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       26, 227, 242, 79, 149, 203, 96, 216, 174, 137, 136,
       141, 20, 166, 163, 134, 94, 110, 120, 82, 19, 130,
       205, 31, 110, 23, 169, 103, 166, 188, 241, 210, 66,
       47, 200, 64, 49, 156, 236, 179, 60, 93, 6, 107,
       165, 103, 202, 144, 206, 56, 126, 155, 221, 118, 45,
       70, 168, 29, 28, 63, 237, 196, 0, 17
-    ]
+    ])
   },
   heidi: {
     addr: '23ZZOJFSTHTNFW7LDOFXQG7YPT2EOXQ4ZMFZKL4JCVH35F7QZX6QOJZIPE',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       214, 97, 59, 157, 59, 4, 74, 38, 52, 143, 58,
       117, 203, 80, 229, 167, 98, 79, 138, 147, 138, 79,
       34, 184, 36, 109, 121, 60, 205, 7, 36, 181, 214,
       243, 151, 36, 178, 153, 230, 210, 219, 235, 27, 139,
       120, 27, 248, 124, 244, 71, 94, 28, 203, 11, 149,
       47, 137, 21, 79, 190, 151, 240, 205, 253
-    ]
+    ])
   },
   ivan: {
     addr: 'T35DJDE56G55FOWP7C6UYFL6ZBFP3UWCR2GOS5V67I7MYM575KZ7AGITAE',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       90, 193, 60, 254, 182, 162, 198, 244, 251, 48,
       102, 219, 70, 65, 172, 69, 232, 153, 242, 72,
       249, 83, 4, 219, 182, 190, 73, 23, 221, 197,
@@ -593,18 +593,18 @@ export const defaultSDKAccounts = {
       186, 207, 248, 189, 76, 21, 126, 200, 74, 253,
       210, 194, 142, 140, 233, 118, 190, 250, 62, 204,
       51, 191, 234, 179
-    ]
+    ])
   },
   judy: {
     addr: '2NXSWBODWXMHGGTXBVCHNO5P2GD4C5YQZYQGS2WKC27A33WDUXU5UJRFTI',
-    sk: Uint8Array(64)[
+    sk: new Uint8Array([
       255, 173, 16, 150, 30, 185, 63, 119, 126, 103, 254,
       11, 77, 163, 99, 229, 145, 42, 232, 207, 183, 230,
       198, 105, 118, 94, 189, 106, 49, 128, 3, 6, 211,
       111, 43, 5, 195, 181, 216, 115, 26, 119, 13, 68,
       118, 187, 175, 209, 135, 193, 119, 16, 206, 32, 105,
       106, 202, 22, 190, 13, 238, 195, 165, 233
-    ]
+    ])
   }
 
 }

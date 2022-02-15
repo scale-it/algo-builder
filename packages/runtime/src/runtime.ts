@@ -40,7 +40,7 @@ export class Runtime {
   private round: number;
   private timestamp: number;
 
-  constructor(accounts: AccountStoreI[]) {
+  constructor (accounts: AccountStoreI[]) {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
@@ -69,33 +69,37 @@ export class Runtime {
     this.timestamp = 1;
   }
 
-  get defaultBalance(): number {
+  get defaultBalance (): number {
     return 1e9; // 1000 Algos
   }
+  
+
   /**
-   * Returns a list of initialized default accounts created using static accountSDK from account.ts and funded with default balance
+   * Returns a list of initialized default accounts created using static accountSDK from account.ts
+   *  and funded with default balance
    * @returns list of AccountStore
    */
-  _setupDefaultAccounts(): AccountStore[] {
+  _setupDefaultAccounts (): AccountStore[] {
     const balance = this.defaultBalance;
     const accounts = Object.values(defaultSDKAccounts)
       .map(accountInfo => new AccountStore(balance, accountInfo));
     this.initializeAccounts(accounts);
     return accounts;
   }
+
   /**
    * Getter for _defaultAccounts, returns a synced version of the accounts list
    * @returns list of AccountStore
    */
-  get defaultAccounts(): AccountStore[] {
-    return this._defaultAccounts.map(account => this.getAccount(account.address));
+  defaultAccounts (): AccountStore[] {
+    return this._defaultAccounts.map((account) => this.getAccount(account.address));
   }
 
   /**
    * Returns transaction receipt for a particular transaction
    * @param txID transaction ID
    */
-  getTxReceipt(txID: string): TxReceipt | undefined {
+  getTxReceipt (txID: string): TxReceipt | undefined {
     return this.store.txReceipts.get(txID);
   }
 
@@ -106,7 +110,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAccountDefined(address: string, a?: AccountStoreI, line?: number): AccountStoreI {
+  assertAccountDefined (address: string, a?: AccountStoreI, line?: number): AccountStoreI {
     const lineNumber = line ?? 'unknown';
     if (a === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
@@ -122,7 +126,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAddressDefined(addr: string | undefined, line?: number): string {
+  assertAddressDefined (addr: string | undefined, line?: number): string {
     const lineNumber = line ?? 'unknown';
     if (addr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
@@ -139,7 +143,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAppDefined(appID: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
+  assertAppDefined (appID: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
     if (app === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND,
@@ -156,7 +160,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAssetDefined(
+  assertAssetDefined (
     assetId: number, assetDef?: modelsv2.AssetParams, line?: number
   ): modelsv2.AssetParams {
     const lineNumber = line ?? 'unknown';
@@ -171,7 +175,7 @@ export class Runtime {
    * Validate first and last rounds of transaction using current round
    * @param gtxns transactions
    */
-  validateTxRound(gtxns: EncTx[]): void {
+  validateTxRound (gtxns: EncTx[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
       if (Number(txn.fv) >= this.round || txn.lv <= this.round) {
@@ -186,7 +190,7 @@ export class Runtime {
    * @param r current round
    * @param timestamp block's timestamp
    */
-  setRoundAndTimestamp(r: number, timestamp: number): void {
+  setRoundAndTimestamp (r: number, timestamp: number): void {
     this.round = r;
     this.timestamp = timestamp;
   }
@@ -194,14 +198,14 @@ export class Runtime {
   /**
    * Return current round
    */
-  getRound(): number {
+  getRound (): number {
     return this.round;
   }
 
   /**
    * Return current timestamp
    */
-  getTimestamp(): number {
+  getTimestamp (): number {
     return this.timestamp;
   }
 
@@ -209,7 +213,7 @@ export class Runtime {
    * Fetches app from `this.store`
    * @param appID Application Index
    */
-  getApp(appID: number): SSCAttributesM {
+  getApp (appID: number): SSCAttributesM {
     if (!this.store.globalApps.has(appID)) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
@@ -222,7 +226,7 @@ export class Runtime {
    * Fetches account from `this.store`
    * @param address account address
    */
-  getAccount(address: string): AccountStoreI {
+  getAccount (address: string): AccountStoreI {
     const account = this.store.accounts.get(address);
     return this.assertAccountDefined(address, account);
   }
@@ -233,7 +237,7 @@ export class Runtime {
    * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState(appID: number, key: Uint8Array | string): StackElem | undefined {
+  getGlobalState (appID: number, key: Uint8Array | string): StackElem | undefined {
     if (!this.store.globalApps.has(appID)) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
@@ -248,7 +252,7 @@ export class Runtime {
    * @param accountAddr address for which local state needs to be retrieved
    * @param key: key to fetch value of from local state
    */
-  getLocalState(appID: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
+  getLocalState (appID: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
     accountAddr = this.assertAddressDefined(accountAddr);
     const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
     return account.getLocalState(appID, key);
@@ -258,7 +262,7 @@ export class Runtime {
    * Returns asset creator account or throws error is it doesn't exist
    * @param Asset Index
    */
-  getAssetAccount(assetId: number): AccountStoreI {
+  getAssetAccount (assetId: number): AccountStoreI {
     const addr = this.store.assetDefs.get(assetId);
     if (addr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
@@ -270,7 +274,7 @@ export class Runtime {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef(assetId: number): modelsv2.AssetParams {
+  getAssetDef (assetId: number): modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
@@ -281,7 +285,7 @@ export class Runtime {
    * Returns undefined if asset is not found.
    * @param name Asset name
    */
-  getAssetInfoFromName(name: string): ASAInfo | undefined {
+  getAssetInfoFromName (name: string): ASAInfo | undefined {
     return this.store.assetNameInfo.get(name);
   }
 
@@ -292,7 +296,7 @@ export class Runtime {
    * @param approval
    * @param clear
    */
-  getAppInfoFromName(approval: string, clear: string): AppInfo | undefined {
+  getAppInfoFromName (approval: string, clear: string): AppInfo | undefined {
     return this.store.appNameInfo.get(approval + "-" + clear);
   }
 
@@ -300,7 +304,7 @@ export class Runtime {
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
-  initializeAccounts(accounts: AccountStoreI[]): void {
+  initializeAccounts (accounts: AccountStoreI[]): void {
     for (const acc of accounts) {
       if (acc.account.name) this.store.accountNameAddress.set(acc.account.name, acc.account.addr);
       this.store.accounts.set(acc.address, acc);
@@ -327,7 +331,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
-  createTxnContext(txnParams: types.ExecParams | types.ExecParams[]): [EncTx, EncTx[]] {
+  createTxnContext (txnParams: types.ExecParams | types.ExecParams[]): [EncTx, EncTx[]] {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -356,7 +360,7 @@ export class Runtime {
   }
 
   // creates new asset creation transaction object.
-  mkAssetCreateTx(
+  mkAssetCreateTx (
     name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
     // this funtion is called only for validation of parameters passed
     const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
@@ -393,7 +397,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset(asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     return this.deployASA(asa, flags);
   }
 
@@ -402,7 +406,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASA(asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASA (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -416,7 +420,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     return this.deployASADef(asa, asaDef, flags);
   }
 
@@ -425,7 +429,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
     const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -438,7 +442,7 @@ export class Runtime {
    * @param name Asset name
    * @param assetID Asset Index
    */
-  optInToASAMultiple(assetID: number, accounts?: string[]): void {
+  optInToASAMultiple (assetID: number, accounts?: string[]): void {
     if (accounts === undefined) {
       return;
     }
@@ -456,7 +460,7 @@ export class Runtime {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
     const txReceipt = this.ctx.optIntoASA(assetIndex, address, flags);
 
     this.store = this.ctx.state;
@@ -468,7 +472,7 @@ export class Runtime {
    * @param assetIndex Asset Index
    * @param address address of account to get holding from
    */
-  getAssetHolding(assetIndex: number, address: AccountAddress): AssetHoldingM {
+  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHoldingM {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
@@ -481,7 +485,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  addCtxAppCreateTxn(flags: AppDeploymentFlags, payFlags: types.TxParams): void {
+  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: types.TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags, this.round),
@@ -516,7 +520,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
-  addApp(
+  addApp (
     approvalProgram: string, clearProgram: string,
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     debugStack?: number
@@ -539,7 +543,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  deployApp(
+  deployApp (
     approvalProgram: string,
     clearProgram: string,
     flags: AppDeploymentFlags,
@@ -559,7 +563,7 @@ export class Runtime {
   }
 
   // creates new OptIn transaction object and update context
-  addCtxOptInTx(
+  addCtxOptInTx (
     senderAddr: string,
     appID: number,
     payFlags: types.TxParams,
@@ -590,7 +594,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  optInToApp(accountAddr: string, appID: number,
+  optInToApp (accountAddr: string, appID: number,
     flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): TxReceipt {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
@@ -601,7 +605,7 @@ export class Runtime {
   }
 
   // creates new Update transaction object and update context
-  addCtxAppUpdateTx(
+  addCtxAppUpdateTx (
     senderAddr: string,
     appID: number,
     payFlags: types.TxParams,
@@ -636,7 +640,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  updateApp(
+  updateApp (
     senderAddr: string,
     appID: number,
     approvalProgram: string,
@@ -656,7 +660,7 @@ export class Runtime {
   }
 
   // verify 'amt' microalgos can be withdrawn from account
-  assertMinBalance(amt: bigint, address: string): void {
+  assertMinBalance (amt: bigint, address: string): void {
     const account = this.getAccount(address);
     if ((account.amount - amt) < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
@@ -672,7 +676,7 @@ export class Runtime {
    * Throw RuntimeError if signature is invalid.
    * @param txParam transaction parameters.
    */
-  validateAccountSignature(txParam: types.ExecParams): void {
+  validateAccountSignature (txParam: types.ExecParams): void {
     const fromAccountAddr = webTx.getFromAddress(txParam);
     const from = this.getAccount(fromAccountAddr);
     const signerAccount = txParam.fromAccount;
@@ -700,7 +704,7 @@ export class Runtime {
    * @param logs only show logs on console when set as true. By default this value is true
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  loadLogic(fileName: string, scTmplParams?: SCParams, logs: boolean = true): LogicSigAccount {
+  loadLogic (fileName: string, scTmplParams?: SCParams, logs: boolean = true): LogicSigAccount {
     const program = getProgram(fileName, scTmplParams, logs);
     return this.createLsigAccount(program, []); // args can be set during executeTx
   }
@@ -713,7 +717,7 @@ export class Runtime {
    * @param args arguments passed
    * @returns logic signature with arguments.
    */
-  createLsigAccount(program: string, args: Uint8Array[]): LogicSigAccount {
+  createLsigAccount (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
@@ -731,7 +735,7 @@ export class Runtime {
    * @param to to address
    * @param amount amount of algo in microalgos
    */
-  fundLsig(from: RuntimeAccountI, to: AccountAddress, amount: number): TxReceipt {
+  fundLsig (from: RuntimeAccountI, to: AccountAddress, amount: number): TxReceipt {
     const fundParam: types.ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -749,7 +753,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun(txnParam: types.ExecParams, debugStack?: number): TxReceipt {
+  validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): TxReceipt {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
@@ -793,7 +797,7 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  executeTx(txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): TxReceipt | TxReceipt[] {
+  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): TxReceipt | TxReceipt[] {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
@@ -836,7 +840,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE: Application mode is only supported in TEALv > 1
    */
-  run(program: string, executionMode: ExecutionMode,
+  run (program: string, executionMode: ExecutionMode,
     indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
     // set new tx receipt
