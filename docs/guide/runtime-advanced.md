@@ -12,7 +12,7 @@ layout: splash
 
 Example: 
 
-We can rekey John account to Bob follow suing the following transaction params.
+We can rekey John account to Bob using the following transaction params.
 ```js
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
