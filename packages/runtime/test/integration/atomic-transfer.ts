@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     syncAccounts();
   });
 
-  function syncAccounts (): void {
+  function syncAccounts(): void {
     john = runtime.getAccount(john.address);
     alice = runtime.getAccount(alice.address);
   }

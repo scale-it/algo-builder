@@ -28,7 +28,7 @@ export function toCheckpointFileName (scriptName: string): string {
 }
 
 export function toScriptFileName (filename: string): string {
-  filename = filename.replace(artifactsPath + path.sep, '');
+  filename = filename.replace(artifactsPath + String(path.sep), '');
   filename = filename.slice(0, -(checkpointFileSuffix.length));
   return filename;
 }
@@ -37,15 +37,15 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, rtypes.ASAInfo>;
-  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>;
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, rtypes.ASAInfo>();
-    const mp = new Map<Timestamp, rtypes.SSCInfo>();
-    this.ssc = new Map<string, typeof mp>();
+    const mp = new Map<Timestamp, rtypes.AppInfo>();
+    this.app = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -59,17 +59,17 @@ export function appendToCheckpoint (
   }
   orig.timestamp = append.timestamp;
   orig.metadata = new Map([...orig.metadata, ...append.metadata]);
-  const allAssetNames = [...append.asa.keys(), ...append.ssc.keys()];
+  const allAssetNames = [...append.asa.keys(), ...append.app.keys()];
   for (const assetName of allAssetNames) {
     if ((orig.asa.get(assetName) && !deepEqual(orig.asa.get(assetName), append.asa.get(assetName))) ??
-      (orig.ssc.get(assetName) && !deepEqual(orig.ssc.get(assetName), append.ssc.get(assetName)))) {
+      (orig.app.get(assetName) && !deepEqual(orig.app.get(assetName), append.app.get(assetName)))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });
     }
   }
   orig.asa = new Map([...orig.asa, ...append.asa]);
-  orig.ssc = new Map([...orig.ssc, ...append.ssc]);
+  orig.app = new Map([...orig.app, ...append.app]);
   orig.dLsig = new Map([...orig.dLsig, ...append.dLsig]);
   return checkpoints;
 }
@@ -98,7 +98,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const current = cp[k];
-      const allAssetNames = [...current.asa.keys(), ...current.ssc.keys(), ...current.dLsig.keys()];
+      const allAssetNames = [...current.asa.keys(), ...current.app.keys(), ...current.dLsig.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -144,22 +144,22 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   private _ensureRegister (
-    map: Map<string, Map<number, rtypes.SSCInfo>>, name: string, info: rtypes.SSCInfo
+    map: Map<string, Map<number, rtypes.AppInfo>>, name: string, info: rtypes.AppInfo
   ): void {
     const nestedMap = map.get(name);
     if (nestedMap) {
       nestedMap.set(info.timestamp, info);
     } else {
-      const newMap = new Map<number, rtypes.SSCInfo>();
+      const newMap = new Map<number, rtypes.AppInfo>();
       newMap.set(info.timestamp, info);
       map.set(name, newMap);
     }
   }
 
-  registerSSC (networkName: string, name: string, info: rtypes.SSCInfo): CheckpointRepo {
-    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
-    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
-    this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
+  registerSSC (networkName: string, name: string, info: rtypes.AppInfo): CheckpointRepo {
+    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).app, name, info);
+    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).app, name, info);
+    this._ensureRegister(this._ensureNet(this.allCPs, networkName).app, name, info);
     return this;
   }
 
@@ -173,7 +173,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   isDefined (networkName: string, name: string): boolean {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
-      (netCP.asa.get(name) !== undefined || netCP.ssc.get(name) !== undefined ||
+      (netCP.asa.get(name) !== undefined || netCP.app.get(name) !== undefined ||
       netCP.dLsig.get(name) !== undefined);
   }
 
@@ -195,13 +195,15 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 /**
  * Register checkpoints for ASA and SSC
  * @param deployer Deployer object
- * @param txns transaction array
+ * @param execParams user transaction(s) input
+ * @param txns SDK transaction array
  * @param txIdxMap transaction map: to match transaction order
  * transaction index mapped to [asset name, asset definition]
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 export async function registerCheckpoints (
   deployer: Deployer,
+  execParams: wtypes.ExecParams[],
   txns: Transaction[],
   txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<void> {
@@ -238,7 +240,7 @@ export async function registerCheckpoints (
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
-          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
+          const temp: rtypes.AppInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
           if (txn.appOnComplete === Number(rtypes.TxOnComplete.DeleteApplication) && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
@@ -247,14 +249,16 @@ export async function registerCheckpoints (
           }
         }
         if (res) {
-          const sscInfo: rtypes.SSCInfo = {
+          const sscInfo: rtypes.AppInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             appID: Number(txConfirmation['application-index']),
             applicationAccount: getApplicationAddress(Number(txConfirmation['application-index'])),
             confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
-            deleted: false
+            deleted: false,
+            approvalFile: (execParams[idx] as any).approvalProgram,
+            clearFile: (execParams[idx] as any).clearProgram
           };
           const val = deployer.checkpoint.getAppfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
@@ -295,7 +299,7 @@ export function toSSCMap <T> (
 
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
-  cpWithObjects.ssc = toSSCMap(cpWithObjects.ssc as any);
+  cpWithObjects.app = toSSCMap(cpWithObjects.app as any);
   cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;
@@ -371,8 +375,8 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * @param key Key here is clear program name appended to approval program name
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
-  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
+  getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.app ??
                         new Map();
     const nestedMap: any = resultMap.get(key);
     if (nestedMap) {
@@ -388,7 +392,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * @param index Application index
    */
   getAppCheckpointKeyFromIndex (index: number): string | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    const resultMap = this.cpData.precedingCP[this.networkName]?.app ?? new Map();
     for (const [key, nestedMap] of resultMap) {
       if (this.getLatestTimestampValue(nestedMap) === index) {
         return key;
@@ -416,7 +420,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * Returns latest timestamp value from map
    * @param map Map
    */
-  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+  getLatestTimestampValue (map: Map<number, rtypes.AppInfo>): number {
     let res: number = -1;
     const cmpValue: number = -1;
     map.forEach((value, key) => {

@@ -32,7 +32,7 @@ We implement a Permissioned Token template, which executes the following steps:
 ### Smart Contracts
 
 Smart contracts (in `/assets`):
-- *clawback.py*: a stateless smart contract which will be responsible to dispatch permission checks and execute the payments. It's set to be the asset clawback address. Clawback logic ensures that during a token transfer between accounts, `controller` smart contract is called. `reserve` account is always allowed to transfer tokens to anyone (bypassing all permission checks). It also handles issuance transaction & update reserve account transaction.
+- *clawback.py*: a smart signature which will be responsible to dispatch permission checks and execute the payments. It's set to be the asset clawback address. Clawback logic ensures that during a token transfer between accounts, `controller` smart contract is called. `reserve` account is always allowed to transfer tokens to anyone (bypassing all permission checks). It also handles issuance transaction & update reserve account transaction.
 - *controller.py*: `C` acts as a controller of the token - it ensures that during a token transfer, smart contract `P` is called and has an ability to update and use other permissions smart contract. If there are multiple permissions contracts, then the controller must ensure that all those contracts are called (it must store the app ids). `C` is also used to kill the token.
 - *permissions.py*: This is the rules stateful smart contract. There can be many `permissions` smart contract implemented, and a controller can use more then one. The users have to opt-in to a smart-contract in order to let the contract store user data. The vision is that the permissions smart contracts are rather independent and shared between different permissioned ASA. It's worth noting that a permissions smart contract can require another smart contract call in the group.
   In this template we implement one permissions smart contract with two rules:
@@ -75,7 +75,7 @@ Below we describe different use cases implemented by the smart contract suite. W
 
 1. [*transfer(fromAccount, toAddress, amount)*](/examples/permissioned-token/scripts/user/transfer.js) -
   Every transfer between non-reserve accounts has to pass permissions check to assure token compliance.
-  Since all tokens are frozen, only clawback can transfer tokens. Since clawback is a stateless smart contract, a logic signature is required. The lsig validates the transfer only if the transfer transaction is accompanied with other transactions (it assures correct transaction group composition).
+  Since all tokens are frozen, only clawback can transfer tokens. Clawback is set to a Smart Signatures account so Logic Signature is required for signing transactions. The lsig validates the transfer only if the transfer transaction is accompanied with other transactions (it assures correct transaction group composition).
    A group of 4 (or more if there are more than 1 permissions contract) transactions is required:
 
    - *tx1*: Call to controller smart contract with  `app-arg = str:transfer` signed by *fromAccount* (asset sender).
