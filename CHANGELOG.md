@@ -32,6 +32,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
       - `mkDelegatedLsig(fileName, lsigName, signer)`
       - `mkContractLsig(fileName, lsigName)`.
 
+For reference you can check out `examples/asa`.
 
 ### Features
 
