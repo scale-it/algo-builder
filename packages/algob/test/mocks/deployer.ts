@@ -160,8 +160,22 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsig (name: string, signer: rtypes.Account,
+  async mkDelegatedLsigByFile (name: string, signer: rtypes.Account,
     scInitParam?: unknown): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async mkDelegatedLsig (fileName: string, lsigName: string,
+    signer: rtypes.Account, scInitParam?: unknown): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async mkContractLsigByFile (name: string, scInitParam?: unknown): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async mkContractLsig (name: string,
+    lsigName: string, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 

@@ -143,11 +143,11 @@ class DeployerBasicMode {
 
   /**
    * Loads stateful smart contract info from checkpoint
-   * @param nameApproval Approval program name
-   * @param nameClear clear program name
+   * @param approvalFileName Approval program name
+   * @param clearFileName clear program name
    */
-  getAppByFile (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
+  getAppByFile (approvalFileName: string, clearFileName: string): rtypes.SSCInfo | undefined {
+    return this.checkpoint.getAppfromCPKey(approvalFileName + "-" + clearFileName);
   }
 
   /**
@@ -742,15 +742,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
+   * @param lsigName name of smart signature (checkpoint info will be stored against this name)
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
-   * @param lsigName name of smart signature (if passed, checkpoint info will be stored against this name)
    */
   async mkDelegatedLsig (
     fileName: string,
+    lsigName: string,
     signer: rtypes.Account,
-    scTmplParams?: SCParams,
-    lsigName?: string
+    scTmplParams?: SCParams
   ): Promise<LsigInfo> {
     return await this._mkLsig(fileName, scTmplParams, signer, lsigName);
   }
@@ -758,15 +758,44 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Stores logic signature info in checkpoint for contract mode
    * @param fileName ASC file name
+   * @param lsigName name of lsig (checkpoint info will be stored against this name)
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
-   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
    */
   async mkContractLsig (
     fileName: string,
-    scTmplParams?: SCParams,
-    lsigName?: string
+    lsigName: string,
+    scTmplParams?: SCParams
   ): Promise<LsigInfo> {
     return await this._mkLsig(fileName, scTmplParams, undefined, lsigName);
+  }
+
+  /**
+   * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
+   * info to checkpoints (in /artifacts)
+   * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param signer: Signer Account which will sign the smart contract
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   */
+  async mkDelegatedLsigByFile (
+    fileName: string,
+    signer: rtypes.Account,
+    scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
+    return await this._mkLsig(fileName, scTmplParams, signer);
+  }
+
+  /**
+   * Stores logic signature info in checkpoint for contract mode
+   * @param fileName ASC file name
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async mkContractLsigByFile (
+    fileName: string,
+    scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
+    return await this._mkLsig(fileName, scTmplParams, undefined);
   }
 
   /**
@@ -954,12 +983,42 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   async mkDelegatedLsig (
-    _name: string,
+    _fileName: string,
+    _lsigName: string,
     _signer: rtypes.Account,
     _scInitParams?: unknown
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
+    });
+  }
+
+  async mkContractLsig (
+    _fileName: string,
+    _lsigName: string,
+    _scInitParams?: unknown
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "mkContractLsig"
+    });
+  }
+
+  async mkDelegatedLsigByFile (
+    _fileName: string,
+    _signer: rtypes.Account,
+    _scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "mkDelegatedLsigByFile"
+    });
+  }
+
+  async mkContractLsigByFile (
+    _fileName: string,
+    _scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "mkContractLsigByFile"
     });
   }
 
