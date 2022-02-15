@@ -15,15 +15,30 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### API breaking
+
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name. The existing functions have been changed to `<func>ByFile` (legacy functions based on file querying):
+
+  - Application:
+    * Exisiting `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    * New `getApp(appName)` function queries app info using the app name.
+
+  - Smart signatures:
+    * Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` has been changed to `getDelegatedLsigByFile(lsig.py)`, `getContractLsigByFile(lsig.py)` respectively.
+    * New `getApp(appName)` function queries app info using the app name.
+    * Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
+    * Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` has been changed to `mkDelegatedLsigByFile(fileName, signer, ..)`, `mkContractLsigByFile(fileName, ..)` respectively.
+    * New functions take the lsigName as a required paramter:
+      - `mkDelegatedLsig(fileName, lsigName, signer)`
+      - `mkContractLsig(fileName, lsigName)`.
+
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
 - Support RekeyTo field in the inner transaction for TEAL v6.
 - Added following functions in `deployer` API
   * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
-  * `getLsigByName`: returns lsig info stored in checkpoint by name
-  * `fundLsigByName`: funds logic signature by name.
-- Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
 - You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.
