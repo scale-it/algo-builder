@@ -31,12 +31,18 @@ describe('Bond token Tests', function () {
   let issuerLsigAddress;
   let lsig;
 
+  // TODO: use runtime default accounts
+  // let accs = []; // accounts
+
   this.beforeAll(async function () {
     runtime = new Runtime([
       appManager, bondTokenCreator,
       issuerAddress, master, elon,
       bob, dex1, dex2
     ]);
+
+    // TODO:
+    // [  ]
 
     flags = {
       sender: appManager.account,
@@ -58,6 +64,9 @@ describe('Bond token Tests', function () {
     dex1 = runtime.getAccount(dex1.address);
     dex2 = runtime.getAccount(dex2.address);
     bob = runtime.getAccount(bob.address);
+    // instead of above, let's use default accounts
+    // get the latest version from runtime
+    // TODO: [appManger, .] = runtime.defaultAccounts()
   }
 
   // Bond-Dapp initialization parameters
@@ -150,12 +159,12 @@ describe('Bond token Tests', function () {
     // opt-in to app
     runtime.optInToApp(appManager.address, applicationId, {}, {});
     runtime.optInToApp(issuerAddress.address, applicationId, {}, {});
+
     syncAccounts();
     assert.isDefined(appManager.appsLocalState.get(applicationId));
     assert.isDefined(issuerAddress.appsLocalState.get(applicationId));
 
     optInLsigToBond(runtime, lsig, currentBondIndex, appManager);
-
     // Issue tokens to issuer from bond token creator
     let groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, currentBondIndex);
     runtime.executeTx(groupTx);

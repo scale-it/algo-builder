@@ -492,3 +492,30 @@ export class BaseModelI implements BaseModel {
     throw new Error("get_obj_for_encoding Not Implemented");
   }
 }
+
+
+export const defaultSDKAccounts = {
+  alice: {
+    addr: '32ZVWGKCOLYHPVV34TUUF2JAFU3TKRXUUWVRMYARCULKLRWNG5V7YMTOLQ',
+    sk: Uint8Array(64)[
+      154, 136, 104, 65, 244, 65, 14, 252, 101, 148, 246,
+      29, 42, 69, 110, 113, 202, 248, 190, 27, 145, 145,
+      252, 89, 208, 56, 217, 147, 180, 229, 239, 14, 222,
+      179, 91, 25, 66, 114, 240, 119, 214, 187, 228, 233,
+      66, 233, 32, 45, 55, 53, 70, 244, 165, 171, 22,
+      96, 17, 21, 22, 165, 198, 205, 55, 107
+    ]
+  },
+  bob: {
+    addr: 'L4GMOPCKAB2FMJ7RWAREWZURDCJU3YWEPNTLHPD2WHQICFGHAG2KPCD57Y',
+    sk: Uint8Array(64)[
+      148, 79, 187, 213, 57, 176, 56, 132, 106, 179, 248,
+      237, 104, 127, 209, 144, 49, 22, 65, 134, 0, 167,
+      237, 128, 17, 17, 163, 77, 119, 110, 133, 183, 95,
+      12, 199, 60, 74, 0, 116, 86, 39, 241, 176, 34,
+      75, 102, 145, 24, 147, 77, 226, 196, 123, 102, 179,
+      188, 122, 177, 224, 129, 20, 199, 1, 180
+    ]
+  }
+  // TODO up to 10 accounts
+}

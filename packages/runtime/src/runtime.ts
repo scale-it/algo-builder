@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore, RuntimeAccount } from "./account";
+import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -33,6 +33,7 @@ export class Runtime {
    * Note: Runtime operates on `store`, it doesn't operate on `ctx`.
    */
   private store: State;
+  private readonly _defaultAccounts: AccountStore[];
   ctx: Context;
   loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
@@ -53,6 +54,8 @@ export class Runtime {
       txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
 
+    this._defaultAccounts = this._setupDefaultAccounts();
+
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
 
@@ -64,6 +67,22 @@ export class Runtime {
 
     this.round = 2;
     this.timestamp = 1;
+  }
+
+  get defaultBalance (): number {
+    return 1e9; // 1000 Algos
+  }
+
+  _setupDefaultAccounts (): AccountStore[] {
+    const b = this.defaultBalance;
+    const accounts = Object.values(defaultSDKAccounts)
+      .map((a) => new AccountStore(b, a));
+    this.initializeAccounts(accounts);
+    return accounts;
+  }
+
+  defaultAccounts (): AccountStore[] {
+    return this._defaultAccounts.map((a) => this.getAccount(a.adddress));
   }
 
   /**
@@ -756,7 +775,7 @@ export class Runtime {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
       this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -829,6 +848,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return this.ctx.state.txReceipts.get(this.ctx.tx.txID);
   }
 }
