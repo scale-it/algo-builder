@@ -125,7 +125,7 @@ describe("Rekey transaction and inner transaction ", function () {
 
       // alice account didn't change
       assert.equal(aliceBalanceBefore, aliceBalanceAfter);
-      // include fee and amount use for inner transaction
+      // include fee and amount used for inner transaction
       assert.equal(applBalanceBefore, applBalanceAfter + amount + BigInt(fee));
       // bob will receive `amount` microAlgos
       assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
