@@ -15,14 +15,16 @@ async function run (runtimeEnv, deployer) {
   await deployer.fundLsig('Gold_C_Lsig',
     { funder: goldOwner, fundingMicroAlgo: 1e6 }, {}); // funding with 1 Algo
 
-  const ascInfoAlgoDelegated = await deployer.mkDelegatedLsigByFile('3-gold-delegated-asc.teal', goldOwner);
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsigByFile('4-gold-asa.teal', goldOwner);
+  const ascInfoAlgoDelegated =
+    await deployer.mkDelegatedLsig('3-gold-delegated-asc.teal', 'Gold_D_Lsig', goldOwner);
+  const ascInfoGoldDelegated =
+    await deployer.mkDelegatedLsig('4-gold-asa.teal', 'Gold_d_asa_lsig', goldOwner);
 
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);
 
   /* Contract opt-in for ASA gold + fund contract with ASA gold */
-  const lsig = await deployer.loadLogicByFile('2-gold-contract-asc.teal');
+  const lsig = await deployer.getLsig('Gold_C_Lsig');
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
   await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 });

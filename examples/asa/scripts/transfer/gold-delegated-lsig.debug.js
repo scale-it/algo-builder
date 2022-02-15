@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
-  const lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
+  const lsigGoldOwner = deployer.getLsig('Gold_d_asa_lsig');
   const txnParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
