@@ -344,9 +344,9 @@ export class Runtime {
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName as string,
+      asaDef.unitName,
       name,
-      asaDef.url as string,
+      asaDef.url,
       typeof asaDef.metadataHash !== "undefined" && typeof asaDef.metadataHash !== 'string'
         ? Buffer.from(asaDef.metadataHash).toString('base64')
         : asaDef.metadataHash,
@@ -755,8 +755,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -816,10 +815,11 @@ export class Runtime {
     indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
     // set new tx receipt
-    this.ctx.state.txReceipts.set(this.ctx.tx.txID, {
+    const txReceipt = {
       txn: this.ctx.tx,
       txID: this.ctx.tx.txID
-    });
+    };
+    this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
 
     // reset pooled opcode cost for single tx, this is to handle singular functions
     // which don't "initialize" a new ctx (eg. deployApp)
@@ -829,6 +829,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return txReceipt;
   }
 }

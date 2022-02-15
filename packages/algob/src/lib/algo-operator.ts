@@ -32,7 +32,7 @@ export interface AlgoOperator {
     name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<rtypes.ASAInfo>
-  fundLsig: (name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+  fundLsig: (lsig: string | LogicSigAccount, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deployApp: (
     approvalProgram: string,
@@ -259,21 +259,23 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Sends Algos to ASC account (Contract Account)
-   * @param name     - ASC filename
+   * @param lsig     - Logic Signature (LogicSigAccount or filename with smart contract code)
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
-    name: string,
+    lsig: string | LogicSigAccount,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<LsigInfo> {
-    const lsig = await getLsig(name, this.algodClient, scTmplParams);
-    const contractAddress = lsig.address();
+    if (typeof lsig === "string") {
+      lsig = await getLsig(lsig, this.algodClient, scTmplParams);
+    }
 
+    const contractAddress = lsig.address();
     const params = await mkTxParams(this.algodClient, payFlags);
     let message = "Funding Contract: " + String(contractAddress);
     console.log(message);
@@ -287,7 +289,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const signedTxn = t.signTxn(flags.funder.sk);
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
-    message = message.concat("\nLsig: " + name);
+    message = message.concat("\nLsig: " + lsig.address());
     txWriter.push(message, confirmedTxn);
     return {
       creator: flags.funder.addr,
@@ -361,7 +363,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       appID: Number(appId),
       applicationAccount: getApplicationAddress(Number(appId)),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: approvalProgram,
+      clearFile: clearProgram
     };
   }
 
@@ -431,7 +435,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       appID: appID,
       applicationAccount: getApplicationAddress(appID),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: newApprovalProgram,
+      clearFile: newClearProgram
     };
   }
 

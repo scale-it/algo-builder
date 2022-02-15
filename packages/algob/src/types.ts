@@ -343,6 +343,7 @@ export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
   lsig: LogicSigAccount
+  file?: string
 }
 
 /**
@@ -499,16 +500,28 @@ export interface Deployer {
 
   /**
    * Funds logic signature account (Contract Account).
-   * @name  Smart Signature filename (must be present in assets folder)
+   * @fileName:  filename with a Smart Signature code (must be present in the assets folder)
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   fundLsig: (
-    name: string,
+    fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
+  ) => void
+
+  /**
+   * This function will send Algos to ASC account in "Contract Mode".
+   * @param lsigName - name of the smart signature (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   */
+  fundLsigByName: (
+    lsigName: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams
   ) => void
 
   /**
@@ -641,6 +654,12 @@ export interface Deployer {
   getAppByName: (appName: string) => rtypes.AppInfo | undefined
 
   /**
+   * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
+   * @param lsigName name of the smart signture (passed during mkContractLsig/mkDelegatedLsig)
+   */
+  getLsigByName: (lsigName: string) => LogicSigAccount | undefined
+
+  /**
    * Queries a delegated logic signature from checkpoint. */
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
@@ -654,7 +673,7 @@ export interface Deployer {
 
   /**
    * Alias to `this.compileASC`
-   * Deprecated: this function will be removed in the next release.
+   * @deprecated this function will be removed in the next release.
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 
@@ -668,11 +687,10 @@ export interface Deployer {
   compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
+   * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+   * @param name App/Lsig name used during deployment
    */
-  getDeployedASC: (name: string) => Promise<ASCCache | undefined>
+  getDeployedASC: (name: string) => Promise<ASCCache | AppCache | undefined>
 
   /**
    * Checks if checkpoint is deleted for a particular transaction
@@ -693,6 +711,11 @@ export interface ASCCache {
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
   base64ToBytes: Uint8Array // compiled base64 in bytes
+}
+
+export interface AppCache {
+  approval: ASCCache | undefined
+  clear: ASCCache | undefined
 }
 
 export interface PyASCCache extends ASCCache {

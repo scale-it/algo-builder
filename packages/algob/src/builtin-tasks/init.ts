@@ -9,8 +9,12 @@ export default function (): void {
       "typescript",
       "Initializes a new typescript project in the given directory"
     )
-    .setAction(async ({ newProjectLocation, typescript }:
-    { newProjectLocation: string, typescript: boolean }, _) => {
-      await createProject(newProjectLocation, typescript);
+    .addFlag(
+      "infrastructure",
+      'Initializes a new project without infrastructure folder'
+    )
+    .setAction(async ({ newProjectLocation, typescript, infrastructure }:
+    { newProjectLocation: string, typescript: boolean, infrastructure: boolean }, _) => {
+      await createProject(newProjectLocation, typescript, infrastructure);
     });
 }

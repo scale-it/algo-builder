@@ -3,7 +3,7 @@
 The Algo Builder project is composed from the following packages:
 
 - `algob`: framework to automate development of Algorand Assets and Smart Contracts.
-- `types/algosdk`: TypeScript typings for algosdk-js.
+- `web`: a package to interact with contracts from react app/frontend app.
 - `runtime`: light Algorand runtime and TEAL interpreter.
 
 ## Objectives
@@ -22,146 +22,12 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 - [Home Page](https://algobuilder.dev/)
 - [User Docs](https://algobuilder.dev/guide/README)
+- [Quick Start](https://algobuilder.dev/guide/README#quick-start)
 - [GitHub](https://github.com/scale-it/algo-builder)
 
-### Templates
+## Examples
 
-- [Smart Contracts](https://github.com/scale-it/algo-builder/tree/master/examples)
-- [dapps](https://github.com/scale-it/algo-builder-templates) (webapps integrated with smart contracts)
-
-## Requirements
-
-- Node 14+
-- Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
-  NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
-- Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
-- Yarn `v3.1+` or NPM `v8.0+` (note: all our examples use yarn v3 workspace to link to the project algob build).
-
-### Installation
-
-#### Pre requirements
-
-Make sure your `yarn global bin` directory is in your `$PATH\*\*.
-
-#### Installation from master
-
-We recommend installation from GitHub _master_ branch if you want to play with [templates](https://github.com/scale-it/algo-builder-templates) and [examples](https://github.com/scale-it/algo-builder/tree/master/examples) (all our example smart contracts are tested against _master_). The master branch corresponds to the latest released version.
-
-```
-git clone https://github.com/scale-it/algo-builder.git
-cd algo-builder
-yarn install
-yarn build
-cd packages/algob
-```
-
-##### Upgrading
-
-If you use installation from master, don't forget to **pull the latest changes** to not to miss the updates:
-
-```
-cd path/to/algo-builder
-git pull -p
-yarn install
-yarn build
-```
-
-#### Installation from released version
-
-To install `algob` globally in your system you can use:
-
-- Using Yarn: `yarn global add @algo-builder/algob`
-- Using NPM: `npm install -g @algo-builder/algob`
-
-### Algorand Node requirements
-
-- algod v2.1.6-stable or higher
-
-Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true` option set in the `<node_data>/config.json`. This is required to compile smart contracts using REST / SDK.
-
-### PyTeal
-
-`algob` supports TEAL smart contracts written in PyTeal. To use them, you have to have [pyteal](https://pypi.org/project/pyteal/) package available in your Python context:
-
-#### Using Pipenv
-
-We recommend to use [pipenv](https://pipenv.pypa.io) and use virtual environments. Pipenv is a packaging tool for Python that solves some common problems associated with the typical workflow using pip, virtualenv, and the good old requirements.txt. In addition to addressing some common issues, it consolidates and simplifies the development process to a single command line tool. It automatically creates and manages a virtualenv for your projects, as well as adds/removes packages from your Pipfile as you install/uninstall packages.
-
-With `pipenv` installed you can use the `Pipfile` and `Pipfile.lock` files from this repository and copy it to your project. Then:
-
-    pipenv sync
-    pipenv shell
-
-The `pipenv shell` will spawn a shell within the virtualenv with all required packages available in Python3 context. You will need to run `algob` within that python virtualenv context.
-
-#### Using pip3
-
-Otherwise you can use a system/user-wide `pyteal` installation:
-
-    pip3 install pyteal
-
-# Usage
-
-## Quick start
-
-### Create a blockchain
-
-- Use [Private Net Quick Start](/infrastructure/README.md).
-- Or install a node with any other network.
-- Remember to set `"EnableDeveloperAPI": true` in the node config.json
-
-### Create an algob project
-
-1.  Create a new yarn/npm project:
-
-        mkdir my_new_project
-        cd my_new_project
-        yarn init
-
-1.  Install algob in the project (unless you already installed it globally) and initialize the workspace.
-
-        yarn add @algo-builder/algob
-        yarn run algob init .
-
-    The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/guide/README](docs/guide#project-initialization) for more information.
-
-1.  Verify if it was installed correctly:
-
-        yarn run algob help
-
-1.  Update the `algob.config.js` file. Make sure you have access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
-
-    - set correct host address, port and token (if you are using the private-net, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
-    - Note: If you are using `private-net` from `infrastructure`, you don't need to update the network config because they are already configured.
-    - you can define multiple networks.
-    - update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
-    - Note: If you follow `infrastructure` instructions, you don't need to do this step as well because command will fund the master account.
-
-1.  Add assets and smart-contracts in the `assets` directory.
-1.  Add deployment scripts in `scripts` directory.
-1.  Run `yarn run algob deploy` to compile and deploy everything.
-1.  Run `yarn run algob run scriptPath/scriptName` to run script.
-1.  To run `algob` on different network (by default the `default` network is used) use
-
-        yarn run algob --network <other_network_name>  <command>
-
-### Examples
-
-Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
-
-- Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
-- Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
-- Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
-- Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
-- Check other examples as well.
-
-## Using algob with a TypeScript project
-
-You can use `algob` within a TS project. You can write your scripts and tests in TS. However to use them with `algob` you firstly need to compile the project to JS.
-
-TIP: Use `tsc --watch` to update the build in a realtime while you develop the project
-
-TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
+In the `/examples` directory we developped an extensive list of smart contract templates: from simple ASA management, security tokens to DAO implementations. Check the [list](./examples/README.md).
 
 ## dApp Templates
 
@@ -171,11 +37,8 @@ Using the `algob unbox-template` command, the developers can get a pre-built dAp
 
 Detailed description about the templates can be found [here](https://github.com/scale-it/algo-builder-templates#algo-builder-templates).
 
+
 # Contributing
-
-### Development
-
-The project development is open and you can observer a progress through [Pivotal tracker board](https://www.pivotaltracker.com/n/projects/2452320).
 
 ### Branch policy
 
@@ -229,3 +92,4 @@ yarn run test:watch
 ```
 
 NOTE: For the moment test watching in `packages/algob` is not stable because of tear down issues in some test suites. We advise to **not use** test watcher in `packages/algob`.
+

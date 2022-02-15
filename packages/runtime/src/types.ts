@@ -116,6 +116,8 @@ export interface AppInfo extends DeployedAssetInfo {
   appID: number
   applicationAccount: string
   timestamp: number
+  approvalFile: string
+  clearFile: string
 }
 
 // describes interpreter's local context (state + txns)
