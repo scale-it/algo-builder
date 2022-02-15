@@ -66,7 +66,7 @@ export interface Networks {
 export interface KmdWallet {
   name: string
   password: string
-  accounts: Array<{name: string, address: string}> // both are obligatory
+  accounts: Array<{ name: string, address: string }> // both are obligatory
 }
 
 export interface KmdCfg {
@@ -338,7 +338,7 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-// stateless smart contract deployment information (log)
+// smart signature deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -374,7 +374,7 @@ export interface CheckpointRepo {
   getMetadata: (networkName: string, key: string) => string | undefined
 
   registerASA: (networkName: string, name: string, info: rtypes.ASAInfo) => CheckpointRepo
-  registerSSC: (networkName: string, name: string, info: rtypes.SSCInfo) => CheckpointRepo
+  registerSSC: (networkName: string, name: string, info: rtypes.AppInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
@@ -389,7 +389,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, rtypes.ASAInfo>
-  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -405,7 +405,7 @@ export interface AssetScriptMap {
 export interface CheckpointFunctions {
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+  getAppfromCPKey: (key: string) => rtypes.AppInfo | undefined
 
   /**
    * Returns SSC checkpoint key using application index,
@@ -421,7 +421,7 @@ export interface CheckpointFunctions {
    */
   getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
 
-  getLatestTimestampValue: (map: Map<number, rtypes.SSCInfo>) => number
+  getLatestTimestampValue: (map: Map<number, rtypes.AppInfo>) => number
 }
 
 export interface Deployer {
@@ -488,7 +488,7 @@ export interface Deployer {
 
   registerASAInfo: (name: string, asaInfo: rtypes.ASAInfo) => void
 
-  registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
+  registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void
 
   logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
 
@@ -526,7 +526,7 @@ export interface Deployer {
 
   /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @name  Smart Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
@@ -554,7 +554,7 @@ export interface Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams,
-    appName?: string) => Promise<rtypes.SSCInfo>
+    appName?: string) => Promise<rtypes.AppInfo>
 
   /**
    * Update programs(approval, clear) for a stateful smart contract.
@@ -578,7 +578,7 @@ export interface Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ) => Promise<rtypes.SSCInfo>
+  ) => Promise<rtypes.AppInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -646,12 +646,12 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getApp: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined
 
   /**
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
-  getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+  getAppByName: (appName: string) => rtypes.AppInfo | undefined
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)

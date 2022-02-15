@@ -168,7 +168,7 @@ def approval_program(TOKEN_ID):
                     If(Global.group_size() > Int(3), Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve(), Int(0))
                 ),
                 Int(1),
-                # else verify that permissions ssc is called
+                # else verify that permissions app is called
                 verify_perm_is_called
             )
         )

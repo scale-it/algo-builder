@@ -4,7 +4,7 @@ layout: splash
 
 # Debugging TEAL
 
-Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful and stateless smart contracts. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
+Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful smart contracts and smart signatures. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
 
 ## Using TEAL debugger with algob
 

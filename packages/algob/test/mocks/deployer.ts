@@ -14,14 +14,14 @@ import type {
 
 export class FakeDeployer implements Deployer {
   asa = new Map<string, rtypes.ASAInfo>();
-  ssc = new Map<string, rtypes.SSCInfo>();
+  app = new Map<string, rtypes.AppInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
   checkpoint = {
-    getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
       throw new Error("Not implemented");
     },
 
@@ -33,7 +33,7 @@ export class FakeDeployer implements Deployer {
       throw new Error("Not implemented");
     },
 
-    getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+    getLatestTimestampValue (map: Map<number, rtypes.AppInfo>): number {
       throw new Error("Not implemented");
     }
   };
@@ -66,7 +66,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.AppInfo): void {
     throw new Error("Not implemented");
   }
 
@@ -78,11 +78,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getApp (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+  getAppByName (appName: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -90,7 +90,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -171,7 +171,7 @@ export class FakeDeployer implements Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string): Promise<rtypes.AppInfo> {
     throw new Error("Not implemented");
   }
 
@@ -184,7 +184,7 @@ export class FakeDeployer implements Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     throw new Error("Not implemented");
   }
 

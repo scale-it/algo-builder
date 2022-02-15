@@ -71,7 +71,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string): Promise<rtypes.AppInfo> {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -93,7 +93,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     return {
       creator: String(sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
