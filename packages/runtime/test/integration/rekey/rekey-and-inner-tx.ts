@@ -66,7 +66,7 @@ describe("Rekey transaction and inner transaction ", function () {
       // query appAccount
       appAccount = runtime.getAccount(getApplicationAddress(appID));
 
-      // fund app (escrow belonging to app) with 10 ALGO
+      // fund app (escrow belonging to app) with 1 ALGO
       const fundAppParams: types.AlgoTransferParam = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
