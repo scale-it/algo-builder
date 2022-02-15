@@ -69,11 +69,11 @@ async function run (runtimeEnv, deployer) {
 
   // fund lsig's
   await Promise.all([
-    deployer.fundLsig('dao-fund-lsig.py',
+    deployer.fundLsigByFile('dao-fund-lsig.py',
       { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
       { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
-    deployer.fundLsig('proposal-lsig.py',
+    deployer.fundLsigByFile('proposal-lsig.py',
       { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
       { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID })
   ]);
