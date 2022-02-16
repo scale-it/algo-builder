@@ -16,18 +16,17 @@ const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
  * Test for the scenario described in Readme.md
  */
 describe('Bond token Tests', function () {
+  let issuerAddress = new AccountStore(minBalance);
   const master = new AccountStore(1000e6);
   let appManager;
   let bondTokenCreator;
-  let issuerAddress = new AccountStore(minBalance);
   let elon;
   let bob;
   let dex1;
   let dex2;
 
   let runtime = new Runtime([master, issuerAddress]);
-
-  [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
+  [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts;
 
   let flags;
   let applicationId;
@@ -49,7 +48,7 @@ describe('Bond token Tests', function () {
   // fetch latest account state
   function syncAccounts () {
     issuerAddress = runtime.getAccount(issuerAddress.address);
-    [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
+    [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts;
     }
 
   // Bond-Dapp initialization parameters

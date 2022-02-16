@@ -959,3 +959,49 @@ describe("Stateful Smart Contracts", function () {
     );
   });
 });
+
+describe("deafultAccounts", function () {
+  let alice: AccountStore;
+  let bob: AccountStore;
+  let runtime: Runtime;
+  const defaultBalance = 1e9;
+  const amount = 1e6;
+  const fee = 1000;
+
+  function syncAccounts (): void {
+    [alice, bob] = runtime.defaultAccounts;
+  }
+  this.beforeAll(() => {
+    runtime = new Runtime([]);
+    [alice, bob] = runtime.defaultAccounts;
+  })
+  it("Should have an address", () => {
+    assert.exists(alice.address);
+  });
+  it("Should have a default balance", () => {
+    assert.equal(alice.balance(), BigInt(defaultBalance), "balance is correct");
+  });
+  it("Should update the state of the accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  })
+
+});
