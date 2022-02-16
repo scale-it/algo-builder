@@ -23,6 +23,7 @@ const numberTxnFields: {[key: number]: Set<string>} = {
   ])
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
+['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation"].forEach(field => numberTxnFields[6].add(field));
 
 const uintTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -61,6 +62,7 @@ const byteTxnFields: {[key: number]: Set<string>} = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+['VotePK', 'SelectionPK'].forEach(field => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -206,6 +208,23 @@ export function setInnerTxField (
       }
       break;
     }
+
+    case 'VotePK': {
+      const votePk = txValue as string;
+      if (votePk.length !== 32) {
+        errMsg = "VoteKey must be 32 bytes";
+      }
+      break;
+    }
+
+    case 'SelectionPK': {
+      const selectionPK = txValue as string;
+      if (selectionPK.length !== 32) {
+        errMsg = "SelectionPK must be 32 bytes";
+      }
+      break;
+    }
+
     default: { break; }
   }
 
@@ -351,6 +370,15 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
+
+    case 'keyreg':
+      execParams.type = types.TransactionType.KeyRegistration;
+      execParams.voteKey = tx.votekey;
+      execParams.selectionKey = tx.selkey;
+      execParams.voteFirst = tx.votefst;
+      execParams.voteLast = tx.votelst;
+      execParams.voteKeyDilution = tx.votekd;
+      break;
     default: {
       throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
     }
