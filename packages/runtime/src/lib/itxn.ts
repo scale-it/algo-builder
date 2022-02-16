@@ -84,6 +84,18 @@ otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
 ['RekeyTo'].forEach((field) => otherAddrTxnFields[6].add(field));
 
+const txTypes: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set(['pay', 'axfer', 'acfg', 'afrz'])
+};
+
+// supported keyreg on teal v6
+txTypes[6] = cloneDeep(txTypes[5]);
+txTypes[6].add('keyreg');
+
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
  * https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#setting-transaction-properties
@@ -124,7 +136,7 @@ export function setInnerTxField (
     txValue = op.assertAlgorandAddress(val, line);
   }
 
-  const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
+  const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
   // txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
   if (txValue === undefined) {
@@ -133,7 +145,7 @@ export function setInnerTxField (
         msg: `Field ${field} is invalid`,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 
@@ -142,11 +154,11 @@ export function setInnerTxField (
   switch (field) {
     case 'Type': {
       const txType = txValue as string;
-      // either invalid string, or not allowed for TEALv5
+      // check txType supported in current teal version or not
       if (
-        txType !== 'pay' && txType !== 'axfer' && txType !== 'acfg' && txType !== 'afrz'
+        !txTypes[tealVersion].has(txType)
       ) {
-        errMsg = `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
+        errMsg = `${txType} is not a valid Type for itxn_field`;
       }
       break;
     }
@@ -203,7 +215,7 @@ export function setInnerTxField (
         msg: errMsg,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 

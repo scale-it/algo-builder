@@ -75,8 +75,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 

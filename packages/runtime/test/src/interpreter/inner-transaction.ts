@@ -120,7 +120,7 @@ describe("Inner Transactions", function () {
       `;
       assert.throws(
         () => executeTEAL(tealCode),
-        `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`
+        `pya is not a valid Type for itxn_field`
       );
     });
 
@@ -1132,7 +1132,7 @@ describe("Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
       assert.isDefined(logs);
 
       for (let i = 0; i < 30; ++i) {
@@ -1194,19 +1194,30 @@ describe("Inner Transactions", function () {
   });
 
   describe("Teal v6 update", function () {
-    let rekeyProgram: string;
+    let program: string;
     this.beforeAll(() => {
       setUpInterpreter(6);
-      rekeyProgram = `
+    });
+
+    it("Should support RekeyTo", function () {
+      program = `
         itxn_begin
         txn Receiver
         itxn_field RekeyTo
         int 1
         return
       `;
+      assert.doesNotThrow(() => executeTEAL(program));
     });
-    it("Should support RekeyTo", function () {
-      assert.doesNotThrow(() => executeTEAL(rekeyProgram));
+
+    it("Should support keyreg transaction", function () {
+      program = `
+      itxn_begin
+      byte "keyreg"
+      itxn_field Type
+      int 1
+      `;
+      assert.doesNotThrow(() => executeTEAL(program));
     });
   });
 });
