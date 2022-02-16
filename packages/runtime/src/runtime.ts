@@ -33,7 +33,7 @@ export class Runtime {
    * Note: Runtime operates on `store`, it doesn't operate on `ctx`.
    */
   private store: State;
-  private readonly _defaultAccounts: AccountStore[];
+  private _defaultAccounts: AccountStore[];
   ctx: Context;
   loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
@@ -86,6 +86,14 @@ export class Runtime {
     this.initializeAccounts(accounts);
     return accounts;
   }
+
+  /**
+   * Resets the state of the default accounts
+   */
+  resetDefaultAccounts (): void{
+    this._defaultAccounts = this._setupDefaultAccounts();
+  }
+
 
   /**
    * Getter for _defaultAccounts, returns a synced version of the accounts list

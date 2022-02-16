@@ -960,9 +960,10 @@ describe("Stateful Smart Contracts", function () {
   });
 });
 
-describe("deafultAccounts", function () {
+describe("Deafult Accounts", function () {
   let alice: AccountStore;
   let bob: AccountStore;
+  let charlie = new AccountStore(minBalance);
   let runtime: Runtime;
   const defaultBalance = 1e9;
   const amount = 1e6;
@@ -970,9 +971,10 @@ describe("deafultAccounts", function () {
 
   function syncAccounts (): void {
     [alice, bob] = runtime.defaultAccounts;
+    charlie = runtime.getAccount(charlie.address);
   }
-  this.beforeAll(() => {
-    runtime = new Runtime([]);
+  this.beforeEach(() => {
+    runtime = new Runtime([charlie]);
     [alice, bob] = runtime.defaultAccounts;
   })
   it("Should have an address", () => {
@@ -1002,6 +1004,46 @@ describe("deafultAccounts", function () {
 
     assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
     assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  });
+  it("Should reset the state of the deafult accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(ALGOTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance());
+    assert.equal(initialBobBalance, bob.balance());
+  });
+  it("Should not reset the state of the other accounts stored in runtime", () => {
+    const initialCharlieBalance = charlie.balance();
+    const ALGOTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: charlie.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+    runtime.executeTx(ALGOTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
   })
 
 });
