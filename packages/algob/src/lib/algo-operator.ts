@@ -35,8 +35,8 @@ export interface AlgoOperator {
   fundLsig: (lsig: string | LogicSigAccount, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deployApp: (
-    approvalProgram: string,
-    clearProgram: string,
+    approvalProgramName: string,
+    clearProgramName: string,
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
@@ -128,7 +128,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    const assets = accountInfo.assets as modelsv2.AssetHolding[];
+    const assets = accountInfo.assets;
     return BigInt(accountInfo.amount) - BigInt((assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
@@ -300,35 +300,33 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Function to deploy Stateful Smart Contract
-   * @param approvalProgram name of file in which approval program is stored
-   * @param clearProgram name of file in which clear program is stored
+   * @param approvalProgramName approval program filename stored in /assets
+   * @param clearProgramName clear program filename stored in /assets
    * @param flags         AppDeploymentFlags
    * @param payFlags      TxParams
    * @param txWriter
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async deployApp (
-    approvalProgram: string,
-    clearProgram: string,
+    approvalProgramName: string,
+    clearProgramName: string,
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
-    const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
-    const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-    const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
-    const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+    const app = await this.ensureCompiled(approvalProgramName, false, scTmplParams);
+    const clear = await this.ensureCompiled(clearProgramName, false, scTmplParams);
 
-    const execParam: wtypes.ExecParams = {
+    const execParam: wtypes.DeployAppParam = {
       type: wtypes.TransactionType.DeployApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: flags.sender,
-      approvalProgram: approvalProgram,
-      clearProgram: clearProgram,
-      approvalProg: approvalProg,
-      clearProg: clearProg,
+      approvalProgram: approvalProgramName, // TODO rename to approvalProgramName
+      approvalProg: app.base64ToBytes, // TODO rename to approvalProgramBytes
+      clearProgram: clearProgramName, // todo: remove
+      clearProg: clear.base64ToBytes,
       payFlags: payFlags,
       localInts: flags.localInts,
       localBytes: flags.localBytes,

@@ -159,15 +159,15 @@ export type DeployASAParam = BasicParams & {
 
 export type DeployAppParam = BasicParams & AppOptionalFlags & {
   type: TransactionType.DeployApp
-  approvalProgram: string
+  approvalProgram: string // todo - remove
   clearProgram: string
   localInts: number
   localBytes: number
   globalInts: number
   globalBytes: number
   extraPages?: number
-  approvalProg?: Uint8Array
-  clearProg?: Uint8Array
+  approvalProg: Uint8Array
+  clearProg: Uint8Array
   appName?: string // name of app to store info against in checkpoint
 };
 

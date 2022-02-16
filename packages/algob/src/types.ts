@@ -707,10 +707,11 @@ export interface Deployer {
 export interface ASCCache {
   filename: string
   timestamp: number // compilation time (Unix time)
-  compiled: string // the compiled code
+  compiled: string // the compiled code in base64
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
-  base64ToBytes: Uint8Array // compiled base64 in bytes
+  // TODO: rename to compiledBytes
+  base64ToBytes: Uint8Array // bytes
 }
 
 export interface AppCache {

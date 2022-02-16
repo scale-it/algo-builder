@@ -5,7 +5,7 @@ import { ERRORS } from '../errors/errors-list';
 import { AccountAddress, ExecParams, SignType, TransactionType, TxParams } from "../types";
 import { parseAppArgs } from "./parsing";
 
-export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
+export function encodeNote (note: string | undefined, noteb64: string | undefined): Uint8Array | undefined {
   if (note === undefined && noteb64 === undefined) { return undefined; }
   const encoder = new TextEncoder();
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
@@ -226,13 +226,14 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.DeployApp: {
       const onComplete = algosdk.OnApplicationComplete.NoOpOC;
+      assertProgramsDefined(execParams.approvalProg, execParams.clearProg);
 
       const tx = algosdk.makeApplicationCreateTxn(
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg,
+        execParams.clearProg,
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -253,8 +254,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg,
+        execParams.clearProg,
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -298,5 +299,21 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR,
         { transaction: transactionType });
     }
+  }
+}
+
+function assertProgramsDefined (approvalProgram: Uint8Array | undefined,
+  clearProgram: Uint8Array | undefined): void {
+  if (!approvalProgram) {
+    throw new BuilderError(
+      ERRORS.GENERAL.PARAM_PARSE_ERROR, {
+        reason: "approvalProgram must be provided to DeployApp ExecParams"
+      });
+  }
+  if (!clearProgram) {
+    throw new BuilderError(
+      ERRORS.GENERAL.PARAM_PARSE_ERROR, {
+        reason: "clearProgram must be provided to DeployApp ExecParams"
+      });
   }
 }
