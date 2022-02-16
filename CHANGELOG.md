@@ -15,6 +15,15 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+## Features
+Added:
+- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e9 microAlgos (1e3 Algos)
+- `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
+- unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
+Changed:
+- `bond-token-flow` test to also use runtime.defaultAccounts.
+
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
