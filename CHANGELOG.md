@@ -32,6 +32,7 @@ Example:
 ```bash
   algob init --infrastructure
 ```
+- Support `keyreg` transaction in inner transaction.
 
 ### Bug fixes
 
