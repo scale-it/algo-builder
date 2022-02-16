@@ -72,7 +72,6 @@ export class Runtime {
   get defaultBalance (): number {
     return 1e9; // 1000 Algos
   }
-  
 
   /**
    * Returns a list of initialized default accounts created using static accountSDK from account.ts
@@ -90,10 +89,9 @@ export class Runtime {
   /**
    * Resets the state of the default accounts
    */
-  resetDefaultAccounts (): void{
+  resetDefaultAccounts (): void {
     this._defaultAccounts = this._setupDefaultAccounts();
   }
-
 
   /**
    * Getter for _defaultAccounts, returns a synced version of the accounts list
