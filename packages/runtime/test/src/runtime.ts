@@ -977,11 +977,9 @@ describe("Deafult Accounts", function () {
     runtime = new Runtime([charlie]);
     [alice, bob] = runtime.defaultAccounts;
   })
-  it("Should have an address", () => {
+  it("Should be properly initialized", () => {
     assert.exists(alice.address);
-  });
-  it("Should have a default balance", () => {
-    assert.equal(alice.balance(), BigInt(defaultBalance), "balance is correct");
+    assert.equal(alice.balance(), BigInt(defaultBalance), "Alice balance must be correct");
   });
   it("Should update the state of the accounts", () => {
     const initialAliceBalance = alice.balance();
