@@ -1,13 +1,13 @@
-const { Runtime } = require("@algo-builder/runtime");
-const { types } = require("@algo-builder/web");
+const { Runtime } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 const minBalance = 20e6; // 20 ALGOs
-const CLAWBACK_STATELESS_PROGRAM = "clawback.py";
-const CONTROLLER_APPROVAL_PROGRAM = "controller.py";
-const PERMISSIONS_APPROVAL_PROGRAM = "permissions.py";
-const CLEAR_STATE_PROGRAM = "clear_state_program.py";
+const CLAWBACK_STATELESS_PROGRAM = 'clawback.py';
+const CONTROLLER_APPROVAL_PROGRAM = 'controller.py';
+const PERMISSIONS_APPROVAL_PROGRAM = 'permissions.py';
+const CLEAR_STATE_PROGRAM = 'clear_state_program.py';
 
-const TRANSFER_ARG = "str:transfer";
+const TRANSFER_ARG = 'str:transfer';
 
 class Context {
   /**
@@ -30,13 +30,13 @@ class Context {
    * - Setup permissions smart contract
    * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
    */
-  constructor(master, alice, bob, elon) {
+  constructor (master, alice, bob, elon) {
     this.master = master;
     this.alice = alice;
     this.bob = bob;
     this.elon = elon;
     this.runtime = new Runtime([master, alice, bob, elon]);
-    this.deployASA("tesla", { ...alice.account, name: "alice" });
+    this.deployASA('tesla', { ...alice.account, name: 'alice' });
     this.deployController(alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
     this.deployClawback(alice, CLAWBACK_STATELESS_PROGRAM);
     this.deployPermissions(alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
@@ -44,24 +44,24 @@ class Context {
   }
 
   // refresh state
-  syncAccounts() {
+  syncAccounts () {
     this.alice = this.getAccount(this.alice.address);
     this.bob = this.getAccount(this.bob.address);
     this.elon = this.getAccount(this.elon.address);
   }
 
-  deployASA(name, creator) {
+  deployASA (name, creator) {
     this.assetIndex = this.runtime.deployASA(name, { creator: creator }).assetID;
   }
 
-  deployController(sender, controllerProgram, clearProgram) {
+  deployController (sender, controllerProgram, clearProgram) {
     const sscFlags = {
       sender: sender.account,
       localInts: 0,
       localBytes: 0,
       globalInts: 2,
       globalBytes: 0,
-      foreignAssets: [this.assetIndex],
+      foreignAssets: [this.assetIndex]
     };
     this.controllerappID = this.runtime.deployApp(
       controllerProgram,
@@ -73,10 +73,10 @@ class Context {
   }
 
   // Deploy Clawback Lsig and Modify Asset
-  deployClawback(sender, clawbackProgram) {
+  deployClawback (sender, clawbackProgram) {
     this.lsig = this.runtime.loadLogic(clawbackProgram, {
       TOKEN_ID: this.assetIndex,
-      CONTROLLER_APP_ID: this.controllerappID,
+      CONTROLLER_APP_ID: this.controllerappID
     });
 
     fund(this.runtime, this.master, this.lsig.address());
@@ -91,21 +91,21 @@ class Context {
         manager: asaDef.manager,
         reserve: asaDef.reserve,
         freeze: asaDef.freeze,
-        clawback: this.lsig.address(),
+        clawback: this.lsig.address()
       },
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     });
     this.optInToASA(this.lsig.address());
   }
 
-  deployPermissions(permManager, permissionsProgram, clearProgram) {
+  deployPermissions (permManager, permissionsProgram, clearProgram) {
     const sscFlags = {
       sender: permManager.account,
       localInts: 1,
       localBytes: 0,
       globalInts: 2,
       globalBytes: 1,
-      appArgs: [`int:${this.controllerappID}`],
+      appArgs: [`int:${this.controllerappID}`]
     };
     this.permissionsappID = this.runtime.deployApp(
       permissionsProgram,
@@ -116,7 +116,7 @@ class Context {
     ).appID;
 
     // set permissions SSC app_id in controller app
-    const appArgs = ["str:set_permission", `int:${this.permissionsappID}`];
+    const appArgs = ['str:set_permission', `int:${this.permissionsappID}`];
     this.runtime.executeTx({
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
@@ -124,29 +124,29 @@ class Context {
       appID: this.controllerappID,
       payFlags: { totalFee: 1000 },
       appArgs: appArgs,
-      foreignAssets: [this.assetIndex],
+      foreignAssets: [this.assetIndex]
     });
   }
 
-  getAccount(address) {
+  getAccount (address) {
     return this.runtime.getAccount(address);
   }
 
-  getAssetDef() {
+  getAssetDef () {
     return this.runtime.getAssetDef(this.assetIndex);
   }
 
-  getAssetHolding(address) {
+  getAssetHolding (address) {
     return this.runtime.getAssetHolding(this.assetIndex, address);
   }
 
   // Opt-In account to ASA
-  optInToASA(address) {
+  optInToASA (address) {
     this.runtime.optIntoASA(this.assetIndex, address, {});
   }
 
   // Opt-In address to Permissions SSC
-  optInToPermissionsSSC(address) {
+  optInToPermissionsSSC (address) {
     try {
       this.runtime.optInToApp(address, this.permissionsappID, {}, {});
     } catch (error) {
@@ -154,7 +154,7 @@ class Context {
     }
   }
 
-  issue(asaReserve, receiver, amount) {
+  issue (asaReserve, receiver, amount) {
     issue(
       this.runtime,
       asaReserve,
@@ -166,16 +166,16 @@ class Context {
     );
   }
 
-  killToken(asaManager) {
+  killToken (asaManager) {
     killToken(this.runtime, asaManager, this.controllerappID, this.assetIndex);
   }
 
-  whitelist(permManager, addrToWhitelist) {
+  whitelist (permManager, addrToWhitelist) {
     this.optInToPermissionsSSC(addrToWhitelist);
     whitelist(this.runtime, permManager, addrToWhitelist, this.permissionsappID);
   }
 
-  transfer(from, to, amount) {
+  transfer (from, to, amount) {
     transfer(
       this.runtime,
       from,
@@ -188,11 +188,11 @@ class Context {
     );
   }
 
-  optOut(asaCreatorAddr, account) {
+  optOut (asaCreatorAddr, account) {
     optOut(this.runtime, asaCreatorAddr, account, this.assetIndex);
   }
 
-  forceTransfer(asaManager, from, to, amount) {
+  forceTransfer (asaManager, from, to, amount) {
     forceTransfer(
       this.runtime,
       asaManager,
@@ -217,7 +217,7 @@ class Context {
  * @param assetIndex ASA ID (Token ID)
  * @param lsig (Clawback LSig)
  */
-function issue(runtime, asaReserve, receiver, amount, controllerappID, assetIndex, lsig) {
+function issue (runtime, asaReserve, receiver, amount, controllerappID, assetIndex, lsig) {
   const txns = [
     {
       type: types.TransactionType.CallApp,
@@ -225,8 +225,8 @@ function issue(runtime, asaReserve, receiver, amount, controllerappID, assetInde
       fromAccount: asaReserve,
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
-      appArgs: ["str:issue"],
-      foreignAssets: [assetIndex],
+      appArgs: ['str:issue'],
+      foreignAssets: [assetIndex]
     },
     {
       type: types.TransactionType.RevokeAsset,
@@ -237,8 +237,8 @@ function issue(runtime, asaReserve, receiver, amount, controllerappID, assetInde
       revocationTarget: asaReserve.addr,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 },
-    },
+      payFlags: { totalFee: 1000 }
+    }
   ];
   runtime.executeTx(txns);
 }
@@ -250,15 +250,15 @@ function issue(runtime, asaReserve, receiver, amount, controllerappID, assetInde
  * @param controllerappID Controller App ID
  * @param assetIndex token index to be killed
  */
-function killToken(runtime, asaManager, controllerappID, assetIndex) {
+function killToken (runtime, asaManager, controllerappID, assetIndex) {
   runtime.executeTx({
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: asaManager,
     appID: controllerappID,
     payFlags: { totalFee: 1000 },
-    appArgs: ["str:kill"],
-    foreignAssets: [assetIndex],
+    appArgs: ['str:kill'],
+    foreignAssets: [assetIndex]
   });
 }
 
@@ -269,15 +269,15 @@ function killToken(runtime, asaManager, controllerappID, assetIndex) {
  * @param addrToWhitelist Address to be whitelisted
  * @param permissionsappID Permissions App ID
  */
-function whitelist(runtime, permManager, addrToWhitelist, permissionsappID) {
+function whitelist (runtime, permManager, addrToWhitelist, permissionsappID) {
   runtime.executeTx({
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: permManager,
     appID: permissionsappID,
     payFlags: { totalFee: 1000 },
-    appArgs: ["str:add_whitelist"],
-    accounts: [addrToWhitelist],
+    appArgs: ['str:add_whitelist'],
+    accounts: [addrToWhitelist]
   });
 }
 
@@ -287,14 +287,14 @@ function whitelist(runtime, permManager, addrToWhitelist, permissionsappID) {
  * @param master Master Account
  * @param address Receiver Account Address
  */
-function fund(runtime, master, address) {
+function fund (runtime, master, address) {
   runtime.executeTx({
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,
     fromAccount: master.account,
     toAccountAddr: address,
     amountMicroAlgos: minBalance,
-    payFlags: {},
+    payFlags: {}
   });
 }
 
@@ -309,7 +309,7 @@ function fund(runtime, master, address) {
  * @param permissionsappID Permissions App ID
  * @param lsig Clawback LSig
  */
-function transfer(
+function transfer (
   runtime,
   from,
   to,
@@ -326,7 +326,7 @@ function transfer(
       fromAccount: from.account,
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER_ARG],
+      appArgs: [TRANSFER_ARG]
     },
     {
       type: types.TransactionType.RevokeAsset,
@@ -337,7 +337,7 @@ function transfer(
       revocationTarget: from.address,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     },
     {
       type: types.TransactionType.TransferAlgo,
@@ -345,7 +345,7 @@ function transfer(
       fromAccount: from.account,
       toAccountAddr: lsig.address(),
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     },
     {
       type: types.TransactionType.CallApp,
@@ -355,8 +355,8 @@ function transfer(
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address],
-      foreignAssets: [assetIndex],
-    },
+      foreignAssets: [assetIndex]
+    }
   ];
   runtime.executeTx(txGroup);
 }
@@ -368,7 +368,7 @@ function transfer(
  * @param account Account to be Opted-Out
  * @param assetIndex ASA ID
  */
-function optOut(runtime, asaCreatorAddr, account, assetIndex) {
+function optOut (runtime, asaCreatorAddr, account, assetIndex) {
   const optOutParams = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
@@ -376,7 +376,7 @@ function optOut(runtime, asaCreatorAddr, account, assetIndex) {
     toAccountAddr: asaCreatorAddr,
     assetID: assetIndex,
     amount: 0,
-    payFlags: { totalFee: 1000, closeRemainderTo: asaCreatorAddr },
+    payFlags: { totalFee: 1000, closeRemainderTo: asaCreatorAddr }
   };
   runtime.executeTx(optOutParams);
 }
@@ -393,7 +393,7 @@ function optOut(runtime, asaCreatorAddr, account, assetIndex) {
  * @param permissionsappID Permissions App ID
  * @param lsig Clawback LSig
  */
-function forceTransfer(
+function forceTransfer (
   runtime,
   asaManager,
   from,
@@ -411,8 +411,8 @@ function forceTransfer(
       fromAccount: asaManager,
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
-      appArgs: ["str:force_transfer"],
-      foreignAssets: [assetIndex],
+      appArgs: ['str:force_transfer'],
+      foreignAssets: [assetIndex]
     },
     {
       type: types.TransactionType.RevokeAsset,
@@ -423,7 +423,7 @@ function forceTransfer(
       revocationTarget: from.address,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     },
     {
       type: types.TransactionType.TransferAlgo,
@@ -431,7 +431,7 @@ function forceTransfer(
       fromAccount: asaManager,
       toAccountAddr: lsig.address(),
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     },
     {
       type: types.TransactionType.CallApp,
@@ -441,12 +441,12 @@ function forceTransfer(
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address],
-      foreignAssets: [assetIndex],
-    },
+      foreignAssets: [assetIndex]
+    }
   ];
   runtime.executeTx(txGroup);
 }
 
 module.exports = {
-  Context: Context,
+  Context: Context
 };

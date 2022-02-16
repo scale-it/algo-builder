@@ -98,8 +98,8 @@ export interface AppOptionalFlags {
 
 /**
  * Transaction execution parameters (on blockchain OR runtime) */
-export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
-ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
+export type ExecParams = AlgoTransferParam | AssetTransferParam | KeyRegistrationParam
+| AppCallsParam | ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
 OptInASAParam | UpdateAppParam;
 
@@ -111,6 +111,7 @@ export enum SignType {
 export enum TransactionType {
   TransferAlgo,
   TransferAsset,
+  KeyRegistration,
   ModifyAsset,
   FreezeAsset,
   RevokeAsset,
@@ -233,6 +234,16 @@ export type AssetTransferParam = BasicParams & {
   toAccountAddr: AccountAddress
   amount: number | bigint
   assetID: number | string
+};
+
+export type KeyRegistrationParam = BasicParams & {
+  type: TransactionType.KeyRegistration
+  voteKey: string
+  selectionKey: string
+  voteFirst: number
+  voteLast: number
+  voteKeyDilution: number
+  nonParticipation?: false
 };
 
 export interface TransactionAndSign {
