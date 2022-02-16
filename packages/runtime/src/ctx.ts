@@ -648,6 +648,11 @@ export class Ctx implements Context {
           r = this.transferAsset(txParam);
           break;
         }
+        case types.TransactionType.KeyRegistration: {
+          // noop
+          r = { txn: this.tx, txID: this.tx.txID };
+          break;
+        }
         case types.TransactionType.CallApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txParam.appID);

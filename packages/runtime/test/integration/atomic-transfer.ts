@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     syncAccounts();
   });
 
-  function syncAccounts(): void {
+  function syncAccounts (): void {
     john = runtime.getAccount(john.address);
     alice = runtime.getAccount(alice.address);
   }
@@ -75,8 +75,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -109,8 +109,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -292,7 +292,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       }
     ];
     syncAccounts();
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
 
     expectRuntimeError(
       () => runtime.executeTx(txGroup),
@@ -424,8 +424,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     const initialJohnBalance = john.balance();
 
     expectRuntimeError(
