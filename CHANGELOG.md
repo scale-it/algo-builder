@@ -17,7 +17,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ### API breaking
 
-- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name. The existing functions have been changed to `<func>ByFile` (legacy functions based on file querying):
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functions have been changed to `<func>ByFile` (legacy functions based on file querying):
 
   - Application:
     * Exisiting `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
@@ -31,6 +31,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
     * New functions take the lsigName as a required paramter:
       - `mkDelegatedLsig(fileName, lsigName, signer)`
       - `mkContractLsig(fileName, lsigName)`.
+      Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
 
 For reference you can check out `examples/asa`.
 
