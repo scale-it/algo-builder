@@ -1,6 +1,4 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
+const { executeTransaction } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const accounts = require('./common/accounts');
 
@@ -21,7 +19,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
 
   /** Deploy Permissions(rules) smart contract **/
   console.log('\n** Deploying smart contract: permissions **');
-  const permissionSSCInfo = await deployer.deployApp(
+  const permissionAppInfo = await deployer.deployApp(
     'permissions.py', // approval program
     'clear_state_program.py', // clear program
     {
@@ -30,8 +28,11 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
       localBytes: 0,
       globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
       globalBytes: 1 // to store permissions manager
-    }, {}, templateParam); // pass perm_manager as a template param (to set during deploy)
-  console.log(permissionSSCInfo);
+    },
+    {},
+    templateParam
+  ); // pass perm_manager as a template param (to set during deploy)
+  console.log(permissionAppInfo);
 
   /**
    * After deploying rules, we need to add it's config (app_id & manager) to controller,
@@ -45,10 +46,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
    */
   console.log('\n** Linking permissions smart contract to the controller **');
   try {
-    const appArgs = [
-      'str:set_permission',
-      `int:${permissionSSCInfo.appID}`
-    ];
+    const appArgs = ['str:set_permission', `int:${permissionAppInfo.appID}`];
 
     await executeTransaction(deployer, {
       type: types.TransactionType.CallApp,

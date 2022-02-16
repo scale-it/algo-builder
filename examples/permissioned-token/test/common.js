@@ -64,7 +64,10 @@ class Context {
       foreignAssets: [this.assetIndex]
     };
     this.controllerappID = this.runtime.deployApp(
-      controllerProgram, clearProgram, sscFlags, {},
+      controllerProgram,
+      clearProgram,
+      sscFlags,
+      {},
       { TOKEN_ID: this.assetIndex }
     ).appID;
   }
@@ -112,11 +115,8 @@ class Context {
       { PERM_MANAGER: permManager.address }
     ).appID;
 
-    // set permissions SSC app_id in controller ssc
-    const appArgs = [
-      'str:set_permission',
-      `int:${this.permissionsappID}`
-    ];
+    // set permissions SSC app_id in controller app
+    const appArgs = ['str:set_permission', `int:${this.permissionsappID}`];
     this.runtime.executeTx({
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
@@ -155,8 +155,15 @@ class Context {
   }
 
   issue (asaReserve, receiver, amount) {
-    issue(this.runtime, asaReserve, receiver, amount,
-      this.controllerappID, this.assetIndex, this.lsig);
+    issue(
+      this.runtime,
+      asaReserve,
+      receiver,
+      amount,
+      this.controllerappID,
+      this.assetIndex,
+      this.lsig
+    );
   }
 
   killToken (asaManager) {
@@ -169,8 +176,16 @@ class Context {
   }
 
   transfer (from, to, amount) {
-    transfer(this.runtime, from, to, amount, this.assetIndex,
-      this.controllerappID, this.permissionsappID, this.lsig);
+    transfer(
+      this.runtime,
+      from,
+      to,
+      amount,
+      this.assetIndex,
+      this.controllerappID,
+      this.permissionsappID,
+      this.lsig
+    );
   }
 
   optOut (asaCreatorAddr, account) {
@@ -178,8 +193,17 @@ class Context {
   }
 
   forceTransfer (asaManager, from, to, amount) {
-    forceTransfer(this.runtime, asaManager, from, to, amount,
-      this.assetIndex, this.controllerappID, this.permissionsappID, this.lsig);
+    forceTransfer(
+      this.runtime,
+      asaManager,
+      from,
+      to,
+      amount,
+      this.assetIndex,
+      this.controllerappID,
+      this.permissionsappID,
+      this.lsig
+    );
   }
 }
 
@@ -285,7 +309,16 @@ function fund (runtime, master, address) {
  * @param permissionsappID Permissions App ID
  * @param lsig Clawback LSig
  */
-function transfer (runtime, from, to, amount, assetIndex, controllerappID, permissionsappID, lsig) {
+function transfer (
+  runtime,
+  from,
+  to,
+  amount,
+  assetIndex,
+  controllerappID,
+  permissionsappID,
+  lsig
+) {
   const txGroup = [
     {
       type: types.TransactionType.CallApp,
@@ -361,7 +394,16 @@ function optOut (runtime, asaCreatorAddr, account, assetIndex) {
  * @param lsig Clawback LSig
  */
 function forceTransfer (
-  runtime, asaManager, from, to, amount, assetIndex, controllerappID, permissionsappID, lsig) {
+  runtime,
+  asaManager,
+  from,
+  to,
+  amount,
+  assetIndex,
+  controllerappID,
+  permissionsappID,
+  lsig
+) {
   const txGroup = [
     {
       type: types.TransactionType.CallApp,

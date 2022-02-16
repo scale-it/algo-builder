@@ -55,7 +55,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+    lsig: LogicSigAccount | string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
@@ -71,7 +71,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string): Promise<rtypes.AppInfo> {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -79,7 +79,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     };
   }
 
@@ -91,7 +93,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     return {
       creator: String(sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -99,7 +101,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     };
   }
 

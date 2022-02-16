@@ -495,8 +495,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -504,8 +504,10 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(assetTransferParam);
     syncAccounts();
 
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100n);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
+    if (initialJohnAssets && initialAliceAssets) {
+      assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100n);
+      assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
+    }
   });
 
   it("should throw error on transfer asset if asset is frozen and amount > 0", () => {
@@ -552,8 +554,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -567,8 +569,10 @@ describe("Algorand Standard Assets", function () {
     syncAccounts();
 
     assert.isUndefined(alice.getAssetHolding(assetId));
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
-    assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+    if (initialJohnAssets && initialAliceAssets) {
+      assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
+      assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+    }
   });
 
   it("should throw error if closeRemainderTo is fromAccountAddr", () => {

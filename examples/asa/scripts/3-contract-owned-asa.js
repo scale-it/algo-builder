@@ -4,7 +4,7 @@
  * smart contract account(stateless).
  * Steps:
  * - Deploy SSC (controls asa)
- * - Create contract account (with ssc app_id embedded/passed as a template param)
+ * - Create contract account (with app_id embedded/passed as a template param)
  * - Deploy ASA using both contracts
  */
 const { executeTransaction } = require('@algo-builder/algob');

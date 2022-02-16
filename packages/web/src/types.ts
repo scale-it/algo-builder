@@ -141,7 +141,7 @@ interface SignWithLsig {
   fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
   lsig: LogicSigAccount
-  /** stateless smart contract args */
+  /** logic signature args */
   args?: Uint8Array[]
 }
 
@@ -280,9 +280,9 @@ export function isFileError (object: unknown): object is FileError {
 // https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
 export function isRequestError (object: unknown): object is RequestError {
   const res = Object.prototype.hasOwnProperty.call(object, "response.statusCode") &&
-   Object.prototype.hasOwnProperty.call(object, "response.text") &&
-   Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
-   Object.prototype.hasOwnProperty.call(object, "response.error");
+    Object.prototype.hasOwnProperty.call(object, "response.text") &&
+    Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
+    Object.prototype.hasOwnProperty.call(object, "response.error");
   return res && Object.prototype.hasOwnProperty.call(object, "error");
 }
 

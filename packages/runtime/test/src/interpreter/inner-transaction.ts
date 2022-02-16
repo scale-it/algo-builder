@@ -389,7 +389,7 @@ describe("Inner Transactions", function () {
     it("should pass: use random address with asa config transaction with acfg address", () => {
       ConfigAddresses.forEach((configAddress) => {
         tealCode = `
-          itxn_begin           
+          itxn_begin
           addr KW5MRCMF4ICRW32EQFHJJQXF6O6DIXHD4URTXPD657B6QTQA3LWZSLJEUY
           itxn_field ${configAddress}
           int acfg
@@ -1132,7 +1132,7 @@ describe("Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
       assert.isDefined(logs);
 
       for (let i = 0; i < 30; ++i) {
@@ -1197,7 +1197,7 @@ describe("Inner Transactions", function () {
     let rekeyProgram: string;
     this.beforeAll(() => {
       setUpInterpreter(6);
-      rekeyProgram = ` 
+      rekeyProgram = `
         itxn_begin
         txn Receiver
         itxn_field RekeyTo

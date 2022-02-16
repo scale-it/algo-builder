@@ -307,7 +307,10 @@ export class Ctx implements Context {
         txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
         timestamp: Math.round(+new Date() / 1000),
-        deleted: false
+        deleted: false,
+        // we don't have access to bytecode in runtime
+        approvalFile: approvalProgram,
+        clearFile: clearProgram
       }
     );
 
@@ -392,7 +395,7 @@ export class Ctx implements Context {
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee: bigint = BigInt(this.gtxs[index]?.fee ?? 0);
+    let fee: bigint = BigInt(this.gtxs[index].fee ?? 0);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
       fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
