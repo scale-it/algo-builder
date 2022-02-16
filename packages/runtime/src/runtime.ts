@@ -97,7 +97,7 @@ export class Runtime {
    * Getter for _defaultAccounts, returns a synced version of the accounts list
    * @returns list of AccountStore
    */
-  get defaultAccounts (): AccountStore[] {
+  defaultAccounts (): AccountStore[] {
     return this._defaultAccounts.map((account) => this.getAccount(account.address));
   }
 
