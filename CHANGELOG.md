@@ -21,7 +21,7 @@ Added:
 - `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
 - unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
 Changed:
-- `bond-token-flow` test to also use runtime.defaultAccounts.
+- `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 
 
 ### Features

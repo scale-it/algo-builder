@@ -965,22 +965,23 @@ describe("Deafult Accounts", function () {
   let bob: AccountStore;
   let charlie = new AccountStore(minBalance);
   let runtime: Runtime;
-  const defaultBalance = 1e9;
   const amount = 1e6;
   const fee = 1000;
 
   function syncAccounts (): void {
-    [alice, bob] = runtime.defaultAccounts;
+    [alice, bob] = runtime.defaultAccounts();
     charlie = runtime.getAccount(charlie.address);
   }
   this.beforeEach(() => {
     runtime = new Runtime([charlie]);
-    [alice, bob] = runtime.defaultAccounts;
-  })
+    [alice, bob] = runtime.defaultAccounts();
+  });
+
   it("Should be properly initialized", () => {
     assert.exists(alice.address);
-    assert.equal(alice.balance(), BigInt(defaultBalance), "Alice balance must be correct");
+    assert.equal(alice.balance(), BigInt(runtime.defaultBalance), "Alice balance must be correct");
   });
+
   it("Should update the state of the accounts", () => {
     const initialAliceBalance = alice.balance();
     const initialBobBalance = bob.balance();
@@ -1003,6 +1004,7 @@ describe("Deafult Accounts", function () {
     assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
     assert.equal(initialBobBalance + BigInt(amount), bob.balance());
   });
+
   it("Should reset the state of the deafult accounts", () => {
     const initialAliceBalance = alice.balance();
     const initialBobBalance = bob.balance();
@@ -1025,6 +1027,7 @@ describe("Deafult Accounts", function () {
     assert.equal(initialAliceBalance, alice.balance());
     assert.equal(initialBobBalance, bob.balance());
   });
+
   it("Should not reset the state of the other accounts stored in runtime", () => {
     const initialCharlieBalance = charlie.balance();
     const ALGOTransferTxParam: types.AlgoTransferParam = {
@@ -1042,6 +1045,5 @@ describe("Deafult Accounts", function () {
     syncAccounts();
 
     assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
-  })
-
+  });
 });

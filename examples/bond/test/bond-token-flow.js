@@ -25,8 +25,8 @@ describe('Bond token Tests', function () {
   let dex1;
   let dex2;
 
-  let runtime = new Runtime([master, issuerAddress]);
-  [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts;
+  const runtime = new Runtime([master, issuerAddress]);
+  [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
 
   let flags;
   let applicationId;
@@ -48,8 +48,8 @@ describe('Bond token Tests', function () {
   // fetch latest account state
   function syncAccounts () {
     issuerAddress = runtime.getAccount(issuerAddress.address);
-    [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts;
-    }
+    [appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
+  }
 
   // Bond-Dapp initialization parameters
   const appManagerPk = convert.addressToPk(appManager.address);

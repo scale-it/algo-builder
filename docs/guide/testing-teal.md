@@ -105,6 +105,35 @@ In this section we will describe the flow of testing smart contracts in runtime:
 - **Update/Refresh State**. After a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. In algob examples we use `syncAccounts()` closure (see [example](https://github.com/scale-it/algo-builder/blob/6743acd/examples/restricted-assets/test/asset-txfer-test.js#L80)) closure which will reassign accounts to their latest state.
 - **Verify State**: Now, we can verify if the `global state` and `local state` as well as accounts are correctly updated. We use `runtime.getGlobalState()` and `runtime.getLocalState()` to check the state and directly inspect account objects (after the `syncAccounts` is made).
 
+### Default Accounts
+This section briefly explains how to use Default Accounts provided by the Runtime. The Default Accounts are predifined accounts that are recommented to be used in tests.  Instead of long setup copy-paste code like this:
+```javascript
+const initialMicroAlgo = 1e9;
+let john = new AccountStore(initialMicroAlgo);
+let bob = new AccountStore(initialMicroAlgo);
+let runtime = Runtime([john, bob]);
+syncAccounts(){
+  john = runtime.getAccount(john.address);
+  bob = runtime.getAccount(bob.address);
+};
+```
+With the utilization of the Default Accounts the setup might look like this:
+```javascript
+let john;
+let bob;
+let runtime = Runtime([]);
+[john, bob] = runtime.defaultAccounts();
+syncAccounts(){
+  [john, bob] = runtime.defaultAccounts();
+};
+```
+There is no need to pass the Default Accounts to the Runtime constructor, since these are created inside of it.
+To sync the accounts the method `runtime.defaultAccounts()` must be invoked. No additional code is necessary. 
+Methods:
+- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e9 microAlgos (100 Algos). 
+- `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts. 
+
+For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 
 ## Run tests
 
