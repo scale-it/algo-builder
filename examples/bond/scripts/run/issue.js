@@ -12,11 +12,6 @@ exports.issue = async function (deployer) {
   const managerAcc = deployer.accountsByName.get('alice');
 
   const appInfo = deployer.getApp('BondApp');
-  const scInitParam = {
-    TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_OWNER: creatorAccount.addr,
-    TMPL_APP_MANAGER: managerAcc.addr
-  };
   const issuerLsig = deployer.getLsig('IssuerLsig');
   const asaInfo = deployer.getASAInfo('bond-token-0');
   const groupTx = issueTx(creatorAccount, issuerLsig, appInfo.appID, asaInfo.assetIndex);
