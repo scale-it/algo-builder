@@ -4,11 +4,9 @@ const {
 const { types } = require('@algo-builder/web');
 
 const accounts = require('../common/accounts');
-const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
+const { fundAccount, optInAccountToApp } = require('../common/common');
 const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
-
-const clearStateProgram = 'clear_state_program.py';
 
 /**
  * Force transfer tokens between 2 accounts by (signed by token manager)
@@ -19,10 +17,10 @@ const clearStateProgram = 'clear_state_program.py';
 async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getAppByFile('controller.py', clearStateProgram);
-  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
+  const controllerAppInfo = deployer.getApp('Controller');
+  const permissionsAppInfo = deployer.getApp('Permissions');
 
-  const clawbackLsig = await getClawback(deployer);
+  const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();
 
   // notice the difference in calls here: stateful calls are done by token manager here
@@ -97,7 +95,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('Permissions');
 
   /*
    * Force transfer some tokens b/w 2 accounts

@@ -2,7 +2,7 @@ const {
   balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
-const { getClawback, executeTransaction, fundAccount, totalSupply } = require('../common/common');
+const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
 const accounts = require('../common/accounts');
 
 /**
@@ -11,9 +11,9 @@ const accounts = require('../common/accounts');
 async function issue (deployer, address, amount) {
   const issuer = deployer.accountsByName.get(accounts.issuer);
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('Controller');
 
-  const clawbackLsig = await getClawback(deployer);
+  const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();
 
   const issuanceParams = [

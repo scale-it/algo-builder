@@ -4,11 +4,9 @@ const {
 const { types } = require('@algo-builder/web');
 
 const accounts = require('../common/accounts');
-const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
+const { fundAccount, optInAccountToApp } = require('../common/common');
 const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
-
-const clearStateProgram = 'clear_state_program.py';
 
 /**
  * If there is a crime evidence, we will need to be able to cease assets back to the issuer.
@@ -19,9 +17,9 @@ const clearStateProgram = 'clear_state_program.py';
 async function cease (deployer, address, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getAppByFile('controller.py', clearStateProgram);
+  const controllerAppInfo = deployer.getApp('Controller');
 
-  const clawbackLsig = await getClawback(deployer);
+  const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();
   const asaReserveAddress = (await deployer.getAssetByID(tesla.assetIndex)).params.reserve;
 
@@ -77,7 +75,7 @@ async function cease (deployer, address, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsAppInfo = deployer.getAppByFile('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('Permissions');
 
   // fund owner and bob
   const bob = deployer.accountsByName.get('bob');

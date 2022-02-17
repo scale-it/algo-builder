@@ -5,7 +5,7 @@ const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 async function run (runtimeEnv, deployer) {
-  const controllerAppInfo = deployer.getAppByFile('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('Controller');
   const controllerappID = controllerAppInfo.appID;
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
