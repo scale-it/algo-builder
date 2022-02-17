@@ -15,6 +15,11 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### API breaking
+
+- Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
+- Updated `txId` key in returned App/ASA info to `txID`.
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
