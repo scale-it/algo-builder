@@ -1238,10 +1238,9 @@ describe("Inner Transactions", function () {
       itxn_field Nonparticipation
       itxn_submit
       int 1
-
       `;
-      executeTEAL(program);
-      //  assert.doesNotThrow(() => executeTEAL(program));
+
+      assert.doesNotThrow(() => executeTEAL(program));
     });
 
     it("Invalid field keyreg transaction", () => {
