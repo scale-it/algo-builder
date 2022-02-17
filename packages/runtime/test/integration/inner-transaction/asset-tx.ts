@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     // create asset
     assetID = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
 
     // fund app (escrow belonging to app) with 10 ALGO
     const fundAppParams: types.AlgoTransferParam = {

@@ -4,7 +4,7 @@ import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { TxReceipt } from "../../src/types";
+import { BaseTxReceipt } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
 const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 5000);
@@ -50,7 +50,7 @@ describe("Key Registration transaction", function () {
       payFlags: { totalFee: 1000 }
     };
 
-    const r = runtime.executeTx(txSKParams) as TxReceipt;
+    const r = runtime.executeTx(txSKParams) as BaseTxReceipt;
     assert.isDefined(r);
     assert.isDefined(r.txn);
     assert.isDefined(r.txID);
@@ -74,7 +74,7 @@ describe("Key Registration transaction", function () {
       payFlags: { totalFee: 1000 }
     };
 
-    const r = runtime.executeTx(txLsigParams) as TxReceipt;
+    const r = runtime.executeTx(txLsigParams) as BaseTxReceipt;
     assert.isDefined(r);
     assert.isDefined(r.txn);
     assert.isDefined(r.txID);

@@ -83,7 +83,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     newBondToken,
     asaDef,
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
-  ).assetID;
+  ).assetIndex;
 
   optInLsigToBond(runtime, issuerLsig, newBond, managerAcc);
 

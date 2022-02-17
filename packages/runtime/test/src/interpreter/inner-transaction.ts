@@ -688,7 +688,7 @@ describe("Inner Transactions", function () {
           { total: 10, decimals: 0, unitName: "TASA" },
           elonAddr,
           { creator: { ...elonAcc.account, name: "elon" } }
-        ).assetID;
+        ).assetIndex;
       }
 
       // passes
@@ -771,7 +771,7 @@ describe("Inner Transactions", function () {
           { total: 11, decimals: 0, unitName: "TASA1" },
           elonAddr,
           { creator: { ...elonAcc.account, name: "elon" } }
-        ).assetID;
+        ).assetIndex;
 
         // not in foreign-assets
         assetID2 = interpreter.runtime.ctx.deployASADef(
@@ -779,7 +779,7 @@ describe("Inner Transactions", function () {
           { total: 22, decimals: 0, unitName: "TASA2" },
           elonAddr,
           { creator: { ...elonAcc.account, name: "elon" } }
-        ).assetID;
+        ).assetIndex;
       }
 
       axfer = `
@@ -1135,11 +1135,13 @@ describe("Inner Transactions", function () {
       const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
       assert.isDefined(logs);
 
-      for (let i = 0; i < 30; ++i) {
-        assert.equal(logs[i], "a");
+      if (logs) {
+        for (let i = 0; i < 30; ++i) {
+          assert.equal(logs[i], "a");
+        }
+        assert.equal(logs[30], "b");
+        assert.equal(logs[31], "c");
       }
-      assert.equal(logs[30], "b");
-      assert.equal(logs[31], "c");
     });
 
     it(`should throw error if log count exceeds threshold`, function () {

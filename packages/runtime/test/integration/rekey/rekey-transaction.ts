@@ -408,7 +408,7 @@ describe("Re-keying transactions", function () {
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: alice.address,
-        assetID: ASAReceipt.assetID,
+        assetID: ASAReceipt.assetIndex,
         amount: 0n,
         payFlags: {
           totalFee: 1000,
