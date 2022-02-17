@@ -92,7 +92,7 @@ export interface State {
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
-  txId: string
+  txID: string
   confirmedRound: number
   deleted: boolean
 }

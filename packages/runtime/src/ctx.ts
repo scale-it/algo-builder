@@ -207,7 +207,7 @@ export class Ctx implements Context {
       creator: senderAcc.address,
       assetIndex: this.state.assetCounter,
       assetDef: asset,
-      txId: this.tx.txID,
+      txID: this.tx.txID,
       confirmedRound: this.runtime.getRound(),
       deleted: false
     };
@@ -299,7 +299,7 @@ export class Ctx implements Context {
       creator: senderAcc.address,
       appID: this.state.appCounter,
       applicationAccount: getApplicationAddress(this.state.appCounter),
-      txId: this.tx.txID,
+      txID: this.tx.txID,
       confirmedRound: this.runtime.getRound(),
       timestamp: Math.round(+new Date() / 1000),
       deleted: false,
