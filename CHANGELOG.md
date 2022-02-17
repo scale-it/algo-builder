@@ -17,10 +17,10 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ### API breaking
 
-- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functions have been changed to `<func>ByFile` (legacy functions based on file querying):
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
 
   - Application:
-    * Exisiting `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    * Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
     * New `getApp(appName)` function queries app info using the app name.
 
   - Smart signatures:
