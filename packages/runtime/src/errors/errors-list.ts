@@ -482,7 +482,7 @@ const transactionErrors = {
   INSUFFICIENT_ACCOUNT_ASSETS: {
     number: 1402,
     message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
-    title: 'Insufficient account assests',
+    title: 'Insufficient account assets',
     description: `Withdrawing %amount% assets will lead to insufficient balance`
   },
   INVALID_TRANSACTION_PARAMS: {
