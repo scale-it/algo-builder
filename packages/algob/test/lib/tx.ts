@@ -774,7 +774,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo?.appID as number,
+      appID: appInfo?.appID ?? 0,
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}
