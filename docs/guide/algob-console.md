@@ -201,12 +201,27 @@ Similar example can be found in `/scrips/transfer/tesla-to-john.js` (tesla ASA).
 ## Transfer Algos according to ASC logic (Contract Account)
 
 Here we will transfer some `algos` from a stateless smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
-+ We will first load the logic signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint.
++ We will first load the logic signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint. Eg.
+  ```js
+  // store contract lsig
+  await deployer.mkContractLsig('file.py', "CLsig", { ARG_DAO_APP: 1 });
+
+  // now during querying, you only need this lsig name
+  const lsigInfo = deployer.getLsig("CLsig");
+  ```
 + This address will be the sender(contract account mode) and receiver will be `john`.
 + Finally, we will transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
-```
+```js
+// by file
 lsig = await deployer.loadLogicByFile("2-gold-contract-asc.teal");
 sender = lsig.address();
+
+// by name
+// store contract lsig in checkpoint (in deploy script)
+await deployer.mkContractLsig('2-gold-contract-asc.teal', "GoldASC");
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsig("GoldASC");
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97818537-e3740300-1cc8-11eb-81cd-a64e80106cf7.png)
 
@@ -289,6 +304,8 @@ Assets are transferred using `algob.executeTransaction({ type: TransactionType.T
 
 Retreive lsig & assetId from checkpoint:
 ```bash
+// you can load by name as well (using name is GOLD_ASA):
+// algob> lsigGoldOwner = deployer.getLsig('GOLD_ASA');
 algob> lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
 LogicSig {
   tag: [

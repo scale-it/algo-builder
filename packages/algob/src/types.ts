@@ -534,7 +534,7 @@ export interface Deployer {
    *     (used only when compiling PyTEAL to TEAL)
    */
   mkDelegatedLsig: (
-    name: string,
+    fileName: string,
     lsigName: string,
     signer: rtypes.Account,
     scTmplParams?: SCParams
@@ -547,7 +547,7 @@ export interface Deployer {
    * @scTmplParams : Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   mkContractLsig: (
-    name: string,
+    fileName: string,
     lsigName: string,
     scTmplParams?: SCParams
   ) => Promise<LsigInfo>
