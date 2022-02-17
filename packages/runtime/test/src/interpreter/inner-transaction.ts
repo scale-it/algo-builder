@@ -49,7 +49,7 @@ describe("Inner Transactions", function () {
     });
   };
 
-  const setUpContext = (tealVersion: number, appBalance: number = ALGORAND_ACCOUNT_MIN_BALANCE): void => {
+  const setUpInterpreter = (tealVersion: number, appBalance: number = ALGORAND_ACCOUNT_MIN_BALANCE): void => {
     // setup 1st account (to be used as sender)
     elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
     setDummyAccInfo(elonAcc);
@@ -80,7 +80,7 @@ describe("Inner Transactions", function () {
     interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
   };
 
-  this.beforeAll(() => setUpContext(5));
+  this.beforeAll(() => setUpInterpreter(5));
 
   describe("TestActionTypes", function () {
     it("should fail: itxn_submit without itxn_begin", function () {
@@ -1141,11 +1141,13 @@ describe("Inner Transactions", function () {
       const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
       assert.isDefined(logs);
 
-      for (let i = 0; i < 30; ++i) {
-        assert.equal(logs[i], "a");
+      if (logs !== undefined) {
+        for (let i = 0; i < 30; ++i) {
+          assert.equal(logs[i], "a");
+        }
+        assert.equal(logs[30], "b");
+        assert.equal(logs[31], "c");
       }
-      assert.equal(logs[30], "b");
-      assert.equal(logs[31], "c");
     });
 
     it(`should throw error if log count exceeds threshold`, function () {
@@ -1200,60 +1202,131 @@ describe("Inner Transactions", function () {
   });
 
   describe("Teal v6 update", function () {
-    let program: string;
     this.beforeAll(() => {
-      // init more balance for application to test inner transaction
-      setUpContext(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
+      setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
     });
 
-    it("Should support RekeyTo", function () {
-      program = `
-        itxn_begin
-        txn Receiver
-        itxn_field RekeyTo
-        int 1
-        return
-      `;
-      assert.doesNotThrow(() => executeTEAL(program));
-    });
+    describe("keyreg transaction", function () {
+      let program: string;
+      this.beforeEach(() => {
+        // init more balance for application to test inner transaction
+        setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
+      });
 
-    it("Should support keyreg transaction", function () {
-      program = `
-      itxn_begin
-      byte "keyreg"
-      itxn_field Type
-      int 32
-      bzero
-      itxn_field VotePK
-      int 32
-      bzero
-      itxn_field SelectionPK
-      int 43
-      itxn_field VoteFirst
-      int 1000
-      itxn_field VoteLast
-      int 5
-      itxn_field VoteKeyDilution
-      int 1
-      itxn_field Nonparticipation
-      itxn_submit
-      int 1
-      `;
-
-      assert.doesNotThrow(() => executeTEAL(program));
-    });
-
-    it("should fail on invalid field keyreg transaction", () => {
-      ["VotePK", "SelectionPK"].forEach((field) => {
+      it("Should support keyreg transaction", function () {
         program = `
+        itxn_begin
+        byte "keyreg"
+        itxn_field Type
+        int 32
+        bzero
+        itxn_field VotePK
+        int 32
+        bzero
+        itxn_field SelectionPK
+        int 43
+        itxn_field VoteFirst
+        int 1000
+        itxn_field VoteLast
+        int 5
+        itxn_field VoteKeyDilution
+        int 1
+        itxn_field Nonparticipation
+        itxn_submit
+        int 1
+        `;
+
+        assert.doesNotThrow(() => executeTEAL(program));
+      });
+
+      it("should fail on invalid field keyreg transaction", () => {
+        ["VotePK", "SelectionPK"].forEach((field) => {
+          program = `
+            itxn_begin
+            int 31
+            bzero
+            itxn_field ${field}
+            int 1
+          `;
+          expectRuntimeError(
+            () => executeTEAL(program),
+            RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+          );
+        });
+      });
+    });
+
+    describe("RekeyTo", () => {
+      let rekeyProgram: string;
+      this.beforeAll(() => {
+        setUpInterpreter(6);
+        rekeyProgram = `
           itxn_begin
-          int 31
-          bzero
-          itxn_field ${field}
+          txn Receiver
+          itxn_field RekeyTo
           int 1
+          return
+        `;
+      });
+
+      it("Should support RekeyTo", function () {
+        assert.doesNotThrow(() => executeTEAL(rekeyProgram));
+      });
+    });
+
+    describe("Note", () => {
+      this.beforeEach(() => {
+        setUpInterpreter(6);
+      });
+
+      it("Should throw error if teal version < 6", function () {
+        setUpInterpreter(5);
+        const invNoteProg = `
+          itxn_begin
+          byte "hello"
+          itxn_field Note
+          int 1
+          return
+        `;
+
+        expectRuntimeError(
+          () => executeTEAL(invNoteProg),
+          RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+        );
+      });
+
+      it("Should support Note for tealv6", function () {
+        const noteProg = `
+          itxn_begin
+          byte "abcdefghijklmnopqrstuvwxyz01234567890"
+          itxn_field Note
+          int 1
+          return
+        `;
+        assert.doesNotThrow(() => executeTEAL(noteProg));
+      });
+
+      it("Should throw error if Note exceeds 1024 bytes", function () {
+        const noteProg = `
+          itxn_begin
+          int 1024
+          bzero
+          itxn_field Note
+          int 1
+          return
+        `;
+        assert.doesNotThrow(() => executeTEAL(noteProg));
+
+        const invalidProg = `
+          itxn_begin
+          int 1025
+          bzero
+          itxn_field Note
+          int 1
+          return
         `;
         expectRuntimeError(
-          () => executeTEAL(program),
+          () => executeTEAL(invalidProg),
           RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
         );
       });

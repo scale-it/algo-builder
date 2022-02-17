@@ -28,6 +28,7 @@ export const LogicSigMaxCost = 20000;
 export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
+export const MaxTxnNoteBytes = 1024;
 export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
 // the assets and application arrays combined and totaled with the accounts array can not exceed 8
