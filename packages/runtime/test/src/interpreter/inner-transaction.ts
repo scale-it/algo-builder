@@ -1243,7 +1243,7 @@ describe("Inner Transactions", function () {
       assert.doesNotThrow(() => executeTEAL(program));
     });
 
-    it("Invalid field keyreg transaction", () => {
+    it("should fail on invalid field keyreg transaction", () => {
       ["VotePK", "SelectionPK"].forEach((field) => {
         program = `
           itxn_begin
