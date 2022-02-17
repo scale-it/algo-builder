@@ -19,13 +19,13 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   }
   const previousToken = 'bond-token-' + String(i - 1);
   const oldBond = tokenMap.get(previousToken);
-  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
+  const issuerLsig = deployer.getLsig('IssuerLsig');
   console.log('Issuer address: ', issuerLsig.address());
   const newBondToken = 'bond-token-' + String(i);
   const deployTx = {

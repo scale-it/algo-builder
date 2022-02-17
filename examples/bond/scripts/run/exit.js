@@ -13,7 +13,7 @@ const { tokenMap, nominalPrice } = require('./common/common');
  * @param amount amount of bond tokens
  */
 exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amount) {
-  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const bondToken = tokenMap.get('bond-token-' + String(n));
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,

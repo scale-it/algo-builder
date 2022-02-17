@@ -12,13 +12,13 @@ const { issuePrice, buyTxNode } = require('./common/common.js');
  */
 exports.epoch0 = async function (deployer) {
   const account = await accounts(deployer);
-  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: account.creator.addr,
     TMPL_APP_MANAGER: account.manager.addr
   };
-  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
+  const issuerLsig = deployer.getLsig('IssuerLsig');
   const asaInfo = deployer.getASAInfo('bond-token-0');
   await deployer.optInAccountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
   await deployer.optInAccountToASA(asaInfo.assetIndex, 'elon-musk', { totalFee: 1000 });

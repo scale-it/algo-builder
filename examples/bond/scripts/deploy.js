@@ -56,7 +56,7 @@ async function run (runtimeEnv, deployer) {
       globalInts: 8,
       globalBytes: 15,
       appArgs: appArgs
-    }, {}, placeholderParam);
+    }, {}, placeholderParam, 'BondApp');
   console.log(bondAppInfo);
 
   // Initialize issuer lsig with bond-app ID
@@ -65,7 +65,9 @@ async function run (runtimeEnv, deployer) {
     TMPL_OWNER: creatorAccount.addr,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const issuerLsig = await deployer.loadLogicByFile('issuer-lsig.py', scInitParam);
+
+  await deployer.mkContractLsig('issuer-lsig.py', 'IssuerLsig', scInitParam);
+  const issuerLsig = deployer.getLsig('IssuerLsig');
 
   algoTxnParams.toAccountAddr = issuerLsig.address();
   await executeTransaction(deployer, algoTxnParams);

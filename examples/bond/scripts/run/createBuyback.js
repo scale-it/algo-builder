@@ -12,7 +12,7 @@ const { tokenMap, optInTx, fundAccount } = require('./common/common');
  * @param n nth bond token
  */
 exports.createBuyback = async function (deployer, managerAcc, n) {
-  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const bondToken = tokenMap.get('bond-token-' + String(n));
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,

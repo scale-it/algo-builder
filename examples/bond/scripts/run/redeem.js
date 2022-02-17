@@ -13,7 +13,7 @@ const { tokenMap, couponValue, redeemCouponTx } = require('./common/common.js');
  * For ex: 1 means your 0 bond-tokens will be redeemed from 1st Dex
  */
 exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount) {
-  const appInfo = deployer.getAppByFile('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const oldBond = tokenMap.get('bond-token-' + String(dex - 1));
   const newBond = tokenMap.get('bond-token-' + String(dex));
   const scInitParam = {
