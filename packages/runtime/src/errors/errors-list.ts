@@ -456,6 +456,12 @@ const runtimeGeneralErrors = {
     message: "Should have been authorized by %spend% but was actually authorized by %signer%",
     title: "Invalid spend account.",
     description: "Invalid spend account"
+  },
+  ACCOUNT_ADDR_MISMATCH: {
+    number: 1317,
+    message: "Account Error - Account and address %address% mismatch at line %line%",
+    title: "Account Error at line %line%",
+    description: `Account and address mismatch in the current state`
   }
 };
 
