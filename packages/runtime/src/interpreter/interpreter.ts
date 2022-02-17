@@ -178,12 +178,13 @@ export class Interpreter {
    * @param line line number
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
+  /* eslint-disable sonarjs/cognitive-complexity */
   getAppIDByReference (appRef: number, foreign: boolean, line: number, op: Op): number {
     const foreignApps = this.runtime.ctx.tx.apfa ?? [];
     if (this.tealVersion >= 4) {
-      // In recent versions (tealv >= 4), accept either kind of Application reference
+      // In recent versions (tealv >= 4), accept either  kind of Application reference
       if (appRef === 0) {
-        return this.runtime.ctx.tx.apid;
+        return this.runtime.ctx.tx.apid ?? 0;
       }
       if (appRef <= foreignApps.length) {
         return foreignApps[appRef - 1];
@@ -196,7 +197,7 @@ export class Interpreter {
       if (foreign) {
         // In old versions, a foreign reference must be an index in ForeignApps or 0
         if (appRef === 0) {
-          return this.runtime.ctx.tx.apid;
+          return this.runtime.ctx.tx.apid ?? 0;
         }
 
         op.checkIndexBound(--appRef, foreignApps, line);
