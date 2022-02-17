@@ -83,10 +83,12 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     runtime.executeTx(txGroup);
 
     syncAccounts();
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 10n);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 10n);
-    assert.equal(john.balance(), initialBalance - 2100n);
-    assert.equal(alice.balance(), initialBalance + 100n);
+    if (initialAliceAssets && initialJohnAssets) {
+      assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 10n);
+      assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 10n);
+      assert.equal(john.balance(), initialBalance - 2100n);
+      assert.equal(alice.balance(), initialBalance + 100n);
+    }
   });
 
   it("should not execute payment transaction (in group) if asset transaction fails", () => {
