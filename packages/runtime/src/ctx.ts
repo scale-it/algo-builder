@@ -12,8 +12,9 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI,
   AppDeploymentFlags,
-  ASADeploymentFlags, AssetHoldingM,
-  Context, DeployedAppTxReceipt, DeployedAssetTxReceipt, EncTx, ExecutionMode,
+  AppInfo,
+  ASADeploymentFlags, ASAInfo, AssetHoldingM,
+  Context, EncTx, ExecutionMode,
   ID, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
@@ -174,7 +175,7 @@ export class Ctx implements Context {
   deployASA (
     name: string,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): DeployedAssetTxReceipt {
+  ): ASAInfo {
     return this.deployASADef(
       name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
     );
@@ -190,7 +191,7 @@ export class Ctx implements Context {
   deployASADef (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ): DeployedAssetTxReceipt {
+  ): ASAInfo {
     const senderAcc = this.getAccount(fromAccountAddr);
     parseASADef(asaDef);
     validateOptInAccNames(this.state.accountNameAddress, asaDef);
@@ -202,25 +203,21 @@ export class Ctx implements Context {
     this.runtime.mkAssetCreateTx(name, flags, asset);
 
     this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
-    this.state.assetNameInfo.set(name, {
+    const asaInfo = {
       creator: senderAcc.address,
       assetIndex: this.state.assetCounter,
       assetDef: asset,
       txId: this.tx.txID,
       confirmedRound: this.runtime.getRound(),
       deleted: false
-    });
+    };
+    this.state.assetNameInfo.set(name, asaInfo);
 
     if (this.isInnerTx) { this.createdAssetID = this.state.assetCounter; }
 
     // set & return transaction receipt
-    const receipt = {
-      txn: this.tx,
-      txID: this.tx.txID,
-      assetID: this.state.assetCounter
-    };
-    this.state.txReceipts.set(this.tx.txID, receipt);
-    return receipt;
+    this.state.txReceipts.set(this.tx.txID, asaInfo);
+    return asaInfo;
   }
 
   /**
@@ -261,7 +258,7 @@ export class Ctx implements Context {
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number,
     scTmplParams?: SCParams
-  ): DeployedAppTxReceipt {
+  ): AppInfo {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     const approvalProgTEAL =
@@ -298,20 +295,21 @@ export class Ctx implements Context {
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     this.state.globalApps.delete(0); // remove zero app from context
     senderAcc.createdApps.set(this.state.appCounter, attributes);
+    const appInfo: AppInfo = {
+      creator: senderAcc.address,
+      appID: this.state.appCounter,
+      applicationAccount: getApplicationAddress(this.state.appCounter),
+      txId: this.tx.txID,
+      confirmedRound: this.runtime.getRound(),
+      timestamp: Math.round(+new Date() / 1000),
+      deleted: false,
+      // we don't have access to bytecode in runtime
+      approvalFile: approvalProgram,
+      clearFile: clearProgram
+    };
     this.state.appNameInfo.set(
       approvalProgram + "-" + clearProgram,
-      {
-        creator: senderAcc.address,
-        appID: this.state.appCounter,
-        applicationAccount: getApplicationAddress(this.state.appCounter),
-        txId: this.tx.txID,
-        confirmedRound: this.runtime.getRound(),
-        timestamp: Math.round(+new Date() / 1000),
-        deleted: false,
-        // we don't have access to bytecode in runtime
-        approvalFile: approvalProgram,
-        clearFile: clearProgram
-      }
+      appInfo
     );
 
     const acc = new AccountStore(
@@ -323,10 +321,8 @@ export class Ctx implements Context {
     );
     this.state.accounts.set(acc.address, acc);
 
-    // set & return transaction receipt
-    const receipt = this.state.txReceipts.get(this.tx.txID) as DeployedAppTxReceipt;
-    receipt.appID = this.state.appCounter;
-    return receipt;
+    // return transaction receipt
+    return appInfo;
   }
 
   /**
@@ -746,7 +742,7 @@ export class Ctx implements Context {
           } else {
             r = this.deployASA(txParam.asaName, fromAccountAddr, flags);
           }
-          this.knowableID.set(idx, (r as DeployedAssetTxReceipt).assetID);
+          this.knowableID.set(idx, r.assetIndex);
           break;
         }
         case types.TransactionType.OptInASA: {
@@ -770,7 +766,7 @@ export class Ctx implements Context {
             txParam.clearProgram,
             idx
           );
-          this.knowableID.set(idx, (r as DeployedAppTxReceipt).appID);
+          this.knowableID.set(idx, (r).appID);
           break;
         }
         case types.TransactionType.OptInToApp: {
