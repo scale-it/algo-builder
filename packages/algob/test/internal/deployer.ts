@@ -32,7 +32,7 @@ function mkASA (): wtypes.ASADef {
 describe("DeployerDeployMode", () => {
   useFixtureProject("config-project");
   let deployerCfg: DeployerConfig, env;
-  const mp = new Map<number, rtypes.SSCInfo>();
+  const mp = new Map<number, rtypes.AppInfo>();
 
   beforeEach(function () {
     env = mkEnv("network 123");
@@ -155,7 +155,7 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     const deployer = new DeployerDeployMode(deployerCfg);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -242,7 +242,7 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     const deployer = new DeployerDeployMode(deployerCfg);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,

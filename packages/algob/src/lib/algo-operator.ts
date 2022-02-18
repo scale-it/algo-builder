@@ -40,7 +40,7 @@ export interface AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
+    scTmplParams?: SCParams) => Promise<rtypes.AppInfo>
   updateApp: (
     sender: algosdk.Account,
     payFlags: wtypes.TxParams,
@@ -50,7 +50,7 @@ export interface AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ) => Promise<rtypes.SSCInfo>
+  ) => Promise<rtypes.AppInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
   optInAccountToASA: (
@@ -128,7 +128,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    const assets = accountInfo.assets as modelsv2.AssetHolding[];
+    const assets = accountInfo.assets;
     return BigInt(accountInfo.amount) - BigInt((assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
@@ -313,7 +313,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
+    scTmplParams?: SCParams): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
@@ -390,7 +390,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);

@@ -24,7 +24,7 @@ export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Check
 }
 
 function createNetwork (timestamp: number): Checkpoint {
-  const mp = new Map<number, rtypes.SSCInfo>();
+  const mp = new Map<number, rtypes.AppInfo>();
   return {
     timestamp: timestamp,
     metadata: new Map<string, string>(),
@@ -77,7 +77,7 @@ describe("Checkpoint", () => {
     const netCheckpoint: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "536",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -209,7 +209,7 @@ describe("Checkpoint", () => {
     const cp1: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "123",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -221,7 +221,7 @@ describe("Checkpoint", () => {
       approvalFile: "approval-file.py",
       clearFile: "clear-file.py"
     });
-    const nestedMap1 = new Map<number, rtypes.SSCInfo>();
+    const nestedMap1 = new Map<number, rtypes.AppInfo>();
     nestedMap1.set(2, {
       creator: "123",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -263,7 +263,7 @@ describe("Checkpoint", () => {
     const cp: CheckpointImpl = new CheckpointImpl();
     cp.timestamp = 12345;
     assert.deepEqual(cp, createNetwork(12345));
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "SSC deployer address",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -331,7 +331,7 @@ describe("Checkpoint with cleanup", () => {
 });
 
 describe("CheckpointRepoImpl", () => {
-  const nestedMap = new Map<number, rtypes.SSCInfo>();
+  const nestedMap = new Map<number, rtypes.AppInfo>();
   it('Should crash if duplication is detected between scripts', async () => {
     const cp1: Checkpoints = {
       network1: {
@@ -448,7 +448,7 @@ describe("CheckpointRepoImpl", () => {
   });
 
   it("Should allow placing state; two networks", () => {
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "SSC creator 951",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -618,8 +618,8 @@ describe("CheckpointRepoImpl", () => {
   });
 
   it("Should deeply merge global checkpoints", async () => {
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
-    const nestedMap1 = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
+    const nestedMap1 = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "SSC creator",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -755,7 +755,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.strippedCP["net 0195"].timestamp = 195;
 
     it("Should contain factory methods for ASA anc SSC asset registration", () => {
-      const nestedMap = new Map<number, rtypes.SSCInfo>();
+      const nestedMap = new Map<number, rtypes.AppInfo>();
       nestedMap.set(1, {
         creator: "SSC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,

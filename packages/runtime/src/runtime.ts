@@ -17,11 +17,11 @@ import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
+  AccountAddress, AccountStoreI, AppDeploymentFlags, AppInfo,
+  AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
   DeployedAppTxReceipt, DeployedAssetTxReceipt,
-  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, SSCInfo,
-  StackElem, State, TxReceipt
+  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 export class Runtime {
@@ -47,7 +47,7 @@ export class Runtime {
       globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
-      appNameInfo: new Map<string, SSCInfo>(),
+      appNameInfo: new Map<string, AppInfo>(),
       appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
       assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
       txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
@@ -267,7 +267,7 @@ export class Runtime {
    * @param approval
    * @param clear
    */
-  getAppInfoFromName (approval: string, clear: string): SSCInfo | undefined {
+  getAppInfoFromName (approval: string, clear: string): AppInfo | undefined {
     return this.store.appNameInfo.get(approval + "-" + clear);
   }
 

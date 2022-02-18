@@ -37,14 +37,14 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, rtypes.ASAInfo>;
-  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>;
+  ssc: Map<string, Map<Timestamp, rtypes.AppInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, rtypes.ASAInfo>();
-    const mp = new Map<Timestamp, rtypes.SSCInfo>();
+    const mp = new Map<Timestamp, rtypes.AppInfo>();
     this.ssc = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
@@ -144,19 +144,19 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   private _ensureRegister (
-    map: Map<string, Map<number, rtypes.SSCInfo>>, name: string, info: rtypes.SSCInfo
+    map: Map<string, Map<number, rtypes.AppInfo>>, name: string, info: rtypes.AppInfo
   ): void {
     const nestedMap = map.get(name);
     if (nestedMap) {
       nestedMap.set(info.timestamp, info);
     } else {
-      const newMap = new Map<number, rtypes.SSCInfo>();
+      const newMap = new Map<number, rtypes.AppInfo>();
       newMap.set(info.timestamp, info);
       map.set(name, newMap);
     }
   }
 
-  registerSSC (networkName: string, name: string, info: rtypes.SSCInfo): CheckpointRepo {
+  registerSSC (networkName: string, name: string, info: rtypes.AppInfo): CheckpointRepo {
     this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
@@ -240,7 +240,7 @@ export async function registerCheckpoints (
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
-          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
+          const temp: rtypes.AppInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
           if (txn.appOnComplete === Number(rtypes.TxOnComplete.DeleteApplication) && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
@@ -249,7 +249,7 @@ export async function registerCheckpoints (
           }
         }
         if (res) {
-          const sscInfo: rtypes.SSCInfo = {
+          const sscInfo: rtypes.AppInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             appID: Number(txConfirmation['application-index']),
@@ -375,7 +375,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * @param key Key here is clear program name appended to approval program name
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
-  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
                         new Map();
     const nestedMap: any = resultMap.get(key);
@@ -420,7 +420,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * Returns latest timestamp value from map
    * @param map Map
    */
-  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+  getLatestTimestampValue (map: Map<number, rtypes.AppInfo>): number {
     let res: number = -1;
     const cmpValue: number = -1;
     map.forEach((value, key) => {
