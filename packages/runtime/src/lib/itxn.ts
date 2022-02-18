@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
+import { Account as AccountSDK, decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
@@ -259,16 +259,12 @@ const _getAddress = (addr?: Uint8Array): string | undefined => {
 
 // parse encoded txn obj to execParams (params passed by user in algob)
 /* eslint-disable sonarjs/cognitive-complexity */
-export function parseEncodedTxnToExecParams (tx: EncTx,
+export function parseEncodedTxnToExecParams (singer: AccountSDK, tx: EncTx,
   interpreter: Interpreter, line: number): types.ExecParams {
-  // signer is the contract
-  const appID = interpreter.runtime.ctx.tx.apid ?? 0;
-  const appAddress = getApplicationAddress(appID);
-
   // initial common fields
   const execParams: any = {
     sign: types.SignType.SecretKey,
-    fromAccount: { addr: appAddress, sk: Buffer.from([]) }, // signer is the contract
+    fromAccount: singer, // signer is the contract
     fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,

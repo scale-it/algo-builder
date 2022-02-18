@@ -1611,8 +1611,8 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
-        const app = this.interpreter.getApp(appID, this.line);
+        const appID = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -3920,8 +3920,19 @@ export class ITxnSubmit extends Op {
       );
     }
 
+    // initial contract account.
+    const appID = this.interpreter.runtime.ctx.tx.apid;
+    const contractAddress = getApplicationAddress(appID as number);
+    const contractAccount = {
+      addr: contractAddress,
+      sk: Buffer.from([])
+    };
+
     // get execution txn params (parsed from encoded sdk txn obj)
-    const execParams = parseEncodedTxnToExecParams(this.interpreter.subTxn, this.interpreter, this.line);
+    // singer will be contractAccount
+    const execParams = parseEncodedTxnToExecParams(
+      contractAccount, this.interpreter.subTxn, this.interpreter, this.line
+    );
     const baseCurrTx = this.interpreter.runtime.ctx.tx;
     const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
