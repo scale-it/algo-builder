@@ -18,10 +18,10 @@ async function run (runtimeEnv, deployer) {
   const appArgs = [convert.stringToBytes('reclaim')];
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getAppByFile('crowdFundApproval.teal', 'crowdFundClear.teal');
+  const appInfo = deployer.getApp('CrowdfundingApp');
 
   // Get Escrow Account Address
-  const lsig = await deployer.loadLogicByFile('crowdFundEscrow.py', { APP_ID: appInfo.appID });
+  const lsig = deployer.getLsig('escrow');
   const escrowAccountAddress = lsig.address();
 
   const txGroup = [

@@ -15,8 +15,8 @@ async function run (runtimeEnv, deployer) {
   });
 
   const appArgs = [convert.stringToBytes('claim')];
-  const appInfo = deployer.getAppByFile('crowdFundApproval.teal', 'crowdFundClear.teal'); // get from checkpoint
-  const escrowAccount = await deployer.loadLogicByFile('crowdFundEscrow.py', { APP_ID: appInfo.appID });
+  const appInfo = deployer.getApp('CrowdfundingApp'); // get from checkpoint
+  const escrowAccount = deployer.getLsig('escrow');
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
   const txGroup = [
