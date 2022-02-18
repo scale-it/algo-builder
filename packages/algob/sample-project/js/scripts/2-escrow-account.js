@@ -11,10 +11,13 @@ async function run (runtimeEnv, deployer) {
   const templateParams = {
     RECEIVER_ADDRESS: 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY'
   };
-  await deployer.fundLsigByFile('escrow.py',
-    { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { fee: 1000 }, templateParams);
-  const escrow = await deployer.loadLogicByFile('escrow.py', templateParams);
+  await deployer.mkContractLsig('escrow.py', 'escrow', templateParams);
 
+  await deployer.fundLsig('escrow',
+    { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { totalFee: 1000 });
+  const escrow = await deployer.getLsig('escrow');
+
+  if (escrow === undefined) { return; }
   await deployer.addCheckpointKV('User Checkpoint Escrow', `Fund Escrow Account: ${escrow.address()}`);
   console.log('Escrow account script execution finished!');
 }
