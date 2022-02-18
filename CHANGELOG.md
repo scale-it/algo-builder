@@ -35,6 +35,8 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 For reference you can check out `examples/asa`.
 
+- Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
