@@ -82,11 +82,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getApp (appName: string): rtypes.SSCInfo | undefined {
+  getApp (appName: string): rtypes.SSCInfo {
     throw new Error("Not implemented");
   }
 
-  getLsig (lsigName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount {
     throw new Error("Not implemented");
   }
 
@@ -102,7 +102,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getDelegatedLsigByFile (lsig: string): object | undefined {
+  getDelegatedLsigByFile (lsig: string): LogicSigAccount {
     throw new Error("Not implemented");
   }
 

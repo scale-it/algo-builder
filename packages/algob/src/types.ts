@@ -691,17 +691,17 @@ export interface Deployer {
   /**
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
-  getApp: (appName: string) => rtypes.SSCInfo | undefined
+  getApp: (appName: string) => rtypes.SSCInfo
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
    * @param lsigName name of the smart signture (passed during mkContractLsig/mkDelegatedLsigByFile)
    */
-  getLsig: (lsigName: string) => LogicSigAccount | undefined
+  getLsig: (lsigName: string) => LogicSigAccount
 
   /**
    * Queries a delegated logic signature from checkpoint. */
-  getDelegatedLsigByFile: (lsigName: string) => Object | undefined
+  getDelegatedLsigByFile: (lsigName: string) => LogicSigAccount
 
   /**
    * Loads contract mode logic signature (TEAL or PyTEAL)

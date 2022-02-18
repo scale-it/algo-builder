@@ -146,35 +146,29 @@ class DeployerBasicMode {
    * @param approvalFileName Approval program name
    * @param clearFileName clear program name
    */
-  getAppByFile (approvalFileName: string, clearFileName: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getAppfromCPKey(approvalFileName + "-" + clearFileName);
+  getAppByFile (approvalFileName: string, clearFileName: string): rtypes.SSCInfo {
+    return this.assertAppExistsInCP(approvalFileName + "-" + clearFileName);
   }
 
   /**
    * Loads stateful smart contract info from checkpoint
    * @param appName name of the app (passed by user during deployment)
    */
-  getApp (appName: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getAppfromCPKey(appName);
+  getApp (appName: string): rtypes.SSCInfo {
+    return this.assertAppExistsInCP(appName);
   }
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
-   * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param lsigName name of the lsig or file name (passed by user during mkContractLsig/mkDelegatedLsig)
    */
-  getLsig (lsigName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsigByFile(lsigName) ?? this.getContractLsigByFile(lsigName);
-  }
-
-  /**
-   * Loads a single signed delegated logic signature account from checkpoint
-   * @param lsigFileName logic signature file name
-   */
-  getDelegatedLsigByFile (lsigFileName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
-    const result = resultMap.get(lsigFileName)?.lsig;
+    const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) {
-      return undefined;
+      throw new BuilderError(ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP, {
+        lsigName: lsigName
+      });
     }
 
     const lsigAccount = Object.assign(getDummyLsig(), result);
@@ -187,11 +181,19 @@ class DeployerBasicMode {
   }
 
   /**
+   * Loads a single signed delegated logic signature account from checkpoint
+   * @param lsigFileName logic signature file name
+   */
+  getDelegatedLsigByFile (lsigFileName: string): LogicSigAccount {
+    return this.getLsig(lsigFileName);
+  }
+
+  /**
    * Loads a logic signature account from checkpoint
    * @param lsigFileName logic signature file name
    */
-  getContractLsigByFile (lsigFileName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsigByFile(lsigFileName);
+  getContractLsigByFile (lsigFileName: string): LogicSigAccount {
+    return this.getLsig(lsigFileName);
   }
 
   /**
@@ -498,17 +500,17 @@ class DeployerBasicMode {
   }
 
   /**
-   * Asserts that there is a checkpoint with given lsig name.
-   * @param lsigName name of the lsig (passed by user during mkContractLsig/mkDelegatedLsig)
+   * Throws error if application info is not present in CP
+   * @param key key against which app information is stored in checkpoint
    */
-  assertLsigExistsInCP (lsigName: string): LogicSigAccount {
-    const lsig = this.getLsig(lsigName);
-    if (lsig === undefined) {
-      throw new BuilderError(ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP, {
-        lsigName: lsigName
+  assertAppExistsInCP (key: string): rtypes.SSCInfo {
+    const app = this.checkpoint.getAppfromCPKey(key);
+    if (app === undefined) {
+      throw new BuilderError(ERRORS.GENERAL.APP_NOT_FOUND_IN_CP, {
+        appName: app
       });
     }
-    return lsig;
+    return app;
   }
 }
 
@@ -680,7 +682,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     payFlags: wtypes.TxParams
   ): Promise<void> {
     try {
-      const lsig = this.assertLsigExistsInCP(lsigName);
+      const lsig = this.getLsig(lsigName);
       await this.algoOp.fundLsig(lsig, flags, payFlags, this.txWriter);
     } catch (error) {
       console.log(error);

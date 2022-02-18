@@ -640,7 +640,10 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("should deploy application in deploy mode and save info by name", async () => {
@@ -664,7 +667,10 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.isDefined(deployer.getApp("dao-app"));
 
     // do note that traditional way doesn't work if appName is passed
-    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("should delete application in run mode", async () => {
@@ -734,7 +740,10 @@ describe("Update transaction test in run mode", () => {
     const appInfo = await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
 
     execParams = {
       type: wtypes.TransactionType.UpdateApp,
@@ -748,7 +757,10 @@ describe("Update transaction test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("deploy in deploy mode, update in run mode", async () => {
@@ -800,7 +812,10 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     const appInfo = await executeTransaction(deployer, execParams);
-    assert.isUndefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
 
     deployer = new DeployerDeployMode(deployerCfg);
     execParams = {
