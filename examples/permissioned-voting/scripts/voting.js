@@ -64,7 +64,7 @@ async function run (runtimeEnv, deployer) {
       globalInts: 6,
       globalBytes: 1,
       appArgs: appArgs
-    }, {});
+    }, {}, {}, 'PermissionedVotingApp');
 
   console.log(res);
 
