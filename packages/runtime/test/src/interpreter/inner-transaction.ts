@@ -6,8 +6,8 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, MaxTEALVersion } from "../../../src/lib/constants";
-import { AccountStoreI, ExecutionMode } from "../../../src/types";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -24,22 +24,11 @@ describe("Inner Transactions", function () {
   let tealCode: string;
   let interpreter: Interpreter;
 
-  // setup 1st account (to be used as sender)
-  const elonAcc: AccountStoreI = new AccountStore(0, elonMuskAccount); // setup test account
-  setDummyAccInfo(elonAcc);
-
-  // setup 2nd account
-  const johnAcc = new AccountStore(0, johnAccount);
-
-  // setup 2nd account
-  const bobAccount = new AccountStore(1000000, bobAcc);
-
-  // setup application account
-  const appAccAddr = getApplicationAddress(TXN_OBJ.apid);
-  const applicationAccount = new AccountStore(ALGORAND_ACCOUNT_MIN_BALANCE, {
-    addr: appAccAddr,
-    sk: new Uint8Array(0)
-  });
+  let elonAcc: AccountStoreI;
+  let johnAcc: AccountStoreI;
+  let bobAccount: AccountStoreI;
+  let appAccAddr: AccountAddress;
+  let applicationAccount: AccountStoreI;
 
   const reset = (): void => {
     while (interpreter.stack.length() !== 0) {
@@ -60,7 +49,24 @@ describe("Inner Transactions", function () {
     });
   };
 
-  const setUpInterpreter = (tealVersion: number): void => {
+  const setUpInterpreter = (tealVersion: number, appBalance: number = ALGORAND_ACCOUNT_MIN_BALANCE): void => {
+    // setup 1st account (to be used as sender)
+    elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
+    setDummyAccInfo(elonAcc);
+
+    // setup 2nd account
+    johnAcc = new AccountStore(0, johnAccount);
+
+    // setup 2nd account
+    bobAccount = new AccountStore(1000000, bobAcc);
+
+    // setup application account
+    appAccAddr = getApplicationAddress(TXN_OBJ.apid);
+    applicationAccount = new AccountStore(appBalance, {
+      addr: appAccAddr,
+      sk: new Uint8Array(0)
+    });
+
     interpreter = new Interpreter();
     interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, applicationAccount]);
     interpreter.tealVersion = tealVersion;
@@ -120,7 +126,7 @@ describe("Inner Transactions", function () {
       `;
       assert.throws(
         () => executeTEAL(tealCode),
-        `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`
+        `pya is not a valid Type for itxn_field`
       );
     });
 
@@ -1132,7 +1138,7 @@ describe("Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
       assert.isDefined(logs);
 
       if (logs !== undefined) {
@@ -1196,6 +1202,60 @@ describe("Inner Transactions", function () {
   });
 
   describe("Teal v6 update", function () {
+    this.beforeAll(() => {
+      setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
+    });
+
+    describe("keyreg transaction", function () {
+      let program: string;
+      this.beforeEach(() => {
+        // init more balance for application to test inner transaction
+        setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
+      });
+
+      it("Should support keyreg transaction", function () {
+        program = `
+        itxn_begin
+        byte "keyreg"
+        itxn_field Type
+        int 32
+        bzero
+        itxn_field VotePK
+        int 32
+        bzero
+        itxn_field SelectionPK
+        int 43
+        itxn_field VoteFirst
+        int 1000
+        itxn_field VoteLast
+        int 5
+        itxn_field VoteKeyDilution
+        int 1
+        itxn_field Nonparticipation
+        itxn_submit
+        int 1
+        `;
+
+        assert.doesNotThrow(() => executeTEAL(program));
+      });
+
+      it("should fail on invalid field keyreg transaction", () => {
+        ["VotePK", "SelectionPK"].forEach((field) => {
+          program = `
+            itxn_begin
+            int 31
+            bzero
+            itxn_field ${field}
+            int 1
+          `;
+          expectRuntimeError(
+            () => executeTEAL(program),
+            RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+          );
+        });
+      });
+    });
+
     describe("RekeyTo", () => {
       let rekeyProgram: string;
       this.beforeAll(() => {
