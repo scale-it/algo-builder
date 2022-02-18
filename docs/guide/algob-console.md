@@ -31,7 +31,7 @@ Following globals are available in an `algob console` REPL:
 
 # Example Walkthrough
 
-For demonstration purpose, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user will be able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with stateless smart contracts (contract account and delegation signature mode) using `algob console`.
+For demonstration purpose, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user will be able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with smart signatures (contract account and delegation signature mode) using `algob console`.
 
 + [Setup](./algob-console.md#setup)
 + [Transfer Algos](./algob-console.md#transfer-algos)
@@ -201,7 +201,7 @@ Similar example can be found in `/scrips/transfer/tesla-to-john.js` (tesla ASA).
 ## Transfer Algos according to ASC logic (Contract Account)
 
 Here we will transfer some `algos` from a stateless smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
-+ We will first load the logic signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint. Eg.
++ We will first load the smart signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint. Eg.
   ```js
   // store contract lsig
   await deployer.mkContractLsig('file.py', "CLsig", { ARG_DAO_APP: 1 });

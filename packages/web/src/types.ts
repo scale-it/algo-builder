@@ -98,8 +98,8 @@ export interface AppOptionalFlags {
 
 /**
  * Transaction execution parameters (on blockchain OR runtime) */
-export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
-ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
+export type ExecParams = AlgoTransferParam | AssetTransferParam | KeyRegistrationParam
+| AppCallsParam | ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
 OptInASAParam | UpdateAppParam;
 
@@ -111,6 +111,7 @@ export enum SignType {
 export enum TransactionType {
   TransferAlgo,
   TransferAsset,
+  KeyRegistration,
   ModifyAsset,
   FreezeAsset,
   RevokeAsset,
@@ -140,7 +141,7 @@ interface SignWithLsig {
   fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
   lsig: LogicSigAccount
-  /** stateless smart contract args */
+  /** logic signature args */
   args?: Uint8Array[]
 }
 
@@ -235,6 +236,16 @@ export type AssetTransferParam = BasicParams & {
   assetID: number | string
 };
 
+export type KeyRegistrationParam = BasicParams & {
+  type: TransactionType.KeyRegistration
+  voteKey: string
+  selectionKey: string
+  voteFirst: number
+  voteLast: number
+  voteKeyDilution: number
+  nonParticipation?: false
+};
+
 export interface TransactionAndSign {
   transaction: Transaction
   sign: Sign
@@ -269,9 +280,9 @@ export function isFileError (object: unknown): object is FileError {
 // https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
 export function isRequestError (object: unknown): object is RequestError {
   const res = Object.prototype.hasOwnProperty.call(object, "response.statusCode") &&
-   Object.prototype.hasOwnProperty.call(object, "response.text") &&
-   Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
-   Object.prototype.hasOwnProperty.call(object, "response.error");
+    Object.prototype.hasOwnProperty.call(object, "response.text") &&
+    Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
+    Object.prototype.hasOwnProperty.call(object, "response.error");
   return res && Object.prototype.hasOwnProperty.call(object, "error");
 }
 

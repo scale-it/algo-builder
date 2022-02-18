@@ -38,10 +38,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.issue(asaReserve.account, elon, 20);
     ctx.syncAccounts();
 
-    assert.equal(
-      ctx.getAssetHolding(elon.address).amount,
-      prevElonAssetHolding.amount + 20n
-    );
+    assert.equal(ctx.getAssetHolding(elon.address).amount, prevElonAssetHolding.amount + 20n);
   });
 
   it('should kill token if sender is token manager', () => {
@@ -53,18 +50,21 @@ describe('Permissioned Token Tests - Happy Paths', function () {
 
     assert.equal(ctx.runtime.getGlobalState(ctx.controllerappID, 'killed'), 1n); // verify token is killed
     // issuance fails now (as token is killed)
-    assert.throws(() =>
-      ctx.issue(asaReserve.account, elon, 20),
-    'RUNTIME_ERR1009: TEAL runtime encountered err opcode');
+    assert.throws(
+      () => ctx.issue(asaReserve.account, elon, 20),
+      'RUNTIME_ERR1009: TEAL runtime encountered err opcode'
+    );
   });
 
   it('should whitelist account if sender is permissions manager', () => {
-    // opt-in to permissions ssc by elon
+    // opt-in to permissions app by elon
     ctx.optInToPermissionsSSC(elon.address);
     ctx.syncAccounts();
     assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsappID)); // verify opt-in
 
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+    const permManagerAddr = encodeAddress(
+      ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager')
+    );
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address); // whitelist elon
     ctx.syncAccounts();
@@ -80,10 +80,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.syncAccounts();
 
     // verify issuance
-    assert.equal(
-      ctx.getAssetHolding(elon.address).amount,
-      20n
-    );
+    assert.equal(ctx.getAssetHolding(elon.address).amount, 20n);
 
     // opt-out issued tokens to creator
     const initialCreatorHolding = ctx.getAssetHolding(asaCreator.address);
@@ -94,16 +91,20 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     assert.isUndefined(ctx.elon.getAssetHolding(ctx.assetIndex)); // verify asset closed from elon account
     assert.equal(
       ctx.getAssetHolding(asaCreator.address).amount,
-      initialCreatorHolding.amount + 20n);
+      initialCreatorHolding.amount + 20n
+    );
   });
 
   it('should change Permissions SSC Manager if sender is current_permissions_manager', () => {
     // throws error as elon is not permissions manager
-    assert.throws(() =>
-      ctx.whitelist(elon.account, bob.address),
-    'RUNTIME_ERR1009: TEAL runtime encountered err opcode');
+    assert.throws(
+      () => ctx.whitelist(elon.account, bob.address),
+      'RUNTIME_ERR1009: TEAL runtime encountered err opcode'
+    );
 
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+    const permManagerAddr = encodeAddress(
+      ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager')
+    );
     const currentPermManager = ctx.getAccount(permManagerAddr);
     assert.notEqual(elon.address, currentPermManager.address); // verify elon is not current_perm_manager
     const txn = {
@@ -120,7 +121,9 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.runtime.executeTx(txn);
     ctx.syncAccounts();
 
-    const newPermManager = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+    const newPermManager = encodeAddress(
+      ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager')
+    );
     assert.equal(newPermManager, elon.address); // verify new perm manager is elon
     ctx.whitelist(elon.account, bob.address); // passes now
 
@@ -129,7 +132,9 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   });
 
   it('should force transfer tokens between non reserve accounts successfully if sender is token manager', () => {
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+    const permManagerAddr = encodeAddress(
+      ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager')
+    );
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address);
     ctx.whitelist(permManager.account, bob.address);
@@ -148,14 +153,8 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
     ctx.forceTransfer(asaManager.account, bob, elon, 20);
     // verify transfer
-    assert.equal(
-      ctx.getAssetHolding(bob.address).amount,
-      initialBobBalance - 20n
-    );
-    assert.equal(
-      ctx.getAssetHolding(elon.address).amount,
-      initialElonBalance + 20n
-    );
+    assert.equal(ctx.getAssetHolding(bob.address).amount, initialBobBalance - 20n);
+    assert.equal(ctx.getAssetHolding(elon.address).amount, initialElonBalance + 20n);
   });
 
   it('should force transfer tokens without permission checks if receiver is asset reserve', () => {
@@ -203,14 +202,8 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const initialReserveBalance = ctx.getAssetHolding(asaReserve.address).amount;
     ctx.runtime.executeTx(forceTxParams);
     // verify transfer
-    assert.equal(
-      ctx.getAssetHolding(bob.address).amount,
-      initialBobBalance - 20n
-    );
-    assert.equal(
-      ctx.getAssetHolding(asaReserve.address).amount,
-      initialReserveBalance + 20n
-    );
+    assert.equal(ctx.getAssetHolding(bob.address).amount, initialBobBalance - 20n);
+    assert.equal(ctx.getAssetHolding(asaReserve.address).amount, initialReserveBalance + 20n);
   });
 
   it('should transfer tokens between non reserve accounts successfully', () => {
@@ -225,7 +218,9 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.syncAccounts();
 
     // whitelisted both accounts
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+    const permManagerAddr = encodeAddress(
+      ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager')
+    );
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address);
     ctx.whitelist(permManager.account, bob.address);
@@ -239,14 +234,8 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
     ctx.transfer(bob, elon, amount);
     ctx.syncAccounts();
-    assert.equal(
-      ctx.getAssetHolding(bob.address).amount,
-      initialBobBalance - amount
-    );
-    assert.equal(
-      ctx.getAssetHolding(elon.address).amount,
-      initialElonBalance + amount
-    );
+    assert.equal(ctx.getAssetHolding(bob.address).amount, initialBobBalance - amount);
+    assert.equal(ctx.getAssetHolding(elon.address).amount, initialElonBalance + amount);
   });
 
   it('should update asset reserve account to another address if sender is asset manager', () => {
@@ -361,10 +350,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.runtime.executeTx(ceaseTxParams);
 
     // verify cease amount
-    assert.equal(
-      ctx.getAssetHolding(bob.address).amount,
-      initialBobBalance - toCeaseAmt
-    );
+    assert.equal(ctx.getAssetHolding(bob.address).amount, initialBobBalance - toCeaseAmt);
     assert.equal(
       ctx.getAssetHolding(asaReserve.address).amount,
       initialReserveBalance + toCeaseAmt
@@ -377,10 +363,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const newPermAppID = 99; // some random value for test
     assert.notEqual(currentPermAppID, newPermAppID);
 
-    const appArgs = [
-      'str:set_permission',
-      `int:${newPermAppID}`
-    ];
+    const appArgs = ['str:set_permission', `int:${newPermAppID}`];
     const setPermTx = {
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,

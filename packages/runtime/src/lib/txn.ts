@@ -51,8 +51,8 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  */
 export function checkIfAssetDeletionTx (txn: Transaction): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.assetIndex > 0) && // assetIndex should not be 0
-  !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
+    (txn.assetIndex > 0) && // assetIndex should not be 0
+    !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
 }
 
 /**
@@ -178,8 +178,8 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
  */
 export function isEncTxAssetDeletion (txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
-  !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
+    (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
+    !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
 
 /**
@@ -188,6 +188,6 @@ export function isEncTxAssetDeletion (txn: EncTx): boolean {
  */
 export function isEncTxAssetConfig (txn: EncTx): boolean {
   return txn.type === 'acfg' && // type should be asset config
-  (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
-  !isEncTxAssetDeletion(txn); // AND should not be asset deletion
+    (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
+    !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }

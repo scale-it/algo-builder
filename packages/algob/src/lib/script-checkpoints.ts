@@ -37,7 +37,7 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, rtypes.ASAInfo>;
-  ssc: Map<string, Map<Timestamp, rtypes.AppInfo>>;
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
@@ -45,7 +45,7 @@ export class CheckpointImpl implements Checkpoint {
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, rtypes.ASAInfo>();
     const mp = new Map<Timestamp, rtypes.AppInfo>();
-    this.ssc = new Map<string, typeof mp>();
+    this.app = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -59,17 +59,17 @@ export function appendToCheckpoint (
   }
   orig.timestamp = append.timestamp;
   orig.metadata = new Map([...orig.metadata, ...append.metadata]);
-  const allAssetNames = [...append.asa.keys(), ...append.ssc.keys()];
+  const allAssetNames = [...append.asa.keys(), ...append.app.keys()];
   for (const assetName of allAssetNames) {
     if ((orig.asa.get(assetName) && !deepEqual(orig.asa.get(assetName), append.asa.get(assetName))) ??
-      (orig.ssc.get(assetName) && !deepEqual(orig.ssc.get(assetName), append.ssc.get(assetName)))) {
+      (orig.app.get(assetName) && !deepEqual(orig.app.get(assetName), append.app.get(assetName)))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });
     }
   }
   orig.asa = new Map([...orig.asa, ...append.asa]);
-  orig.ssc = new Map([...orig.ssc, ...append.ssc]);
+  orig.app = new Map([...orig.app, ...append.app]);
   orig.dLsig = new Map([...orig.dLsig, ...append.dLsig]);
   return checkpoints;
 }
@@ -98,7 +98,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const current = cp[k];
-      const allAssetNames = [...current.asa.keys(), ...current.ssc.keys(), ...current.dLsig.keys()];
+      const allAssetNames = [...current.asa.keys(), ...current.app.keys(), ...current.dLsig.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -157,9 +157,9 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   registerSSC (networkName: string, name: string, info: rtypes.AppInfo): CheckpointRepo {
-    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
-    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
-    this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
+    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).app, name, info);
+    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).app, name, info);
+    this._ensureRegister(this._ensureNet(this.allCPs, networkName).app, name, info);
     return this;
   }
 
@@ -173,7 +173,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   isDefined (networkName: string, name: string): boolean {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
-      (netCP.asa.get(name) !== undefined || netCP.ssc.get(name) !== undefined ||
+      (netCP.asa.get(name) !== undefined || netCP.app.get(name) !== undefined ||
       netCP.dLsig.get(name) !== undefined);
   }
 
@@ -299,7 +299,7 @@ export function toSSCMap <T> (
 
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
-  cpWithObjects.ssc = toSSCMap(cpWithObjects.ssc as any);
+  cpWithObjects.app = toSSCMap(cpWithObjects.app as any);
   cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;
@@ -376,7 +376,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
   getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
+    const resultMap = this.cpData.precedingCP[this.networkName]?.app ??
                         new Map();
     const nestedMap: any = resultMap.get(key);
     if (nestedMap) {
@@ -392,7 +392,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * @param index Application index
    */
   getAppCheckpointKeyFromIndex (index: number): string | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    const resultMap = this.cpData.precedingCP[this.networkName]?.app ?? new Map();
     for (const [key, nestedMap] of resultMap) {
       if (this.getLatestTimestampValue(nestedMap) === index) {
         return key;

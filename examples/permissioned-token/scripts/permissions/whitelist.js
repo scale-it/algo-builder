@@ -1,6 +1,4 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
+const { executeTransaction } = require('@algo-builder/algob');
 const { fundAccount, optInAccountToApp } = require('../common/common');
 const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
@@ -18,7 +16,7 @@ const clearStateProgram = 'clear_state_program.py';
  * @param address account address to whitelist
  */
 async function whitelist (deployer, permissionsManager, address) {
-  const permissionSSCInfo = deployer.getApp('Permissions');
+  const permissionAppInfo = deployer.getApp('Permissions');
 
   /*
    * - Only permissions manager can add accounts to whitelist. Which is set to alice(during deploy).
@@ -29,7 +27,7 @@ async function whitelist (deployer, permissionsManager, address) {
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // permissions manager account (fails otherwise)
-    appID: permissionSSCInfo.appID,
+    appID: permissionAppInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:add_whitelist'],
     accounts: [address] // pass address to add to whitelisted addresses
@@ -42,18 +40,18 @@ async function whitelist (deployer, permissionsManager, address) {
  * + Fund accounts (manager, account_to_whitelist)
  * + Opt-In to permissions by elon (skip this code if already opted-in)
  * + call permissions smart contract with `add_whitelist` arg
-*/
+ */
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner); // alice is set as the permissions_manager during deploy
   const elon = deployer.accountsByName.get('elon-musk');
   const john = deployer.accountsByName.get('john');
-  const permissionSSCInfo = deployer.getApp('Permissions');
+  const permissionAppInfo = deployer.getApp('Permissions');
 
   /** Fund all accounts with ALGO **/
   await fundAccount(deployer, [owner, elon, john]);
 
   console.log('* Opt-In and whitelist Elon *');
-  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await optInAccountToApp(deployer, elon, permissionAppInfo.appID, {}, {});
   await whitelist(deployer, owner, elon.addr);
 
   // Example of invalid transaction: sender !== permissions manager

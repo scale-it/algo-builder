@@ -42,7 +42,7 @@ def approval_program(PERM_MANAGER):
             )
         ),
 
-        # Save max_tokens count in global state (default = 100, during ssc deploy)
+        # Save max_tokens count in global state (default = 100, during app deploy)
         App.globalPut(max_tokens, Int(100)),
 
         # Initialize whitelisted accounts counter to 0

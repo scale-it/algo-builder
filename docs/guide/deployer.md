@@ -139,7 +139,7 @@ For opting in to App, `deployer` supports the following methods:
     };
   ```
 
-#### Stateless Smart Contracts
+#### Smart Signatures
 
 - *Contract Mode:*
 
@@ -147,7 +147,7 @@ For opting in to App, `deployer` supports the following methods:
 
   Contract accounts can be also be used to deploy ASAs.
 
-  Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find two methods to fund an lsig (by file, or by name):
+  Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Smart Signatures (lsig). In the file `scripts/deploy.ts`, you will find two methods to fund an lsig (by file, or by name):
 
   + By Name (default behaviour):
     ```js
@@ -167,7 +167,7 @@ For opting in to App, `deployer` supports the following methods:
 
 - *Delegated Signature Mode*:
 
-  Stateless smart contracts can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
+  Smart Signatures can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
 
   Use `mkDelegatedLsigByFile` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
@@ -175,7 +175,7 @@ For opting in to App, `deployer` supports the following methods:
   console.log(ascInfoGoldDelegated);
   ```
 
-You can learn more about Stateless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
+You can learn more about Logic Signatures[here](https://developer.algorand.org/docs/features/asc1/stateless/).
 
 
 #### Checkpoint names

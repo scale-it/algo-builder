@@ -6,7 +6,7 @@ import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
+import { MaxTxnNoteBytes, TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
 import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
@@ -61,6 +61,7 @@ const byteTxnFields: {[key: number]: Set<string>} = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+['Note'].forEach((field) => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -194,6 +195,13 @@ export function setInnerTxField (
       }
       break;
     }
+    case 'Note': {
+      const note = txValue as Uint8Array;
+      if (note.length > MaxTxnNoteBytes) {
+        errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+      }
+      break;
+    }
     default: { break; }
   }
 
@@ -264,7 +272,8 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
     fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,
-      firstValid: tx.fv
+      firstValid: tx.fv,
+      note: tx.note
     }
   };
 

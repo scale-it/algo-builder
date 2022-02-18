@@ -66,7 +66,7 @@ export interface Networks {
 export interface KmdWallet {
   name: string
   password: string
-  accounts: Array<{name: string, address: string}> // both are obligatory
+  accounts: Array<{ name: string, address: string }> // both are obligatory
 }
 
 export interface KmdCfg {
@@ -338,7 +338,7 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-// stateless smart contract deployment information (log)
+// smart signature deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -389,7 +389,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, rtypes.ASAInfo>
-  ssc: Map<string, Map<Timestamp, rtypes.AppInfo>>
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -527,7 +527,7 @@ export interface Deployer {
 
   /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @name  Smart Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @lsigName name of smart signature (checkpoint info will be stored against this name)
    * @scTmplParams  Smart contract template parameters

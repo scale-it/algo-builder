@@ -48,7 +48,7 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, rtypes.ASAInfo>(),
-      ssc: new Map<string, typeof mp>(),
+      app: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -70,7 +70,7 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
       asa: new Map<string, rtypes.ASAInfo>(),
-      ssc: new Map<string, typeof mp>(),
+      app: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -81,7 +81,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -90,7 +90,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -102,14 +102,14 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -143,7 +143,7 @@ describe("DeployerDeployMode", () => {
           assetDef: mkASA(),
           deleted: false
         }]]),
-        ssc: new Map(),
+        app: new Map(),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -193,7 +193,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["app-clear", nestedMap]]),
+        app: new Map([["app-clear", nestedMap]]),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -230,7 +230,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["app-clear", nestedMap]]),
+        app: new Map([["app-clear", nestedMap]]),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -280,7 +280,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["my-app", nestedMap]]), // checkpoint created against "app name"
+        app: new Map([["my-app", nestedMap]]), // checkpoint created against "app name"
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -318,7 +318,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["my-app", nestedMap]]), // update app checkpoint created against "same app" name
+        app: new Map([["my-app", nestedMap]]), // update app checkpoint created against "same app" name
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -378,7 +378,7 @@ describe("DeployerDeployMode", () => {
           assetDef: expectedASADef,
           deleted: false
         }]]),
-        ssc: new Map(),
+        app: new Map(),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -403,7 +403,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",

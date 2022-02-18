@@ -14,7 +14,7 @@ import type {
 
 export class FakeDeployer implements Deployer {
   asa = new Map<string, rtypes.ASAInfo>();
-  ssc = new Map<string, rtypes.AppInfo>();
+  app = new Map<string, rtypes.AppInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];

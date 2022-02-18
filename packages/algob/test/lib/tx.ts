@@ -338,7 +338,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await deployer.optInLsigToASA('233212', mockLsig, {});
   });
 
-  it("should throw error with opt-in ssc functions, if ssc exist and deleted", async () => {
+  it("should throw error with opt-in app functions, if app exist and deleted", async () => {
     await expectBuilderErrorAsync(
       async () => await deployer.optInAccountToApp(bobAcc, appID, {}, {}),
       ERRORS.GENERAL.APP_DELETED
@@ -350,20 +350,20 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     );
   });
 
-  it("should pass with opt-in ssc functions, if ssc doesn't exist in checkpoint", async () => {
+  it("should pass with opt-in app functions, if app doesn't exist in checkpoint", async () => {
     await deployer.optInAccountToApp(bobAcc, 122, {}, {});
 
     await deployer.optInLsigToApp(12223, mockLsig, {}, {});
   });
 
-  it("should throw error with update ssc function, if ssc exist and deleted", async () => {
+  it("should throw error with update app function, if app exist and deleted", async () => {
     await expectBuilderErrorAsync(
       async () => await deployer.updateApp(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
       ERRORS.GENERAL.APP_DELETED
     );
   });
 
-  it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", async () => {
+  it("should pass with update app functions, if app doesn't exist in checkpoint", async () => {
     await deployer.updateApp(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
   });
 
@@ -782,7 +782,7 @@ describe("Update transaction test in run mode", () => {
     assert.isDefined(appInfo);
 
     deployer = new DeployerRunMode(deployerCfg);
-    if (appInfo?.appID) {
+    if (appInfo) {
       execParams = {
         type: wtypes.TransactionType.UpdateApp,
         sign: wtypes.SignType.SecretKey,
