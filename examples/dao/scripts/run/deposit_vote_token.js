@@ -3,7 +3,7 @@ const { accounts } = require('./common/accounts.js');
 const { mkDepositVoteTokenTx } = require('./common/tx-params.js');
 
 async function depositVote (deployer, voterAcc, amt) {
-  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getApp('DAOApp'); ;
   const govToken = deployer.asa.get('gov-token');
 
   // opt-in to App by voterAcc

@@ -1,9 +1,9 @@
 const { tryExecuteTx, Vote } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { accounts, getProposalLsig } = require('./common/accounts.js');
+const { accounts } = require('./common/accounts.js');
 
 async function registerVote (deployer, voterAcc, proposalAddr, voteType) {
-  const daoAppInfo = deployer.getAppByFile('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getApp('DAOApp'); ;
 
   console.log(`* Register votes by ${voterAcc.addr} *`);
   // call to DAO app by voter (to register deposited votes)
@@ -22,7 +22,7 @@ async function registerVote (deployer, voterAcc, proposalAddr, voteType) {
 
 async function run (runtimeEnv, deployer) {
   const { _, __, voterA, voterB } = accounts(deployer);
-  const proposalLsig = await getProposalLsig(deployer);
+  const proposalLsig = deployer.getLsig('proposalLsig');
 
   // register votes (deposited in ./deposit_vote_token.js)
   await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);

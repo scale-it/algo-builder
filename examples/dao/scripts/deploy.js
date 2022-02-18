@@ -1,7 +1,7 @@
 const { types } = require('@algo-builder/web');
 const { fundAccount, tryExecuteTx } = require('./run/common/common.js');
 
-const { accounts, getDAOFundLsig } = require('./run/common/accounts');
+const { accounts } = require('./run/common/accounts');
 const { getApplicationAddress } = require('algosdk');
 
 async function run (runtimeEnv, deployer) {
@@ -39,7 +39,7 @@ async function run (runtimeEnv, deployer) {
       globalInts: 4,
       globalBytes: 2,
       appArgs: appArgs
-    }, {}, templateParam);
+    }, {}, templateParam, 'DAOApp');
   console.log(daoAppInfo);
 
   // Fund application account with some ALGO(5)
@@ -67,19 +67,26 @@ async function run (runtimeEnv, deployer) {
   };
   await tryExecuteTx(deployer, optInToGovASAParam);
 
+  // save lsig's (by name in checkpoint)
+  await deployer.mkContractLsig('dao-fund-lsig.py', 'daoFundLsig',
+    { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID });
+
+  await deployer.mkContractLsig('proposal-lsig.py', 'proposalLsig',
+    { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID });
+
   // fund lsig's
   await Promise.all([
-    deployer.fundLsigByFile('dao-fund-lsig.py',
-      { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
-      { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
+    deployer.fundLsig('daoFundLsig',
+      { funder: creator, fundingMicroAlgo: 5e6 }, {} // 5 algo
+    ),
 
-    deployer.fundLsigByFile('proposal-lsig.py',
-      { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
-      { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID })
+    deployer.fundLsig('proposalLsig',
+      { funder: creator, fundingMicroAlgo: 5e6 }, {} // 5 algo
+    )
   ]);
 
   console.log('* ASA distribution (Gov tokens) *');
-  const daoFundLsig = await getDAOFundLsig(deployer);
+  const daoFundLsig = deployer.getLsig('daoFundLsig');
   await Promise.all([
     deployer.optInLsigToASA(govToken.assetIndex, daoFundLsig, { totalFee: 1000 }),
     deployer.optInAccountToASA(govToken.assetIndex, proposer.name, {}),
