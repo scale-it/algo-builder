@@ -56,7 +56,7 @@ export class Runtime {
     this._defaultAccounts = this._setupDefaultAccounts();
 
     // intialize accounts (should be done during runtime initialization)
-    this.initializeAccounts(this._defaultAccounts);
+    this.initializeAccounts(accounts);
 
     // load asa yaml files
     this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
