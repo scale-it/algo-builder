@@ -33,7 +33,7 @@ describe('Bond token Tests', function () {
   let issuerLsigAddress;
   let lsig;
 
-  this.beforeAll(async function () {
+  this.beforeAll(() => {
     flags = {
       sender: appManager.account,
       localInts: 1,

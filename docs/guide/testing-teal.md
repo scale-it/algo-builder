@@ -108,7 +108,7 @@ In this section we will describe the flow of testing smart contracts in runtime:
 ### Default Accounts
 This section briefly explains how to use Default Accounts provided by the Runtime. The Default Accounts are predifined accounts that are recommented to be used in tests.  Instead of long setup copy-paste code like this:
 ```javascript
-const initialMicroAlgo = 1e9;
+const initialMicroAlgo = 1e8;
 let john = new AccountStore(initialMicroAlgo);
 let bob = new AccountStore(initialMicroAlgo);
 let runtime = Runtime([john, bob]);
@@ -130,7 +130,7 @@ syncAccounts(){
 There is no need to pass the Default Accounts to the Runtime constructor, since these are created inside of it.
 To sync the accounts the method `runtime.defaultAccounts()` must be invoked. No additional code is necessary. 
 Methods:
-- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e9 microAlgos (100 Algos). 
+- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e8 microAlgos (100 Algos). 
 - `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts. 
 
 For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))

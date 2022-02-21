@@ -17,7 +17,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Features
 Added:
-- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e9 microAlgos (1e3 Algos)
+- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
 - `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
 - unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
 Changed:
