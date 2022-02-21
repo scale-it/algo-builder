@@ -28,7 +28,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 
   it("Should opt-in to multiple accounts mentioned in asa.yaml", () => {
     const asset =
-      runtime.deployASA('asa', { creator: { ...john.account, name: "john" } }).assetID;
+      runtime.deployASA('asa', { creator: { ...john.account, name: "john" } }).assetIndex;
 
     syncAccounts();
     assert.isDefined(bob.getAssetHolding(asset));

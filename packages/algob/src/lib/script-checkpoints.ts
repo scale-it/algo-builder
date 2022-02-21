@@ -224,7 +224,7 @@ export async function registerCheckpoints (
         if (res) {
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
-            txId: txn.txID(),
+            txID: txn.txID(),
             assetIndex: Number(txConfirmation['asset-index']),
             confirmedRound: Number(txConfirmation['confirmed-round']),
             assetDef: res[1] as modelsv2.AssetParams,
@@ -251,7 +251,7 @@ export async function registerCheckpoints (
         if (res) {
           const sscInfo: rtypes.AppInfo = {
             creator: encodeAddress(txn.from.publicKey),
-            txId: txn.txID(),
+            txID: txn.txID(),
             appID: Number(txConfirmation['application-index']),
             applicationAccount: getApplicationAddress(Number(txConfirmation['application-index'])),
             confirmedRound: Number(txConfirmation['confirmed-round']),

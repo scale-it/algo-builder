@@ -6,7 +6,7 @@ import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
+import { MaxTxnNoteBytes, TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
 import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
@@ -23,6 +23,7 @@ const numberTxnFields: {[key: number]: Set<string>} = {
   ])
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
+['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation"].forEach(field => numberTxnFields[6].add(field));
 
 const uintTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -61,6 +62,7 @@ const byteTxnFields: {[key: number]: Set<string>} = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+['VotePK', 'SelectionPK', 'Note'].forEach(field => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -83,6 +85,18 @@ const otherAddrTxnFields: {[key: number]: Set<string>} = {
 otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
 ['RekeyTo'].forEach((field) => otherAddrTxnFields[6].add(field));
+
+const txTypes: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set(['pay', 'axfer', 'acfg', 'afrz'])
+};
+
+// supported keyreg on teal v6
+txTypes[6] = cloneDeep(txTypes[5]);
+txTypes[6].add('keyreg');
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -124,7 +138,7 @@ export function setInnerTxField (
     txValue = op.assertAlgorandAddress(val, line);
   }
 
-  const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
+  const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
   // txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
   if (txValue === undefined) {
@@ -133,7 +147,7 @@ export function setInnerTxField (
         msg: `Field ${field} is invalid`,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 
@@ -142,11 +156,11 @@ export function setInnerTxField (
   switch (field) {
     case 'Type': {
       const txType = txValue as string;
-      // either invalid string, or not allowed for TEALv5
+      // check txType supported in current teal version or not
       if (
-        txType !== 'pay' && txType !== 'axfer' && txType !== 'acfg' && txType !== 'afrz'
+        !txTypes[tealVersion].has(txType)
       ) {
-        errMsg = `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
+        errMsg = `${txType} is not a valid Type for itxn_field`;
       }
       break;
     }
@@ -194,6 +208,30 @@ export function setInnerTxField (
       }
       break;
     }
+
+    case 'VotePK': {
+      const votePk = txValue as string;
+      if (votePk.length !== 32) {
+        errMsg = "VoteKey must be 32 bytes";
+      }
+      break;
+    }
+
+    case 'SelectionPK': {
+      const selectionPK = txValue as string;
+      if (selectionPK.length !== 32) {
+        errMsg = "SelectionPK must be 32 bytes";
+      }
+      break;
+    }
+
+    case 'Note': {
+      const note = txValue as Uint8Array;
+      if (note.length > MaxTxnNoteBytes) {
+        errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+      }
+      break;
+    }
     default: { break; }
   }
 
@@ -203,7 +241,7 @@ export function setInnerTxField (
         msg: errMsg,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 
@@ -264,7 +302,8 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
     fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,
-      firstValid: tx.fv
+      firstValid: tx.fv,
+      note: tx.note
     }
   };
 
@@ -339,6 +378,15 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
+
+    case 'keyreg':
+      execParams.type = types.TransactionType.KeyRegistration;
+      execParams.voteKey = tx.votekey;
+      execParams.selectionKey = tx.selkey;
+      execParams.voteFirst = tx.votefst;
+      execParams.voteLast = tx.votelst;
+      execParams.voteKeyDilution = tx.votekd;
+      break;
     default: {
       throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
     }

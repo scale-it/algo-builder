@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   function setupAsset (): void {
     // create asset
     assetId = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
   }
 
   function setupApp (): void {
@@ -98,7 +98,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
     assert.isUndefined(initialJohnAssets);
     assert.throws(() => { runtime.executeTx(txGroup); }, "ABLDR17");
 
@@ -118,7 +118,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.OptInASA,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        assetID: assetInfo?.assetIndex as number,
+        assetID: assetInfo?.assetIndex,
         payFlags: { totalFee: 1000 }
       }
     ];
@@ -200,7 +200,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.OptInToApp,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        appID: appInfo?.appID as number,
+        appID: appInfo?.appID,
         payFlags: { totalFee: 1000 }
       }
     ];
