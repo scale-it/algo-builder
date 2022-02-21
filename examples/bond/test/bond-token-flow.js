@@ -84,7 +84,7 @@ describe('Bond token Tests', function () {
 
     const currentBondIndex = runtime.deployASA(
       'bond-token-0',
-      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetID;
+      { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } }).assetIndex;
 
     const creationFlags = Object.assign({}, flags);
     const creationArgs = [
