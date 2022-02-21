@@ -6091,6 +6091,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sample-project@workspace:examples/es6-module":
+  version: 0.0.0-use.local
+  resolution: "sample-project@workspace:examples/es6-module"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "seek-bzip@npm:^1.0.5":
   version: 1.0.6
   resolution: "seek-bzip@npm:1.0.6"
