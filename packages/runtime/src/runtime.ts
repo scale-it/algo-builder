@@ -74,7 +74,7 @@ export class Runtime {
 
   /**
    * Returns a list of initialized default accounts created using static accountSDK from account.ts
-   *  and funded with default balance
+   *  and funded with default balance (100 ALGO)
    * @returns list of AccountStore
    */
   _setupDefaultAccounts (): AccountStore[] {
