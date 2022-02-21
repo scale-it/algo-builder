@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
   const escrow = contract.address(); // contract account
 
   await deployer.mkDelegatedLsigByFile(contractName, masterAccount, scInitParam); // sign contract
-  const signedContract = await deployer.getDelegatedLsigByFile(contractName);
+  const signedContract = await deployer.getLsig(contractName);
   console.log('SIGn1 ', signedContract);
 
   let transactions = [

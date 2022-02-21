@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
 
   // Get Statless Account Address
   await deployer.mkContractLsig(
-    '5-contract-asa-stateless.py', 'StateLessASALsig', { APP_ID: appInfo.appID }
+    'StateLessASALsig', '5-contract-asa-stateless.py', { APP_ID: appInfo.appID }
   );
   const statelessAccount = deployer.getLsig('StateLessASALsig');
   console.log('stateless Account Address:', statelessAccount.address());

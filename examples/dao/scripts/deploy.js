@@ -68,10 +68,10 @@ async function run (runtimeEnv, deployer) {
   await tryExecuteTx(deployer, optInToGovASAParam);
 
   // save lsig's (by name in checkpoint)
-  await deployer.mkContractLsig('dao-fund-lsig.py', 'daoFundLsig',
+  await deployer.mkContractLsig('daoFundLsig', 'dao-fund-lsig.py',
     { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID });
 
-  await deployer.mkContractLsig('proposal-lsig.py', 'proposalLsig',
+  await deployer.mkContractLsig('proposalLsig', 'proposal-lsig.py',
     { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID });
 
   // fund lsig's

@@ -14,7 +14,7 @@ async function run (
   const templateParams = {
     RECEIVER_ADDRESS: 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY'
   };
-  await deployer.mkContractLsig('escrow.py', 'escrow', templateParams);
+  await deployer.mkContractLsig('escrow', 'escrow.py', templateParams);
 
   await deployer.fundLsig('escrow',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { totalFee: 1000 });

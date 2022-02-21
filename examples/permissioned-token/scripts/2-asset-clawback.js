@@ -19,7 +19,7 @@ async function setupClawback (runtimeEnv, deployer) {
   // NOTE: make sure to deploy ASA and controller before
   const tesla = deployer.asa.get('tesla');
   const clawbackParams = getClawbackParams(deployer);
-  await deployer.mkContractLsig('clawback.py', 'ClawbackLsig', clawbackParams);
+  await deployer.mkContractLsig('ClawbackLsig', 'clawback.py', clawbackParams);
 
   const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();

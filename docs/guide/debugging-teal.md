@@ -61,7 +61,7 @@ First we need to deploy the contracts using `algob deploy`. We will debug a tran
 Setting up transaction params (note that this is a passing scenario as amount = 500 <= 1000):
 ```js
 // load signed lsig from checkpoint
-const lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
+const lsigGoldOwner = deployer.getLsig('4-gold-asa.teal');
 const txnParam = {
   type: types.TransactionType.TransferAsset,
   sign: types.SignType.LogicSignature,

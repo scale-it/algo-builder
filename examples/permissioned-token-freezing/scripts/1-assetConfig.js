@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
     ASSET_ID: assetInfo.assetIndex,
     APP_ID: appInfo.appID
   };
-  await deployer.mkContractLsig('clawback-escrow.py', 'clawbackEscrow', escrowParams);
+  await deployer.mkContractLsig('clawbackEscrow', 'clawback-escrow.py', escrowParams);
 
   await deployer.fundLsig('clawbackEscrow',
     { funder: creator, fundingMicroAlgo: 1e6 }, {}); // sending 1 Algo

@@ -79,7 +79,7 @@ To use this feature in scripts, you can pass an external parameter object (using
     ARG_AMT: 700000,
     ARG_CLS: masterAccount.addr
   }
-  await deployer.mkContractLsig("dynamic-fee.py", "dynamicFee" ,scInitParam);
+  await deployer.mkContractLsig("dynamicFee", "dynamic-fee.py" ,scInitParam);
   await deployer.getLsig('dynamicFee');
   ```
 
@@ -109,7 +109,7 @@ PyTEAL supports [`Tmpl`](https://pyteal.readthedocs.io/en/stable/api.html?highli
     TMPL_SENDER: bob.addr // bob address
     TMPL_AMOUNT: 100 // this could be any integer
   }
-  await deployer.mkContractLsig("asc.py", "asc", scInitParam);
+  await deployer.mkContractLsig("asc", "asc.py", scInitParam);
   await deployer.getLsig('asc');
   ```
 

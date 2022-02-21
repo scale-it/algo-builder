@@ -102,10 +102,6 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getDelegatedLsigByFile (lsig: string): LogicSigAccount {
-    throw new Error("Not implemented");
-  }
-
   async loadLogicByFile (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
     throw new Error("Not implemented");
   }
@@ -160,22 +156,13 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsigByFile (name: string, signer: rtypes.Account,
-    scInitParam?: unknown): Promise<LsigInfo> {
-    throw new Error("Not implemented");
-  }
-
-  async mkDelegatedLsig (fileName: string, lsigName: string,
+  async mkDelegatedLsig (lsigName: string, fileName: string,
     signer: rtypes.Account, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 
-  async mkContractLsigByFile (name: string, scInitParam?: unknown): Promise<LsigInfo> {
-    throw new Error("Not implemented");
-  }
-
-  async mkContractLsig (name: string,
-    lsigName: string, scInitParam?: unknown): Promise<LsigInfo> {
+  async mkContractLsig (lsigName: string,
+    fileName: string, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 

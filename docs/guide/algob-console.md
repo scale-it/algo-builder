@@ -204,7 +204,7 @@ Here we will transfer some `algos` from a stateless smart contract ([`/assets/te
 + We will first load the smart signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint. Eg.
   ```js
   // store contract lsig
-  await deployer.mkContractLsig('file.py', "CLsig", { ARG_DAO_APP: 1 });
+  await deployer.mkContractLsig("CLsig", 'file.py', { ARG_DAO_APP: 1 });
 
   // now during querying, you only need this lsig name
   const lsigInfo = deployer.getLsig("CLsig");
@@ -218,7 +218,7 @@ sender = lsig.address();
 
 // by name
 // store contract lsig in checkpoint (in deploy script)
-await deployer.mkContractLsig('2-gold-contract-asc.teal', "GoldASC");
+await deployer.mkContractLsig("GoldASC", '2-gold-contract-asc.teal');
 
 // now during querying, you only need this lsig name
 const lsigInfo = deployer.getLsig("GoldASC");
@@ -299,14 +299,14 @@ Code can be found in `/scripts/transfer/gold-contract-sc.js`
 Here, we will first transfer some Algorand Standard Assets(ASA) from `goldOwner` (delegating authority in this case) to `john` according to asc `/assets/4-gold-asa.teal`.
 `goldOwner` is the delegating authority here, as during deployment (`algob deploy`) the smart contract's logic signature was signed by this account (check `/scripts/2-gold-asc.js`).
 
-Logic signature (stored in checkpoint) is retreived using `deployer.getDelegatedLsigByFile('<file_name>.teal'`).
+Logic signature (stored in checkpoint) is retreived using `deployer.getLsig('<file_name>.teal'`).
 Assets are transferred using `algob.executeTransaction({ type: TransactionType.TransferAsset, ...})`.
 
 Retreive lsig & assetId from checkpoint:
 ```bash
 // you can load by name as well (using name is GOLD_ASA):
 // algob> lsigGoldOwner = deployer.getLsig('GOLD_ASA');
-algob> lsigGoldOwner = deployer.getDelegatedLsigByFile('4-gold-asa.teal');
+algob> lsigGoldOwner = deployer.getLsig('4-gold-asa.teal');
 LogicSig {
   tag: [
      80, 114, 111,

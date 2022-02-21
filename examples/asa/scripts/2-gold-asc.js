@@ -10,15 +10,15 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, goldOwner.addr, 200e6, { note: 'funding account' }));
 
   // save Smart Signature by name & fund the account
-  const ascInfoContract = await deployer.mkContractLsig('2-gold-contract-asc.teal', 'Gold_C_Lsig', {});
+  const ascInfoContract = await deployer.mkContractLsig('Gold_C_Lsig', '2-gold-contract-asc.teal', {});
   console.log(ascInfoContract);
   await deployer.fundLsig('Gold_C_Lsig',
     { funder: goldOwner, fundingMicroAlgo: 1e6 }, {}); // funding with 1 Algo
 
   const ascInfoAlgoDelegated =
-    await deployer.mkDelegatedLsig('3-gold-delegated-asc.teal', 'Gold_D_Lsig', goldOwner);
+    await deployer.mkDelegatedLsig('Gold_D_Lsig', '3-gold-delegated-asc.teal', goldOwner);
   const ascInfoGoldDelegated =
-    await deployer.mkDelegatedLsig('4-gold-asa.teal', 'Gold_d_asa_lsig', goldOwner);
+    await deployer.mkDelegatedLsig('Gold_d_asa_lsig', '4-gold-asa.teal', goldOwner);
 
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);

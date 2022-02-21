@@ -53,7 +53,7 @@ async function run (runtimeEnv, deployer) {
   console.log(appInfo);
 
   // save lsig in checkpoint
-  await deployer.mkContractLsig('crowdFundEscrow.py', 'escrow', { APP_ID: appInfo.appID });
+  await deployer.mkContractLsig('escrow', 'crowdFundEscrow.py', { APP_ID: appInfo.appID });
 
   // Get Escrow Account Address
   const escrowAccount = await deployer.getLsig('escrow');

@@ -151,7 +151,7 @@ For opting in to App, `deployer` supports the following methods:
 
   + By Name (default behaviour):
     ```js
-    await deployer.mkContractLsig('htlc.py', 'HTLC_Lsig', scTmplParams);
+    await deployer.mkContractLsig('HTLC_Lsig', 'htlc.py', scTmplParams);
     // no need to pass smTmplParams again and again
     await deployer.fundLsig('HTLC_Lsig', { funder: bob, fundingMicroAlgo: 2e6 }, {});
     ```
@@ -209,7 +209,7 @@ Similar to storing app names, you can store lsig info against name in a checkpoi
 ```js
 const bob = deployer.accountsByName.get('bob');
 // store delegatedLsig
-await deployer.mkDelegatedLsig('file.py', "DLsig", bob, { ARG_DAO_APP: 1 });
+await deployer.mkDelegatedLsig('DLsig', 'file.py', bob, { ARG_DAO_APP: 1 });
 
 // now during querying, you only need this lsig name
 const lsigInfo = deployer.getLsig("DLsig");
@@ -218,7 +218,7 @@ const lsigInfo = deployer.getLsig("DLsig");
 Similarly for contract lsig:
 ```js
 // store contract lsig
-await deployer.mkContractLsig('file.py', "CLsig", { ARG_DAO_APP: 1 });
+await deployer.mkContractLsig("CLsig", 'file.py', { ARG_DAO_APP: 1 });
 
 // now during querying, you only need this lsig name
 const lsigInfo = deployer.getLsig("CLsig");

@@ -34,7 +34,7 @@ async function run (
   console.log('hash of the secret:', scTmplParams.hash_image);
   // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 
-  await deployer.mkContractLsig('htlc.py', 'HTLC_Lsig', scTmplParams);
+  await deployer.mkContractLsig('HTLC_Lsig', 'htlc.py', scTmplParams);
 
   await deployer.fundLsig('HTLC_Lsig',
     { funder: bob, fundingMicroAlgo: 2e6 }, {});
