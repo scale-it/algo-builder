@@ -42,7 +42,7 @@ async function run (runtimeEnv, deployer) {
       globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset
       globalBytes: 1, // to store creator address
       appArgs: appArgs
-    }, {});
+    }, {}, {}, 'PermissionedTokenApp');
 
   console.log(sscInfo);
 

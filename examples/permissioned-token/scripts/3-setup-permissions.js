@@ -7,7 +7,7 @@ const accounts = require('./common/accounts');
  * and link it to the controller (using the controller  add_permission argument)
  */
 async function setupPermissionsApp (runtimeEnv, deployer) {
-  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('Controller');
 
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
@@ -28,10 +28,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
       localBytes: 0,
       globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
       globalBytes: 1 // to store permissions manager
-    },
-    {},
-    templateParam
-  ); // pass perm_manager as a template param (to set during deploy)
+    }, {}, templateParam, 'Permissions'); // pass perm_manager as a template param (to set during deploy)
   console.log(permissionAppInfo);
 
   /**

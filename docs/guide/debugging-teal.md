@@ -61,7 +61,7 @@ First we need to deploy the contracts using `algob deploy`. We will debug a tran
 Setting up transaction params (note that this is a passing scenario as amount = 500 <= 1000):
 ```js
 // load signed lsig from checkpoint
-const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+const lsigGoldOwner = deployer.getLsig('4-gold-asa.teal');
 const txnParam = {
   type: types.TransactionType.TransferAsset,
   sign: types.SignType.LogicSignature,
@@ -204,7 +204,7 @@ For more details, check the project [README](https://github.com/scale-it/algo-bu
 Setting up transaction group:
 ```js
 // load app, asset info from checkpoint
-const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+const appInfo = deployer.getAppByFile('poi-approval.teal', 'poi-clear.teal');
 const assetInfo = deployer.asa.get('gold');
 
 // load logic signature
@@ -212,7 +212,7 @@ const escrowParams = {
   ASSET_ID: assetInfo.assetIndex,
   APP_ID: appInfo.appID
 };
-const escrowLsig = await deployer.loadLogic('clawback-escrow.py', escrowParams);
+const escrowLsig = await deployer.loadLogicByFile('clawback-escrow.py', escrowParams);
 const escrowAddress = escrowLsig.address();
 
 const txGroup = [

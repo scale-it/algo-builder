@@ -505,7 +505,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  fundLsig: (
+  fundLsigByFile: (
     fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
@@ -514,11 +514,12 @@ export interface Deployer {
 
   /**
    * This function will send Algos to ASC account in "Contract Mode".
-   * @param lsigName - name of the smart signature (passed by user during mkContractLsig/mkDelegatedLsig)
+   * @param lsigName - name of the smart signature (passed by user during
+   * mkContractLsig/mkDelegatedLsig)
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
-  fundLsigByName: (
+  fundLsig: (
     lsigName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams
@@ -526,14 +527,28 @@ export interface Deployer {
 
   /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Smart Signature filename (must be present in assets folder)
+   * @lsigName name of smart signature (checkpoint info will be stored against this name)
+   * @fileName  Smart Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   mkDelegatedLsig: (
-    name: string,
+    lsigName: string,
+    fileName: string,
     signer: rtypes.Account,
+    scTmplParams?: SCParams
+  ) => Promise<LsigInfo>
+
+  /**
+   * Stores logic signature info in checkpoint for contract mode
+   * @lsigName name of lsig (checkpoint info will be stored against this name)
+   * @fileName ASC file name
+   * @scTmplParams : Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  mkContractLsig: (
+    lsigName: string,
+    fileName: string,
     scTmplParams?: SCParams
   ) => Promise<LsigInfo>
 
@@ -646,22 +661,19 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getApp: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined
+  getAppByFile: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined
 
   /**
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
-  getAppByName: (appName: string) => rtypes.AppInfo | undefined
+  getApp: (appName: string) => rtypes.AppInfo
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
-   * @param lsigName name of the smart signture (passed during mkContractLsig/mkDelegatedLsig)
+   * @param lsigName name of the smart signture
+   * (defined by user during mkContractLsig/mkDelegatedLsig)
    */
-  getLsigByName: (lsigName: string) => LogicSigAccount | undefined
-
-  /**
-   * Queries a delegated logic signature from checkpoint. */
-  getDelegatedLsig: (lsigName: string) => Object | undefined
+  getLsig: (lsigName: string) => LogicSigAccount
 
   /**
    * Loads contract mode logic signature (TEAL or PyTEAL)
@@ -669,7 +681,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
+  loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
    * Alias to `this.compileASC`

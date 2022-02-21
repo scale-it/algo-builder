@@ -1138,7 +1138,7 @@ describe("Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
       assert.isDefined(logs);
 
       if (logs !== undefined) {

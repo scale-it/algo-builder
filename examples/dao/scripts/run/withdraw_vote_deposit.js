@@ -3,7 +3,7 @@ const { accounts } = require('./common/accounts.js');
 const { mkWithdrawVoteDepositTx } = require('./common/tx-params.js');
 
 async function withdrawVoteDeposit (deployer, voterAcc, amt) {
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getApp('DAOApp'); ;
   const govToken = deployer.asa.get('gov-token');
 
   console.log(`* Withrawing ${amt} votes by ${voterAcc.addr} *`);
