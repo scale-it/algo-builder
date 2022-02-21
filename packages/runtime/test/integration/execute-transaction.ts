@@ -113,8 +113,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const assetInfo = runtime.getAssetInfoFromName('gold');
     assert.isDefined(assetInfo);
+    let tx: types.ExecParams[];
     if (assetInfo !== undefined) {
-      const tx: types.ExecParams[] = [
+      tx = [
         {
           type: types.TransactionType.OptInASA,
           sign: types.SignType.SecretKey,
@@ -197,8 +198,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const appInfo = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isDefined(appInfo);
+    let tx: types.ExecParams[];
     if (appInfo !== undefined) {
-      const tx: types.ExecParams[] = [
+      tx = [
         {
           type: types.TransactionType.OptInToApp,
           sign: types.SignType.SecretKey,

@@ -27,7 +27,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
     * Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
     * New `getApp(appName)` function queries app info using the app name.
     * Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
-    * Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the lsigName as a required paramter:
+    * Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
       - `mkDelegatedLsig(lsigName, fileName, signer)`
       - `mkContractLsig(lsigName, fileName)`.
       Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
