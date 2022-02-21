@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   function setupAsset (): void {
     // create asset
     assetId = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
   }
 
   function setupApp (): void {
