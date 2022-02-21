@@ -152,15 +152,15 @@ class DeployerBasicMode {
 
   /**
    * Loads stateful smart contract info from checkpoint
-   * @param appName name of the app (passed by user during deployment)
+   * @param appName name of the app (defined by user during deployment)
    */
   getApp (appName: string): rtypes.AppInfo {
     return this.assertAppExistsInCP(appName);
   }
 
   /**
-   * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
-   * @param lsigName name of the lsig or file name (passed by user during mkContractLsig/mkDelegatedLsig)
+   * Loads logic signature object (contract or delegated) from checkpoint (by lsig name). Panics if the lsig doesn't exists.
+   * @param lsigName filename or name (defined by user during mkContractLsig/mkDelegatedLsig)
    */
   getLsig (lsigName: string): LogicSigAccount {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
@@ -775,7 +775,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
-   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param fileName: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
