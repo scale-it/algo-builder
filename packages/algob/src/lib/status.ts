@@ -92,7 +92,7 @@ export async function printAssets (deployer: Deployer, account: string): Promise
  * @param accountAddr account address to print local state
  * @param appID application index of smart contract
  */
-export async function printLocalStateSSC (
+export async function printLocalStateApp (
   deployer: Deployer,
   accountAddr: AccountAddress,
   appID: number): Promise<void> {
@@ -108,7 +108,7 @@ export async function printLocalStateSSC (
  * @param creatorAddr creator address of stateful smart contract
  * @param appID application index of smart contract
  */
-export async function printGlobalStateSSC (
+export async function printGlobalStateApp (
   deployer: Deployer,
   creatorAddr: AccountAddress,
   appID: number): Promise<void> {
