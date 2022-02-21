@@ -125,7 +125,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(asaInfo,
       {
         creator: "addr-1-get-address-dry-run",
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         assetIndex: 1,
         assetDef: mkASA(),
@@ -137,7 +137,7 @@ describe("DeployerDeployMode", () => {
       network1: {
         asa: new Map([["MY_ASA", {
           creator: "addr-1-get-address-dry-run",
-          txId: "tx-id-dry-run",
+          txID: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
           assetDef: mkASA(),
@@ -159,7 +159,7 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
@@ -180,7 +180,7 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
@@ -203,7 +203,7 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(2, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
@@ -217,7 +217,7 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
@@ -246,7 +246,7 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
@@ -267,7 +267,7 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
@@ -290,7 +290,7 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(2, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
@@ -305,7 +305,7 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
@@ -360,7 +360,7 @@ describe("DeployerDeployMode", () => {
 
     assert.deepEqual(asaInfo, {
       creator: "addr-1-get-address-dry-run",
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       assetIndex: 1,
       assetDef: expectedASADef,
@@ -372,7 +372,7 @@ describe("DeployerDeployMode", () => {
       network1: {
         asa: new Map([["MY_ASA", {
           creator: "addr-1-get-address-dry-run",
-          txId: "tx-id-dry-run",
+          txID: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
           assetDef: expectedASADef,
@@ -423,7 +423,7 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", {
         creator: "ASA creator 123",
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         assetIndex: 0,
         assetDef: {} as wtypes.ASADef,
@@ -432,7 +432,7 @@ describe("DeployerDeployMode", () => {
       .registerSSC(networkName, "ASC name", {
         creator: "ASC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
@@ -532,7 +532,7 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     deployerCfg.cpData.registerASA("hi", "hi123", {
       creator: "",
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       assetIndex: 1337,
       assetDef: {} as wtypes.ASADef,
@@ -547,7 +547,7 @@ describe("DeployerDeployMode", () => {
     await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
     assert.deepEqual(deployer.asa, new Map([["ASA_key", {
       creator: 'addr-1-get-address-dry-run',
-      txId: 'tx-id-dry-run',
+      txID: 'tx-id-dry-run',
       assetIndex: 1,
       confirmedRound: -1,
       assetDef: mkASA(),

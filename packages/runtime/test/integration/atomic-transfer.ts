@@ -24,7 +24,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     runtime = new Runtime([john, alice]); // setup test
     // create asset
     assetId = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
     approvalProgramFileName = 'counter-approval.teal';
     clearProgramFileName = 'clear.teal';
 

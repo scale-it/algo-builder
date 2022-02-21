@@ -34,7 +34,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
+  waitForConfirmation (txID: string): Promise<ConfirmedTxInfo> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
@@ -46,7 +46,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
       creator: String(flags.creator.addr) + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
       assetDef: asaDef,
@@ -75,7 +75,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
@@ -97,7 +97,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: String(sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,

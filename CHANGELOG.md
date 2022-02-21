@@ -33,9 +33,11 @@ Features, Bug Fixes, Breaking Changes, Deprecated
       - `mkContractLsig(fileName, lsigName)`.
       Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
 
-For reference you can check out `examples/asa`.
+  For reference you can check out `examples/asa`.
 
 - Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
+- Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
+- Updated `txId` key in returned App/ASA info to `txID`.
 
 ### Features
 
@@ -51,6 +53,7 @@ Example:
 ```bash
   algob init --infrastructure
 ```
+- Support `keyreg` transaction in inner transaction.
 
 ### Bug fixes
 
