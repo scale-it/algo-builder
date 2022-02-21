@@ -113,17 +113,19 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const assetInfo = runtime.getAssetInfoFromName('gold');
     assert.isDefined(assetInfo);
-    const tx: types.ExecParams[] = [
-      {
-        type: types.TransactionType.OptInASA,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        assetID: assetInfo?.assetIndex,
-        payFlags: { totalFee: 1000 }
-      }
-    ];
+    if (assetInfo !== undefined) {
+      const tx: types.ExecParams[] = [
+        {
+          type: types.TransactionType.OptInASA,
+          sign: types.SignType.SecretKey,
+          fromAccount: alice.account,
+          assetID: assetInfo.assetIndex,
+          payFlags: { totalFee: 1000 }
+        }
+      ];
 
-    runtime.executeTx(tx);
+      runtime.executeTx(tx);
+    }
   });
 
   it("should execute group of (payment + app creation) successfully", () => {
@@ -195,16 +197,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const appInfo = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
     assert.isDefined(appInfo);
-    const tx: types.ExecParams[] = [
-      {
-        type: types.TransactionType.OptInToApp,
-        sign: types.SignType.SecretKey,
-        fromAccount: alice.account,
-        appID: appInfo?.appID,
-        payFlags: { totalFee: 1000 }
-      }
-    ];
+    if (appInfo !== undefined) {
+      const tx: types.ExecParams[] = [
+        {
+          type: types.TransactionType.OptInToApp,
+          sign: types.SignType.SecretKey,
+          fromAccount: alice.account,
+          appID: appInfo?.appID,
+          payFlags: { totalFee: 1000 }
+        }
+      ];
 
-    runtime.executeTx(tx);
+      runtime.executeTx(tx);
+    }
   });
 });
