@@ -15,6 +15,13 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+## Features
+Added:
+- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
+- `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
+- unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
+Changed:
+- `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 ### API breaking
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
