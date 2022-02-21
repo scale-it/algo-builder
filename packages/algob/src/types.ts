@@ -515,7 +515,7 @@ export interface Deployer {
   /**
    * This function will send Algos to ASC account in "Contract Mode".
    * @param lsigName - name of the smart signature (passed by user during
-   * mkContractLsig/mkDelegatedLsigByFile)
+   * mkContractLsig/mkDelegatedLsig)
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
@@ -670,7 +670,8 @@ export interface Deployer {
 
   /**
    * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
-   * @param lsigName name of the smart signture (passed during mkContractLsig/mkDelegatedLsigByFile)
+   * @param lsigName name of the smart signture
+   * (defined by user during mkContractLsig/mkDelegatedLsig)
    */
   getLsig: (lsigName: string) => LogicSigAccount
 

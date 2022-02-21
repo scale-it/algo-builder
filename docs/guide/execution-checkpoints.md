@@ -90,7 +90,7 @@ deployer.deployer.getLsig(lsigName);
 - Ex:
 ```js
 // store checkpoint
-deployer.mkDelegatedLsigByFile(contractFileName, lsigName, signer);
+deployer.mkDelegatedLsig(lsigName, contractFileName, signer);
 // load checkpoint
 deployer.getLsig(lsigName);
 ```

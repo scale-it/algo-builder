@@ -169,9 +169,9 @@ For opting in to App, `deployer` supports the following methods:
 
   Smart Signatures can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
 
-  Use `mkDelegatedLsigByFile` function to compile and sign a logic signature & save it to checkpoint.
+  Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsigByFile('4-gold-asa.teal', goldOwner);
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('goldASC', '4-gold-asa.teal', goldOwner);
   console.log(ascInfoGoldDelegated);
   ```
 
@@ -205,7 +205,7 @@ const daoAppInfo = await deployer.deployApp(
 
 #### Smart Signature Name
 
-Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsigByFile` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
+Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsig` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
 ```js
 const bob = deployer.accountsByName.get('bob');
 // store delegatedLsig
