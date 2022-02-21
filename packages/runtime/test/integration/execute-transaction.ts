@@ -118,7 +118,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.OptInASA,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        assetID: assetInfo?.assetIndex as number,
+        assetID: assetInfo?.assetIndex,
         payFlags: { totalFee: 1000 }
       }
     ];
@@ -200,7 +200,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         type: types.TransactionType.OptInToApp,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        appID: appInfo?.appID as number,
+        appID: appInfo?.appID,
         payFlags: { totalFee: 1000 }
       }
     ];
