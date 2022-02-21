@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const accounts = require('./common/accounts');
-const { getClawbackParams, getClawback } = require('./common/common');
+const { getClawbackParams } = require('./common/common');
 
 /**
  * Compile and set clawback logic sig (escrow) with template parameters:
@@ -19,7 +19,9 @@ async function setupClawback (runtimeEnv, deployer) {
   // NOTE: make sure to deploy ASA and controller before
   const tesla = deployer.asa.get('tesla');
   const clawbackParams = getClawbackParams(deployer);
-  const clawbackLsig = await getClawback(deployer);
+  await deployer.mkContractLsig('ClawbackLsig', 'clawback.py', clawbackParams);
+
+  const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();
 
   /*
@@ -32,8 +34,8 @@ async function setupClawback (runtimeEnv, deployer) {
     const [_, multsigaddr] = createMsigAddress(1, 2, addrs); // use multsigaddr in TOKEN_RESERVE
   */
 
-  await deployer.fundLsig('clawback.py',
-    { funder: owner, fundingMicroAlgo: 5e6 }, {}, clawbackParams);
+  await deployer.fundLsig('ClawbackLsig',
+    { funder: owner, fundingMicroAlgo: 5e6 }, {});
 
   console.log('\n** Updating asset clawback to lsig **');
   const assetConfigParams = {

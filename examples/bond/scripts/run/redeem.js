@@ -13,7 +13,7 @@ const { tokenMap, couponValue, redeemCouponTx } = require('./common/common.js');
  * For ex: 1 means your 0 bond-tokens will be redeemed from 1st Dex
  */
 exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount) {
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const oldBond = tokenMap.get('bond-token-' + String(dex - 1));
   const newBond = tokenMap.get('bond-token-' + String(dex));
   const scInitParam = {
@@ -22,7 +22,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr
   };
-  const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
+  const dexLsig = await deployer.loadLogicByFile('dex-lsig.py', scInitParam);
   await deployer.optInAccountToASA(newBond, buyerAccount.name, {});
   const groupTx = redeemCouponTx(
     buyerAccount, dexLsig, amount,

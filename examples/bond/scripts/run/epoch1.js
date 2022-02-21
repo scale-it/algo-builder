@@ -17,13 +17,8 @@ exports.epoch1 = async function (deployer) {
   await redeem(deployer, account.elon, account.manager, 1, 8);
   console.log('Elon redeemed 8 bonds from dex_1');
 
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
-  const scInitParam = {
-    TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_OWNER: account.creator.addr,
-    TMPL_APP_MANAGER: account.manager.addr
-  };
-  const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
+  const appInfo = deployer.getApp('BondApp');
+  const issuerLsig = deployer.getLsig('IssuerLsig');
   const bondToken = tokenMap.get('bond-token-1');
   await deployer.optInAccountToASA(bondToken, 'bob', { totalFee: 1000 });
   await deployer.optInAccountToASA(bondToken, 'elon-musk', { totalFee: 1000 });

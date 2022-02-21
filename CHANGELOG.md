@@ -24,6 +24,24 @@ Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 ### API breaking
 
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
+
+  - Application:
+    * Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    * New `getApp(appName)` function queries app info using the app name.
+
+  - Smart signatures:
+    * Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
+    * New `getApp(appName)` function queries app info using the app name.
+    * Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
+    * Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
+      - `mkDelegatedLsig(lsigName, fileName, signer)`
+      - `mkContractLsig(lsigName, fileName)`.
+      Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
+
+  For reference you can check out `examples/asa`.
+
+- Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
 - Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
 - Updated `txId` key in returned App/ASA info to `txID`.
 
@@ -33,9 +51,6 @@ Changed:
 - Support RekeyTo field in the inner transaction for TEAL v6.
 - Added following functions in `deployer` API
   * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
-  * `getLsigByName`: returns lsig info stored in checkpoint by name
-  * `fundLsigByName`: funds logic signature by name.
-- Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
 - You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.

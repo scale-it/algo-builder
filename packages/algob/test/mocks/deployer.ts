@@ -78,15 +78,15 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getApp (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
+  getAppByFile (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
-  getAppByName (appName: string): rtypes.AppInfo | undefined {
+  getApp (appName: string): rtypes.AppInfo {
     throw new Error("Not implemented");
   }
 
-  getLsigByName (lsigName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount {
     throw new Error("Not implemented");
   }
 
@@ -102,11 +102,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getDelegatedLsig (lsig: string): object | undefined {
-    throw new Error("Not implemented");
-  }
-
-  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
+  async loadLogicByFile (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
     throw new Error("Not implemented");
   }
 
@@ -150,18 +146,23 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async fundLsig (name: string, flags: FundASCFlags,
+  async fundLsigByFile (name: string, flags: FundASCFlags,
     payFlags: wtypes.TxParams, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  async fundLsigByName (lsigName: string, flags: FundASCFlags,
+  async fundLsig (lsigName: string, flags: FundASCFlags,
     payFlags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsig (name: string, signer: rtypes.Account,
-    scInitParam?: unknown): Promise<LsigInfo> {
+  async mkDelegatedLsig (lsigName: string, fileName: string,
+    signer: rtypes.Account, scInitParam?: unknown): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async mkContractLsig (lsigName: string,
+    fileName: string, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 

@@ -189,6 +189,12 @@ Please check algob output for more details.`
     message: `Logic signature(name = %lsigName%) not found in checkpoint`,
     title: "Lsig not found",
     description: "Lsig not found"
+  },
+  APP_NOT_FOUND_IN_CP: {
+    number: 20,
+    message: `Application(name = %appName%) not found in checkpoint`,
+    title: "App by name not found in checkpoint",
+    description: "App by name not found in checkpoint"
   }
 };
 

@@ -10,14 +10,14 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   // NOTE: set min asset level first using ./set-clear-level.js
-  const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+  const appInfo = deployer.getApp('PermissionedTokenApp');
   const assetInfo = deployer.asa.get('gold');
 
   const escrowParams = {
     ASSET_ID: assetInfo.assetIndex,
     APP_ID: appInfo.appID
   };
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', escrowParams);
+  const escrowLsig = deployer.getLsig('clawbackEscrow');
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [

@@ -9,7 +9,7 @@ const accounts = require('../common/accounts');
  * @param address account address to change permissions_manager to
  */
 async function changePermissionsManager (deployer, permissionsManager, address) {
-  const permissionAppInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
+  const permissionAppInfo = deployer.getApp('Permissions');
 
   const changePerManagerParams = {
     type: types.TransactionType.CallApp,
@@ -35,7 +35,7 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, [permissionsManager, elon]);
 
   console.log('* Opt-In to permissions(rules) smart contract *');
-  const permissionAppInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
+  const permissionAppInfo = deployer.getApp('Permissions');
   await optInAccountToApp(deployer, elon, permissionAppInfo.appID, {}, {});
 
   // tx FAIL because john is not a permissions manager

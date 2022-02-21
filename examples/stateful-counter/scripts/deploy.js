@@ -29,7 +29,7 @@ async function run (runtimeEnv, deployer) {
       localBytes: 1,
       globalInts: 1,
       globalBytes: 1
-    }, {});
+    }, {}, {}, 'CounterApp');
 
   console.log(sscInfo);
 

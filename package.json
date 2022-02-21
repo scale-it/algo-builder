@@ -20,7 +20,7 @@
     "build:apidocs": "yarn workspaces foreach -t run build:docs",
     "build:apidocs-push": "yarn workspaces foreach -t run build:docs; git add docs; git ci -am 'generating api docs' -n; HUSKY=0 git push -f",
     "watch": "tsc --build --watch packages/web packages/runtime packages/algob",
-    "test": "pipenv run yarn workspaces foreach -p run test",
+    "test": "yarn workspaces foreach -p run test",
     "test:watch": "pipenv run yarn workspaces foreach run test:watch:p",
     "lint": "yarn workspaces foreach -p run lint",
     "lint:fix": "yarn workspaces foreach -p run lint:fix",
