@@ -56,7 +56,7 @@ export class Runtime {
     this._defaultAccounts = this._setupDefaultAccounts();
 
     // intialize accounts (should be done during runtime initialization)
-    this.initializeAccounts([...accounts, ...this._defaultAccounts]);
+    this.initializeAccounts(this._defaultAccounts);
 
     // load asa yaml files
     this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
@@ -79,8 +79,10 @@ export class Runtime {
    */
   _setupDefaultAccounts (): AccountStore[] {
     const balance = this.defaultBalance;
-    return Object.values(defaultSDKAccounts)
+    const accounts = Object.values(defaultSDKAccounts)
       .map(accountInfo => new AccountStore(balance, accountInfo));
+    this.initializeAccounts(accounts);
+    return accounts;
   }
 
   /**
