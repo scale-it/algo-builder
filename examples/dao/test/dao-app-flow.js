@@ -87,7 +87,7 @@ describe('DAO test', function () {
 
   function setUpDAO () {
     govTokenID = runtime.addAsset(
-      'gov-token', { creator: { ...creator.account, name: 'dao-creator' } }).assetID;
+      'gov-token', { creator: { ...creator.account, name: 'dao-creator' } }).assetIndex;
 
     const daoAppArgs = [
       `int:${deposit}`,

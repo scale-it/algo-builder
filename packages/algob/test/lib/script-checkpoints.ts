@@ -81,7 +81,7 @@ describe("Checkpoint", () => {
     nestedMap.set(1, {
       creator: "536",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -91,7 +91,7 @@ describe("Checkpoint", () => {
     });
     netCheckpoint.asa.set("asa1", {
       creator: "123",
-      txId: "",
+      txID: "",
       assetIndex: 0,
       confirmedRound: 0,
       assetDef: {} as wtypes.ASADef,
@@ -111,7 +111,7 @@ describe("Checkpoint", () => {
           ["key3", "data3"]]),
         asa: new Map([["asa1", {
           creator: "123",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -133,7 +133,7 @@ describe("Checkpoint", () => {
     netCheckpoint2.asa.set(
       "my asa 2", {
         creator: "creator",
-        txId: "",
+        txID: "",
         assetIndex: 0,
         confirmedRound: 0,
         assetDef: {} as wtypes.ASADef,
@@ -149,7 +149,7 @@ describe("Checkpoint", () => {
         asa: new Map([
           ["asa1", {
             creator: "123",
-            txId: "",
+            txID: "",
             assetIndex: 0,
             confirmedRound: 0,
             assetDef: {} as wtypes.ASADef,
@@ -157,7 +157,7 @@ describe("Checkpoint", () => {
           }],
           ["my asa 2", {
             creator: "creator",
-            txId: "",
+            txID: "",
             assetIndex: 0,
             confirmedRound: 0,
             assetDef: {} as wtypes.ASADef,
@@ -181,7 +181,7 @@ describe("Checkpoint", () => {
       34251);
     cp1.asa.set("asa1", {
       creator: "123",
-      txId: "",
+      txID: "",
       assetIndex: 0,
       confirmedRound: 0,
       assetDef: {} as wtypes.ASADef,
@@ -191,7 +191,7 @@ describe("Checkpoint", () => {
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
     cp2.asa.set("asa1", {
       creator: "36506",
-      txId: "",
+      txID: "",
       assetIndex: 0,
       confirmedRound: 0,
       assetDef: {} as wtypes.ASADef,
@@ -213,7 +213,7 @@ describe("Checkpoint", () => {
     nestedMap.set(1, {
       creator: "123",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -225,7 +225,7 @@ describe("Checkpoint", () => {
     nestedMap1.set(2, {
       creator: "123",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 2,
@@ -267,7 +267,7 @@ describe("Checkpoint", () => {
     nestedMap.set(1, {
       creator: "SSC deployer address",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -279,7 +279,7 @@ describe("Checkpoint", () => {
       "My ASA",
       {
         creator: "ASA deployer address",
-        txId: "",
+        txID: "",
         assetIndex: 0,
         confirmedRound: 0,
         assetDef: {} as wtypes.ASADef,
@@ -293,7 +293,7 @@ describe("Checkpoint", () => {
       metadata: new Map<string, string>(),
       asa: new Map([["My ASA", {
         creator: "ASA deployer address",
-        txId: "",
+        txID: "",
         assetIndex: 0,
         confirmedRound: 0,
         assetDef: {} as wtypes.ASADef,
@@ -339,7 +339,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map([["ASA name", {
           creator: "ASA creator 123",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -355,7 +355,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map([["ASA name", {
           creator: "ASA creator 123",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -421,7 +421,7 @@ describe("CheckpointRepoImpl", () => {
     const cpData = new CheckpointRepoImpl()
       .registerASA("network1", "ASA name", {
         creator: "ASA creator 123",
-        txId: "",
+        txID: "",
         assetIndex: 0,
         confirmedRound: 0,
         assetDef: {} as wtypes.ASADef,
@@ -435,7 +435,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map([["metadata key", "metadata value"]]),
         asa: new Map([["ASA name", {
           creator: "ASA creator 123",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -452,7 +452,7 @@ describe("CheckpointRepoImpl", () => {
     nestedMap.set(1, {
       creator: "SSC creator 951",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -464,7 +464,7 @@ describe("CheckpointRepoImpl", () => {
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
@@ -550,7 +550,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map<string, string>(),
         asa: new Map([["asa key", {
           creator: "asa creator",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -572,7 +572,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map([["asa key", {
           creator: "asa creator",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -588,7 +588,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map<string, string>(),
         asa: new Map([["asa key", {
           creator: "asa creator",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -605,7 +605,7 @@ describe("CheckpointRepoImpl", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map([["asa key", {
           creator: "asa creator",
-          txId: "",
+          txID: "",
           assetIndex: 0,
           confirmedRound: 0,
           assetDef: {} as wtypes.ASADef,
@@ -623,7 +623,7 @@ describe("CheckpointRepoImpl", () => {
     nestedMap.set(1, {
       creator: "SSC creator",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -634,7 +634,7 @@ describe("CheckpointRepoImpl", () => {
     nestedMap1.set(1, {
       creator: "SSC creator1",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       appID: -1,
       timestamp: 1,
@@ -725,7 +725,7 @@ describe("CheckpointRepoImpl", () => {
       .putMetadata("net 0195", "1241 key", "345 value")
       .registerASA("network1", "ASA name", {
         creator: "ASA creator 123",
-        txId: "",
+        txID: "",
         assetIndex: 0,
         confirmedRound: 0,
         assetDef: {} as wtypes.ASADef,
@@ -734,7 +734,7 @@ describe("CheckpointRepoImpl", () => {
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
@@ -759,7 +759,7 @@ describe("CheckpointRepoImpl", () => {
       nestedMap.set(1, {
         creator: "SSC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
@@ -774,7 +774,7 @@ describe("CheckpointRepoImpl", () => {
             ["metadata key", "metadata value"]]),
           asa: new Map([["ASA name", {
             creator: "ASA creator 123",
-            txId: "",
+            txID: "",
             assetIndex: 0,
             confirmedRound: 0,
             assetDef: {} as wtypes.ASADef,
@@ -806,7 +806,7 @@ describe("CheckpointRepoImpl", () => {
             ["metadata key", "metadata value"]]),
           asa: new Map([["ASA name", {
             creator: "ASA creator 123",
-            txId: "",
+            txID: "",
             assetIndex: 0,
             confirmedRound: 0,
             assetDef: {} as wtypes.ASADef,
@@ -831,7 +831,7 @@ describe("CheckpointRepoImpl", () => {
             ["metadata key", "metadata value"]]),
           asa: new Map([["ASA name", {
             creator: "ASA creator 123",
-            txId: "",
+            txID: "",
             assetIndex: 0,
             confirmedRound: 0,
             assetDef: {} as wtypes.ASADef,
@@ -863,7 +863,7 @@ describe("CheckpointRepoImpl", () => {
     assert.isFalse(cpData.isDefined("network1", "SSC name"));
     cpData.registerASA("network1", "ASA name", {
       creator: "ASA creator 123",
-      txId: "",
+      txID: "",
       assetIndex: 0,
       confirmedRound: 0,
       assetDef: {} as wtypes.ASADef,
@@ -872,7 +872,7 @@ describe("CheckpointRepoImpl", () => {
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,

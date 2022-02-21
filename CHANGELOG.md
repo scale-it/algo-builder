@@ -22,7 +22,10 @@ Added:
 - unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
 Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+### API breaking
 
+- Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
+- Updated `txId` key in returned App/ASA info to `txID`.
 
 ### Features
 
@@ -41,6 +44,7 @@ Example:
 ```bash
   algob init --infrastructure
 ```
+- Support `keyreg` transaction in inner transaction.
 
 ### Bug fixes
 

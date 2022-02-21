@@ -339,7 +339,7 @@ describe("Algorand Standard Assets", function () {
 
   this.beforeEach(() => {
     assetId = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
     assetTransferParam.assetID = assetId;
     syncAccounts();
   });
@@ -352,7 +352,7 @@ describe("Algorand Standard Assets", function () {
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
     assetId =
-      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetID;
+      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetIndex;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -384,7 +384,7 @@ describe("Algorand Standard Assets", function () {
     };
     assetId = runtime.deployASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
-    ).assetID;
+    ).assetIndex;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -649,7 +649,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
     const assetId = runtime.deployASA('silver',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
 
     const modFields: types.AssetModFields = {
       manager: bob.address,

@@ -20,7 +20,6 @@ import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppInfo,
   AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  DeployedAppTxReceipt, DeployedAssetTxReceipt,
   EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
@@ -403,7 +402,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addAsset (asa: string, flags: ASADeploymentFlags): ASAInfo {
     return this.deployASA(asa, flags);
   }
 
@@ -412,7 +411,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASA (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASA (asa: string, flags: ASADeploymentFlags): ASAInfo {
     const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -426,7 +425,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
     return this.deployASADef(asa, asaDef, flags);
   }
 
@@ -435,7 +434,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
     const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -530,7 +529,7 @@ export class Runtime {
     approvalProgram: string, clearProgram: string,
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     debugStack?: number
-  ): DeployedAppTxReceipt {
+  ): AppInfo {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
     const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
@@ -556,7 +555,7 @@ export class Runtime {
     payFlags: types.TxParams,
     scTmplParams?: SCParams,
     debugStack?: number
-  ): DeployedAppTxReceipt {
+  ): AppInfo {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
 

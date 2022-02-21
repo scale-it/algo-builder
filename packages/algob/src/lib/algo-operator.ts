@@ -249,7 +249,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     txWriter.push(message, txConfirmation);
     return {
       creator: flags.creator.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       assetIndex: Number(assetIndex),
       confirmedRound: Number(txConfirmation[confirmedRound]),
       assetDef: asaDef,
@@ -358,7 +358,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     return {
       creator: flags.sender.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: Number(appId),
       applicationAccount: getApplicationAddress(Number(appId)),
@@ -430,7 +430,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     return {
       creator: sender.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: appID,
       applicationAccount: getApplicationAddress(appID),
