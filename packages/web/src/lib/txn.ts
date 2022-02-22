@@ -227,16 +227,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.DeployApp: {
       const onComplete = algosdk.OnApplicationComplete.NoOpOC;
-      // TODO: handle in https://github.com/scale-it/algo-builder/pull/584
-      if (execParams.approvalProg === undefined || execParams.clearProg === undefined) {
-        throw new Error("");
-      }
       const tx = algosdk.makeApplicationCreateTxn(
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg ?? new Uint8Array(8).fill(0),
+        execParams.clearProg ?? new Uint8Array(8).fill(0),
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -253,16 +249,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.UpdateApp: {
-      // TODO: handle in https://github.com/scale-it/algo-builder/pull/584
-      if (execParams.approvalProg === undefined || execParams.clearProg === undefined) {
-        throw new Error("");
-      }
       const tx = algosdk.makeApplicationUpdateTxn(
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg ?? new Uint8Array(8).fill(0),
+        execParams.clearProg ?? new Uint8Array(8).fill(0),
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
