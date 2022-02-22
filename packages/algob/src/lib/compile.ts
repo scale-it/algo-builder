@@ -8,7 +8,7 @@ import YAML from "yaml";
 
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { ASCCache, PyASCCache, SCParams } from "../types";
+import type { ASCCache, SCParams } from "../types";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -33,7 +33,7 @@ export class CompileOp {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async ensureCompiled (filename: string, force?: boolean, scTmplParams?: SCParams):
-  Promise<ASCCache | PyASCCache> {
+  Promise<ASCCache> {
     if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt) && !filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${tealExt}" or "${lsigExt}" or "${pyExt}"`); // TODO: convert to buildererror
     }
@@ -98,7 +98,7 @@ export class CompileOp {
     return this.algocl.compile(code).do();
   }
 
-  async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache | PyASCCache> {
+  async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache> {
     try {
       const co = await this.callCompiler(tealCode);
       return {

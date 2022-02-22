@@ -723,15 +723,12 @@ export interface ASCCache {
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
   base64ToBytes: Uint8Array // compiled base64 in bytes
+  tealCode: string
 }
 
 export interface AppCache {
   approval: ASCCache | undefined
   clear: ASCCache | undefined
-}
-
-export interface PyASCCache extends ASCCache {
-  tealCode: string
 }
 
 // ************************
