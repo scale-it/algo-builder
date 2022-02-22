@@ -48,6 +48,10 @@ Changed:
 - `printLocalStateSCC` renamed to `printLocalStateApp`.
 - `printGlobalStateSCC` renamed to `printGlobalStateApp`.
 
+- The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
+- The ` PyASCCache` has been merged to `ASCCache` and is not used anymore. 
+
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
