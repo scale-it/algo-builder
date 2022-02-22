@@ -111,7 +111,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       compiledHash: "ASDF", // hash returned by the compiler
       srcHash: 123, // source code hash
       base64ToBytes: new Uint8Array(1), // compiled base64 in bytes
-      tealCode: "TEAL", // teal code
+      tealCode: "TEAL" // teal code
     };
   }
 
