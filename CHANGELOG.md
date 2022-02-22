@@ -15,6 +15,13 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
+### Breaking Changes
+- `printLocalStateSCC` renamed to `printLocalStateApp`
+- `printGlobalStateSCC` renamed to `printGlobalStateApp`
+
+
+
+
 ### API breaking
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
