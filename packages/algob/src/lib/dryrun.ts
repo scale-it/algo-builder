@@ -209,7 +209,7 @@ export class Tealdbg {
 
         // load pyCache from "artifacts/cache"
         if (fs.existsSync(path.join(CACHE_DIR, file + ".yaml"))) {
-          const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml");
+          const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml") as string;
           const pyCache = loadFromYamlFileSilent(pathToPyCache) as ASCCache;
           tealFromPyTEAL = pyCache.tealCode;
         }
@@ -227,7 +227,7 @@ export class Tealdbg {
         }
         this.writeFile(pathToFile, tealFromPyTEAL);
       } else {
-        pathToFile = getPathFromDirRecursive(ASSETS_DIR, file);
+        pathToFile = getPathFromDirRecursive(ASSETS_DIR, file) as string;
       }
 
       tealdbgArgs.push(pathToFile);
