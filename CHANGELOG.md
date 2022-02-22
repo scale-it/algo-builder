@@ -15,13 +15,6 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
-### Breaking Changes
-- `printLocalStateSCC` renamed to `printLocalStateApp`
-- `printGlobalStateSCC` renamed to `printGlobalStateApp`
-
-
-
-
 ### API breaking
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
@@ -44,6 +37,9 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 - Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
 - Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
 - Updated `txId` key in returned App/ASA info to `txID`.
+
+- `printLocalStateSCC` renamed to `printLocalStateApp`.
+- `printGlobalStateSCC` renamed to `printGlobalStateApp`.
 
 ### Features
 
