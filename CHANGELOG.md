@@ -45,6 +45,9 @@ Changed:
 - Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
 - Updated `txId` key in returned App/ASA info to `txID`.
 
+- `printLocalStateSCC` renamed to `printLocalStateApp`.
+- `printGlobalStateSCC` renamed to `printGlobalStateApp`.
+
 ### Features
 
 - Used app account instead of `deposit_lsig` in `examples/dao`
