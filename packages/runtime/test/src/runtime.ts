@@ -1,20 +1,67 @@
 import { types } from "@algo-builder/web";
-import { AccountAddress, AlgoTransferParam } from "@algo-builder/web/build/types";
-import algosdk, { LogicSigAccount } from "algosdk";
+import { AlgoTransferParam } from "@algo-builder/web/build/types";
+import algosdk, { LogicSigAccount, makeAssetCreateTxnWithSuggestedParams } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
-import { AccountStoreI } from "../../src/types";
+import { AccountStoreI, TxReceipt } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
 const minBalance = BigInt(1e7);
+
+describe("Execute SDK transaction", function () {
+  useFixture("asa-check");
+  const fee = 1000;
+
+  let alice: AccountStoreI;
+  let bob: AccountStoreI;
+  let alan: AccountStoreI;
+
+  let runtime: Runtime;
+
+  this.beforeEach(() => {
+    alice = new AccountStore(minBalance * 10n);
+    bob = new AccountStore(minBalance * 10n);
+    alan = new AccountStore(minBalance * 10n);
+    runtime = new Runtime([alice, bob, alan]);
+  });
+
+  it("Create ASA txn", () => {
+    const params = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+    const txn = makeAssetCreateTxnWithSuggestedParams(
+      alice.address, undefined, 10000, 0,
+      false,
+      alice.address, alice.address, alice.address, alice.address,
+      "GOLD", "goal",
+      undefined,
+      undefined,
+      params,
+      undefined
+    );
+
+    runtime.executeTx({
+      transaction: txn,
+      sign: {
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account
+      }
+    }) as TxReceipt;
+
+    const asaDef = runtime.getAssetInfoFromName('goal');
+
+    assert.isDefined(asaDef);
+    assert.equal(asaDef?.creator, alice.address);
+    assert.equal(asaDef?.assetDef.manager, alice.address);
+  });
+});
 
 describe("Transfer Algo Transaction", function () {
   const amount = minBalance;

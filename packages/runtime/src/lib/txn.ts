@@ -1,11 +1,12 @@
-import { parsing } from "@algo-builder/web";
-import { EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
+import { parsing, types } from "@algo-builder/web";
+import { AccountAddress } from "@algo-builder/web/build/types";
+import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { EncTx, StackElem, TxField, TxnType } from "../types";
+import { TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
+import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
 
 export const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -191,3 +192,126 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
     (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
     !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
+
+export function transactionAndSignToExecParams (
+  txAndSign: types.TransactionAndSign, ctx: Context, line?: number
+): types.ExecParams {
+  const encTx = txAndSign.transaction.get_obj_for_encoding() as EncTx;
+  const sign = txAndSign.sign;
+  return sdkTransactionToExecParams(encTx, sign, ctx, line);
+}
+
+/* eslint-disable sonarjs/cognitive-complexity */
+export function sdkTransactionToExecParams (
+  encTx: EncTx, sign: types.Sign, ctx: Context, line?: number
+): types.ExecParams {
+  const execParams: any = {
+    ...sign,
+    payFlags: {} as types.ExecParams
+  };
+
+  execParams.payFlags.totalFee = encTx.fee;
+  if (encTx.close) {
+    execParams.payFlags.closeRemainderTo = encodeAddress(encTx.close);
+  }
+
+  switch (encTx.type) {
+    case 'pay': {
+      execParams.type = types.TransactionType.TransferAlgo;
+      execParams.toAccountAddr =
+        _getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
+      execParams.amountMicroAlgos = encTx.amt ?? 0n;
+      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.close, ctx, line);
+      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      break;
+    }
+    case 'afrz': {
+      execParams.type = types.TransactionType.FreezeAsset;
+      execParams.assetID = encTx.faid;
+      execParams.freezeTarget = _getRuntimeAccountAddr(encTx.fadd, ctx, line);
+      execParams.freezeState = BigInt(encTx.afrz ?? 0n) === 1n;
+      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      break;
+    }
+    case 'axfer': {
+      if (encTx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
+        execParams.type = types.TransactionType.RevokeAsset;
+        execParams.recipient =
+          _getRuntimeAccountAddr(encTx.arcv, ctx, line) ?? ZERO_ADDRESS_STR;
+        execParams.revocationTarget = _getRuntimeAccountAddr(encTx.asnd, ctx, line);
+      } else { // asset transfer
+        execParams.type = types.TransactionType.TransferAsset;
+        execParams.toAccountAddr =
+          _getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
+      }
+      // set common fields (asset amount, index, closeRemTo)
+      execParams.amount = encTx.aamt ?? 0n;
+      execParams.assetID = encTx.xaid ?? 0;
+      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.aclose, ctx, line);
+      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      break;
+    }
+
+    case 'acfg': {
+      if (isEncTxAssetDeletion(encTx)) {
+        execParams.type = types.TransactionType.DestroyAsset;
+        execParams.assetID = encTx.caid;
+      } else if (isEncTxAssetConfig(encTx)) {
+        // from the docs: all fields must be reset, otherwise they will be cleared
+        // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#asset-configuration
+        execParams.type = types.TransactionType.ModifyAsset;
+        execParams.assetID = encTx.caid;
+        execParams.fields = {
+          manager: _getASAConfigAddr(encTx.apar?.m),
+          reserve: _getASAConfigAddr(encTx.apar?.r),
+          clawback: _getASAConfigAddr(encTx.apar?.c),
+          freeze: _getASAConfigAddr(encTx.apar?.f)
+        };
+      } else { // if not delete or modify, it's ASA deployment
+        execParams.type = types.TransactionType.DeployASA;
+        execParams.asaName = encTx.apar?.an;
+        execParams.asaDef = {
+          name: encTx.apar?.an,
+          total: Number(encTx.apar?.t),
+          decimals: encTx.apar?.dc !== undefined ? Number(encTx.apar.dc) : 0,
+          defaultFrozen: BigInt(encTx.apar?.df ?? 0n) === 1n,
+          unitName: encTx.apar?.un,
+          url: encTx.apar?.au,
+          metadataHash: encTx.apar?.am,
+          manager: _getASAConfigAddr(encTx.apar?.m),
+          reserve: _getASAConfigAddr(encTx.apar?.r),
+          clawback: _getASAConfigAddr(encTx.apar?.c),
+          freeze: _getASAConfigAddr(encTx.apar?.f)
+        };
+      }
+    }
+  };
+  return execParams as types.ExecParams;
+}
+
+const _getASAConfigAddr = (addr?: Uint8Array): string => {
+  if (addr) {
+    return encodeAddress(addr);
+  }
+  return "";
+};
+
+const _getRuntimeAccount = (publickey: Buffer | undefined,
+  ctx: Context, line?: number): RuntimeAccountI | undefined => {
+  if (publickey === undefined) { return undefined; }
+  const address = encodeAddress(Uint8Array.from(publickey));
+  const runtimeAcc = ctx.getAccount(
+    address
+  );
+  return runtimeAcc.account;
+};
+
+const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
+  ctx: Context, line?: number): AccountAddress | undefined => {
+  return _getRuntimeAccount(publickey, ctx, line)?.addr;
+};
+
+const _getAddress = (addr?: Uint8Array): string | undefined => {
+  if (addr) { return encodeAddress(addr); }
+  return undefined;
+};
