@@ -218,6 +218,7 @@ export function sdkTransactionToExecParams (
   switch (encTx.type) {
     case 'pay': {
       execParams.type = types.TransactionType.TransferAlgo;
+      execParams.fromAccountAddr = _getAddress(encTx.snd);
       execParams.toAccountAddr =
         _getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = encTx.amt ?? 0n;
@@ -284,6 +285,21 @@ export function sdkTransactionToExecParams (
           freeze: _getASAConfigAddr(encTx.apar?.f)
         };
       }
+      break;
+    }
+
+    case 'keyreg': {
+      execParams.type = types.TransactionType.KeyRegistration;
+      execParams.voteKey = encTx.votekey;
+      execParams.selectionKey = encTx.selkey;
+      execParams.voteFirst = encTx.votefst;
+      execParams.voteLast = encTx.votelst;
+      execParams.voteKeyDilution = encTx.votekd;
+      break;
+    }
+
+    default: {
+      throw new Error(`unsupported type for itxn_submit at line ${line}`);
     }
   };
   return execParams as types.ExecParams;

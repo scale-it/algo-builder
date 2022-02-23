@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
@@ -19,13 +19,13 @@ import {
   MAX_UINT64, MAX_UINT128,
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
-import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
+import { setInnerTxField } from "../lib/itxn";
 import {
   assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { txAppArg, txnSpecbyField } from "../lib/txn";
+import { sdkTransactionToExecParams, txAppArg, txnSpecbyField } from "../lib/txn";
 import { DecodingMode, EncodingType, StackElem, TEALStack, TxnType, TxOnComplete, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1612,7 +1612,7 @@ export class Global extends Op {
       }
       case 'CreatorAddress': {
         const appID = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appID as number, this.line);
+        const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -3922,7 +3922,7 @@ export class ITxnSubmit extends Op {
 
     // initial contract account.
     const appID = this.interpreter.runtime.ctx.tx.apid;
-    const contractAddress = getApplicationAddress(appID as number);
+    const contractAddress = getApplicationAddress(appID);
     const contractAccount = {
       addr: contractAddress,
       sk: Buffer.from([])
@@ -3930,8 +3930,14 @@ export class ITxnSubmit extends Op {
 
     // get execution txn params (parsed from encoded sdk txn obj)
     // singer will be contractAccount
-    const execParams = parseEncodedTxnToExecParams(
-      contractAccount, this.interpreter.subTxn, this.interpreter, this.line
+    const execParams = sdkTransactionToExecParams(
+      this.interpreter.subTxn,
+      {
+        sign: types.SignType.SecretKey,
+        fromAccount: contractAccount
+      },
+      this.interpreter.runtime.ctx,
+      this.line
     );
     const baseCurrTx = this.interpreter.runtime.ctx.tx;
     const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
@@ -4218,7 +4224,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded

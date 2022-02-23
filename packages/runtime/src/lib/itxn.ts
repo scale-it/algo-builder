@@ -1,15 +1,14 @@
-import { types } from "@algo-builder/web";
-import { Account as AccountSDK, decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
+import { decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { MaxTxnNoteBytes, TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
-import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
+import { MaxTxnNoteBytes, TxnFields, TxnTypeMap } from "../lib/constants";
+import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
+import { assetTxnFields } from "./txn";
 
 // requires their type as number
 const numberTxnFields: {[key: number]: Set<string>} = {
@@ -256,137 +255,4 @@ export function setInnerTxField (
   }
 
   return subTxn;
-}
-
-const _getRuntimeAccount = (publickey: Buffer | undefined,
-  interpreter: Interpreter, line: number): RuntimeAccountI | undefined => {
-  if (publickey === undefined) { return undefined; }
-  const address = encodeAddress(Uint8Array.from(publickey));
-  const runtimeAcc = interpreter.runtime.assertAccountDefined(
-    address,
-    interpreter.runtime.ctx.state.accounts.get(address),
-    line
-  );
-  return runtimeAcc.account;
-};
-
-const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
-  interpreter: Interpreter, line: number): AccountAddress | undefined => {
-  return _getRuntimeAccount(publickey, interpreter, line)?.addr;
-};
-
-const _getASAConfigAddr = (addr?: Uint8Array): string => {
-  if (addr) {
-    return encodeAddress(addr);
-  }
-  return "";
-};
-
-const _getAddress = (addr?: Uint8Array): string | undefined => {
-  if (addr) { return encodeAddress(addr); }
-  return undefined;
-};
-
-// parse encoded txn obj to execParams (params passed by user in algob)
-/* eslint-disable sonarjs/cognitive-complexity */
-export function parseEncodedTxnToExecParams (singer: AccountSDK, tx: EncTx,
-  interpreter: Interpreter, line: number): types.ExecParams {
-  // initial common fields
-  const execParams: any = {
-    sign: types.SignType.SecretKey,
-    fromAccount: singer, // signer is the contract
-    fromAccountAddr: encodeAddress(tx.snd),
-    payFlags: {
-      totalFee: tx.fee,
-      firstValid: tx.fv,
-      note: tx.note
-    }
-  };
-
-  switch (tx.type) {
-    case 'pay': {
-      execParams.type = types.TransactionType.TransferAlgo;
-      execParams.toAccountAddr =
-        _getRuntimeAccountAddr(tx.rcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-      execParams.amountMicroAlgos = tx.amt ?? 0n;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close, interpreter, line);
-      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
-      break;
-    }
-    case 'afrz': {
-      execParams.type = types.TransactionType.FreezeAsset;
-      execParams.assetID = tx.faid;
-      execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd, interpreter, line);
-      execParams.freezeState = BigInt(tx.afrz ?? 0n) === 1n;
-      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
-      break;
-    }
-    case 'axfer': {
-      if (tx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
-        execParams.type = types.TransactionType.RevokeAsset;
-        execParams.recipient =
-          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-        execParams.revocationTarget = _getRuntimeAccountAddr(tx.asnd, interpreter, line);
-      } else { // asset transfer
-        execParams.type = types.TransactionType.TransferAsset;
-        execParams.toAccountAddr =
-          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-      }
-      // set common fields (asset amount, index, closeRemTo)
-      execParams.amount = tx.aamt ?? 0n;
-      execParams.assetID = tx.xaid ?? 0;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose, interpreter, line);
-      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
-      break;
-    }
-    case 'acfg': { // can be asset modification, destroy, or deployment(create)
-      if (isEncTxAssetDeletion(tx)) {
-        execParams.type = types.TransactionType.DestroyAsset;
-        execParams.assetID = tx.caid;
-      } else if (isEncTxAssetConfig(tx)) {
-        // from the docs: all fields must be reset, otherwise they will be cleared
-        // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#asset-configuration
-        execParams.type = types.TransactionType.ModifyAsset;
-        execParams.assetID = tx.caid;
-        execParams.fields = {
-          manager: _getASAConfigAddr(tx.apar?.m),
-          reserve: _getASAConfigAddr(tx.apar?.r),
-          clawback: _getASAConfigAddr(tx.apar?.c),
-          freeze: _getASAConfigAddr(tx.apar?.f)
-        };
-      } else { // if not delete or modify, it's ASA deployment
-        execParams.type = types.TransactionType.DeployASA;
-        execParams.asaName = tx.apar?.an;
-        execParams.asaDef = {
-          name: tx.apar?.an,
-          total: tx.apar?.t,
-          decimals: tx.apar?.dc !== undefined ? Number(tx.apar.dc) : undefined,
-          defaultFrozen: BigInt(tx.apar?.df ?? 0n) === 1n,
-          unitName: tx.apar?.un,
-          url: tx.apar?.au,
-          metadataHash: tx.apar?.am,
-          manager: _getASAConfigAddr(tx.apar?.m),
-          reserve: _getASAConfigAddr(tx.apar?.r),
-          clawback: _getASAConfigAddr(tx.apar?.c),
-          freeze: _getASAConfigAddr(tx.apar?.f)
-        };
-      }
-      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
-      break;
-    }
-
-    case 'keyreg':
-      execParams.type = types.TransactionType.KeyRegistration;
-      execParams.voteKey = tx.votekey;
-      execParams.selectionKey = tx.selkey;
-      execParams.voteFirst = tx.votefst;
-      execParams.voteLast = tx.votelst;
-      execParams.voteKeyDilution = tx.votekd;
-      break;
-    default: {
-      throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
-    }
-  }
-
-  return execParams;
 }
