@@ -523,6 +523,42 @@ describe("DeployerDeployMode", () => {
     await deployer.fundLsig("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
   });
 
+  it("Should crash if lsig/app name is already present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "MyLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .registerSSC(networkName, "ASC name", {
+        creator: "ASC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
+        txID: "",
+        confirmedRound: 0,
+        appID: -1,
+        timestamp: 1,
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerCfg.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerCfg);
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoLsig("MyLsig"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT,
+      "Lsig name is already used: MyLsig"
+    );
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoApp("ASC name"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT,
+      "App name is already used: ASC name"
+    );
+  });
+
   it("Should return empty ASA map on no CP", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     assert.deepEqual(deployer.asa, new Map());
