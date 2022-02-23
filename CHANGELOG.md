@@ -22,6 +22,7 @@ Added:
 - unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
 Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+- The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
 ### API breaking
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
@@ -47,6 +48,9 @@ Changed:
 
 - `printLocalStateSCC` renamed to `printLocalStateApp`.
 - `printGlobalStateSCC` renamed to `printGlobalStateApp`.
+
+- The ` PyASCCache` has been merged to `ASCCache` and is not used anymore. 
+
 
 ### Features
 
