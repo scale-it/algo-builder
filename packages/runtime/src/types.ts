@@ -23,6 +23,8 @@ export type TEALStack = IStack<bigint | Uint8Array>;
 
 export interface EncTx extends EncodedTransaction {
   txID: string
+  approvalProgram?: string
+  clearProgram?: string
 }
 
 export type TxField = keyof typeof TxnFields[2];

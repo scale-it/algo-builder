@@ -193,10 +193,19 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
     !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
 
+export function isEncTxApplicationCreate (txn: EncTx): boolean {
+  return txn.type === 'appl' && (txn.apan === 0 || txn.apan === undefined);
+}
+
 export function transactionAndSignToExecParams (
   txAndSign: types.TransactionAndSign, ctx: Context, line?: number
 ): types.ExecParams {
-  const encTx = txAndSign.transaction.get_obj_for_encoding() as EncTx;
+  const transaction = txAndSign.transaction as any;
+  const encTx = transaction.get_obj_for_encoding() as EncTx;
+  // inject approval Program and clear program with string format.
+  // TODO: should create function to convert TEAL in Uint8Array to string format?
+  encTx.approvalProgram = transaction.approvalProgram;
+  encTx.clearProgram = transaction.clearProgram;
   const sign = txAndSign.sign;
   return sdkTransactionToExecParams(encTx, sign, ctx, line);
 }
@@ -216,6 +225,19 @@ export function sdkTransactionToExecParams (
   }
 
   switch (encTx.type) {
+    case 'appl': {
+      if (isEncTxApplicationCreate(encTx)) {
+        execParams.type = types.TransactionType.DeployApp;
+        execParams.approvalProgram = encTx.approvalProgram;
+        execParams.clearProgram = encTx.clearProgram;
+        execParams.localInts = encTx.apgs?.nui;
+        execParams.localBytes = encTx.apgs?.nbs;
+        execParams.globalInts = encTx.apgs?.nui;
+        execParams.globalBytes = encTx.apgs?.nbs;
+      }
+      break;
+    }
+
     case 'pay': {
       execParams.type = types.TransactionType.TransferAlgo;
       execParams.fromAccountAddr = _getAddress(encTx.snd);

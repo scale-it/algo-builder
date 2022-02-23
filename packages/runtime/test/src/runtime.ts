@@ -1,15 +1,16 @@
 import { types } from "@algo-builder/web";
 import { AlgoTransferParam } from "@algo-builder/web/build/types";
-import algosdk, { LogicSigAccount, makeAssetCreateTxnWithSuggestedParams } from "algosdk";
+import algosdk, { LogicSigAccount, makeApplicationCreateTxn, makeAssetCreateTxnWithSuggestedParams, OnApplicationComplete } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
+import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
-import { AccountStoreI, TxReceipt } from "../../src/types";
+import { AccountStoreI, EncTx, TxReceipt } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
@@ -18,20 +19,22 @@ const programName = "basic.teal";
 const minBalance = BigInt(1e7);
 
 describe("Execute SDK transaction", function () {
-  useFixture("asa-check");
+  useFixture("stateful");
   const fee = 1000;
 
   let alice: AccountStoreI;
-  let bob: AccountStoreI;
-  let alan: AccountStoreI;
 
   let runtime: Runtime;
 
+  let sign: types.Sign;
+
   this.beforeEach(() => {
     alice = new AccountStore(minBalance * 10n);
-    bob = new AccountStore(minBalance * 10n);
-    alan = new AccountStore(minBalance * 10n);
-    runtime = new Runtime([alice, bob, alan]);
+    runtime = new Runtime([alice]);
+    sign = {
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account
+    };
   });
 
   it("Create ASA txn", () => {
@@ -40,7 +43,7 @@ describe("Execute SDK transaction", function () {
       alice.address, undefined, 10000, 0,
       false,
       alice.address, alice.address, alice.address, alice.address,
-      "GOLD", "goal",
+      "GOLD", "gold",
       undefined,
       undefined,
       params,
@@ -55,11 +58,31 @@ describe("Execute SDK transaction", function () {
       }
     }) as TxReceipt;
 
-    const asaDef = runtime.getAssetInfoFromName('goal');
+    const asaDef = runtime.getAssetInfoFromName('gold');
 
     assert.isDefined(asaDef);
     assert.equal(asaDef?.creator, alice.address);
     assert.equal(asaDef?.assetDef.manager, alice.address);
+  });
+
+  it("Create Application txn", () => {
+    const params = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+    const txn: any = makeApplicationCreateTxn(
+      alice.address, params, OnApplicationComplete.NoOpOC,
+      new Uint8Array(32), new Uint8Array(32),
+      1, 1, 1, 1
+    );
+
+    // inject approval program and clear program with string format.
+    txn.approvalProgram = getProgram('counter-approval.teal');
+    txn.clearProgram = getProgram('clear.teal');
+
+    assert.doesNotThrow(
+      () => runtime.executeTx({
+        transaction: txn,
+        sign: sign
+      })
+    );
   });
 });
 

@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args, this.line);
+      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1612,7 +1612,7 @@ export class Global extends Op {
       }
       case 'CreatorAddress': {
         const appID = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appID, this.line);
+        const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -3921,7 +3921,7 @@ export class ITxnSubmit extends Op {
     }
 
     // initial contract account.
-    const appID = this.interpreter.runtime.ctx.tx.apid;
+    const appID = this.interpreter.runtime.ctx.tx.apid as number;
     const contractAddress = getApplicationAddress(appID);
     const contractAccount = {
       addr: contractAddress,
@@ -4224,7 +4224,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
