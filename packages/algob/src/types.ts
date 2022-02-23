@@ -481,6 +481,8 @@ export interface Deployer {
   loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
+  assertNoLsig: (lsigName: string) => void
+  assertNoApp: (appName: string) => void
 
   getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
