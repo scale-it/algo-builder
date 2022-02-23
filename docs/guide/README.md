@@ -95,7 +95,7 @@ Check the _requirements_ section above first._
 
 1.  Install algob in the project (unless you already installed it globally) and initialize the workspace.
 
-        yarn add @algo-builder/algob
+        yarn add tslib @walletconnect/encoding @algo-builder/algob
         yarn run algob init .
 
     The `init` command expects a directory where to initialize the workspace and creates sample project files there.
