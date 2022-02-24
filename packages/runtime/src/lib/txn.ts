@@ -309,7 +309,7 @@ export function encTxToExecParams (
           defaultFrozen: BigInt(encTx.apar?.df ?? 0n) === 1n,
           unitName: encTx.apar?.un,
           url: encTx.apar?.au,
-          metadataHash: encTx.apar?.am,
+          metadataHash: encTx.apar?.am ? convertToString(encTx.apar?.am) : undefined,
           manager: _getASAConfigAddr(encTx.apar?.m),
           reserve: _getASAConfigAddr(encTx.apar?.r),
           clawback: _getASAConfigAddr(encTx.apar?.c),

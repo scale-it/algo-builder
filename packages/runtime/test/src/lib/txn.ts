@@ -27,23 +27,17 @@ describe("Convert encode Tx to ExecParams", function () {
   // helper - help convert and check param from EncTx to ExecParams
   function assertConvertParams (runtime: Runtime, execParams: types.ExecParams): void {
     const [encTx] = runtime.createTxnContext(execParams);
-    const sign: types.Sign = {
+    const sign = {
       sign: types.SignType.SecretKey,
-      fromAccount: execParams.fromAccount as Account
+      fromAccount: execParams.fromAccount
     };
+    // add approvalProgram and clearProgram to encTx
     if (execParams.type === types.TransactionType.DeployApp) {
       encTx.approvalProgram = execParams.approvalProgram;
       encTx.clearProgram = execParams.clearProgram;
     }
 
-    // convert metadataHash to buffer case Deploy ASA, easy to compare.
-    if (execParams.type === types.TransactionType.DeployASA &&
-        execParams.asaDef?.metadataHash && typeof execParams.asaDef?.metadataHash === 'string'
-    ) {
-      execParams.asaDef.metadataHash = convertToBuffer(execParams.asaDef.metadataHash);
-    }
-
-    assert.deepEqual(encTxToExecParams(encTx, sign, runtime.ctx), execParams);
+    assert.deepEqual(encTxToExecParams(encTx, sign as types.Sign, runtime.ctx), execParams);
   };
 
   describe("pay transaction", function () {
