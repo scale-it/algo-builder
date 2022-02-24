@@ -118,8 +118,10 @@ export class Tealdbg {
         // load pyCache from "artifacts/cache"
         if (fs.existsSync(path.join(CACHE_DIR, file + ".yaml"))) {
           const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml");
-          const pyCache = loadFromYamlFileSilent(pathToPyCache) as PyASCCache;
-          tealFromPyTEAL = pyCache.tealCode;
+          if (pathToPyCache) {
+            const pyCache = loadFromYamlFileSilent(pathToPyCache) as PyASCCache;
+            tealFromPyTEAL = pyCache.tealCode;
+          }
         }
 
         /* Use cached TEAL code if:
@@ -138,7 +140,7 @@ export class Tealdbg {
         pathToFile = getPathFromDirRecursive(ASSETS_DIR, file);
       }
 
-      tealdbgArgs.push(pathToFile);
+      if (pathToFile) { tealdbgArgs.push(pathToFile); }
     }
 
     // push path to --dryrun-dump (msgpack encoded) present in `/cache/dryrun`
