@@ -17,7 +17,7 @@ async function run (runtimeEnv, deployer) {
   console.log(nftAppInfo);
 
   // fund C_p lsig
-  await deployer.fundLsig('stateless.py',
+  await deployer.fundLsigByFile('stateless.py',
     { funder: creator, fundingMicroAlgo: 1e6 }, {}, // 1 algo
     { ARG_P: p, ARG_NFT_APP_ID: nftAppInfo.appID });
 

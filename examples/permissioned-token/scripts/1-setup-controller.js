@@ -29,7 +29,7 @@ async function setupControllerSSC (runtimeEnv, deployer) {
       globalInts: 2, // 1 to store kill_status, 1 for storing permissions_app_id
       globalBytes: 0,
       foreignAssets: [tesla.assetIndex] // pass token_id in foreign assets array
-    }, {}, templateParam); // pass token_id as a template paramenter
+    }, {}, templateParam, 'Controller'); // pass token_id as a template paramenter
   console.log(controllerAppInfo);
 
   // Use executeSignedTxnFromFile function to execute deployment transaction from a signed file:

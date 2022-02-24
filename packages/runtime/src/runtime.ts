@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore, RuntimeAccount } from "./account";
+import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -33,6 +33,7 @@ export class Runtime {
    * Note: Runtime operates on `store`, it doesn't operate on `ctx`.
    */
   private store: State;
+  private _defaultAccounts: AccountStore[];
   ctx: Context;
   loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
@@ -53,6 +54,8 @@ export class Runtime {
       txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
 
+    this._defaultAccounts = this._setupDefaultAccounts();
+
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
 
@@ -64,6 +67,38 @@ export class Runtime {
 
     this.round = 2;
     this.timestamp = 1;
+  }
+
+  get defaultBalance (): number {
+    return 100 * 1e6; // 100 Algos
+  }
+
+  /**
+   * Returns a list of initialized default accounts created using static accountSDK from account.ts
+   *  and funded with default balance (100 ALGO)
+   * @returns list of AccountStore
+   */
+  _setupDefaultAccounts (): AccountStore[] {
+    const balance = this.defaultBalance;
+    const accounts = Object.values(defaultSDKAccounts)
+      .map(accountInfo => new AccountStore(balance, accountInfo));
+    this.initializeAccounts(accounts);
+    return accounts;
+  }
+
+  /**
+   * Resets the state of the default accounts
+   */
+  resetDefaultAccounts (): void {
+    this._defaultAccounts = this._setupDefaultAccounts();
+  }
+
+  /**
+   * Getter for _defaultAccounts, returns a synced version of the accounts list
+   * @returns list of AccountStore
+   */
+  defaultAccounts (): AccountStore[] {
+    return this._defaultAccounts.map((account) => this.getAccount(account.address));
   }
 
   /**

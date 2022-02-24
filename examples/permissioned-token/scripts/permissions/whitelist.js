@@ -16,7 +16,7 @@ const clearStateProgram = 'clear_state_program.py';
  * @param address account address to whitelist
  */
 async function whitelist (deployer, permissionsManager, address) {
-  const permissionAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionAppInfo = deployer.getApp('Permissions');
 
   /*
    * - Only permissions manager can add accounts to whitelist. Which is set to alice(during deploy).
@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner); // alice is set as the permissions_manager during deploy
   const elon = deployer.accountsByName.get('elon-musk');
   const john = deployer.accountsByName.get('john');
-  const permissionAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionAppInfo = deployer.getApp('Permissions');
 
   /** Fund all accounts with ALGO **/
   await fundAccount(deployer, [owner, elon, john]);

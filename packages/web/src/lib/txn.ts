@@ -53,6 +53,7 @@ export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
  * @param suggestedParams blockchain transaction suggested parameters (firstRound, lastRound, fee..)
  * @returns SDK Transaction object
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
   const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
   const transactionType = execParams.type;
@@ -226,13 +227,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.DeployApp: {
       const onComplete = algosdk.OnApplicationComplete.NoOpOC;
-
       const tx = algosdk.makeApplicationCreateTxn(
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg ?? new Uint8Array(8).fill(0),
+        execParams.clearProg ?? new Uint8Array(8).fill(0),
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -253,8 +253,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg as Uint8Array,
-        execParams.clearProg as Uint8Array,
+        execParams.approvalProg ?? new Uint8Array(8).fill(0),
+        execParams.clearProg ?? new Uint8Array(8).fill(0),
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,

@@ -12,14 +12,14 @@ const { tokenMap, optInTx, fundAccount } = require('./common/common');
  * @param n nth bond token
  */
 exports.createBuyback = async function (deployer, managerAcc, n) {
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const bondToken = tokenMap.get('bond-token-' + String(n));
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr,
     TMPL_BOND: bondToken
   };
-  const buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  const buybackLsig = await deployer.loadLogicByFile('buyback-lsig.py', scInitParam);
   await fundAccount(deployer, buybackLsig.address());
 
   const buybackTx = {

@@ -147,13 +147,23 @@ For opting in to App, `deployer` supports the following methods:
 
   Contract accounts can be also be used to deploy ASAs.
 
-   Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Smart Signatures (lsig). In the file `scripts/deploy.ts`, you will find:
+  Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Smart Signatures (lsig). In the file `scripts/deploy.ts`, you will find two methods to fund an lsig (by file, or by name):
 
-  ```
-  await deployer.fundLsig('htlc.py',
-    { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
-  ```
-  `fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsig` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
+  + By Name (default behaviour):
+    ```js
+    await deployer.mkContractLsig('HTLC_Lsig', 'htlc.py', scTmplParams);
+    // no need to pass smTmplParams again and again
+    await deployer.fundLsig('HTLC_Lsig', { funder: bob, fundingMicroAlgo: 2e6 }, {});
+    ```
+
+  + By File (legacy behaviour):
+    ```js
+    await deployer.fundLsigByFile('htlc.py',
+      { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
+    ```
+
+  `fundLsigByFile`/`fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsigByFile` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
+
 
 - *Delegated Signature Mode*:
 
@@ -161,7 +171,7 @@ For opting in to App, `deployer` supports the following methods:
 
   Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner);
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('goldASC', '4-gold-asa.teal', goldOwner);
   console.log(ascInfoGoldDelegated);
   ```
 
@@ -190,7 +200,7 @@ const daoAppInfo = await deployer.deployApp(
   }, {}, {}, "DAO App"); // app name passed here
 
   // now during querying, you only need this app name
-  const appInfo = deployer.getAppByName("DAO App");
+  const appInfo = deployer.getApp("DAO App");
 ```
 
 #### Smart Signature Name
@@ -199,25 +209,32 @@ Similar to storing app names, you can store lsig info against name in a checkpoi
 ```js
 const bob = deployer.accountsByName.get('bob');
 // store delegatedLsig
-await deployer.mkDelegatedLsig('file.py', bob, { ARG_DAO_APP: 1 }, "DLsig");
+await deployer.mkDelegatedLsig('DLsig', 'file.py', bob, { ARG_DAO_APP: 1 });
 
 // now during querying, you only need this lsig name
-const lsigInfo = deployer.getLsigByName("DLsig");
+const lsigInfo = deployer.getLsig("DLsig");
 ```
 
 Similarly for contract lsig:
 ```js
 // store contract lsig
-await deployer.mkContractLsig('file.py', { ARG_DAO_APP: 1 }, "CLsig");
+await deployer.mkContractLsig("CLsig", 'file.py', { ARG_DAO_APP: 1 });
 
 // now during querying, you only need this lsig name
-const lsigInfo = deployer.getLsigByName("CLsig");
+const lsigInfo = deployer.getLsig("CLsig");
 ```
 
-**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsigByName(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogic`.
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsig(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogicByFile`.
 
+#### Managing Artifacts
 
-#### Compile contracts
+Artifacts folder (`/artifacts`) comprises of two folders:
++ `scripts/`: these contain the checkpoints and transaction logs while executing your "direct" (deployment) scripts. Checkpoints can be stored against a name (for an `app` or `lsig`), or against filenames (eg. `dao-app.py`, `treasury-lsig.py`).
++ `cache/`: these contain `.yml` files which stores "cached" teal code. During any kind of transaction processing (`fundLsigByFile`, `loadLogicByFile`, `deployApp` ..etc) if there is an intermediary compilation of teal code, it is stored in `artifacts/cache`. So that next time, this compiled code can be directly used.
+
+In the next section we'll see how to compile your contracts in real time (or load from cache) using filenames and app/lsig names.
+
+##### Compile contracts
 
 You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
   * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:

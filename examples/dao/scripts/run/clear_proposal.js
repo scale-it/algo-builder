@@ -1,10 +1,10 @@
 const { tryExecuteTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { getProposalLsig, accounts } = require('./common/accounts.js');
+const { accounts } = require('./common/accounts.js');
 const { mkClearProposalTx } = require('./common/tx-params.js');
 
 async function clearProposal (deployer, proposalLsig, depositAmt) {
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  const daoAppInfo = deployer.getApp('DAOApp'); ;
   const govToken = deployer.asa.get('gov-token');
 
   console.log(`* Clearing proposal_lsig record ${proposalLsig.address()} *`);
@@ -20,7 +20,7 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
 async function run (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);
   const govToken = deployer.asa.get('gov-token');
-  const proposalLsig = await getProposalLsig(deployer);
+  const proposalLsig = deployer.getLsig('proposalLsig');
 
   // optIn to ASA(GOV_TOKEN) by proposalLsig
   // we will receive the deposit back into proposalLsig

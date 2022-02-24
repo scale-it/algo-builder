@@ -17,10 +17,6 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return mockAlgod;
   };
 
-  getDelegatedLsig (lsig: string): Object | undefined {
-    throw new Error("Not implemented");
-  }
-
   getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return new Promise((resolve, reject) => {
       assetIndex === 1n ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
@@ -114,7 +110,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       compiled: "ASDF", // the compiled code
       compiledHash: "ASDF", // hash returned by the compiler
       srcHash: 123, // source code hash
-      base64ToBytes: new Uint8Array(1) // compiled base64 in bytes
+      base64ToBytes: new Uint8Array(1), // compiled base64 in bytes
+      tealCode: "TEAL" // teal code
     };
   }
 

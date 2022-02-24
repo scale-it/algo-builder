@@ -29,7 +29,7 @@ describe("Convert encode Tx to ExecParams", function () {
     const [encTx] = runtime.createTxnContext(execParams);
     const sign: types.Sign = {
       sign: types.SignType.SecretKey,
-      fromAccount: execParams.fromAccount
+      fromAccount: execParams.fromAccount as Account
     };
     if (execParams.type === types.TransactionType.DeployApp) {
       encTx.approvalProgram = execParams.approvalProgram;

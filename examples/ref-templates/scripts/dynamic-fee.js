@@ -15,15 +15,15 @@ async function run (runtimeEnv, deployer) {
   };
   const contractName = 'dynamic-fee.py';
   // setup a contract account and send 1 ALGO from master
-  await deployer.fundLsig(contractName,
+  await deployer.fundLsigByFile(contractName,
     { funder: masterAccount, fundingMicroAlgo: 100000000 },
     { closeRemainderTo: masterAccount.addr }, scInitParam);
 
-  const contract = await deployer.loadLogic(contractName, scInitParam);
+  const contract = await deployer.loadLogicByFile(contractName, scInitParam);
   const escrow = contract.address(); // contract account
 
-  await deployer.mkDelegatedLsig(contractName, masterAccount, scInitParam); // sign contract
-  const signedContract = await deployer.getDelegatedLsig(contractName);
+  await deployer.mkDelegatedLsig('dynamicFeeLsig', contractName, masterAccount, scInitParam); // sign contract
+  const signedContract = await deployer.getLsig('dynamicFeeLsig');
   console.log('SIGn1 ', signedContract);
 
   let transactions = [

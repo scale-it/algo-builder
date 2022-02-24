@@ -13,12 +13,13 @@ import { executeTx, prepareParameters } from "./common";
 
 async function run (
   runtimeEnv: algob.types.RuntimeEnv, deployer: algob.types.Deployer): Promise<void> {
-  const { alice, scTmplParams, secret } = prepareParameters(deployer);
+  const { alice, _, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
-  const lsig = await deployer.loadLogic('htlc.py', scTmplParams);
-  const sender = lsig.address();
+  const lsig = deployer.getLsig('HTLC_Lsig');
+  if (lsig === undefined) { return; }
 
+  const sender = lsig.address();
   const txnParams: rtypes.AlgoTransferParam = {
     type: rtypes.TransactionType.TransferAlgo,
     sign: rtypes.SignType.LogicSignature,

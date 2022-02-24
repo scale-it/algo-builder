@@ -413,7 +413,7 @@ describe("DeployerDeployMode", () => {
     };
 
     deployerCfg.cpData.merge(cp1, "12s");
-    const result = deployer.getDelegatedLsig("MY_LSIG");
+    const result = deployer.getLsig("MY_LSIG");
     assert.deepEqual(logicSig, result);
   });
 
@@ -493,20 +493,20 @@ describe("DeployerDeployMode", () => {
 
   it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    await deployer.fundLsigByFile("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
   });
 
-  it("Should crash on fundLsigByName if lsig is not present in checkpoint", async () => {
+  it("Should crash on fundLsig if lsig is not present in checkpoint", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     await expectBuilderErrorAsync(
-      async () => await deployer.fundLsigByName("AwesomeLsig",
+      async () => await deployer.fundLsig("AwesomeLsig",
         { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
       ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP,
       "Logic signature(name = AwesomeLsig) not found in checkpoint"
     );
   });
 
-  it("Should not crash on fundLsigByName if lsig is present in checkpoint", async () => {
+  it("Should not crash on fundLsig if lsig is present in checkpoint", async () => {
     const networkName = "network1";
     const env = mkEnv(networkName);
     const cpData = new CheckpointRepoImpl()
@@ -520,7 +520,43 @@ describe("DeployerDeployMode", () => {
     deployerCfg.cpData = cpData;
     const deployer = new DeployerDeployMode(deployerCfg);
     // passes
-    await deployer.fundLsigByName("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    await deployer.fundLsig("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+  });
+
+  it("Should crash if lsig/app name is already present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "MyLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .registerSSC(networkName, "ASC name", {
+        creator: "ASC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
+        txID: "",
+        confirmedRound: 0,
+        appID: -1,
+        timestamp: 1,
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerConfig = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerConfig.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerConfig);
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoLsig("MyLsig"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT,
+      "Lsig name is already used: MyLsig"
+    );
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoApp("ASC name"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT,
+      "App name is already used: ASC name"
+    );
   });
 
   it("Should return empty ASA map on no CP", async () => {

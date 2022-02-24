@@ -113,7 +113,7 @@ describe("Transfer Algo Transaction", function () {
     const initialAliceBalance = alice.balance();
     const initialBobBalance = bob.balance();
 
-    const ALGOTransferTxParam: types.AlgoTransferParam = {
+    const algoTransferTxParam: types.AlgoTransferParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
@@ -124,7 +124,7 @@ describe("Transfer Algo Transaction", function () {
       }
     };
 
-    runtime.executeTx(ALGOTransferTxParam);
+    runtime.executeTx(algoTransferTxParam);
     syncAccounts();
 
     assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
@@ -135,7 +135,7 @@ describe("Transfer Algo Transaction", function () {
     const initialAliceBalance = alice.balance();
     const initialBobBalance = bob.balance();
 
-    const ALGOTransferTxParam: types.AlgoTransferParam = {
+    const algoTransferTxParam: types.AlgoTransferParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
@@ -147,7 +147,7 @@ describe("Transfer Algo Transaction", function () {
       }
     };
 
-    runtime.executeTx(ALGOTransferTxParam);
+    runtime.executeTx(algoTransferTxParam);
 
     syncAccounts();
     assert.equal(alice.balance(), 0n);
@@ -158,7 +158,7 @@ describe("Transfer Algo Transaction", function () {
     const initialAliceBalance = alice.balance();
     const initialBobBalance = bob.balance();
 
-    const ALGOTransferTxParam: types.AlgoTransferParam = {
+    const algoTransferTxParam: types.AlgoTransferParam = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
@@ -171,7 +171,7 @@ describe("Transfer Algo Transaction", function () {
       }
     };
 
-    runtime.executeTx(ALGOTransferTxParam);
+    runtime.executeTx(algoTransferTxParam);
 
     syncAccounts();
     assert.equal(alice.balance(), 0n);
@@ -1027,5 +1027,93 @@ describe("Stateful Smart Contracts", function () {
       () => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
+  });
+});
+
+describe("Deafult Accounts", function () {
+  let alice: AccountStore;
+  let bob: AccountStore;
+  let charlie = new AccountStore(minBalance);
+  let runtime: Runtime;
+  const amount = 1e6;
+  const fee = 1000;
+
+  function syncAccounts (): void {
+    [alice, bob] = runtime.defaultAccounts();
+    charlie = runtime.getAccount(charlie.address);
+  }
+  this.beforeEach(() => {
+    runtime = new Runtime([charlie]);
+    [alice, bob] = runtime.defaultAccounts();
+  });
+
+  it("Should be properly initialized", () => {
+    assert.exists(alice.address);
+    assert.equal(alice.balance(), BigInt(runtime.defaultBalance), "Alice balance must be correct");
+  });
+
+  it("Should update the state of the default accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  });
+
+  it("Should reset the state of the default accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance());
+    assert.equal(initialBobBalance, bob.balance());
+  });
+
+  it("Should not reset the state of the other accounts stored in runtime", () => {
+    const initialCharlieBalance = charlie.balance();
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: charlie.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+    runtime.executeTx(algoTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
   });
 });

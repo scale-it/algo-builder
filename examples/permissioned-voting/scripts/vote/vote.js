@@ -35,7 +35,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
+  const appInfo = deployer.getApp('PermissionedVotingApp');
   const voteAssetID = deployer.asa.get('vote-token').assetIndex;
 
   // Atomic Transaction (Stateful Smart Contract call + Asset Transfer)
