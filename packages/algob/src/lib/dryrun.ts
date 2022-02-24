@@ -123,7 +123,7 @@ export class Tealdbg {
         }
 
         /* Use cached TEAL code if:
-         *  + we already have compiled pyteal code in artifacts/cache
+         *  + We already have compiled pyteal code in artifacts/cache
          *  + template paramteres (scInitParam) are not passed by user
          * NOTE: if template parameters are passed, recompilation is forced to compile
          * pyTEAL with the passed params (as the generated TEAL code could differ from cache)
