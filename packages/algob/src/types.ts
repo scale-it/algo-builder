@@ -481,6 +481,8 @@ export interface Deployer {
   loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
+  assertNoLsig: (lsigName: string) => void
+  assertNoApp: (appName: string) => void
 
   getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
@@ -723,15 +725,12 @@ export interface ASCCache {
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
   base64ToBytes: Uint8Array // compiled base64 in bytes
+  tealCode: string
 }
 
 export interface AppCache {
   approval: ASCCache | undefined
   clear: ASCCache | undefined
-}
-
-export interface PyASCCache extends ASCCache {
-  tealCode: string
 }
 
 // ************************

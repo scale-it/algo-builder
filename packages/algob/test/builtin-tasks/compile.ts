@@ -10,7 +10,7 @@ import YAML from 'yaml';
 import { compile } from "../../src/builtin-tasks/compile";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { CompileOp } from "../../src/lib/compile";
-import type { ASCCache, PyASCCache } from "../../src/types";
+import type { ASCCache } from "../../src/types";
 import { useFixtureProjectCopy } from "../helpers/project";
 
 interface CompileIn {
@@ -23,7 +23,7 @@ class CompileOpMock extends CompileOp {
   compiledFiles = [] as CompileIn[];
   writtenFiles = [] as string[];
 
-  async compile (filename: string, _tealCode: string, tealHash: number): Promise<ASCCache | PyASCCache> {
+  async compile (filename: string, _tealCode: string, tealHash: number): Promise<ASCCache> {
     this.compiledFiles.push({ filename, tealHash });
     this.timestamp++;
     return {
@@ -124,7 +124,7 @@ describe("Compile task", () => {
     assert.deepEqual(content.toString(), res);
   });
 
-  it("should return correct PyASCCache from CompileOp", async () => {
+  it("should return correct ASCCache from CompileOp", async () => {
     const result = await op.ensureCompiled(f3PY, true);
     const expected = fs.readFileSync(path.join(ASSETS_DIR, 'gold-asa-py-check.yaml'), 'utf8');
     assert.deepEqual(YAML.stringify(result), expected);
@@ -211,7 +211,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
       TMPL_AMOUNT: 1000n
     };
 
-    const result = await op.ensureCompiled(stateless, false, scTmplParam) as PyASCCache;
+    const result = await op.ensureCompiled(stateless, false, scTmplParam);
 
     const expected = fs.readFileSync('expected-stateless.teal', 'utf-8');
     assert.equal(result.tealCode, expected);
@@ -223,7 +223,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
       TMPL_AMOUNT: 100n
     };
 
-    const result = await op.ensureCompiled(stateful, false, scTmplParam) as PyASCCache;
+    const result = await op.ensureCompiled(stateful, false, scTmplParam);
 
     const expected = fs.readFileSync('expected-stateful.teal', 'utf-8');
     assert.equal(result.tealCode, expected);

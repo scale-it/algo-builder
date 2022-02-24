@@ -641,6 +641,24 @@ Please check your config file.
     description: `Tried to use \`algob test\` with nonexistent tests directory: %directory%.
 
 Please check your directory`
+  },
+  DEPLOYER_LSIG_ALREADY_PRESENT: {
+    number: 615,
+    message: "Lsig name is already used: %lsigName%",
+    title: "Lsig name is already used",
+    description: `Lsig name is already used: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.isDefined(name)' to check if the name is already used.
+`
+  },
+  DEPLOYER_APP_ALREADY_PRESENT: {
+    number: 616,
+    message: "App name is already used: %appName%",
+    title: "App name is already used",
+    description: `App name is already used: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.isDefined(name)' to check if the name is already used.
+`
   }
 };
 

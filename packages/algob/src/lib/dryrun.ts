@@ -9,7 +9,7 @@ import * as path from 'path';
 import { writeToFile } from "../builtin-tasks/gen-accounts";
 import { ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { DebuggerContext, Deployer, PyASCCache } from "../types";
+import type { ASCCache, DebuggerContext, Deployer } from "../types";
 import { makeAndSignTx } from "./tx";
 
 export const tealExt = ".teal";
@@ -119,7 +119,7 @@ export class Tealdbg {
         if (fs.existsSync(path.join(CACHE_DIR, file + ".yaml"))) {
           const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml");
           if (pathToPyCache) {
-            const pyCache = loadFromYamlFileSilent(pathToPyCache) as PyASCCache;
+            const pyCache = loadFromYamlFileSilent(pathToPyCache) as ASCCache;
             tealFromPyTEAL = pyCache.tealCode;
           }
         }
