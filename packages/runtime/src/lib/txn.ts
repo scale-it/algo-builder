@@ -1,12 +1,13 @@
 import { parsing, types } from "@algo-builder/web";
 import { AccountAddress } from "@algo-builder/web/build/types";
-import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
+import algosdk, { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
 import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
+import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -207,11 +208,11 @@ export function transactionAndSignToExecParams (
   encTx.approvalProgram = transaction.approvalProgram;
   encTx.clearProgram = transaction.clearProgram;
   const sign = txAndSign.sign;
-  return sdkTransactionToExecParams(encTx, sign, ctx, line);
+  return encTxToExecParams(encTx, sign, ctx, line);
 }
 
 /* eslint-disable sonarjs/cognitive-complexity */
-export function sdkTransactionToExecParams (
+export function encTxToExecParams (
   encTx: EncTx, sign: types.Sign, ctx: Context, line?: number
 ): types.ExecParams {
   const execParams: any = {
@@ -220,9 +221,6 @@ export function sdkTransactionToExecParams (
   };
 
   execParams.payFlags.totalFee = encTx.fee;
-  if (encTx.close) {
-    execParams.payFlags.closeRemainderTo = encodeAddress(encTx.close);
-  }
 
   switch (encTx.type) {
     case 'appl': {
@@ -244,8 +242,12 @@ export function sdkTransactionToExecParams (
       execParams.toAccountAddr =
         _getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = encTx.amt ?? 0n;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.close, ctx, line);
-      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      if (encTx.close) {
+        execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.close, ctx, line);
+      }
+      if (encTx.rekey) {
+        execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      }
       break;
     }
     case 'afrz': {
@@ -253,7 +255,9 @@ export function sdkTransactionToExecParams (
       execParams.assetID = encTx.faid;
       execParams.freezeTarget = _getRuntimeAccountAddr(encTx.fadd, ctx, line);
       execParams.freezeState = BigInt(encTx.afrz ?? 0n) === 1n;
-      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      if (encTx.rekey) {
+        execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      }
       break;
     }
     case 'axfer': {
@@ -267,11 +271,16 @@ export function sdkTransactionToExecParams (
         execParams.toAccountAddr =
           _getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
       }
-      // set common fields (asset amount, index, closeRemTo)
+      // set common fields (asset amount, index, closeRemainderTo)
       execParams.amount = encTx.aamt ?? 0n;
       execParams.assetID = encTx.xaid ?? 0;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.aclose, ctx, line);
-      execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      // option fields
+      if (encTx.aclose) {
+        execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.aclose, ctx, line);
+      }
+      if (encTx.rekey) {
+        execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
+      }
       break;
     }
 
@@ -312,8 +321,8 @@ export function sdkTransactionToExecParams (
 
     case 'keyreg': {
       execParams.type = types.TransactionType.KeyRegistration;
-      execParams.voteKey = encTx.votekey;
-      execParams.selectionKey = encTx.selkey;
+      execParams.voteKey = encTx.votekey?.toString('base64');
+      execParams.selectionKey = encTx.selkey?.toString('base64');
       execParams.voteFirst = encTx.votefst;
       execParams.voteLast = encTx.votelst;
       execParams.voteKeyDilution = encTx.votekd;

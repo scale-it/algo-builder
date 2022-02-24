@@ -776,7 +776,14 @@ export class Runtime {
 
     let tx, gtxs;
 
-    if (!types.isSDKTransactionAndSign(txnParamerters[0])) {
+    if (types.isSDKTransactionAndSign(txnParamerters[0])) {
+      const sdkTxns: EncTx[] = txnParamerters.map((txnParamerter): EncTx => {
+        const txn = txnParamerter as types.TransactionAndSign;
+        return txn.transaction.get_obj_for_encoding() as EncTx;
+      });
+      tx = sdkTxns[0];
+      gtxs = sdkTxns;
+    } else {
       for (const txnParamerter of txnParamerters) {
         const txn = txnParamerter as types.ExecParams;
         switch (txn.type) {
@@ -793,13 +800,6 @@ export class Runtime {
       }
       // get current txn and txn group (as encoded obj)
       [tx, gtxs] = this.createTxnContext(txnParamerters as types.ExecParams[]);
-    } else {
-      const sdkTxns: EncTx[] = txnParamerters.map((txnParamerter): EncTx => {
-        const txn = txnParamerter as types.TransactionAndSign;
-        return txn.transaction.get_obj_for_encoding() as EncTx;
-      });
-      tx = sdkTxns[0];
-      gtxs = sdkTxns;
     }
 
     // validate first and last rounds
@@ -814,7 +814,8 @@ export class Runtime {
     // then execute the transaction without interacting with store.
     const runtimeTxnParams: types.ExecParams[] =
       txnParamerters.map(
-        (txn) => types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn);
+        (txn) => types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
+      );
 
     const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
 
