@@ -152,9 +152,9 @@ async function mkTx (
     }
     case wtypes.TransactionType.DeployApp: {
       const name = txn.appName ?? String(txn.approvalProgram) + "-" + String(txn.clearProgram);
-      deployer.assertNoAsset(name);
-      const approval = await deployer.ensureCompiled(txn.approvalProgram);
-      const clear = await deployer.ensureCompiled(txn.clearProgram);
+      deployer.assertNoApp(name);
+      const approval = await deployer.compileASC(txn.approvalProgram);
+      const clear = await deployer.compileASC(txn.clearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
@@ -162,8 +162,8 @@ async function mkTx (
     }
     case wtypes.TransactionType.UpdateApp: {
       const cpKey = txn.appName ?? String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
-      const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
-      const clear = await deployer.ensureCompiled(txn.newClearProgram);
+      const approval = await deployer.compileASC(txn.newApprovalProgram);
+      const clear = await deployer.compileASC(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
       txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);

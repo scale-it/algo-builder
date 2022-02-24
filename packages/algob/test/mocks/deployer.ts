@@ -42,6 +42,14 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  assertNoLsig (name: string): void {
+    throw new Error("Not implemented");
+  }
+
+  assertNoApp (name: string): void {
+    throw new Error("Not implemented");
+  }
+
   getASAInfo (name: string): rtypes.ASAInfo {
     throw new Error("Not implemented");
   }

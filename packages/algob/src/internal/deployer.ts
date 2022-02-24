@@ -534,6 +534,32 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
+   * Asserts if lsig is not already present in checkpoint
+   * @param lsigName lsig name
+   */
+  assertNoLsig (lsigName: string): void {
+    if (this.isDefined(lsigName)) {
+      this.persistCP();
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT, {
+        lsigName: lsigName
+      });
+    }
+  }
+
+  /**
+   * Asserts if app is not already present in checkpoint
+   * @param appName app name
+   */
+  assertNoApp (appName: string): void {
+    if (this.isDefined(appName)) {
+      this.persistCP();
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT, {
+        appName: appName
+      });
+    }
+  }
+
+  /**
    * Persist checkpoint till current call.
    */
   persistCP (): void {
@@ -692,7 +718,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     lsigName?: string
   ): Promise<LsigInfo> {
     const cpLsigName = lsigName ?? fileName;
-    this.assertNoAsset(cpLsigName);
+    this.assertNoLsig(cpLsigName);
     let lsigInfo = {} as any;
     try {
       const lsig = await getLsig(fileName, this.algoOp.algodClient, scTmplParams);
@@ -777,7 +803,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   ): Promise<rtypes.AppInfo> {
     const name = appName ?? approvalProgram + "-" + clearProgram;
 
-    this.assertNoAsset(name);
+    this.assertNoApp(name);
     let sscInfo = {} as rtypes.AppInfo;
     try {
       sscInfo = await this.algoOp.deployApp(
@@ -875,6 +901,22 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     if (this.isDefined(name)) {
       throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
         assetName: name
+      });
+    }
+  }
+
+  assertNoLsig (lsigName: string): void {
+    if (this.isDefined(lsigName)) {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT, {
+        lsigName: lsigName
+      });
+    }
+  }
+
+  assertNoApp (appName: string): void {
+    if (this.isDefined(appName)) {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT, {
+        appName: appName
       });
     }
   }
