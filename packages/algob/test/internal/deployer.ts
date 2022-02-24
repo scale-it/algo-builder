@@ -544,9 +544,9 @@ describe("DeployerDeployMode", () => {
         clearFile: "clear-file.py"
       })
       .putMetadata(networkName, "k", "v");
-    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
-    deployerCfg.cpData = cpData;
-    const deployer = new DeployerDeployMode(deployerCfg);
+    const deployerConfig = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerConfig.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerConfig);
     await expectBuilderErrorAsync(
       async () => deployer.assertNoLsig("MyLsig"),
       ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT,
