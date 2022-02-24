@@ -1,6 +1,6 @@
 import { parsing, types } from "@algo-builder/web";
 import { AccountAddress } from "@algo-builder/web/build/types";
-import algosdk, { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
+import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -330,7 +330,13 @@ export function encTxToExecParams (
     }
 
     default: {
-      throw new Error(`unsupported type for itxn_submit at line ${line}`);
+      // if line is defined => called from ItxnSubmit
+      // => throw error with itxn_submit
+      if (line) {
+        throw new Error(`unsupported type for itxn_submit at line ${line}`);
+      } else {
+        throw new Error("Can't convert encode tx to execParams");
+      }
     }
   };
   return execParams as types.ExecParams;
