@@ -12,10 +12,10 @@ import { Runtime } from "../../src/runtime";
 import { AccountStoreI, TxReceipt } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
-const minBalance = BigInt(1e7);
+const minBalance = BigInt(10 * 1e6);
 
 // TODO: add more test for all transaction types.
-describe("Execute SDK transaction", function () {
+describe("Execute SDK transaction object using runtime", function () {
   const fee = 1000;
 
   let alice: AccountStoreI;
@@ -121,7 +121,7 @@ describe("Execute SDK transaction", function () {
       runtime.executeTx(txAndSign);
     });
 
-    it("Check application after deploy", () => {
+    it("Check application exists after deployment", () => {
       const appInfo = runtime.getAppInfoFromName('counter-approval.teal', 'clear.teal');
       assert.isDefined(appInfo);
     });
