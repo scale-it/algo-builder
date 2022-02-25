@@ -3,6 +3,7 @@
   "version": "3.2.0",
   "author": "Robert Zaremba (https://zaremba.ch)",
   "license": "Apache-2.0",
+  "homepage": "https://algobuilder.dev",
   "repository": "https://github.com/scale-it/algo-builder.git",
   "description": "A framework for building and testing Algorand smart contracts and dapps.",
   "keywords": [
@@ -61,7 +62,7 @@
     "@types/tmp": "^0.2.0",
     "chai": "^4.3.4",
     "cross-env": "^7.0.3",
-    "eslint": "^8.7.0",
+    "eslint": "^8.9.0",
     "glob": "^7.2.0",
     "human-signals": "^3.0.1",
     "lodash": "^4.17.21",

@@ -15,6 +15,7 @@ import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
+  AppCache,
   ASCCache,
   CheckpointFunctions,
   CheckpointRepo,
@@ -142,29 +143,33 @@ class DeployerBasicMode {
 
   /**
    * Loads stateful smart contract info from checkpoint
-   * @param nameApproval Approval program name
-   * @param nameClear clear program name
+   * @param approvalFileName Approval program file name
+   * @param clearFileName clear program file name
    */
-  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
+  getAppByFile (approvalFileName: string, clearFileName: string): rtypes.AppInfo {
+    return this.assertAppExistsInCP(approvalFileName + "-" + clearFileName);
   }
 
   /**
    * Loads stateful smart contract info from checkpoint
-   * @param appName name of the app (passed by user during deployment)
+   * @param appName name of the app (defined by user during deployment)
    */
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getAppfromCPKey(appName);
+  getApp (appName: string): rtypes.AppInfo {
+    return this.assertAppExistsInCP(appName);
   }
 
   /**
-   * Loads a single signed delegated logic signature account from checkpoint
+   * Loads logic signature object (contract or delegated) from checkpoint (by lsig name).
+   * Panics if the lsig doesn't exists.
+   * @param lsigName filename or lsigName (defined by user during mkContractLsig/mkDelegatedLsig)
    */
-  getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
+  getLsig (lsigName: string): LogicSigAccount {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) {
-      return undefined;
+      throw new BuilderError(ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP, {
+        lsigName: lsigName
+      });
     }
 
     const lsigAccount = Object.assign(getDummyLsig(), result);
@@ -177,20 +182,12 @@ class DeployerBasicMode {
   }
 
   /**
-   * Loads a logic signature account from checkpoint
-   * @param lsigName logic signature name
-   */
-  getContractLsig (lsigName: string): LogicSigAccount | undefined {
-    return this.getDelegatedLsig(lsigName);
-  }
-
-  /**
    * Loads logic signature for contract mode
    * @param name ASC name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
+  async loadLogicByFile (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
@@ -199,6 +196,9 @@ class DeployerBasicMode {
    * passing template parameters always during loading logic signature.
    * @param name ASC name
    * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
+   * @deprecated this function will be removed in the next release. Use mkContractLsig to
+   * store lsig info in checkpoint (against lsigName), and query it in scripts using
+   * getLsig
    */
   async loadLogicFromCache (name: string): Promise<LogicSigAccount> {
     return await getLsigFromCache(name);
@@ -206,7 +206,7 @@ class DeployerBasicMode {
 
   /**
    * Alias to `this.compileASC` with last two parameters being swapped.
-   * Deprecated: this function will be removed in the next release.
+   * @deprecated this function will be removed in the next release.
    */
   ensureCompiled (
     name: string,
@@ -228,13 +228,31 @@ class DeployerBasicMode {
   }
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
+   * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+   * @param name App/Lsig name used during deployment
    */
-  getDeployedASC (name: string): Promise<ASCCache | undefined> {
+  async getDeployedASC (name: string): Promise<ASCCache | AppCache | undefined> {
     const op = new CompileOp(this.algoOp.algodClient);
-    return op.readArtifact(name);
+
+    // app
+    const app = this.getApp(name);
+    if (app !== undefined) {
+      const approvalCache = await op.readArtifact(app.approvalFile);
+      const clearCache = await op.readArtifact(app.clearFile);
+      return {
+        approval: approvalCache,
+        clear: clearCache
+      };
+    }
+
+    // lsig
+    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map();
+    const lsigInfo = resultMap.get(name);
+    if (lsigInfo?.file) {
+      return await op.readArtifact(lsigInfo.file);
+    }
+
+    return undefined;
   }
 
   /**
@@ -399,7 +417,7 @@ class DeployerBasicMode {
 
   /**
    * Asserts App is defined in a checkpoint by app id.
-   * First: search for SSCInfo in checkpoints
+   * First: search for AppInfo in checkpoints
    * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
    * If deleted boolean is true throw error
    * else, pass
@@ -465,6 +483,20 @@ class DeployerBasicMode {
       this._assertCpNotDeleted(execParams);
     }
   }
+
+  /**
+   * Throws error if application info is not present in CP
+   * @param key key against which app information is stored in checkpoint
+   */
+  assertAppExistsInCP (key: string): rtypes.AppInfo {
+    const app = this.checkpoint.getAppfromCPKey(key);
+    if (app === undefined) {
+      throw new BuilderError(ERRORS.GENERAL.APP_NOT_FOUND_IN_CP, {
+        appName: app
+      });
+    }
+    return app;
+  }
 }
 
 /**
@@ -502,6 +534,32 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
+   * Asserts if lsig is not already present in checkpoint
+   * @param lsigName lsig name
+   */
+  assertNoLsig (lsigName: string): void {
+    if (this.isDefined(lsigName)) {
+      this.persistCP();
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT, {
+        lsigName: lsigName
+      });
+    }
+  }
+
+  /**
+   * Asserts if app is not already present in checkpoint
+   * @param appName app name
+   */
+  assertNoApp (appName: string): void {
+    if (this.isDefined(appName)) {
+      this.persistCP();
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT, {
+        appName: appName
+      });
+    }
+  }
+
+  /**
    * Persist checkpoint till current call.
    */
   persistCP (): void {
@@ -518,7 +576,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Register SSC Info in checkpoints
    */
-  registerSSCInfo (sscName: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (sscName: string, sscInfo: rtypes.AppInfo): void {
     this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
@@ -603,19 +661,40 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
   /**
    * This function will send Algos to ASC account in "Contract Mode"
-   * @param name     - ASC filename
+   * @param fileName     - ASC filename
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async fundLsig (
-    name: string,
+  async fundLsigByFile (
+    fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
+      await this.algoOp.fundLsig(fileName, flags, payFlags, this.txWriter, scTmplParams);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  /**
+   * This function will send Algos to ASC account in "Contract Mode". Takes lsig name
+   * as input
+   * @param lsigName - name of the smart signature (defined by user during mkContractLsig/mkDelegatedLsig)
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   */
+  async fundLsig (
+    lsigName: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams
+  ): Promise<void> {
+    try {
+      const lsig = this.getLsig(lsigName);
+      await this.algoOp.fundLsig(lsig, flags, payFlags, this.txWriter);
     } catch (error) {
       console.log(error);
       throw error;
@@ -625,33 +704,38 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
-   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param name: Logic Signature filename (must be present in assets folder)
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    * @param signer: Signer Account which will sign the smart
    * contract(optional in case of contract account)
+   * @param lsigName name of lsig (if passed, checkpoint info will be stored against this name)
    */
   async _mkLsig (
-    name: string,
+    fileName: string,
     scTmplParams?: SCParams,
-    signer?: rtypes.Account
+    signer?: rtypes.Account,
+    lsigName?: string
   ): Promise<LsigInfo> {
-    this.assertNoAsset(name);
+    const cpLsigName = lsigName ?? fileName;
+    this.assertNoLsig(cpLsigName);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
+      const lsig = await getLsig(fileName, this.algoOp.algodClient, scTmplParams);
       if (signer) {
         lsig.sign(signer.sk);
         lsigInfo = {
           creator: signer.addr,
           contractAddress: lsig.address(),
-          lsig: lsig
+          lsig: lsig,
+          file: fileName
         };
       } else {
         lsigInfo = {
           creator: lsig.address(),
           contractAddress: lsig.address(),
-          lsig: lsig
+          lsig: lsig,
+          file: fileName
         };
       }
     } catch (error) {
@@ -660,7 +744,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       console.log(error);
       throw error;
     }
-    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+
+    this.cpData.registerLsig(this.networkName, cpLsigName, lsigInfo);
     return lsigInfo;
   }
 
@@ -668,26 +753,33 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
-   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param lsigName name of smart signature (checkpoint info will be stored against this name)
+   * @param fileName: Logic Signature filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   async mkDelegatedLsig (
-    name: string,
+    lsigName: string,
+    fileName: string,
     signer: rtypes.Account,
     scTmplParams?: SCParams
   ): Promise<LsigInfo> {
-    return await this._mkLsig(name, scTmplParams, signer);
+    return await this._mkLsig(fileName, scTmplParams, signer, lsigName);
   }
 
   /**
    * Stores logic signature info in checkpoint for contract mode
-   * @param name ASC name
+   * @param lsigName name of lsig (checkpoint info will be stored against this name)
+   * @param fileName ASC file name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async mkContractLsig (name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
-    return await this._mkLsig(name, scTmplParams);
+  async mkContractLsig (
+    lsigName: string,
+    fileName: string,
+    scTmplParams?: SCParams
+  ): Promise<LsigInfo> {
+    return await this._mkLsig(fileName, scTmplParams, undefined, lsigName);
   }
 
   /**
@@ -708,11 +800,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     const name = appName ?? approvalProgram + "-" + clearProgram;
 
-    this.assertNoAsset(name);
-    let sscInfo = {} as rtypes.SSCInfo;
+    this.assertNoApp(name);
+    let sscInfo = {} as rtypes.AppInfo;
     try {
       sscInfo = await this.algoOp.deployApp(
         approvalProgram,
@@ -755,7 +847,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
@@ -767,7 +859,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     });
     const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
 
-    let sscInfo = {} as rtypes.SSCInfo;
+    let sscInfo = {} as rtypes.AppInfo;
     try {
       sscInfo = await this.algoOp.updateApp(
         sender,
@@ -813,13 +905,29 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     }
   }
 
+  assertNoLsig (lsigName: string): void {
+    if (this.isDefined(lsigName)) {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT, {
+        lsigName: lsigName
+      });
+    }
+  }
+
+  assertNoApp (appName: string): void {
+    if (this.isDefined(appName)) {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT, {
+        appName: appName
+      });
+    }
+  }
+
   registerASAInfo (name: string, asaInfo: rtypes.ASAInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerASAInfo"
     });
   }
 
-  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.AppInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
     });
@@ -853,11 +961,21 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async fundLsig (
-    _name: string,
+  async fundLsigByFile (
+    _fileName: string,
     _flags: FundASCFlags,
     _payFlags: wtypes.TxParams,
     _scInitParams?: unknown
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "fundLsigByFile"
+    });
+  }
+
+  async fundLsig (
+    _lsigName: string,
+    _flags: FundASCFlags,
+    _payFlags: wtypes.TxParams
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
@@ -865,12 +983,23 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   async mkDelegatedLsig (
-    _name: string,
+    _lsigName: string,
+    _fileName: string,
     _signer: rtypes.Account,
     _scInitParams?: unknown
   ): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
+    });
+  }
+
+  async mkContractLsig (
+    _lsigName: string,
+    _fileName: string,
+    _scInitParams?: unknown
+  ): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "mkContractLsig"
     });
   }
 
@@ -881,7 +1010,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     payFlags: wtypes.TxParams,
     scInitParam?: unknown,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
     });
@@ -907,7 +1036,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,

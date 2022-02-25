@@ -32,7 +32,7 @@ export interface AlgoOperator {
     name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<rtypes.ASAInfo>
-  fundLsig: (name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+  fundLsig: (lsig: string | LogicSigAccount, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deployApp: (
     approvalProgram: string,
@@ -40,7 +40,7 @@ export interface AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
+    scTmplParams?: SCParams) => Promise<rtypes.AppInfo>
   updateApp: (
     sender: algosdk.Account,
     payFlags: wtypes.TxParams,
@@ -50,7 +50,7 @@ export interface AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ) => Promise<rtypes.SSCInfo>
+  ) => Promise<rtypes.AppInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
   optInAccountToASA: (
@@ -128,8 +128,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    const assets = accountInfo.assets as modelsv2.AssetHolding[];
-    return BigInt(accountInfo.amount) - BigInt((assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
+    const assets = accountInfo.assets;
+    return BigInt(accountInfo.amount) - BigInt(((assets ?? []).length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
   getOptInTxSize (
@@ -249,7 +249,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     txWriter.push(message, txConfirmation);
     return {
       creator: flags.creator.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       assetIndex: Number(assetIndex),
       confirmedRound: Number(txConfirmation[confirmedRound]),
       assetDef: asaDef,
@@ -259,21 +259,23 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Sends Algos to ASC account (Contract Account)
-   * @param name     - ASC filename
+   * @param lsig     - Logic Signature (LogicSigAccount or filename with smart contract code)
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
-    name: string,
+    lsig: string | LogicSigAccount,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<LsigInfo> {
-    const lsig = await getLsig(name, this.algodClient, scTmplParams);
-    const contractAddress = lsig.address();
+    if (typeof lsig === "string") {
+      lsig = await getLsig(lsig, this.algodClient, scTmplParams);
+    }
 
+    const contractAddress = lsig.address();
     const params = await mkTxParams(this.algodClient, payFlags);
     let message = "Funding Contract: " + String(contractAddress);
     console.log(message);
@@ -287,7 +289,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const signedTxn = t.signTxn(flags.funder.sk);
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
-    message = message.concat("\nLsig: " + name);
+    message = message.concat("\nLsig: " + lsig.address());
     txWriter.push(message, confirmedTxn);
     return {
       creator: flags.funder.addr,
@@ -311,7 +313,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
+    scTmplParams?: SCParams): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
@@ -356,12 +358,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     return {
       creator: flags.sender.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: Number(appId),
       applicationAccount: getApplicationAddress(Number(appId)),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: approvalProgram,
+      clearFile: clearProgram
     };
   }
 
@@ -386,7 +390,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter,
     scTmplParams?: SCParams
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     const params = await mkTxParams(this.algodClient, payFlags);
 
     const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);
@@ -426,12 +430,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     return {
       creator: sender.addr,
-      txId: txInfo.txId,
+      txID: txInfo.txId,
       confirmedRound: Number(confirmedTxInfo[confirmedRound]),
       appID: appID,
       applicationAccount: getApplicationAddress(appID),
       timestamp: Math.round(+new Date() / 1000),
-      deleted: false
+      deleted: false,
+      approvalFile: newApprovalProgram,
+      clearFile: newClearProgram
     };
   }
 

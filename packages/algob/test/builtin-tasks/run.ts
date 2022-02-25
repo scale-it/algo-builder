@@ -193,19 +193,19 @@ scripts directory: script 1 executed
     assert.equal(scriptOutput, "deployASA script\n");
   });
 
-  it("Should crash on fundLsig", async function () {
+  it("Should crash on fundLsigByFile", async function () {
     await expectBuilderErrorAsync(
       async () =>
         await this.env.run(TASK_RUN, {
           scripts: ["scripts/other-scripts/deploy-asc.js"]
         }),
       ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
-      "fundLsig"
+      "fundLsigByFile"
     );
     const persistedSnapshot = loadCheckpoint("scripts/other-scripts/deploy-asc.js");
     assert.deepEqual(persistedSnapshot, {});
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
-    assert.equal(scriptOutput, "fundLsig script\n");
+    assert.equal(scriptOutput, "fundLsigByFile script\n");
   });
 });
 

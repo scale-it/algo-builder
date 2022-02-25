@@ -76,15 +76,7 @@ export interface BaseTxReceipt {
   logs?: string[]
 }
 
-export interface DeployedAssetTxReceipt extends BaseTxReceipt {
-  assetID: number
-}
-
-export interface DeployedAppTxReceipt extends BaseTxReceipt {
-  appID: number
-}
-
-export type TxReceipt = BaseTxReceipt | DeployedAppTxReceipt | DeployedAssetTxReceipt;
+export type TxReceipt = BaseTxReceipt | AppInfo | ASAInfo;
 
 export interface State {
   accounts: Map<string, AccountStoreI>
@@ -92,7 +84,7 @@ export interface State {
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
   assetNameInfo: Map<string, ASAInfo>
-  appNameInfo: Map<string, SSCInfo>
+  appNameInfo: Map<string, AppInfo>
   appCounter: number
   assetCounter: number
   txReceipts: Map<string, TxReceipt> // map of {txID: txReceipt}
@@ -100,7 +92,7 @@ export interface State {
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
-  txId: string
+  txID: string
   confirmedRound: number
   deleted: boolean
 }
@@ -109,13 +101,18 @@ export interface DeployedAssetInfo {
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
   assetDef: types.ASADef
+  logs?: string[]
 }
 
 // Stateful smart contract deployment information (log)
-export interface SSCInfo extends DeployedAssetInfo {
+export interface AppInfo extends DeployedAssetInfo {
   appID: number
   applicationAccount: string
   timestamp: number
+  approvalFile: string
+  clearFile: string
+  logs?: string[]
+  gas?: number // used in runtime
 }
 
 // describes interpreter's local context (state + txns)
@@ -149,17 +146,17 @@ export interface Context {
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
   deployASA: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => DeployedAssetTxReceipt
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => ASAInfo
   deployASADef: (
     name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => DeployedAssetTxReceipt
+  ) => ASAInfo
   optIntoASA: (
     assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
   deployApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
-  ) => DeployedAppTxReceipt
+  ) => AppInfo
   optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
   updateApp: (appID: number, approvalProgram: string,
     clearProgram: string, idx: number, scTmplParams?: SCParams) => TxReceipt

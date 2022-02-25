@@ -15,7 +15,7 @@ export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
 export const MaxTEALVersion = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
-// minimum balance costs (in microalgos) for ssc schema
+// minimum balance costs (in microalgos) for app schema
 export const APPLICATION_BASE_FEE = 0.1e6; // base fee for creating or opt-in to application
 export const ASSET_CREATION_FEE = 0.1e6; // creation fee for asset
 export const SSC_VALUE_UINT = 28500; // cost for value as uint64
@@ -28,6 +28,7 @@ export const LogicSigMaxCost = 20000;
 export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
+export const MaxTxnNoteBytes = 1024;
 export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
 // the assets and application arrays combined and totaled with the accounts array can not exceed 8

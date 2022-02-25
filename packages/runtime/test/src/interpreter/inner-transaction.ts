@@ -6,8 +6,8 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, MaxTEALVersion } from "../../../src/lib/constants";
-import { AccountStoreI, ExecutionMode } from "../../../src/types";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -19,29 +19,21 @@ export function setDummyAccInfo (acc: AccountStoreI): void {
   acc.createdApps = accInfo[0].createdApps;
 }
 
-describe("TEALv5: Inner Transactions", function () {
+describe("Inner Transactions", function () {
   const elonPk = decodeAddress(elonAddr).publicKey;
   let tealCode: string;
   let interpreter: Interpreter;
 
-  // setup 1st account (to be used as sender)
-  const elonAcc: AccountStoreI = new AccountStore(0, elonMuskAccount); // setup test account
-  setDummyAccInfo(elonAcc);
-
-  // setup 2nd account
-  const johnAcc = new AccountStore(0, johnAccount);
-
-  // setup 2nd account
-  const bobAccount = new AccountStore(1000000, bobAcc);
-
-  // setup application account
-  const appAccAddr = getApplicationAddress(TXN_OBJ.apid);
-  const applicationAccount = new AccountStore(
-    ALGORAND_ACCOUNT_MIN_BALANCE,
-    { addr: appAccAddr, sk: new Uint8Array(0) });
+  let elonAcc: AccountStoreI;
+  let johnAcc: AccountStoreI;
+  let bobAccount: AccountStoreI;
+  let appAccAddr: AccountAddress;
+  let applicationAccount: AccountStoreI;
 
   const reset = (): void => {
-    while (interpreter.stack.length() !== 0) { interpreter.stack.pop(); }
+    while (interpreter.stack.length() !== 0) {
+      interpreter.stack.pop();
+    }
     interpreter.subTxn = undefined;
     interpreter.runtime.ctx.pooledApplCost = 0;
     interpreter.instructions = [];
@@ -57,10 +49,27 @@ describe("TEALv5: Inner Transactions", function () {
     });
   };
 
-  const setUpInterpreter = (): void => {
+  const setUpInterpreter = (tealVersion: number, appBalance: number = ALGORAND_ACCOUNT_MIN_BALANCE): void => {
+    // setup 1st account (to be used as sender)
+    elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
+    setDummyAccInfo(elonAcc);
+
+    // setup 2nd account
+    johnAcc = new AccountStore(0, johnAccount);
+
+    // setup 2nd account
+    bobAccount = new AccountStore(1000000, bobAcc);
+
+    // setup application account
+    appAccAddr = getApplicationAddress(TXN_OBJ.apid);
+    applicationAccount = new AccountStore(appBalance, {
+      addr: appAccAddr,
+      sk: new Uint8Array(0)
+    });
+
     interpreter = new Interpreter();
     interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, applicationAccount]);
-    interpreter.tealVersion = MaxTEALVersion;
+    interpreter.tealVersion = tealVersion;
     reset();
   };
 
@@ -71,7 +80,7 @@ describe("TEALv5: Inner Transactions", function () {
     interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
   };
 
-  this.beforeAll(setUpInterpreter);
+  this.beforeAll(() => setUpInterpreter(5));
 
   describe("TestActionTypes", function () {
     it("should fail: itxn_submit without itxn_begin", function () {
@@ -106,8 +115,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-      assert.throws(
-        () => executeTEAL(tealCode), `unsupported type for itxn_submit`);
+      assert.throws(() => executeTEAL(tealCode), `unsupported type for itxn_submit`);
 
       tealCode = `
         itxn_begin
@@ -117,7 +125,9 @@ describe("TEALv5: Inner Transactions", function () {
         int 1
       `;
       assert.throws(
-        () => executeTEAL(tealCode), `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`);
+        () => executeTEAL(tealCode),
+        `pya is not a valid Type for itxn_field`
+      );
     });
 
     it("should fail: Type arg not a byte array", function () {
@@ -130,10 +140,7 @@ describe("TEALv5: Inner Transactions", function () {
         int 1
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
     });
 
     it("should fail: not a uint64", function () {
@@ -146,10 +153,7 @@ describe("TEALv5: Inner Transactions", function () {
         int 1
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
     });
 
     it("should fail: invalid types (good, but not allowed in tealv5)", function () {
@@ -162,10 +166,7 @@ describe("TEALv5: Inner Transactions", function () {
         int 1
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
 
       tealCode = `
         itxn_begin
@@ -174,10 +175,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
     });
 
     it("should fail: invalid types (good, but not allowed in tealv5) for TypeEnum", function () {
@@ -190,10 +188,7 @@ describe("TEALv5: Inner Transactions", function () {
         int 1
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
 
       tealCode = `
         itxn_begin
@@ -202,10 +197,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
 
       tealCode = `
         itxn_begin
@@ -214,10 +206,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
 
       tealCode = `
         itxn_begin
@@ -226,10 +215,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-      expectRuntimeError(
-        () => executeTEAL(tealCode),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(tealCode), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
     });
 
     it(`should fail: "insufficient balance" because app account is charged fee`, function () {
@@ -302,7 +288,9 @@ describe("TEALv5: Inner Transactions", function () {
     it(`should pass if app account is funded`, function () {
       // increase balance
       const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-      if (acc) { acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n; }
+      if (acc) {
+        acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
+      }
 
       // default receiver is zeroAddr, amount is 0
       tealCode = `
@@ -384,9 +372,14 @@ describe("TEALv5: Inner Transactions", function () {
   });
 
   describe("TestFieldTypes", function () {
-    const ConfigAddresses = ['ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'];
+    const ConfigAddresses = [
+      "ConfigAssetManager",
+      "ConfigAssetReserve",
+      "ConfigAssetFreeze",
+      "ConfigAssetClawback"
+    ];
 
-    it('should pass: teal understand 32 bytes value is address with acfg address', () => {
+    it("should pass: teal understand 32 bytes value is address with acfg address", () => {
       ConfigAddresses.forEach((configAddr) => {
         tealCode = `
         itxn_begin
@@ -402,7 +395,7 @@ describe("TEALv5: Inner Transactions", function () {
     it("should pass: use random address with asa config transaction with acfg address", () => {
       ConfigAddresses.forEach((configAddress) => {
         tealCode = `
-          itxn_begin           
+          itxn_begin
           addr KW5MRCMF4ICRW32EQFHJJQXF6O6DIXHD4URTXPD657B6QTQA3LWZSLJEUY
           itxn_field ${configAddress}
           int acfg
@@ -518,9 +511,13 @@ describe("TEALv5: Inner Transactions", function () {
     it(`should assert sender, application balance 0 before pay`, function () {
       // set sender.balance == 0
       const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
-      if (elonAcc) { elonAcc.amount = 0n; }
+      if (elonAcc) {
+        elonAcc.amount = 0n;
+      }
       const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-      if (acc) { acc.amount = 0n; }
+      if (acc) {
+        acc.amount = 0n;
+      }
       const checkBal = `
         txn Sender
         balance
@@ -554,7 +551,8 @@ describe("TEALv5: Inner Transactions", function () {
     // */
 
     it(`should fail: insufficient balance`, function () {
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100
@@ -569,9 +567,12 @@ describe("TEALv5: Inner Transactions", function () {
     // TODO: check if this should indeed fail (if receiver account.balance < minBalance)
     it(`should pass: after increasing app account's balance`, function () {
       const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-      if (acc) { acc.amount = 1000000n; }
+      if (acc) {
+        acc.amount = 1000000n;
+      }
 
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100
@@ -597,7 +598,9 @@ describe("TEALv5: Inner Transactions", function () {
 
     it(`should test pay with closeRemTo`, function () {
       const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
-      if (acc) { acc.amount = 1000000n; }
+      if (acc) {
+        acc.amount = 1000000n;
+      }
 
       const teal = `
         itxn_begin
@@ -643,10 +646,7 @@ describe("TEALv5: Inner Transactions", function () {
 
     it(`should fail: invalid ASA Ref`, function () {
       TXN_OBJ.apas = []; // remove foreign assets refs
-      expectRuntimeError(
-        () => executeTEAL(axfer),
-        RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE
-      );
+      expectRuntimeError(() => executeTEAL(axfer), RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE);
     });
 
     it(`should fail: ref is passed but bal == 0`, function () {
@@ -660,13 +660,12 @@ describe("TEALv5: Inner Transactions", function () {
     it(`should fail: not opted in`, function () {
       // increase app balance
       const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-      if (acc) { acc.amount = 1000000n; }
+      if (acc) {
+        acc.amount = 1000000n;
+      }
 
       // sufficient bal, but not optedIn
-      expectRuntimeError(
-        () => executeTEAL(axfer),
-        RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN
-      );
+      expectRuntimeError(() => executeTEAL(axfer), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
     });
 
     it(`should test ASA optin, asa transfer`, function () {
@@ -685,20 +684,17 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       // does not exist
-      expectRuntimeError(
-        () => executeTEAL(optin),
-        RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
-      );
+      expectRuntimeError(() => executeTEAL(optin), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
 
       let assetID = 0;
       const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
       if (elonAcc) {
         assetID = interpreter.runtime.ctx.deployASADef(
-          'test-asa',
+          "test-asa",
           { total: 10, decimals: 0, unitName: "TASA" },
           elonAddr,
-          { creator: { ...elonAcc.account, name: 'elon' } }
-        ).assetID;
+          { creator: { ...elonAcc.account, name: "elon" } }
+        ).assetIndex;
       }
 
       // passes
@@ -711,8 +707,12 @@ describe("TEALv5: Inner Transactions", function () {
       );
 
       // increase asa balance to 5
-      const holding = interpreter.runtime.ctx.state.accounts.get(appAccAddr)?.getAssetHolding(assetID);
-      if (holding) { holding.amount = 5n; }
+      const holding = interpreter.runtime.ctx.state.accounts
+        .get(appAccAddr)
+        ?.getAssetHolding(assetID);
+      if (holding) {
+        holding.amount = 5n;
+      }
 
       executeTEAL(axfer);
       executeTEAL(axfer);
@@ -773,19 +773,19 @@ describe("TEALv5: Inner Transactions", function () {
       if (elonAcc) {
         // in foreign-assets
         assetID1 = interpreter.runtime.ctx.deployASADef(
-          'test-asa-1',
+          "test-asa-1",
           { total: 11, decimals: 0, unitName: "TASA1" },
           elonAddr,
-          { creator: { ...elonAcc.account, name: 'elon' } }
-        ).assetID;
+          { creator: { ...elonAcc.account, name: "elon" } }
+        ).assetIndex;
 
         // not in foreign-assets
         assetID2 = interpreter.runtime.ctx.deployASADef(
-          'test-asa-2',
+          "test-asa-2",
           { total: 22, decimals: 0, unitName: "TASA2" },
           elonAddr,
-          { creator: { ...elonAcc.account, name: 'elon' } }
-        ).assetID;
+          { creator: { ...elonAcc.account, name: "elon" } }
+        ).assetIndex;
       }
 
       axfer = `
@@ -813,10 +813,7 @@ describe("TEALv5: Inner Transactions", function () {
         ==
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(teal),
-        RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE
-      );
+      expectRuntimeError(() => executeTEAL(teal), RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE);
     });
 
     it(`should fail: Sender not opted-in`, function () {
@@ -830,10 +827,7 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       // assert failed
-      expectRuntimeError(
-        () => executeTEAL(teal),
-        RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR
-      );
+      expectRuntimeError(() => executeTEAL(teal), RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR);
     });
 
     it(`should fail: app account not opted in`, function () {
@@ -847,18 +841,18 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       // assert failed
-      expectRuntimeError(
-        () => executeTEAL(teal),
-        RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR
-      );
+      expectRuntimeError(() => executeTEAL(teal), RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR);
     });
 
     it(`should create new holding in appAccount`, function () {
       interpreter.runtime.ctx.optIntoASA(assetID1, appAccAddr, {});
       // increase asa balance to 5
-      const holding =
-        interpreter.runtime.ctx.state.accounts.get(appAccAddr)?.getAssetHolding(assetID1);
-      if (holding) { holding.amount = 3000n; }
+      const holding = interpreter.runtime.ctx.state.accounts
+        .get(appAccAddr)
+        ?.getAssetHolding(assetID1);
+      if (holding) {
+        holding.amount = 3000n;
+      }
 
       const verifyHolding = `
         global CurrentApplicationAddress
@@ -873,23 +867,22 @@ describe("TEALv5: Inner Transactions", function () {
 
     it(`should fail: receiver not optedin`, function () {
       TXN_OBJ.apat = [Buffer.from(decodeAddress(johnAddr).publicKey)];
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100
       ` + axfer;
 
-      expectRuntimeError(
-        () => executeTEAL(teal),
-        RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN
-      );
+      expectRuntimeError(() => executeTEAL(teal), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
     });
 
     it(`should fail: insufficient balance`, function () {
       // optin by txn Account1
       interpreter.runtime.ctx.optIntoASA(assetID1, johnAddr, {});
 
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100000
@@ -905,16 +898,14 @@ describe("TEALv5: Inner Transactions", function () {
       // changing to random
       TXN_OBJ.apas = [1211, 323];
 
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100000
       ` + axfer;
 
-      expectRuntimeError(
-        () => executeTEAL(teal),
-        RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE
-      );
+      expectRuntimeError(() => executeTEAL(teal), RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE);
 
       TXN_OBJ.apas = [assetID1]; // restore
     });
@@ -935,18 +926,18 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       // defaults to 0, which is not opted in
-      expectRuntimeError(
-        () => executeTEAL(noid),
-        RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN
-      );
+      expectRuntimeError(() => executeTEAL(noid), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
     });
 
     it(`should pass: inner transaction axfer`, function () {
-      const teal = `
+      const teal =
+        `
         global CurrentApplicationAddress
         txn Accounts 1
         int 100
-      ` + axfer + `
+      ` +
+        axfer +
+        `
         int 1
       `;
       assert.doesNotThrow(() => executeTEAL(teal));
@@ -995,10 +986,7 @@ describe("TEALv5: Inner Transactions", function () {
         itxn_submit
       `;
 
-      expectRuntimeError(
-        () => executeTEAL(pay),
-        RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
-      );
+      expectRuntimeError(() => executeTEAL(pay), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
     });
   });
 
@@ -1017,10 +1005,14 @@ describe("TEALv5: Inner Transactions", function () {
 
       assert.doesNotThrow(() => executeTEAL(pay + `int 1`));
       assert.doesNotThrow(() => executeTEAL(pay + pay + `int 1`));
-      assert.doesNotThrow(() => executeTEAL(pay + pay + pay + pay + pay + pay + pay + pay + `int 1`));
+      assert.doesNotThrow(() =>
+        executeTEAL(pay + pay + pay + pay + pay + pay + pay + pay + `int 1`)
+      );
 
       let heavyCode = ``;
-      for (let i = 0; i <= 17; ++i) { heavyCode += pay; }
+      for (let i = 0; i <= 17; ++i) {
+        heavyCode += pay;
+      }
       expectRuntimeError(
         () => executeTEAL(heavyCode),
         RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED
@@ -1096,18 +1088,12 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       TXN_OBJ.apas = [];
-      expectRuntimeError(
-        () => executeTEAL(freeze),
-        RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE
-      );
+      expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TEAL.INVALID_ASA_REFERENCE);
 
       TXN_OBJ.apas = [createdAssetID];
       TXN_OBJ.apaa = [Buffer.from(new Uint8Array([1]))];
       // does not hold Asset
-      expectRuntimeError(
-        () => executeTEAL(freeze),
-        RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN
-      );
+      expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 
       // should freeze now
       interpreter.runtime.optIntoASA(createdAssetID, johnAddr, {});
@@ -1152,12 +1138,16 @@ describe("TEALv5: Inner Transactions", function () {
       `;
 
       assert.doesNotThrow(() => executeTEAL(log));
-      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs as string[];
+      const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
       assert.isDefined(logs);
 
-      for (let i = 0; i < 30; ++i) { assert.equal(logs[i], "a"); }
-      assert.equal(logs[30], "b");
-      assert.equal(logs[31], "c");
+      if (logs !== undefined) {
+        for (let i = 0; i < 30; ++i) {
+          assert.equal(logs[i], "a");
+        }
+        assert.equal(logs[30], "b");
+        assert.equal(logs[31], "c");
+      }
     });
 
     it(`should throw error if log count exceeds threshold`, function () {
@@ -1208,6 +1198,138 @@ describe("TEALv5: Inner Transactions", function () {
         () => executeTEAL(log),
         RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD
       );
+    });
+  });
+
+  describe("Teal v6 update", function () {
+    this.beforeAll(() => {
+      setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
+    });
+
+    describe("keyreg transaction", function () {
+      let program: string;
+      this.beforeEach(() => {
+        // init more balance for application to test inner transaction
+        setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
+      });
+
+      it("Should support keyreg transaction", function () {
+        program = `
+        itxn_begin
+        byte "keyreg"
+        itxn_field Type
+        int 32
+        bzero
+        itxn_field VotePK
+        int 32
+        bzero
+        itxn_field SelectionPK
+        int 43
+        itxn_field VoteFirst
+        int 1000
+        itxn_field VoteLast
+        int 5
+        itxn_field VoteKeyDilution
+        int 1
+        itxn_field Nonparticipation
+        itxn_submit
+        int 1
+        `;
+
+        assert.doesNotThrow(() => executeTEAL(program));
+      });
+
+      it("should fail on invalid field keyreg transaction", () => {
+        ["VotePK", "SelectionPK"].forEach((field) => {
+          program = `
+            itxn_begin
+            int 31
+            bzero
+            itxn_field ${field}
+            int 1
+          `;
+          expectRuntimeError(
+            () => executeTEAL(program),
+            RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+          );
+        });
+      });
+    });
+
+    describe("RekeyTo", () => {
+      let rekeyProgram: string;
+      this.beforeAll(() => {
+        setUpInterpreter(6);
+        rekeyProgram = `
+          itxn_begin
+          txn Receiver
+          itxn_field RekeyTo
+          int 1
+          return
+        `;
+      });
+
+      it("Should support RekeyTo", function () {
+        assert.doesNotThrow(() => executeTEAL(rekeyProgram));
+      });
+    });
+
+    describe("Note", () => {
+      this.beforeEach(() => {
+        setUpInterpreter(6);
+      });
+
+      it("Should throw error if teal version < 6", function () {
+        setUpInterpreter(5);
+        const invNoteProg = `
+          itxn_begin
+          byte "hello"
+          itxn_field Note
+          int 1
+          return
+        `;
+
+        expectRuntimeError(
+          () => executeTEAL(invNoteProg),
+          RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+        );
+      });
+
+      it("Should support Note for tealv6", function () {
+        const noteProg = `
+          itxn_begin
+          byte "abcdefghijklmnopqrstuvwxyz01234567890"
+          itxn_field Note
+          int 1
+          return
+        `;
+        assert.doesNotThrow(() => executeTEAL(noteProg));
+      });
+
+      it("Should throw error if Note exceeds 1024 bytes", function () {
+        const noteProg = `
+          itxn_begin
+          int 1024
+          bzero
+          itxn_field Note
+          int 1
+          return
+        `;
+        assert.doesNotThrow(() => executeTEAL(noteProg));
+
+        const invalidProg = `
+          itxn_begin
+          int 1025
+          bzero
+          itxn_field Note
+          int 1
+          return
+        `;
+        expectRuntimeError(
+          () => executeTEAL(invalidProg),
+          RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR
+        );
+      });
     });
   });
 });

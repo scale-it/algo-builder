@@ -5,8 +5,7 @@ const { types } = require('@algo-builder/web');
 const { issue } = require('../admin/issue');
 const { whitelist } = require('../permissions/whitelist');
 
-const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
-const clearStateProgram = 'clear_state_program.py';
+const { fundAccount, optInAccountToApp } = require('../common/common');
 
 /**
  * Transfer token between non-reserve accounts
@@ -16,10 +15,10 @@ const clearStateProgram = 'clear_state_program.py';
  */
 async function transfer (deployer, from, toAddr, amount) {
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getApp('controller.py', clearStateProgram);
-  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const controllerAppInfo = deployer.getApp('Controller');
+  const permissionsAppInfo = deployer.getApp('Permissions');
 
-  const clawbackLsig = await getClawback(deployer);
+  const clawbackLsig = deployer.getLsig('ClawbackLsig');
   const clawbackAddress = clawbackLsig.address();
 
   const txGroup = [
@@ -91,7 +90,7 @@ async function transfer (deployer, from, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   // alice is set-up as the permissions manager during deploy
   const permissionsManager = deployer.accountsByName.get('alice');
-  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('Permissions');
 
   /*
    * Transfer some tokens b/w 2 non-reserve accounts

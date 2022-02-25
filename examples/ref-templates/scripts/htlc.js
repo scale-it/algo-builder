@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
   // setup a contract account and send 1 ALGO from master
-  await deployer.fundLsig('htlc.py', {
+  await deployer.fundLsigByFile('htlc.py', {
     funder: masterAccount,
     fundingMicroAlgo: 1e6 // 1 Algo
   },
@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 
-  const contract = await deployer.loadLogic('htlc.py');
+  const contract = await deployer.loadLogicByFile('htlc.py');
   const contractAddress = contract.address();
 
   txnParams.fromAccountAddr = contractAddress;

@@ -4,7 +4,7 @@
  * smart contract account(stateless).
  * Steps:
  * - Deploy SSC (controls asa)
- * - Create contract account (with ssc app_id embedded/passed as a template param)
+ * - Create contract account (with app_id embedded/passed as a template param)
  * - Deploy ASA using both contracts
  */
 const { executeTransaction } = require('@algo-builder/algob');
@@ -28,12 +28,15 @@ async function run (runtimeEnv, deployer) {
       localBytes: 1,
       globalInts: 1,
       globalBytes: 1
-    }, {});
+    }, {}, {}, 'StatefulASA_App');
 
   console.log(appInfo);
 
   // Get Statless Account Address
-  const statelessAccount = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
+  await deployer.mkContractLsig(
+    'StateLessASALsig', '5-contract-asa-stateless.py', { APP_ID: appInfo.appID }
+  );
+  const statelessAccount = deployer.getLsig('StateLessASALsig');
   console.log('stateless Account Address:', statelessAccount.address());
 
   await executeTransaction(deployer, mkParam(masterAccount, statelessAccount.address(), 200e6, { note: 'funding account' }));

@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     // create asset
     assetID = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
 
     // fund app (escrow belonging to app) with 10 ALGO
     const fundAppParams: types.AlgoTransferParam = {
@@ -132,9 +132,9 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
   it("initiate ASA transfer from smart contract", function () {
     optInToASAbyApp();
-    const appHoldingBefore = appAccount.getAssetHolding(assetID)?.amount as bigint;
-    const johnHoldingBefore = john.getAssetHolding(assetID)?.amount as bigint;
-    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount as bigint;
+    const appHoldingBefore = appAccount.getAssetHolding(assetID)?.amount;
+    const johnHoldingBefore = john.getAssetHolding(assetID)?.amount;
+    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount;
 
     // contracts sends 1 ASA to sender, and 2 ASA to txn.accounts[1]
     const transferASAbyAppParam = {
@@ -147,15 +147,17 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     syncAccounts();
 
     // verify ASA transfer
-    assert.equal(appAccount.getAssetHolding(assetID)?.amount, appHoldingBefore - 3n);
-    assert.equal(john.getAssetHolding(assetID)?.amount, johnHoldingBefore + 1n);
-    assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + 2n);
+    if (appHoldingBefore && johnHoldingBefore && elonHoldingBefore) {
+      assert.equal(appAccount.getAssetHolding(assetID)?.amount, appHoldingBefore - 3n);
+      assert.equal(john.getAssetHolding(assetID)?.amount, johnHoldingBefore + 1n);
+      assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + 2n);
+    }
   });
 
   it("empty app's account ASA holding to txn.accounts[1] if close remainder to is passed", function () {
     optInToASAbyApp();
-    const appHoldingBefore = appAccount.getAssetHolding(assetID)?.amount as bigint;
-    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount as bigint;
+    const appHoldingBefore = appAccount.getAssetHolding(assetID)?.amount;
+    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount;
     assert.isDefined(appHoldingBefore);
 
     // empties contract's ALGO's to elon (after deducting fees)
@@ -171,7 +173,9 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
     // verify app holding removed and all ASA transferred to elon
     assert.isUndefined(appAccount.getAssetHolding(assetID));
-    assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + appHoldingBefore);
+    if (elonHoldingBefore && appHoldingBefore) {
+      assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + appHoldingBefore);
+    }
   });
 
   it("should fail on asset clawback if clawback !== application account", function () {
@@ -192,8 +196,8 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
   it("should clawback 2 ASA by application account from Txn.accounts[1] to Txn.accounts[2]", function () {
     optInToASAbyApp();
-    const johnHoldingBefore = john.getAssetHolding(assetID)?.amount as bigint;
-    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount as bigint;
+    const johnHoldingBefore = john.getAssetHolding(assetID)?.amount;
+    const elonHoldingBefore = elon.getAssetHolding(assetID)?.amount;
 
     // update clawback to app account
     const asaDef = john.createdAssets.get(assetID);
@@ -211,8 +215,10 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
     syncAccounts();
 
     // verify 2 ASA are clawbacked from john -> elon
-    assert.equal(john.getAssetHolding(assetID)?.amount, johnHoldingBefore - 2n);
-    assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + 2n);
+    if (johnHoldingBefore && elonHoldingBefore) {
+      assert.equal(john.getAssetHolding(assetID)?.amount, johnHoldingBefore - 2n);
+      assert.equal(elon.getAssetHolding(assetID)?.amount, elonHoldingBefore + 2n);
+    }
   });
 
   it("should fail on asset freeze if asset freeze !== application account", function () {

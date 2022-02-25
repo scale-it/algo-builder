@@ -91,7 +91,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 6. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
 
-7. `sanbox-reset` - Rlseset the containers to their initial state.
+7. `sanbox-reset` - Reset the containers to their initial state.
 
 **To be noted :**
 - To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.

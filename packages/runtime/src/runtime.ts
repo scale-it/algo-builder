@@ -4,7 +4,7 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore, RuntimeAccount } from "./account";
+import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -17,11 +17,10 @@ import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
+  AccountAddress, AccountStoreI, AppDeploymentFlags, AppInfo,
+  AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  DeployedAppTxReceipt, DeployedAssetTxReceipt,
-  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, SSCInfo,
-  StackElem, State, TxReceipt
+  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, StackElem, State, TxReceipt
 } from "./types";
 
 export class Runtime {
@@ -33,6 +32,7 @@ export class Runtime {
    * Note: Runtime operates on `store`, it doesn't operate on `ctx`.
    */
   private store: State;
+  private _defaultAccounts: AccountStore[];
   ctx: Context;
   loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
@@ -47,11 +47,13 @@ export class Runtime {
       globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
-      appNameInfo: new Map<string, SSCInfo>(),
+      appNameInfo: new Map<string, AppInfo>(),
       appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
       assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
       txReceipts: new Map<string, TxReceipt>() // receipt of each transaction, i.e map of {txID: txReceipt}
     };
+
+    this._defaultAccounts = this._setupDefaultAccounts();
 
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
@@ -64,6 +66,38 @@ export class Runtime {
 
     this.round = 2;
     this.timestamp = 1;
+  }
+
+  get defaultBalance (): number {
+    return 100 * 1e6; // 100 Algos
+  }
+
+  /**
+   * Returns a list of initialized default accounts created using static accountSDK from account.ts
+   *  and funded with default balance (100 ALGO)
+   * @returns list of AccountStore
+   */
+  _setupDefaultAccounts (): AccountStore[] {
+    const balance = this.defaultBalance;
+    const accounts = Object.values(defaultSDKAccounts)
+      .map(accountInfo => new AccountStore(balance, accountInfo));
+    this.initializeAccounts(accounts);
+    return accounts;
+  }
+
+  /**
+   * Resets the state of the default accounts
+   */
+  resetDefaultAccounts (): void {
+    this._defaultAccounts = this._setupDefaultAccounts();
+  }
+
+  /**
+   * Getter for _defaultAccounts, returns a synced version of the accounts list
+   * @returns list of AccountStore
+   */
+  defaultAccounts (): AccountStore[] {
+    return this._defaultAccounts.map((account) => this.getAccount(account.address));
   }
 
   /**
@@ -272,7 +306,7 @@ export class Runtime {
    * @param approval
    * @param clear
    */
-  getAppInfoFromName (approval: string, clear: string): SSCInfo | undefined {
+  getAppInfoFromName (approval: string, clear: string): AppInfo | undefined {
     return this.store.appNameInfo.get(approval + "-" + clear);
   }
 
@@ -349,9 +383,9 @@ export class Runtime {
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName as string,
+      asaDef.unitName,
       name,
-      asaDef.url as string,
+      asaDef.url,
       typeof asaDef.metadataHash !== "undefined" && typeof asaDef.metadataHash !== 'string'
         ? Buffer.from(asaDef.metadataHash).toString('base64')
         : asaDef.metadataHash,
@@ -373,7 +407,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addAsset (asa: string, flags: ASADeploymentFlags): ASAInfo {
     return this.deployASA(asa, flags);
   }
 
@@ -382,7 +416,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASA (asa: string, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASA (asa: string, flags: ASADeploymentFlags): ASAInfo {
     const txReceipt = this.ctx.deployASA(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -396,7 +430,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
     return this.deployASADef(asa, asaDef, flags);
   }
 
@@ -405,7 +439,7 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): DeployedAssetTxReceipt {
+  deployASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
     const txReceipt = this.ctx.deployASADef(asa, asaDef, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
@@ -500,7 +534,7 @@ export class Runtime {
     approvalProgram: string, clearProgram: string,
     flags: AppDeploymentFlags, payFlags: types.TxParams,
     debugStack?: number
-  ): DeployedAppTxReceipt {
+  ): AppInfo {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
     const txReceipt = this.ctx.deployApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
@@ -526,7 +560,7 @@ export class Runtime {
     payFlags: types.TxParams,
     scTmplParams?: SCParams,
     debugStack?: number
-  ): DeployedAppTxReceipt {
+  ): AppInfo {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
 
@@ -760,8 +794,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
-      return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+      return this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -821,10 +854,11 @@ export class Runtime {
     indexInGroup: number, debugStack?: number): TxReceipt {
     const interpreter = new Interpreter();
     // set new tx receipt
-    this.ctx.state.txReceipts.set(this.ctx.tx.txID, {
+    const txReceipt = {
       txn: this.ctx.tx,
       txID: this.ctx.tx.txID
-    });
+    };
+    this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
 
     // reset pooled opcode cost for single tx, this is to handle singular functions
     // which don't "initialize" a new ctx (eg. deployApp)
@@ -834,6 +868,6 @@ export class Runtime {
     if (executionMode === ExecutionMode.APPLICATION) {
       this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
     }
-    return this.ctx.state.txReceipts.get(this.ctx.tx.txID) as TxReceipt;
+    return txReceipt;
   }
 }

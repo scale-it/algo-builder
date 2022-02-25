@@ -17,6 +17,7 @@ layout: splash
 - [Algob Console](./algob-console.md)
 - [PyTeal](./py-teal.md)
 - [Test TEAL](./testing-teal.md)
+- [Advanced Runtime Features](./runtime-advanced.md)
 - [Templates](./templates.md)
 - [Execute Transaction](./execute-transaction.md)
 - [Sign Multisig](./sign-multisig.md)
@@ -217,9 +218,15 @@ After initializing a project you will have the following items:
 - `tests/`: Directory for test files for testing your assets and contracts
 - `algob.config.js`: Algob configuration file
 
+You can initialize project with `infrastructure/` folder by adding `--infrastructure` flag. It will contain scripts to setup a private network - a copy the `/infrastructure` directory from our repository.
+
+```bash
+algob init my-project --infrastructure
+```
+
 A `sample-project` is provided for your reference.
 
-Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
+Further information about the `sample-project` can be found in sample project [README](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/js/README.md) file.
 
 **NOTE**:
 a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.

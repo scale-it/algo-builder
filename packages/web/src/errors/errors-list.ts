@@ -183,6 +183,18 @@ Please check algob output for more details.`
     message: `Exec params length is zero'.`,
     title: "Invalid parameter",
     description: `Empty list is not supported.`
+  },
+  LSIG_NOT_FOUND_IN_CP: {
+    number: 19,
+    message: `Logic signature(name = %lsigName%) not found in checkpoint`,
+    title: "Lsig not found",
+    description: "Lsig not found"
+  },
+  APP_NOT_FOUND_IN_CP: {
+    number: 20,
+    message: `Application(name = %appName%) not found in checkpoint`,
+    title: "App by name not found in checkpoint",
+    description: "App by name not found in checkpoint"
   }
 };
 
@@ -629,6 +641,24 @@ Please check your config file.
     description: `Tried to use \`algob test\` with nonexistent tests directory: %directory%.
 
 Please check your directory`
+  },
+  DEPLOYER_LSIG_ALREADY_PRESENT: {
+    number: 615,
+    message: "Lsig name is already used: %lsigName%",
+    title: "Lsig name is already used",
+    description: `Lsig name is already used: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.isDefined(name)' to check if the name is already used.
+`
+  },
+  DEPLOYER_APP_ALREADY_PRESENT: {
+    number: 616,
+    message: "App name is already used: %appName%",
+    title: "App name is already used",
+    description: `App name is already used: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.isDefined(name)' to check if the name is already used.
+`
   }
 };
 

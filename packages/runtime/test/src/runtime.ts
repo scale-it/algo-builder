@@ -1,5 +1,6 @@
 import { types } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
+import { AccountAddress, AlgoTransferParam } from "@algo-builder/web/build/types";
+import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -7,12 +8,168 @@ import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
+import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
 const minBalance = BigInt(1e7);
+
+describe("Transfer Algo Transaction", function () {
+  const amount = minBalance;
+  const fee = 1000;
+
+  let alice: AccountStoreI;
+  let bob: AccountStoreI;
+  let alan: AccountStoreI;
+
+  let runtime: Runtime;
+
+  function syncAccounts (): void {
+    alice = runtime.getAccount(alice.address);
+    bob = runtime.getAccount(bob.address);
+    alan = runtime.getAccount(alan.address);
+  }
+
+  this.beforeEach(() => {
+    alice = new AccountStore(minBalance * 10n);
+    bob = new AccountStore(minBalance * 10n);
+    alan = new AccountStore(minBalance * 10n);
+    runtime = new Runtime([alice, bob, alan]);
+  });
+
+  it("Transfer ALGO from alice to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  });
+
+  it("close alice acount to bob", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
+      payFlags: {
+        totalFee: fee,
+        closeRemainderTo: bob.address
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+  });
+
+  it("should ignore rekey when use with closeRemainderTo", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 0n,
+      payFlags: {
+        totalFee: fee,
+        closeRemainderTo: bob.address,
+        rekeyTo: alan.address
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+
+    syncAccounts();
+    assert.equal(alice.balance(), 0n);
+    assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
+    // spend/auth address of alice not changed.
+    assert.equal(alice.getSpendAddress(), alice.address);
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: 0n,
+        payFlags: {
+          totalFee: fee,
+          closeRemainderTo: alice.address
+        }
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
+  });
+
+  describe("Transfer algo to implicit account", function () {
+    let externalRuntimeAccount: AccountStoreI;
+    let externalAccount: algosdk.Account;
+    this.beforeEach(function () {
+      externalAccount = new AccountStore(0).account;
+
+      const transferAlgoTx: AlgoTransferParam = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: externalAccount.addr,
+        amountMicroAlgos: amount,
+        payFlags: {
+          totalFee: 1000
+        }
+      };
+
+      runtime.executeTx(transferAlgoTx);
+      // query new external account in runtime.
+      externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
+    });
+
+    it("Balance of toAccountAddr should updated", () => {
+      assert.equal(externalRuntimeAccount.amount, amount);
+    });
+
+    it("Can create transaction from external account", () => {
+      const transferAlgoTx: AlgoTransferParam = {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: externalRuntimeAccount.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 1000n,
+        payFlags: {
+          totalFee: 1000
+        }
+      };
+
+      assert.doesNotThrow(() => runtime.executeTx(transferAlgoTx));
+    });
+  });
+});
 
 describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
@@ -182,7 +339,7 @@ describe("Algorand Standard Assets", function () {
 
   this.beforeEach(() => {
     assetId = runtime.deployASA('gold',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
     assetTransferParam.assetID = assetId;
     syncAccounts();
   });
@@ -195,7 +352,7 @@ describe("Algorand Standard Assets", function () {
   it("should create asset using asa.yaml file and raise account minimum balance", () => {
     const initialMinBalance = john.minBalance;
     assetId =
-      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetID;
+      runtime.deployASA('gold', { creator: { ...john.account, name: "john" } }).assetIndex;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -227,7 +384,7 @@ describe("Algorand Standard Assets", function () {
     };
     assetId = runtime.deployASADef(
       expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
-    ).assetID;
+    ).assetIndex;
     syncAccounts();
 
     const res = runtime.getAssetDef(assetId);
@@ -279,13 +436,13 @@ describe("Algorand Standard Assets", function () {
 
     const johnAssetHolding = john.getAssetHolding(assetId);
     assert.isDefined(johnAssetHolding);
-    assert.equal(johnAssetHolding?.amount as bigint, 5912599999515n);
+    assert.equal(johnAssetHolding?.amount, 5912599999515n);
 
     // opt-in for alice
     runtime.optIntoASA(assetId, alice.address, {});
     const aliceAssetHolding = alice.getAssetHolding(assetId);
     assert.isDefined(aliceAssetHolding);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
   });
 
   it("should opt-in to asset using asset transfer transaction", () => {
@@ -307,7 +464,7 @@ describe("Algorand Standard Assets", function () {
     syncAccounts();
 
     const aliceAssetHolding = alice.getAssetHolding(assetId);
-    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    assert.equal(aliceAssetHolding?.amount, 0n);
     // verfiy min balance is also raised
     assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
   });
@@ -338,8 +495,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -347,8 +504,10 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(assetTransferParam);
     syncAccounts();
 
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100n);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
+    if (initialJohnAssets && initialAliceAssets) {
+      assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100n);
+      assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
+    }
   });
 
   it("should throw error on transfer asset if asset is frozen and amount > 0", () => {
@@ -395,8 +554,8 @@ describe("Algorand Standard Assets", function () {
 
     syncAccounts();
     assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -410,8 +569,35 @@ describe("Algorand Standard Assets", function () {
     syncAccounts();
 
     assert.isUndefined(alice.getAssetHolding(assetId));
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
-    assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+    if (initialJohnAssets && initialAliceAssets) {
+      assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
+      assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
+    }
+  });
+
+  it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    // transfer few assets to alice
+    runtime.executeTx({
+      ...assetTransferParam,
+      toAccountAddr: alice.address,
+      amount: 30n
+    });
+
+    // throw error because closeReaminderTo invalid.
+    expectRuntimeError(
+      () => runtime.executeTx({
+        ...assetTransferParam,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: alice.address,
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // transfer all assets of alice => john (using closeRemTo)
+      }),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+    );
   });
 
   it("should throw error if trying to close asset holding of asset creator account", () => {
@@ -463,7 +649,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
     const assetId = runtime.deployASA('silver',
-      { creator: { ...john.account, name: "john" } }).assetID;
+      { creator: { ...john.account, name: "john" } }).assetIndex;
 
     const modFields: types.AssetModFields = {
       manager: bob.address,
@@ -771,5 +957,93 @@ describe("Stateful Smart Contracts", function () {
       () => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
+  });
+});
+
+describe("Deafult Accounts", function () {
+  let alice: AccountStore;
+  let bob: AccountStore;
+  let charlie = new AccountStore(minBalance);
+  let runtime: Runtime;
+  const amount = 1e6;
+  const fee = 1000;
+
+  function syncAccounts (): void {
+    [alice, bob] = runtime.defaultAccounts();
+    charlie = runtime.getAccount(charlie.address);
+  }
+  this.beforeEach(() => {
+    runtime = new Runtime([charlie]);
+    [alice, bob] = runtime.defaultAccounts();
+  });
+
+  it("Should be properly initialized", () => {
+    assert.exists(alice.address);
+    assert.equal(alice.balance(), BigInt(runtime.defaultBalance), "Alice balance must be correct");
+  });
+
+  it("Should update the state of the default accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+    assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+  });
+
+  it("Should reset the state of the default accounts", () => {
+    const initialAliceBalance = alice.balance();
+    const initialBobBalance = bob.balance();
+
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+
+    runtime.executeTx(algoTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialAliceBalance, alice.balance());
+    assert.equal(initialBobBalance, bob.balance());
+  });
+
+  it("Should not reset the state of the other accounts stored in runtime", () => {
+    const initialCharlieBalance = charlie.balance();
+    const algoTransferTxParam: types.AlgoTransferParam = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: charlie.address,
+      amountMicroAlgos: amount,
+      payFlags: {
+        totalFee: fee
+      }
+    };
+    runtime.executeTx(algoTransferTxParam);
+    runtime.resetDefaultAccounts();
+    syncAccounts();
+
+    assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
   });
 });

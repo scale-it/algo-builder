@@ -32,7 +32,7 @@ function mkASA (): wtypes.ASADef {
 describe("DeployerDeployMode", () => {
   useFixtureProject("config-project");
   let deployerCfg: DeployerConfig, env;
-  const mp = new Map<number, rtypes.SSCInfo>();
+  const mp = new Map<number, rtypes.AppInfo>();
 
   beforeEach(function () {
     env = mkEnv("network 123");
@@ -48,7 +48,7 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, rtypes.ASAInfo>(),
-      ssc: new Map<string, typeof mp>(),
+      app: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -70,7 +70,7 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
       asa: new Map<string, rtypes.ASAInfo>(),
-      ssc: new Map<string, typeof mp>(),
+      app: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -81,7 +81,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -90,7 +90,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -102,14 +102,14 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -125,7 +125,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(asaInfo,
       {
         creator: "addr-1-get-address-dry-run",
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         assetIndex: 1,
         assetDef: mkASA(),
@@ -137,13 +137,13 @@ describe("DeployerDeployMode", () => {
       network1: {
         asa: new Map([["MY_ASA", {
           creator: "addr-1-get-address-dry-run",
-          txId: "tx-id-dry-run",
+          txID: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
           assetDef: mkASA(),
           deleted: false
         }]]),
-        ssc: new Map(),
+        app: new Map(),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -155,15 +155,17 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     const deployer = new DeployerDeployMode(deployerCfg);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -178,18 +180,20 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["app-clear", nestedMap]]),
+        app: new Map([["app-clear", nestedMap]]),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -199,11 +203,13 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(2, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
@@ -211,18 +217,20 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["app-clear", nestedMap]]),
+        app: new Map([["app-clear", nestedMap]]),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -234,15 +242,17 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     const deployer = new DeployerDeployMode(deployerCfg);
-    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap = new Map<number, rtypes.AppInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const sscFlags = {
@@ -257,18 +267,20 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["my-app", nestedMap]]), // checkpoint created against "app name"
+        app: new Map([["my-app", nestedMap]]), // checkpoint created against "app name"
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -278,11 +290,13 @@ describe("DeployerDeployMode", () => {
     nestedMap.set(2, {
       creator: "addr-1-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     });
 
     const updatedInfo = await deployer.updateApp(
@@ -291,18 +305,20 @@ describe("DeployerDeployMode", () => {
       {
         creator: "addr-1-get-address-dry-run",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "tx-id-dry-run",
+        txID: "tx-id-dry-run",
         confirmedRound: -1,
         appID: 33,
         timestamp: 2,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       });
 
     // should create a nested checkpoint if name is same after update
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
         asa: new Map(),
-        ssc: new Map([["my-app", nestedMap]]), // update app checkpoint created against "same app" name
+        app: new Map([["my-app", nestedMap]]), // update app checkpoint created against "same app" name
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -344,7 +360,7 @@ describe("DeployerDeployMode", () => {
 
     assert.deepEqual(asaInfo, {
       creator: "addr-1-get-address-dry-run",
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       assetIndex: 1,
       assetDef: expectedASADef,
@@ -356,13 +372,13 @@ describe("DeployerDeployMode", () => {
       network1: {
         asa: new Map([["MY_ASA", {
           creator: "addr-1-get-address-dry-run",
-          txId: "tx-id-dry-run",
+          txID: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
           assetDef: expectedASADef,
           deleted: false
         }]]),
-        ssc: new Map(),
+        app: new Map(),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -387,7 +403,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, rtypes.ASAInfo>(),
-        ssc: new Map<string, typeof mp>(),
+        app: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",
@@ -397,7 +413,7 @@ describe("DeployerDeployMode", () => {
     };
 
     deployerCfg.cpData.merge(cp1, "12s");
-    const result = deployer.getDelegatedLsig("MY_LSIG");
+    const result = deployer.getLsig("MY_LSIG");
     assert.deepEqual(logicSig, result);
   });
 
@@ -407,7 +423,7 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", {
         creator: "ASA creator 123",
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         assetIndex: 0,
         assetDef: {} as wtypes.ASADef,
@@ -416,11 +432,13 @@ describe("DeployerDeployMode", () => {
       .registerSSC(networkName, "ASC name", {
         creator: "ASC creator 951",
         applicationAccount: MOCK_APPLICATION_ADDRESS,
-        txId: "",
+        txID: "",
         confirmedRound: 0,
         appID: -1,
         timestamp: 1,
-        deleted: false
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
       })
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
@@ -475,7 +493,70 @@ describe("DeployerDeployMode", () => {
 
   it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    await deployer.fundLsigByFile("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+  });
+
+  it("Should crash on fundLsig if lsig is not present in checkpoint", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    await expectBuilderErrorAsync(
+      async () => await deployer.fundLsig("AwesomeLsig",
+        { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      ERRORS.GENERAL.LSIG_NOT_FOUND_IN_CP,
+      "Logic signature(name = AwesomeLsig) not found in checkpoint"
+    );
+  });
+
+  it("Should not crash on fundLsig if lsig is present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "AlgoLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerCfg.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerCfg);
+    // passes
+    await deployer.fundLsig("AlgoLsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+  });
+
+  it("Should crash if lsig/app name is already present in checkpoint", async () => {
+    const networkName = "network1";
+    const env = mkEnv(networkName);
+    const cpData = new CheckpointRepoImpl()
+      .registerLsig(networkName, "MyLsig", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSigAccount
+      })
+      .registerSSC(networkName, "ASC name", {
+        creator: "ASC creator 951",
+        applicationAccount: MOCK_APPLICATION_ADDRESS,
+        txID: "",
+        confirmedRound: 0,
+        appID: -1,
+        timestamp: 1,
+        deleted: false,
+        approvalFile: "approval-file.py",
+        clearFile: "clear-file.py"
+      })
+      .putMetadata(networkName, "k", "v");
+    const deployerConfig = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    deployerConfig.cpData = cpData;
+    const deployer = new DeployerDeployMode(deployerConfig);
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoLsig("MyLsig"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_LSIG_ALREADY_PRESENT,
+      "Lsig name is already used: MyLsig"
+    );
+    await expectBuilderErrorAsync(
+      async () => deployer.assertNoApp("ASC name"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_APP_ALREADY_PRESENT,
+      "App name is already used: ASC name"
+    );
   });
 
   it("Should return empty ASA map on no CP", async () => {
@@ -487,7 +568,7 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     deployerCfg.cpData.registerASA("hi", "hi123", {
       creator: "",
-      txId: "",
+      txID: "",
       confirmedRound: 0,
       assetIndex: 1337,
       assetDef: {} as wtypes.ASADef,
@@ -502,7 +583,7 @@ describe("DeployerDeployMode", () => {
     await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
     assert.deepEqual(deployer.asa, new Map([["ASA_key", {
       creator: 'addr-1-get-address-dry-run',
-      txId: 'tx-id-dry-run',
+      txID: 'tx-id-dry-run',
       assetIndex: 1,
       confirmedRound: -1,
       assetDef: mkASA(),

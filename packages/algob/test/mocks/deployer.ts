@@ -14,14 +14,14 @@ import type {
 
 export class FakeDeployer implements Deployer {
   asa = new Map<string, rtypes.ASAInfo>();
-  ssc = new Map<string, rtypes.SSCInfo>();
+  app = new Map<string, rtypes.AppInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
   checkpoint = {
-    getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
       throw new Error("Not implemented");
     },
 
@@ -33,12 +33,20 @@ export class FakeDeployer implements Deployer {
       throw new Error("Not implemented");
     },
 
-    getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+    getLatestTimestampValue (map: Map<number, rtypes.AppInfo>): number {
       throw new Error("Not implemented");
     }
   };
 
   assertNoAsset (name: string): void {
+    throw new Error("Not implemented");
+  }
+
+  assertNoLsig (name: string): void {
+    throw new Error("Not implemented");
+  }
+
+  assertNoApp (name: string): void {
     throw new Error("Not implemented");
   }
 
@@ -66,7 +74,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.AppInfo): void {
     throw new Error("Not implemented");
   }
 
@@ -78,15 +86,19 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getAppByFile (nameApproval: string, nameClear: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
-  getAppByName (appName: string): rtypes.SSCInfo | undefined {
+  getApp (appName: string): rtypes.AppInfo {
     throw new Error("Not implemented");
   }
 
-  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getLsig (lsigName: string): LogicSigAccount {
+    throw new Error("Not implemented");
+  }
+
+  getAppfromCPKey (key: string): rtypes.AppInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -98,11 +110,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getDelegatedLsig (lsig: string): object | undefined {
-    throw new Error("Not implemented");
-  }
-
-  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
+  async loadLogicByFile (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
     throw new Error("Not implemented");
   }
 
@@ -146,13 +154,23 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async fundLsig (name: string, flags: FundASCFlags,
+  async fundLsigByFile (name: string, flags: FundASCFlags,
     payFlags: wtypes.TxParams, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsig (name: string, signer: rtypes.Account,
-    scInitParam?: unknown): Promise<LsigInfo> {
+  async fundLsig (lsigName: string, flags: FundASCFlags,
+    payFlags: wtypes.TxParams): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  async mkDelegatedLsig (lsigName: string, fileName: string,
+    signer: rtypes.Account, scInitParam?: unknown): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async mkContractLsig (lsigName: string,
+    fileName: string, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 
@@ -162,7 +180,7 @@ export class FakeDeployer implements Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string): Promise<rtypes.AppInfo> {
     throw new Error("Not implemented");
   }
 
@@ -175,7 +193,7 @@ export class FakeDeployer implements Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     throw new Error("Not implemented");
   }
 

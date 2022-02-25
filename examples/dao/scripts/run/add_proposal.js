@@ -1,5 +1,5 @@
 const { fundAccount, tryExecuteTx } = require('./common/common.js');
-const { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } = require('./common/accounts.js');
+const { accounts } = require('./common/accounts.js');
 const { mkProposalTx } = require('./common/tx-params.js');
 
 async function addProposal (runtimeEnv, deployer) {
@@ -8,23 +8,21 @@ async function addProposal (runtimeEnv, deployer) {
   // fund account
   await fundAccount(deployer, proposer);
 
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
-  const proposalLsig = await getProposalLsig(deployer);
+  const daoAppInfo = deployer.getApp('DAOApp'); ;
+  const proposalLsig = deployer.getLsig('proposalLsig');
   try {
     await deployer.optInLsigToApp(daoAppInfo.appID, proposalLsig, {}, {});
   } catch (e) {
     console.log(e.message);
   }
 
-  const daoFundLsig = await getDAOFundLsig(deployer);
-  const depositLsig = await getDepositLsig(deployer);
+  const daoFundLsig = deployer.getLsig('daoFundLsig');
   const govToken = deployer.asa.get('gov-token');
 
   const addProposalTx = mkProposalTx(
     daoAppInfo.appID,
     govToken.assetIndex,
     proposer,
-    depositLsig,
     proposalLsig,
     daoFundLsig
   );

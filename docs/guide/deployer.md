@@ -139,7 +139,7 @@ For opting in to App, `deployer` supports the following methods:
     };
   ```
 
-#### Stateless Smart Contracts
+#### Smart Signatures
 
 - *Contract Mode:*
 
@@ -147,28 +147,94 @@ For opting in to App, `deployer` supports the following methods:
 
   Contract accounts can be also be used to deploy ASAs.
 
-   Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
+  Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Smart Signatures (lsig). In the file `scripts/deploy.ts`, you will find two methods to fund an lsig (by file, or by name):
 
-  ```
-  await deployer.fundLsig('htlc.py',
-    { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
-  ```
-  `fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsig` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
+  + By Name (default behaviour):
+    ```js
+    await deployer.mkContractLsig('HTLC_Lsig', 'htlc.py', scTmplParams);
+    // no need to pass smTmplParams again and again
+    await deployer.fundLsig('HTLC_Lsig', { funder: bob, fundingMicroAlgo: 2e6 }, {});
+    ```
+
+  + By File (legacy behaviour):
+    ```js
+    await deployer.fundLsigByFile('htlc.py',
+      { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
+    ```
+
+  `fundLsigByFile`/`fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsigByFile` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
+
 
 - *Delegated Signature Mode*:
 
-  Stateless smart contracts can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
+  Smart Signatures can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
 
   Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner);
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('goldASC', '4-gold-asa.teal', goldOwner);
   console.log(ascInfoGoldDelegated);
   ```
 
-You can learn more about Stateless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
+You can learn more about Logic Signatures[here](https://developer.algorand.org/docs/features/asc1/stateless/).
 
 
-#### Compile contracts
+#### Checkpoint names
+
+Algob creates [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.html) and associates them with a name. This is a very useful feature. For example, you don't need to pass smart contract template parameters every time when getting app info, or loading a logic signature. Since `algob v4.0`, we support naming for apps (Algorand stateful smart contracts) and smart signatures.
+
+##### App Name
+
+`deployer.deployApp` requires `appName` when deploying an application. The app metadata in checkpoint will be stored against "appName". Eg.
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+  'dao-app-approval.py',
+  'dao-app-clear.py',
+  {
+    sender: creator,
+    localInts: 9,
+    localBytes: 7,
+    globalInts: 4,
+    globalBytes: 2,
+    appArgs: appArgs
+  }, {}, {}, "DAO App"); // app name passed here
+
+  // now during querying, you only need this app name
+  const appInfo = deployer.getApp("DAO App");
+```
+
+#### Smart Signature Name
+
+Similar to storing app names, you can store lsig info against name in a checkpoint. To store delegated lsig use `mkDelegatedLsig` function, and to store contract lsig info, use `mkContractLsig` function. Eg.
+```js
+const bob = deployer.accountsByName.get('bob');
+// store delegatedLsig
+await deployer.mkDelegatedLsig('DLsig', 'file.py', bob, { ARG_DAO_APP: 1 });
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsig("DLsig");
+```
+
+Similarly for contract lsig:
+```js
+// store contract lsig
+await deployer.mkContractLsig("CLsig", 'file.py', { ARG_DAO_APP: 1 });
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsig("CLsig");
+```
+
+**NOTE:** For contract lsig you generally don't require to save info in checkpoint, but we recommend it so that it creates an entry in checkpoint, and then you can directly use `deployer.getLsig(<name>)` to query it's data. Alternatively, you can also use `deployer.loadLogicByFile`.
+
+#### Managing Artifacts
+
+Artifacts folder (`/artifacts`) comprises of two folders:
++ `scripts/`: these contain the checkpoints and transaction logs while executing your "direct" (deployment) scripts. Checkpoints can be stored against a name (for an `app` or `lsig`), or against filenames (eg. `dao-app.py`, `treasury-lsig.py`).
++ `cache/`: these contain `.yml` files which stores "cached" teal code. During any kind of transaction processing (`fundLsigByFile`, `loadLogicByFile`, `deployApp` ..etc) if there is an intermediary compilation of teal code, it is stored in `artifacts/cache`. So that next time, this compiled code can be directly used.
+
+In the next section we'll see how to compile your contracts in real time (or load from cache) using filenames and app/lsig names.
+
+##### Compile contracts
 
 You can use the deployer API to compile smart contracts (ASC) and get the contract's bytecode, hash, compilation timestamp etc:
   * `compiledASC`: compiles a contract in real time, returns `ASCCache` object. Example:
@@ -177,4 +243,11 @@ You can use the deployer API to compile smart contracts (ASC) and get the contra
   const bytecode = info.compiled;
   ```
 
-  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by deployment name. 
+  * `getDeployedASC`: Similar to above, but instead of compiling, it returns cached program (from artifacts/cache) by app or lsig name.
+  ```js
+  // lsig
+  const info = await deployer.getDeployedASC('MyApp');
+  const [approvalInfo, clearInfo] = [info.approval, info.clear];
+
+  const lsigInfo = await deployer.getDeployedASC('MyLsig');
+  ```

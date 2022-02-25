@@ -105,6 +105,35 @@ In this section we will describe the flow of testing smart contracts in runtime:
 - **Update/Refresh State**. After a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. In algob examples we use `syncAccounts()` closure (see [example](https://github.com/scale-it/algo-builder/blob/6743acd/examples/restricted-assets/test/asset-txfer-test.js#L80)) closure which will reassign accounts to their latest state.
 - **Verify State**: Now, we can verify if the `global state` and `local state` as well as accounts are correctly updated. We use `runtime.getGlobalState()` and `runtime.getLocalState()` to check the state and directly inspect account objects (after the `syncAccounts` is made).
 
+### Default Accounts
+This section briefly explains how to use Default Accounts provided by the Runtime. The Default Accounts are predifined accounts that are recommented to be used in tests.  Instead of long setup copy-paste code like this:
+```javascript
+const initialMicroAlgo = 1e8;
+let john = new AccountStore(initialMicroAlgo);
+let bob = new AccountStore(initialMicroAlgo);
+let runtime = Runtime([john, bob]);
+syncAccounts(){
+  john = runtime.getAccount(john.address);
+  bob = runtime.getAccount(bob.address);
+};
+```
+With the utilization of the Default Accounts the setup might look like this:
+```javascript
+let john;
+let bob;
+let runtime = Runtime([]);
+[john, bob] = runtime.defaultAccounts();
+syncAccounts(){
+  [john, bob] = runtime.defaultAccounts();
+};
+```
+There is no need to pass the Default Accounts to the Runtime constructor, since these are created inside of it.
+To sync the accounts the method `runtime.defaultAccounts()` must be invoked. No additional code is necessary. 
+Methods:
+- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e8 microAlgos (100 Algos). 
+- `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts. 
+
+For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 
 ## Run tests
 
@@ -123,7 +152,7 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
 #### Escrow Account
 
-Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract (smart signature) logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
+Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a smart signature logic. In the example below, we will use a TEAL code from our [escrow account test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 The logic signature accepts only ALGO payment transaction where amount is <= 100 AND receiver is `john` AND fee <= 10000.
 
 - First let's prepare the runtime and state: initialize accounts, get a logic signature for escrow and set up runtime:
@@ -203,7 +232,7 @@ Full example with above tests is available in our [escrow-account.ts](https://gi
 
 #### Delegated Signature Account
 
-Let's try to execute a transaction where a user (`john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
+Let's try to execute a transaction where a user (`john`) will use delegated signature based on a smart signatures logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
 
   - As before we start with preparing the runtime. We use `runtime.loadLogic('escrow.teal', [])` to create and load logic signature.
 

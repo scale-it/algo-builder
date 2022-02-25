@@ -232,7 +232,7 @@ describe("Delete ASA and SSC", () => {
     await executeTransaction(deployer, execParams);
   });
 
-  it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
+  it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
     const flags: types.AppDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,
@@ -251,7 +251,7 @@ describe("Delete ASA and SSC", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getApp("approval.teal", "clear.teal");
+    const res = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(res);
     if (res) assert.equal(res.deleted, true);
   });
@@ -338,7 +338,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await deployer.optInLsigToASA('233212', mockLsig, {});
   });
 
-  it("should throw error with opt-in ssc functions, if ssc exist and deleted", async () => {
+  it("should throw error with opt-in app functions, if app exist and deleted", async () => {
     await expectBuilderErrorAsync(
       async () => await deployer.optInAccountToApp(bobAcc, appID, {}, {}),
       ERRORS.GENERAL.APP_DELETED
@@ -350,20 +350,20 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     );
   });
 
-  it("should pass with opt-in ssc functions, if ssc doesn't exist in checkpoint", async () => {
+  it("should pass with opt-in app functions, if app doesn't exist in checkpoint", async () => {
     await deployer.optInAccountToApp(bobAcc, 122, {}, {});
 
     await deployer.optInLsigToApp(12223, mockLsig, {}, {});
   });
 
-  it("should throw error with update ssc function, if ssc exist and deleted", async () => {
+  it("should throw error with update app function, if app exist and deleted", async () => {
     await expectBuilderErrorAsync(
       async () => await deployer.updateApp(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
       ERRORS.GENERAL.APP_DELETED
     );
   });
 
-  it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", async () => {
+  it("should pass with update app functions, if app doesn't exist in checkpoint", async () => {
     await deployer.updateApp(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
   });
 
@@ -640,7 +640,10 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("should deploy application in deploy mode and save info by name", async () => {
@@ -661,10 +664,13 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // able to retrieve info by "appName"
-    assert.isDefined(deployer.getAppByName("dao-app"));
+    assert.isDefined(deployer.getApp("dao-app"));
 
     // do note that traditional way doesn't work if appName is passed
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("should delete application in run mode", async () => {
@@ -694,7 +700,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getApp("approval.teal", "clear.teal");
+    const res = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(res);
     assert.equal(res?.deleted, false);
   });
@@ -734,7 +740,10 @@ describe("Update transaction test in run mode", () => {
     const appInfo = await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
 
     execParams = {
       type: wtypes.TransactionType.UpdateApp,
@@ -748,7 +757,10 @@ describe("Update transaction test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
   });
 
   it("deploy in deploy mode, update in run mode", async () => {
@@ -766,22 +778,24 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     await executeTransaction(deployer, execParams);
-    const appInfo = deployer.getApp("approval.teal", "clear.teal");
+    const appInfo = deployer.getAppByFile("approval.teal", "clear.teal");
     assert.isDefined(appInfo);
 
     deployer = new DeployerRunMode(deployerCfg);
-    execParams = {
-      type: wtypes.TransactionType.UpdateApp,
-      sign: wtypes.SignType.SecretKey,
-      fromAccount: bobAcc,
-      appID: appInfo?.appID as number,
-      newApprovalProgram: "approval.teal",
-      newClearProgram: "clear.teal",
-      payFlags: {}
-    };
+    if (appInfo) {
+      execParams = {
+        type: wtypes.TransactionType.UpdateApp,
+        sign: wtypes.SignType.SecretKey,
+        fromAccount: bobAcc,
+        appID: appInfo.appID,
+        newApprovalProgram: "approval.teal",
+        newClearProgram: "clear.teal",
+        payFlags: {}
+      };
 
-    await executeTransaction(deployer, execParams);
-    assert.deepEqual(appInfo, deployer.getApp("approval.teal", "clear.teal"));
+      await executeTransaction(deployer, execParams);
+      assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
+    }
   });
 
   it("deploy in run mode, update in deploy mode", async () => {
@@ -798,7 +812,10 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     const appInfo = await executeTransaction(deployer, execParams);
-    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+    expectBuilderError(
+      () => deployer.getAppByFile("approval.teal", "clear.teal"),
+      ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
+    );
 
     deployer = new DeployerDeployMode(deployerCfg);
     execParams = {
@@ -813,7 +830,7 @@ describe("Update transaction test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
     // checkpoint is stored for the update
-    assert.isDefined(deployer.getApp("approval.teal", "clear.teal"));
+    assert.isDefined(deployer.getAppByFile("approval.teal", "clear.teal"));
   });
 });
 

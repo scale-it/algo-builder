@@ -13,14 +13,14 @@ const { tokenMap, nominalPrice } = require('./common/common');
  * @param amount amount of bond tokens
  */
 exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amount) {
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const appInfo = deployer.getApp('BondApp');
   const bondToken = tokenMap.get('bond-token-' + String(n));
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr,
     TMPL_BOND: bondToken
   };
-  const buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  const buybackLsig = await deployer.loadLogicByFile('buyback-lsig.py', scInitParam);
   const exitAmount = Number(amount) * Number(nominalPrice);
   const exitTx = [
     //  Bond token transfer to buyback address

@@ -66,7 +66,7 @@ export interface Networks {
 export interface KmdWallet {
   name: string
   password: string
-  accounts: Array<{name: string, address: string}> // both are obligatory
+  accounts: Array<{ name: string, address: string }> // both are obligatory
 }
 
 export interface KmdCfg {
@@ -338,11 +338,12 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-// stateless smart contract deployment information (log)
+// smart signature deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
   lsig: LogicSigAccount
+  file?: string
 }
 
 /**
@@ -373,7 +374,7 @@ export interface CheckpointRepo {
   getMetadata: (networkName: string, key: string) => string | undefined
 
   registerASA: (networkName: string, name: string, info: rtypes.ASAInfo) => CheckpointRepo
-  registerSSC: (networkName: string, name: string, info: rtypes.SSCInfo) => CheckpointRepo
+  registerSSC: (networkName: string, name: string, info: rtypes.AppInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
@@ -388,7 +389,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, rtypes.ASAInfo>
-  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>
+  app: Map<string, Map<Timestamp, rtypes.AppInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -404,7 +405,7 @@ export interface AssetScriptMap {
 export interface CheckpointFunctions {
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+  getAppfromCPKey: (key: string) => rtypes.AppInfo | undefined
 
   /**
    * Returns SSC checkpoint key using application index,
@@ -420,7 +421,7 @@ export interface CheckpointFunctions {
    */
   getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
 
-  getLatestTimestampValue: (map: Map<number, rtypes.SSCInfo>) => number
+  getLatestTimestampValue: (map: Map<number, rtypes.AppInfo>) => number
 }
 
 export interface Deployer {
@@ -480,6 +481,8 @@ export interface Deployer {
   loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
+  assertNoLsig: (lsigName: string) => void
+  assertNoApp: (appName: string) => void
 
   getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
@@ -487,7 +490,7 @@ export interface Deployer {
 
   registerASAInfo: (name: string, asaInfo: rtypes.ASAInfo) => void
 
-  registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
+  registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void
 
   logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
 
@@ -499,28 +502,55 @@ export interface Deployer {
 
   /**
    * Funds logic signature account (Contract Account).
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @fileName:  filename with a Smart Signature code (must be present in the assets folder)
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  fundLsig: (
-    name: string,
+  fundLsigByFile: (
+    fileName: string,
     flags: FundASCFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ) => void
 
   /**
+   * This function will send Algos to ASC account in "Contract Mode".
+   * @param lsigName - name of the smart signature (passed by user during
+   * mkContractLsig/mkDelegatedLsig)
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   */
+  fundLsig: (
+    lsigName: string,
+    flags: FundASCFlags,
+    payFlags: wtypes.TxParams
+  ) => void
+
+  /**
    * Makes delegated logic signature signed by the `signer`.
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
+   * @lsigName name of smart signature (checkpoint info will be stored against this name)
+   * @fileName  Smart Signature filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   mkDelegatedLsig: (
-    name: string,
+    lsigName: string,
+    fileName: string,
     signer: rtypes.Account,
+    scTmplParams?: SCParams
+  ) => Promise<LsigInfo>
+
+  /**
+   * Stores logic signature info in checkpoint for contract mode
+   * @lsigName name of lsig (checkpoint info will be stored against this name)
+   * @fileName ASC file name
+   * @scTmplParams : Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  mkContractLsig: (
+    lsigName: string,
+    fileName: string,
     scTmplParams?: SCParams
   ) => Promise<LsigInfo>
 
@@ -541,7 +571,7 @@ export interface Deployer {
     flags: rtypes.AppDeploymentFlags,
     payFlags: wtypes.TxParams,
     scTmplParams?: SCParams,
-    appName?: string) => Promise<rtypes.SSCInfo>
+    appName?: string) => Promise<rtypes.AppInfo>
 
   /**
    * Update programs(approval, clear) for a stateful smart contract.
@@ -565,7 +595,7 @@ export interface Deployer {
     flags: rtypes.AppOptionalFlags,
     scTmplParams?: SCParams,
     appName?: string
-  ) => Promise<rtypes.SSCInfo>
+  ) => Promise<rtypes.AppInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -633,16 +663,19 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getAppByFile: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined
 
   /**
    * Queries a stateful smart contract info from checkpoint name
    * passed by user during deployment */
-  getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+  getApp: (appName: string) => rtypes.AppInfo
 
   /**
-   * Queries a delegated logic signature from checkpoint. */
-  getDelegatedLsig: (lsigName: string) => Object | undefined
+   * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
+   * @param lsigName name of the smart signture
+   * (defined by user during mkContractLsig/mkDelegatedLsig)
+   */
+  getLsig: (lsigName: string) => LogicSigAccount
 
   /**
    * Loads contract mode logic signature (TEAL or PyTEAL)
@@ -650,11 +683,11 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
+  loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
 
   /**
    * Alias to `this.compileASC`
-   * Deprecated: this function will be removed in the next release.
+   * @deprecated this function will be removed in the next release.
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 
@@ -668,11 +701,10 @@ export interface Deployer {
   compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
 
   /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
+   * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+   * @param name App/Lsig name used during deployment
    */
-  getDeployedASC: (name: string) => Promise<ASCCache | undefined>
+  getDeployedASC: (name: string) => Promise<ASCCache | AppCache | undefined>
 
   /**
    * Checks if checkpoint is deleted for a particular transaction
@@ -693,10 +725,12 @@ export interface ASCCache {
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
   base64ToBytes: Uint8Array // compiled base64 in bytes
+  tealCode: string
 }
 
-export interface PyASCCache extends ASCCache {
-  tealCode: string
+export interface AppCache {
+  approval: ASCCache | undefined
+  clear: ASCCache | undefined
 }
 
 // ************************

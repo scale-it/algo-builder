@@ -17,10 +17,6 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return mockAlgod;
   };
 
-  getDelegatedLsig (lsig: string): Object | undefined {
-    throw new Error("Not implemented");
-  }
-
   getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return new Promise((resolve, reject) => {
       assetIndex === 1n ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
@@ -34,7 +30,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
+  waitForConfirmation (txID: string): Promise<ConfirmedTxInfo> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
@@ -46,7 +42,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
       creator: String(flags.creator.addr) + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
       assetDef: asaDef,
@@ -55,7 +51,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
+    lsig: LogicSigAccount | string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
@@ -71,15 +67,17 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown,
-    appName?: string): Promise<rtypes.SSCInfo> {
+    appName?: string): Promise<rtypes.AppInfo> {
     return {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 1,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     };
   }
 
@@ -91,15 +89,17 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     newClearProgram: string,
     flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
-  ): Promise<rtypes.SSCInfo> {
+  ): Promise<rtypes.AppInfo> {
     return {
       creator: String(sender.addr) + "-get-address-dry-run",
       applicationAccount: MOCK_APPLICATION_ADDRESS,
-      txId: "tx-id-dry-run",
+      txID: "tx-id-dry-run",
       confirmedRound: -1,
       appID: 33,
       timestamp: 2,
-      deleted: false
+      deleted: false,
+      approvalFile: "approval-file.py",
+      clearFile: "clear-file.py"
     };
   }
 
@@ -110,7 +110,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       compiled: "ASDF", // the compiled code
       compiledHash: "ASDF", // hash returned by the compiler
       srcHash: 123, // source code hash
-      base64ToBytes: new Uint8Array(1) // compiled base64 in bytes
+      base64ToBytes: new Uint8Array(1), // compiled base64 in bytes
+      tealCode: "TEAL" // teal code
     };
   }
 

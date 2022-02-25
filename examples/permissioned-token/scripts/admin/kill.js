@@ -14,7 +14,7 @@ async function kill (deployer) {
    * token is killed.
    */
   const tesla = deployer.asa.get('tesla');
-  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('Controller');
   const killParams = {
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,

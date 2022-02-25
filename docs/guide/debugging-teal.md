@@ -4,7 +4,7 @@ layout: splash
 
 # Debugging TEAL
 
-Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful and stateless smart contracts. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
+Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful smart contracts and smart signatures. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
 
 Before beginning, make sure you have `tealdbg` installed. It is included as part of the default Algorand Node when [installed via the updater script](https://developer.algorand.org/docs/run-a-node/setup/install/#installation-with-the-updater-script) but must be [installed seperately](https://developer.algorand.org/docs/run-a-node/setup/install/#installing-the-devtools) if you installed the Algorand Node via a Linux package manager. Try to run:
 
@@ -69,7 +69,7 @@ First we need to deploy the contracts using `algob deploy`. We will debug a tran
 Setting up transaction params (note that this is a passing scenario as amount = 500 <= 1000):
 ```js
 // load signed lsig from checkpoint
-const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+const lsigGoldOwner = deployer.getLsig('4-gold-asa.teal');
 const txnParam = {
   type: types.TransactionType.TransferAsset,
   sign: types.SignType.LogicSignature,
@@ -212,7 +212,7 @@ For more details, check the project [README](https://github.com/scale-it/algo-bu
 Setting up transaction group:
 ```js
 // load app, asset info from checkpoint
-const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+const appInfo = deployer.getAppByFile('poi-approval.teal', 'poi-clear.teal');
 const assetInfo = deployer.asa.get('gold');
 
 // load logic signature
@@ -220,7 +220,7 @@ const escrowParams = {
   ASSET_ID: assetInfo.assetIndex,
   APP_ID: appInfo.appID
 };
-const escrowLsig = await deployer.loadLogic('clawback-escrow.py', escrowParams);
+const escrowLsig = await deployer.loadLogicByFile('clawback-escrow.py', escrowParams);
 const escrowAddress = escrowLsig.address();
 
 const txGroup = [

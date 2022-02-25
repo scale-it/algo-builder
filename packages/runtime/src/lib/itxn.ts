@@ -1,44 +1,102 @@
 import { types } from "@algo-builder/web";
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
+import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
+import { MaxTxnNoteBytes, TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
 import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
 
 // requires their type as number
-const numberTxnFields = new Set([
-  'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
-  'ConfigAssetDefaultFrozen'
-]);
+const numberTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
+    'ConfigAssetDefaultFrozen'
+  ])
+};
+numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
+['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation"].forEach(field => numberTxnFields[6].add(field));
 
-const uintTxnFields = new Set([
-  'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
-]);
+const uintTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
+  ])
+};
+uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
-const assetIDFields = new Set([
-  'XferAsset', 'FreezeAsset', 'ConfigAsset'
-]);
+const assetIDFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'XferAsset', 'FreezeAsset', 'ConfigAsset'
+  ])
+};
 
-const byteTxnFields = new Set([
-  'Type', 'ConfigAssetName', 'ConfigAssetUnitName',
-  'ConfigAssetMetadataHash', 'ConfigAssetURL'
-]);
+assetIDFields[6] = cloneDeep(assetIDFields[5]);
 
-const acfgAddrTxnFields = new Set([
-  'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
-]);
+const byteTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'Type', 'ConfigAssetName', 'ConfigAssetUnitName',
+    'ConfigAssetMetadataHash', 'ConfigAssetURL'
+  ])
+};
 
-const otherAddrTxnFields = new Set([
-  'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
-  'AssetReceiver', 'FreezeAssetAccount'
-]);
+byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+['VotePK', 'SelectionPK', 'Note'].forEach(field => byteTxnFields[6].add(field));
+
+const acfgAddrTxnFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set([
+    'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
+  ])
+};
+acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
+
+const otherAddrTxnFields: {[key: number]: Set<string>} = {
+  5: new Set([
+    'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
+    'AssetReceiver', 'FreezeAssetAccount'
+  ])
+};
+
+otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
+// add new inner transaction fields support in teal v6.
+['RekeyTo'].forEach((field) => otherAddrTxnFields[6].add(field));
+
+const txTypes: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set(),
+  4: new Set(),
+  5: new Set(['pay', 'axfer', 'acfg', 'afrz'])
+};
+
+// supported keyreg on teal v6
+txTypes[6] = cloneDeep(txTypes[5]);
+txTypes[6].add('keyreg');
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -49,36 +107,38 @@ export function setInnerTxField (
   subTxn: EncTx, field: string, val: StackElem,
   op: Op, interpreter: Interpreter, line: number): EncTx {
   let txValue: bigint | number | string | Uint8Array | undefined;
-  if (uintTxnFields.has(field)) {
+  const tealVersion = interpreter.tealVersion;
+
+  if (uintTxnFields[tealVersion].has(field)) {
     txValue = op.assertBigInt(val, line);
   }
 
-  if (numberTxnFields.has(field)) {
+  if (numberTxnFields[tealVersion].has(field)) {
     txValue = Number(op.assertBigInt(val, line));
   }
 
-  if (assetIDFields.has(field)) {
+  if (assetIDFields[tealVersion].has(field)) {
     const id = op.assertBigInt(val, line);
     txValue = interpreter.getAssetIDByReference(Number(id), false, line, op);
   }
 
-  if (byteTxnFields.has(field)) {
+  if (byteTxnFields[tealVersion].has(field)) {
     const assertedVal = op.assertBytes(val, line);
     txValue = convertToString(assertedVal);
   }
 
-  if (otherAddrTxnFields.has(field)) {
+  if (otherAddrTxnFields[tealVersion].has(field)) {
     const assertedVal = op.assertBytes(val, line);
     const accountState = interpreter.getAccount(assertedVal, line);
     txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
   }
 
   // if address use for acfg we only check address is valid
-  if (acfgAddrTxnFields.has(field)) {
+  if (acfgAddrTxnFields[tealVersion].has(field)) {
     txValue = op.assertAlgorandAddress(val, line);
   }
 
-  const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
+  const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
   // txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
   if (txValue === undefined) {
@@ -87,7 +147,7 @@ export function setInnerTxField (
         msg: `Field ${field} is invalid`,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 
@@ -96,11 +156,11 @@ export function setInnerTxField (
   switch (field) {
     case 'Type': {
       const txType = txValue as string;
-      // either invalid string, or not allowed for TEALv5
+      // check txType supported in current teal version or not
       if (
-        txType !== 'pay' && txType !== 'axfer' && txType !== 'acfg' && txType !== 'afrz'
+        !txTypes[tealVersion].has(txType)
       ) {
-        errMsg = `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
+        errMsg = `${txType} is not a valid Type for itxn_field`;
       }
       break;
     }
@@ -148,6 +208,30 @@ export function setInnerTxField (
       }
       break;
     }
+
+    case 'VotePK': {
+      const votePk = txValue as string;
+      if (votePk.length !== 32) {
+        errMsg = "VoteKey must be 32 bytes";
+      }
+      break;
+    }
+
+    case 'SelectionPK': {
+      const selectionPK = txValue as string;
+      if (selectionPK.length !== 32) {
+        errMsg = "SelectionPK must be 32 bytes";
+      }
+      break;
+    }
+
+    case 'Note': {
+      const note = txValue as Uint8Array;
+      if (note.length > MaxTxnNoteBytes) {
+        errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+      }
+      break;
+    }
     default: { break; }
   }
 
@@ -157,7 +241,7 @@ export function setInnerTxField (
         msg: errMsg,
         field: field,
         line: line,
-        tealV: interpreter.tealVersion
+        tealV: tealVersion
       });
   }
 
@@ -198,6 +282,11 @@ const _getASAConfigAddr = (addr?: Uint8Array): string => {
   return "";
 };
 
+const _getAddress = (addr?: Uint8Array): string | undefined => {
+  if (addr) { return encodeAddress(addr); }
+  return undefined;
+};
+
 // parse encoded txn obj to execParams (params passed by user in algob)
 /* eslint-disable sonarjs/cognitive-complexity */
 export function parseEncodedTxnToExecParams (tx: EncTx,
@@ -213,7 +302,8 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
     fromAccountAddr: encodeAddress(tx.snd),
     payFlags: {
       totalFee: tx.fee,
-      firstValid: tx.fv
+      firstValid: tx.fv,
+      note: tx.note
     }
   };
 
@@ -224,6 +314,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
         _getRuntimeAccountAddr(tx.rcv, interpreter, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = tx.amt ?? 0n;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close, interpreter, line);
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'afrz': {
@@ -231,6 +322,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.assetID = tx.faid;
       execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd, interpreter, line);
       execParams.freezeState = BigInt(tx.afrz ?? 0n) === 1n;
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'axfer': {
@@ -248,6 +340,7 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
       execParams.amount = tx.aamt ?? 0n;
       execParams.assetID = tx.xaid ?? 0;
       execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose, interpreter, line);
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
     case 'acfg': { // can be asset modification, destroy, or deployment(create)
@@ -282,8 +375,18 @@ export function parseEncodedTxnToExecParams (tx: EncTx,
           freeze: _getASAConfigAddr(tx.apar?.f)
         };
       }
+      execParams.payFlags.rekeyTo = _getAddress(tx.rekey);
       break;
     }
+
+    case 'keyreg':
+      execParams.type = types.TransactionType.KeyRegistration;
+      execParams.voteKey = tx.votekey;
+      execParams.selectionKey = tx.selkey;
+      execParams.voteFirst = tx.votefst;
+      execParams.voteLast = tx.votelst;
+      execParams.voteKeyDilution = tx.votekd;
+      break;
     default: {
       throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
     }

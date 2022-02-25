@@ -31,7 +31,7 @@ Following globals are available in an `algob console` REPL:
 
 # Example Walkthrough
 
-For demonstration purpose, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user will be able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with stateless smart contracts (contract account and delegation signature mode) using `algob console`.
+For demonstration purpose, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user will be able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with smart signatures (contract account and delegation signature mode) using `algob console`.
 
 + [Setup](./algob-console.md#setup)
 + [Transfer Algos](./algob-console.md#transfer-algos)
@@ -66,7 +66,7 @@ algob> deployer.asa
 Map(1) {
   'gold' => {
     creator: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
-    txId: 'QBKYATG6Y7BS5A5NXE6OYRZ5B5TY22EOJC2UEK25GFMW5S7WVEVA',
+    txID: 'QBKYATG6Y7BS5A5NXE6OYRZ5B5TY22EOJC2UEK25GFMW5S7WVEVA',
     assetIndex: 25,
     confirmedRound: 3446,
     assetDef: {
@@ -201,12 +201,27 @@ Similar example can be found in `/scrips/transfer/tesla-to-john.js` (tesla ASA).
 ## Transfer Algos according to ASC logic (Contract Account)
 
 Here we will transfer some `algos` from a stateless smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
-+ We will first load the logic signature (using `deployer.loadLogic(<file_name>.teal)` and get it's address(`lsig.address()`).
++ We will first load the smart signature (using `deployer.loadLogicByFile(<file_name>.teal)` and get it's address(`lsig.address()`). It is worth noting that you can use `mkContractLsig` to save your lsig info against a "name" (eg. `myLsig`), and directly use `deployer.getLsig` to query Lsig information from a checkpoint. Eg.
+  ```js
+  // store contract lsig
+  await deployer.mkContractLsig("CLsig", 'file.py', { ARG_DAO_APP: 1 });
+
+  // now during querying, you only need this lsig name
+  const lsigInfo = deployer.getLsig("CLsig");
+  ```
 + This address will be the sender(contract account mode) and receiver will be `john`.
 + Finally, we will transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
-```
-lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
+```js
+// by file
+lsig = await deployer.loadLogicByFile("2-gold-contract-asc.teal");
 sender = lsig.address();
+
+// by name
+// store contract lsig in checkpoint (in deploy script)
+await deployer.mkContractLsig("GoldASC", '2-gold-contract-asc.teal');
+
+// now during querying, you only need this lsig name
+const lsigInfo = deployer.getLsig("GoldASC");
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97818537-e3740300-1cc8-11eb-81cd-a64e80106cf7.png)
 
@@ -284,12 +299,14 @@ Code can be found in `/scripts/transfer/gold-contract-sc.js`
 Here, we will first transfer some Algorand Standard Assets(ASA) from `goldOwner` (delegating authority in this case) to `john` according to asc `/assets/4-gold-asa.teal`.
 `goldOwner` is the delegating authority here, as during deployment (`algob deploy`) the smart contract's logic signature was signed by this account (check `/scripts/2-gold-asc.js`).
 
-Logic signature (stored in checkpoint) is retreived using `deployer.getDelegatedLsig('<file_name>.teal'`).
+Logic signature (stored in checkpoint) is retreived using `deployer.getLsig('<file_name>.teal'`).
 Assets are transferred using `algob.executeTransaction({ type: TransactionType.TransferAsset, ...})`.
 
 Retreive lsig & assetId from checkpoint:
 ```bash
-algob> lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+// you can load by name as well (using name is GOLD_ASA):
+// algob> lsigGoldOwner = deployer.getLsig('GOLD_ASA');
+algob> lsigGoldOwner = deployer.getLsig('4-gold-asa.teal');
 LogicSig {
   tag: [
      80, 114, 111,
