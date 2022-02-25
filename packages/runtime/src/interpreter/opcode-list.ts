@@ -3921,12 +3921,9 @@ export class ITxnSubmit extends Op {
     }
 
     // initial contract account.
-    const appID = this.interpreter.runtime.ctx.tx.apid;
-    const contractAddress = getApplicationAddress(appID as number);
-    const contractAccount = {
-      addr: contractAddress,
-      sk: Buffer.from([])
-    };
+    const appID = this.interpreter.runtime.ctx.tx.apid as number;
+    const contractAddress = getApplicationAddress(appID);
+    const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
     // get execution txn params (parsed from encoded sdk txn obj)
     // singer will be contractAccount

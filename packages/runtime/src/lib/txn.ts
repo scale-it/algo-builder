@@ -193,12 +193,22 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
     !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
 
+/**
+ * Check if given encoded transaction obj is appl creation
+ * @param txn Encoded EncTx Object
+ */
 export function isEncTxApplicationCreate (txn: EncTx): boolean {
   return txn.type === EncTxnType.appl && (txn.apan === 0 || txn.apan === undefined);
 }
 
+/**
+ *
+ * @param txAndSign transaction and sign
+ * @param ctx context which is tx and sign apply
+ * @returns ExecParams object equivalent with txAndSign
+ */
 export function transactionAndSignToExecParams (
-  txAndSign: types.TransactionAndSign, ctx: Context, line?: number
+  txAndSign: types.TransactionAndSign, ctx: Context
 ): types.ExecParams {
   const transaction = txAndSign.transaction as any;
   const encTx = transaction.get_obj_for_encoding() as EncTx;
@@ -207,7 +217,7 @@ export function transactionAndSignToExecParams (
   encTx.approvalProgram = transaction.approvalProgram;
   encTx.clearProgram = transaction.clearProgram;
   const sign = txAndSign.sign;
-  return encTxToExecParams(encTx, sign, ctx, line);
+  return encTxToExecParams(encTx, sign, ctx);
 }
 
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -222,7 +232,7 @@ export function encTxToExecParams (
   execParams.payFlags.totalFee = encTx.fee;
 
   switch (encTx.type) {
-    case 'appl': {
+    case EncTxnType.appl: {
       if (isEncTxApplicationCreate(encTx)) {
         execParams.type = types.TransactionType.DeployApp;
         execParams.approvalProgram = encTx.approvalProgram;
@@ -235,7 +245,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case 'pay': {
+    case EncTxnType.pay: {
       execParams.type = types.TransactionType.TransferAlgo;
       execParams.fromAccountAddr = _getAddress(encTx.snd);
       execParams.toAccountAddr =
@@ -249,7 +259,7 @@ export function encTxToExecParams (
       }
       break;
     }
-    case 'afrz': {
+    case EncTxnType.afrz: {
       execParams.type = types.TransactionType.FreezeAsset;
       execParams.assetID = encTx.faid;
       execParams.freezeTarget = _getRuntimeAccountAddr(encTx.fadd, ctx, line);
@@ -283,7 +293,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case 'acfg': {
+    case EncTxnType.acfg: {
       if (isEncTxAssetDeletion(encTx)) {
         execParams.type = types.TransactionType.DestroyAsset;
         execParams.assetID = encTx.caid;
@@ -318,7 +328,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case 'keyreg': {
+    case EncTxnType.keyreg: {
       execParams.type = types.TransactionType.KeyRegistration;
       execParams.voteKey = encTx.votekey?.toString('base64');
       execParams.selectionKey = encTx.selkey?.toString('base64');

@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { AlgoTransferParam } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
@@ -134,7 +133,7 @@ describe("Transfer Algo Transaction", function () {
     this.beforeEach(function () {
       externalAccount = new AccountStore(0).account;
 
-      const transferAlgoTx: AlgoTransferParam = {
+      const transferAlgoTx: types.AlgoTransferParam = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
@@ -155,7 +154,7 @@ describe("Transfer Algo Transaction", function () {
     });
 
     it("Can create transaction from external account", () => {
-      const transferAlgoTx: AlgoTransferParam = {
+      const transferAlgoTx: types.AlgoTransferParam = {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: externalRuntimeAccount.account,
