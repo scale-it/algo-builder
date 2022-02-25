@@ -23,6 +23,8 @@ Added:
 Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 - The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
+- Support execute `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
+
 ### API breaking
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
