@@ -1,15 +1,10 @@
-import { types } from "@algo-builder/web";
-import { mkTransaction } from "@algo-builder/web/build/lib/txn";
-import { ASADef } from "@algo-builder/web/build/types";
-import algosdk, { makeApplicationCreateTxn, makeAssetCreateTxnWithSuggestedParams, OnApplicationComplete, Transaction } from "algosdk";
+import { tx as webTx, types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { getProgram, loadASAFile } from "../../src";
 import { AccountStore } from "../../src/account";
-import { convertToString } from "../../src/lib/parsing";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
-import { AccountStoreI, TxReceipt } from "../../src/types";
+import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
 const minBalance = BigInt(1e7);
@@ -26,7 +21,7 @@ describe("Execute SDK transaction", function () {
 
   function mkTransactionAndSign (runtime: Runtime, execParams: types.ExecParams): types.TransactionAndSign {
     const suggestedParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
-    const transaction = mkTransaction(execParams, suggestedParams) as any;
+    const transaction = webTx.mkTransaction(execParams, suggestedParams) as any;
     let sign: types.Sign;
 
     // extract `sign` from execParams

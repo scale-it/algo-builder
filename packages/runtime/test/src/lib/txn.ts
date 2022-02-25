@@ -1,14 +1,12 @@
 import { types } from "@algo-builder/web";
 import { stringToBytes } from "@algo-builder/web/build/lib/parsing";
-import { Account } from "algosdk";
 import { assert } from "chai";
 import { encodeBase64 } from "tweetnacl-ts";
 
 import { AccountStore } from "../../../src";
-import { convertToBuffer } from "../../../src/lib/parsing";
 import { encTxToExecParams } from "../../../src/lib/txn";
 import { Runtime } from "../../../src/runtime";
-import { AccountStoreI, EncTx } from "../../../src/types";
+import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 
 describe("Convert encode Tx to ExecParams", function () {
@@ -25,7 +23,7 @@ describe("Convert encode Tx to ExecParams", function () {
   });
 
   // helper - help convert and check param from EncTx to ExecParams
-  function assertConvertParams (runtime: Runtime, execParams: types.ExecParams): void {
+  function assertEncTxConvertedToExecParam (runtime: Runtime, execParams: types.ExecParams): void {
     const [encTx] = runtime.createTxnContext(execParams);
     const sign = {
       sign: types.SignType.SecretKey,
@@ -56,7 +54,7 @@ describe("Convert encode Tx to ExecParams", function () {
         }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
   });
 
@@ -73,7 +71,7 @@ describe("Convert encode Tx to ExecParams", function () {
 
       execParams.asaDef = runtime.loadedAssetsDefs[execParams.asaName];
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
     it("Asset Freeze Transaction", () => {
@@ -88,7 +86,7 @@ describe("Convert encode Tx to ExecParams", function () {
         freezeTarget: smith.address,
         freezeState: true
       };
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
     it("Asset Transfer", () => {
@@ -104,7 +102,7 @@ describe("Convert encode Tx to ExecParams", function () {
         }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
     it("Destroy Asset", () => {
@@ -118,7 +116,7 @@ describe("Convert encode Tx to ExecParams", function () {
         }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
     it("ModifyAsset", () => {
@@ -138,7 +136,7 @@ describe("Convert encode Tx to ExecParams", function () {
         }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
   });
 
@@ -156,7 +154,7 @@ describe("Convert encode Tx to ExecParams", function () {
         payFlags: { totalFee: 1000 }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
   });
 
@@ -178,7 +176,7 @@ describe("Convert encode Tx to ExecParams", function () {
         }
       };
 
-      assertConvertParams(runtime, execParams);
+      assertEncTxConvertedToExecParam(runtime, execParams);
     });
   });
 });
