@@ -9,7 +9,7 @@ import { Runtime } from "../../../src/runtime";
 import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 
-describe("Convert encode Tx to ExecParams", function () {
+describe("Convert encoded Txn to ExecParams", function () {
   let john: AccountStoreI;
   let smith: AccountStoreI;
 
