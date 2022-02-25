@@ -39,6 +39,16 @@ export enum TxnType {
   appl = '6' // ApplicationCall
 }
 
+export enum EncTxnType {
+  unknown = 'unknow',
+  pay = 'pay',
+  keyreg = 'keyreg',
+  acfg = 'acfg',
+  axfer = 'axfer',
+  afrz = 'afrz',
+  appl = 'appl'
+}
+
 export enum GlobalField {
   MinTxnFee, // micro Algos
   MinBalance, // micro Algos

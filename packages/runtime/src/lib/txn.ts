@@ -1,12 +1,11 @@
 import { parsing, types } from "@algo-builder/web";
-import { AccountAddress } from "@algo-builder/web/build/types";
 import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
-import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
+import { Context, EncTx, EncTxnType, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
 import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
@@ -52,7 +51,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
 export function checkIfAssetDeletionTx (txn: Transaction): boolean {
-  return txn.type === 'acfg' && // type should be asset config
+  return ((txn.type as string) === EncTxnType.acfg) && // type should be asset config
     (txn.assetIndex > 0) && // assetIndex should not be 0
     !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
 }
@@ -179,7 +178,7 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
 export function isEncTxAssetDeletion (txn: EncTx): boolean {
-  return txn.type === 'acfg' && // type should be asset config
+  return txn.type === EncTxnType.acfg && // type should be asset config
     (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
     !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
@@ -189,13 +188,13 @@ export function isEncTxAssetDeletion (txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig (txn: EncTx): boolean {
-  return txn.type === 'acfg' && // type should be asset config
+  return txn.type === EncTxnType.acfg && // type should be asset config
     (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
     !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
 
 export function isEncTxApplicationCreate (txn: EncTx): boolean {
-  return txn.type === 'appl' && (txn.apan === 0 || txn.apan === undefined);
+  return txn.type === EncTxnType.appl && (txn.apan === 0 || txn.apan === undefined);
 }
 
 export function transactionAndSignToExecParams (
@@ -360,7 +359,7 @@ const _getRuntimeAccount = (publickey: Buffer | undefined,
 };
 
 const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
-  ctx: Context, line?: number): AccountAddress | undefined => {
+  ctx: Context, line?: number): types.AccountAddress | undefined => {
   return _getRuntimeAccount(publickey, ctx, line)?.addr;
 };
 
