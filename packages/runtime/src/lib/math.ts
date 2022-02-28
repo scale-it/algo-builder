@@ -1,6 +1,6 @@
 // compute square root of bigint
 // ref https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
-export const bigIntSqrt = (value: bigint): bigint => {
+export const bigintSqrt = (value: bigint): bigint => {
   if (value < 2n) {
     return value;
   }

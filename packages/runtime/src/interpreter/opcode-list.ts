@@ -20,7 +20,7 @@ import {
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
 import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
-import { bigIntSqrt } from "../lib/math";
+import { bigintSqrt } from "../lib/math";
 import {
   assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
@@ -3109,7 +3109,7 @@ export class Bsqrt extends Op {
     // convert to bigint
     const bigintValue = bigEndianBytesToBigInt(value);
     // compute sqrt
-    const bigintResult = bigIntSqrt(bigintValue);
+    const bigintResult = bigintSqrt(bigintValue);
 
     stack.push(bigintToBigEndianBytes(bigintResult));
   }
@@ -3302,7 +3302,7 @@ export class Sqrt extends Op {
   execute (stack: TEALStack): void {
     // https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
     const value = this.assertBigInt(stack.pop(), this.line);
-    const result = bigIntSqrt(value);
+    const result = bigintSqrt(value);
     stack.push(result);
   }
 }
