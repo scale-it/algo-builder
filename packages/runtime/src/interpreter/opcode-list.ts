@@ -67,7 +67,7 @@ export class Pragma extends Op {
     return this.version;
   }
 
-  execute (stack: TEALStack): void {}
+  execute (stack: TEALStack): void { }
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1027,6 +1027,37 @@ export class Mulw extends Op {
   }
 }
 
+// A,B / C. Fail if C == 0 or if result overflows.
+// The notation A,B indicates that A and B are interpreted as a uint128 value,
+// with A as the high uint64 and B the low.
+// push to stack [...stack, bigint]
+// Availability: v6
+export class Divw extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const valueC = this.assertBigInt(stack.pop(), this.line);
+    const valueB = this.assertBigInt(stack.pop(), this.line);
+    const valueA = this.assertBigInt(stack.pop(), this.line);
+
+    const result = (valueA >> BigInt('64') + valueB) / valueC;
+
+    this.checkOverflow(result, this.line, MAX_UINT64);
+
+    stack.push(result);
+  }
+}
 // Pop one element from stack
 // [...stack] // pop value.
 export class Pop extends Op {
@@ -1406,7 +1437,7 @@ export class Label extends Op {
     this.line = line;
   };
 
-  execute (stack: TEALStack): void {}
+  execute (stack: TEALStack): void { }
 }
 
 // branch unconditionally to label - Tealv <= 3
@@ -1611,7 +1642,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
+        const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -4207,7 +4238,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
