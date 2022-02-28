@@ -351,6 +351,12 @@ maximun uint128`
     message: "App Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
     title: "App Field Error at line %line%",
     description: `App field unknown`
+  },
+  EXECUTION_MODE_NOT_VALID: {
+    number: 1054,
+    message: "Opcode %opcode% is only allowed in %allowedIn% mode, but was run in %ranIn% mode. Teal version #%tealV%, [error-line: %line%]",
+    title: "Execution mode not valid",
+    description: `Execution mode not valid`
   }
 };
 
