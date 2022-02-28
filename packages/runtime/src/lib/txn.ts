@@ -249,10 +249,10 @@ export function encTxToExecParams (
       execParams.type = types.TransactionType.TransferAlgo;
       execParams.fromAccountAddr = _getAddress(encTx.snd);
       execParams.toAccountAddr =
-        _getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
+        getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
       execParams.amountMicroAlgos = encTx.amt ?? 0n;
       if (encTx.close) {
-        execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.close, ctx, line);
+        execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.close, ctx, line);
       }
       if (encTx.rekey) {
         execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
@@ -262,7 +262,7 @@ export function encTxToExecParams (
     case EncTxnType.afrz: {
       execParams.type = types.TransactionType.FreezeAsset;
       execParams.assetID = encTx.faid;
-      execParams.freezeTarget = _getRuntimeAccountAddr(encTx.fadd, ctx, line);
+      execParams.freezeTarget = getRuntimeAccountAddr(encTx.fadd, ctx, line);
       execParams.freezeState = BigInt(encTx.afrz ?? 0n) === 1n;
       if (encTx.rekey) {
         execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
@@ -273,19 +273,19 @@ export function encTxToExecParams (
       if (encTx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
         execParams.type = types.TransactionType.RevokeAsset;
         execParams.recipient =
-          _getRuntimeAccountAddr(encTx.arcv, ctx, line) ?? ZERO_ADDRESS_STR;
-        execParams.revocationTarget = _getRuntimeAccountAddr(encTx.asnd, ctx, line);
+          getRuntimeAccountAddr(encTx.arcv, ctx, line) ?? ZERO_ADDRESS_STR;
+        execParams.revocationTarget = getRuntimeAccountAddr(encTx.asnd, ctx, line);
       } else { // asset transfer
         execParams.type = types.TransactionType.TransferAsset;
         execParams.toAccountAddr =
-          _getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
+          getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
       }
       // set common fields (asset amount, index, closeRemainderTo)
       execParams.amount = encTx.aamt ?? 0n;
       execParams.assetID = encTx.xaid ?? 0;
       // option fields
       if (encTx.aclose) {
-        execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(encTx.aclose, ctx, line);
+        execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.aclose, ctx, line);
       }
       if (encTx.rekey) {
         execParams.payFlags.rekeyTo = _getAddress(encTx.rekey);
@@ -358,19 +358,19 @@ const _getASAConfigAddr = (addr?: Uint8Array): string => {
   return "";
 };
 
-const _getRuntimeAccount = (publickey: Buffer | undefined,
+const getRuntimeAccount = (publicKey: Buffer | undefined,
   ctx: Context, line?: number): RuntimeAccountI | undefined => {
-  if (publickey === undefined) { return undefined; }
-  const address = encodeAddress(Uint8Array.from(publickey));
+  if (publicKey === undefined) { return undefined; }
+  const address = encodeAddress(Uint8Array.from(publicKey));
   const runtimeAcc = ctx.getAccount(
     address
   );
   return runtimeAcc.account;
 };
 
-const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
+const getRuntimeAccountAddr = (publickey: Buffer | undefined,
   ctx: Context, line?: number): types.AccountAddress | undefined => {
-  return _getRuntimeAccount(publickey, ctx, line)?.addr;
+  return getRuntimeAccount(publickey, ctx, line)?.addr;
 };
 
 const _getAddress = (addr?: Uint8Array): string | undefined => {

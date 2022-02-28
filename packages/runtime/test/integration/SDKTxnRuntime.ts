@@ -117,7 +117,7 @@ describe("Should execute SDK transaction object using runtime", function () {
       runtime.executeTx(txAndSign);
     });
 
-    it("Check application exists after deployment", () => {
+    it("Should check if application exists after deployment", () => {
       const appInfo = runtime.getAppInfoFromName('counter-approval.teal', 'clear.teal');
       assert.isDefined(appInfo);
     });
