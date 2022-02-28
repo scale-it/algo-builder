@@ -20,6 +20,7 @@ import {
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
 import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
+import { bigIntSqrt } from "../lib/math";
 import {
   assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
@@ -3086,6 +3087,33 @@ export class ByteZero extends ByteOp {
   }
 }
 
+// The largest integer I such that I^2 <= A. A and I are interpreted as big-endian unsigned integers
+// Stack: ..., A: []byte → ..., []byte
+// Cost: 40
+// Availability: v6
+export class Bsqrt extends Op {
+  readonly line: number;
+  /**
+  * Asserts 0 arguments are passed.
+  * @param args Expected arguments: [] // none
+  * @param line line number in TEAL file
+  */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const value = this.assertBytes(stack.pop(), this.line);
+    // convert to bigint
+    const bigintValue = bigEndianBytesToBigInt(value);
+    // compute sqrt
+    const bigintResult = bigIntSqrt(bigintValue);
+
+    stack.push(bigintToBigEndianBytes(bigintResult));
+  }
+}
 /**
  * Pop four uint64 values. The deepest two are interpreted
  * as a uint128 dividend (deepest value is high word),
@@ -3274,29 +3302,8 @@ export class Sqrt extends Op {
   execute (stack: TEALStack): void {
     // https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
     const value = this.assertBigInt(stack.pop(), this.line);
-    if (value < 2n) {
-      stack.push(value);
-      return;
-    }
-
-    if (value < 16n) {
-      stack.push(BigInt(Math.floor(Math.sqrt(Number(value)))));
-      return;
-    }
-    let x1;
-    if (value < (1n << 52n)) {
-      x1 = BigInt(Math.floor(Math.sqrt(Number(value)))) - 3n;
-    } else {
-      x1 = (1n << 52n) - 2n;
-    }
-
-    let x0 = -1n;
-    while ((x0 !== x1 && x0 !== (x1 - 1n))) {
-      x0 = x1;
-      x1 = ((value / x0) + x0) >> 1n;
-    }
-
-    stack.push(x0);
+    const result = bigIntSqrt(value);
+    stack.push(result);
   }
 }
 
