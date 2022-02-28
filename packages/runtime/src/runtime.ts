@@ -122,7 +122,7 @@ export class Runtime {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
         { address: address, line: lineNumber });
     }
-    if (a.address !== address){
+    if (a.address !== address) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_ADDR_MISMATCH,
         { address: address, line: lineNumber });
     }
