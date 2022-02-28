@@ -1,6 +1,6 @@
 import { getPathFromDirRecursive, getProgram, loadFromYamlFileSilent, types as rtypes } from "@algo-builder/runtime";
-import { tx, types as wtypes } from "@algo-builder/web";
-import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
+import { types as wtypes } from "@algo-builder/web";
+import { createDryrun, decodeSignedTransaction, encodeObj, modelsv2, SignedTransaction } from "algosdk";
 import { spawn } from "child_process";
 import * as fs from 'fs';
 import { ensureDirSync } from "fs-extra";
@@ -26,87 +26,6 @@ export class Tealdbg {
   }
 
   /**
-   * Get account state(s) (fetched using account address) for dry run.
-   * For eg. app_local_get, app_local_put requires an accounts ledger state to be uploaded.
-   * @param txn transaction parameters
-   */
-  private async getAccountsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Account[]> {
-    // get addresses of Txn.Accounts (in case of stateful tx params) & Txn.Sender
-    const txAccounts = (txn as wtypes.AppCallsParam).accounts ?? []; // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
-    const addrs = [...txAccounts, tx.getFromAddress(txn)];
-
-    const accountsForDryRun = [];
-    for (const addr of addrs) {
-      const accInfo = await this.deployer.algodClient.accountInformation(addr).do();
-      if (!accInfo) { continue; }
-
-      const acc = new modelsv2.Account({
-        address: accInfo.address,
-        amount: accInfo.amount,
-        amountWithoutPendingRewards: accInfo['amount-without-pending-rewards'],
-        appsLocalState: accInfo['apps-local-state'],
-        appsTotalSchema: accInfo['apps-total-schema'],
-        assets: accInfo.assets,
-        createdApps: accInfo['created-apps'],
-        createdAssets: accInfo['created-assets'],
-        pendingRewards: accInfo['pending-rewards'],
-        rewardBase: accInfo['reward-base'],
-        rewards: accInfo.rewards,
-        round: accInfo.round,
-        status: accInfo.status
-      });
-      accountsForDryRun.push(acc);
-    }
-    return accountsForDryRun;
-  }
-
-  /**
-   * Get application state(s) (fetched by appID) for dry run.
-   * For eg. app_global_get, app_global_put requires app state.
-   * @param txn transaction parameters
-   */
-  private async getAppsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Application[]> {
-    if (!(
-      txn.type === wtypes.TransactionType.ClearApp ||
-      txn.type === wtypes.TransactionType.CloseApp ||
-      txn.type === wtypes.TransactionType.DeleteApp ||
-      txn.type === wtypes.TransactionType.UpdateApp ||
-      txn.type === wtypes.TransactionType.OptInToApp ||
-      txn.type === wtypes.TransactionType.CallApp
-    )) {
-      return [];
-    }
-
-    // maybe txn.foreignApps won't work: https://github.com/algorand/go-algorand/issues/2609
-    // this would be required with app_global_get_ex ops (access external contract's state)
-    const appIDs = [...(txn.foreignApps ?? []), txn.appID];
-    const appsForDryRun = [];
-    for (const appID of appIDs) {
-      const app = await this.deployer.algodClient.getApplicationByID(appID).do();
-
-      const globalStateSchema = new modelsv2.ApplicationStateSchema(app.params['global-state-schema']['num-uint'], app.params['global-state-schema']['num-byte-slice']);
-      const localStateSchema = new modelsv2.ApplicationStateSchema(app.params['local-state-schema']['num-uint'], app.params['local-state-schema']['num-byte-slice']);
-      const globalState = (app.params['global-state'] || []).map(({ key, value }: { key: string, value: any }) => (
-        new modelsv2.TealKeyValue(key, new modelsv2.TealValue(value.type, value.bytes, value.uint))
-      ));
-
-      const appParams = new modelsv2.ApplicationParams({
-        approvalProgram: app.params['approval-program'],
-        clearStateProgram: app.params['clear-state-program'],
-        creator: app.params.creator,
-        globalState,
-        globalStateSchema,
-        localStateSchema,
-        extraProgramPages: app.params['extra-program-pages']
-      });
-      const appForDryRun = new modelsv2.Application(app.id, appParams);
-      appsForDryRun.push(appForDryRun);
-    }
-
-    return appsForDryRun;
-  }
-
-  /**
    * Create dry run request object using SDK transaction(s) from wtypes.ExecParams
    * User can dump the response (using this.dryRunResponse) or start debugger session
    * @returns SDK dryrun request object
@@ -115,28 +34,15 @@ export class Tealdbg {
     let [_, signedTxn] = await makeAndSignTx(this.deployer, this.execParams, new Map());
     if (!Array.isArray(signedTxn)) { signedTxn = [signedTxn]; }
 
-    const encodedSignedTxns: EncodedSignedTransaction[] = [];
+    const signedTxns: SignedTransaction[] = [];
     for (const s of signedTxn) {
       const decodedTx = decodeSignedTransaction(s);
-      encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
+      signedTxns.push(decodedTx);
     }
 
-    // query application and account state and pass them to a debug session
-    const execParamsArr = Array.isArray(this.execParams) ? this.execParams : [this.execParams];
-    const appsForDryRun: modelsv2.Application[] = [];
-    const accountsForDryRun: modelsv2.Account[] = [];
-    for (const e of execParamsArr) {
-      appsForDryRun.push(...(await this.getAppsForDryRun(e)));
-      accountsForDryRun.push(...(await this.getAccountsForDryRun(e)));
-    }
-
-    // issue: https://github.com/algorand/js-algorand-sdk/issues/410
-    // task: https://www.pivotaltracker.com/story/show/179060295
-    return new (modelsv2 as any).DryrunRequest({
-      accounts: accountsForDryRun.length > 0 ? accountsForDryRun : undefined,
-      apps: appsForDryRun.length > 0 ? appsForDryRun : undefined,
-      txns: encodedSignedTxns,
-      sources: undefined
+    return await createDryrun({
+      client: this.deployer.algodClient,
+      txns: signedTxns
     });
   }
 
@@ -163,6 +69,8 @@ export class Tealdbg {
    */
   protected async runDebugger (tealdbgArgs: string[]): Promise<boolean> {
     spawn(`killall`, ['-9', 'tealdbg']); // kill existing tealdbg process first
+
+    console.log('--> ', tealdbgArgs);
 
     const childProcess = spawn(`tealdbg`, ['debug', ...tealdbgArgs], {
       stdio: "inherit",
@@ -209,13 +117,15 @@ export class Tealdbg {
 
         // load pyCache from "artifacts/cache"
         if (fs.existsSync(path.join(CACHE_DIR, file + ".yaml"))) {
-          const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml") as string;
-          const pyCache = loadFromYamlFileSilent(pathToPyCache) as ASCCache;
-          tealFromPyTEAL = pyCache.tealCode;
+          const pathToPyCache = getPathFromDirRecursive(CACHE_DIR, file + ".yaml");
+          if (pathToPyCache) {
+            const pyCache = loadFromYamlFileSilent(pathToPyCache) as ASCCache;
+            tealFromPyTEAL = pyCache.tealCode;
+          }
         }
 
         /* Use cached TEAL code if:
-         *  + we already have compiled pyteal code in artifacts/cache
+         *  + We already have compiled pyteal code in artifacts/cache
          *  + template paramteres (scInitParam) are not passed by user
          * NOTE: if template parameters are passed, recompilation is forced to compile
          * pyTEAL with the passed params (as the generated TEAL code could differ from cache)
@@ -227,10 +137,10 @@ export class Tealdbg {
         }
         this.writeFile(pathToFile, tealFromPyTEAL);
       } else {
-        pathToFile = getPathFromDirRecursive(ASSETS_DIR, file) as string;
+        pathToFile = getPathFromDirRecursive(ASSETS_DIR, file);
       }
 
-      tealdbgArgs.push(pathToFile);
+      if (pathToFile) { tealdbgArgs.push(pathToFile); }
     }
 
     // push path to --dryrun-dump (msgpack encoded) present in `/cache/dryrun`
@@ -266,6 +176,19 @@ export class Tealdbg {
   async run (debugCtxParams?: DebuggerContext): Promise<void> {
     // construct encoded dryrun request using SDK
     const dryRunRequest = await this.createDryRunReq();
+
+    /*
+      Encoding fails on taking empty arrays ([]), so we need to convert
+      to undefined first (hence the type hack). Ideally, the js-sdk type
+      for dryrunreq.accounts should be "modelsv2.accounts[] | undefined"
+    */
+    if (dryRunRequest.accounts.length === 0) {
+      (dryRunRequest as any).accounts = undefined;
+    }
+    if (dryRunRequest.apps.length === 0) {
+      (dryRunRequest as any).apps = undefined;
+    }
+
     const encodedReq = encodeObj(dryRunRequest.get_obj_for_encoding(true));
 
     // output the dump in cache/dryrun directory (.msgp file is used as input to teal debugger)
