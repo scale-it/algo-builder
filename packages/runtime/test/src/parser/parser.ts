@@ -38,6 +38,7 @@ import {
   Dig,
   Div,
   DivModw,
+  Divw,
   Dup,
   Dup2,
   EcdsaPkDecompress,
@@ -1210,6 +1211,18 @@ describe("Parser", function () {
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
+
+      it("bsqrt", () => {
+        const res = opcodeFromSentence(["bsqrt"], 1, interpreter, ExecutionMode.APPLICATION);
+        const expected = new Sqrt([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["bsqrt", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
     });
 
     describe("should return correct opcodes for tealv5 ops", () => {
@@ -1641,7 +1654,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
+        new Pragma(["version", "6"], 1, interpreter),
         new Itob([], 2),
         new Btoi([], 3),
         new Mulw([], 4),
@@ -1651,7 +1664,8 @@ describe("Parser", function () {
         new Dup2([], 8),
         new Concat([], 9),
         new Substring(["0", "4"], 10),
-        new Substring3([], 11)
+        new Substring3([], 11),
+        new Divw([], 12)
       ];
 
       assert.deepEqual(res, expected);
@@ -1838,7 +1852,7 @@ describe("Parser", function () {
       interpreter.gas = 0;
       file = "test-others.teal";
       parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 10);
+      assert.equal(interpreter.gas, 11);
 
       interpreter.gas = 0;
       file = "test-stateful.teal";

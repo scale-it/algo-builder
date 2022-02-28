@@ -6,10 +6,11 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, AppParamsGet, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
+  Bsqrt,
   Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
-  ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress,
+  ByteZero, Callsub, Concat, Cover, Dig, Div, DivModw, Divw, Dup, Dup2, EcdsaPkDecompress,
   EcdsaPkRecover, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
   ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
@@ -243,7 +244,10 @@ opCodeMap[5] = {
 };
 
 opCodeMap[6] = {
-  ...opCodeMap[5]
+  ...opCodeMap[5],
+
+  divw: Divw,
+  bsqrt: Bsqrt
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -281,7 +285,7 @@ const commonModeOps = new Set([
   "extract", "extract3", "extract_uint16", "extract_uint32", "extract_uint64", "pushbytes",
   "pushint", "callsub", "retsub", "shl", "shr", "sqrt", "bitlen", "exp", "expw", 'b+',
   'b-', 'b*', 'b/', 'b%', 'b<', 'b>', 'b<=', 'b>=', 'b==', 'b!=', 'b|', 'b&', 'b^', 'b~', 'bzero',
-  "txnas", "gtxnas", "gtxnsas"
+  "txnas", "gtxnas", "gtxnsas", 'divw', 'bsqrt'
 ]);
 
 /**
