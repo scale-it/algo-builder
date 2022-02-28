@@ -1047,12 +1047,16 @@ export class Divw extends Op {
   };
 
   execute (stack: TEALStack): void {
-    this.assertMinStackLen(stack, 2, this.line);
+    this.assertMinStackLen(stack, 3, this.line);
     const valueC = this.assertBigInt(stack.pop(), this.line);
     const valueB = this.assertBigInt(stack.pop(), this.line);
     const valueA = this.assertBigInt(stack.pop(), this.line);
 
-    const result = (valueA >> BigInt('64') + valueB) / valueC;
+    if (valueC === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
+    }
+
+    const result = ((valueA << BigInt('64')) + valueB) / valueC;
 
     this.checkOverflow(result, this.line, MAX_UINT64);
 
@@ -3105,7 +3109,9 @@ export class Bsqrt extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const value = this.assertBytes(stack.pop(), this.line);
+    this.assertMinStackLen(stack, 1, this.line);
+
+    const value = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
     // convert to bigint
     const bigintValue = bigEndianBytesToBigInt(value);
     // compute sqrt
