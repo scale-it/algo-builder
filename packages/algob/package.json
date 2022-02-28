@@ -33,7 +33,7 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
-    "prepublish": "yarn build",
+    "prepublish": "yarn build; for file in Makefile README.md private-net-template.json sandbox-docker-compose.yml; cp ../../infrastructure/$file sample-project/infrastructure",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "publishConfig": {
