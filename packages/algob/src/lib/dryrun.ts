@@ -179,7 +179,8 @@ export class Tealdbg {
 
     /*
       Encoding fails on taking empty arrays ([]), so we need to convert
-      to undefined first.
+      to undefined first (hence the type hack). Ideally, the js-sdk type
+      for dryrunreq.accounts should be "modelsv2.accounts[] | undefined"
     */
     if (dryRunRequest.accounts.length === 0) {
       (dryRunRequest as any).accounts = undefined;
