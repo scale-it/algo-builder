@@ -351,6 +351,12 @@ maximun uint128`
     message: "App Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
     title: "App Field Error at line %line%",
     description: `App field unknown`
+  },
+  EXECUTION_MODE_NOT_VALID: {
+    number: 1054,
+    message: "Opcode %opcode% is only allowed in %allowedIn% mode, but was run in %ranIn% mode. Teal version #%tealV%, [error-line: %line%]",
+    title: "Execution mode not valid",
+    description: `Execution mode not valid`
   }
 };
 
@@ -457,6 +463,12 @@ const runtimeGeneralErrors = {
     title: "Invalid spend account.",
     description: "Invalid spend account"
   },
+  ACCOUNT_ADDR_MISMATCH: {
+    number: 1317,
+    message: "Account Error - Account and address %address% mismatch at line %line%",
+    title: "Account Error at line %line%",
+    description: `Account and address mismatch in the current state`
+  },
   INVALID_CLOSE_REMAINDER_TO: {
     number: 1507,
     message: "Transaction cannot close account to its sender",
@@ -482,7 +494,7 @@ const transactionErrors = {
   INSUFFICIENT_ACCOUNT_ASSETS: {
     number: 1402,
     message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
-    title: 'Insufficient account assests',
+    title: 'Insufficient account assets',
     description: `Withdrawing %amount% assets will lead to insufficient balance`
   },
   INVALID_TRANSACTION_PARAMS: {

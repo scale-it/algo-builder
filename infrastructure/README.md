@@ -188,3 +188,13 @@ curl "localhost:8980/v2/accounts" | json_pp
 It should list all accounts in your local-network. More examples can be found [here](https://developer.algorand.org/docs/features/indexer/?query=indexer%2520#date-time).
 
 To **remove** local indexer directory from system, use `make remove-indexer` (removes ~/.algorand-indexer-download).
+
+## Tealdbg
+
+Algob includes helpful tools to setup debugging sessions with `tealdbg`. To use these, `tealdbg` must be locally installed. It's included by default along with the Algorand Node when installed via the updater script. If the Algorand Node was installed via a linux package manger it must be installed seperately [via the devtools package](https://developer.algorand.org/docs/run-a-node/setup/install/#installing-the-devtools). You can check your installation simply by running:
+
+```
+tealdbg
+```
+
+More details on using tealdbg with algob can be found [here](https://algobuilder.dev/guide/debugging-teal.html).

@@ -258,6 +258,32 @@ const interpreterReqList = new Set([
   "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'app_params_get'
 ]);
 
+const signatureModeOps = new Set([
+  "arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"
+]);
+
+const applicationModeOps = new Set([
+  "gload", "gloads", "gaid", "gaids", "balance", "app_opted_in", "app_local_get",
+  "app_local_get_ex", "app_global_get", "app_global_get_ex", "app_local_put", "app_global_put",
+  "app_local_del", "app_global_del", "asset_holding_get", "asset_params_get", "app_params_get",
+  "min_balance", "log", "itxn_begin", "itxn_field", "itxn_submit", "itxn", "itxna"
+]);
+
+// opcodes allowed in both application and signature mode
+const commonModeOps = new Set([
+  "err", "sha256", "keccak256", "sha512_256", "ed25519verify", "ecdsa_verify", "ecdsa_pk_decompress",
+  "+", "-", "/", "*", "<", ">", "<=", ">=", "&&", "||", "==", "!=", "!", "len", "itob", "btoi",
+  "%", "|", "&", "^", "~", "mulw", "addw", "divmodw", "intcblock", "intc", "intc_0", "intc_1",
+  "intc_2", "intc_3", "intc_0", "bytecblock", "bytec", "bytec_0", "bytec_1", "bytec_2", "bytec_3",
+  "txn", "global", "gtxn", "load", "store", "txna", "gtxna", "gtxns", "gtxnsa", "stores",
+  "bnz", "bz", "b", "return", "assert", "pop", "dup", "dup2", "dig", "swap", "select", "cover",
+  "uncover", "concat", "substring", "substring3", "getbit", "setbit", "getbyte", "setbyte",
+  "extract", "extract3", "extract_uint16", "extract_uint32", "extract_uint64", "pushbytes",
+  "pushint", "callsub", "retsub", "shl", "shr", "sqrt", "bitlen", "exp", "expw", 'b+',
+  'b-', 'b*', 'b/', 'b%', 'b<', 'b>', 'b<=', 'b>=', 'b==', 'b!=', 'b|', 'b&', 'b^', 'b~', 'bzero',
+  "txnas", "gtxnas", "gtxnsas"
+]);
+
 /**
  * Description: Read line and split it into words
  * - ignore comments, keep only part that is relevant to interpreter
@@ -355,7 +381,12 @@ export function wordsFromLine (line: string): string[] {
  * @param counter: line number in TEAL file
  * @param interpreter: interpreter object
  */
-export function opcodeFromSentence (words: string[], counter: number, interpreter: Interpreter): Operator {
+export function opcodeFromSentence (
+  words: string[],
+  counter: number,
+  interpreter: Interpreter,
+  mode: ExecutionMode
+): Operator {
   let opCode = words[0];
   const tealVersion = interpreter.tealVersion;
 
@@ -399,6 +430,26 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   if (opCodeMap[tealVersion][opCode] === undefined) {
     throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_OPCODE,
       { opcode: opCode, version: tealVersion, line: counter });
+  }
+
+  if (mode === ExecutionMode.APPLICATION && signatureModeOps.has(opCode)) {
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID, {
+      opcode: opCode,
+      allowedIn: "signature",
+      ranIn: "application",
+      tealV: tealVersion,
+      line: counter
+    });
+  }
+
+  if (mode === ExecutionMode.SIGNATURE && applicationModeOps.has(opCode)) {
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID, {
+      opcode: opCode,
+      allowedIn: "application",
+      ranIn: "signature",
+      tealV: tealVersion,
+      line: counter
+    });
   }
 
   // store cost for opcodes at each line in `interpreter.lineToCost`
@@ -488,7 +539,7 @@ export function parser (program: string, mode: ExecutionMode, interpreter: Inter
     // Trim whitespace from line and extract words from line
     const words = wordsFromLine(line);
     if (words.length !== 0) {
-      opCodeList.push(opcodeFromSentence(words, counter, interpreter));
+      opCodeList.push(opcodeFromSentence(words, counter, interpreter, mode));
     }
   }
 

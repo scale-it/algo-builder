@@ -6,6 +6,14 @@ layout: splash
 
 Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful smart contracts and smart signatures. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
 
+Before beginning, make sure you have `tealdbg` installed. It is included as part of the default Algorand Node when [installed via the updater script](https://developer.algorand.org/docs/run-a-node/setup/install/#installation-with-the-updater-script) but must be [installed seperately](https://developer.algorand.org/docs/run-a-node/setup/install/#installing-the-devtools) if you installed the Algorand Node via a Linux package manager. Try to run:
+
+```bash
+tealdbg
+```
+
+If it displays the `tealdbg` help, you're good to go.
+
 ## Using TEAL debugger with algob
 
 Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTransaction](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).

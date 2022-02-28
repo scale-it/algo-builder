@@ -111,6 +111,7 @@ export class Runtime {
 
   /**
    * asserts if account is defined.
+   * @param address address
    * @param a account
    * @param line line number in TEAL file
    * Note: if user is accessing this function directly through runtime,
@@ -120,6 +121,10 @@ export class Runtime {
     const lineNumber = line ?? 'unknown';
     if (a === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
+        { address: address, line: lineNumber });
+    }
+    if (a.address !== address) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_ADDR_MISMATCH,
         { address: address, line: lineNumber });
     }
     return a;
