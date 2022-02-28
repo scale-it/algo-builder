@@ -463,6 +463,12 @@ const runtimeGeneralErrors = {
     title: "Invalid spend account.",
     description: "Invalid spend account"
   },
+  ACCOUNT_ADDR_MISMATCH: {
+    number: 1317,
+    message: "Account Error - Account and address %address% mismatch at line %line%",
+    title: "Account Error at line %line%",
+    description: `Account and address mismatch in the current state`
+  },
   INVALID_CLOSE_REMAINDER_TO: {
     number: 1507,
     message: "Transaction cannot close account to its sender",
@@ -488,7 +494,7 @@ const transactionErrors = {
   INSUFFICIENT_ACCOUNT_ASSETS: {
     number: 1402,
     message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
-    title: 'Insufficient account assests',
+    title: 'Insufficient account assets',
     description: `Withdrawing %amount% assets will lead to insufficient balance`
   },
   INVALID_TRANSACTION_PARAMS: {
