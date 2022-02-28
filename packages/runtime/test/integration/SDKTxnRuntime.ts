@@ -11,7 +11,7 @@ const minBalance = BigInt(10 * 1e6);
 
 // TODO: add more test for all transaction types.
 // https://www.pivotaltracker.com/n/projects/2452320/stories/181383052
-describe("Execute SDK transaction object using runtime", function () {
+describe("Should execute SDK transaction object using runtime", function () {
   const fee = 1000;
 
   let alice: AccountStoreI;
@@ -59,7 +59,7 @@ describe("Execute SDK transaction object using runtime", function () {
 
   describe("ASA transaction", function () {
     useFixture('asa-check');
-    it("Deploy ASA transaction", () => {
+    it("Should deploy ASA transaction", () => {
       const asaName = 'gold';
       const asaDef = runtime.loadedAssetsDefs[asaName];
 
@@ -124,7 +124,7 @@ describe("Execute SDK transaction object using runtime", function () {
   });
 
   describe("Payment transaciton", function () {
-    it("Transfer ALGO Transaction", () => {
+    it("Should transfer ALGO transaction", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         type: types.TransactionType.TransferAlgo,

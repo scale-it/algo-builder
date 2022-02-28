@@ -194,7 +194,7 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
 }
 
 /**
- * Check if given encoded transaction obj is appl creation
+ * Check if given encoded transaction object is app creation
  * @param txn Encoded EncTx Object
  */
 export function isEncTxApplicationCreate (txn: EncTx): boolean {

@@ -39,7 +39,7 @@ describe("Convert encoded Txn to ExecParams", function () {
   };
 
   describe("pay transaction", function () {
-    it("convert Encode Tx(pay transaction) to ExecParams(TransferAlgo)", () => {
+    it("Should convert Encode Tx(pay transaction) to ExecParams(TransferAlgo)", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -60,7 +60,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 
   describe("asa Transactions", function () {
     useFixture("asa-check");
-    it("Deploy ASA", () => {
+    it("Should deploy ASA", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -74,7 +74,7 @@ describe("Convert encoded Txn to ExecParams", function () {
       assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
-    it("Asset Freeze Transaction", () => {
+    it("Should asset Freeze Transaction", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -89,7 +89,7 @@ describe("Convert encoded Txn to ExecParams", function () {
       assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
-    it("Asset Transfer", () => {
+    it("Should transfer asset", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -105,7 +105,7 @@ describe("Convert encoded Txn to ExecParams", function () {
       assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
-    it("Destroy Asset", () => {
+    it("Should destroy asset", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
@@ -119,7 +119,7 @@ describe("Convert encoded Txn to ExecParams", function () {
       assertEncTxConvertedToExecParam(runtime, execParams);
     });
 
-    it("ModifyAsset", () => {
+    it("Should modify asset", () => {
       execParams = {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
