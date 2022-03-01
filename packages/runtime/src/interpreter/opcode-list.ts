@@ -2724,7 +2724,7 @@ export class Gloadss extends Gload {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", "11"], line, interpreter);
+    super(["11", "11", ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
