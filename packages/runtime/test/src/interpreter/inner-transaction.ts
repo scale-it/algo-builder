@@ -1036,6 +1036,8 @@ describe("Inner Transactions", function () {
         itxn_field ConfigAssetName
         byte "https://gold.rush/"
         itxn_field ConfigAssetURL
+        byte "12312442142141241244444411111133"
+        itxn_field ConfigAssetMetadataHash
         itxn_submit
         int 1
       `;

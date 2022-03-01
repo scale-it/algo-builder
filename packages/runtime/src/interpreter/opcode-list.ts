@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
@@ -19,13 +19,13 @@ import {
   MAX_UINT64, MAX_UINT128,
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
-import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
+import { setInnerTxField } from "../lib/itxn";
 import {
   assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { txAppArg, txnSpecbyField } from "../lib/txn";
+import { encTxToExecParams, txAppArg, txnSpecbyField } from "../lib/txn";
 import { DecodingMode, EncodingType, StackElem, TEALStack, TxnType, TxOnComplete, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -1616,8 +1616,8 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
-        const app = this.interpreter.getApp(appID, this.line);
+        const appID = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -3925,8 +3925,22 @@ export class ITxnSubmit extends Op {
       );
     }
 
+    // initial contract account.
+    const appID = this.interpreter.runtime.ctx.tx.apid as number;
+    const contractAddress = getApplicationAddress(appID);
+    const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
+
     // get execution txn params (parsed from encoded sdk txn obj)
-    const execParams = parseEncodedTxnToExecParams(this.interpreter.subTxn, this.interpreter, this.line);
+    // singer will be contractAccount
+    const execParams = encTxToExecParams(
+      this.interpreter.subTxn,
+      {
+        sign: types.SignType.SecretKey,
+        fromAccount: contractAccount
+      },
+      this.interpreter.runtime.ctx,
+      this.line
+    );
     const baseCurrTx = this.interpreter.runtime.ctx.tx;
     const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
