@@ -67,7 +67,7 @@ export class Pragma extends Op {
     return this.version;
   }
 
-  execute (stack: TEALStack): void {}
+  execute (stack: TEALStack): void { }
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1341,6 +1341,11 @@ export class Txna extends Op {
   }
 }
 
+/// placeholder values
+const mockTxIdx = "100";
+const mockTxField = "f";
+const mockTxFieldIdx = "200";
+
 /**
  * push value of a field to the stack from a transaction in the current transaction group
  * push to stack [...stack, value of field]
@@ -1359,9 +1364,9 @@ export class Gtxna extends Op {
    * Sets `field`(Transaction Field), `idx`(Array Index) and
    * `txIdx`(Transaction Group Index) values according to arguments passed.
    * @param args Expected arguments:
-   * [transaction group index, transaction field, transaction field array index]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   [transaction group index, transaction field, transaction field array index]
+   *   Note: Transaction field is expected as string instead of a number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1406,7 +1411,7 @@ export class Label extends Op {
     this.line = line;
   };
 
-  execute (stack: TEALStack): void {}
+  execute (stack: TEALStack): void { }
 }
 
 // branch unconditionally to label - Tealv <= 3
@@ -1611,7 +1616,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
+        const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -2590,15 +2595,15 @@ export class Gtxnsa extends Gtxna {
   /**
    * Sets `field`(Transaction Field), `idx`(Array Index) values according to arguments passed.
    * @param args Expected arguments: [transaction field(F), transaction field array index(I)]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` is expected rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // NOTE: txIdx will be updated in execute.
     // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
-    super(["100", ...args], line, interpreter);
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -4072,17 +4077,15 @@ export class Txnas extends Txna {
   /**
    * Sets `field`, `txIdx` values according to arguments passed.
    * @param args Expected arguments: [transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In txnas & gtxnas opcodes, index is fetched from top of stack.
-    // eg. [ int 1; txnas Accounts; ], [ txna Accounts 1].
-    super([...args, "100"], line, interpreter);
     assertLen(args.length, 1, line);
+    // NOTE: txField will be updated in execute.
+    super([...args, mockTxField], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -4104,17 +4107,15 @@ export class Gtxnas extends Gtxna {
    * Sets `field`(Transaction Field) and
    * `txIdx`(Transaction Group Index) values according to arguments passed.
    * @param args Expected arguments: [transaction group index, transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In txnas & gtxnas opcodes, index is fetched from top of stack.
-    // eg. [ int 1; gtxnas 0 Accounts; ], [ gtxna 0 Accounts 1].
-    super([...args, "100"], line, interpreter);
     assertLen(args.length, 2, line);
+    // NOTE: txFieldIdx will be updated in execute.
+    super([...args, mockTxFieldIdx], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -4136,17 +4137,15 @@ export class Gtxnsas extends Gtxna {
   /**
    * Sets `field`(Transaction Field)
    * @param args Expected arguments: [transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In gtxnsas opcode, {tx-index, index of array field} is fetched from top of stack.
-    // eg. [ int 0; int 1; gtxnsas Accounts; ], [ gtxna 0 Accounts 1].
-    super(["100", args[0], "100"], line, interpreter);
     assertLen(args.length, 1, line);
+    // NOTE: txIdx and TxFieldIdx will be updated in execute.
+    super([mockTxIdx, args[0], mockTxFieldIdx], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -4207,7 +4206,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
