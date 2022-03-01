@@ -812,6 +812,8 @@ export class Runtime {
     txnParams: types.ExecParams | types.ExecParams[] | types.TransactionAndSign | types.TransactionAndSign[],
     debugStack?: number
   ): TxReceipt | TxReceipt[] {
+    // TODO: union above and create new type in task below:
+    // https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
     const txnParamerters = Array.isArray(txnParams) ? txnParams : [txnParams];
 
     let tx, gtxs;
