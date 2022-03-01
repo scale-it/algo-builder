@@ -1,3 +1,7 @@
+---
+layout: splash
+---
+
 # Connect algob project settings with a webapp
 
 In this guide we explain how an `algob` project can be easily connetced/integrated with your dapp.
