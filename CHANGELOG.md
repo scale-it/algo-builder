@@ -15,7 +15,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 ## Unreleased
 
-## Features
+### Features
 Added:
 - `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
 - `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
@@ -23,7 +23,23 @@ Added:
 Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 - The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
+- Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
 - Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in *signature* mode, and parser will reject the execution if run in application mode.
+- Support RekeyTo field in the inner transaction for TEAL v6.
+- Support `keyreg` transaction in inner transaction.
+- Added following functions in `deployer` API
+  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
+- Support `RekeyTo` field in the inner transaction for TEAL v6.
+- Enable transfer ALGO to implicit account.
+- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag. Example:
+    ```bash
+      algob init --infrastructure
+    ```
+
+
+### Template improvements
+
+- Using App instead of Lsig (Smart Signature) in `examples/dao` to simplify deposit management.
 
 ### API breaking
 
@@ -53,23 +69,6 @@ Changed:
 
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
 
-
-### Features
-
-- Used app account instead of `deposit_lsig` in `examples/dao`
-- Support RekeyTo field in the inner transaction for TEAL v6.
-- Added following functions in `deployer` API
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
-- Support `RekeyTo` field in the inner transaction for TEAL v6.
-- Enable transfer ALGO to implicit account.
-- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.
-Example:
-
-```bash
-  algob init --infrastructure
-```
-- Support `keyreg` transaction in inner transaction.
-
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
@@ -77,7 +76,7 @@ Example:
 
 ### Infrastructure
 
--  Support for run command `setup-master-account` and `sandbox-setup-master-account` more than one time.
+-  Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
 
 ## v3.2.0 2022-02-03
 
