@@ -4,8 +4,8 @@ import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transactio
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
-import { Context, EncTx, EncTxnType, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
+import { TransactionTypeEnum, TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
+import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
 import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
@@ -51,7 +51,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
 export function checkIfAssetDeletionTx (txn: Transaction): boolean {
-  return ((txn.type as string) === EncTxnType.acfg) && // type should be asset config
+  return (String(txn.type) === TransactionTypeEnum.ASSET_CONFIG) && // type should be asset config
     (txn.assetIndex > 0) && // assetIndex should not be 0
     !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
 }
@@ -178,7 +178,7 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
 export function isEncTxAssetDeletion (txn: EncTx): boolean {
-  return txn.type === EncTxnType.acfg && // type should be asset config
+  return txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
     (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
     !(txn.apar?.m ?? txn.apar?.r ?? txn.apar?.f ?? txn.apar?.c); // fields should be empty
 }
@@ -188,7 +188,7 @@ export function isEncTxAssetDeletion (txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig (txn: EncTx): boolean {
-  return txn.type === EncTxnType.acfg && // type should be asset config
+  return txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
     (txn.caid !== undefined && txn.caid !== 0) && // assetIndex should not be 0
     !isEncTxAssetDeletion(txn); // AND should not be asset deletion
 }
@@ -198,7 +198,7 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
 export function isEncTxApplicationCreate (txn: EncTx): boolean {
-  return txn.type === EncTxnType.appl && (txn.apan === 0 || txn.apan === undefined);
+  return txn.type === TransactionTypeEnum.APPLICATION_CALL && (txn.apan === 0 || txn.apan === undefined);
 }
 
 /**
@@ -232,7 +232,7 @@ export function encTxToExecParams (
   execParams.payFlags.totalFee = encTx.fee;
 
   switch (encTx.type) {
-    case EncTxnType.appl: {
+    case TransactionTypeEnum.APPLICATION_CALL: {
       if (isEncTxApplicationCreate(encTx)) {
         execParams.type = types.TransactionType.DeployApp;
         execParams.approvalProgram = encTx.approvalProgram;
@@ -245,7 +245,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case EncTxnType.pay: {
+    case TransactionTypeEnum.PAYMENT: {
       execParams.type = types.TransactionType.TransferAlgo;
       execParams.fromAccountAddr = _getAddress(encTx.snd);
       execParams.toAccountAddr =
@@ -259,7 +259,7 @@ export function encTxToExecParams (
       }
       break;
     }
-    case EncTxnType.afrz: {
+    case TransactionTypeEnum.ASSET_FREEZE: {
       execParams.type = types.TransactionType.FreezeAsset;
       execParams.assetID = encTx.faid;
       execParams.freezeTarget = getRuntimeAccountAddr(encTx.fadd, ctx, line);
@@ -269,7 +269,7 @@ export function encTxToExecParams (
       }
       break;
     }
-    case 'axfer': {
+    case TransactionTypeEnum.ASSET_TRANSFER: {
       if (encTx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
         execParams.type = types.TransactionType.RevokeAsset;
         execParams.recipient =
@@ -293,7 +293,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case EncTxnType.acfg: {
+    case TransactionTypeEnum.ASSET_CONFIG: {
       if (isEncTxAssetDeletion(encTx)) {
         execParams.type = types.TransactionType.DestroyAsset;
         execParams.assetID = encTx.caid;
@@ -328,7 +328,7 @@ export function encTxToExecParams (
       break;
     }
 
-    case EncTxnType.keyreg: {
+    case TransactionTypeEnum.KEY_REGISTRATION: {
       execParams.type = types.TransactionType.KeyRegistration;
       execParams.voteKey = encTx.votekey?.toString('base64');
       execParams.selectionKey = encTx.selkey?.toString('base64');
