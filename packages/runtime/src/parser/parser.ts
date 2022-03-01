@@ -247,7 +247,7 @@ opCodeMap[6] = {
   gloadss: Gloadss
 };
 
-// list of opcodes that require one extra parameter than others: `interpreter`.
+// list of opcodes with exactly one parameter.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
   "load", "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
