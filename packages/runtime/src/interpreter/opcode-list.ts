@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1611,7 +1611,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
+        const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -2653,7 +2653,7 @@ export class MinBalance extends Op {
 // Args expected: [{uint8 transaction group index}(T),
 // {uint8 position in scratch space to load from}(I)]
 export class Gload extends Op {
-  readonly scratchIndex: number;
+  scratchIndex: number;
   txIndex: number;
   readonly interpreter: Interpreter;
   readonly line: number;
@@ -2707,6 +2707,29 @@ export class Gloads extends Gload {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Bth scratch space value of the Ath transaction in the current group
+// Stack: ..., A: uint64, B: uint64 → ..., any
+// Availability: v6
+export class Gloadss extends Gload {
+  /**
+   * Stores scratch space index number according to argument passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", "11"], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    this.scratchIndex = Number(this.assertBigInt(stack.pop(), this.line));
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
   }
@@ -4207,7 +4230,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
