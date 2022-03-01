@@ -1357,7 +1357,7 @@ export class Gtxna extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
   readonly line: number;
-  idx: number; // array index
+  fieldIdx: number; // array index
   protected txIdx: number; // transaction group index
 
   /**
@@ -1379,7 +1379,7 @@ export class Gtxna extends Op {
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
-    this.idx = Number(args[2]); // transaction field array index
+    this.fieldIdx = Number(args[2]); // transaction field array index
     this.interpreter = interpreter;
     this.line = line;
   }
@@ -1388,7 +1388,7 @@ export class Gtxna extends Op {
     this.assertUint8(BigInt(this.txIdx), this.line);
     this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
+    const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
@@ -4121,7 +4121,7 @@ export class Gtxnas extends Gtxna {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const top = this.assertBigInt(stack.pop(), this.line);
-    this.idx = Number(top);
+    this.fieldIdx = Number(top);
     super.execute(stack);
   }
 }
@@ -4152,7 +4152,7 @@ export class Gtxnsas extends Gtxna {
     this.assertMinStackLen(stack, 2, this.line);
     const arrFieldIdx = this.assertBigInt(stack.pop(), this.line);
     const txIdxInGrp = this.assertBigInt(stack.pop(), this.line);
-    this.idx = Number(arrFieldIdx);
+    this.fieldIdx = Number(arrFieldIdx);
     this.txIdx = Number(txIdxInGrp);
     super.execute(stack);
   }
