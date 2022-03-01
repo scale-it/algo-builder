@@ -1,3 +1,7 @@
+---
+layout: splash
+---
+
 # PureStake
 
 [PureStake's](https://developer.purestake.io/) API-As-A-Service provides access to native Algorand REST APIs for MainNet, TestNet and BetaNet. You need to sign up to have an API KEY (required for making requests).
