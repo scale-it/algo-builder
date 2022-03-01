@@ -2712,7 +2712,7 @@ export class Gloads extends Gload {
   }
 }
 
-// Bth scratch space value of the Ath transaction in the current group
+// Loads a scratch space value of another transaction from the current group
 // Stack: ..., A: uint64, B: uint64 → ..., any
 // Availability: v6
 export class Gloadss extends Gload {
