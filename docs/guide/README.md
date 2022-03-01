@@ -25,7 +25,7 @@ layout: splash
 - [Using algob with WebApp](./algob-web.md)
 - [PureStake API](./purestake-api.md)
 - [Best Practices](./best-practices.md)
-- [Contributing](https://github.com/scale-it/algo-builder#requirements#contributing)
+- [Contributing](https://github.com/scale-it/algo-builder#contributing)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 

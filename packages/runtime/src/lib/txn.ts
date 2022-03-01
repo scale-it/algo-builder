@@ -140,7 +140,7 @@ export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], teal
  * of accounts or application args
  * @param tx current transaction
  * @param txField transaction field
- * @param idx array index
+ * @param idx index in EncodedTransaction[txField]
  * @param op Op object
  * @param tealVersion version of TEAL
  * @param line line number in TEAL file
