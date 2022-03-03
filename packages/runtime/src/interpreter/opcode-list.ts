@@ -223,10 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     // get args from context
-    let args = this.interpreter.runtime.ctx.args;
-    // if args is undefined we assign empty array for it.
-    args = (args) || [];
-
+    const args = this.interpreter.runtime.ctx.args ?? [];
     this.checkIndexBound(
       this.index, args, this.line);
     const argN = this.assertBytes(args?.[this.index], this.line);
