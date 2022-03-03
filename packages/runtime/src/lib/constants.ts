@@ -428,15 +428,6 @@ export const enum MathOp {
   BitwiseInvert
 }
 
-// tealv5 supported types (typeEnum -> type mapping)
-// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
-export const TxnTypeMap: {[key: string]: string} = {
-  1: 'pay',
-  3: 'acfg', // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
-  4: 'axfer', // TransferAsset OR RevokeAsset,
-  5: 'afrz'
-};
-
 /**
  * https://developer.algorand.org/docs/get-details/dapps/avm/teal/specification/#typeenum-constants
  */

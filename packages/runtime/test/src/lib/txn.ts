@@ -1,5 +1,4 @@
-import { types } from "@algo-builder/web";
-import { stringToBytes } from "@algo-builder/web/build/lib/parsing";
+import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
 import { encodeBase64 } from "tweetnacl-ts";
 
@@ -35,6 +34,10 @@ describe("Convert encoded Txn to ExecParams", function () {
       encTx.clearProgram = execParams.clearProgram;
     }
 
+    // convert appArgs to buffer to easier compare.
+    if (execParams.type === types.TransactionType.CallApp) {
+      execParams.appArgs = parsing.parseAppArgs(execParams.appArgs);
+    }
     assert.deepEqual(encTxToExecParams(encTx, sign as types.Sign, runtime.ctx), execParams);
   };
 
@@ -146,8 +149,8 @@ describe("Convert encoded Txn to ExecParams", function () {
         type: types.TransactionType.KeyRegistration, // payment
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
-        voteKey: encodeBase64(stringToBytes('this-is-vote-key')),
-        selectionKey: encodeBase64(stringToBytes("this-is-selection-key")),
+        voteKey: encodeBase64(parsing.stringToBytes('this-is-vote-key')),
+        selectionKey: encodeBase64(parsing.stringToBytes("this-is-selection-key")),
         voteFirst: 43,
         voteLast: 1000,
         voteKeyDilution: 5,
@@ -171,6 +174,21 @@ describe("Convert encoded Txn to ExecParams", function () {
         globalInts: 10,
         localBytes: 10,
         localInts: 10,
+        payFlags: {
+          totalFee: 1000
+        }
+      };
+
+      assertEncTxConvertedToExecParam(runtime, execParams);
+    });
+
+    it("should convert SDK NoOpt Txn to ExecParams(CallApp)", () => {
+      execParams = {
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        type: types.TransactionType.CallApp,
+        appID: 42,
+        appArgs: ['str:hello', "int:42"],
         payFlags: {
           totalFee: 1000
         }

@@ -5,10 +5,21 @@ import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { MaxTxnNoteBytes, TxnFields, TxnTypeMap } from "../lib/constants";
+import { MaxTxnNoteBytes, TxnFields } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields } from "./txn";
+
+// supported types for inner tx (typeEnum -> type mapping)
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
+const TxnTypeMap: {[key: string]: {version: number, field: string | number}} = {
+  1: { version: 5, field: 'pay' },
+  2: { version: 6, field: 'keyreg' },
+  3: { version: 5, field: 'acfg' }, // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
+  4: { version: 5, field: 'axfer' }, // TransferAsset OR RevokeAsset,
+  5: { version: 5, field: 'afrz' },
+  6: { version: 6, field: 'appl' }
+};
 
 // requires their type as number
 const numberTxnFields: {[key: number]: Set<string>} = {
@@ -22,7 +33,7 @@ const numberTxnFields: {[key: number]: Set<string>} = {
   ])
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
-['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation"].forEach(field => numberTxnFields[6].add(field));
+['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation", "ApplicationID"].forEach(field => numberTxnFields[6].add(field));
 
 const uintTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -61,7 +72,7 @@ const byteTxnFields: {[key: number]: Set<string>} = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
-['VotePK', 'SelectionPK', 'Note'].forEach(field => byteTxnFields[6].add(field));
+['VotePK', 'SelectionPK', 'Note', "ApplicationArgs"].forEach(field => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
@@ -96,6 +107,7 @@ const txTypes: {[key: number]: Set<string>} = {
 // supported keyreg on teal v6
 txTypes[6] = cloneDeep(txTypes[5]);
 txTypes[6].add('keyreg');
+txTypes[6].add('appl');
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -165,11 +177,14 @@ export function setInnerTxField (
     }
     case 'TypeEnum': {
       const txType = op.assertBigInt(val, line);
-      if (TxnTypeMap[Number(txType)] === undefined) {
-        errMsg = `TypeEnum does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
+      if (
+        TxnTypeMap[Number(txType)] === undefined ||
+        TxnTypeMap[Number(txType)].version > interpreter.tealVersion
+      ) {
+        errMsg = `TypeEnum ${Number(txType)}does not support`;
+      } else {
+        subTxn.type = String(TxnTypeMap[Number(txType)].field);
       }
-
-      subTxn.type = TxnTypeMap[Number(txType)];
       break;
     }
     case 'ConfigAssetDecimals': {
@@ -251,7 +266,14 @@ export function setInnerTxField (
     (subTxn as any).apar = (subTxn as any).apar ?? {};
     (subTxn as any).apar[encodedField] = txValue;
   } else {
-    (subTxn as any)[encodedField] = txValue;
+    if (field === 'ApplicationArgs') {
+      if ((subTxn as any)[encodedField] === undefined) {
+        (subTxn as any)[encodedField] = [];
+      }
+      (subTxn as any)[encodedField].push(txValue);
+    } else {
+      (subTxn as any)[encodedField] = txValue;
+    }
   }
 
   return subTxn;

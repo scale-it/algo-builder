@@ -1,0 +1,103 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l14
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l13
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l12
+txn OnCompletion
+int CloseOut
+==
+bnz main_l11
+txn OnCompletion
+int OptIn
+==
+bnz main_l10
+txna ApplicationArgs 0
+byte "call_method"
+==
+bnz main_l9
+txna ApplicationArgs 0
+byte "echo_method"
+==
+bnz main_l8
+err
+main_l8:
+callsub echo_1
+callsub retlog_3
+int 1
+return
+main_l9:
+callsub call_0
+callsub retlog_3
+int 1
+return
+main_l10:
+int 1
+return
+main_l11:
+int 1
+return
+main_l12:
+txn Sender
+global CreatorAddress
+==
+return
+main_l13:
+txn Sender
+global CreatorAddress
+==
+return
+main_l14:
+int 1
+return
+
+// call
+call_0:
+itxn_begin
+int appl
+itxn_field TypeEnum
+txna ApplicationArgs 1
+btoi
+txnas Applications
+itxn_field ApplicationID
+byte "echo_method"
+itxn_field ApplicationArgs
+int 0
+itxn_field Fee
+itxn_submit
+itxna Logs 0
+extract 6 0
+retsub
+
+// echo
+echo_1:
+byte "Call from applicatiton"
+retsub
+
+// string_encode
+stringencode_2:
+store 1
+load 1
+len
+itob
+extract 6 2
+load 1
+concat
+retsub
+
+// ret_log
+retlog_3:
+store 0
+byte 0x151f7c75
+load 0
+callsub stringencode_2
+concat
+log
+retsub

@@ -198,7 +198,17 @@ export function isEncTxAssetConfig (txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
 export function isEncTxApplicationCreate (txn: EncTx): boolean {
-  return txn.type === TransactionTypeEnum.APPLICATION_CALL && (txn.apan === 0 || txn.apan === undefined);
+  return txn.type === TransactionTypeEnum.APPLICATION_CALL &&
+        (txn.apan === 0 || txn.apan === undefined) &&
+        (txn.apid === undefined);
+}
+
+/**
+ * Check if given encoded transaction object is application call
+ * @param txn Encode EncTx Object
+ */
+export function isEncTxApplicationCall (txn: EncTx): boolean {
+  return txn.type === TransactionTypeEnum.APPLICATION_CALL && (txn.apid !== undefined);
 }
 
 /**
@@ -237,10 +247,14 @@ export function encTxToExecParams (
         execParams.type = types.TransactionType.DeployApp;
         execParams.approvalProgram = encTx.approvalProgram;
         execParams.clearProgram = encTx.clearProgram;
-        execParams.localInts = encTx.apgs?.nui;
-        execParams.localBytes = encTx.apgs?.nbs;
+        execParams.localInts = encTx.apls?.nui;
+        execParams.localBytes = encTx.apls?.nbs;
         execParams.globalInts = encTx.apgs?.nui;
         execParams.globalBytes = encTx.apgs?.nbs;
+      } else if (isEncTxApplicationCall(encTx)) {
+        execParams.type = types.TransactionType.CallApp;
+        execParams.appID = encTx.apid;
+        execParams.appArgs = encTx.apaa;
       }
       break;
     }
