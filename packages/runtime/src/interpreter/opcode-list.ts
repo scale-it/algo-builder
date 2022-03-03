@@ -222,9 +222,14 @@ export class Arg extends Op {
   }
 
   execute (stack: TEALStack): void {
+    // get args from context
+    let args = this.interpreter.runtime.ctx.args;
+    // if args is undefined we assign empty array for it.
+    args = (args) || [];
+
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args, this.line);
-    const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
+      this.index, args, this.line);
+    const argN = this.assertBytes(args?.[this.index], this.line);
     stack.push(argN);
   }
 }
@@ -1616,7 +1621,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid;
+        const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -4231,31 +4236,35 @@ export class Log extends Op {
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
     const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
-    if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+    // for Log opcode we assume receipt is alway exist
+    // TODO: recheck when log opcode failed
+    if (txReceipt) {
+      if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
-    // max no. of logs exceeded
-    if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
-          maxLogs: ALGORAND_MAX_LOGS_COUNT,
-          line: this.line
-        }
-      );
+      // max no. of logs exceeded
+      if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
+            maxLogs: ALGORAND_MAX_LOGS_COUNT,
+            line: this.line
+          }
+        );
+      }
+
+      // max "length" of logs exceeded
+      const length = txReceipt.logs.join("").length + logByte.length;
+      if (length > ALGORAND_MAX_LOGS_LENGTH) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
+            maxLength: ALGORAND_MAX_LOGS_LENGTH,
+            origLength: length,
+            line: this.line
+          }
+        );
+      }
+
+      txReceipt.logs.push(convertToString(logByte));
     }
-
-    // max "length" of logs exceeded
-    const length = txReceipt.logs.join("").length + logByte.length;
-    if (length > ALGORAND_MAX_LOGS_LENGTH) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
-          maxLength: ALGORAND_MAX_LOGS_LENGTH,
-          origLength: length,
-          line: this.line
-        }
-      );
-    }
-
-    txReceipt.logs.push(convertToString(logByte));
   }
 }
 
