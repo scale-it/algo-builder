@@ -1056,7 +1056,7 @@ export class Divw extends Op {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
     }
 
-    const result = ((valueA << BigInt('64')) + valueB) / valueC;
+    const result = ((valueA << 64n) + valueB) / valueC;
 
     this.checkOverflow(result, this.line, MAX_UINT64);
 
