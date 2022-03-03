@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1345,7 +1345,7 @@ export class Txna extends Op {
 /// placeholder values
 const mockTxIdx = "100";
 const mockTxFieldIdx = "200";
-
+const mockScratchIndex = "100";
 /**
  * push value of a field to the stack from a transaction in the current transaction group
  * push to stack [...stack, value of field]
@@ -1616,7 +1616,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid as number;
+        const appID = this.interpreter.runtime.ctx.tx.apid;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -2572,9 +2572,9 @@ export class Gtxns extends Gtxn {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // NOTE: mockTxIdx is a mock value (max no of txns in group can be 16 atmost).
     // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
-    super(["100", ...args], line, interpreter);
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -2706,8 +2706,8 @@ export class Gloads extends Gload {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder value, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -2728,8 +2728,8 @@ export class Gloadss extends Gload {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", "11", ...args], line, interpreter);
+    // Just place holder field;
+    super([mockTxIdx, mockScratchIndex, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3344,8 +3344,8 @@ export class Gaids extends Gaid {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder argument, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3725,8 +3725,8 @@ export class Loads extends Load {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockScratchIndex is place holder arguments, will be updated when poping from stack in execute
+    super([mockScratchIndex, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -4193,7 +4193,8 @@ export class Args extends Arg {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    super([...args, "100"], line, interpreter);
+    // just place holder value
+    super([...args, mockTxIdx], line, interpreter);
     assertLen(args.length, 0, line);
   }
 
@@ -4229,7 +4230,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded
