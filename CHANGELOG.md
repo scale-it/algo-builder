@@ -35,6 +35,8 @@ Changed:
     ```bash
       algob init --infrastructure
     ```
+- Teal V6 support: 
+  - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
 
 
 ### Template improvements
