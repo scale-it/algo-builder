@@ -1,12 +1,17 @@
-import algosdk, { SuggestedParams, Transaction } from 'algosdk';
+import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
-import { BuilderError } from '../errors/errors';
-import { ERRORS } from '../errors/errors-list';
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { AccountAddress, ExecParams, SignType, TransactionType, TxParams } from "../types";
 import { parseAppArgs } from "./parsing";
 
-export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
-  if (note === undefined && noteb64 === undefined) { return undefined; }
+export function encodeNote(
+  note: string | undefined,
+  noteb64: string | undefined
+): Uint8Array | undefined {
+  if (note === undefined && noteb64 === undefined) {
+    return undefined;
+  }
   const encoder = new TextEncoder();
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
@@ -15,7 +20,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  * Returns from address from the transaction params depending on @SignType
  * @param execParams transaction execution params passed by user
  */
-export function getFromAddress (execParams: ExecParams): AccountAddress {
+export function getFromAddress(execParams: ExecParams): AccountAddress {
   if (execParams.sign === SignType.SecretKey) {
     return execParams.fromAccountAddr || execParams.fromAccount.addr; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
   }
@@ -28,7 +33,7 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  * @param params Transaction parameters
  * @param tx SDK Transaction object
  */
-export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
+export function updateTxFee(params: TxParams, tx: Transaction): Transaction {
   if (params.totalFee !== undefined) {
     tx.fee = params.totalFee;
   }
@@ -54,7 +59,10 @@ export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
  * @returns SDK Transaction object
  */
 /* eslint-disable sonarjs/cognitive-complexity */
-export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
+export function mkTransaction(
+  execParams: ExecParams,
+  suggestedParams: SuggestedParams
+): Transaction {
   const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
   const transactionType = execParams.type;
   const fromAccountAddr = getFromAddress(execParams);
@@ -218,11 +226,10 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         );
         return updateTxFee(execParams.payFlags, tx);
       } else {
-        throw new BuilderError(
-          ERRORS.GENERAL.PARAM_PARSE_ERROR, {
-            reason: "ASA Definition not found",
-            source: execParams.asaName
-          });
+        throw new BuilderError(ERRORS.GENERAL.PARAM_PARSE_ERROR, {
+          reason: "ASA Definition not found",
+          source: execParams.asaName,
+        });
       }
     }
     case TransactionType.DeployApp: {
@@ -231,8 +238,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg ?? new Uint8Array(8).fill(0),
-        execParams.clearProg ?? new Uint8Array(8).fill(0),
+        execParams.approvalProg ? execParams.approvalProg : new Uint8Array(8).fill(0),
+        execParams.clearProg ? execParams.clearProg : new Uint8Array(8).fill(0),
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -253,8 +260,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg ?? new Uint8Array(8).fill(0),
-        execParams.clearProg ?? new Uint8Array(8).fill(0),
+        execParams.approvalProg ? execParams.approvalProg : new Uint8Array(8).fill(0),
+        execParams.clearProg ? execParams.clearProg : new Uint8Array(8).fill(0),
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -310,8 +317,9 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return updateTxFee(execParams.payFlags, tx);
     }
     default: {
-      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR,
-        { transaction: transactionType });
+      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, {
+        transaction: transactionType,
+      });
     }
   }
 }
