@@ -23,6 +23,7 @@ Added:
 Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 - The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
+- Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
 - Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in *signature* mode, and parser will reject the execution if run in application mode.
 - Support RekeyTo field in the inner transaction for TEAL v6.
 - Support `keyreg` transaction in inner transaction.
