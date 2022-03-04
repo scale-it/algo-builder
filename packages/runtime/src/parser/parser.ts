@@ -13,7 +13,7 @@ import {
   EcdsaPkRecover, EcdsaVerify, Ed25519verify,
   EqualTo, Err, Exp, Expw, Extract, Extract3, ExtractUint16,
   ExtractUint32, ExtractUint64, Gaid, Gaids, GetAssetDef, GetAssetHolding,
-  GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
+  GetBit, GetByte, Gload, Gloads, Gloadss, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxnas, Gtxns, Gtxnsa, Gtxnsas, Int, Intc, Intcblock, Itob,
   ITxn, ITxna, ITxnBegin, ITxnField, ITxnSubmit,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Loads, Log, MinBalance, Mod,
@@ -243,10 +243,11 @@ opCodeMap[5] = {
 };
 
 opCodeMap[6] = {
-  ...opCodeMap[5]
+  ...opCodeMap[5],
+  gloadss: Gloadss
 };
 
-// list of opcodes that require one extra parameter than others: `interpreter`.
+// list of opcodes with exactly one parameter.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
   "load", "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
@@ -255,7 +256,7 @@ const interpreterReqList = new Set([
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
   "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
   "gaid", "gaids", "loads", "stores", "itxn_begin", "itxn_field", "itxn_submit",
-  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'app_params_get'
+  "itxn", "itxna", "txnas", "gtxnas", "gtxnsas", "args", "log", 'app_params_get', 'gloadss'
 ]);
 
 const signatureModeOps = new Set([
@@ -266,7 +267,7 @@ const applicationModeOps = new Set([
   "gload", "gloads", "gaid", "gaids", "balance", "app_opted_in", "app_local_get",
   "app_local_get_ex", "app_global_get", "app_global_get_ex", "app_local_put", "app_global_put",
   "app_local_del", "app_global_del", "asset_holding_get", "asset_params_get", "app_params_get",
-  "min_balance", "log", "itxn_begin", "itxn_field", "itxn_submit", "itxn", "itxna"
+  "min_balance", "log", "itxn_begin", "itxn_field", "itxn_submit", "itxn", "itxna", 'gloadss'
 ]);
 
 // opcodes allowed in both application and signature mode
@@ -281,7 +282,7 @@ const commonModeOps = new Set([
   "extract", "extract3", "extract_uint16", "extract_uint32", "extract_uint64", "pushbytes",
   "pushint", "callsub", "retsub", "shl", "shr", "sqrt", "bitlen", "exp", "expw", 'b+',
   'b-', 'b*', 'b/', 'b%', 'b<', 'b>', 'b<=', 'b>=', 'b==', 'b!=', 'b|', 'b&', 'b^', 'b~', 'bzero',
-  "txnas", "gtxnas", "gtxnsas"
+  "txnas", "gtxnas", "gtxnsas", 'gloadss'
 ]);
 
 /**

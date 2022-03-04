@@ -1,5 +1,4 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing, types } from "@algo-builder/web";
 import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
@@ -222,9 +221,11 @@ export class Arg extends Op {
   }
 
   execute (stack: TEALStack): void {
+    // get args from context
+    const args = this.interpreter.runtime.ctx.args ?? [];
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args, this.line);
-    const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
+      this.index, args, this.line);
+    const argN = this.assertBytes(args?.[this.index], this.line);
     stack.push(argN);
   }
 }
@@ -1345,7 +1346,7 @@ export class Txna extends Op {
 /// placeholder values
 const mockTxIdx = "100";
 const mockTxFieldIdx = "200";
-
+const mockScratchIndex = "100";
 /**
  * push value of a field to the stack from a transaction in the current transaction group
  * push to stack [...stack, value of field]
@@ -1616,7 +1617,7 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid;
+        const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
         const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
@@ -2572,9 +2573,9 @@ export class Gtxns extends Gtxn {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // NOTE: mockTxIdx is a mock value (max no of txns in group can be 16 atmost).
     // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
-    super(["100", ...args], line, interpreter);
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -2658,7 +2659,7 @@ export class MinBalance extends Op {
 // Args expected: [{uint8 transaction group index}(T),
 // {uint8 position in scratch space to load from}(I)]
 export class Gload extends Op {
-  readonly scratchIndex: number;
+  scratchIndex: number;
   txIndex: number;
   readonly interpreter: Interpreter;
   readonly line: number;
@@ -2706,12 +2707,35 @@ export class Gloads extends Gload {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder value, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Loads a scratch space value of another transaction from the current group
+// Stack: ..., A: uint64, B: uint64 → ..., any
+// Availability: v6
+export class Gloadss extends Gload {
+  /**
+   * Stores scratch space index number according to argument passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // Just place holder field;
+    super([mockTxIdx, mockScratchIndex, ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    this.scratchIndex = Number(this.assertBigInt(stack.pop(), this.line));
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
   }
@@ -3321,8 +3345,8 @@ export class Gaids extends Gaid {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder argument, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3702,8 +3726,8 @@ export class Loads extends Load {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockScratchIndex is place holder arguments, will be updated when poping from stack in execute
+    super([mockScratchIndex, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3926,7 +3950,7 @@ export class ITxnSubmit extends Op {
     }
 
     // initial contract account.
-    const appID = this.interpreter.runtime.ctx.tx.apid;
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
     const contractAddress = getApplicationAddress(appID);
     const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
@@ -4184,7 +4208,8 @@ export class Args extends Arg {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    super([...args, "100"], line, interpreter);
+    // just place holder value
+    super([...args, mockTxIdx], line, interpreter);
     assertLen(args.length, 0, line);
   }
 
@@ -4221,31 +4246,35 @@ export class Log extends Op {
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
     const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
-    if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+    // for Log opcode we assume receipt is alway exist
+    // TODO: recheck when log opcode failed
+    if (txReceipt) {
+      if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
-    // max no. of logs exceeded
-    if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
-          maxLogs: ALGORAND_MAX_LOGS_COUNT,
-          line: this.line
-        }
-      );
+      // max no. of logs exceeded
+      if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
+            maxLogs: ALGORAND_MAX_LOGS_COUNT,
+            line: this.line
+          }
+        );
+      }
+
+      // max "length" of logs exceeded
+      const length = txReceipt.logs.join("").length + logByte.length;
+      if (length > ALGORAND_MAX_LOGS_LENGTH) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
+            maxLength: ALGORAND_MAX_LOGS_LENGTH,
+            origLength: length,
+            line: this.line
+          }
+        );
+      }
+
+      txReceipt.logs.push(convertToString(logByte));
     }
-
-    // max "length" of logs exceeded
-    const length = txReceipt.logs.join("").length + logByte.length;
-    if (length > ALGORAND_MAX_LOGS_LENGTH) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
-          maxLength: ALGORAND_MAX_LOGS_LENGTH,
-          origLength: length,
-          line: this.line
-        }
-      );
-    }
-
-    txReceipt.logs.push(convertToString(logByte));
   }
 }
 

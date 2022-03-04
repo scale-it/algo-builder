@@ -24,16 +24,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       resolve(mockConfirmedTx);
     });
   }
 
-  /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txID: string): Promise<ConfirmedTxInfo> {
-    return new Promise((resolve, reject) => {
-      resolve(mockConfirmedTx);
-    });
+  waitForConfirmation (_txID: string): Promise<ConfirmedTxInfo> {
+    return this.sendAndWait([]);
   }
 
   async deployASA (

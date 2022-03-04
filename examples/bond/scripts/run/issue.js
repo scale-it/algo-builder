@@ -9,8 +9,6 @@ const { issueTx } = require('./common/common');
  */
 exports.issue = async function (deployer) {
   const creatorAccount = deployer.accountsByName.get('john');
-  const managerAcc = deployer.accountsByName.get('alice');
-
   const appInfo = deployer.getApp('BondApp');
   const issuerLsig = deployer.getLsig('IssuerLsig');
   const asaInfo = deployer.getASAInfo('bond-token-0');

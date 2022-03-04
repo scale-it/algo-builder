@@ -1,4 +1,3 @@
-/* eslint sonarjs/no-identical-functions: 0 */
 import { encodeAddress, isValidAddress } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";

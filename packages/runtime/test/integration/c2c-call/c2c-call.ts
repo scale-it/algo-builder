@@ -55,7 +55,7 @@ describe("C2C call", function () {
         totalFee: 2000
       }
     };
-    const txReceipt = runtime.executeTx(execParams);
+    const txReceipt = runtime.executeTx(execParams) as TxReceipt;
     const logs = txReceipt.logs ?? [];
     assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
   });

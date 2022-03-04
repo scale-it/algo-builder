@@ -50,7 +50,6 @@ export function expectRuntimeError (
   );
 }
 
-/* eslint-disable sonarjs/cognitive-complexity */
 export async function expectRuntimeErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
@@ -75,26 +74,26 @@ export async function expectRuntimeErrorAsync (
   try {
     await f();
   } catch (error) {
-    assert.instanceOf(error, RuntimeError);
-    if (error instanceof RuntimeError) {
-      assert.equal(error.number, errorDescriptor.number);
-      assert.notMatch(
-        error.message,
-        /%[a-zA-Z][a-zA-Z0-9]*%/,
-        "RuntimeError has an non-replaced variable tag"
-      );
-
-      if (matchMessage !== undefined) {
-        if (typeof matchMessage === "string") {
-          if (!error.message.includes(matchMessage)) {
-            notExactMatch.message += `${String(error.message)}`;
-            throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
-          }
-        } else {
-          if (matchMessage.exec(error.message) === null) {
-            notRegexpMatch.message += `${String(error.message)}`;
-            throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
-          }
+    if (!(error instanceof RuntimeError)){
+      assert.instanceOf(error, RuntimeError);
+      return;
+    }
+    assert.equal(error.number, errorDescriptor.number);
+    assert.notMatch(
+      error.message,
+      /%[a-zA-Z][a-zA-Z0-9]*%/,
+      "RuntimeError has an non-replaced variable tag"
+    );
+    if (matchMessage !== undefined) {
+      if (typeof matchMessage === "string") {
+        if (!error.message.includes(matchMessage)) {
+          notExactMatch.message += `${String(error.message)}`;
+          throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+        }
+      } else {
+        if (matchMessage.exec(error.message) === null) {
+          notRegexpMatch.message += `${String(error.message)}`;
+          throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
         }
       }
     }

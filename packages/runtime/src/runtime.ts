@@ -1,5 +1,3 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
-/* eslint sonarjs/no-small-switch: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
