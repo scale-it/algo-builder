@@ -1,8 +1,9 @@
 import { types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
+import { assert } from "chai";
 
 import { Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
+import { AccountStoreI, AppDeploymentFlags, TxReceipt } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 
 describe("C2C call", function () {
@@ -16,10 +17,10 @@ describe("C2C call", function () {
     [alice] = runtime.defaultAccounts();
     const flags: AppDeploymentFlags = {
       sender: alice.account,
-      localBytes: 10,
-      globalBytes: 60,
-      localInts: 10,
-      globalInts: 10
+      localBytes: 1,
+      globalBytes: 1,
+      localInts: 1,
+      globalInts: 1
     };
 
     firstAppID = runtime.deployApp('c2c-call.teal', 'clear.teal', flags, {}).appID;
@@ -42,7 +43,7 @@ describe("C2C call", function () {
     runtime.executeTx(fundTx);
   });
 
-  it.skip("can call another application", () => {
+  it("can call another application", () => {
     const execParams: types.ExecParams = {
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
@@ -54,6 +55,8 @@ describe("C2C call", function () {
         totalFee: 2000
       }
     };
-    runtime.executeTx(execParams);
+    const txReceipt = runtime.executeTx(execParams);
+    const logs = txReceipt.logs ?? [];
+    assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
   });
 });

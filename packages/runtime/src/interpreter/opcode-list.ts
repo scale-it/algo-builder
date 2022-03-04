@@ -223,7 +223,7 @@ export class Arg extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
+      this.index, this.interpreter.runtime.ctx.args, this.line);
     const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
     stack.push(argN);
   }
@@ -1233,7 +1233,7 @@ export class Txn extends Op {
     let result;
     if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
       result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
-        this.interpreter.tealVersion, this.line);
+        this.interpreter, this.line);
     } else {
       result = txnSpecbyField(
         this.field,
@@ -1289,7 +1289,7 @@ export class Gtxn extends Op {
 
     if (this.txFieldIdx !== undefined) {
       const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx]; // current tx
-      result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter.tealVersion, this.line);
+      result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
     } else {
       result = txnSpecbyField(
         this.field,
@@ -1337,7 +1337,7 @@ export class Txna extends Op {
 
   execute (stack: TEALStack): void {
     const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.fieldIdx, this,
-      this.interpreter.tealVersion, this.line);
+      this.interpreter, this.line);
     stack.push(result);
   }
 }
@@ -1388,7 +1388,7 @@ export class Gtxna extends Op {
     this.assertUint8(BigInt(this.txIdx), this.line);
     this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter.tealVersion, this.line);
+    const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter, this.line);
     stack.push(result);
   }
 }
@@ -1617,7 +1617,7 @@ export class Global extends Op {
       }
       case 'CreatorAddress': {
         const appID = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appID as number, this.line);
+        const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -3926,7 +3926,7 @@ export class ITxnSubmit extends Op {
     }
 
     // initial contract account.
-    const appID = this.interpreter.runtime.ctx.tx.apid as number;
+    const appID = this.interpreter.runtime.ctx.tx.apid;
     const contractAddress = getApplicationAddress(appID);
     const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
@@ -4029,7 +4029,7 @@ export class ITxn extends Op {
         // similarly as Txn Op
         if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
           result = txAppArg(this.field, tx, this.idx, this,
-            this.interpreter.tealVersion, this.line);
+            this.interpreter, this.line);
         } else {
           result = txnSpecbyField(this.field, tx, [tx], this.interpreter.tealVersion);
         }
@@ -4076,7 +4076,7 @@ export class ITxna extends Op {
 
     const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
     const result = txAppArg(this.field, tx, this.idx, this,
-      this.interpreter.tealVersion, this.line);
+      this.interpreter, this.line, true);
     stack.push(result);
   }
 }
@@ -4220,7 +4220,7 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
     if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
     // max no. of logs exceeded

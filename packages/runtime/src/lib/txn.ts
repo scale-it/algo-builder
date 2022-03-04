@@ -1,12 +1,13 @@
 import { parsing, types } from "@algo-builder/web";
 import { encodeAddress, EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
+import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TransactionTypeEnum, TxFieldDefaults, TxnFields, ZERO_ADDRESS_STR } from "../lib/constants";
 import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
-import { convertToString } from "./parsing";
+import { convertToBuffer, convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -146,9 +147,18 @@ export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], teal
  * @param line line number in TEAL file
  */
 export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
-  tealVersion: number, line: number): StackElem {
+  interpreter: Interpreter, line: number, isInnerTx?: boolean): StackElem {
+  const tealVersion: number = interpreter.tealVersion;
+
   const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-  const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
+  let result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
+  // handle Logs
+  if (isInnerTx && txField === 'Logs') {
+    const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+    const logs = txReceipt?.logs ?? [];
+    result = logs.map(log => convertToBuffer(log));
+  }
+
   if (!result) { // handle defaults
     return TxFieldDefaults[txField];
   }
@@ -166,6 +176,7 @@ export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
     if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during ssc deploy tx.app_id is 0
     idx--;
   }
+
   op.checkIndexBound(idx, result, line);
   return parseToStackElem(result[idx], txField);
 }
