@@ -7,10 +7,9 @@ export { ERRORS }; // re-export errors-list
 // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
 
 export class BuilderError extends Error {
-  public static isBuilderError(other: any): other is BuilderError { // eslint-disable-line
-    return (
-      other !== undefined && other !== null && other._isBuilderError === true
-    );
+  public static isBuilderError (other: any): other is BuilderError {
+    // eslint-disable-line
+    return other !== undefined && other !== null && other._isBuilderError === true;
   }
 
   public readonly errorDescriptor: ErrorDescriptor;
@@ -45,19 +44,31 @@ export class BuilderError extends Error {
 }
 
 export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
-  if (e === undefined) { return new BuilderError(ERRORS.NETWORK.NODE_IS_NOT_RUNNING); }
+  if (e === undefined) {
+    return new BuilderError(ERRORS.NETWORK.NODE_IS_NOT_RUNNING);
+  }
 
-  if (e.response?.statusCode !== undefined) {
-    if (e.response?.statusCode >= 400 && e.response?.statusCode < 500) {
-      return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST, {
-        status: e.response?.statusCode,
-        message: e.response?.body?.message || e.response?.text || e.response?.error, // // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-        ctx: JSON.stringify(ctx)
-      }, e.error);
+  /* eslint-disable @typescript-eslint/prefer-optional-chain */
+  if (e.response && e.response.statusCode !== undefined) {
+    if (e.response.statusCode >= 400 && e.response.statusCode < 500) {
+      return new BuilderError(
+        ERRORS.ALGORAND.BAD_REQUEST,
+        {
+          status: e.response.statusCode,
+          message:
+            (e.response.body && e.response.body.message) || e.response.text || e.response.error, // // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+          ctx: JSON.stringify(ctx)
+        },
+        e.error
+      );
     }
-    return new BuilderError(ERRORS.ALGORAND.INTERNAL_ERROR, {
-      status: e.response?.statusCode
-    }, e);
+    return new BuilderError(
+      ERRORS.ALGORAND.INTERNAL_ERROR,
+      {
+        status: e.response.statusCode
+      },
+      e
+    );
   }
   return e;
 }
@@ -120,10 +131,6 @@ function _applyErrorMessageTemplate (
 /**
  * Replaces all the instances of [[toReplace]] by [[replacement]] in [[str]].
  */
-export function replaceAll (
-  str: string,
-  toReplace: string,
-  replacement: string
-): string {
+export function replaceAll (str: string, toReplace: string, replacement: string): string {
   return str.split(toReplace).join(replacement);
 }
