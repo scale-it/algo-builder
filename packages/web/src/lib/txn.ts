@@ -5,7 +5,7 @@ import { ERRORS } from "../errors/errors-list";
 import { AccountAddress, ExecParams, SignType, TransactionType, TxParams } from "../types";
 import { parseAppArgs } from "./parsing";
 
-export function encodeNote(
+export function encodeNote (
   note: string | undefined,
   noteb64: string | undefined
 ): Uint8Array | undefined {
@@ -20,7 +20,7 @@ export function encodeNote(
  * Returns from address from the transaction params depending on @SignType
  * @param execParams transaction execution params passed by user
  */
-export function getFromAddress(execParams: ExecParams): AccountAddress {
+export function getFromAddress (execParams: ExecParams): AccountAddress {
   if (execParams.sign === SignType.SecretKey) {
     return execParams.fromAccountAddr || execParams.fromAccount.addr; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
   }
@@ -33,7 +33,7 @@ export function getFromAddress(execParams: ExecParams): AccountAddress {
  * @param params Transaction parameters
  * @param tx SDK Transaction object
  */
-export function updateTxFee(params: TxParams, tx: Transaction): Transaction {
+export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
   if (params.totalFee !== undefined) {
     tx.fee = params.totalFee;
   }
@@ -59,7 +59,7 @@ export function updateTxFee(params: TxParams, tx: Transaction): Transaction {
  * @returns SDK Transaction object
  */
 /* eslint-disable sonarjs/cognitive-complexity */
-export function mkTransaction(
+export function mkTransaction (
   execParams: ExecParams,
   suggestedParams: SuggestedParams
 ): Transaction {
@@ -228,7 +228,7 @@ export function mkTransaction(
       } else {
         throw new BuilderError(ERRORS.GENERAL.PARAM_PARSE_ERROR, {
           reason: "ASA Definition not found",
-          source: execParams.asaName,
+          source: execParams.asaName
         });
       }
     }
@@ -318,7 +318,7 @@ export function mkTransaction(
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, {
-        transaction: transactionType,
+        transaction: transactionType
       });
     }
   }
