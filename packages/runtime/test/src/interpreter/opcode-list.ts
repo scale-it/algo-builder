@@ -20,7 +20,7 @@ import {
   Ed25519verify, EqualTo,
   Err, Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32,
   ExtractUint64, GetAssetDef, GetAssetHolding, GetBit,
-  GetByte, Gload, Gloads, Global,
+  GetByte, Gload, Gloads, Gloadss, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxnas, Gtxns, Gtxnsa, Gtxnsas, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Loads, Log, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
@@ -3047,7 +3047,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        const appID = interpreter.runtime.ctx.tx.apid as number;
+        const appID = interpreter.runtime.ctx.tx.apid as number
         let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
         let value = acc?.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
@@ -4379,7 +4379,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("TEALv4: shared data between contracts", () => {
+  describe("Shared data between contracts opcode(gload, gloads, gloadss)", () => {
     let stack: Stack<StackElem>;
     let interpreter: Interpreter;
 
@@ -4395,76 +4395,124 @@ describe("Teal Opcodes", function () {
 
     this.beforeEach(() => { stack = new Stack<StackElem>(); });
 
-    it("should push value from ith tx in shared scratch space(gload)", () => {
-      const op = new Gload(["0", "1"], 1, interpreter);
+    describe("gload opcode", function () {
+      it("should push value from ith tx in shared scratch space(gload)", () => {
+        const op = new Gload(["0", "1"], 1, interpreter);
 
-      op.execute(stack);
-      const top = stack.pop();
+        op.execute(stack);
+        const top = stack.pop();
 
-      assert.equal(top, 2n);
+        assert.equal(top, 2n);
+      });
+
+      it("should throw error if tx doesn't exist(gload)", () => {
+        let op = new Gload(["1", "1"], 1, interpreter);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
+
+        op = new Gload(["1", "3"], 1, interpreter);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
+      });
+
+      it("should throw error if value doesn't exist in stack elem array(gload)", () => {
+        const op = new Gload(["2", "5"], 1, interpreter);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+      });
     });
 
-    it("should throw error if tx doesn't exist(gload)", () => {
-      let op = new Gload(["1", "1"], 1, interpreter);
+    describe("gloads opcode", function () {
+      it("should push value from ith tx in shared scratch space(gloads)", () => {
+        const op = new Gloads(["1"], 1, interpreter);
+        stack.push(0n);
 
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
-      );
+        op.execute(stack);
+        const top = stack.pop();
 
-      op = new Gload(["1", "3"], 1, interpreter);
+        assert.equal(top, 2n);
+      });
 
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
-      );
+      it("should throw error if tx doesn't exist(gloads)", () => {
+        let op = new Gloads(["1"], 1, interpreter);
+        stack.push(1n);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
+
+        op = new Gloads(["3"], 1, interpreter);
+        stack.push(1n);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
+      });
+
+      it("should throw error if value doesn't exist in stack elem array(gloads)", () => {
+        const op = new Gloads(["5"], 1, interpreter);
+        stack.push(2n);
+
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+      });
     });
 
-    it("should throw error if value doesn't exist in stack elem array(gload)", () => {
-      const op = new Gload(["2", "5"], 1, interpreter);
+    describe("gloadss opcode(TEAL v6)", function () {
+      it("should push value from ith tx in shared scratch space(gloadss)", () => {
+        const op = new Gloadss([], 1, interpreter);
+        stack.push(0n); // transaction 0th
+        stack.push(1n); // scratch space 1st
 
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
-      );
-    });
+        op.execute(stack);
+        const top = stack.pop();
 
-    it("should push value from ith tx in shared scratch space(gloads)", () => {
-      const op = new Gloads(["1"], 1, interpreter);
-      stack.push(0n);
+        assert.equal(top, 2n);
+      });
 
-      op.execute(stack);
-      const top = stack.pop();
+      it("should throw error if tx doesn't exist(gloadss)", () => {
+        let op = new Gloadss([], 1, interpreter);
+        stack.push(1n);
+        stack.push(1n);
 
-      assert.equal(top, 2n);
-    });
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
 
-    it("should throw error if tx doesn't exist(gloads)", () => {
-      let op = new Gloads(["1"], 1, interpreter);
-      stack.push(1n);
+        op = new Gloadss([], 1, interpreter);
+        stack.push(3n);
+        stack.push(1n);
 
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
-      );
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+        );
+      });
 
-      op = new Gloads(["3"], 1, interpreter);
-      stack.push(1n);
+      it("should throw error if value doesn't exist in stack elem array(gloadss)", () => {
+        const op = new Gloadss([], 1, interpreter);
+        stack.push(2n); // transaction id
+        stack.push(5n); // scratch id
 
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
-      );
-    });
-
-    it("should throw error if value doesn't exist in stack elem array(gloads)", () => {
-      const op = new Gloads(["5"], 1, interpreter);
-      stack.push(2n);
-
-      expectRuntimeError(
-        () => op.execute(stack),
-        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
-      );
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+      });
     });
   });
 
