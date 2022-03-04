@@ -33,7 +33,7 @@ __metadata:
     deepmerge: ^4.2.2
     download-git-repo: ^3.0.2
     enquirer: ^2.3.6
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     findup-sync: ^5.0.0
     fs-extra: ^10.0.0
     glob: ^7.2.0
@@ -74,7 +74,7 @@ __metadata:
     algosdk: ^1.13.1
     chai: ^4.3.4
     elliptic: ^6.5.4
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     hi-base32: ^0.5.1
     js-sha256: ^0.9.0
     js-sha512: ^0.8.0
@@ -108,7 +108,7 @@ __metadata:
     algorand-walletconnect-qrcode-modal: ^1.6.1
     algosdk: ^1.13.1
     chai: ^4.3.4
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
     nyc: ^15.1.0
     sinon: ^12.0.1
@@ -401,9 +401,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/eslintrc@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@eslint/eslintrc@npm:1.1.0"
+"@eslint/eslintrc@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@eslint/eslintrc@npm:1.2.0"
   dependencies:
     ajv: ^6.12.4
     debug: ^4.3.2
@@ -414,7 +414,7 @@ __metadata:
     js-yaml: ^4.1.0
     minimatch: ^3.0.4
     strip-json-comments: ^3.1.1
-  checksum: 784aa2157e2808b52bbbaf1d1cfca9a6ba0b2faaa3696eb7a1229d4b357400fbd8a6aa09a16e7ae0868ea075d3a8f365cf5928b6d05a1df47f40a1167423a4fa
+  checksum: a5e51dcf02627363567094456d7880b46b6a14a285d7a057f083ca903bdd862483bb6314cbc9fb6fa2d2c4537d50e0d28bd5e39650840241ae4796faaec65d2e
   languageName: node
   linkType: hard
 
@@ -1277,13 +1277,13 @@ __metadata:
   dependencies:
     "@typescript-eslint/eslint-plugin": ^5.1.0
     "@typescript-eslint/parser": ^5.1.0
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     eslint-config-standard-with-typescript: ^21.0.1
     eslint-plugin-import: ^2.25.4
     eslint-plugin-node: ^11.1.0
     eslint-plugin-promise: ^6.0.0
     eslint-plugin-simple-import-sort: ^7.0.0
-    eslint-plugin-sonarjs: ^0.11.0
+    eslint-plugin-sonarjs: ^0.12.0
     husky: ^7.0.4
     lint-staged: ^12.3.1
     mocha: ^9.2.0
@@ -1308,7 +1308,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -2157,7 +2157,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -2170,7 +2170,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -2830,12 +2830,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-sonarjs@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "eslint-plugin-sonarjs@npm:0.11.0"
+"eslint-plugin-sonarjs@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "eslint-plugin-sonarjs@npm:0.12.0"
   peerDependencies:
     eslint: ^5.0.0 || ^6.0.0 || ^7.0.0|| ^8.0.0
-  checksum: ef9633e518f6d8365b7370bf48f70fb837124c68318e14146c13ffa8f4c5a747b5f776956124549f81252131ebb8c139d071b9c66e2af77889d0eada725d6d25
+  checksum: 96be3002ce2344a07081c33649d9bb927189153c2e68ecb13069b0adfa4ff2e2cecec6f25ee3d5e29600d8d8aac6e14e54f1990b0847234975f311d48521c828
   languageName: node
   linkType: hard
 
@@ -2907,11 +2907,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.9.0":
-  version: 8.9.0
-  resolution: "eslint@npm:8.9.0"
+"eslint@npm:^8.10.0":
+  version: 8.10.0
+  resolution: "eslint@npm:8.10.0"
   dependencies:
-    "@eslint/eslintrc": ^1.1.0
+    "@eslint/eslintrc": ^1.2.0
     "@humanwhocodes/config-array": ^0.9.2
     ajv: ^6.10.0
     chalk: ^4.0.0
@@ -2948,7 +2948,7 @@ __metadata:
     v8-compile-cache: ^2.0.3
   bin:
     eslint: bin/eslint.js
-  checksum: 8efecdb9752ee6cb4d2787a14e00cbeab29562ed95dd71c6f3f8ac410426a067d5aa659416d2290e46ca44bc5607e6a6e6c62f814694d8639f80666f522022a7
+  checksum: 8b31ab3de5b48b6828bf13c09c9e62ee0045fa0afa017efaa73eedcf4dc33bc204ee4c467d4677e37967d1645f73816ddef4271422e691fded352040f8f83093
   languageName: node
   linkType: hard
 
@@ -3020,7 +3020,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -3033,7 +3033,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -3814,7 +3814,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     js-sha256: ^0.9.0
     mocha: ^9.2.0
   languageName: unknown
@@ -5153,7 +5153,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -5639,7 +5639,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -5652,7 +5652,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -5665,7 +5665,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -5905,7 +5905,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -6208,7 +6208,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -6400,7 +6400,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
@@ -7019,7 +7019,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.13.1
-    eslint: ^8.9.0
+    eslint: ^8.10.0
     mocha: ^9.2.0
   languageName: unknown
   linkType: soft
