@@ -99,6 +99,7 @@ __metadata:
   resolution: "@algo-builder/web@workspace:packages/web"
   dependencies:
     "@json-rpc-tools/utils": ^1.7.6
+    "@randlabs/myalgo-connect": ^1.1.2
     "@types/chai": ^4.2.22
     "@types/mocha": ^9.0.0
     "@types/node": 15.12.5
@@ -543,6 +544,22 @@ __metadata:
   version: 1.0.1
   resolution: "@pedrouid/environment@npm:1.0.1"
   checksum: fd88340ad760f26340a2816c3677f0ca913976e315880891c3de3f028fe64abc9704fb904234dce77a1ff15c22d0b6cbf1d4199a76de6695c2aed8353ce20590
+  languageName: node
+  linkType: hard
+
+"@randlabs/communication-bridge@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@randlabs/communication-bridge@npm:1.0.0"
+  checksum: fe32ac0dcdb404bb63dcbdbc63ac8710497b71334f4f9b3c77b7301556822a174192d5b0fafcb0c0ae90e6fb5223aeebdb0f02e1eb6b91d2926f5f2ed19774fa
+  languageName: node
+  linkType: hard
+
+"@randlabs/myalgo-connect@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@randlabs/myalgo-connect@npm:1.1.2"
+  dependencies:
+    "@randlabs/communication-bridge": ^1.0.0
+  checksum: 4932c0704272eebf88e825821ffa0f16402751f1063030b3bee18fdc62764f63f978c3cc4a832f29b61cdea5cbb340bcc97a0eb048be176d53f18b7eaa7ab74f
   languageName: node
   linkType: hard
 
