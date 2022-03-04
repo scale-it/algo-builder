@@ -18,9 +18,9 @@ const LAST_ROUND = "last-round";
 export class WallectConnectSession {
   readonly connector: WalletConnect;
   private readonly algodClient: algosdk.Algodv2;
-  wcAccounts: string[]
+  wcAccounts: string[];
 
-  constructor (chain: ChainType, connector?: WalletConnect) {
+  constructor (chain: string, connector?: WalletConnect) {
     this.algodClient = clientForChain(chain);
     if (connector) {
       this.connector = connector;
@@ -191,9 +191,9 @@ export class WallectConnectSession {
   };
 
   /**
- * Execute single transaction or group of transactions (atomic transaction)
- * @param execParams transaction parameters or atomic transaction parameters
- */
+   * Execute single transaction or group of transactions (atomic transaction)
+   * @param execParams transaction parameters or atomic transaction parameters
+   */
   async executeTransaction (execParams: ExecParams | ExecParams[]):
   Promise<algosdk.modelsv2.PendingTransactionResponse> {
     let signedTxn;

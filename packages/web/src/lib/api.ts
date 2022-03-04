@@ -5,14 +5,14 @@ import { ChainType, TxParams } from "../types";
 const mainNetClient = new Algodv2("", "https://algoexplorerapi.io", "");
 const testNetClient = new Algodv2("", "https://testnet.algoexplorerapi.io", "");
 
-export function clientForChain (chain: ChainType): algosdk.Algodv2 {
+export function clientForChain (chain: string): algosdk.Algodv2 {
   switch (chain) {
     case ChainType.MainNet:
       return mainNetClient;
     case ChainType.TestNet:
       return testNetClient;
     default:
-      throw new Error(`Unknown chain type: ${chain as string}`);
+      throw new Error(`Unknown chain type: ${chain}`);
   }
 }
 
