@@ -37,7 +37,7 @@ function assertParamDefinition (
   }
 }
 
-const runSuperNop: any = async () => {};
+const runSuperNop: any = async () => { };
 runSuperNop.isDefined = false;
 
 describe("SimpleTaskDefinition", () => {
@@ -226,7 +226,7 @@ describe("SimpleTaskDefinition", () => {
           );
         });
 
-        describe("should still accept non-positional ones", () => { // eslint-disable-line sonarjs/no-identical-functions
+        describe("should still accept non-positional ones", () => {
           it("should accept a common param", () => {
             taskDefinition.addParam("p");
             assert.notEqual(taskDefinition.paramDefinitions.p, undefined);

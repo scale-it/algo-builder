@@ -1,5 +1,4 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing, types } from "@algo-builder/web";
 import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";

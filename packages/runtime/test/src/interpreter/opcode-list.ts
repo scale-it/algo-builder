@@ -1,5 +1,3 @@
-/* eslint sonarjs/no-identical-functions: 0 */
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, encodeAddress, generateAccount, getApplicationAddress, signBytes } from "algosdk";
 import { assert } from "chai";

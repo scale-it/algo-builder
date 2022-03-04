@@ -752,18 +752,7 @@ describe("Config validation", function () {
       });
       const cfg: any = deepmerge({}, localhost);
       Object.assign(cfg, { kmdCfg: kmd });
-      expectBuilderError(
-        () =>
-          validateConfig({
-            networks: {
-              localhost: cfg,
-              [ALGOB_CHAIN_NAME]: {
-                asdasd: "3"
-              }
-            }
-          }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
+      expectConfigError(localhost, cfg, "3");
     });
   });
 
@@ -819,22 +808,25 @@ describe("Config validation", function () {
       assert.isEmpty(errors.errors, errors.toString());
     });
 
-    /* eslint-disable sonarjs/no-identical-functions */
-    it("Shouldn't accept invalid types", function () {
+    it("Shouldn't accept invalid types [indexer]", function () {
       const cfg: any = deepmerge({}, localhost);
       cfg.indexerCfg.port = [8080];
-      expectBuilderError(
-        () =>
-          validateConfig({
-            networks: {
-              localhost: Object.assign(localhost, cfg),
-              [ALGOB_CHAIN_NAME]: {
-                asdasd: "1"
-              }
-            }
-          }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
+      expectConfigError(localhost, cfg, "1");
     });
   });
 });
+
+function expectConfigError (localhost: unknown, cfg: unknown, val: string): void {
+  expectBuilderError(
+    () =>
+      validateConfig({
+        networks: {
+          localhost: Object.assign(localhost, cfg),
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: val
+          }
+        }
+      }),
+    ERRORS.GENERAL.INVALID_CONFIG
+  );
+}
