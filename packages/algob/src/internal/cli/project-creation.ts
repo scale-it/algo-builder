@@ -28,15 +28,12 @@ function copy (directory: string, location: string): void {
   fsExtra.copySync(directory, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
-    filter: (src: string, dest: string) => {
+    filter: (_src: string, dest: string) => {
       const relPath = path.relative(process.cwd(), dest);
       if (relPath === '') {
         return true;
       }
-      if (path.basename(dest) === ".gitkeep") {
-        return false;
-      }
-      return true;
+      return path.basename(dest) !== ".gitkeep";
     }
   });
 }

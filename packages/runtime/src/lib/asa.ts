@@ -126,8 +126,7 @@ export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): types.AS
 }
 
 function isDefined (value: string | undefined): boolean {
-  if (value !== undefined && value !== "") return true;
-  return false;
+  return value !== undefined && value !== "";
 }
 
 /**
