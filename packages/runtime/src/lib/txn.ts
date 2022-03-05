@@ -147,17 +147,11 @@ export function txnSpecbyField (txField: string, tx: EncTx, gtxns: EncTx[], teal
  * @param line line number in TEAL file
  */
 export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
-  interpreter: Interpreter, line: number, isInnerTx?: boolean): StackElem {
+  interpreter: Interpreter, line: number): StackElem {
   const tealVersion: number = interpreter.tealVersion;
 
   const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-  let result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
-  // handle Logs
-  if (isInnerTx && txField === 'Logs') {
-    const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-    const logs = txReceipt?.logs ?? [];
-    result = logs.map(log => convertToBuffer(log));
-  }
+  const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
   if (!result) { // handle defaults
     return TxFieldDefaults[txField];

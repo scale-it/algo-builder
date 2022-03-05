@@ -4099,8 +4099,21 @@ export class ITxna extends Op {
     }
 
     const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
-    const result = txAppArg(this.field, tx, this.idx, this,
-      this.interpreter, this.line, true);
+
+    let result: StackElem;
+
+    if (this.interpreter.tealVersion >= 5 && this.field === 'Logs') {
+      // handle Logs
+      const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+      let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
+      logs = logs.map(log => convertToBuffer(log));
+      this.checkIndexBound(this.idx, logs, this.line);
+      result = logs[this.idx];
+    } else {
+      // handle other case
+      result = txAppArg(this.field, tx, this.idx, this,
+        this.interpreter, this.line);
+    }
     stack.push(result);
   }
 }
