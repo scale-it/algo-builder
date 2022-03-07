@@ -44,12 +44,7 @@ module.exports = {
 		"@typescript-eslint/no-unused-vars": unusedVarsCfg,
 
 		"@typescript-eslint/consistent-type-assertions": "off",
-		"@typescript-eslint/promise-function-async": "off",
 		"@typescript-eslint/no-dynamic-delete": "off",
-		"@typescript-eslint/quotes": "off",
-		semi: "off", // required for a proper work
-		"@typescript-eslint/semi": ["error", "always"],
-		"@typescript-eslint/strict-boolean-expressions": "off",
 		"sonarjs/cognitive-complexity": ["error", 16],
 	},
 	overrides: [
