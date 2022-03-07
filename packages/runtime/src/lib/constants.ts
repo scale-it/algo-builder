@@ -405,7 +405,10 @@ OpGasCost[5] = {
   ecdsa_pk_recover: 2000
 };
 
-OpGasCost[6] = { ...OpGasCost[5] };
+OpGasCost[6] = {
+  ...OpGasCost[5],
+  bsqrt: 40
+};
 
 export const enum MathOp {
   // arithmetic

@@ -2,6 +2,7 @@ import { parsing } from "@algo-builder/web";
 import { decodeAddress, encodeAddress, generateAccount, getApplicationAddress, signBytes } from "algosdk";
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
+import { describe } from "mocha";
 
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -11,12 +12,12 @@ import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, AppParamsGet, Arg, Args, Assert, Balance, BitLen, BitwiseAnd, BitwiseNot, BitwiseOr,
-  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Bsqrt, Btoi,
   Byte, ByteAdd, ByteBitwiseAnd,
   ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
   ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
   ByteNotEqualTo, ByteSub, ByteZero,
-  Concat, Cover, Dig, Div, DivModw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify,
+  Concat, Cover, Dig, Div, DivModw, Divw, Dup, Dup2, EcdsaPkDecompress, EcdsaPkRecover, EcdsaVerify,
   Ed25519verify, EqualTo,
   Err, Exp, Expw, Extract, Extract3, ExtractUint16, ExtractUint32,
   ExtractUint64, GetAssetDef, GetAssetHolding, GetBit,
@@ -28,7 +29,7 @@ import {
   Sub, Substring, Substring3, Swap, Txn, Txna, Txnas, Uncover
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
-import { bigEndianBytesToBigInt, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
+import { bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, EncTx as EncodedTx, SSCAttributesM, StackElem } from "../../../src/types";
@@ -6099,6 +6100,82 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => new AppParamsGet(["AppCreatorInvalid"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
+      );
+    });
+  });
+
+  describe("TEALv6 opcodes", function () {
+    let stack: Stack<StackElem>;
+
+    const initStack = (values: StackElem[]): Stack<StackElem> => {
+      const st: Stack<StackElem> = new Stack();
+      values.forEach(value => {
+        st.push(value);
+      });
+      return st;
+    };
+
+    it("Divw opcode happy cases", () => {
+      const op = new Divw([], 0);
+
+      // 1/ 1
+      stack = initStack([0n, 1n, 1n]);
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack = initStack([0n, 9n, 4n]);
+      op.execute(stack);
+      assert.equal(stack.pop(), 2n);
+
+      stack = initStack([1n, 0n, 2n]);
+      op.execute(stack);
+      assert.equal(stack.pop(), 9223372036854775808n);
+    });
+
+    it("Divw opcode unhappy cases", () => {
+      const op = new Divw([], 0);
+
+      // div by Zero
+      stack = initStack([0n, 1n, 0n]);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ZERO_DIV
+      );
+
+      // overflow
+      stack = initStack([2n, 1n, 1n]);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      stack = initStack([2n, 0n, 2n]);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+    });
+
+    it("Bsqrt opcode happy cases", () => {
+      const op = new Bsqrt([], 0);
+      // should run success for case 64 bytes.
+      const inputs = [0n, 1n, 10n, (1n << 32n), BigInt('0x' + 'ff'.repeat(64))];
+      const outputs = [0n, 1n, 3n, (1n << 16n), BigInt('0x' + 'ff'.repeat(32))];
+
+      inputs.forEach((number, index) => {
+        stack = initStack([bigintToBigEndianBytes(number)]);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), bigintToBigEndianBytes(outputs[index]));
+      });
+    });
+
+    it("Bsqrt opcode unhappy cases", () => {
+      const op = new Bsqrt([], 0);
+      // length of input more than 64
+      stack = initStack([bigintToBigEndianBytes(BigInt('0x' + 'ff'.repeat(100)))]);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
       );
     });
   });
