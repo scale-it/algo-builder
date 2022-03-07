@@ -12,7 +12,9 @@ module.exports = {
     mocha: true,
   },
   plugins: ["simple-import-sort", "sonarjs"],
-  extends: ["standard-with-typescript", "plugin:sonarjs/recommended"],
+  extends: ["plugin:sonarjs/recommended",
+    // "eslint:recommended", "plugin:@typescript-eslint/recommended"
+    "prettier"],
   parserOptions: {
     ecmaVersion: 2020,
     // sourceType: "module"
