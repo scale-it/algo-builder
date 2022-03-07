@@ -285,7 +285,7 @@ const commonModeOps = new Set([
   "extract", "extract3", "extract_uint16", "extract_uint32", "extract_uint64", "pushbytes",
   "pushint", "callsub", "retsub", "shl", "shr", "sqrt", "bitlen", "exp", "expw", 'b+',
   'b-', 'b*', 'b/', 'b%', 'b<', 'b>', 'b<=', 'b>=', 'b==', 'b!=', 'b|', 'b&', 'b^', 'b~', 'bzero',
-  "txnas", "gtxnas", "gtxnsas", 'divw', 'bsqrt','gloadss'
+  "txnas", "gtxnas", "gtxnsas", 'divw', 'bsqrt', 'gloadss'
 ]);
 
 /**
