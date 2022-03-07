@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 
-import { IClientMeta } from "@walletconnect/types"; /* eslint-disable-line import/no-unresolved */
+import { IClientMeta } from "@walletconnect/types";
 import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
 
