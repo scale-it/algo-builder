@@ -62,7 +62,6 @@ export class Runtime {
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-
     this.round = 2;
     this.timestamp = 1;
   }

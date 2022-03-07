@@ -16,6 +16,8 @@ describe("C2C call", function () {
   let secondAppID: number;
   let thirdAppID: number;
 
+  let appCallArgs: string[];
+
   this.beforeEach(() => {
     runtime = new Runtime([]);
     [alice] = runtime.defaultAccounts();
@@ -49,6 +51,7 @@ describe("C2C call", function () {
 
     fundTx.toAccountAddr = getApplicationAddress(thirdAppID);
     runtime.executeTx(fundTx);
+    appCallArgs = ['str:call_method', 'int:1'];
   });
 
   it("can call another application", () => {
@@ -58,7 +61,7 @@ describe("C2C call", function () {
       fromAccount: alice.account,
       foreignApps: [secondAppID],
       appID: firstAppID,
-      appArgs: ['str:call_method', 'int:1'],
+      appArgs: appCallArgs,
       payFlags: {
         totalFee: 2000
       }
@@ -75,7 +78,7 @@ describe("C2C call", function () {
       fromAccount: alice.account,
       foreignApps: [thirdAppID],
       appID: firstAppID,
-      appArgs: ['str:call_method', 'int:1'],
+      appArgs: appCallArgs,
       payFlags: {
         totalFee: 2000
       }
@@ -84,6 +87,25 @@ describe("C2C call", function () {
     expectRuntimeError(
       () => runtime.executeTx(execParams),
       RUNTIME_ERRORS.GENERAL.INNER_APP_CALL_INVALID_VERSION
+    );
+  });
+
+  it("should failed: inner tx appl self-call", () => {
+    const execParams: types.ExecParams = {
+      type: types.TransactionType.CallApp,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      foreignApps: [firstAppID],
+      appID: firstAppID,
+      appArgs: appCallArgs,
+      payFlags: {
+        totalFee: 2000
+      }
+    };
+
+    expectRuntimeError(
+      () => runtime.executeTx(execParams),
+      RUNTIME_ERRORS.GENERAL.INNER_APPL_SELF_CALL
     );
   });
 });

@@ -480,6 +480,18 @@ const runtimeGeneralErrors = {
     message: "Inner app call with version 5 < 6",
     title: "Inner app call with version 5 < 6.",
     description: "Inner app call with version 5 < 6"
+  },
+  INNER_APPL_DEEP_EXCEEDED: {
+    number: 1509,
+    message: "Inner transaction appl deep exceeded",
+    title: "Inner transaction appl deep exceeded.",
+    description: "Inner transaction appl deep exceeded"
+  },
+  INNER_APPL_SELF_CALL: {
+    number: 1510,
+    message: "Inner transaction appl self-call",
+    title: "Inner transaction appl self-call.",
+    description: "Inner transaction appl self-call"
   }
 };
 

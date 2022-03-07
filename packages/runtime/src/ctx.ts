@@ -6,7 +6,7 @@ import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
-import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
+import { ALGORAND_MIN_TX_FEE, TransactionTypeEnum } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
 import {
@@ -32,6 +32,7 @@ export class Ctx implements Context {
   pooledApplCost: number; // total opcode cost for each application call for single/group tx
   // inner transaction props
   isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
+  innerTxApplCallStack: number[];
   createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
   constructor (state: State, tx: EncTx, gtxs: EncTx[], args: Uint8Array[],
@@ -49,6 +50,7 @@ export class Ctx implements Context {
     this.pooledApplCost = 0;
     // inner transaction props
     this.isInnerTx = false;
+    this.innerTxApplCallStack = [];
     this.createdAssetID = 0;
   }
 
@@ -386,6 +388,26 @@ export class Ctx implements Context {
   }
 
   /**
+   * Verify we can excute current inner transaction.
+   */
+  verifyAndUpdateInnerApplCallStack (): void {
+    // verify
+    if (!this.isInnerTx) return;
+
+    if (this.innerTxApplCallStack.length >= 8) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APPL_DEEP_EXCEEDED);
+    }
+    const appID = this.tx.apid ?? 0;
+    if (appID > 0 && this.innerTxApplCallStack.find((id) => id === appID) !== undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APPL_SELF_CALL);
+    }
+
+    // update inner tx call stack
+    if (appID > 0)
+      this.innerTxApplCallStack.push(appID);
+  }
+
+  /**
    * Deduct transaction fee from sender account.
    * @param sender Sender address
    * @param index Index of current tx being processed in tx group
@@ -613,6 +635,7 @@ export class Ctx implements Context {
     let r: TxReceipt;
 
     this.verifyMinimumFees();
+    this.verifyAndUpdateInnerApplCallStack();
     txParams.forEach((txParam, idx) => {
       const fromAccountAddr = webTx.getFromAddress(txParam);
       this.deductFee(fromAccountAddr, idx, txParam.payFlags);

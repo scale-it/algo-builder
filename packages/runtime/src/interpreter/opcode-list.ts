@@ -3969,26 +3969,30 @@ export class ITxnSubmit extends Op {
     );
 
     // back up current context
-    const currentContext = cloneDeep(this.interpreter.runtime.ctx);
-
+    const currentCtx = cloneDeep(this.interpreter.runtime.ctx);
     try {
-      const baseCurrTx = this.interpreter.runtime.ctx.tx;
-      const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
-      // execute innner transaction
+      const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
+      const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
+
+      // set up context for inner transaction
       this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
       this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
       this.interpreter.runtime.ctx.isInnerTx = true;
 
+      if (this.interpreter.runtime.ctx.innerTxApplCallStack.length === 0) {
+        this.interpreter.runtime.ctx.innerTxApplCallStack = [baseCurrTx.apid ?? 0];
+      }
+      // execute innner transaction
       this.interpreter.runtime.ctx.processTransactions([execParams]);
       // update current txns to base (top-level) after innerTx execution
+
       this.interpreter.runtime.ctx.tx = baseCurrTx;
       this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
-
       // save executed tx
       this.interpreter.innerTxns.push(this.interpreter.subTxn);
     } catch (err: any) {
       // revert to begining context
-      this.interpreter.runtime.ctx = currentContext;
+      this.interpreter.runtime.ctx = currentCtx;
       throw new RuntimeError(err.errorDescriptor, err.messageArguments);
     } finally {
       this.interpreter.runtime.ctx.isInnerTx = false;
