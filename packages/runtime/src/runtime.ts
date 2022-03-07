@@ -1,5 +1,3 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
-/* eslint sonarjs/no-small-switch: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
@@ -14,6 +12,7 @@ import {
   ZERO_ADDRESS_STR
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
+import { transactionAndSignToExecParams } from "./lib/txn";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
@@ -807,22 +806,42 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): TxReceipt | TxReceipt[] {
-    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
-    for (const txn of txnParameters) {
-      switch (txn.type) {
-        case types.TransactionType.DeployASA: {
-          if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
-          break;
-        }
-        case types.TransactionType.DeployApp: {
-          txn.approvalProg = new Uint8Array(32); // mock approval program
-          txn.clearProg = new Uint8Array(32); // mock clear program
-          break;
+  executeTx (
+    txnParams: types.ExecParams | types.ExecParams[] | types.TransactionAndSign | types.TransactionAndSign[],
+    debugStack?: number
+  ): TxReceipt | TxReceipt[] {
+    // TODO: union above and create new type in task below:
+    // https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
+    const txnParamerters = Array.isArray(txnParams) ? txnParams : [txnParams];
+
+    let tx, gtxs;
+
+    if (types.isSDKTransactionAndSign(txnParamerters[0])) {
+      const sdkTxns: EncTx[] = txnParamerters.map((txnParamerter): EncTx => {
+        const txn = txnParamerter as types.TransactionAndSign;
+        return txn.transaction.get_obj_for_encoding() as EncTx;
+      });
+      tx = sdkTxns[0];
+      gtxs = sdkTxns;
+    } else {
+      for (const txnParamerter of txnParamerters) {
+        const txn = txnParamerter as types.ExecParams;
+        switch (txn.type) {
+          case types.TransactionType.DeployASA: {
+            if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+            break;
+          }
+          case types.TransactionType.DeployApp: {
+            txn.approvalProg = new Uint8Array(32); // mock approval program
+            txn.clearProg = new Uint8Array(32); // mock clear program
+            break;
+          }
         }
       }
+      // get current txn and txn group (as encoded obj)
+      [tx, gtxs] = this.createTxnContext(txnParamerters as types.ExecParams[]);
     }
-    const [tx, gtxs] = this.createTxnContext(txnParameters); // get current txn and txn group (as encoded obj)
+
     // validate first and last rounds
     this.validateTxRound(gtxs);
 
@@ -833,7 +852,12 @@ export class Runtime {
 
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
-    const txReceipts = this.ctx.processTransactions(txnParameters);
+    const runtimeTxnParams: types.ExecParams[] =
+      txnParamerters.map(
+        (txn) => types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
+      );
+
+    const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
 
     // update store only if all the transactions are passed
     this.store = this.ctx.state;

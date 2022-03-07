@@ -3,8 +3,6 @@ const { fundAccount, optInAccountToApp } = require('../common/common');
 const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
-const clearStateProgram = 'clear_state_program.py';
-
 /**
  * If permissions manager is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.

@@ -33,7 +33,7 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
-    "prepublish": "yarn build",
+    "prepublish": "yarn build; for f in Makefile README.md private-net-template.json sandbox-docker-compose.yml; cp ../../infrastructure/$f sample-project/infrastructure",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "publishConfig": {
@@ -62,7 +62,7 @@
     "@types/tmp": "^0.2.0",
     "chai": "^4.3.4",
     "cross-env": "^7.0.3",
-    "eslint": "^8.9.0",
+    "eslint": "^8.10.0",
     "glob": "^7.2.0",
     "human-signals": "^3.0.1",
     "lodash": "^4.17.21",

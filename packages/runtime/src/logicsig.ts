@@ -124,8 +124,7 @@ export class LogicSig {
   verify (accPk: Uint8Array): boolean {
     const accAddr = encodeAddress(accPk);
     if (!this.sig && !this.msig) {
-      if (accAddr === this.lsigAddress) return true;
-      return false;
+      return accAddr === this.lsigAddress;
     }
 
     if (this.sig) {
@@ -192,11 +191,7 @@ export class LogicSig {
       }
     }
 
-    if (verifiedCounter < threshold) {
-      return false;
-    }
-
-    return true;
+    return verifiedCounter >= threshold;
   }
 
   /**

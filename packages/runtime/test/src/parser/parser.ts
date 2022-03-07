@@ -62,6 +62,7 @@ import {
   GetByte,
   Gload,
   Gloads,
+  Gloadss,
   Global,
   GreaterThan,
   GreaterThanEqualTo,
@@ -1426,6 +1427,25 @@ describe("Parser", function () {
         expectRuntimeError(
           () => opcodeFromSentence(["app_params_get", "unknow", "hello"], 1, interpreter, ExecutionMode.APPLICATION),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("shoud return correct opcode for tealv6 ops", () => {
+      it("gloadss", () => {
+        const res = opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.APPLICATION);
+        const expected = new Gloadss([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloadss", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.SIGNATURE),
+          RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
         );
       });
     });

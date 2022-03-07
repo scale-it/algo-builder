@@ -1,6 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-/* eslint sonarjs/no-duplicate-string: 0 */
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddress, encodeUint64, getApplicationAddress, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
@@ -19,14 +18,14 @@ import {
   MAX_UINT64, MAX_UINT128,
   MaxTEALVersion, TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
-import { parseEncodedTxnToExecParams, setInnerTxField } from "../lib/itxn";
+import { setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
   assertLen, assertNumber, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { txAppArg, txnSpecbyField } from "../lib/txn";
+import { encTxToExecParams, txAppArg, txnSpecbyField } from "../lib/txn";
 import { DecodingMode, EncodingType, StackElem, TEALStack, TxnType, TxOnComplete, TxReceipt } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -223,9 +222,11 @@ export class Arg extends Op {
   }
 
   execute (stack: TEALStack): void {
+    // get args from context
+    const args = this.interpreter.runtime.ctx.args ?? [];
     this.checkIndexBound(
-      this.index, this.interpreter.runtime.ctx.args as Uint8Array[], this.line);
-    const argN = this.assertBytes(this.interpreter.runtime.ctx.args?.[this.index], this.line);
+      this.index, args, this.line);
+    const argN = this.assertBytes(args?.[this.index], this.line);
     stack.push(argN);
   }
 }
@@ -269,7 +270,7 @@ export class Bytec extends Op {
   readonly line: number;
 
   /**
-   * Sets index according to arguments passed
+   * Sets index according to the passed arguments
    * @param args Expected arguments: [byteblock index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -330,7 +331,7 @@ export class Intc extends Op {
   readonly line: number;
 
   /**
-   * Sets index according to arguments passed
+   * Sets index according to the passed arguments
    * @param args Expected arguments: [intcblock index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -477,7 +478,7 @@ export class Store extends Op {
   readonly line: number;
 
   /**
-   * Stores index number according to arguments passed
+   * Stores index number according to the passed arguments
    * @param args Expected arguments: [index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -508,7 +509,7 @@ export class Load extends Op {
   readonly line: number;
 
   /**
-   * Stores index number according to arguments passed.
+   * Stores index number according to the passed arguments.
    * @param args Expected arguments: [index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1177,7 +1178,7 @@ export class Substring extends Op {
   readonly line: number;
 
   /**
-   * Stores values of `start` and `end` according to arguments passed.
+   * Stores values of `start` and `end` according to the passed arguments.
    * @param args Expected arguments: [start index number, end index number]
    * @param line line number in TEAL file
    */
@@ -1239,7 +1240,7 @@ export class Txn extends Op {
   readonly line: number;
 
   /**
-   * Set transaction field according to arguments passed
+   * Set transaction field according to the passed arguments
    * @param args Expected arguments: [transaction field]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
@@ -1292,7 +1293,7 @@ export class Gtxn extends Op {
   protected txIdx: number;
 
   /**
-   * Sets `field`, `txIdx` values according to arguments passed.
+   * Sets `field`, `txIdx` values according to the passed arguments.
    * @param args Expected arguments: [transaction group index, transaction field]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
@@ -1340,43 +1341,48 @@ export class Gtxn extends Op {
 /**
  * push value of an array field from current transaction to stack
  * push to stack [...stack, value of an array field ]
- * NOTE: a) for arg="Accounts" index 0 means sender's address, and index 1 means first address
- * from accounts array (eg. txna Accounts 1: will push 1st address from Accounts[] to stack)
+ * NOTE:
+ * a) for arg="Accounts" index 0 means sender's address, and index 1 means first address
+ *    from accounts array (eg. txna Accounts 1: will push 1st address from Accounts[] to stack)
  * b) for arg="ApplicationArgs" index 0 means first argument for application array (normal indexing)
  */
 export class Txna extends Op {
-  readonly field: string;
   readonly interpreter: Interpreter;
   readonly line: number;
-  idx: number;
+  readonly field: string;
+  fieldIdx: number;
 
   /**
-   * Sets `field` and `idx` values according to arguments passed.
+   * Sets `field` and `fieldIdx` values according to passed arguments.
    * @param args Expected arguments: [transaction field, transaction field array index]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of a number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
+    assertLen(args.length, 2, line);
     super();
     this.line = line;
-    assertLen(args.length, 2, line);
     assertOnlyDigits(args[1], line);
     this.assertTxArrFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
-    this.idx = Number(args[1]);
+    this.fieldIdx = Number(args[1]);
     this.interpreter = interpreter;
   }
 
   execute (stack: TEALStack): void {
-    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
+    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.fieldIdx, this,
       this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
 
+/// placeholder values
+const mockTxIdx = "100";
+const mockTxFieldIdx = "200";
+const mockScratchIndex = "100";
 /**
  * push value of a field to the stack from a transaction in the current transaction group
  * push to stack [...stack, value of field]
@@ -1388,16 +1394,16 @@ export class Gtxna extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
   readonly line: number;
-  idx: number; // array index
+  fieldIdx: number; // array index
   protected txIdx: number; // transaction group index
 
   /**
-   * Sets `field`(Transaction Field), `idx`(Array Index) and
-   * `txIdx`(Transaction Group Index) values according to arguments passed.
+   * Sets `field`(Transaction Field), `fieldIdx`(Array Index) and
+   * `txIdx`(Transaction Group Index) values according to the passed arguments.
    * @param args Expected arguments:
-   * [transaction group index, transaction field, transaction field array index]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   [transaction group index, transaction field, transaction field array index]
+   *   Note: Transaction field is expected as string instead of a number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1410,7 +1416,7 @@ export class Gtxna extends Op {
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
-    this.idx = Number(args[2]); // transaction field array index
+    this.fieldIdx = Number(args[2]); // transaction field array index
     this.interpreter = interpreter;
     this.line = line;
   }
@@ -1419,7 +1425,7 @@ export class Gtxna extends Op {
     this.assertUint8(BigInt(this.txIdx), this.line);
     this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
+    const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
@@ -1431,7 +1437,7 @@ export class Label extends Op {
   readonly line: number;
 
   /**
-   * Sets `label` according to arguments passed.
+   * Sets `label` according to the passed arguments.
    * @param args Expected arguments: [label]
    * @param line line number in TEAL file
    */
@@ -1453,7 +1459,7 @@ export class Branch extends Op {
   readonly line: number;
 
   /**
-   * Sets `label` according to arguments passed.
+   * Sets `label` according to the passed arguments.
    * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1488,7 +1494,7 @@ export class BranchIfZero extends Op {
   readonly line: number;
 
   /**
-   * Sets `label` according to arguments passed.
+   * Sets `label` according to the passed arguments.
    * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1533,7 +1539,7 @@ export class BranchIfNotZero extends Op {
   readonly line: number;
 
   /**
-   * Sets `label` according to arguments passed.
+   * Sets `label` according to the passed arguments.
    * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1647,8 +1653,8 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appID = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appID as number, this.line);
+        const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+        const app = this.interpreter.getApp(appID, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -2040,7 +2046,7 @@ export class GetAssetHolding extends Op {
   readonly line: number;
 
   /**
-   * Sets field according to arguments passed.
+   * Sets field according to the passed arguments.
    * @param args Expected arguments: [Asset Holding field]
    * // Note: Asset holding field will be string
    * For ex: `AssetBalance` is correct `0` is not.
@@ -2096,7 +2102,7 @@ export class GetAssetDef extends Op {
   readonly line: number;
 
   /**
-   * Sets transaction field according to arguments passed
+   * Sets transaction field according to the passed arguments
    * @param args Expected arguments: [Asset Params field]
    * // Note: Asset Params field will be string
    * For ex: `AssetTotal` is correct `0` is not.
@@ -2167,7 +2173,7 @@ export class Int extends Op {
   readonly line: number;
 
   /**
-   * Sets uint64 variable according to arguments passed.
+   * Sets uint64 variable according to the passed arguments.
    * @param args Expected arguments: [number]
    * @param line line number in TEAL file
    */
@@ -2205,7 +2211,7 @@ export class Byte extends Op {
   readonly line: number;
 
   /**
-   * Sets `str` and  `encoding` values according to arguments passed.
+   * Sets `str` and  `encoding` values according to the passed arguments.
    * @param args Expected arguments: [data string]
    * @param line line number in TEAL file
    */
@@ -2228,7 +2234,7 @@ export class Addr extends Op {
   readonly line: number;
 
   /**
-   * Sets `addr` value according to arguments passed.
+   * Sets `addr` value according to the passed arguments.
    * @param args Expected arguments: [Address]
    * @param line line number in TEAL file
    */
@@ -2285,7 +2291,7 @@ export class PushInt extends Op {
   readonly line: number;
 
   /**
-   * Sets uint64 variable according to arguments passed.
+   * Sets uint64 variable according to the passed arguments.
    * @param args Expected arguments: [number]
    * @param line line number in TEAL file
    */
@@ -2316,7 +2322,7 @@ export class PushBytes extends Op {
   readonly line: number;
 
   /**
-   * Sets `str` and  `encoding` values according to arguments passed.
+   * Sets `str` and  `encoding` values according to the passed arguments.
    * @param args Expected arguments: [data string]
    * @param line line number in TEAL file
    */
@@ -2595,7 +2601,7 @@ export class Select extends Op {
  */
 export class Gtxns extends Gtxn {
   /**
-   * Sets `field`, `txIdx` values according to arguments passed.
+   * Sets `field`, `txIdx` values according to the passed arguments.
    * @param args Expected arguments: [transaction field]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
@@ -2603,9 +2609,9 @@ export class Gtxns extends Gtxn {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // NOTE: mockTxIdx is a mock value (max no of txns in group can be 16 atmost).
     // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
-    super(["100", ...args], line, interpreter);
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -2624,17 +2630,17 @@ export class Gtxns extends Gtxn {
  */
 export class Gtxnsa extends Gtxna {
   /**
-   * Sets `field`(Transaction Field), `idx`(Array Index) values according to arguments passed.
+   * Sets `field`(Transaction Field), `fieldIdx`(Array Index) values according to the passed arguments.
    * @param args Expected arguments: [transaction field(F), transaction field array index(I)]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` is expected rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // NOTE: txIdx will be updated in execute.
     // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
-    super(["100", ...args], line, interpreter);
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -2689,13 +2695,13 @@ export class MinBalance extends Op {
 // Args expected: [{uint8 transaction group index}(T),
 // {uint8 position in scratch space to load from}(I)]
 export class Gload extends Op {
-  readonly scratchIndex: number;
+  scratchIndex: number;
   txIndex: number;
   readonly interpreter: Interpreter;
   readonly line: number;
 
   /**
-   * Stores scratch space index and transaction index number according to arguments passed.
+   * Stores scratch space index and transaction index number according to the passed arguments.
    * @param args Expected arguments: [index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -2737,12 +2743,35 @@ export class Gloads extends Gload {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder value, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+// Loads a scratch space value of another transaction from the current group
+// Stack: ..., A: uint64, B: uint64 → ..., any
+// Availability: v6
+export class Gloadss extends Gload {
+  /**
+   * Stores scratch space index number according to argument passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // Just place holder field;
+    super([mockTxIdx, mockScratchIndex, ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    this.scratchIndex = Number(this.assertBigInt(stack.pop(), this.line));
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
   }
@@ -2763,7 +2792,7 @@ export class Callsub extends Op {
   readonly line: number;
 
   /**
-   * Sets `label` according to arguments passed.
+   * Sets `label` according to the passed arguments.
    * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -3360,8 +3389,8 @@ export class Gaids extends Gaid {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockTxIdx is place holder argument, will be updated when poping from stack in execute
+    super([mockTxIdx, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3741,8 +3770,8 @@ export class Loads extends Load {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // "11" is mock value, will be updated when poping from stack in execute
-    super(["11", ...args], line, interpreter);
+    // mockScratchIndex is place holder arguments, will be updated when poping from stack in execute
+    super([mockScratchIndex, ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
@@ -3760,7 +3789,7 @@ export class Stores extends Op {
   readonly line: number;
 
   /**
-   * Stores index number according to arguments passed
+   * Stores index number according to the passed arguments
    * @param args Expected arguments: []
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -3789,7 +3818,7 @@ export class ITxnBegin extends Op {
   readonly line: number;
 
   /**
-   * Stores index number according to arguments passed
+   * Stores index number according to the passed arguments
    * @param args Expected arguments: []
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -3885,7 +3914,7 @@ export class ITxnField extends Op {
   readonly line: number;
 
   /**
-   * Set transaction field according to arguments passed
+   * Set transaction field according to the passed arguments
    * @param args Expected arguments: [transaction field]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -3924,7 +3953,7 @@ export class ITxnSubmit extends Op {
   readonly line: number;
 
   /**
-   * Stores index number according to arguments passed
+   * Stores index number according to the passed arguments
    * @param args Expected arguments: []
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -3964,8 +3993,22 @@ export class ITxnSubmit extends Op {
       );
     }
 
+    // initial contract account.
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+    const contractAddress = getApplicationAddress(appID);
+    const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
+
     // get execution txn params (parsed from encoded sdk txn obj)
-    const execParams = parseEncodedTxnToExecParams(this.interpreter.subTxn, this.interpreter, this.line);
+    // singer will be contractAccount
+    const execParams = encTxToExecParams(
+      this.interpreter.subTxn,
+      {
+        sign: types.SignType.SecretKey,
+        fromAccount: contractAccount
+      },
+      this.interpreter.runtime.ctx,
+      this.line
+    );
     const baseCurrTx = this.interpreter.runtime.ctx.tx;
     const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
@@ -3995,7 +4038,7 @@ export class ITxn extends Op {
   readonly line: number;
 
   /**
-   * Set transaction field according to arguments passed
+   * Set transaction field according to the passed arguments
    * @param args Expected arguments: [transaction field]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
@@ -4074,7 +4117,7 @@ export class ITxna extends Op {
   readonly line: number;
 
   /**
-   * Sets `field` and `idx` values according to arguments passed.
+   * Sets `field` and `idx` values according to the passed arguments.
    * @param args Expected arguments: [transaction field, transaction field array index]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
@@ -4114,25 +4157,23 @@ export class ITxna extends Op {
  */
 export class Txnas extends Txna {
   /**
-   * Sets `field`, `txIdx` values according to arguments passed.
+   * Sets `field`, `txIdx` values according to the passed arguments.
    * @param args Expected arguments: [transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In txnas & gtxnas opcodes, index is fetched from top of stack.
-    // eg. [ int 1; txnas Accounts; ], [ txna Accounts 1].
-    super([...args, "100"], line, interpreter);
     assertLen(args.length, 1, line);
+    // NOTE: txField will be updated in execute.
+    super([...args, mockTxFieldIdx], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const top = this.assertBigInt(stack.pop(), this.line);
-    this.idx = Number(top);
+    this.fieldIdx = Number(top);
     super.execute(stack);
   }
 }
@@ -4146,25 +4187,23 @@ export class Txnas extends Txna {
 export class Gtxnas extends Gtxna {
   /**
    * Sets `field`(Transaction Field) and
-   * `txIdx`(Transaction Group Index) values according to arguments passed.
+   * `txIdx`(Transaction Group Index) values according to the passed arguments.
    * @param args Expected arguments: [transaction group index, transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In txnas & gtxnas opcodes, index is fetched from top of stack.
-    // eg. [ int 1; gtxnas 0 Accounts; ], [ gtxna 0 Accounts 1].
-    super([...args, "100"], line, interpreter);
     assertLen(args.length, 2, line);
+    // NOTE: txFieldIdx will be updated in execute.
+    super([...args, mockTxFieldIdx], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const top = this.assertBigInt(stack.pop(), this.line);
-    this.idx = Number(top);
+    this.fieldIdx = Number(top);
     super.execute(stack);
   }
 }
@@ -4180,24 +4219,22 @@ export class Gtxnsas extends Gtxna {
   /**
    * Sets `field`(Transaction Field)
    * @param args Expected arguments: [transaction field]
-   * // Note: Transaction field is expected as string instead of number.
-   * For ex: `Fee` is expected and `0` is not expected.
+   *   Note: Transaction field is expected as string instead of number.
+   *   For ex: `"Fee"` rather than `0`.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    // NOTE: 100 is a mock value.
-    // In gtxnsas opcode, {tx-index, index of array field} is fetched from top of stack.
-    // eg. [ int 0; int 1; gtxnsas Accounts; ], [ gtxna 0 Accounts 1].
-    super(["100", args[0], "100"], line, interpreter);
     assertLen(args.length, 1, line);
+    // NOTE: txIdx and TxFieldIdx will be updated in execute.
+    super([mockTxIdx, args[0], mockTxFieldIdx], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
     const arrFieldIdx = this.assertBigInt(stack.pop(), this.line);
     const txIdxInGrp = this.assertBigInt(stack.pop(), this.line);
-    this.idx = Number(arrFieldIdx);
+    this.fieldIdx = Number(arrFieldIdx);
     this.txIdx = Number(txIdxInGrp);
     super.execute(stack);
   }
@@ -4215,7 +4252,8 @@ export class Args extends Arg {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    super([...args, "100"], line, interpreter);
+    // just place holder value
+    super([...args, mockTxIdx], line, interpreter);
     assertLen(args.length, 0, line);
   }
 
@@ -4251,32 +4289,36 @@ export class Log extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const logByte = this.assertBytes(stack.pop(), this.line);
     const txID = this.interpreter.runtime.ctx.tx.txID;
-    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID) as TxReceipt;
-    if (txReceipt.logs === undefined) { txReceipt.logs = []; }
+    const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
+    // for Log opcode we assume receipt is alway exist
+    // TODO: recheck when log opcode failed
+    if (txReceipt) {
+      if (txReceipt.logs === undefined) { txReceipt.logs = []; }
 
-    // max no. of logs exceeded
-    if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
-          maxLogs: ALGORAND_MAX_LOGS_COUNT,
-          line: this.line
-        }
-      );
+      // max no. of logs exceeded
+      if (txReceipt.logs.length === ALGORAND_MAX_LOGS_COUNT) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_COUNT_EXCEEDED_THRESHOLD, {
+            maxLogs: ALGORAND_MAX_LOGS_COUNT,
+            line: this.line
+          }
+        );
+      }
+
+      // max "length" of logs exceeded
+      const length = txReceipt.logs.join("").length + logByte.length;
+      if (length > ALGORAND_MAX_LOGS_LENGTH) {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
+            maxLength: ALGORAND_MAX_LOGS_LENGTH,
+            origLength: length,
+            line: this.line
+          }
+        );
+      }
+
+      txReceipt.logs.push(convertToString(logByte));
     }
-
-    // max "length" of logs exceeded
-    const length = txReceipt.logs.join("").length + logByte.length;
-    if (length > ALGORAND_MAX_LOGS_LENGTH) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.LOGS_LENGTH_EXCEEDED_THRESHOLD, {
-          maxLength: ALGORAND_MAX_LOGS_LENGTH,
-          origLength: length,
-          line: this.line
-        }
-      );
-    }
-
-    txReceipt.logs.push(convertToString(logByte));
   }
 }
 

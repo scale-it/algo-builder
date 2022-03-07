@@ -128,10 +128,10 @@ syncAccounts(){
 };
 ```
 There is no need to pass the Default Accounts to the Runtime constructor, since these are created inside of it.
-To sync the accounts the method `runtime.defaultAccounts()` must be invoked. No additional code is necessary. 
+To sync the accounts the method `runtime.defaultAccounts()` must be invoked. No additional code is necessary.
 Methods:
-- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e8 microAlgos (100 Algos). 
-- `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts. 
+- `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e8 microAlgos (100 Algos).
+- `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts.
 
 For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 
@@ -147,6 +147,7 @@ or you can also run tests using algob
 
 See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
+**NOTE:** Please note that few opcodes (eg. `arg`, `arg_0`, `app_global_get` ..etc) can only be used in a single *run* mode (*signature*/*application*). `Runtime` will throw an error if an opcode is not being used in it's preferred "execution mode".
 
 ### Stateless TEAL
 

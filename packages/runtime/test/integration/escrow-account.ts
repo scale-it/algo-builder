@@ -1,4 +1,3 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 

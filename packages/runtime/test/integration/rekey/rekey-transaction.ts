@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
