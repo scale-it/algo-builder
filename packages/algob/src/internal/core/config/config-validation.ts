@@ -122,8 +122,8 @@ export function validateConfig(config: any) {
 	throw new BuilderError(ERRORS.GENERAL.INVALID_CONFIG, { errors: errorList });
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getValidationErrors(config: any): CfgErrors {
-	// eslint-disable-line
 	const errors = new CfgErrors();
 
 	if (config !== undefined && typeof config.networks === "object") {
@@ -225,9 +225,9 @@ function validateChainCfg(ncfg: ChainCfg, errors: CfgErrors): void {
 // this comes from https://stackoverflow.com/questions/5717093
 const hostPattern = new RegExp(
 	"^(https?:\\/\\/)?" + // protocol
-		"((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-		"(localhost)|" + // localhost
-		"((\\d{1,3}\\.){3}\\d{1,3}))"
+	"((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+	"(localhost)|" + // localhost
+	"((\\d{1,3}\\.){3}\\d{1,3}))"
 ); // OR ip (v4) address
 
 function validateHostname(str: string): boolean {

@@ -9,11 +9,11 @@ describe("TasksDSL", () => {
 	beforeEach(() => {
 		dsl = new TasksDSL();
 	});
+	const action = Promise.resolve; // empty promise
 
 	it("should add a task", () => {
 		const taskName = "compile";
 		const description = "compiler task description";
-		const action = async (): Promise<void> => {};
 
 		const task = dsl.task(taskName, description, action);
 
@@ -24,13 +24,11 @@ describe("TasksDSL", () => {
 	});
 
 	it("should add an internal task", () => {
-		const action = async (): Promise<void> => {};
 		const task = dsl.internalTask("compile", "compiler task description", action);
 		assert.isTrue(task.isInternal);
 	});
 
 	it("should add a task without description", () => {
-		const action = async (): Promise<void> => {};
 		const task = dsl.task("compile", action);
 		assert.isUndefined(task.description);
 		assert.equal(task.action, action);
@@ -41,7 +39,7 @@ describe("TasksDSL", () => {
 		assert.isDefined(task.description);
 		assert.isDefined(task.action);
 
-		const runSuperNop: any = async (): Promise<void> => {};
+		const runSuperNop: any = () => Promise.resolve();
 		runSuperNop.isDefined = false;
 
 		await expectBuilderErrorAsync(
@@ -51,8 +49,6 @@ describe("TasksDSL", () => {
 	});
 
 	it("should override task", () => {
-		const action = async (): Promise<void> => {};
-
 		const builtin = dsl.task("compile", "built-in", action);
 		let tasks = dsl.getTaskDefinitions();
 		assert.equal(tasks.compile, builtin);

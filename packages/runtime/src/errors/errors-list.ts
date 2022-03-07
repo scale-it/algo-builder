@@ -624,7 +624,7 @@ const runtimeAsaErrors = {
 };
 
 export const RUNTIME_ERRORS: {
-	[category in keyof typeof RUNTIME_ERROR_RANGES]: {
+	[_category in keyof typeof RUNTIME_ERROR_RANGES]: {
 		[errorName: string]: ErrorDescriptor;
 	};
 } = {

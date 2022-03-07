@@ -11,7 +11,7 @@ import { MnemonicAccount, RuntimeEnv, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
 const fsp = _fs.promises;
 
-export default function (): void {
+export default function(): void {
 	task(TASK_GEN_ACCOUNTS, "Generates custom accounts (not safe for production use)")
 		.addPositionalParam("n", "number of accounts to generate", undefined, types.int, false)
 		.addFlag("force", "Overwrite generated accounts if the file already exists")
@@ -63,7 +63,7 @@ export async function writeToFile(
 			);
 			return;
 		}
-	} catch (e) {}
+	} catch (e) { }  // eslint-disable-line no-empty
 
 	try {
 		await fsp.writeFile(fileName, content, "utf8");

@@ -126,7 +126,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
 		const response = await this.algodClient.status().do();
 		let lastround = response["last-round"];
-		while (true) {
+		let maxTries = 6;
+		while (--maxTries > 0) {
 			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
 			if (pendingInfo["pool-error"]) {
 				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
@@ -135,8 +136,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				return pendingInfo as ConfirmedTxInfo;
 			}
 			lastround++;
+			// TODO: maybe we should use sleep?
 			await this.algodClient.statusAfterBlock(lastround).do();
 		}
+		throw new Error("timeout");
 	}
 
 	/**

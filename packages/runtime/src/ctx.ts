@@ -746,8 +746,8 @@ export class Ctx implements Context {
 							this.debugStack
 						);
 					} catch (error) {
-						// if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
-						// tested by running on algorand network
+						// if transaction type is Clear Call, remove the app without throwing error
+						// (rejecting tx) tested by running on algorand network
 						// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
 					}
 

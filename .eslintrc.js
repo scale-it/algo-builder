@@ -1,56 +1,62 @@
 const unusedVarsCfg = [
-  "warn",
-  { vars: "all", args: "none", ignoreRestSiblings: false, varsIgnorePattern: "_" },
+	"warn",
+	{ vars: "all", args: "none", ignoreRestSiblings: false, varsIgnorePattern: "_" },
 ];
 
 module.exports = {
-  env: {
-    node: true,
-    es6: true,
-    es2020: true,
-    mocha: true,
-  },
-  plugins: ["simple-import-sort", "sonarjs"],
-  extends: [
-    "plugin:sonarjs/recommended",
-    "eslint:recommended", "plugin:@typescript-eslint/recommended",
-    "plugin:import/recommended", "plugin:import/typescript",
-    "plugin:node/recommended",
-    "prettier",
-  ],
-  parserOptions: {
-    ecmaVersion: 2020,
-    // sourceType: "module"
-  },
-  rules: {
-    // "ter-indent": [2, {"FunctionDeclaration": {"parameters": "first"}}],
-    "import/no-extraneous-dependencies": 0,
-    "import/prefer-default-export": "off",
-    "max-classes-per-file": 0,
-    "max-len": [
-      "error",
-      {
-        code: 110,
-        ignoreTrailingComments: true,
-        ignoreUrls: true,
-        ignoreStrings: true,
-        ignoreTemplateLiterals: true,
-      },
-    ],
-    "no-underscore-dangle": 0,
-    "simple-import-sort/imports": "warn",
-    "sort-imports": "off",
+	env: {
+		node: true,
+		es6: true,
+		es2020: true,
+		mocha: true,
+	},
+	plugins: ["simple-import-sort", "sonarjs"],
+	extends: [
+		"plugin:sonarjs/recommended",
+		"plugin:import/recommended", "plugin:import/typescript",
+		"eslint:recommended", "plugin:@typescript-eslint/recommended",
+		"prettier",
+	],
+	parserOptions: {
+		ecmaVersion: 2020,
+		// sourceType: "module"
+	},
+	rules: {
+		// "ter-indent": [2, {"FunctionDeclaration": {"parameters": "first"}}],
+		"import/no-extraneous-dependencies": 0,
+		"import/prefer-default-export": "off",
+		"max-classes-per-file": 0,
+		"max-len": [
+			"error",
+			{
+				code: 110,
+				ignoreTrailingComments: true,
+				ignoreUrls: true,
+				ignoreStrings: true,
+				ignoreTemplateLiterals: true,
+			},
+		],
+		"no-underscore-dangle": 0,
+		"simple-import-sort/imports": "warn",
+		"sort-imports": "off",
 
-    "no-unused-vars": unusedVarsCfg,
-    "@typescript-eslint/no-unused-vars": unusedVarsCfg,
+		"no-unused-vars": unusedVarsCfg,
+		"@typescript-eslint/no-unused-vars": unusedVarsCfg,
 
-    "@typescript-eslint/consistent-type-assertions": "off",
-    "@typescript-eslint/promise-function-async": "off",
-    "@typescript-eslint/no-dynamic-delete": "off",
-    "@typescript-eslint/quotes": "off",
-    semi: "off", // required for a proper work
-    "@typescript-eslint/semi": ["error", "always"],
-    "@typescript-eslint/strict-boolean-expressions": "off",
-    "sonarjs/cognitive-complexity": ["error", 16],
-  },
+		"@typescript-eslint/consistent-type-assertions": "off",
+		"@typescript-eslint/promise-function-async": "off",
+		"@typescript-eslint/no-dynamic-delete": "off",
+		"@typescript-eslint/quotes": "off",
+		semi: "off", // required for a proper work
+		"@typescript-eslint/semi": ["error", "always"],
+		"@typescript-eslint/strict-boolean-expressions": "off",
+		"sonarjs/cognitive-complexity": ["error", 16],
+	},
+	overrides: [
+		{
+			"files": ["**/test/**/*.js"],
+			rules: {
+				"@typescript-eslint/no-var-requires": "off"
+			}
+		}]
 };

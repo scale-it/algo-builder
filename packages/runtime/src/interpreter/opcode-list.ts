@@ -58,7 +58,6 @@ import {
 	TEALStack,
 	TxnType,
 	TxOnComplete,
-	TxReceipt,
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -100,7 +99,7 @@ export class Pragma extends Op {
 		return this.version;
 	}
 
-	execute(stack: TEALStack): void {}
+	execute(_stack: TEALStack): void { }  /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -288,7 +287,7 @@ export class Bytecblock extends Op {
 		this.bytecblock = bytecblock;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		this.assertArrLength(this.bytecblock, this.line);
 		this.interpreter.bytecblock = this.bytecblock;
 	}
@@ -349,7 +348,7 @@ export class Intcblock extends Op {
 		this.intcblock = intcblock;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		this.assertArrLength(this.intcblock, this.line);
 		this.interpreter.intcblock = this.intcblock;
 	}
@@ -577,7 +576,7 @@ export class Err extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
 	}
 }
@@ -1514,7 +1513,7 @@ export class Label extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {}
+	execute(_stack: TEALStack): void { } /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // branch unconditionally to label - Tealv <= 3
@@ -1538,7 +1537,7 @@ export class Branch extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		this.interpreter.jumpForward(this.label, this.line);
 	}
 }
@@ -1547,7 +1546,7 @@ export class Branch extends Op {
 // can also jump backward
 // push to stack [...stack]
 export class Branchv4 extends Branch {
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		this.interpreter.jumpToLabel(this.label, this.line);
 	}
 }
@@ -2897,7 +2896,7 @@ export class Callsub extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		// the current location in the program is saved
 		this.interpreter.callStack.push(this.interpreter.instructionIndex);
 		// immediately jumps to the label passed to the opcode.
@@ -2930,7 +2929,7 @@ export class Retsub extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		// get current location from saved point
 		// jump to saved instruction opcode
 		if (this.interpreter.callStack.length() === 0) {
@@ -3929,7 +3928,7 @@ export class ITxnBegin extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		if (typeof this.interpreter.subTxn !== "undefined") {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
@@ -4070,7 +4069,7 @@ export class ITxnSubmit extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(_stack: TEALStack): void {
 		if (typeof this.interpreter.subTxn === "undefined") {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,

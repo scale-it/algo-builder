@@ -135,6 +135,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		});
 	}
 
+	// eslint-disable-next-line sonarjs/no-identical-functions
 	optInLsigToASA(
 		asaName: string,
 		assetIndex: number,
@@ -146,6 +147,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		});
 	}
 
+	// eslint-disable-next-line sonarjs/no-identical-functions
 	optInAccountToApp(
 		sender: rtypes.Account,
 		index: number,
@@ -157,6 +159,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		});
 	}
 
+	// eslint-disable-next-line sonarjs/no-identical-functions
 	optInLsigToApp(
 		appID: number,
 		lsig: LogicSigAccount,

@@ -54,15 +54,14 @@ export function lazyObject<T extends object>(objectCreator: () => T): T {
 	);
 }
 
-// tslint:disable-next-line ban-types
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function lazyFunction<T extends Function>(functionCreator: () => T): T {
-	// eslint-disable-line
 	return createLazyProxy(
 		functionCreator,
 		(getRealTarget) => {
-			function dummyTarget(): void {}
+			function dummyTarget(): void { }  // eslint-disable-line @typescript-eslint/no-empty-function
 
-			(dummyTarget as any)[util.inspect.custom] = function () {
+			(dummyTarget as any)[util.inspect.custom] = function() {
 				// eslint-disable-line @typescript-eslint/no-explicit-any
 				const realTarget = getRealTarget();
 				return util.inspect(realTarget);

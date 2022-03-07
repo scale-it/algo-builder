@@ -37,7 +37,7 @@ function assertParamDefinition(
 	}
 }
 
-const runSuperNop: any = async () => {};
+const runSuperNop: any = () => Promise.resolve();
 runSuperNop.isDefined = false;
 
 describe("SimpleTaskDefinition", () => {
@@ -295,8 +295,8 @@ describe("SimpleTaskDefinition", () => {
 					);
 				});
 
+				// eslint-disable-next-line sonarjs/no-identical-functions
 				describe("should still accept non-positional ones", () => {
-					// eslint-disable-line sonarjs/no-identical-functions
 					it("should accept a common param", () => {
 						taskDefinition.addParam("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
@@ -324,7 +324,7 @@ describe("SimpleTaskDefinition", () => {
 		});
 
 		describe("addParam", () => {
-			it("Should fail if the param name isn't camelCase", function () {
+			it("Should fail if the param name isn't camelCase", function() {
 				expectBuilderError(
 					() => taskDefinition.addParam("A"),
 					ERRORS.TASK_DEFINITIONS.INVALID_PARAM_NAME_CASING

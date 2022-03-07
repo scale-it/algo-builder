@@ -44,7 +44,7 @@ export function splitAfter(
 }
 
 /** Partitions an unsorted string list into sorted parts:
-    `[1 2 2 3 4 3 4 2 1]` returns `[[1 2 2 3 4] [3 4] [2] [1]]` */
+		`[1 2 2 3 4 3 4 2 1]` returns `[[1 2 2 3 4] [3 4] [2] [1]]` */
 function partitionIntoSorted(unsorted: string[]): string[][] {
 	return partitionByFn(
 		(a: string, b: string) => cmpStr(a, b) === 1, // split when a > b
@@ -130,7 +130,7 @@ async function executeRunTask(
 	await runMultipleScripts(
 		runtimeEnv,
 		assertDirChildren(scriptsDirectory, scripts),
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => {},
+		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
 		true,
 		logDebugTag,
 		false,
@@ -138,7 +138,7 @@ async function executeRunTask(
 	);
 }
 
-export default function (): void {
+export default function(): void {
 	task(TASK_RUN, "Runs a user-defined script after compiling the project")
 		.addVariadicPositionalParam("scripts", "A js file to be run within algob's environment")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));

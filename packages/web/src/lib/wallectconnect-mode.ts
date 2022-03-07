@@ -56,7 +56,9 @@ export class WallectConnectSession {
 			if (force) {
 				try {
 					await this.close();
-				} catch (e) {}
+				} catch (e) {
+					console.error("Can't close walletconnect connection", e);
+				}
 			} else {
 				console.warn(`A session is already active`);
 				return;
@@ -197,7 +199,7 @@ export class WallectConnectSession {
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const response = await this.algodClient.status().do();
 		let lastround = response[LAST_ROUND];
-		while (true) {
+		while (true) { // eslint-disable-line no-constant-condition
 			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
 			if (pendingInfo["pool-error"]) {
 				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);

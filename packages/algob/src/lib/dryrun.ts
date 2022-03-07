@@ -42,7 +42,7 @@ export class Tealdbg {
 	 * @returns SDK dryrun request object
 	 */
 	private async createDryRunReq(): Promise<modelsv2.DryrunRequest> {
-		let [_, signedTxn] = await makeAndSignTx(this.deployer, this.execParams, new Map());
+		let signedTxn = (await makeAndSignTx(this.deployer, this.execParams, new Map()))[1];
 		if (!Array.isArray(signedTxn)) {
 			signedTxn = [signedTxn];
 		}
@@ -65,7 +65,7 @@ export class Tealdbg {
 	 * @param outFile name of file to dump the response. Dumped in `assets/<file>`
 	 * @param force if true, overwrites an existing dryrun response dump
 	 */
-	async dryRunResponse(outFile?: string, force?: boolean): Promise<Object> {
+	async dryRunResponse(outFile?: string, force?: boolean): Promise<unknown> {
 		const dryRunRequest = await this.createDryRunReq();
 		const dryRunResponse = await this.deployer.algodClient.dryrun(dryRunRequest).do();
 		if (outFile) {
@@ -124,8 +124,8 @@ export class Tealdbg {
 			let pathToFile;
 			if (file.endsWith(pyExt)) {
 				let tealFromPyTEAL: string | undefined;
-				// note: currently tealdbg only accepts "teal" code, so we need to compile pyTEAL to TEAL first
-				// issue: https://github.com/algorand/go-algorand/issues/2538
+				// note: currently tealdbg only accepts "teal" code, so we need to compile pyTEAL to
+				// TEAL first. issue: https://github.com/algorand/go-algorand/issues/2538
 				pathToFile = path.join(
 					CACHE_DIR,
 					"dryrun",
@@ -202,10 +202,10 @@ export class Tealdbg {
 		const dryRunRequest = await this.createDryRunReq();
 
 		/*
-      Encoding fails on taking empty arrays ([]), so we need to convert
-      to undefined first (hence the type hack). Ideally, the js-sdk type
-      for dryrunreq.accounts should be "modelsv2.accounts[] | undefined"
-    */
+			Encoding fails on taking empty arrays ([]), so we need to convert
+			to undefined first (hence the type hack). Ideally, the js-sdk type
+			for dryrunreq.accounts should be "modelsv2.accounts[] | undefined"
+		*/
 		if (dryRunRequest.accounts.length === 0) {
 			(dryRunRequest as any).accounts = undefined;
 		}

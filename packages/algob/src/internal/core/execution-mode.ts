@@ -61,7 +61,8 @@ export function getExecutionMode(): ExecutionMode {
 function alternativeIsLocalInstallation(): boolean {
 	let cwd = workingDirectoryOnLoad;
 
-	while (true) {
+	let maxIter = 30;
+	while (--maxIter >= 0) {
 		const nodeModules = findupSync("node_modules", { cwd });
 
 		if (nodeModules === null || nodeModules === undefined) {
@@ -73,5 +74,8 @@ function alternativeIsLocalInstallation(): boolean {
 		}
 
 		cwd = path.join(nodeModules, "..", "..");
+		if (cwd === "")
+			return false;
 	}
+	return false;
 }

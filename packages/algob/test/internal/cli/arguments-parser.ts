@@ -348,7 +348,7 @@ describe("ArgumentsParser", () => {
 
 			taskDefinition = new SimpleTaskDefinition("t", false)
 				.addOptionalParam("b", "A boolean", true, boolean)
-				.setAction(async () => {});
+				.setAction(Promise.resolve);
 
 			expectBuilderError(
 				() => argumentsParser.parseTaskArguments(taskDefinition, rawCLAs),
