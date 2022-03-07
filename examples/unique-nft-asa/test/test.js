@@ -23,9 +23,8 @@ describe("Unique NFT ASA tests", function () {
 	const clearProgramFileName = "nft-app-clear.py";
 
 	this.beforeEach(async function () {
-		creator = new AccountStore(minBalance);
-		bob = new AccountStore(minBalance);
-		runtime = new Runtime([master, creator, bob]);
+		runtime = new Runtime([master]);
+		[creator, bob] = runtime.defaultAccounts();
 
 		creationFlags = {
 			sender: creator.account,
@@ -106,8 +105,7 @@ describe("Unique NFT ASA tests", function () {
 
 	// Update account state
 	function syncAccounts() {
-		creator = runtime.getAccount(creator.address);
-		bob = runtime.getAccount(bob.address);
+		[creator, bob] = runtime.defaultAccounts();
 		statelessLsigAcc = runtime.getAccount(statelessLsig.address());
 	}
 
