@@ -94,4 +94,9 @@ sw.*
 .DS_Store
 
 # other ignored
-.lock
+
+*.lock
+docs/_layouts/default.html
+.yarn
+@types
+docs/_css/bootstrap.css
