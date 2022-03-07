@@ -1,9 +1,7 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
-const accounts = require('./common/accounts');
-const { getClawbackParams } = require('./common/common');
+const { executeTransaction } = require("@algo-builder/algob");
+const { types } = require("@algo-builder/web");
+const accounts = require("./common/accounts");
+const { getClawbackParams } = require("./common/common");
 
 /**
  * Compile and set clawback logic sig (escrow) with template parameters:
@@ -13,18 +11,18 @@ const { getClawbackParams } = require('./common/common');
  * - token_reserve: asa.reserve address (owner of all non-minted tokens). Clawback checks during
  *   Issuance tx that from account is the asset reserve
  */
-async function setupClawback (runtimeEnv, deployer) {
-  const owner = deployer.accountsByName.get(accounts.owner);
+async function setupClawback(runtimeEnv, deployer) {
+	const owner = deployer.accountsByName.get(accounts.owner);
 
-  // NOTE: make sure to deploy ASA and controller before
-  const tesla = deployer.asa.get('tesla');
-  const clawbackParams = getClawbackParams(deployer);
-  await deployer.mkContractLsig('ClawbackLsig', 'clawback.py', clawbackParams);
+	// NOTE: make sure to deploy ASA and controller before
+	const tesla = deployer.asa.get("tesla");
+	const clawbackParams = getClawbackParams(deployer);
+	await deployer.mkContractLsig("ClawbackLsig", "clawback.py", clawbackParams);
 
-  const clawbackLsig = deployer.getLsig('ClawbackLsig');
-  const clawbackAddress = clawbackLsig.address();
+	const clawbackLsig = deployer.getLsig("ClawbackLsig");
+	const clawbackAddress = clawbackLsig.address();
 
-  /*
+	/*
     Use code below if token_reserve is multisig account
     const bob = deployer.accountsByName.get('bob');
     const charlie = deployer.accountsByName.get('charlie');
@@ -34,19 +32,18 @@ async function setupClawback (runtimeEnv, deployer) {
     const [_, multsigaddr] = createMsigAddress(1, 2, addrs); // use multsigaddr in TOKEN_RESERVE
   */
 
-  await deployer.fundLsig('ClawbackLsig',
-    { funder: owner, fundingMicroAlgo: 5e6 }, {});
+	await deployer.fundLsig("ClawbackLsig", { funder: owner, fundingMicroAlgo: 5e6 }, {});
 
-  console.log('\n** Updating asset clawback to lsig **');
-  const assetConfigParams = {
-    type: types.TransactionType.ModifyAsset,
-    sign: types.SignType.SecretKey,
-    fromAccount: owner,
-    assetID: tesla.assetIndex,
-    fields: { clawback: clawbackAddress },
-    payFlags: { totalFee: 1000 }
-  };
-  await executeTransaction(deployer, assetConfigParams);
+	console.log("\n** Updating asset clawback to lsig **");
+	const assetConfigParams = {
+		type: types.TransactionType.ModifyAsset,
+		sign: types.SignType.SecretKey,
+		fromAccount: owner,
+		assetID: tesla.assetIndex,
+		fields: { clawback: clawbackAddress },
+		payFlags: { totalFee: 1000 },
+	};
+	await executeTransaction(deployer, assetConfigParams);
 }
 
 module.exports = { default: setupClawback };

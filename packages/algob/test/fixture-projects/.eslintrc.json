@@ -1,6 +1,6 @@
 {
-  "rules": {
-    "no-undef": "off",
-    "@typescript-eslint/semi": "off"
-  }
+	"rules": {
+		"no-undef": "off",
+		"@typescript-eslint/semi": "off"
+	}
 }

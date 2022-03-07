@@ -13,66 +13,65 @@ import { loadCheckpointsIntoCPData, lsScriptsDir } from "../lib/script-checkpoin
 import { Deployer, RuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
-function initializeDeployer (runtimeEnv: RuntimeEnv): Deployer {
-  const algoOp = createAlgoOperator(runtimeEnv.network);
-  const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
-  const scriptsFromScriptsDir: string[] = lsScriptsDir();
-  loadCheckpointsIntoCPData(deployerCfg.cpData, scriptsFromScriptsDir);
-  return mkDeployer(false, deployerCfg);
+function initializeDeployer(runtimeEnv: RuntimeEnv): Deployer {
+	const algoOp = createAlgoOperator(runtimeEnv.network);
+	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+	const scriptsFromScriptsDir: string[] = lsScriptsDir();
+	loadCheckpointsIntoCPData(deployerCfg.cpData, scriptsFromScriptsDir);
+	return mkDeployer(false, deployerCfg);
 }
 
 // handles top level await by preprocessing input and awaits the output before returning
-async function evaluate (code: string, context: object, filename: string,
-  callback: (err: Error | null, result?: object) => void): Promise<void> {
-  try {
-    const result = await runInNewContext(preprocess(code), context);
-    callback(null, result);
-  } catch (e) {
-    if (e instanceof Error && isRecoverableError(e)) {
-      callback(new repl.Recoverable(e));
-    } else {
-      console.error(e);
-      callback(null);
-    }
-  }
+async function evaluate(
+	code: string,
+	context: object,
+	filename: string,
+	callback: (err: Error | null, result?: object) => void
+): Promise<void> {
+	try {
+		const result = await runInNewContext(preprocess(code), context);
+		callback(null, result);
+	} catch (e) {
+		if (e instanceof Error && isRecoverableError(e)) {
+			callback(new repl.Recoverable(e));
+		} else {
+			console.error(e);
+			callback(null);
+		}
+	}
 }
 
-async function startConsole (runtimeEnv: RuntimeEnv): Promise<void> {
-  const deployer = initializeDeployer(runtimeEnv);
-  const algodClient = createClient(runtimeEnv.network);
-  await new Promise<void>((resolve, reject) => {
-    console.log("★", chalk.cyan(" Welcome to algob console"), "★");
-    console.log(chalk.green('Try typing: config\n'));
+async function startConsole(runtimeEnv: RuntimeEnv): Promise<void> {
+	const deployer = initializeDeployer(runtimeEnv);
+	const algodClient = createClient(runtimeEnv.network);
+	await new Promise<void>((resolve, reject) => {
+		console.log("★", chalk.cyan(" Welcome to algob console"), "★");
+		console.log(chalk.green("Try typing: config\n"));
 
-    const server = repl.start({
-      prompt: 'algob> ',
-      eval: evaluate
-    });
+		const server = repl.start({
+			prompt: "algob> ",
+			eval: evaluate,
+		});
 
-    // assign repl context
-    server.context.deployer = deployer;
-    server.context.algodClient = algodClient;
-    server.context.algob = algob;
-    server.context.algosdk = algosdk;
+		// assign repl context
+		server.context.deployer = deployer;
+		server.context.algodClient = algodClient;
+		server.context.algob = algob;
+		server.context.algosdk = algosdk;
 
-    server.on('exit', () => {
-      resolve();
-    });
-  });
+		server.on("exit", () => {
+			resolve();
+		});
+	});
 }
 
 export default function (): void {
-  task(TASK_CONSOLE, "Opens algob console")
-    .addFlag("noCompile", "Don't compile before running this task")
-    .setAction(
-      async (
-        { noCompile }: { noCompile: boolean },
-        runtimeEnv: RuntimeEnv
-      ) => {
-        if (!runtimeEnv.config.paths) {
-          return;
-        }
-        await startConsole(runtimeEnv);
-      }
-    );
+	task(TASK_CONSOLE, "Opens algob console")
+		.addFlag("noCompile", "Don't compile before running this task")
+		.setAction(async ({ noCompile }: { noCompile: boolean }, runtimeEnv: RuntimeEnv) => {
+			if (!runtimeEnv.config.paths) {
+				return;
+			}
+			await startConsole(runtimeEnv);
+		});
 }

@@ -1,4 +1,3 @@
-
 const unusedVarsCfg = [
   "warn",
   { vars: "all", args: "none", ignoreRestSiblings: false, varsIgnorePattern: "_" },
@@ -12,9 +11,13 @@ module.exports = {
     mocha: true,
   },
   plugins: ["simple-import-sort", "sonarjs"],
-  extends: ["plugin:sonarjs/recommended",
-    // "eslint:recommended", "plugin:@typescript-eslint/recommended"
-    "prettier"],
+  extends: [
+    "plugin:sonarjs/recommended",
+    "eslint:recommended", "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended", "plugin:import/typescript",
+    "plugin:node/recommended",
+    "prettier",
+  ],
   parserOptions: {
     ecmaVersion: 2020,
     // sourceType: "module"
@@ -51,4 +54,3 @@ module.exports = {
     "sonarjs/cognitive-complexity": ["error", 16],
   },
 };
-

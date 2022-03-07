@@ -7,25 +7,21 @@
  * @param plural An optional plural form of the word. If non is given, the
  * plural form is constructed by appending an "s" to the singular form.
  */
-export function pluralize (n: number, singular: string, plural?: string): string {
-  if (n === 1) {
-    return singular;
-  }
+export function pluralize(n: number, singular: string, plural?: string): string {
+	if (n === 1) {
+		return singular;
+	}
 
-  if (plural !== undefined) {
-    return plural;
-  }
+	if (plural !== undefined) {
+		return plural;
+	}
 
-  return `${singular}s`;
+	return `${singular}s`;
 }
 
 /**
  * Replaces all the instances of [[toReplace]] by [[replacement]] in [[str]].
  */
-export function replaceAll (
-  str: string,
-  toReplace: string,
-  replacement: string
-): string {
-  return str.split(toReplace).join(replacement);
+export function replaceAll(str: string, toReplace: string, replacement: string): string {
+	return str.split(toReplace).join(replacement);
 }

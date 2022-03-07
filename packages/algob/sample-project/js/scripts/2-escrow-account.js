@@ -4,22 +4,30 @@
  * This receiver address is hardcoded in the smart contract, and can be passed
  * dynamically to the contract using fundLsigByFile function (passed as a template parameter)
  */
-async function run (runtimeEnv, deployer) {
-  console.log('Escrow account script execution started!');
+async function run(runtimeEnv, deployer) {
+	console.log("Escrow account script execution started!");
 
-  // RECEIVER_ADDRESS is set in escrow.py when it is compiled from PyTEAL to TEAL
-  const templateParams = {
-    RECEIVER_ADDRESS: 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY'
-  };
-  await deployer.mkContractLsig('escrow', 'escrow.py', templateParams);
+	// RECEIVER_ADDRESS is set in escrow.py when it is compiled from PyTEAL to TEAL
+	const templateParams = {
+		RECEIVER_ADDRESS: "WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY",
+	};
+	await deployer.mkContractLsig("escrow", "escrow.py", templateParams);
 
-  await deployer.fundLsig('escrow',
-    { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, { totalFee: 1000 });
-  const escrow = await deployer.getLsig('escrow');
+	await deployer.fundLsig(
+		"escrow",
+		{ funder: deployer.accounts[0], fundingMicroAlgo: 20e6 },
+		{ totalFee: 1000 }
+	);
+	const escrow = await deployer.getLsig("escrow");
 
-  if (escrow === undefined) { return; }
-  await deployer.addCheckpointKV('User Checkpoint Escrow', `Fund Escrow Account: ${escrow.address()}`);
-  console.log('Escrow account script execution finished!');
+	if (escrow === undefined) {
+		return;
+	}
+	await deployer.addCheckpointKV(
+		"User Checkpoint Escrow",
+		`Fund Escrow Account: ${escrow.address()}`
+	);
+	console.log("Escrow account script execution finished!");
 }
 
 module.exports = { default: run };
