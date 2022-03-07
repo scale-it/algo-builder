@@ -77,8 +77,7 @@ async function updateReserveByAssetConfig(deployer, address) {
 			payFlags: { totalFee: 1000 },
 		},
 		/*
-		 * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1).
-		 */
+		 * tx 2: Payment of 1000 microAlgo to cover clawback transaction cost (tx 1). */
 		{
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -87,10 +86,8 @@ async function updateReserveByAssetConfig(deployer, address) {
 			amountMicroAlgos: 1000,
 			payFlags: { totalFee: 1000 },
 		},
-		/*
-		 * tx 3 (last tx) - Asset config transaction to update token reserve to new address. Can only be executed
-		 * by the asset manager.
-		 */
+		/* tx 3 (last tx) - Asset config transaction to update token reserve to new address.
+		 * Can only be executed by the asset manager. */
 		{
 			type: types.TransactionType.ModifyAsset,
 			sign: types.SignType.SecretKey,

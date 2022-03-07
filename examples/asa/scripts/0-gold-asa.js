@@ -3,9 +3,9 @@ const crypto = require("crypto");
 const { executeTransaction, balanceOf } = require("@algo-builder/algob");
 const { mkParam } = require("./transfer/common");
 /*
-  Create "gold" Algorand Standard Asset (ASA).
-  Accounts are loaded from config.
-  To use ASA, accounts have to opt-in. Owner is opt-in by default.
+	Create "gold" Algorand Standard Asset (ASA).
+	Accounts are loaded from config.
+	To use ASA, accounts have to opt-in. Owner is opt-in by default.
 */
 
 async function run(runtimeEnv, deployer) {
@@ -35,7 +35,8 @@ async function run(runtimeEnv, deployer) {
 	// or UTF-8 string:
 	// let metadataHash = "this must be 32 chars long text."
 	// or from hex:
-	// let metadataHash = Buffer.from('664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex')
+	// let metadataHash = Buffer.from(
+	//     '664143504f346e52674f35356a316e64414b3357365367633441506b63794668', 'hex')
 
 	// Let's deploy ASA. The following commnad will open the `assets/asa.yaml` file and search for
 	// the `gold` ASA. The transaction can specify standard transaction parameters. If skipped
