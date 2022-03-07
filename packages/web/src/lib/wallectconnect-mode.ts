@@ -47,7 +47,7 @@ export class WallectConnectSession {
   async create (force: boolean = false): Promise<void> {
     if (this.connector.connected) {
       if (force) {
-        try { await this.close(); } catch (e) {};
+        try { await this.close(); } catch (e) { };
       } else {
         console.warn(`A session is already active`);
         return;
@@ -69,9 +69,9 @@ export class WallectConnectSession {
    */
   onConnect (handler: (error: Error | null, response: SessionConnectResponse) => unknown): void {
     this.connector.on("connect", (err, payload) => {
-      const { wcPeerId, wcPeerMeta, wcAccounts }: SessionConnectResponse = payload.params[0];
-      this.wcAccounts = wcAccounts;
-      handler(err, { wcPeerId, wcPeerMeta, wcAccounts });
+      const { peerId, peerMeta, accounts }: SessionConnectResponse = payload.params[0];
+      this.wcAccounts = accounts;
+      handler(err, { peerId, peerMeta, accounts });
     });
   }
 
@@ -81,9 +81,9 @@ export class WallectConnectSession {
    */
   onUpdate (handler: (error: Error | null, response: SessionUpdateResponse) => unknown): void {
     this.connector.on("session_update", (err, payload) => {
-      const { wcAccounts }: SessionUpdateResponse = payload.params[0];
-      this.wcAccounts = wcAccounts;
-      handler(err, { wcAccounts });
+      const { accounts }: SessionUpdateResponse = payload.params[0];
+      this.wcAccounts = accounts;
+      handler(err, { accounts });
     });
   }
 

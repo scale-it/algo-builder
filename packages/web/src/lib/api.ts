@@ -3,7 +3,7 @@ import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk"
 import { ChainType, TxParams } from "../types";
 
 const mainNetClient = new Algodv2("", "https://algoexplorerapi.io", "");
-const testNetClient = new Algodv2("", "https://testnet.algoexplorerapi.io", "");
+const testNetClient = new Algodv2("", "https://node.testnet.algoexplorerapi.io", "");
 
 export function clientForChain (chain: string): algosdk.Algodv2 {
   switch (chain) {

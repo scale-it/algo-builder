@@ -22,17 +22,15 @@ export class MyAlgoWalletSession {
     } else {
       this.connector = new MyAlgoConnect();
     }
-    this.connectToMyAlgo()
-      .then()
-      .catch((error) => {
-        console.warn(error);
-      });
   }
 
   // https://connect.myalgo.com/docs/interactive-examples/Connect
   async connectToMyAlgo (): Promise<void> {
     try {
-      this.accounts = await this.connector.connect();
+      this.accounts = await this.connector.connect({
+        shouldSelectOneAccount: true,
+        openManager: true
+      });
       this.addresses = this.accounts.map((account) => account.address);
     } catch (err) {
       throw new Error("Error while connecting to my algo wallet");
