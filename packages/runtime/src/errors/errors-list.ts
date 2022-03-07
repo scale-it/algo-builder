@@ -474,6 +474,12 @@ const runtimeGeneralErrors = {
     message: "Transaction cannot close account to its sender",
     title: "Transaction cannot close account to its sender.",
     description: "Transaction cannot close account to its sender"
+  },
+  INNER_APP_CALL_INVALID_VERSION: {
+    number: 1508,
+    message: "Inner app call with version 5 < 6",
+    title: "Inner app call with version 5 < 6.",
+    description: "Inner app call with version 5 < 6"
   }
 };
 

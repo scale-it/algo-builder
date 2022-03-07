@@ -376,11 +376,11 @@ export class Ctx implements Context {
 
   /**
   * Verify closeRemainderTo field is different than fromAccountAddr
-  * @param txParam transaction param
+  * @param txnParams transaction params
   */
-  verifyCloseRemainderTo (txParam: types.ExecParams): void {
-    if (!txParam.payFlags.closeRemainderTo) return;
-    if (txParam.payFlags.closeRemainderTo === webTx.getFromAddress(txParam)) {
+  verifyCloseRemainderTo (txnParams: types.ExecParams): void {
+    if (!txnParams.payFlags.closeRemainderTo) return;
+    if (txnParams.payFlags.closeRemainderTo === webTx.getFromAddress(txnParams)) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO);
     }
   }

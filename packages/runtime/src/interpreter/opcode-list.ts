@@ -4,6 +4,7 @@ import algosdk, { ALGORAND_MIN_TX_FEE, decodeAddress, decodeUint64, encodeAddres
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
+import cloneDeep from "lodash.clonedeep";
 import { Keccak } from 'sha3';
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -16,7 +17,8 @@ import {
   MAX_CONCAT_SIZE, MAX_INNER_TRANSACTIONS,
   MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MAX_UINT128,
-  MaxTEALVersion, TxArrFields, ZERO_ADDRESS
+  MaxTEALVersion, TransactionTypeEnum,
+  TxArrFields, ZERO_ADDRESS
 } from "../lib/constants";
 import { setInnerTxField } from "../lib/itxn";
 import {
@@ -3965,23 +3967,33 @@ export class ITxnSubmit extends Op {
       this.interpreter.runtime.ctx,
       this.line
     );
-    const baseCurrTx = this.interpreter.runtime.ctx.tx;
-    const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
-    // execute innner transaction
-    this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
-    this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
-    this.interpreter.runtime.ctx.isInnerTx = true;
-    this.interpreter.runtime.ctx.processTransactions([execParams]);
+    // back up current context
+    const currentContext = cloneDeep(this.interpreter.runtime.ctx);
 
-    // update current txns to base (top-level) after innerTx execution
-    this.interpreter.runtime.ctx.tx = baseCurrTx;
-    this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+    try {
+      const baseCurrTx = this.interpreter.runtime.ctx.tx;
+      const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
+      // execute innner transaction
+      this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
+      this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
+      this.interpreter.runtime.ctx.isInnerTx = true;
 
-    // save executed tx, reset current tx
-    this.interpreter.runtime.ctx.isInnerTx = false;
-    this.interpreter.innerTxns.push(this.interpreter.subTxn);
-    this.interpreter.subTxn = undefined;
+      this.interpreter.runtime.ctx.processTransactions([execParams]);
+      // update current txns to base (top-level) after innerTx execution
+      this.interpreter.runtime.ctx.tx = baseCurrTx;
+      this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+
+      // save executed tx
+      this.interpreter.innerTxns.push(this.interpreter.subTxn);
+    } catch (err: any) {
+      // revert to begining context
+      this.interpreter.runtime.ctx = currentContext;
+      throw new RuntimeError(err.errorDescriptor, err.messageArguments);
+    } finally {
+      this.interpreter.runtime.ctx.isInnerTx = false;
+      this.interpreter.subTxn = undefined;
+    }
   }
 }
 
