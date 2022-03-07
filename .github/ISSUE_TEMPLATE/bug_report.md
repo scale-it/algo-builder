@@ -1,13 +1,13 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ## Describe the bug
+
 A clear and concise description of what the bug is.
 
 #### Expected Behavior
@@ -18,8 +18,8 @@ A clear and concise description of what the bug is.
 
 ## Steps to Reproduce
 
-1. 
-2. 
+1.
+2.
 
 ### Environment
 

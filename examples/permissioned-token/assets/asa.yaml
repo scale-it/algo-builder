@@ -1,6 +1,6 @@
 tesla:
   total: 10000000000 # (10 billions)
-  decimals: 0  # tokens are not fractional
+  decimals: 0 # tokens are not fractional
   defaultFrozen: true
   unitName: "TESLA"
   url: "ipfs.io/ipfs/<hash>" # https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu

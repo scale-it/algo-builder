@@ -4,25 +4,26 @@ layout: splash
 
 # Rekeying transaction
 
-- Read first about [Algorand rekeying](https://developer.algorand.org/docs/get-details/accounts/rekey/). 
-`Runtime` supports a rekey transaction. You can use field `rekeyTo` in `payFlags` to rekey:
+- Read first about [Algorand rekeying](https://developer.algorand.org/docs/get-details/accounts/rekey/).
+  `Runtime` supports a rekey transaction. You can use field `rekeyTo` in `payFlags` to rekey:
 - Account to any account.
 - Smart Signature account to any account.
 - Application to any account. We use inner transaction to rekey application.
 
-Example: 
+Example:
 
 We can rekey John account to Bob using the following transaction params.
+
 ```js
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 0n,
-    payFlags: { 
-        totalFee: fee 
+    payFlags: {
+        totalFee: fee
         rekeyTo: bob.address
-    } 
+    }
 ```
 
 - We can rekey smart signature (lsig) to Bob.
@@ -35,8 +36,8 @@ We can rekey John account to Bob using the following transaction params.
     toAccountAddr: bob.address,
     amountMicroAlgos: 0n,
     payFlags: {
-        totalFee: fee 
-        rekeyTo: bob.address 
+        totalFee: fee
+        rekeyTo: bob.address
     }
 }
 ```

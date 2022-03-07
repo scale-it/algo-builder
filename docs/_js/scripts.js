@@ -1,4 +1,4 @@
 $(function () {
-    // init feather icons
-    feather.replace();
+	// init feather icons
+	feather.replace();
 });
