@@ -13,8 +13,8 @@ module.exports = {
 	plugins: ["simple-import-sort", "sonarjs"],
 	extends: [
 		"plugin:sonarjs/recommended",
-		"plugin:import/recommended",
-		"plugin:import/typescript",
+		// "plugin:import/recommended",
+		// "plugin:import/typescript",
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"prettier",
