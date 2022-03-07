@@ -133,7 +133,9 @@ Methods:
 - `runtime.defaultAccounts()` returns a list of 16 pre-generated accounts with predefined addresses and keys, each with 1e8 microAlgos (100 Algos).
 - `runtime.resetDefaultAccounts()` - will reset the state of all the Default Accounts.
 
-For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+The Default Accounts also require syncing, however its done in the same manner as the first creation of them (see the example above).
+
+For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js) or [example](https://github.com/scale-it/algo-builder/blob/master/examples/unique-nft-asa/test/test.js))
 
 ## Run tests
 
