@@ -324,7 +324,7 @@ describe("SimpleTaskDefinition", () => {
 		});
 
 		describe("addParam", () => {
-			it("Should fail if the param name isn't camelCase", function() {
+			it("Should fail if the param name isn't camelCase", function () {
 				expectBuilderError(
 					() => taskDefinition.addParam("A"),
 					ERRORS.TASK_DEFINITIONS.INVALID_PARAM_NAME_CASING

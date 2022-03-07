@@ -130,7 +130,7 @@ async function executeRunTask(
 	await runMultipleScripts(
 		runtimeEnv,
 		assertDirChildren(scriptsDirectory, scripts),
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
+		(_cpData: CheckpointRepo, _relativeScriptPath: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
 		true,
 		logDebugTag,
 		false,
@@ -138,7 +138,7 @@ async function executeRunTask(
 	);
 }
 
-export default function(): void {
+export default function (): void {
 	task(TASK_RUN, "Runs a user-defined script after compiling the project")
 		.addVariadicPositionalParam("scripts", "A js file to be run within algob's environment")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));

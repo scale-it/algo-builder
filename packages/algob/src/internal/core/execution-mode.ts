@@ -74,8 +74,7 @@ function alternativeIsLocalInstallation(): boolean {
 		}
 
 		cwd = path.join(nodeModules, "..", "..");
-		if (cwd === "")
-			return false;
+		if (cwd === "") return false;
 	}
 	return false;
 }

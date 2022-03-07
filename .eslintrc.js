@@ -13,8 +13,10 @@ module.exports = {
 	plugins: ["simple-import-sort", "sonarjs"],
 	extends: [
 		"plugin:sonarjs/recommended",
-		"plugin:import/recommended", "plugin:import/typescript",
-		"eslint:recommended", "plugin:@typescript-eslint/recommended",
+		"plugin:import/recommended",
+		"plugin:import/typescript",
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
 		"prettier",
 	],
 	parserOptions: {
@@ -49,10 +51,11 @@ module.exports = {
 	},
 	overrides: [
 		{
-			"files": ["**/*.js"],
+			files: ["**/*.js"],
 			rules: {
-				"@typescript-eslint/no-var-requires": "off"
-			}
-		}],
-	"ignorePatterns": ["**/*.json"],
+				"@typescript-eslint/no-var-requires": "off",
+			},
+		},
+	],
+	ignorePatterns: ["**/*.json"],
 };

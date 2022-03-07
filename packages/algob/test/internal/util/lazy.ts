@@ -72,7 +72,7 @@ describe("lazy module", () => {
 		});
 
 		it("doesn't support classes", () => {
-			const obj = lazyObject(() => class { }) as any; // eslint-disable-line @typescript-eslint/no-extraneous-class
+			const obj = lazyObject(() => class {}) as any; // eslint-disable-line @typescript-eslint/no-extraneous-class
 
 			expectBuilderError(() => (obj.asd = 123), ERRORS.GENERAL.UNSUPPORTED_OPERATION);
 			expectBuilderError(() => obj.asd, ERRORS.GENERAL.UNSUPPORTED_OPERATION);
@@ -80,7 +80,7 @@ describe("lazy module", () => {
 		});
 
 		it("doesn't support functions", () => {
-			const obj = lazyObject(() => () => { }) as any;// eslint-disable-line @typescript-eslint/no-empty-function
+			const obj = lazyObject(() => () => {}) as any; // eslint-disable-line @typescript-eslint/no-empty-function
 
 			expectBuilderError(() => (obj.asd = 123), ERRORS.GENERAL.UNSUPPORTED_OPERATION);
 			expectBuilderError(() => obj.asd, ERRORS.GENERAL.UNSUPPORTED_OPERATION);

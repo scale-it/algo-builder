@@ -18,11 +18,7 @@ export class PyCompileOp {
 	 * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
 	 * @param logs only show logs on console when set as true. By default this value is true
 	 */
-	ensurePyTEALCompiled(
-		filename: string,
-		scTmplParams?: SCParams,
-		logs = true
-	): string {
+	ensurePyTEALCompiled(filename: string, scTmplParams?: SCParams, logs = true): string {
 		if (!filename.endsWith(pyExt)) {
 			throw new Error(`filename "${filename}" must end with "${pyExt}"`);
 		}
@@ -41,10 +37,7 @@ export class PyCompileOp {
 	 * @param scTmplParams smart contract template parameters
 	 * @param logs only show logs on console when set as true. By default this value is true
 	 */
-	parseScTmplParam(
-		scTmplParams?: SCParams,
-		logs = true
-	): [ReplaceParams, string | undefined] {
+	parseScTmplParam(scTmplParams?: SCParams, logs = true): [ReplaceParams, string | undefined] {
 		let param: string | undefined;
 		const replaceParams: ReplaceParams = {};
 		if (scTmplParams === undefined) {

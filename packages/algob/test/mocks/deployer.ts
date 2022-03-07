@@ -118,7 +118,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	addCheckpointKV(key: string, value: string): void { } // eslint-disable-line @typescript-eslint/no-empty-function
+	addCheckpointKV(key: string, value: string): void {} // eslint-disable-line @typescript-eslint/no-empty-function
 
 	getCheckpointKV(key: string): string | undefined {
 		return "metadata";

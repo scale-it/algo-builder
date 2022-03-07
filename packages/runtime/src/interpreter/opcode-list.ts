@@ -99,7 +99,9 @@ export class Pragma extends Op {
 		return this.version;
 	}
 
-	execute(_stack: TEALStack): void { }  /* eslint-disable-line @typescript-eslint/no-empty-function */
+	execute(
+		_stack: TEALStack
+	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -1513,7 +1515,9 @@ export class Label extends Op {
 		this.line = line;
 	}
 
-	execute(_stack: TEALStack): void { } /* eslint-disable-line @typescript-eslint/no-empty-function */
+	execute(
+		_stack: TEALStack
+	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // branch unconditionally to label - Tealv <= 3

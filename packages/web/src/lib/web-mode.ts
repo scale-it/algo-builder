@@ -27,7 +27,8 @@ export class WebMode {
 		});
 		console.log(response);
 		let lastround = response[LAST_ROUND] as number;
-		while (true) { // eslint-disable-line no-constant-condition
+		while (true) {
+			// eslint-disable-line no-constant-condition
 			const pendingInfo = await this.algoSigner.algod({
 				ledger: this.chainName,
 				path: `/v2/transactions/pending/${txId}`,

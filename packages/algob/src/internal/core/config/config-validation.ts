@@ -135,9 +135,9 @@ export function getValidationErrors(config: any): CfgErrors {
 				const p = errors.putter(net + ".accounts", i.toString());
 				validateAccount(a, p);
 				if ((j = accountsMap.get(a.name)) !== undefined) {
-					const errorMessage = `Account name ${String(
-						a.name
-					)} already exists at index ${String(j)}`;
+					const errorMessage = `Account name ${String(a.name)} already exists at index ${String(
+						j
+					)}`;
 					p.push("name", errorMessage, "string");
 				} else {
 					accountsMap.set(a.name, i);
@@ -225,9 +225,9 @@ function validateChainCfg(ncfg: ChainCfg, errors: CfgErrors): void {
 // this comes from https://stackoverflow.com/questions/5717093
 const hostPattern = new RegExp(
 	"^(https?:\\/\\/)?" + // protocol
-	"((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-	"(localhost)|" + // localhost
-	"((\\d{1,3}\\.){3}\\d{1,3}))"
+		"((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+		"(localhost)|" + // localhost
+		"((\\d{1,3}\\.){3}\\d{1,3}))"
 ); // OR ip (v4) address
 
 function validateHostname(str: string): boolean {

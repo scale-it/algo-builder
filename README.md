@@ -37,7 +37,6 @@ Using the `algob unbox-template` command, the developers can get a pre-built dAp
 
 Detailed description about the templates can be found [here](https://github.com/scale-it/algo-builder-templates#algo-builder-templates).
 
-
 # Contributing
 
 ### Branch policy
@@ -92,4 +91,3 @@ yarn run test:watch
 ```
 
 NOTE: For the moment test watching in `packages/algob` is not stable because of tear down issues in some test suites. We advise to **not use** test watcher in `packages/algob`.
-

@@ -23,7 +23,7 @@
 		"test": "yarn workspaces foreach -p run test",
 		"test:watch": "yarn workspaces foreach run test:watch:p",
 		"format": "prettier --check .",
-		"format:fix": "prettier --ignore-path .gitignore --loglevel warn --write \"**/*.+(js|ts|json)\"",
+		"format:fix": "prettier --ignore-path .gitignore --loglevel warn --write .",
 		"lint": "yarn workspaces foreach -p run lint",
 		"lint:fix": "yarn workspaces foreach -p run lint:fix",
 		"coverage": "yarn workspaces foreach -p run coverage",
