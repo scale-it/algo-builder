@@ -8,7 +8,7 @@ import algosdk, {
 } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
-import { SinonStub,stub } from "sinon";
+import { SinonStub, stub } from "sinon";
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
@@ -53,12 +53,12 @@ function mkASA(): wtypes.ASADef {
 }
 
 function stubAlgodGenesisAndTxParams(algodClient: algosdk.Algodv2): void {
-	stub(algodClient, "getTransactionParams")
-		.returns({ do: async () => mockSuggestedParam } as ReturnType<
-			algosdk.Algodv2["getTransactionParams"]
-		>);
-	stub(algodClient, "genesis")
-		.returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2["genesis"]>);
+	stub(algodClient, "getTransactionParams").returns({
+		do: async () => mockSuggestedParam,
+	} as ReturnType<algosdk.Algodv2["getTransactionParams"]>);
+	stub(algodClient, "genesis").returns({ do: async () => mockGenesisInfo } as ReturnType<
+		algosdk.Algodv2["genesis"]
+	>);
 }
 
 describe("Opt-In to ASA", () => {

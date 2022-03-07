@@ -54,12 +54,12 @@ describe("Debugging TEAL code using tealdbg", () => {
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
 		deployer = new DeployerRunMode(deployerCfg);
-		stub(algod.algodClient, "getTransactionParams")
-			.returns({ do: async () => mockSuggestedParam } as ReturnType<
-				algosdk.Algodv2["getTransactionParams"]
-			>);
-		stub(algod.algodClient, "genesis")
-			.returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2["genesis"]>);
+		stub(algod.algodClient, "getTransactionParams").returns({
+			do: async () => mockSuggestedParam,
+		} as ReturnType<algosdk.Algodv2["getTransactionParams"]>);
+		stub(algod.algodClient, "genesis").returns({
+			do: async () => mockGenesisInfo,
+		} as ReturnType<algosdk.Algodv2["genesis"]>);
 
 		(stub(algod.algodClient, "dryrun") as any).returns({
 			do: async () => mockDryRunResponse,
@@ -126,9 +126,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		// if --force == true is passed then file is overwritten
 		await tealDebugger.dryRunResponse("response.json", true);
 		assert.isTrue(
-			(console.log as SinonStub).calledWith(
-				`Data written succesfully to assets/response.json`
-			)
+			(console.log as SinonStub).calledWith(`Data written succesfully to assets/response.json`)
 		);
 
 		fs.rmSync(path.join(process.cwd(), ASSETS_DIR, "response.json"));
