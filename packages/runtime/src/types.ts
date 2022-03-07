@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import { types } from "@algo-builder/web";
 import { Account as AccountSDK, EncodedTransaction, modelsv2 } from "algosdk";
 

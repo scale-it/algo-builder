@@ -199,8 +199,8 @@ export class WallectConnectSession {
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const response = await this.algodClient.status().do();
 		let lastround = response[LAST_ROUND];
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
-			// eslint-disable-line no-constant-condition
 			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
 			if (pendingInfo["pool-error"]) {
 				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);

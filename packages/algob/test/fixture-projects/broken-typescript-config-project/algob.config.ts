@@ -1,5 +1,4 @@
-function implicitAny(a: any) {
-	// eslint-disable-line
+function _implicitAny(a: any) {
 	return a;
 }
 

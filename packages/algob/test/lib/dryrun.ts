@@ -6,7 +6,7 @@ import { assert } from "chai";
 import * as fs from "fs";
 import { pathExistsSync } from "fs-extra";
 import * as path from "path";
-import sinon from "sinon";
+import { SinonStub, stub } from "sinon";
 import YAML from "yaml";
 
 import { ExecutionMode } from "../../../runtime/src/types";
@@ -54,24 +54,22 @@ describe("Debugging TEAL code using tealdbg", () => {
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
 		deployer = new DeployerRunMode(deployerCfg);
-		sinon
-			.stub(algod.algodClient, "getTransactionParams")
+		stub(algod.algodClient, "getTransactionParams")
 			.returns({ do: async () => mockSuggestedParam } as ReturnType<
 				algosdk.Algodv2["getTransactionParams"]
 			>);
-		sinon
-			.stub(algod.algodClient, "genesis")
+		stub(algod.algodClient, "genesis")
 			.returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2["genesis"]>);
 
-		(sinon.stub(algod.algodClient, "dryrun") as any).returns({
+		(stub(algod.algodClient, "dryrun") as any).returns({
 			do: async () => mockDryRunResponse,
 		}) as ReturnType<algosdk.Algodv2["dryrun"]>;
 
-		(sinon.stub(algod.algodClient, "accountInformation") as any).returns({
+		(stub(algod.algodClient, "accountInformation") as any).returns({
 			do: async () => mockAccountInformation,
 		}) as ReturnType<algosdk.Algodv2["accountInformation"]>;
 
-		(sinon.stub(algod.algodClient, "getApplicationByID") as any).returns({
+		(stub(algod.algodClient, "getApplicationByID") as any).returns({
 			do: async () => mockApplicationResponse,
 		}) as ReturnType<algosdk.Algodv2["getApplicationByID"]>;
 
@@ -89,11 +87,11 @@ describe("Debugging TEAL code using tealdbg", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.dryrun as sinon.SinonStub).restore();
-		(algod.algodClient.accountInformation as sinon.SinonStub).restore();
-		(algod.algodClient.getApplicationByID as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.dryrun as SinonStub).restore();
+		(algod.algodClient.accountInformation as SinonStub).restore();
+		(algod.algodClient.getApplicationByID as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("dump dryrunResponse in assets/<file>", async () => {
@@ -115,7 +113,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 	});
 
 	it("should warn or overwrite existing dryRunResponse based on --force flag", async () => {
-		const stub = console.error as sinon.SinonStub;
+		const stub = console.error as SinonStub;
 		stub.reset();
 
 		await tealDebugger.dryRunResponse("response.json");
@@ -128,7 +126,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		// if --force == true is passed then file is overwritten
 		await tealDebugger.dryRunResponse("response.json", true);
 		assert.isTrue(
-			(console.log as sinon.SinonStub).calledWith(
+			(console.log as SinonStub).calledWith(
 				`Data written succesfully to assets/response.json`
 			)
 		);
@@ -184,7 +182,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 	});
 
 	it("should run debugger from cached TEAL code", async () => {
-		const stub = console.info as sinon.SinonStub;
+		const stub = console.info as SinonStub;
 		stub.reset();
 		const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;
 
@@ -201,7 +199,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 
 		// verify cached console.info is true
 		assert.isTrue(
-			(console.info as sinon.SinonStub).calledWith(
+			(console.info as SinonStub).calledWith(
 				"\x1b[33m%s\x1b[0m",
 				`Using cached TEAL code for gold-asa.py`
 			)

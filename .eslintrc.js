@@ -13,8 +13,8 @@ module.exports = {
 	plugins: ["simple-import-sort", "sonarjs"],
 	extends: [
 		"plugin:sonarjs/recommended",
-		// "plugin:import/recommended",
-		// "plugin:import/typescript",
+		"plugin:import/recommended",
+		"plugin:import/typescript",
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"prettier",
@@ -48,6 +48,10 @@ module.exports = {
 		"@typescript-eslint/consistent-type-assertions": "off",
 		"@typescript-eslint/no-dynamic-delete": "off",
 		"sonarjs/cognitive-complexity": ["error", 16],
+		"import/no-named-as-default-member": "off",
+
+		// TODO: remove this rule
+		"@typescript-eslint/no-explicit-any": "off",
 	},
 	overrides: [
 		{

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import { IClientMeta } from "@walletconnect/types"; /* eslint-disable-line import/no-unresolved */
 import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
@@ -196,11 +198,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-			| TransactionType.CallApp
-			| TransactionType.ClearApp
-			| TransactionType.CloseApp
-			| TransactionType.DeleteApp
-			| TransactionType.OptInToApp;
+		| TransactionType.CallApp
+		| TransactionType.ClearApp
+		| TransactionType.CloseApp
+		| TransactionType.DeleteApp
+		| TransactionType.OptInToApp;
 		appID: number;
 	};
 

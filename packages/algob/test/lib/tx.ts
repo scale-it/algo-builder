@@ -8,7 +8,7 @@ import algosdk, {
 } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
-import sinon from "sinon";
+import { SinonStub,stub } from "sinon";
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
@@ -53,13 +53,11 @@ function mkASA(): wtypes.ASADef {
 }
 
 function stubAlgodGenesisAndTxParams(algodClient: algosdk.Algodv2): void {
-	sinon
-		.stub(algodClient, "getTransactionParams")
+	stub(algodClient, "getTransactionParams")
 		.returns({ do: async () => mockSuggestedParam } as ReturnType<
 			algosdk.Algodv2["getTransactionParams"]
 		>);
-	sinon
-		.stub(algodClient, "genesis")
+	stub(algodClient, "genesis")
 		.returns({ do: async () => mockGenesisInfo } as ReturnType<algosdk.Algodv2["genesis"]>);
 }
 
@@ -95,8 +93,8 @@ describe("Opt-In to ASA", () => {
 	});
 
 	afterEach(() => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("should opt-in to asa using asset id as number", async () => {
@@ -151,8 +149,8 @@ describe("ASA modify fields", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	/**
@@ -170,14 +168,14 @@ describe("ASA modify fields", () => {
 			assert.equal(encodeAddress(tx.assetFreeze.publicKey), mockAssetInfo.params.freeze);
 			assert.equal(encodeAddress(tx.assetClawback.publicKey), assetFields.clawback);
 		}
-		(algod.sendAndWait as sinon.SinonStub).restore();
+		(algod.sendAndWait as SinonStub).restore();
 		return algod.sendAndWait(rawTxns);
 	}
 
 	it("Should set fields, freeze is not sent, therefore it should be picked from assetInfo", async () => {
 		// Manager should be set to ""(sent as undefined to network)
 		// Clawback should be updated
-		sinon.stub(algod, "sendAndWait").callsFake(checkTx);
+		stub(algod, "sendAndWait").callsFake(checkTx);
 
 		await executeTransaction(deployer, execParams);
 	});
@@ -198,8 +196,8 @@ describe("Delete ASA and SSC", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("Should delete ASA, and set delete boolean in ASAInfo", async () => {
@@ -325,8 +323,8 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("should throw error with opt-in asa functions, if asa exist and deleted", async () => {
@@ -612,8 +610,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("should deploy asa in run mode", async () => {
@@ -730,8 +728,8 @@ describe("Update transaction test in run mode", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("should update in run mode", async () => {
@@ -859,8 +857,8 @@ describe("Deploy ASA without asa.yaml", () => {
 	});
 
 	afterEach(async () => {
-		(algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
-		(algod.algodClient.genesis as sinon.SinonStub).restore();
+		(algod.algodClient.getTransactionParams as SinonStub).restore();
+		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
 	it("should deploy asa without asa.yaml", async () => {

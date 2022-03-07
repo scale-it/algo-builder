@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 import { expect } from "chai";
-import sinon from "sinon";
+import from "sinon";
 
 import { DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";

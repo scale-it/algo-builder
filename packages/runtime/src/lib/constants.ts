@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 

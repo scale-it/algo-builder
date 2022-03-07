@@ -800,7 +800,7 @@ export const pyTealErrors = {
 };
 
 export const ERRORS: {
-	[category in keyof typeof ERROR_RANGES]: {
+	[_category in keyof typeof ERROR_RANGES]: {
 		[errorName: string]: ErrorDescriptor;
 	};
 } = {
