@@ -23,7 +23,7 @@
 		"node": ">=14.11.0"
 	},
 	"scripts": {
-		"lint": "eslint --cache  --ext .js,.ts src test",
+		"lint": "eslint --ext .js,.ts src test",
 		"lint:fix": "eslint --cache  --fix --ext .js,.ts src test",
 		"lint:unix": "eslint --cache  --format unix --ext .js,.ts src test",
 		"test": "echo testing algob; mocha",

@@ -19,7 +19,7 @@
 		"node": ">=14.11.0"
 	},
 	"scripts": {
-		"lint": "eslint --cache --ext .js,.ts src",
+		"lint": "eslint --ext .js,.ts src",
 		"lint:fix": "eslint --cache --fix --ext .js,.ts src",
 		"lint:unix": "eslint --cache --format unix --ext .js,.ts src",
 		"test": "echo testing runtime; mocha",
