@@ -50,7 +50,8 @@
 	},
 	"lint-staged": {
 		"**/{src,test,scripts}/**/*.{ts,js}": [
-			"eslint --format stylish --fix"
+			"eslint --format stylish --fix",
+			"prettier --write"
 		]
 	}
 }
