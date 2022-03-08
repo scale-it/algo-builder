@@ -22,10 +22,10 @@
 		"watch": "tsc --build --watch packages/web packages/runtime packages/algob",
 		"test": "yarn workspaces foreach -p run test",
 		"test:watch": "yarn workspaces foreach run test:watch:p",
-		"format": "prettier --check .",
-		"format:fix": "prettier --loglevel warn --write .",
+		"format": "prettier --loglevel warn --write .",
+		"format:check": "prettier --check .",
 		"lint": "yarn workspaces foreach -p run lint",
-		"lint:fix": "yarn workspaces foreach -p run lint:fix",
+		"lint:check": "yarn workspaces foreach -p run lint:check",
 		"coverage": "yarn workspaces foreach -p run coverage",
 		"prepare": "husky install",
 		"algob": "yarn workspace @algo-builder/algob algob"
