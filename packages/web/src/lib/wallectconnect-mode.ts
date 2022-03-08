@@ -5,10 +5,10 @@ import algosdk, { Transaction } from "algosdk";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
-  ChainType, ExecParams, SessionConnectResponse, SessionDisconnectResponse,
+  ExecParams, SessionConnectResponse, SessionDisconnectResponse,
   SessionUpdateResponse, SignTxnParams, TransactionInGroup
 } from "../types";
-import { clientForChain, mkTxParams } from "./api";
+import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST } from "./constants";
 import { mkTransaction } from "./txn";
 
@@ -21,7 +21,7 @@ export class WallectConnectSession {
   wcAccounts: string[];
 
   constructor (chain: string, connector?: WalletConnect) {
-    this.algodClient = clientForChain(chain);
+    this.algodClient = algoexplorerAlgod(chain);
     if (connector) {
       this.connector = connector;
     } else {

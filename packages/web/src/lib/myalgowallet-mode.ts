@@ -3,7 +3,7 @@ import algosdk, { Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
 import { ExecParams, TransactionInGroup } from "../types";
-import { clientForChain } from "./api";
+import { algoexplorerAlgod } from "./api";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -16,7 +16,7 @@ export class MyAlgoWalletSession {
   addresses: Address[] = [];
 
   constructor (chain: string, connector?: MyAlgoConnect) {
-    this.algodClient = clientForChain(chain);
+    this.algodClient = algoexplorerAlgod(chain);
     if (connector) {
       this.connector = connector;
     } else {

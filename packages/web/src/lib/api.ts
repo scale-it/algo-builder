@@ -2,15 +2,15 @@ import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk"
 
 import { ChainType, TxParams } from "../types";
 
-const mainNetClient = new Algodv2("", "https://algoexplorerapi.io", "");
-const testNetClient = new Algodv2("", "https://node.testnet.algoexplorerapi.io", "");
+const mainnetAlgoExplorer = new Algodv2("", "https://algoexplorerapi.io", "");
+const testnetAlgoExplorer = new Algodv2("", "https://node.testnet.algoexplorerapi.io", "");
 
-export function clientForChain (chain: string): algosdk.Algodv2 {
+export function algoexplorerAlgod (chain: string): algosdk.Algodv2 {
   switch (chain) {
     case ChainType.MainNet:
-      return mainNetClient;
+      return mainnetAlgoExplorer;
     case ChainType.TestNet:
-      return testNetClient;
+      return testnetAlgoExplorer;
     default:
       throw new Error(`Unknown chain type: ${chain}`);
   }
