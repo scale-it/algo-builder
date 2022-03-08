@@ -135,7 +135,7 @@ Methods:
 
 The Default Accounts also require syncing, however its done in the same manner as the first creation of them (see the example above).
 
-For a better understading see the following example ([example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js) or [example](https://github.com/scale-it/algo-builder/blob/master/examples/unique-nft-asa/test/test.js))
+For a better understanding see the following examples: [bond token test](https://github.com/scale-it/algo-builder/blob/master/examples/bond/test/bond-token-flow.js) or [unique asa test](https://github.com/scale-it/algo-builder/blob/master/examples/unique-nft-asa/test/test.js).
 
 ## Run tests
 
