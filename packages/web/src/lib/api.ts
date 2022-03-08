@@ -25,7 +25,9 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
   const genesisInfo = await algocl.genesis().do();
   // Private chains may have an issue with firstRound
   if (!genesisInfo.devmode && params.firstRound === 0) {
-    throw new Error("Suggested params returned 0 as firstRound. Ensure that your node progresses.");
+    throw new Error(
+      "Suggested params returned 0 as firstRound. Ensure that your node progresses."
+    );
   }
   return params;
 }
@@ -37,8 +39,13 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
  * @param s suggested transaction params
  */
 export async function mkTxParams (
-  algocl: Algodv2, userParams: TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
-  if (s === undefined) { s = await getSuggestedParams(algocl); }
+  algocl: Algodv2,
+  userParams: TxParams,
+  s?: SuggestedParams
+): Promise<SuggestedParams> {
+  if (s === undefined) {
+    s = await getSuggestedParams(algocl);
+  }
 
   if (userParams.flatFee === undefined) {
     s.flatFee = userParams.totalFee !== undefined;
@@ -46,8 +53,9 @@ export async function mkTxParams (
   s.fee = userParams.totalFee || userParams.feePerByte || ALGORAND_MIN_TX_FEE; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 
   s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-    ? s.lastRound
-    : Number(userParams.firstValid) + Number(userParams.validRounds);
+  s.lastRound =
+    userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+      ? s.lastRound
+      : Number(userParams.firstValid) + Number(userParams.validRounds);
   return s;
 }

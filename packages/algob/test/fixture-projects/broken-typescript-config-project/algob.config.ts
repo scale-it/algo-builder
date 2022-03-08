@@ -1,11 +1,11 @@
-function implicitAny(a: any) { // eslint-disable-line
-  return a;
+function _implicitAny(a: any) {
+	return a;
 }
 
 export default {
-  networks: {
-    network: {
-      host: ""
-    }
-  }
+	networks: {
+		network: {
+			host: "",
+		},
+	},
 };

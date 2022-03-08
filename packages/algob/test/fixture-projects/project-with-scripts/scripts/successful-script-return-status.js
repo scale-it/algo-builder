@@ -1,6 +1,5 @@
-
-async function run (runtimeEnv, deployer) {
-  return 1.5
+async function run(runtimeEnv, deployer) {
+	return 1.5;
 }
 
-module.exports = { default: run }
+module.exports = { default: run };

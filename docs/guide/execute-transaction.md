@@ -9,10 +9,12 @@ If you pass an array of `ExecParams`, it will be considered as `atomic transacti
 In below sections we will demonstrate how to pass these parameters.
 
 Note: For each parameter `type` and `sign` fields are mandatory.
-  - `type`: type of transaction
-  - `sign`: sign type
+
+- `type`: type of transaction
+- `sign`: sign type
 
 Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#execparams):
+
 ### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
 
 ```js
@@ -24,6 +26,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     amountMicroAlgos: 100,
     payFlags: { totalFee: fee }  }
 ```
+
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
 
 ### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
@@ -43,6 +46,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
 ### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
 
 To deploy an ASA using `asa.yaml`:
+
 ```js
   {
     type: TransactionType.DeployASA,
@@ -55,7 +59,7 @@ To deploy an ASA using `asa.yaml`:
 
 To deploy an ASA without using `asa.yaml`:
 
-```js 
+```js
   {
     type: types.TransactionType.DeployASA,
     sign: types.SignType.SecretKey,
@@ -116,6 +120,7 @@ To deploy an ASA without using `asa.yaml`:
     payFlags: {}
   }
 ```
+
 - To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
 ### [Opt-In to App](https://algobuilder.dev/api/algob/modules/runtime.types.html#optintoappparam)
@@ -174,6 +179,7 @@ To deploy an ASA without using `asa.yaml`:
 With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
 Algob now supports pooled fees where one transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
 Ex:
+
 ```js
   {
     type: TransactionType.TransferAlgo,
@@ -195,10 +201,10 @@ Ex:
 
 Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.
 
-
 ## Sign and Send SDK Transaction object using `executeTransaction` function
 
 `executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
+
 ```
 const tx = makeAssetCreateTxn(
   bobAcc.addr, mockSuggestedParam.fee,
@@ -213,6 +219,7 @@ const transaction: wtypes.TransactionAndSign = {
 
 const res = await executeTransaction(deployer, transaction);
 ```
+
 You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
 
 ## SignTransactions function

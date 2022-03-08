@@ -125,7 +125,7 @@ export class WallectConnectSession {
    * TODO: handle case of multiple signers in group transaction
    */
   async signTransactionGroup (txns: TransactionInGroup[], message?: string):
-  Promise<Array<(Uint8Array | null)>> {
+    Promise<Array<(Uint8Array | null)>> {
     const walletTxns: WalletTransaction[] = txns.map(txn => {
       const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn.txn)).toString("base64");
       let signers: string[] | undefined;
@@ -195,7 +195,7 @@ export class WallectConnectSession {
    * @param execParams transaction parameters or atomic transaction parameters
    */
   async executeTransaction (execParams: ExecParams | ExecParams[]):
-  Promise<algosdk.modelsv2.PendingTransactionResponse> {
+    Promise<algosdk.modelsv2.PendingTransactionResponse> {
     let signedTxn;
     let txns: Transaction[] = [];
     let confirmedTx: algosdk.modelsv2.PendingTransactionResponse;
