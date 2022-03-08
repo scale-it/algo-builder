@@ -3967,6 +3967,15 @@ export class ITxnSubmit extends Op {
       this.interpreter.runtime.ctx,
       this.line
     );
+	
+	// only support call app(NoOpt) for appl transaction type.
+	if (
+		this.interpreter.subTxn.type === TransactionTypeEnum.APPLICATION_CALL &&
+		execParams.type !== types.TransactionType.CallApp
+	) {
+		console.warn("This action not support in current Runtime version.");
+		return;
+	}
 
     // back up current context
     const currentCtx = cloneDeep(this.interpreter.runtime.ctx);
@@ -3990,6 +3999,11 @@ export class ITxnSubmit extends Op {
       this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
       // save executed tx
       this.interpreter.innerTxns.push(this.interpreter.subTxn);
+	  // pop current application in the inner app call stack 
+	  this.interpreter.runtime.ctx.innerTxApplCallStack.pop();
+	  if (this.interpreter.runtime.ctx.innerTxApplCallStack.length === 1) {
+		this.interpreter.runtime.ctx.innerTxApplCallStack.pop(); 
+	  }
     } catch (err: any) {
       // revert to begining context
       this.interpreter.runtime.ctx = currentCtx;

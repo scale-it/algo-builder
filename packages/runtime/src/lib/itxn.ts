@@ -72,7 +72,7 @@ const byteTxnFields: {[key: number]: Set<string>} = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
-['VotePK', 'SelectionPK', 'Note', "ApplicationArgs"].forEach(field => byteTxnFields[6].add(field));
+['VotePK', 'SelectionPK', 'Note', "ApplicationArgs", "ApprovalProgram", "ClearStateProgram"].forEach(field => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: {[key: number]: Set<string>} = {
   1: new Set(),
