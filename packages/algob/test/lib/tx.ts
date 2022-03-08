@@ -11,7 +11,7 @@ import { isArray } from "lodash";
 import { SinonStub, stub } from "sinon";
 import { TextEncoder } from "util";
 
-import { executeTransaction } from "../../src";
+import { executeTx } from "../../src";
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { ConfirmedTxInfo, Deployer } from "../../src/types";
@@ -98,7 +98,7 @@ describe("Opt-In to ASA", () => {
 	});
 
 	it("should opt-in to asa using asset id as number", async () => {
-		const res = await executeTransaction(deployer, execParams);
+		const res = await executeTx(deployer, execParams);
 
 		assert.deepEqual(res, expected);
 	});
@@ -107,7 +107,7 @@ describe("Opt-In to ASA", () => {
 		execParams.assetID = "unknown";
 
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParams),
+			async () => await executeTx(deployer, execParams),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED,
 			"unknown"
 		);
@@ -116,7 +116,7 @@ describe("Opt-In to ASA", () => {
 	it("Should set asset id to asset id of asset name passed", async () => {
 		execParams.assetID = "silver";
 
-		const res = await executeTransaction(deployer, execParams);
+		const res = await executeTx(deployer, execParams);
 
 		assert.deepEqual(res, expected);
 	});
@@ -177,7 +177,7 @@ describe("ASA modify fields", () => {
 		// Clawback should be updated
 		stub(algod, "sendAndWait").callsFake(checkTx);
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 	});
 });
 
@@ -208,7 +208,7 @@ describe("Delete ASA and SSC", () => {
 			fromAccount: bobAcc,
 			assetID: "silver",
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		const res = deployer.getASAInfo("silver");
 		assert.equal(res.deleted, true);
@@ -222,7 +222,7 @@ describe("Delete ASA and SSC", () => {
 			fromAccount: bobAcc,
 			assetID: 1,
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		const res = deployer.getASAInfo("silver");
 		assert.equal(res.deleted, true);
@@ -236,7 +236,7 @@ describe("Delete ASA and SSC", () => {
 			fromAccount: bobAcc,
 			assetID: 2,
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 	});
 
 	it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
@@ -256,7 +256,7 @@ describe("Delete ASA and SSC", () => {
 			appID: info.appID,
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		const res = deployer.getAppByFile("approval.teal", "clear.teal");
 		assert.isDefined(res);
@@ -271,11 +271,11 @@ describe("Delete ASA and SSC", () => {
 			fromAccount: bobAcc,
 			appID: 23,
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 	});
 });
 
-describe("Delete ASA and SSC transaction flow(with functions and executeTransaction)", () => {
+describe("Delete ASA and SSC transaction flow(with functions and executeTx)", () => {
 	useFixtureProject("stateful");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
@@ -300,7 +300,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			fromAccount: bobAcc,
 			assetID: 1,
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		// deploy and delete app
 		const flags: types.AppDeploymentFlags = {
@@ -319,7 +319,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			fromAccount: bobAcc,
 			appID: info.appID,
 		};
-		await executeTransaction(deployer, execParam);
+		await executeTx(deployer, execParam);
 	});
 
 	afterEach(async () => {
@@ -384,7 +384,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			assetID: assetID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -399,7 +399,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			fields: {},
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -415,7 +415,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			freezeState: true,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -432,7 +432,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			amount: 1000,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -446,7 +446,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			assetID: assetID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -462,7 +462,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			amount: 12,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.ASSET_DELETED
 		);
 	});
@@ -477,7 +477,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			toAccountAddr: aliceAcc.addr,
 			amount: 12,
 		};
-		await executeTransaction(deployer, execParam);
+		await executeTx(deployer, execParam);
 	});
 
 	it("should throw error if user tries to delete deleted app", async () => {
@@ -489,7 +489,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			appID: appID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
@@ -505,7 +505,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			newClearProgram: "clear.teal",
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
@@ -519,7 +519,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			appID: appID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
@@ -533,7 +533,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			appID: appID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
@@ -547,7 +547,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			appID: appID,
 		};
 		await expectBuilderErrorAsync(
-			async () => await executeTransaction(deployer, execParam),
+			async () => await executeTx(deployer, execParam),
 			ERRORS.GENERAL.APP_DELETED
 		);
 
@@ -558,7 +558,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			payFlags: {},
 			appID: appID,
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 	});
 
 	it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
@@ -570,7 +570,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			assetID: 123,
 		};
 
-		await executeTransaction(deployer, execParam);
+		await executeTx(deployer, execParam);
 	});
 
 	it("should pass if user tries delete (asset + app) that doesn't exist in checkpoint", async () => {
@@ -591,7 +591,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 			},
 		];
 
-		await executeTransaction(deployer, txGroup);
+		await executeTx(deployer, txGroup);
 	});
 });
 
@@ -623,7 +623,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			payFlags: {},
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		// should not be stored in checkpoint if in run mode
 		expectBuilderError(
@@ -645,7 +645,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		// should not be stored in checkpoint if in run mode
 		expectBuilderError(
@@ -669,7 +669,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			payFlags: {},
 			appName: "dao-app",
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		// able to retrieve info by "appName"
 		assert.isDefined(deployer.getApp("dao-app"));
@@ -695,7 +695,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await executeTransaction(deployer, execParams);
+		const appInfo = await executeTx(deployer, execParams);
 
 		deployer = new DeployerRunMode(deployerCfg);
 		execParams = {
@@ -706,7 +706,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			payFlags: {},
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		const res = deployer.getAppByFile("approval.teal", "clear.teal");
 		assert.isDefined(res);
@@ -745,7 +745,7 @@ describe("Update transaction test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await executeTransaction(deployer, execParams);
+		const appInfo = await executeTx(deployer, execParams);
 
 		// should not be stored in checkpoint if in run mode
 		expectBuilderError(
@@ -763,7 +763,7 @@ describe("Update transaction test in run mode", () => {
 			payFlags: {},
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 		// should not be stored in checkpoint if in run mode
 		expectBuilderError(
 			() => deployer.getAppByFile("approval.teal", "clear.teal"),
@@ -785,7 +785,7 @@ describe("Update transaction test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 		const appInfo = deployer.getAppByFile("approval.teal", "clear.teal");
 		assert.isDefined(appInfo);
 
@@ -801,7 +801,7 @@ describe("Update transaction test in run mode", () => {
 				payFlags: {},
 			};
 
-			await executeTransaction(deployer, execParams);
+			await executeTx(deployer, execParams);
 			assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
 		}
 	});
@@ -819,7 +819,7 @@ describe("Update transaction test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await executeTransaction(deployer, execParams);
+		const appInfo = await executeTx(deployer, execParams);
 		expectBuilderError(
 			() => deployer.getAppByFile("approval.teal", "clear.teal"),
 			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
@@ -836,7 +836,7 @@ describe("Update transaction test in run mode", () => {
 			payFlags: {},
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 		// checkpoint is stored for the update
 		assert.isDefined(deployer.getAppByFile("approval.teal", "clear.teal"));
 	});
@@ -880,7 +880,7 @@ describe("Deploy ASA without asa.yaml", () => {
 			payFlags: {},
 		};
 
-		await executeTransaction(deployer, execParams);
+		await executeTx(deployer, execParams);
 
 		const res = deployer.getASAInfo("silver-1");
 		assert.isDefined(res);
@@ -926,7 +926,7 @@ describe("SDK Transaction object", () => {
 			sign: { sign: wtypes.SignType.SecretKey, fromAccount: bobAcc },
 		};
 
-		const res = await executeTransaction(deployer, transaction);
+		const res = await executeTx(deployer, transaction);
 		assert.isDefined(res);
 		assert.equal(res["confirmed-round"], 1);
 		assert.equal(res["asset-index"], 1);

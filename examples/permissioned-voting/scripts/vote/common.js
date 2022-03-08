@@ -1,8 +1,8 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 
-exports.executeTransaction = async function (deployer, txnParams) {
+exports.executeTx = async function (deployer, txnParams) {
 	try {
-		await executeTransaction(deployer, txnParams);
+		await executeTx(deployer, txnParams);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e.error);
 	}

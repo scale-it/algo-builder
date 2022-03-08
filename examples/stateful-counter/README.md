@@ -87,7 +87,7 @@ const algoTxnParams = {
 	payFlags: {},
 };
 // transfer some algos to creator account
-await executeTransaction(deployer, algoTxnParams);
+await executeTx(deployer, algoTxnParams);
 ```
 
 In the code above we declared user accounts and funded `creatorAccount` account. `masterAccount` is the default account used in algob private net.
@@ -159,7 +159,7 @@ const tx = {
 	payFlags: {},
 };
 
-await executeTransaction(deployer, tx);
+await executeTx(deployer, tx);
 ```
 
 In `tx` there are following parameters:
@@ -218,7 +218,7 @@ const tx = {
 	appArgs: [],
 };
 
-await executeTransaction(deployer, tx);
+await executeTx(deployer, tx);
 ```
 
 Note: Deleting non existing app will throw error.

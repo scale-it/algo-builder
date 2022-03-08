@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { accounts } = require("./common/accounts.js");
 const { issuePrice, buyTxNode } = require("./common/common.js");
@@ -29,7 +29,7 @@ exports.epoch0 = async function (deployer) {
 	);
 
 	console.log("Elon buying 10 bonds!");
-	await executeTransaction(deployer, groupTx);
+	await executeTx(deployer, groupTx);
 	console.log("Elon bought 10 bonds!");
 
 	// elon sells 2 bonds to bob for 2020 Algo
@@ -52,6 +52,6 @@ exports.epoch0 = async function (deployer) {
 			payFlags: { totalFee: 1000 },
 		},
 	];
-	await executeTransaction(deployer, sellTx);
+	await executeTx(deployer, sellTx);
 	console.log("2 bonds sold to bob from elon!");
 };

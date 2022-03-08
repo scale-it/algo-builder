@@ -277,7 +277,7 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
  * or TransactionAndSign object(SDK transaction object and signer parameters)
  */
-export async function executeTransaction(
+export async function executeTx(
 	deployer: Deployer,
 	transactions:
 		| (wtypes.ExecParams | wtypes.TransactionAndSign)

@@ -1,9 +1,9 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function tryExecuteTx(deployer, txnParams) {
 	try {
-		await executeTransaction(deployer, txnParams);
+		await executeTx(deployer, txnParams);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 	}
@@ -33,7 +33,7 @@ async function fundAccount(deployer, accounts) {
 	}
 
 	try {
-		await executeTransaction(deployer, params);
+		await executeTx(deployer, params);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error.text : e);
 	}

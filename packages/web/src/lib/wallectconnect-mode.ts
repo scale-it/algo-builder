@@ -217,7 +217,7 @@ export class WallectConnectSession {
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTransaction(
+	async executeTx(
 		execParams: ExecParams | ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
