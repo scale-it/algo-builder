@@ -419,7 +419,7 @@ export class Ctx implements Context {
 	verifyCloseRemainderTo(txnParams: types.ExecParams): void {
 		if (!txnParams.payFlags.closeRemainderTo) return;
 		if (txnParams.payFlags.closeRemainderTo === webTx.getFromAddress(txnParams)) {
-			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO);
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO);
 		}
 	}
 
@@ -431,11 +431,11 @@ export class Ctx implements Context {
 		if (!this.isInnerTx) return;
 
 		if (this.innerTxApplCallStack.length >= 8) {
-			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APPL_DEEP_EXCEEDED);
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED);
 		}
 		const appID = this.tx.apid ?? 0;
 		if (appID > 0 && this.innerTxApplCallStack.find((id) => id === appID) !== undefined) {
-			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APPL_SELF_CALL);
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL);
 		}
 
 		// update inner tx call stack

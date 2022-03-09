@@ -94,8 +94,8 @@ describe("C2C call", function () {
 
 			expectRuntimeError(
 				() => runtime.executeTx(execParams),
-				RUNTIME_ERRORS.GENERAL.INNER_APP_CALL_INVALID_VERSION,
-				"RUNTIME_ERR1508: Inner app call in older version 5"
+				RUNTIME_ERRORS.TRANSACTION.INNER_APP_CALL_INVALID_VERSION,
+				"RUNTIME_ERR1408: Inner app call in older version 5"
 			);
 		});
 
@@ -114,14 +114,13 @@ describe("C2C call", function () {
 
 			expectRuntimeError(
 				() => runtime.executeTx(execParams),
-				RUNTIME_ERRORS.GENERAL.INNER_APPL_SELF_CALL
+				RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL
 			);
 		});
 	});
 
 	describe("Depth appl call", function () {
 		const totalApp = 8;
-		// eslint-disable-next-line sonarjs/no-unused-collection
 		let apps: AppInfo[];
 		let baseApp: AppInfo;
 		let bob: AccountStoreI;
@@ -167,7 +166,7 @@ describe("C2C call", function () {
 
 			expectRuntimeError(
 				() => runtime.executeTx(execParams),
-				RUNTIME_ERRORS.GENERAL.INNER_APPL_DEEP_EXCEEDED
+				RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED
 			);
 			// TODO: compare runtime store and ensure it not change.
 			assert.isUndefined(runtime.remainCtx);

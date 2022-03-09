@@ -490,7 +490,7 @@ export class Interpreter {
 				this.runtime.ctx.tx.type === TransactionTypeEnum.APPLICATION_CALL &&
 				this.tealVersion < MinVersionSupportC2CCall
 			) {
-				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APP_CALL_INVALID_VERSION, {
+				throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APP_CALL_INVALID_VERSION, {
 					tealVersion: this.tealVersion,
 				});
 			}

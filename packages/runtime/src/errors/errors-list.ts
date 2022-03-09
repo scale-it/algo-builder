@@ -491,30 +491,6 @@ const runtimeGeneralErrors = {
 		title: "Account Error at line %line%",
 		description: `Account and address mismatch in the current state`,
 	},
-	INVALID_CLOSE_REMAINDER_TO: {
-		number: 1507,
-		message: "Transaction cannot close account to its sender",
-		title: "Transaction cannot close account to its sender.",
-		description: "Transaction cannot close account to its sender",
-	},
-	INNER_APP_CALL_INVALID_VERSION: {
-		number: 1508,
-		message: "Inner app call in older version %tealVersion%",
-		title: "Inner app call with version %tealVersion%.",
-		description: "Inner app call with version %tealVersion%",
-	},
-	INNER_APPL_DEEP_EXCEEDED: {
-		number: 1509,
-		message: "Inner transaction appl deep exceeded",
-		title: "Inner transaction appl deep exceeded.",
-		description: "Inner transaction appl deep exceeded",
-	},
-	INNER_APPL_SELF_CALL: {
-		number: 1510,
-		message: "Inner transaction appl self-call",
-		title: "Inner transaction appl self-call.",
-		description: "Inner transaction appl self-call",
-	},
 };
 
 const transactionErrors = {
@@ -551,16 +527,40 @@ const transactionErrors = {
 		description: "Asset Holding Not Found",
 	},
 	ACCOUNT_ASSET_FROZEN: {
-		number: 1505,
+		number: 1405,
 		message: `Asset index %assetId% frozen for account %address%`,
 		title: "Asset Frozen",
 		description: "Asset Frozen for account",
 	},
 	FEES_NOT_ENOUGH: {
-		number: 1506,
+		number: 1406,
 		message: `Fee required %required% is greater than fee collected %collected%`,
 		title: "Not enough fees",
 		description: "Fees not enough to cover transaction cost",
+	},
+	INVALID_CLOSE_REMAINDER_TO: {
+		number: 1407,
+		message: "Transaction cannot close account to its sender",
+		title: "Transaction cannot close account to its sender.",
+		description: "Transaction cannot close account to its sender",
+	},
+	INNER_APP_CALL_INVALID_VERSION: {
+		number: 1408,
+		message: "Inner app call in older version %tealVersion%",
+		title: "Inner app call with version %tealVersion%.",
+		description: "Inner app call with version %tealVersion%",
+	},
+	INNER_APPL_DEEP_EXCEEDED: {
+		number: 1409,
+		message: "Inner transaction appl deep exceeded",
+		title: "Inner transaction appl deep exceeded.",
+		description: "Inner transaction appl deep exceeded",
+	},
+	INNER_APPL_SELF_CALL: {
+		number: 1410,
+		message: "Inner transaction appl self-call",
+		title: "Inner transaction appl self-call.",
+		description: "Inner transaction appl self-call",
 	},
 };
 
