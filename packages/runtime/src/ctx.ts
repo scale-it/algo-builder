@@ -1,5 +1,9 @@
 import { tx as webTx, types } from "@algo-builder/web";
-import { getApplicationAddress, makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
+import {
+	getApplicationAddress,
+	makeAssetTransferTxnWithSuggestedParams,
+	modelsv2,
+} from "algosdk";
 
 import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RuntimeAccount } from "./account";
@@ -10,12 +14,22 @@ import { ALGORAND_MIN_TX_FEE, TransactionTypeEnum } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI,
-  AppDeploymentFlags,
-  AppInfo,
-  ASADeploymentFlags, ASAInfo, AssetHoldingM,
-  Context, EncTx, ExecutionMode,
-  ID, SCParams, SSCAttributesM, StackElem, State, TxReceipt
+	AccountAddress,
+	AccountStoreI,
+	AppDeploymentFlags,
+	AppInfo,
+	ASADeploymentFlags,
+	ASAInfo,
+	AssetHoldingM,
+	Context,
+	EncTx,
+	ExecutionMode,
+	ID,
+	SCParams,
+	SSCAttributesM,
+	StackElem,
+	State,
+	TxReceipt,
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -413,7 +427,7 @@ export class Ctx implements Context {
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee: bigint = BigInt(this.gtxs[index].fee ?? 0);
+    let fee = BigInt(this.gtxs[index].fee ?? 0);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
       fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));

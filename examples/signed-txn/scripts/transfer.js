@@ -1,7 +1,7 @@
-const { executeSignedTxnFromFile } = require('@algo-builder/algob');
+const { executeSignedTxnFromFile } = require("@algo-builder/algob");
 
-async function run (runtimeEnv, deployer) {
-  /* Spec txnParams is encoded in john-to-bob.txn
+async function run(runtimeEnv, deployer) {
+	/* Spec txnParams is encoded in john-to-bob.txn
   const john = deployer.accountsByName.get('john');
   const bob = deployer.accountsByName.get('bob');
   const txnParam = {
@@ -13,11 +13,11 @@ async function run (runtimeEnv, deployer) {
     payFlags: { totalFee: 1000 }
   }; */
 
-  try {
-    await executeSignedTxnFromFile(deployer, 'john-to-bob.txn');
-  } catch (e) {
-    console.log(e.response ? e.response.error : e);
-  }
+	try {
+		await executeSignedTxnFromFile(deployer, "john-to-bob.txn");
+	} catch (e) {
+		console.log(e.response ? e.response.error : e);
+	}
 }
 
 module.exports = { default: run };

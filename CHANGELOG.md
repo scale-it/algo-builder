@@ -10,34 +10,35 @@ Organize change log in the following section (in that order):
 Features, Bug Fixes, Breaking Changes, Deprecated
 -->
 
-
 # CHANGELOG
 
 ## Unreleased
 
 ### Features
+
 Added:
+
 - `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
 - `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
-- unit tests that cover new scenarios when  `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
-Changed:
+- unit tests that cover new scenarios when `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
+  Changed:
 - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
 - The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
 - Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
-- Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in *signature* mode, and parser will reject the execution if run in application mode.
+- Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in _signature_ mode, and parser will reject the execution if run in application mode.
 - Support RekeyTo field in the inner transaction for TEAL v6.
 - Support `keyreg` transaction in inner transaction.
 - Added following functions in `deployer` API
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
+  - `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
 - You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag. Example:
-    ```bash
-      algob init --infrastructure
-    ```
-- Teal V6 support: 
+  ```bash
+    algob init --infrastructure
+  ```
+- Teal V6 support:
+  - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
-
 
 ### Template improvements
 
@@ -45,20 +46,21 @@ Changed:
 
 ### API breaking
 
-- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by  "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
 
   - Application:
-    * Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
-    * New `getApp(appName)` function queries app info using the app name.
+
+    - Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    - New `getApp(appName)` function queries app info using the app name.
 
   - Smart signatures:
-    * Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
-    * New `getApp(appName)` function queries app info using the app name.
-    * Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
-    * Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
+    - Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
+    - New `getApp(appName)` function queries app info using the app name.
+    - Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
+    - Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
       - `mkDelegatedLsig(lsigName, fileName, signer)`
       - `mkContractLsig(lsigName, fileName)`.
-      Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
+        Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
 
   For reference you can check out `examples/asa`.
 
@@ -74,30 +76,31 @@ Changed:
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
-- When close account should remove auth/spend address. Fixed in  [#575](https://github.com/scale-it/algo-builder/pull/575).
+- When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
 
 ### Infrastructure
 
--  Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
+- Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
 
 ## v3.2.0 2022-02-03
 
 ### Features
 
 - Added following functions in `deployer` API
-  * `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name.
+  - `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
+  - `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name.
 - Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 - Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially updated template params, now we fail with an exception.
 
 Dependencies:
+
 - Updated `algosdk` to `v1.13.1`
 
 ### Bug Fixes
 
 - Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
 - Add missing opcode `bitlen` and `app_params_get`.
-- In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in  [#569](https://github.com/scale-it/algo-builder/pull/569).
+- In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in [#569](https://github.com/scale-it/algo-builder/pull/569).
 
 ### Notes
 

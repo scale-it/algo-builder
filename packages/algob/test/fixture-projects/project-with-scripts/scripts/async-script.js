@@ -1,6 +1,5 @@
-
-function run (runtimeEnv, deployer) {
-  return new Promise(resolve => setTimeout(resolve, 100))
+function run(runtimeEnv, deployer) {
+	return new Promise((resolve) => setTimeout(resolve, 100));
 }
 
-module.exports = { default: run }
+module.exports = { default: run };

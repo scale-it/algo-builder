@@ -30,29 +30,29 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.9"
-          cache: 'pipenv'
+          cache: "pipenv"
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync
 
       - name: Install Algorand
         run: |
-            sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
-            curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
-            sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
-            sudo apt-get update && sudo apt-get install -y algorand
+          sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+          curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+          sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+          sudo apt-get update && sudo apt-get install -y algorand
       - name: Setup Network
         run: cd infrastructure && make setup-private-net
 
       - name: Example ASA
         working-directory: ./examples/asa
         run: |
-            pipenv run yarn algob deploy
-            pipenv run yarn algob run scripts/transfer/gold-contract-sc.js
-            pipenv run yarn algob run scripts/transfer/gold-delegated-lsig.js
-            pipenv run yarn algob run scripts/transfer/gold-to-john.js
-            pipenv run yarn algob run scripts/transfer/master-fund-john.js
-            pipenv run yarn algob run scripts/transfer/tesla-to-john.js
+          pipenv run yarn algob deploy
+          pipenv run yarn algob run scripts/transfer/gold-contract-sc.js
+          pipenv run yarn algob run scripts/transfer/gold-delegated-lsig.js
+          pipenv run yarn algob run scripts/transfer/gold-to-john.js
+          pipenv run yarn algob run scripts/transfer/master-fund-john.js
+          pipenv run yarn algob run scripts/transfer/tesla-to-john.js
 
       - name: Example bond token
         working-directory: ./examples/bond

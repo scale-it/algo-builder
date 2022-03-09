@@ -4,10 +4,10 @@ const fs = require("fs");
 // config provided by this repository.
 
 let config = "../algob.config-local.js";
-try{
-  fs.accessSync(config, fs.constants.F_OK);
+try {
+	fs.accessSync(config, fs.constants.F_OK);
 } catch {
-  config = "../algob.config-template.js";
+	config = "../algob.config-template.js";
 }
 console.log("config file: ", config);
 

@@ -14,35 +14,28 @@ export const testFixtureOutputFile = "output.txt";
  *
  * @param projectName The base name of the folder with the project to use.
  */
-export function useFixtureProject (projectName: string): void {
-  let projectPath: string;
-  let prevWorkingDir: string;
+export function useFixtureProject(projectName: string): void {
+	let projectPath: string;
+	let prevWorkingDir: string;
 
-  before(() => {
-    projectPath = getFixtureProjectPath(projectName);
-    prevWorkingDir = process.cwd();
-    process.chdir(projectPath);
-  });
+	before(() => {
+		projectPath = getFixtureProjectPath(projectName);
+		prevWorkingDir = process.cwd();
+		process.chdir(projectPath);
+	});
 
-  after(() => {
-    process.chdir(prevWorkingDir);
-  });
+	after(() => {
+		process.chdir(prevWorkingDir);
+	});
 }
 
-export function getFixtureProjectPath (
-  projectName: string
-): string {
-  const projectPath = path.join(
-    __dirname,
-    "..",
-    "fixture-projects",
-    projectName
-  );
-  if (!fs.existsSync(projectPath)) {
-    throw new Error(`Fixture project ${projectName} doesn't exist`);
-  }
+export function getFixtureProjectPath(projectName: string): string {
+	const projectPath = path.join(__dirname, "..", "fixture-projects", projectName);
+	if (!fs.existsSync(projectPath)) {
+		throw new Error(`Fixture project ${projectName} doesn't exist`);
+	}
 
-  return fs.realpathSync(projectPath);
+	return fs.realpathSync(projectPath);
 }
 
 /**
@@ -50,32 +43,32 @@ export function getFixtureProjectPath (
  * The copied project name is `projecName + "-tmp"`. If it already exists an exception
  * is thrown.
  */
-export function useFixtureProjectCopy (srcProjectName: string): void {
-  const project = srcProjectName + "-tmp";
-  const srcProjectPath = getFixtureProjectPath(srcProjectName);
-  const projectPath = path.join(srcProjectPath, "..", project);
+export function useFixtureProjectCopy(srcProjectName: string): void {
+	const project = srcProjectName + "-tmp";
+	const srcProjectPath = getFixtureProjectPath(srcProjectName);
+	const projectPath = path.join(srcProjectPath, "..", project);
 
-  fsExtra.copySync(srcProjectPath, projectPath);
-  useFixtureProject(project);
+	fsExtra.copySync(srcProjectPath, projectPath);
+	useFixtureProject(project);
 
-  after(() => fsExtra.removeSync(projectPath));
+	after(() => fsExtra.removeSync(projectPath));
 }
 
 /**
  * Allows tests to interact with a clean fixture project.
  * Allows to inspect the output file after running the test by cleaning before running.
  */
-export function useCleanFixtureProject (projectName: string): void {
-  useFixtureProject(projectName);
-  useEnvironment(async (algobEnv: RuntimeEnv) => {
-    return await algobEnv.run(TASK_CLEAN, {});
-  });
+export function useCleanFixtureProject(projectName: string): void {
+	useFixtureProject(projectName);
+	useEnvironment(async (algobEnv: RuntimeEnv) => {
+		return await algobEnv.run(TASK_CLEAN, {});
+	});
 
-  beforeEach(function () {
-    try {
-      fs.unlinkSync(testFixtureOutputFile);
-    } catch (err) {
-      // ignored
-    }
-  });
+	beforeEach(function () {
+		try {
+			fs.unlinkSync(testFixtureOutputFile);
+		} catch (err) {
+			// ignored
+		}
+	});
 }

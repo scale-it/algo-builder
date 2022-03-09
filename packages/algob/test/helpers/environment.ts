@@ -11,75 +11,75 @@ import { HttpNetworkConfig, NetworkConfig, PromiseAny, RuntimeEnv } from "../../
 import { account1 } from "../mocks/account";
 
 declare module "mocha" {
-  interface Context {
-    env: RuntimeEnv
-  }
+	interface Context {
+		env: RuntimeEnv;
+	}
 }
 
 let ctx: BuilderContext;
 
 export const defaultNetCfg: HttpNetworkConfig = {
-  accounts: [account1],
-  host: "localhost",
-  port: 8080,
-  token: "some secret value"
+	accounts: [account1],
+	host: "localhost",
+	port: 8080,
+	token: "some secret value",
 };
 
-export function useEnvironment (
-  beforeEachFn?: (algobRuntimeEnv: RuntimeEnv) => PromiseAny
+export function useEnvironment(
+	beforeEachFn?: (algobRuntimeEnv: RuntimeEnv) => PromiseAny
 ): void {
-  beforeEach("Load environment", async function () {
-    this.env = await getEnv(defaultNetCfg);
-    if (beforeEachFn) {
-      return await beforeEachFn(this.env);
-    }
-  });
+	beforeEach("Load environment", async function () {
+		this.env = await getEnv(defaultNetCfg);
+		if (beforeEachFn) {
+			return await beforeEachFn(this.env);
+		}
+	});
 
-  afterEach("reset builder context", function () {
-    resetBuilderContext();
-  });
+	afterEach("reset builder context", function () {
+		resetBuilderContext();
+	});
 }
 
-export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<RuntimeEnv> {
-  if (BuilderContext.isCreated()) {
-    ctx = BuilderContext.getBuilderContext();
+export async function getEnv(defaultNetworkCfg?: NetworkConfig): Promise<RuntimeEnv> {
+	if (BuilderContext.isCreated()) {
+		ctx = BuilderContext.getBuilderContext();
 
-    // The most probable reason for this to happen is that this file was imported
-    // from the config file
-    if (ctx.environment === undefined) {
-      throw new BuilderError(ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG);
-    }
+		// The most probable reason for this to happen is that this file was imported
+		// from the config file
+		if (ctx.environment === undefined) {
+			throw new BuilderError(ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG);
+		}
 
-    return ctx.environment;
-  }
+		return ctx.environment;
+	}
 
-  ctx = BuilderContext.createBuilderContext();
-  const runtimeArgs = getEnvRuntimeArgs(
-    ALGOB_PARAM_DEFINITIONS,
-    process.env
-  );
+	ctx = BuilderContext.createBuilderContext();
+	const runtimeArgs = getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, process.env);
 
-  if (runtimeArgs.verbose) {
-    debug.enable("algob*");
-  }
+	if (runtimeArgs.verbose) {
+		debug.enable("algob*");
+	}
 
-  const config = await loadConfigAndTasks(runtimeArgs);
+	const config = await loadConfigAndTasks(runtimeArgs);
 
-  if (runtimeArgs.network == null) {
-    throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
-  }
+	if (runtimeArgs.network == null) {
+		throw new Error(
+			"INTERNAL ERROR. Default network should be registered in `register.ts` module"
+		);
+	}
 
-  if (defaultNetworkCfg !== undefined) {
-    config.networks.default = defaultNetworkCfg;
-  }
+	if (defaultNetworkCfg !== undefined) {
+		config.networks.default = defaultNetworkCfg;
+	}
 
-  const env = new Environment(
-    config,
-    runtimeArgs,
-    ctx.tasksDSL.getTaskDefinitions(),
-    ctx.extendersManager.getExtenders(),
-    true);
-  ctx.setRuntimeEnv(env);
+	const env = new Environment(
+		config,
+		runtimeArgs,
+		ctx.tasksDSL.getTaskDefinitions(),
+		ctx.extendersManager.getExtenders(),
+		true
+	);
+	ctx.setRuntimeEnv(env);
 
-  return env;
+	return env;
 }

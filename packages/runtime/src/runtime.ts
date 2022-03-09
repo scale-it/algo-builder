@@ -8,18 +8,33 @@ import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
-  ALGORAND_ACCOUNT_MIN_BALANCE, ALGORAND_MAX_TX_ARRAY_LEN, TransactionTypeEnum,
-  ZERO_ADDRESS_STR
+	ALGORAND_ACCOUNT_MIN_BALANCE,
+	ALGORAND_MAX_TX_ARRAY_LEN,
+	TransactionTypeEnum,
+	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { transactionAndSignToExecParams } from "./lib/txn";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AppDeploymentFlags, AppInfo,
-  AppOptionalFlags,
-  ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  EncTx, ExecutionMode, RuntimeAccountI, SCParams, SSCAttributesM, StackElem, State, TxReceipt
+	AccountAddress,
+	AccountStoreI,
+	AppDeploymentFlags,
+	AppInfo,
+	AppOptionalFlags,
+	ASADeploymentFlags,
+	ASAInfo,
+	AssetHoldingM,
+	Context,
+	EncTx,
+	ExecutionMode,
+	RuntimeAccountI,
+	SCParams,
+	SSCAttributesM,
+	StackElem,
+	State,
+	TxReceipt,
 } from "./types";
 
 export class Runtime {
@@ -712,7 +727,7 @@ export class Runtime {
    * @param logs only show logs on console when set as true. By default this value is true
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  loadLogic (fileName: string, scTmplParams?: SCParams, logs: boolean = true): LogicSigAccount {
+  loadLogic (fileName: string, scTmplParams?: SCParams, logs = true): LogicSigAccount {
     const program = getProgram(fileName, scTmplParams, logs);
     return this.createLsigAccount(program, []); // args can be set during executeTx
   }
