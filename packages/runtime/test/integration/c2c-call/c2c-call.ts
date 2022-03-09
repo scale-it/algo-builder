@@ -119,7 +119,7 @@ describe("C2C call", function () {
 		});
 	});
 
-	describe("Depth call limit at 8", function () {
+	describe("Depth appl call", function () {
 		const totalApp = 8;
 		// eslint-disable-next-line sonarjs/no-unused-collection
 		let apps: AppInfo[];
@@ -138,7 +138,22 @@ describe("C2C call", function () {
 			}
 		});
 
-		it("Should failed: inner call with maxium depth = 8", () => {
+		it("Should success: inner call with maxium depth = 7", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: baseApp.appID,
+				appArgs: ["int:7", ...apps.map((info) => `int:${info.appID}`)],
+				payFlags: {
+					totalFee: 10000,
+				},
+			};
+
+			assert.doesNotThrow(() => runtime.executeTx(execParams));
+		});
+
+		it("Should failed: inner call with depth = 8", () => {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -149,7 +164,13 @@ describe("C2C call", function () {
 					totalFee: 10000,
 				},
 			};
-			runtime.executeTx(execParams);
+
+			expectRuntimeError(
+				() => runtime.executeTx(execParams),
+				RUNTIME_ERRORS.GENERAL.INNER_APPL_DEEP_EXCEEDED
+			);
+			// TODO: compare runtime store and ensure it not change.
+			assert.isUndefined(runtime.remainCtx);
 		});
 	});
 

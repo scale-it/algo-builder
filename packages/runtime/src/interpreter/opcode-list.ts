@@ -4075,20 +4075,26 @@ export class ITxnSubmit extends Op {
 		}
 
 		// back up current context
-		if (this.interpreter.runtime.remainCtx === undefined)
+		if (this.interpreter.runtime.remainCtx === undefined) {
 			this.interpreter.runtime.remainCtx = cloneDeep(this.interpreter.runtime.ctx);
+		}
 
 		// calculate fee accross all txns
 		let totalFee = 0;
-		for (const t of this.interpreter.runtime.remainCtx.gtxs) {
+		for (const t of this.interpreter.runtime.ctx.gtxs) {
 			totalFee += t.fee ?? 0;
 		}
+
 		for (const t of this.interpreter.innerTxns) {
 			totalFee += t.fee ?? 0;
 		}
+
 		totalFee += this.interpreter.subTxn.fee ?? 0;
-		const totalTxCnt =
-			this.interpreter.runtime.remainCtx.gtxs.length + this.interpreter.innerTxns.length + 1;
+
+		let totalTxCnt = this.interpreter.innerTxns.length + 1;
+		if (!this.interpreter.runtime.ctx.isInnerTx) {
+			totalTxCnt += this.interpreter.runtime.ctx.gtxs.length;
+		}
 
 		// fee too less accross pool
 		const feeBal = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
@@ -4111,6 +4117,11 @@ export class ITxnSubmit extends Op {
 		) {
 			console.warn("Only support application call in this version");
 			return;
+		}
+
+		// this fee will use for pay in application call next time
+		if (isEncTxApplicationCall(this.interpreter.subTxn)) {
+			this.interpreter.subTxn.fee = feeBal;
 		}
 
 		// get execution txn params (parsed from encoded sdk txn obj)
