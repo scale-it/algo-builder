@@ -44,9 +44,9 @@ describe("C2C call", function () {
 		};
 		// deploy first app
 		// eslint-disable-next-line sonarjs/no-duplicate-string
-		firstApp = runtime.deployApp("c2c-call.teal", "clear.teal", flags, {});
+		firstApp = runtime.deployApp("c2c-call.py", "clear.teal", flags, {});
 		// deploy second app
-		secondApp = runtime.deployApp("c2c-echo.teal", "clear.teal", flags, {});
+		secondApp = runtime.deployApp("c2c-echo.py", "clear.teal", flags, {});
 
 		// fund to application
 		fundToApp(alice, firstApp);
