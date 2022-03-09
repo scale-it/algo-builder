@@ -17,7 +17,7 @@ import {
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
 import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
-import { convertToBuffer, convertToString } from "./parsing";
+import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
 	"ConfigAssetTotal",
@@ -168,33 +168,44 @@ export function txnSpecbyField(
  * @param tealVersion version of TEAL
  * @param line line number in TEAL file
  */
-export function txAppArg (txField: TxField, tx: EncTx, idx: number, op: Op,
-  interpreter: Interpreter, line: number): StackElem {
-  const tealVersion: number = interpreter.tealVersion;
+export function txAppArg(
+	txField: TxField,
+	tx: EncTx,
+	idx: number,
+	op: Op,
+	interpreter: Interpreter,
+	line: number
+): StackElem {
+	const tealVersion: number = interpreter.tealVersion;
 
-  const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-  const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
+	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
+	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
-  if (!result) { // handle defaults
-    return TxFieldDefaults[txField];
-  }
+	if (!result) {
+		// handle defaults
+		return TxFieldDefaults[txField];
+	}
 
-  /**
-   * handle special case of accounts and applications:
-   * + EncTx.Accounts[0] represents sender's account
-   * + EncTx.Applications[0] represents current_application_id
-   * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
-   */
-  if (txField === 'Accounts') {
-    if (idx === 0) { return parseToStackElem(tx.snd, txField); }
-    idx--; // if not sender, then reduce index by 1
-  } else if (txField === 'Applications') {
-    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during ssc deploy tx.app_id is 0
-    idx--;
-  }
+	/**
+	 * handle special case of accounts and applications:
+	 * + EncTx.Accounts[0] represents sender's account
+	 * + EncTx.Applications[0] represents current_application_id
+	 * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
+	 */
+	if (txField === "Accounts") {
+		if (idx === 0) {
+			return parseToStackElem(tx.snd, txField);
+		}
+		idx--; // if not sender, then reduce index by 1
+	} else if (txField === "Applications") {
+		if (idx === 0) {
+			return parseToStackElem(tx.apid ?? 0n, txField);
+		} // during ssc deploy tx.app_id is 0
+		idx--;
+	}
 
-  op.checkIndexBound(idx, result, line);
-  return parseToStackElem(result[idx], txField);
+	op.checkIndexBound(idx, result, line);
+	return parseToStackElem(result[idx], txField);
 }
 
 /**
@@ -230,18 +241,20 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  * Check if given encoded transaction object is app creation
  * @param txn Encoded EncTx Object
  */
-export function isEncTxApplicationCreate (txn: EncTx): boolean {
-  return txn.type === TransactionTypeEnum.APPLICATION_CALL &&
-        (txn.apan === 0 || txn.apan === undefined) &&
-        (txn.apid === undefined);
+export function isEncTxApplicationCreate(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.APPLICATION_CALL &&
+		(txn.apan === 0 || txn.apan === undefined) &&
+		txn.apid === undefined
+	);
 }
 
 /**
  * Check if given encoded transaction object is application call
  * @param txn Encode EncTx Object
  */
-export function isEncTxApplicationCall (txn: EncTx): boolean {
-  return txn.type === TransactionTypeEnum.APPLICATION_CALL && (txn.apid !== undefined);
+export function isEncTxApplicationCall(txn: EncTx): boolean {
+	return txn.type === TransactionTypeEnum.APPLICATION_CALL && txn.apid !== undefined;
 }
 
 /**
@@ -278,23 +291,23 @@ export function encTxToExecParams(
 
 	execParams.payFlags.totalFee = encTx.fee;
 
-  switch (encTx.type) {
-    case TransactionTypeEnum.APPLICATION_CALL: {
-      if (isEncTxApplicationCreate(encTx)) {
-        execParams.type = types.TransactionType.DeployApp;
-        execParams.approvalProgram = encTx.approvalProgram;
-        execParams.clearProgram = encTx.clearProgram;
-        execParams.localInts = encTx.apls?.nui;
-        execParams.localBytes = encTx.apls?.nbs;
-        execParams.globalInts = encTx.apgs?.nui;
-        execParams.globalBytes = encTx.apgs?.nbs;
-      } else if (isEncTxApplicationCall(encTx)) {
-        execParams.type = types.TransactionType.CallApp;
-        execParams.appID = encTx.apid;
-        execParams.appArgs = encTx.apaa;
-      }
-      break;
-    }
+	switch (encTx.type) {
+		case TransactionTypeEnum.APPLICATION_CALL: {
+			if (isEncTxApplicationCreate(encTx)) {
+				execParams.type = types.TransactionType.DeployApp;
+				execParams.approvalProgram = encTx.approvalProgram;
+				execParams.clearProgram = encTx.clearProgram;
+				execParams.localInts = encTx.apls?.nui;
+				execParams.localBytes = encTx.apls?.nbs;
+				execParams.globalInts = encTx.apgs?.nui;
+				execParams.globalBytes = encTx.apgs?.nbs;
+			} else if (isEncTxApplicationCall(encTx)) {
+				execParams.type = types.TransactionType.CallApp;
+				execParams.appID = encTx.apid;
+				execParams.appArgs = encTx.apaa;
+			}
+			break;
+		}
 
 		case TransactionTypeEnum.PAYMENT: {
 			execParams.type = types.TransactionType.TransferAlgo;
