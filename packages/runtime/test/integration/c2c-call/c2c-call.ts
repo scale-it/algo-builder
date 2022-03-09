@@ -119,22 +119,61 @@ describe("C2C call", function () {
 		});
 	});
 
-	it("Should not support other inner tx appl(not include appcall)", () => {
-		const appInfo = runtime.deployApp("inner-tx-deploy.py", "clear.teal", flags, {});
+	describe("Depth call limit at 8", function () {
+		const totalApp = 8;
+		// eslint-disable-next-line sonarjs/no-unused-collection
+		let apps: AppInfo[];
+		let baseApp: AppInfo;
+		let bob: AccountStoreI;
+		this.beforeEach(() => {
+			apps = [];
+			bob = runtime.defaultAccounts()[1];
+			flags.sender = bob.account;
+			baseApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+			fundToApp(bob, baseApp);
+			for (let id = 0; id < totalApp; ++id) {
+				const curApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+				fundToApp(bob, curApp);
+				apps.push(curApp);
+			}
+		});
 
-		const execParams: types.ExecParams = {
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: alice.account,
-			appID: appInfo.appID,
-			payFlags: {
-				totalFee: 2000,
-			},
-		};
+		it("Should failed: inner call with maxium depth = 8", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: baseApp.appID,
+				appArgs: ["int:8", ...apps.map((info) => `int:${info.appID}`)],
+				payFlags: {
+					totalFee: 10000,
+				},
+			};
+			runtime.executeTx(execParams);
+		});
+	});
 
-		assert.doesNotThrow(() => runtime.executeTx(execParams));
-		assert.isTrue(
-			(console["warn"] as any).calledWith("This action not support in current Runtime version.")
-		);
+	describe("Only support application call for now", function () {
+		let execParams: types.ExecParams;
+		this.beforeEach(() => {
+			const appInfo = runtime.deployApp("inner-tx-deploy.py", "clear.teal", flags, {});
+
+			execParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: appInfo.appID,
+				payFlags: {
+					totalFee: 2000,
+				},
+			};
+		});
+
+		it("Should not support other inner tx appl(not include appcall)", () => {
+			assert.doesNotThrow(() => runtime.executeTx(execParams));
+			assert.isTrue(
+				(console["warn"] as any).calledWith("Only support application call in this version")
+			);
+		});
 	});
 });
