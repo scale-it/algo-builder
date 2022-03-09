@@ -5,6 +5,7 @@ prefix = Bytes("base16", "151f7c75")
 
 def mk_next_args():
     return [
+        # decrease position by one - move to next app
         Itob(Btoi(Txn.application_args[0]) - Int(1)),
         Txn.application_args[1],
         Txn.application_args[2],
@@ -29,7 +30,7 @@ def call():
         InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.ApplicationCall,
-                # access the actual id specified by the 2nd app arg
+                # next app id
                 TxnField.application_id: next_app_id,
                 # Pass the selector as the first arg to trigger the `echo` method
                 TxnField.application_args: mk_next_args(),

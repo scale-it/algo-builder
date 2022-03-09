@@ -1,4 +1,3 @@
-import { types } from "@algo-builder/web";
 import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 

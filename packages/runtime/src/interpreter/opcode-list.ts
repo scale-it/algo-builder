@@ -4145,9 +4145,6 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
-			if (this.interpreter.runtime.ctx.innerTxApplCallStack.length === 0) {
-				this.interpreter.runtime.ctx.innerTxApplCallStack = [baseCurrTx.apid ?? 0];
-			}
 			// execute innner transaction
 			this.interpreter.runtime.ctx.processTransactions([execParams]);
 			// update current txns to base (top-level) after innerTx execution
@@ -4156,11 +4153,6 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
 			// save executed tx
 			this.interpreter.innerTxns.push(this.interpreter.subTxn);
-			// pop current application in the inner app call stack
-			this.interpreter.runtime.ctx.innerTxApplCallStack.pop();
-			if (this.interpreter.runtime.ctx.innerTxApplCallStack.length === 1) {
-				this.interpreter.runtime.ctx.innerTxApplCallStack.pop();
-			}
 		} catch (err: any) {
 			// revert to begining context
 			if (this.interpreter.runtime.remainCtx)

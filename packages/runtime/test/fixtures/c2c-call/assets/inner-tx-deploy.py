@@ -1,5 +1,8 @@
 from pyteal import *
 
+# int 1; return
+APPROVAL_PROGRAM = "BoEBQw==" 
+CLEAR_PROGRAM = "BoEBQw=="
 
 def replicate():
     return Seq(
@@ -8,8 +11,8 @@ def replicate():
         InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.ApplicationCall,
-                TxnField.approval_program: Bytes("base64", "BiACAQAmAQtlY2hvX21ldGhvZDEYIxJAAFwxGYEFEkAATjEZgQQSQABAMRmBAhJAADYxGSISQAAtNhoAgAtjYWxsX21ldGhvZBJAABE2GgAoEkAAAQCIADqIAF0iQ4gAF4gAVSJDIkMiQzEAMgkSQzEAMgkSQyJDsYEGshA2GgEXwDKyGCiyGiOyAbO1OgBXBgCJgBZDYWxsIGZyb20gYXBwbGljYXRpdG9uiTUBNAEVFlcGAjQBUIk1AIAEFR98dTQAiP/mULCJ"),
-                TxnField.clear_state_program: Bytes("base64", "BoEBQw=="),
+                TxnField.approval_program: Bytes("base64", APPROVAL_PROGRAM),
+                TxnField.clear_state_program: Bytes("base64", CLEAR_PROGRAM),
                 TxnField.fee: Int(0),
             }
         ),

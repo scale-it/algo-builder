@@ -46,7 +46,7 @@ export class Ctx implements Context {
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
-	innerTxApplCallStack: number[];
+	innerTxAppIDCallStack: number[];
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -70,7 +70,8 @@ export class Ctx implements Context {
 		this.pooledApplCost = 0;
 		// inner transaction props
 		this.isInnerTx = false;
-		this.innerTxApplCallStack = [];
+		// initial appl call stack
+		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 	}
 
@@ -430,16 +431,16 @@ export class Ctx implements Context {
 		// verify
 		if (!this.isInnerTx) return;
 
-		if (this.innerTxApplCallStack.length >= 8) {
+		if (this.innerTxAppIDCallStack.length >= 8) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED);
 		}
 		const appID = this.tx.apid ?? 0;
-		if (appID > 0 && this.innerTxApplCallStack.find((id) => id === appID) !== undefined) {
+		if (appID > 0 && this.innerTxAppIDCallStack.find((id) => id === appID) !== undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL);
 		}
 
 		// update inner tx call stack
-		if (appID > 0) this.innerTxApplCallStack.push(appID);
+		if (appID > 0) this.innerTxAppIDCallStack.push(appID);
 	}
 
 	/**
@@ -895,6 +896,13 @@ export class Ctx implements Context {
 			// apply rekey after pass all logic
 			this.rekeyTo(txParam);
 
+			if (this.isInnerTx) {
+				// pop current application in the inner app call stack
+				this.innerTxAppIDCallStack.pop();
+				if (this.innerTxAppIDCallStack.length === 1) {
+					this.runtime.ctx.innerTxAppIDCallStack.pop();
+				}
+			}
 			if (r) {
 				txReceipts.push(r);
 			}

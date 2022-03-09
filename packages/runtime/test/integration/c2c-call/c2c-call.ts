@@ -117,59 +117,61 @@ describe("C2C call", function () {
 				RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL
 			);
 		});
-	});
 
-	describe("Depth appl call", function () {
-		const totalApp = 8;
-		let apps: AppInfo[];
-		let baseApp: AppInfo;
-		let bob: AccountStoreI;
-		this.beforeEach(() => {
-			apps = [];
-			bob = runtime.defaultAccounts()[1];
-			flags.sender = bob.account;
-			baseApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
-			fundToApp(bob, baseApp);
-			for (let id = 0; id < totalApp; ++id) {
-				const curApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
-				fundToApp(bob, curApp);
-				apps.push(curApp);
-			}
-		});
+		describe("Depth appl call", function () {
+			const totalApp = 8;
+			let apps: AppInfo[];
+			let baseApp: AppInfo;
+			let bob: AccountStoreI;
+			this.beforeEach(() => {
+				apps = [];
+				bob = runtime.defaultAccounts()[1];
+				flags.sender = bob.account;
+				baseApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+				fundToApp(bob, baseApp);
+				for (let id = 0; id < totalApp; ++id) {
+					const curApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+					fundToApp(bob, curApp);
+					apps.push(curApp);
+				}
+			});
 
-		it("Should success: inner call with maxium depth = 7", () => {
-			const execParams: types.ExecParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				appID: baseApp.appID,
-				appArgs: ["int:7", ...apps.map((info) => `int:${info.appID}`)],
-				payFlags: {
-					totalFee: 10000,
-				},
-			};
+			it("Should success: inner call with maximum depth = 8", () => {
+				const execParams: types.ExecParams = {
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account,
+					appID: baseApp.appID,
+					// include base app so depth = 8
+					appArgs: ["int:7", ...apps.map((info) => `int:${info.appID}`)],
+					payFlags: {
+						totalFee: 10000,
+					},
+				};
 
-			assert.doesNotThrow(() => runtime.executeTx(execParams));
-		});
+				assert.doesNotThrow(() => runtime.executeTx(execParams));
+			});
 
-		it("Should failed: inner call with depth = 8", () => {
-			const execParams: types.ExecParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				appID: baseApp.appID,
-				appArgs: ["int:8", ...apps.map((info) => `int:${info.appID}`)],
-				payFlags: {
-					totalFee: 10000,
-				},
-			};
+			it("Should failed: inner call with depth > 8", () => {
+				const execParams: types.ExecParams = {
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account,
+					appID: baseApp.appID,
+					// include base app so depth = 9
+					appArgs: ["int:8", ...apps.map((info) => `int:${info.appID}`)],
+					payFlags: {
+						totalFee: 10000,
+					},
+				};
 
-			expectRuntimeError(
-				() => runtime.executeTx(execParams),
-				RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED
-			);
-			// TODO: compare runtime store and ensure it not change.
-			assert.isUndefined(runtime.remainCtx);
+				expectRuntimeError(
+					() => runtime.executeTx(execParams),
+					RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED
+				);
+				// TODO: compare runtime store and ensure it not change.
+				assert.isUndefined(runtime.remainCtx);
+			});
 		});
 	});
 

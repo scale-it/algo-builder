@@ -139,50 +139,66 @@ export interface AppInfo extends DeployedAssetInfo {
 
 // describes interpreter's local context (state + txns)
 export interface Context {
-  state: State
-  sharedScratchSpace: Map<number, StackElem[]>
-  knowableID: Map<number, ID>
-  tx: EncTx // current txn
-  gtxs: EncTx[] // all transactions
-  args?: Uint8Array[]
-  debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
-  pooledApplCost: number // total opcode cost for each application call for single/group tx
-  // inner transaction props
-  isInnerTx: boolean // true if "ctx" is switched to an inner transaction
-  innerTxApplCallStack: number[]
-  createdAssetID: number // Asset ID allocated by the creation of an ASA (for an inner-tx)
-  getAccount: (address: string) => AccountStoreI
-  getAssetAccount: (assetId: number) => AccountStoreI
-  getApp: (appID: number, line?: number) => SSCAttributesM
-  transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  verifyMinimumFees: () => void
-  deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
-  transferAsset: (txnParam: types.AssetTransferParam) => void
-  modifyAsset: (assetId: number, fields: types.AssetModFields) => void
-  freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
-  revokeAsset: (
-    recipient: string, assetID: number,
-    revocationTarget: string, amount: bigint
-  ) => void
-  destroyAsset: (assetId: number) => void
-  deleteApp: (appID: number) => void
-  closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[]
-  deployASA: (name: string,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => ASAInfo
-  deployASADef: (
-    name: string, asaDef: types.ASADef,
-    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
-  ) => ASAInfo
-  optIntoASA: (
-    assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt
-  deployApp: (
-    fromAccountAddr: string, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx: number, scTmplParams?: SCParams
-  ) => AppInfo
-  optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt
-  updateApp: (appID: number, approvalProgram: string,
-    clearProgram: string, idx: number, scTmplParams?: SCParams) => TxReceipt
+	state: State;
+	sharedScratchSpace: Map<number, StackElem[]>;
+	knowableID: Map<number, ID>;
+	tx: EncTx; // current txn
+	gtxs: EncTx[]; // all transactions
+	args?: Uint8Array[];
+	debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+	pooledApplCost: number; // total opcode cost for each application call for single/group tx
+	// inner transaction props
+	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
+	// save appID use inner tx call stack
+	innerTxAppIDCallStack: number[];
+	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
+	getAccount: (address: string) => AccountStoreI;
+	getAssetAccount: (assetId: number) => AccountStoreI;
+	getApp: (appID: number, line?: number) => SSCAttributesM;
+	transferAlgo: (txnParam: types.AlgoTransferParam) => void;
+	verifyMinimumFees: () => void;
+	deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void;
+	transferAsset: (txnParam: types.AssetTransferParam) => void;
+	modifyAsset: (assetId: number, fields: types.AssetModFields) => void;
+	freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void;
+	revokeAsset: (
+		recipient: string,
+		assetID: number,
+		revocationTarget: string,
+		amount: bigint
+	) => void;
+	destroyAsset: (assetId: number) => void;
+	deleteApp: (appID: number) => void;
+	closeApp: (sender: AccountAddress, appID: number) => void;
+	processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[];
+	deployASA: (
+		name: string,
+		fromAccountAddr: AccountAddress,
+		flags: ASADeploymentFlags
+	) => ASAInfo;
+	deployASADef: (
+		name: string,
+		asaDef: types.ASADef,
+		fromAccountAddr: AccountAddress,
+		flags: ASADeploymentFlags
+	) => ASAInfo;
+	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
+	deployApp: (
+		fromAccountAddr: string,
+		flags: AppDeploymentFlags,
+		approvalProgram: string,
+		clearProgram: string,
+		idx: number,
+		scTmplParams?: SCParams
+	) => AppInfo;
+	optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt;
+	updateApp: (
+		appID: number,
+		approvalProgram: string,
+		clearProgram: string,
+		idx: number,
+		scTmplParams?: SCParams
+	) => TxReceipt;
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)
