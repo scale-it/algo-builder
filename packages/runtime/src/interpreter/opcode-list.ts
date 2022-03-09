@@ -20,6 +20,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
+	AcctParamQueryFields,
 	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
@@ -4554,6 +4555,70 @@ export class AppParamsGet extends Op {
 					value = decodeAddress(getApplicationAddress(appID)).publicKey;
 			}
 
+			stack.push(value);
+			stack.push(1n);
+		} else {
+			stack.push(0n);
+			stack.push(0n);
+		}
+	}
+}
+
+export class AcctParamsGet extends Op {
+	readonly interpreter: Interpreter;
+	readonly line: number;
+	readonly field: string;
+	/**
+	 * Asserts 1 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		this.interpreter = interpreter;
+		assertLen(args.length, 1, line);
+
+		if (
+			!AcctParamQueryFields[args[0]] ||
+			AcctParamQueryFields[args[0]].version > interpreter.tealVersion
+		) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD, {
+				field: args[0],
+				line: line,
+				tealV: interpreter.tealVersion,
+			});
+		}
+
+		this.field = args[0];
+	}
+
+	execute(stack: Stack<StackElem>): void {
+		this.assertMinStackLen(stack, 1, this.line);
+
+		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
+
+		const accountInfo = this.interpreter.runtime.ctx.state.accounts.get(
+			encodeAddress(acctAddress)
+		);
+
+		if (accountInfo && accountInfo.balance() > 0) {
+			let value: StackElem = 0n;
+			switch (this.field) {
+				case "AcctBalance": {
+					value = BigInt(accountInfo.balance());
+					break;
+				}
+				case "AcctMinBalance": {
+					value = BigInt(accountInfo.minBalance);
+					break;
+				}
+				case "AcctAuthAddr": {
+					value = convertToBuffer(accountInfo.getSpendAddress());
+					break;
+				}
+			}
 			stack.push(value);
 			stack.push(1n);
 		} else {
