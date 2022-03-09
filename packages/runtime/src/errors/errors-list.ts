@@ -380,138 +380,141 @@ maximun uint128`,
 };
 
 const runtimeGeneralErrors = {
-  LOGIC_SIGNATURE_NOT_FOUND: {
-    number: 1300,
-    message: "logic signature not found",
-    title: "lsig error",
-    description: `lsig error`
-  },
-  LOGIC_SIGNATURE_VALIDATION_FAILED: {
-    number: 1301,
-    message: "logic signature validation failed. address: %address%",
-    title: "lsig validation error",
-    description: `lsig validation error`
-  },
-  INVALID_ROUND: {
-    number: 1302,
-    message: "Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
-    title: 'Round Error',
-    description: `Round Error`
-  },
-  MAX_LIMIT_APPS: {
-    number: 1303,
-    message: "Error while creating app for %address%. Maximum created apps for an account is %max%",
-    title: 'App Creation Error',
-    description: `App Creation Error`
-  },
-  INVALID_SECRET_KEY: {
-    number: 1304,
-    message: "invalid secret key: %secretkey%",
-    title: "secret key error",
-    description: `secret key error`
-  },
-  ACCOUNT_DOES_NOT_EXIST: {
-    number: 1305,
-    message: "Account Error - Account %address% doesn't exist at line %line%",
-    title: "Account Error at line %line%",
-    description: `Account does not exist in the current state`
-  },
-  APP_NOT_FOUND: {
-    number: 1306,
-    message: "Application Index %appID% not found or is invalid at line %line%",
-    title: "Application index %appID% is not found line at %line%",
-    description: `Application index %appID% is not found`
-  },
-  INVALID_APPROVAL_PROGRAM: {
-    number: 1307,
-    message: "Approval program is empty",
-    title: "Invalid approval program",
-    description: `Invalid approval program`
-  },
-  INVALID_CLEAR_PROGRAM: {
-    number: 1308,
-    message: "Clear program is empty",
-    title: "Invalid clear program",
-    description: `Invalid clear program`
-  },
-  INVALID_PROGRAM: {
-    number: 1309,
-    message: "Program is empty",
-    title: "Invalid program",
-    description: `Invalid program`
-  },
-  MULTIPLE_FILES_WITH_SAME_NAME_IN_DIR: {
-    number: 1310,
-    message: "Directory %directory% has same file \"%file%\" in multiple paths: %path1%, %path2%",
-    title: "Multiple files with same fileName present in directory %directory%",
-    description: `Directory %directory% has same file in multiple paths: %path1%, %path2%`
-  },
-  FILE_NOT_FOUND_IN_DIR: {
-    number: 1311,
-    message: "File name \"%file%\" does not exist in directory \"%directory%\"",
-    title: "File \"%file%\" does not exist in directory \"%directory%\"",
-    description: `File "%file%" does not exist in directory "%directory%"`
-  },
-  INVALID_TX_ACCOUNTS_LEN: {
-    number: 1312,
-    message: "tx.Accounts too long, max number of accounts is %max%, got: %len%",
-    title: "Transaction.Accounts exceeds max length",
-    description: `Transaction.Accounts cannot exceed max length of %max%`
-  },
-  INVALID_APP_ARGS_LEN: {
-    number: 1313,
-    message: "tx.AppArgs too long, max number of application args is %max%, got: %len%",
-    title: "Transaction.ApplicationArgs exceeds max length",
-    description: `Transaction.ApplicationArgs cannot exceed max length of %max%`
-  },
-  MAX_REFERENCES_EXCEEDED: {
-    number: 1314,
-    message: "tx has too many references, max is %max%, got: %len%",
-    title: "Transaction references(assets + apps + accounts) exceeds max length of %max%",
-    description: `Transaction references cannot exceed max length of %max%`
-  },
-  MAX_INNER_TRANSACTIONS_EXCEEDED: {
-    number: 1315,
-    message: "Attempt to create too many inner transactions, max is %max%, got: %len%, at line %line%",
-    title: "Max inner transactions exceeded",
-    description: `Inner transaction in a single call cannot be more than %max%`
-  },
-  INVALID_AUTH_ACCOUNT: {
-    number: 1316,
-    message: "Should have been authorized by %spend% but was actually authorized by %signer%",
-    title: "Invalid spend account.",
-    description: "Invalid spend account"
-  },
-  ACCOUNT_ADDR_MISMATCH: {
-    number: 1317,
-    message: "Account Error - Account and address %address% mismatch at line %line%",
-    title: "Account Error at line %line%",
-    description: `Account and address mismatch in the current state`
-  },
-  INVALID_CLOSE_REMAINDER_TO: {
-    number: 1507,
-    message: "Transaction cannot close account to its sender",
-    title: "Transaction cannot close account to its sender.",
-    description: "Transaction cannot close account to its sender"
-  },
-  INNER_APP_CALL_INVALID_VERSION: {
-    number: 1508,
-    message: "Inner app call with version 5 < 6",
-    title: "Inner app call with version 5 < 6.",
-    description: "Inner app call with version 5 < 6"
-  },
-  INNER_APPL_DEEP_EXCEEDED: {
-    number: 1509,
-    message: "Inner transaction appl deep exceeded",
-    title: "Inner transaction appl deep exceeded.",
-    description: "Inner transaction appl deep exceeded"
-  },
-  INNER_APPL_SELF_CALL: {
-    number: 1510,
-    message: "Inner transaction appl self-call",
-    title: "Inner transaction appl self-call.",
-    description: "Inner transaction appl self-call"
-  }
+	LOGIC_SIGNATURE_NOT_FOUND: {
+		number: 1300,
+		message: "logic signature not found",
+		title: "lsig error",
+		description: `lsig error`,
+	},
+	LOGIC_SIGNATURE_VALIDATION_FAILED: {
+		number: 1301,
+		message: "logic signature validation failed. address: %address%",
+		title: "lsig validation error",
+		description: `lsig validation error`,
+	},
+	INVALID_ROUND: {
+		number: 1302,
+		message:
+			"Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
+		title: "Round Error",
+		description: `Round Error`,
+	},
+	MAX_LIMIT_APPS: {
+		number: 1303,
+		message:
+			"Error while creating app for %address%. Maximum created apps for an account is %max%",
+		title: "App Creation Error",
+		description: `App Creation Error`,
+	},
+	INVALID_SECRET_KEY: {
+		number: 1304,
+		message: "invalid secret key: %secretkey%",
+		title: "secret key error",
+		description: `secret key error`,
+	},
+	ACCOUNT_DOES_NOT_EXIST: {
+		number: 1305,
+		message: "Account Error - Account %address% doesn't exist at line %line%",
+		title: "Account Error at line %line%",
+		description: `Account does not exist in the current state`,
+	},
+	APP_NOT_FOUND: {
+		number: 1306,
+		message: "Application Index %appID% not found or is invalid at line %line%",
+		title: "Application index %appID% is not found line at %line%",
+		description: `Application index %appID% is not found`,
+	},
+	INVALID_APPROVAL_PROGRAM: {
+		number: 1307,
+		message: "Approval program is empty",
+		title: "Invalid approval program",
+		description: `Invalid approval program`,
+	},
+	INVALID_CLEAR_PROGRAM: {
+		number: 1308,
+		message: "Clear program is empty",
+		title: "Invalid clear program",
+		description: `Invalid clear program`,
+	},
+	INVALID_PROGRAM: {
+		number: 1309,
+		message: "Program is empty",
+		title: "Invalid program",
+		description: `Invalid program`,
+	},
+	MULTIPLE_FILES_WITH_SAME_NAME_IN_DIR: {
+		number: 1310,
+		message: 'Directory %directory% has same file "%file%" in multiple paths: %path1%, %path2%',
+		title: "Multiple files with same fileName present in directory %directory%",
+		description: `Directory %directory% has same file in multiple paths: %path1%, %path2%`,
+	},
+	FILE_NOT_FOUND_IN_DIR: {
+		number: 1311,
+		message: 'File name "%file%" does not exist in directory "%directory%"',
+		title: 'File "%file%" does not exist in directory "%directory%"',
+		description: `File "%file%" does not exist in directory "%directory%"`,
+	},
+	INVALID_TX_ACCOUNTS_LEN: {
+		number: 1312,
+		message: "tx.Accounts too long, max number of accounts is %max%, got: %len%",
+		title: "Transaction.Accounts exceeds max length",
+		description: `Transaction.Accounts cannot exceed max length of %max%`,
+	},
+	INVALID_APP_ARGS_LEN: {
+		number: 1313,
+		message: "tx.AppArgs too long, max number of application args is %max%, got: %len%",
+		title: "Transaction.ApplicationArgs exceeds max length",
+		description: `Transaction.ApplicationArgs cannot exceed max length of %max%`,
+	},
+	MAX_REFERENCES_EXCEEDED: {
+		number: 1314,
+		message: "tx has too many references, max is %max%, got: %len%",
+		title: "Transaction references(assets + apps + accounts) exceeds max length of %max%",
+		description: `Transaction references cannot exceed max length of %max%`,
+	},
+	MAX_INNER_TRANSACTIONS_EXCEEDED: {
+		number: 1315,
+		message:
+			"Attempt to create too many inner transactions, max is %max%, got: %len%, at line %line%",
+		title: "Max inner transactions exceeded",
+		description: `Inner transaction in a single call cannot be more than %max%`,
+	},
+	INVALID_AUTH_ACCOUNT: {
+		number: 1316,
+		message: "Should have been authorized by %spend% but was actually authorized by %signer%",
+		title: "Invalid spend account.",
+		description: "Invalid spend account",
+	},
+	ACCOUNT_ADDR_MISMATCH: {
+		number: 1317,
+		message: "Account Error - Account and address %address% mismatch at line %line%",
+		title: "Account Error at line %line%",
+		description: `Account and address mismatch in the current state`,
+	},
+	INVALID_CLOSE_REMAINDER_TO: {
+		number: 1507,
+		message: "Transaction cannot close account to its sender",
+		title: "Transaction cannot close account to its sender.",
+		description: "Transaction cannot close account to its sender",
+	},
+	INNER_APP_CALL_INVALID_VERSION: {
+		number: 1508,
+		message: "Inner app call in older version %tealVersion%",
+		title: "Inner app call with version %tealVersion%.",
+		description: "Inner app call with version %tealVersion%",
+	},
+	INNER_APPL_DEEP_EXCEEDED: {
+		number: 1509,
+		message: "Inner transaction appl deep exceeded",
+		title: "Inner transaction appl deep exceeded.",
+		description: "Inner transaction appl deep exceeded",
+	},
+	INNER_APPL_SELF_CALL: {
+		number: 1510,
+		message: "Inner transaction appl self-call",
+		title: "Inner transaction appl self-call.",
+		description: "Inner transaction appl self-call",
+	},
 };
 
 const transactionErrors = {

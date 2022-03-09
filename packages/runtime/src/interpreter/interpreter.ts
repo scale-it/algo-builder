@@ -10,7 +10,16 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Runtime } from "../index";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { ALGORAND_MAX_APP_ARGS_LEN, ALGORAND_MAX_TX_ACCOUNTS_LEN, ALGORAND_MAX_TX_ARRAY_LEN, DEFAULT_STACK_ELEM, MaxAppProgramCost, MaxTEALVersion, MinVersionSupportC2CCall, TransactionTypeEnum } from "../lib/constants";
+import {
+	ALGORAND_MAX_APP_ARGS_LEN,
+	ALGORAND_MAX_TX_ACCOUNTS_LEN,
+	ALGORAND_MAX_TX_ARRAY_LEN,
+	DEFAULT_STACK_ELEM,
+	MaxAppProgramCost,
+	MaxTEALVersion,
+	MinVersionSupportC2CCall,
+	TransactionTypeEnum,
+} from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
@@ -467,21 +476,24 @@ export class Interpreter {
 			this.assertValidTxArray();
 		}
 
-    let dynamicCost = 0;
-    const txReceipt = this.runtime.ctx.state.txReceipts
-      .get(this.runtime.ctx.tx.txID) as (BaseTxReceipt | AppInfo);
+		let dynamicCost = 0;
+		const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as
+			| BaseTxReceipt
+			| AppInfo;
 
-    while (this.instructionIndex < this.instructions.length) {
-      const instruction = this.instructions[this.instructionIndex];
-      instruction.execute(this.stack);
+		while (this.instructionIndex < this.instructions.length) {
+			const instruction = this.instructions[this.instructionIndex];
+			instruction.execute(this.stack);
 
-      if (
-        this.runtime.ctx.isInnerTx &&
-        this.runtime.ctx.tx.type === TransactionTypeEnum.APPLICATION_CALL &&
-        this.tealVersion < MinVersionSupportC2CCall
-      ) {
-        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APP_CALL_INVALID_VERSION);
-      }
+			if (
+				this.runtime.ctx.isInnerTx &&
+				this.runtime.ctx.tx.type === TransactionTypeEnum.APPLICATION_CALL &&
+				this.tealVersion < MinVersionSupportC2CCall
+			) {
+				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INNER_APP_CALL_INVALID_VERSION, {
+					tealVersion: this.tealVersion,
+				});
+			}
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
