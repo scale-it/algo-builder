@@ -4599,11 +4599,10 @@ export class AcctParamsGet extends Op {
 
 		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
 
-		const accountInfo = this.interpreter.runtime.ctx.state.accounts.get(
-			encodeAddress(acctAddress)
-		);
+		// get account from current context
+		const accountInfo = this.interpreter.getAccount(acctAddress, this.line);
 
-		if (accountInfo && accountInfo.balance() > 0) {
+		if (accountInfo.balance() > 0) {
 			let value: StackElem = 0n;
 			switch (this.field) {
 				case "AcctBalance": {
@@ -4615,7 +4614,11 @@ export class AcctParamsGet extends Op {
 					break;
 				}
 				case "AcctAuthAddr": {
-					value = convertToBuffer(accountInfo.getSpendAddress());
+					if (accountInfo.getSpendAddress() === accountInfo.address) {
+						value = ZERO_ADDRESS;
+					} else {
+						value = Buffer.from(decodeAddress(accountInfo.getSpendAddress()).publicKey);
+					}
 					break;
 				}
 			}
