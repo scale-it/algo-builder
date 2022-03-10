@@ -3,7 +3,7 @@
 	"description": "Framework to automate development of Algorand Assets and Smart Contracts.",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
-	"packageManager": "yarn@3.1.1",
+	"packageManager": "yarn@3.2.0",
 	"license": "Apache-2.0",
 	"private": true,
 	"workspaces": [
@@ -12,7 +12,8 @@
 	],
 	"engines": {
 		"node": ">=14.11.0",
-		"yarn": ">=3.1.0"
+		"yarn": ">=3.2.0",
+		"packageManager": "yarn@3.2.0"
 	},
 	"scripts": {
 		"cleanup": "./cleanup.sh",
