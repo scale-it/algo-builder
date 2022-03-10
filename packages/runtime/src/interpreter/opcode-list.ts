@@ -4600,32 +4600,32 @@ export class AcctParamsGet extends Op {
 		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
 
 		// get account from current context
-		const accountInfo = this.interpreter.getAccount(acctAddress, this.line);
+		const accountInfo = this.interpreter.getAccount(acctAddress, this.line, false);
+
+		let value: StackElem = 0n;
+		switch (this.field) {
+			case "AcctBalance": {
+				value = BigInt(accountInfo.balance());
+				break;
+			}
+			case "AcctMinBalance": {
+				value = BigInt(accountInfo.minBalance);
+				break;
+			}
+			case "AcctAuthAddr": {
+				if (accountInfo.getSpendAddress() === accountInfo.address) {
+					value = ZERO_ADDRESS;
+				} else {
+					value = Buffer.from(decodeAddress(accountInfo.getSpendAddress()).publicKey);
+				}
+				break;
+			}
+		}
+		stack.push(value);
 
 		if (accountInfo.balance() > 0) {
-			let value: StackElem = 0n;
-			switch (this.field) {
-				case "AcctBalance": {
-					value = BigInt(accountInfo.balance());
-					break;
-				}
-				case "AcctMinBalance": {
-					value = BigInt(accountInfo.minBalance);
-					break;
-				}
-				case "AcctAuthAddr": {
-					if (accountInfo.getSpendAddress() === accountInfo.address) {
-						value = ZERO_ADDRESS;
-					} else {
-						value = Buffer.from(decodeAddress(accountInfo.getSpendAddress()).publicKey);
-					}
-					break;
-				}
-			}
-			stack.push(value);
 			stack.push(1n);
 		} else {
-			stack.push(0n);
 			stack.push(0n);
 		}
 	}

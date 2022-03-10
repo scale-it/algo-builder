@@ -8,7 +8,7 @@ import {
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { Runtime } from "../index";
+import { AccountStore, Runtime } from "../index";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import {
 	ALGORAND_MAX_APP_ARGS_LEN,
@@ -22,6 +22,7 @@ import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { assertMaxCost, parser } from "../parser/parser";
 import {
+	AccountAddress,
 	AccountStoreI,
 	AppInfo,
 	BaseTxReceipt,
@@ -108,13 +109,27 @@ export class Interpreter {
 	}
 
 	/**
+	 * Create new account with `address` if this is undefined in ctx and return
+	 * else return state of this account in ctx.
+	 * @param addr address we want to query.
+	 */
+	private createAccountIfAbsent(addr: AccountAddress): AccountStoreI {
+		let account = this.runtime.ctx.state.accounts.get(addr);
+		if (!account) {
+			account = new AccountStore(0, {addr, sk: new Uint8Array(0)});
+			this.runtime.ctx.state.accounts.set(addr, account);
+		} 
+		return account;
+	}
+	
+	/**
 	 * Beginning from TEALv4, user can directly pass address instead of index to Txn.Accounts.
 	 * However, the address must still be present in tx.Accounts OR should be equal to Txn.Sender
 	 * @param accountPk public key of account
 	 * @param line line number in TEAL file
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
-	private _getAccountFromAddr(accountPk: Uint8Array, line: number): AccountStoreI {
+	private _getAccountFromAddr(accountPk: Uint8Array, line: number, strict = true): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
 		const appID = this.runtime.ctx.tx.apid ?? 0;
 		if (this.tealVersion <= 3) {
@@ -145,7 +160,13 @@ export class Interpreter {
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey)
 		) {
 			const address = encodeAddress(pkBuffer);
-			const account = this.runtime.ctx.state.accounts.get(address);
+			let account = this.runtime.ctx.state.accounts.get(address);
+			// strict is turn on we will create account store
+			// we will create account if it not exist
+			if (!strict) {
+				account = this.createAccountIfAbsent(address);
+			}
+
 			return this.runtime.assertAccountDefined(address, account, line);
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT, {
@@ -158,12 +179,14 @@ export class Interpreter {
 	/**
 	 * Queries account by accountIndex or `ctx.tx.snd` (if `accountIndex==0`).
 	 * If account address is passed, then queries account by address.
-	 * Throws exception if account is not found.
+	 * when `strict` is true we will throws exception if account is not found. 
+	 * when `strict` is false we will create new account and add it to context.
 	 * @param accountRef index of account to fetch from account list
 	 * @param line line number
+	 * @param strict strict flag
 	 * NOTE: index 0 represents txn sender account
 	 */
-	getAccount(accountRef: StackElem, line: number): AccountStoreI {
+	getAccount(accountRef: StackElem, line: number, strict = true): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
 		if (typeof accountRef === "bigint") {
@@ -181,9 +204,12 @@ export class Interpreter {
 				}
 				address = encodeAddress(pkBuffer);
 				account = this.runtime.ctx.state.accounts.get(address);
+				if (!strict) {
+					account = this.createAccountIfAbsent(address);
+				}
 			}
 		} else {
-			return this._getAccountFromAddr(accountRef, line);
+			return this._getAccountFromAddr(accountRef, line, strict);
 		}
 
 		return this.runtime.assertAccountDefined(address, account, line);

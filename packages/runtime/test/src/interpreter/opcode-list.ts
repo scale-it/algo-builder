@@ -2383,7 +2383,8 @@ describe("Teal Opcodes", function () {
 		describe("Gtxn", function () {
 			before(function () {
 				const tx = interpreter.runtime.ctx.tx;
-				// a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// a) 'apas' represents 'foreignAssets', b) 
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
 				// https://developer.algorand.org/docs/reference/transactions/
 				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
@@ -6299,7 +6300,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
 		});
 
-		it("Shoud return  Auth Address - rekey case", () => {
+		it("Shoud return Auth Address - rekey case", () => {
 			// set spend key for alice is bob
 			alice.rekeyTo(bob.address);
 			interpreter.runtime.ctx.state.accounts.set(alice.address, alice);
@@ -6309,16 +6310,30 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), decodeAddress(bob.address).publicKey);
 		});
 
-		// TODO: create un strictgetAccount
-		it.skip("Should return Auth Address", () => {
+		it("Should return balance with account own zero balance", () => {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
-			assert.equal(stack.pop(), 0n); // balance > 0
-			assert.deepEqual(stack.pop(), 0n);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.equal(stack.pop(), 0n);
+		});
+	
+		it("Should return min balance with account own zero balance", () => {
+			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
+			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
+			op.execute(stack);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.equal(stack.pop(), BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
 		});
 
-	
+		it("Should return Auth Address with account own zero balance", () => {
+			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
+			op.execute(stack);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
+		});
+
 		it("Should throw error when query unknow field", () => {
 			expectRuntimeError(
 				() => new AcctParamsGet(["Miles"], 1, interpreter),
