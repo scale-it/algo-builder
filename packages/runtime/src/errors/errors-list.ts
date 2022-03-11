@@ -377,6 +377,12 @@ maximun uint128`,
 		title: "Execution mode not valid",
 		description: `Execution mode not valid`,
 	},
+	PROGRAM_VERSION_MISMATCH: {
+		number: 1055,
+		message: "program version mismatch %approvalVersion != %clearVersion",
+		title: "program version mismatch %approvalVersion != %clearVersion.",
+		description: "program version mismatch",
+	},
 };
 
 const runtimeGeneralErrors = {

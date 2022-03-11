@@ -1,3 +1,5 @@
+import { number } from "zod";
+
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Interpreter } from "../interpreter/interpreter";
@@ -855,4 +857,16 @@ export function parser(
 	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
 	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
+}
+
+/**
+ *
+ * @param program teal program
+ * @returns pragma version of this file
+ */
+export function getProgramVersion(program: string): number {
+	const firstLine = program.split("\n")[0];
+	const ip = new Interpreter();
+	opcodeFromSentence(wordsFromLine(firstLine), 1, ip, ExecutionMode.APPLICATION);
+	return ip.tealVersion;
 }
