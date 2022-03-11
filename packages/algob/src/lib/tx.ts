@@ -302,7 +302,7 @@ export async function executeTransaction(
 
 	if (isSDK && signedTxn) {
 		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.log(confirmedTx);
+		console.debug(confirmedTx);
 		return confirmedTx;
 	}
 
@@ -317,7 +317,7 @@ export async function executeTransaction(
 		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
 		const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
 		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.log(confirmedTx);
+		console.debug(confirmedTx);
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
 		}
@@ -354,6 +354,6 @@ export async function executeSignedTxnFromFile(
 		algosdk.decodeSignedTransaction(signedTxn)
 	);
 	const confirmedTx = await deployer.sendAndWait(signedTxn);
-	console.log(confirmedTx);
+	console.debug(confirmedTx);
 	return confirmedTx;
 }

@@ -623,7 +623,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		} catch (error) {
 			this.persistCP();
 
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 
@@ -640,7 +640,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		} catch (error) {
 			this.persistCP();
 
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 
@@ -663,7 +663,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		try {
 			await this.algoOp.fundLsig(fileName, flags, payFlags, this.txWriter, scTmplParams);
 		} catch (error) {
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 	}
@@ -684,7 +684,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 			const lsig = this.getLsig(lsigName);
 			await this.algoOp.fundLsig(lsig, flags, payFlags, this.txWriter);
 		} catch (error) {
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 	}
@@ -729,7 +729,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		} catch (error) {
 			this.persistCP();
 
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 
@@ -805,7 +805,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		} catch (error) {
 			this.persistCP();
 
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 
@@ -862,7 +862,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		} catch (error) {
 			this.persistCP();
 
-			console.debug(error);
+			console.error(error);
 			throw error;
 		}
 
