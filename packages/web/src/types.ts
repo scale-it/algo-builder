@@ -198,11 +198,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-		| TransactionType.CallApp
-		| TransactionType.ClearApp
-		| TransactionType.CloseApp
-		| TransactionType.DeleteApp
-		| TransactionType.OptInToApp;
+			| TransactionType.CallApp
+			| TransactionType.ClearApp
+			| TransactionType.CloseApp
+			| TransactionType.DeleteApp
+			| TransactionType.OptInToApp;
 		appID: number;
 	};
 
@@ -290,13 +290,13 @@ export interface FileError extends Error {
 }
 
 // This function is used to check if given objects implements `FileError` interface
-export function isFileError (object: unknown): object is FileError {
+export function isFileError(object: unknown): object is FileError {
 	return Object.prototype.hasOwnProperty.call(object, "errno");
 }
 
 // This function is used to check if given objects implements `RequestError` interface
 // https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
-export function isRequestError (object: unknown): object is RequestError {
+export function isRequestError(object: unknown): object is RequestError {
 	const res =
 		Object.prototype.hasOwnProperty.call(object, "response.statusCode") &&
 		Object.prototype.hasOwnProperty.call(object, "response.text") &&
@@ -306,7 +306,7 @@ export function isRequestError (object: unknown): object is RequestError {
 }
 
 // This function checks if given object implements `Transaction` class
-export function isSDKTransaction (object: unknown): object is Transaction {
+export function isSDKTransaction(object: unknown): object is Transaction {
 	if (object === undefined || object === null) {
 		return false;
 	}
@@ -319,7 +319,7 @@ export function isSDKTransaction (object: unknown): object is Transaction {
 }
 
 // This function checks if given object implements `Transaction` class and has Sign
-export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
+export function isSDKTransactionAndSign(object: unknown): object is TransactionAndSign {
 	if (object === undefined || object === null) {
 		return false;
 	}
@@ -335,13 +335,13 @@ export enum ChainType {
 }
 
 export interface SessionConnectResponse {
-	peerId: string
-	peerMeta?: IClientMeta
-	accounts: string[]
+	peerId: string;
+	peerMeta?: IClientMeta;
+	accounts: string[];
 }
 
 export interface SessionUpdateResponse {
-	accounts: string[]
+	accounts: string[];
 }
 
 export interface SessionDisconnectResponse {
