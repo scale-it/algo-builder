@@ -20,7 +20,7 @@ export function getDeployerAccount(
 	return account;
 }
 
-export async function executeTx(
+export async function WithdrawExecuteTx(
 	deployer: algob.types.Deployer,
 	txnParams: wtypes.ExecParams
 ): Promise<void> {

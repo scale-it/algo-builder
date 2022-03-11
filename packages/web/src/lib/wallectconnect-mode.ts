@@ -1,3 +1,4 @@
+import { executeTx } from "@algo-builder/algob";
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
@@ -253,5 +254,11 @@ export class WallectConnectSession {
 
 		console.log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
+	}
+	/** @deprecated */
+	async executeTransaction(
+		execParams: ExecParams | ExecParams[]
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		return this.executeTx(execParams);
 	}
 }

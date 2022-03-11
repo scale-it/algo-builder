@@ -171,4 +171,8 @@ export class WebMode {
 		}
 		throw new Error("Transaction Error");
 	}
+	/** @deprecated */
+	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
+		return this.executeTx(execParams);
+	}
 }

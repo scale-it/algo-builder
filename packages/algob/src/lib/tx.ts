@@ -331,6 +331,16 @@ export async function executeTx(
 	}
 }
 
+/** @deprecated */
+export async function executeTransaction(
+	deployer: Deployer,
+	transactions:
+		| (wtypes.ExecParams | wtypes.TransactionAndSign)
+		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
+): Promise<ConfirmedTxInfo> {
+	return executeTx(deployer, transactions);
+}
+
 /**
  * Decode signed txn from file and send to network.
  * probably won't work, because transaction contains fields like
