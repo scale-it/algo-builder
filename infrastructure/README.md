@@ -7,12 +7,18 @@ This directory (`/infrastructure`) provides an example setup for a private-net i
 
 Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
-NOTE: For Windows user, check this StackOverflow [thread](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows) on how to install `make`. As a workaround, you can always open Makefile in a text editor and copy paste the commands from required make job, directly to your terminal.
+### Windows Users
+
+For Windows user, check this [StackOverflow thread](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows) on how to install `make`. As a workaround, you can always open Makefile in a text editor and copy paste the commands from required make job, directly to your terminal.
 
 We advise Windows users to install WSL on their system for better accessibility and easier development in the future
 [Installing WSL](https://docs.microsoft.com/en-us/windows/wsl/install)
 [Setting up Node js on WSL](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl)
 [Setting up Pip,venv on WSL](https://docs.microsoft.com/en-us/windows/python/web-frameworks#install-python-pip-and-venv)
+
+Another solution is to run Linux on Windows using Virtual Box, [tutorial](https://www.instructables.com/How-to-install-Linux-on-your-Windows/).
+
+Finally follow the instructions below to download Algorand binaries and run them in Linux.
 
 ## Setting up a local node
 

@@ -7,16 +7,16 @@
 		"@algo-builder/algob": "workspace:*",
 		"@algo-builder/runtime": "workspace:*",
 		"@algo-builder/web": "workspace:*",
-		"algosdk": "^1.13.1"
+		"algosdk": "^1.14.0"
 	},
 	"devDependencies": {
 		"eslint": "^8.10.0",
-		"mocha": "^9.2.0"
+		"mocha": "^9.2.1"
 	},
 	"scripts": {
 		"algob": "algob",
-		"lint": "eslint --ext .js,.ts scripts",
-		"lint:fix": "eslint --fix --ext .js,.ts scripts",
+		"lint:check": "eslint --ext .js,.ts scripts",
+		"lint": "eslint --fix --ext .js,.ts scripts",
 		"test": "echo testing dao; mocha",
 		"build:docs": "echo ok",
 		"build": "echo ok"
