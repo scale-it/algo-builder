@@ -4599,7 +4599,8 @@ export class AcctParamsGet extends Op {
 		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
 
 		// get account from current context
-		const accountInfo = this.interpreter.getAccount(acctAddress, this.line, false);
+		// not `create` flag = true
+		const accountInfo = this.interpreter.getAccount(acctAddress, this.line, true);
 
 		let value: StackElem = 0n;
 		switch (this.field) {
