@@ -6358,7 +6358,7 @@ describe("Teal Opcodes", function () {
 			)
 		});
 
-		it("Should throw error if top element in stack is not address type", () => {
+		it("Should throw error if top element in stack is not an address", () => {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(parsing.stringToBytes("ABCDE"));
 

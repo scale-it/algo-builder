@@ -4569,8 +4569,7 @@ export class AcctParamsGet extends Op {
 	readonly line: number;
 	readonly field: string;
 	/**
-	 * Asserts 1 arguments are passed.
-	 * @param args Expected arguments: [] // none
+	 * @param args Expected arguments: [account_param]
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */

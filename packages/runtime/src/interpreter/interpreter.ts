@@ -160,12 +160,7 @@ export class Interpreter {
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey)
 		) {
 			const address = encodeAddress(pkBuffer);
-			let account = this.runtime.ctx.state.accounts.get(address);
-			// strict is turn on we will create account store
-			// we will create account if it not exist
-			if (!strict) {
-				account = this.createAccountIfAbsent(address);
-			}
+			let account = create ? this.createAccountIfAbsent(address) : this.runtime.ctx.state.accounts.get(address);
 
 			return this.runtime.assertAccountDefined(address, account, line);
 		} else {
@@ -203,10 +198,7 @@ export class Interpreter {
 					throw new Error("pk Buffer not found");
 				}
 				address = encodeAddress(pkBuffer);
-				account = this.runtime.ctx.state.accounts.get(address);
-				if (!strict) {
-					account = this.createAccountIfAbsent(address);
-				}
+				account = create ? this.createAccountIfAbsent(address) : this.runtime.ctx.state.accounts.get(address);
 			}
 		} else {
 			return this._getAccountFromAddr(accountRef, line, strict);
