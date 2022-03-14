@@ -256,8 +256,10 @@ export type AssetTransferParam = BasicParams & {
 
 export type KeyRegistrationParam = BasicParams & {
 	type: TransactionType.KeyRegistration;
-	voteKey: string;
-	selectionKey: string;
+	/// voteKey must be a 32 byte Uint8Array or Buffer or base64 string.
+	voteKey: string | Uint8Array;
+	/// voteKey must be a 32 byte Uint8Array or Buffer or base64 string.
+	selectionKey: string | Uint8Array;
 	voteFirst: number;
 	voteLast: number;
 	voteKeyDilution: number;

@@ -6,6 +6,7 @@ import { AccountStore } from "../../../src";
 import { encTxToExecParams } from "../../../src/lib/txn";
 import { Runtime } from "../../../src/runtime";
 import { AccountStoreI } from "../../../src/types";
+import * as testdata from "../../helpers/data";
 import { useFixture } from "../../helpers/integration";
 
 describe("Convert encoded Txn to ExecParams", function () {
@@ -37,12 +38,12 @@ describe("Convert encoded Txn to ExecParams", function () {
 			encTx.clearProgram = execParams.clearProgram;
 		}
 
-    // convert appArgs to buffer to easier compare.
-    if (execParams.type === types.TransactionType.CallApp) {
-      execParams.appArgs = parsing.parseAppArgs(execParams.appArgs);
-    }
-    assert.deepEqual(encTxToExecParams(encTx, sign as types.Sign, runtime.ctx), execParams);
-  };
+		// convert appArgs to buffer to easier compare.
+		if (execParams.type === types.TransactionType.CallApp) {
+			execParams.appArgs = parsing.parseAppArgs(execParams.appArgs);
+		}
+		assert.deepEqual(encTxToExecParams(encTx, sign as types.Sign, runtime.ctx), execParams);
+	}
 
 	describe("Case pay transaction types", function () {
 		it("Should convert SDK Payment Txn(pay) to ExecParams(TransferAlgo)", () => {
@@ -146,19 +147,19 @@ describe("Convert encoded Txn to ExecParams", function () {
 		});
 	});
 
-  describe("Case keyreg transaction type", function () {
-    it("should convert SDK Keyreg Txn to ExecParams(KeyRegistration)", () => {
-      execParams = {
-        type: types.TransactionType.KeyRegistration, // payment
-        sign: types.SignType.SecretKey,
-        fromAccount: john.account,
-        voteKey: encodeBase64(parsing.stringToBytes('this-is-vote-key')),
-        selectionKey: encodeBase64(parsing.stringToBytes("this-is-selection-key")),
-        voteFirst: 43,
-        voteLast: 1000,
-        voteKeyDilution: 5,
-        payFlags: { totalFee: 1000 }
-      };
+	describe("Case keyreg transaction type", function () {
+		it("should convert SDK Keyreg Txn to ExecParams(KeyRegistration)", () => {
+			execParams = {
+				type: types.TransactionType.KeyRegistration, // payment
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				voteKey: encodeBase64(testdata.key1),
+				selectionKey: encodeBase64(testdata.key2),
+				voteFirst: 43,
+				voteLast: 1000,
+				voteKeyDilution: 5,
+				payFlags: { totalFee: 1000 },
+			};
 
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
@@ -182,22 +183,22 @@ describe("Convert encoded Txn to ExecParams", function () {
 				},
 			};
 
-      assertEncTxConvertedToExecParam(runtime, execParams);
-    });
+			assertEncTxConvertedToExecParam(runtime, execParams);
+		});
 
-    it("should convert SDK NoOpt Txn to ExecParams(CallApp)", () => {
-      execParams = {
-        sign: types.SignType.SecretKey,
-        fromAccount: john.account,
-        type: types.TransactionType.CallApp,
-        appID: 42,
-        appArgs: ['str:hello', "int:42"],
-        payFlags: {
-          totalFee: 1000
-        }
-      };
+		it("should convert SDK NoOpt Txn to ExecParams(CallApp)", () => {
+			execParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.CallApp,
+				appID: 42,
+				appArgs: ["str:hello", "int:42"],
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
 
-      assertEncTxConvertedToExecParam(runtime, execParams);
-    });
-  });
+			assertEncTxConvertedToExecParam(runtime, execParams);
+		});
+	});
 });
