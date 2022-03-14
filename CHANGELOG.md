@@ -39,7 +39,8 @@ Added:
 - Teal V6 support:
   - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
-
+  - Add new opcode acct_params_get([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  
 ### Template improvements
 
 - Using App instead of Lsig (Smart Signature) in `examples/dao` to simplify deposit management.

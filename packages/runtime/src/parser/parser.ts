@@ -4,6 +4,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Interpreter } from "../interpreter/interpreter";
 import {
+	AcctParamsGet,
 	Add,
 	Addr,
 	Addw,
@@ -376,6 +377,7 @@ opCodeMap[6] = {
 	divw: Divw,
 	bsqrt: Bsqrt,
 	gloadss: Gloadss,
+	acct_params_get: AcctParamsGet,
 };
 
 // list of opcodes with exactly one parameter.
@@ -432,6 +434,7 @@ const interpreterReqList = new Set([
 	"log",
 	"app_params_get",
 	"gloadss",
+	"acct_params_get",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -462,6 +465,7 @@ const applicationModeOps = new Set([
 	"itxn",
 	"itxna",
 	"gloadss",
+	"acct_params_get",
 ]);
 
 // opcodes allowed in both application and signature mode
@@ -577,6 +581,7 @@ const commonModeOps = new Set([
 	"divw",
 	"bsqrt",
 	"gloadss",
+	"acct_params_get",
 ]);
 
 /**

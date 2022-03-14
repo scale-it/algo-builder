@@ -383,6 +383,13 @@ maximun uint128`,
 		title: "program version mismatch %approvalVersion != %clearVersion.",
 		description: "program version mismatch",
 	},
+	UNKNOWN_ACCT_FIELD: {
+		number: 1056,
+		message:
+			"Account Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
+		title: "Account Field Error at line %line%",
+		description: `Account field unknown`,
+	}
 };
 
 const runtimeGeneralErrors = {
