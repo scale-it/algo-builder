@@ -1,11 +1,18 @@
-import { decodeAddress } from "algosdk";
+import { types } from "@algo-builder/web";
+import algosdk, { decodeAddress, getApplicationAddress, TransactionType } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { MaxTxnNoteBytes, TxnFields, TxnTypeMap } from "../lib/constants";
+import {
+	ALGORAND_MIN_TX_FEE,
+	MaxTxnNoteBytes,
+	TransactionTypeEnum,
+	TxnFields,
+	TxnTypeMap,
+} from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
 import { assetTxnFields } from "./txn";
@@ -264,4 +271,63 @@ export function setInnerTxField(
 	}
 
 	return subTxn;
+}
+
+/**
+ * TODO: What I am supposed to do???
+ * @param interpreter interpeter execute current tx
+ * @param line line number
+ * @returns EncTx object
+ */
+export function createBaseSubInnerTx(interpreter: Interpreter, line: number): EncTx {
+	// get app, assert it exists
+	const appID = interpreter.runtime.ctx.tx.apid ?? 0;
+	interpreter.runtime.assertAppDefined(appID, interpreter.getApp(appID, line), line);
+
+	// get application's account
+	const address = getApplicationAddress(appID);
+	const applicationAccount = interpreter.runtime.assertAccountDefined(
+		address,
+		interpreter.runtime.ctx.state.accounts.get(address),
+		line
+	);
+
+	// calculate feeCredit(extra fee) accross all txns
+	let totalFee = 0;
+	let totalPassTx = 0;
+
+	for (const t of interpreter.runtime.ctx.gtxs) {
+		totalFee += t.fee ?? 0;
+	}
+
+	for (const gt of interpreter.innerTxns) {
+		for (const t of gt) {
+			totalFee += t.fee ?? 0;
+		}
+		totalPassTx += gt.length;
+	}
+
+	const totalTxCnt = interpreter.runtime.ctx.gtxs.length + totalPassTx;
+	const feeCredit = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
+
+	let txFee;
+	if (feeCredit >= ALGORAND_MIN_TX_FEE) {
+		txFee = 0; // we have enough fee in pool
+	} else {
+		const diff = feeCredit - ALGORAND_MIN_TX_FEE;
+		txFee = diff >= 0 ? diff : ALGORAND_MIN_TX_FEE;
+	}
+
+	return {
+		// set sender, fee, fv, lv
+		snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
+		fee: txFee,
+		fv: interpreter.runtime.ctx.tx.fv,
+		lv: interpreter.runtime.ctx.tx.lv,
+		// to avoid type hack
+		gen: interpreter.runtime.ctx.tx.gen,
+		gh: interpreter.runtime.ctx.tx.gh,
+		txID: "",
+		type: TransactionTypeEnum.UNKNOWN,
+	};
 }

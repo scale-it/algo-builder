@@ -34,7 +34,7 @@ describe("Inner Transactions", function () {
 		while (interpreter.stack.length() !== 0) {
 			interpreter.stack.pop();
 		}
-		interpreter.subTxn = undefined;
+		interpreter.subTxn = [];
 		interpreter.runtime.ctx.pooledApplCost = 0;
 		interpreter.instructions = [];
 		interpreter.innerTxns = [];

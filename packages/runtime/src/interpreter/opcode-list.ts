@@ -36,7 +36,7 @@ import {
 	TxArrFields,
 	ZERO_ADDRESS,
 } from "../lib/constants";
-import { setInnerTxField } from "../lib/itxn";
+import { createBaseSubInnerTx, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
 	assertLen,
@@ -3933,7 +3933,7 @@ export class ITxnBegin extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (typeof this.interpreter.subTxn !== "undefined") {
+		if (this.interpreter.subTxn === []) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
 			});
@@ -3947,57 +3947,7 @@ export class ITxnBegin extends Op {
 			});
 		}
 
-		// get app, assert it exists
-		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
-		this.interpreter.runtime.assertAppDefined(
-			appID,
-			this.interpreter.getApp(appID, this.line),
-			this.line
-		);
-
-		// get application's account
-		const address = getApplicationAddress(appID);
-		const applicationAccount = this.interpreter.runtime.assertAccountDefined(
-			address,
-			this.interpreter.runtime.ctx.state.accounts.get(address),
-			this.line
-		);
-
-		// calculate feeCredit(extra fee) accross all txns
-		let totalFee = 0;
-		for (const t of this.interpreter.runtime.ctx.gtxs) {
-			totalFee += t.fee ?? 0;
-		}
-		for (const t of this.interpreter.innerTxns) {
-			totalFee += t.fee ?? 0;
-		}
-
-		const totalTxCnt =
-			this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length;
-		const feeCredit = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
-
-		let txFee;
-		if (feeCredit >= ALGORAND_MIN_TX_FEE) {
-			txFee = 0; // we have enough fee in pool
-		} else {
-			const diff = feeCredit - ALGORAND_MIN_TX_FEE;
-			txFee = diff >= 0 ? diff : ALGORAND_MIN_TX_FEE;
-		}
-
-		const txnParams = {
-			// set sender, fee, fv, lv
-			snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
-			fee: txFee,
-			fv: this.interpreter.runtime.ctx.tx.fv,
-			lv: this.interpreter.runtime.ctx.tx.lv,
-			// to avoid type hack
-			gen: this.interpreter.runtime.ctx.tx.gen,
-			gh: this.interpreter.runtime.ctx.tx.gh,
-			txID: "",
-			type: "",
-		};
-
-		this.interpreter.subTxn = txnParams;
+		this.interpreter.subTxn = [createBaseSubInnerTx(this.interpreter, this.line)];
 	}
 }
 
@@ -4034,14 +3984,15 @@ export class ITxnField extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const valToSet: StackElem = stack.pop();
 
-		if (typeof this.interpreter.subTxn === "undefined") {
+		if (this.interpreter.subTxn === []) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
 		}
 
+		const subTxCnt = this.interpreter.subTxn.length - 1;
 		const updatedSubTx = setInnerTxField(
-			this.interpreter.subTxn,
+			this.interpreter.subTxn[subTxCnt],
 			this.field,
 			valToSet,
 			this,
@@ -4049,7 +4000,7 @@ export class ITxnField extends Op {
 			this.line
 		);
 
-		this.interpreter.subTxn = updatedSubTx;
+		this.interpreter.subTxn[subTxCnt] = updatedSubTx;
 	}
 }
 
@@ -4082,15 +4033,20 @@ export class ITxnSubmit extends Op {
 
 		// calculate fee accross all txns
 		let totalFee = 0;
+		let totalPassTx = 0;
+
 		for (const t of this.interpreter.runtime.ctx.gtxs) {
 			totalFee += t.fee ?? 0;
 		}
-		for (const t of this.interpreter.innerTxns) {
-			totalFee += t.fee ?? 0;
+
+		for (const gt of this.interpreter.innerTxns) {
+			for (const t of gt) {
+				totalFee += t.fee ?? 0;
+			}
+			totalPassTx += gt.length;
 		}
-		totalFee += this.interpreter.subTxn.fee ?? 0;
-		const totalTxCnt =
-			this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length + 1;
+
+		const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + totalPassTx + 1;
 
 		// fee too less accross pool
 		const feeBal = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
@@ -4108,23 +4064,26 @@ export class ITxnSubmit extends Op {
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
-		const execParams = encTxToExecParams(
-			this.interpreter.subTxn,
-			{
-				sign: types.SignType.SecretKey,
-				fromAccount: contractAccount,
-			},
-			this.interpreter.runtime.ctx,
-			this.line
+		const execParams = this.interpreter.subTxn.map((encTx) =>
+			encTxToExecParams(
+				encTx,
+				{
+					sign: types.SignType.SecretKey,
+					fromAccount: contractAccount,
+				},
+				this.interpreter.runtime.ctx,
+				this.line
+			)
 		);
+
 		const baseCurrTx = this.interpreter.runtime.ctx.tx;
 		const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
 		// execute innner transaction
-		this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
-		this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
+		this.interpreter.runtime.ctx.tx = this.interpreter.subTxn[0];
+		this.interpreter.runtime.ctx.gtxs = this.interpreter.subTxn;
 		this.interpreter.runtime.ctx.isInnerTx = true;
-		this.interpreter.runtime.ctx.processTransactions([execParams]);
+		this.interpreter.runtime.ctx.processTransactions(execParams);
 
 		// update current txns to base (top-level) after innerTx execution
 		this.interpreter.runtime.ctx.tx = baseCurrTx;
@@ -4133,7 +4092,7 @@ export class ITxnSubmit extends Op {
 		// save executed tx, reset current tx
 		this.interpreter.runtime.ctx.isInnerTx = false;
 		this.interpreter.innerTxns.push(this.interpreter.subTxn);
-		this.interpreter.subTxn = undefined;
+		this.interpreter.subTxn = [];
 	}
 }
 
@@ -4182,7 +4141,9 @@ export class ITxn extends Op {
 		}
 
 		let result;
-		const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		// what is "last "
+		const groupTx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		const tx = groupTx[groupTx.length - 1];
 
 		switch (this.field) {
 			case "Logs": {
@@ -4261,8 +4222,8 @@ export class ITxna extends Op {
 				line: this.line,
 			});
 		}
-
-		const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		const groupTx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		const tx = groupTx[groupTx.length - 1];
 		const result = txAppArg(
 			this.field,
 			tx,
@@ -4560,5 +4521,44 @@ export class AppParamsGet extends Op {
 			stack.push(0n);
 			stack.push(0n);
 		}
+	}
+}
+
+// Pops: None
+// Pushes: None
+// Begin preparation of a new inner transaction in the same transaction group
+export class ITxnNext extends Op {
+	readonly interpreter: Interpreter;
+	readonly line: number;
+
+	/**
+	 * Stores index number according to the passed arguments
+	 * @param args Expected arguments: []
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, this.line);
+		this.interpreter = interpreter;
+	}
+
+	execute(_stack: TEALStack): void {
+		if (this.interpreter.subTxn === []) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
+				line: this.line,
+			});
+		}
+
+		if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
+				line: this.line,
+				len: this.interpreter.innerTxns.length + 1,
+				max: MAX_INNER_TRANSACTIONS,
+			});
+		}
+
+		this.interpreter.subTxn.push(createBaseSubInnerTx(this.interpreter, this.line));
 	}
 }
