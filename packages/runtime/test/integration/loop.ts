@@ -15,6 +15,7 @@ describe("TEALv4: Loops", function () {
 	let approvalProgramFailFileName: string;
 	let approvalProgramFail1FileName: string;
 	let clearProgramFileName: string;
+	let clearProgramV3: string;
 	let flags: AppDeploymentFlags;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
@@ -22,6 +23,7 @@ describe("TEALv4: Loops", function () {
 		approvalProgramFailFileName = "approval-fail.teal";
 		approvalProgramFail1FileName = "approval-fail-1.teal";
 		clearProgramFileName = "clear.teal";
+		clearProgramV3 = "clearv3.teal";
 
 		flags = {
 			sender: john.account,
@@ -50,7 +52,7 @@ describe("TEALv4: Loops", function () {
 	it("should fail during create application", function () {
 		// this fails because we try to use loops in tealv3
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFail1FileName, clearProgramFileName, flags, {}),
+			() => runtime.deployApp(approvalProgramFail1FileName, clearProgramV3, flags, {}),
 			RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
 		);
 	});

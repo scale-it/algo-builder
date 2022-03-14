@@ -293,6 +293,13 @@ export const AppParamDefined: { [key: number]: Set<string> } = {
 
 AppParamDefined[6] = cloneDeep(AppParamDefined[5]);
 
+// param use for query acct_params_get opcode
+
+export const AcctParamQueryFields: { [key: string]: { version: number } } = {
+	AcctBalance: { version: 6 },
+	AcctMinBalance: { version: 6 },
+	AcctAuthAddr: { version: 6 },
+};
 export const reDigit = /^\d+$/;
 export const reDec = /^(0|[1-9]\d*)$/;
 export const reHex = /^0x[0-9a-fA-F]+$/;
