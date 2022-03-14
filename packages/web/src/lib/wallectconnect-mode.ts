@@ -56,7 +56,7 @@ export class WallectConnectSession {
 				try {
 					await this.close();
 				} catch (e) {
-					console.log(e);
+					console.error("Can't close walletconnect connection", e);
 				}
 			} else {
 				console.warn(`A session is already active`);
