@@ -377,6 +377,13 @@ maximun uint128`,
 		title: "Execution mode not valid",
 		description: `Execution mode not valid`,
 	},
+	UNKNOWN_ACCT_FIELD: {
+		number: 1055,
+		message:
+			"Account Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
+		title: "Account Field Error at line %line%",
+		description: `Account field unknown`,
+	},
 };
 
 const runtimeGeneralErrors = {
