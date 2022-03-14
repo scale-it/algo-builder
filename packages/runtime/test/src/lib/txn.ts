@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { stringToBytes } from "@algo-builder/web/build/lib/parsing";
 import { assert } from "chai";
 import { encodeBase64 } from "tweetnacl-ts";
 
@@ -7,6 +6,7 @@ import { AccountStore } from "../../../src";
 import { encTxToExecParams } from "../../../src/lib/txn";
 import { Runtime } from "../../../src/runtime";
 import { AccountStoreI } from "../../../src/types";
+import * as testdata from "../../helpers/data";
 import { useFixture } from "../../helpers/integration";
 
 describe("Convert encoded Txn to ExecParams", function () {
@@ -149,8 +149,8 @@ describe("Convert encoded Txn to ExecParams", function () {
 				type: types.TransactionType.KeyRegistration, // payment
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
-				voteKey: encodeBase64(stringToBytes("this-is-vote-key")),
-				selectionKey: encodeBase64(stringToBytes("this-is-selection-key")),
+				voteKey: encodeBase64(testdata.key1),
+				selectionKey: encodeBase64(testdata.key2),
 				voteFirst: 43,
 				voteLast: 1000,
 				voteKeyDilution: 5,
