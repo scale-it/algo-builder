@@ -26,7 +26,7 @@
 		"lint:check": "eslint --ext .js,.ts src test",
 		"lint": "eslint --cache  --fix --ext .js,.ts src test",
 		"lint:unix": "eslint --cache  --format unix --ext .js,.ts src test",
-		"test": "echo testing algob; mocha",
+		"test": "echo testing algob; mocha -R progress",
 		"test:watch:p": "mocha -w &",
 		"coverage": "nyc ../../node_modules/mocha/bin/mocha",
 		"build:docs": "typedoc --out ../../docs/api/algob --excludePrivate --exclude 'src/internal/**' src/index.ts",

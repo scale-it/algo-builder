@@ -22,7 +22,7 @@
 		"lint:check": "eslint --ext .js,.ts src",
 		"lint": "eslint --cache --fix --ext .js,.ts src",
 		"lint:unix": "eslint --cache --format unix --ext .js,.ts src",
-		"test": "echo testing runtime; mocha",
+		"test": "echo testing runtime; mocha -R progress",
 		"test:watch:p": "mocha -w &",
 		"coverage": "nyc ../../node_modules/mocha/bin/mocha",
 		"build": "tsc --build .",

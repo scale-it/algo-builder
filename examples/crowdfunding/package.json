@@ -17,7 +17,7 @@
 		"algob": "algob",
 		"lint:check": "eslint --ext .js,.ts scripts",
 		"lint": "eslint --fix --ext .js,.ts scripts",
-		"test": "echo testing crowdfunding; mocha",
+		"test": "echo testing crowdfunding; mocha -R progress",
 		"build:docs": "echo ok",
 		"build": "echo ok"
 	},
