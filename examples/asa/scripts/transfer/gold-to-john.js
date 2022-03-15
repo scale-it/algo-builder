@@ -3,7 +3,7 @@
  * This script shows a basic ASA transfer functionality between 2 user accounts.
  */
 
-const { executeTransaction, balanceOf } = require("@algo-builder/algob");
+const { executeTx, balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -19,7 +19,7 @@ async function run(runtimeEnv, deployer) {
 	const goldOwner = deployer.accountsByName.get("alice");
 
 	// execute asset transfer transaction
-	await executeTransaction(deployer, {
+	await executeTx(deployer, {
 		type: types.TransactionType.TransferAsset,
 		sign: types.SignType.SecretKey,
 		fromAccount: goldOwner,

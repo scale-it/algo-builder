@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { issue } = require("./issue");
-const { executeTransaction, fundAccount } = require("../common/common");
+const { executeTx, fundAccount } = require("../common/common");
 const accounts = require("../common/accounts");
 
 async function kill(deployer) {
@@ -26,7 +26,7 @@ async function kill(deployer) {
 	};
 
 	console.log("* Kill Token: tesla *");
-	await executeTransaction(deployer, killParams);
+	await executeTx(deployer, killParams);
 }
 
 async function run(runtimeEnv, deployer) {

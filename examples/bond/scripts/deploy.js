@@ -1,4 +1,4 @@
-const { executeTransaction, convert } = require("@algo-builder/algob");
+const { executeTx, convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { optInTx } = require("./run/common/common.js");
 
@@ -15,9 +15,9 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 10e6,
 		payFlags: {},
 	};
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 	algoTxnParams.toAccountAddr = creatorAccount.addr;
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 
 	// Create B_0 - Bond Token
 	const asaInfo = await deployer.deployASA("bond-token-0", { creator: creatorAccount });
@@ -66,7 +66,7 @@ async function run(runtimeEnv, deployer) {
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 
 	algoTxnParams.toAccountAddr = issuerLsig.address();
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 
 	// Only app manager can opt-in issueer lsig to ASA
 	await optInTx(deployer, managerAcc, issuerLsig, asaInfo.assetIndex);
@@ -82,7 +82,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 		appArgs: appArgs,
 	};
-	await executeTransaction(deployer, appCallParams);
+	await executeTx(deployer, appCallParams);
 
 	console.log("Issuer address updated!");
 }

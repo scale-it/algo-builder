@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-identical-functions */
+/* eslint-disable sonarjs/no-duplicate-string */
 import { parsing } from "@algo-builder/web";
 import {
 	decodeAddress,
@@ -2383,7 +2385,7 @@ describe("Teal Opcodes", function () {
 		describe("Gtxn", function () {
 			before(function () {
 				const tx = interpreter.runtime.ctx.tx;
-				// a) 'apas' represents 'foreignAssets', b) 
+				// a) 'apas' represents 'foreignAssets', b)
 				// 'apfa' represents 'foreignApps' (id's of foreign apps)
 				// https://developer.algorand.org/docs/reference/transactions/
 				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
@@ -6255,8 +6257,7 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-
-	describe("Tealv6: acct_params_get opcode", function(){
+	describe("Tealv6: acct_params_get opcode", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
 		let alice: AccountStoreI;
@@ -6267,17 +6268,20 @@ describe("Teal Opcodes", function () {
 		this.beforeEach(() => {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
-			[alice, bob] = interpreter.runtime.defaultAccounts()
+			[alice, bob] = interpreter.runtime.defaultAccounts();
 			// init tx
-			interpreter.runtime.ctx.tx = {...TXN_OBJ, apat: [
-				Buffer.from(decodeAddress(alice.address).publicKey), 
-				Buffer.from(decodeAddress(zeroBalanceAddr).publicKey)
-			]};
-			interpreter.tealVersion = MaxTEALVersion; 
+			interpreter.runtime.ctx.tx = {
+				...TXN_OBJ,
+				apat: [
+					Buffer.from(decodeAddress(alice.address).publicKey),
+					Buffer.from(decodeAddress(zeroBalanceAddr).publicKey),
+				],
+			};
+			interpreter.tealVersion = MaxTEALVersion;
 			interpreter.runtime.ctx.gtxs = [TXN_OBJ];
 			interpreter.tealVersion = 6;
 			stack.push(decodeAddress(alice.address).publicKey);
-		});	
+		});
 
 		it("Should return balance", () => {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
@@ -6317,7 +6321,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n); // balance = 0
 			assert.equal(stack.pop(), 0n);
 		});
-	
+
 		it("Should return min balance with account own zero balance", () => {
 			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
@@ -6343,29 +6347,26 @@ describe("Teal Opcodes", function () {
 
 		it("Should throw error if query account not in ref account list", () => {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
-			stack.push(decodeAddress(bob.address).publicKey)
+			stack.push(decodeAddress(bob.address).publicKey);
 
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
-			)
+			);
 
 			// valid address but not in tx accounts list
 			stack.push(parsing.stringToBytes("01234567890123456789012345678901"));
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
-			)
+			);
 		});
 
 		it("Should throw error if top element in stack is not an address", () => {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(parsing.stringToBytes("ABCDE"));
 
-			expectRuntimeError(
-				() => op.execute(stack),
-				RUNTIME_ERRORS.TEAL.INVALID_ADDR
-			)
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
 		});
 	});
 });

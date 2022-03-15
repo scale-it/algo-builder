@@ -1,6 +1,6 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { executeTransaction, fundAccount, totalSupply } = require("../common/common");
+const { executeTx, fundAccount, totalSupply } = require("../common/common");
 const accounts = require("../common/accounts");
 
 /**
@@ -47,7 +47,7 @@ async function issue(deployer, address, amount) {
 		},
 	];
 	console.log(`* Issuing ${amount} tokens to [${address}] *`);
-	await executeTransaction(deployer, issuanceParams);
+	await executeTx(deployer, issuanceParams);
 
 	console.log(`* ${address} asset holding: *`);
 	console.log(await balanceOf(deployer, address, tesla.assetIndex));

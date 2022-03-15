@@ -7854,7 +7854,7 @@
 								class="language-javascript line-numbers"
 							><code class="language-javascript">// Transfer Algo, create "gold" ASA and opt-in
 
-import { executeTransaction, balanceOf } from '@algo-builder/algob';
+import { executeTx, balanceOf } from '@algo-builder/algob';
 import { types } from '@algo-builder/web';
 
 async function run (runtimeEnv, deployer) {
@@ -7863,7 +7863,7 @@ async function run (runtimeEnv, deployer) {
   const bob `=` deployer.accountsByName.get('bob');
 
   // transfer ALGO
-  await executeTransaction(deployer, {
+  await executeTx(deployer, {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
