@@ -5,7 +5,7 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { AccountStore, getProgram, parseASADef, Runtime } from ".";
+import { AccountStore, getProgram, Interpreter, parseASADef, parser, Runtime } from ".";
 import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -13,6 +13,7 @@ import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
+import { getProgramVersion } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
@@ -33,6 +34,7 @@ import {
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
+const CLEAR_PROGRAM = "clear-state-program";
 
 export class Ctx implements Context {
 	state: State;
@@ -97,6 +99,19 @@ export class Ctx implements Context {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN, {
 				assetId: assetIndex,
 				address: address,
+			});
+		}
+	}
+
+	// verify approval program and clear state program build in same version
+	verifyTEALVersionIsMatch(approvalProg: string, clearProgram: string): void {
+		const approvalVersion = getProgramVersion(approvalProg);
+		const clearVersion = getProgramVersion(clearProgram);
+
+		if (approvalVersion !== clearVersion) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH, {
+				approvalVersion,
+				clearVersion,
 			});
 		}
 	}
@@ -311,6 +326,8 @@ export class Ctx implements Context {
 		if (clearProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
 		}
+
+		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 
 		// create app with id = 0 in globalApps for teal execution
 		const app = senderAcc.addApp(0, flags, approvalProgTEAL, clearProgTEAL);
@@ -625,6 +642,7 @@ export class Ctx implements Context {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
 		}
 
+		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 		const appParams = this.getApp(appID);
 		const txReceipt = this.runtime.run(
 			appParams[APPROVAL_PROGRAM],
@@ -635,7 +653,7 @@ export class Ctx implements Context {
 
 		const updatedApp = this.getApp(appID);
 		updatedApp[APPROVAL_PROGRAM] = approvalProgTEAL;
-		updatedApp["clear-state-program"] = clearProgTEAL;
+		updatedApp[CLEAR_PROGRAM] = clearProgTEAL;
 		return txReceipt;
 	}
 

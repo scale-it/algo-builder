@@ -943,6 +943,14 @@ describe("Stateful Smart Contracts", function () {
 		assert.isDefined(app);
 	});
 
+	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", () => {
+		clearProgramFileName = "clearv6.teal";
+		expectRuntimeError(
+			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
+		);
+	});
+
 	it("Should not update application if approval or clear program is empty", () => {
 		const appID = runtime.deployApp(
 			approvalProgramFileName,
@@ -959,6 +967,29 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
+		);
+	});
+
+	it("Should not update application if approval and clear program not match", () => {
+		const appID = runtime.deployApp(
+			approvalProgramFileName,
+			clearProgramFileName,
+			creationFlags,
+			{}
+		).appID;
+
+		clearProgramFileName = "clearv6.teal";
+		expectRuntimeError(
+			() =>
+				runtime.updateApp(
+					john.address,
+					appID,
+					approvalProgramFileName,
+					clearProgramFileName,
+					{},
+					{}
+				),
+			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
 		);
 	});
 });

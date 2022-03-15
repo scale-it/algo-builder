@@ -7,7 +7,6 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 import { assert } from "chai";
-import { isArray } from "lodash";
 import { SinonStub, stub } from "sinon";
 import { TextEncoder } from "util";
 
@@ -158,7 +157,7 @@ describe("ASA modify fields", () => {
 	 * @param rawTxns rawTxns Signed transactions in Uint8Array
 	 */
 	function checkTx(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-		if (isArray(rawTxns)) {
+		if (Array.isArray(rawTxns)) {
 			// verify here if group tx
 		} else {
 			const tx: Transaction = decodeSignedTransaction(rawTxns).txn;

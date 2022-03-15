@@ -4,6 +4,7 @@ import { assert } from "chai";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { BaseTxReceipt } from "../../src/types";
+import * as testdata from "../helpers/data";
 import { useFixture } from "../helpers/integration";
 
 const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 5000);
@@ -12,6 +13,9 @@ describe("Key Registration transaction", function () {
 	let john: AccountStore;
 	let bob: AccountStore;
 	let runtime: Runtime;
+
+	const vKey = testdata.key1;
+	const sKey = testdata.key2;
 
 	this.beforeAll(async function () {
 		john = new AccountStore(minBalance);
@@ -30,14 +34,13 @@ describe("Key Registration transaction", function () {
 			type: types.TransactionType.KeyRegistration, // payment
 			sign: types.SignType.SecretKey,
 			fromAccount: john.account,
-			voteKey: "v-key",
-			selectionKey: "s-key",
+			voteKey: vKey,
+			selectionKey: sKey,
 			voteFirst: 43,
 			voteLast: 1000,
 			voteKeyDilution: 5,
 			payFlags: { totalFee: 1000 },
 		};
-
 		const r = runtime.executeTx(txSKParams) as BaseTxReceipt;
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
@@ -53,8 +56,8 @@ describe("Key Registration transaction", function () {
 			type: types.TransactionType.KeyRegistration, // payment
 			sign: types.SignType.LogicSignature,
 			fromAccountAddr: john.account.addr,
-			voteKey: "v-key",
-			selectionKey: "s-key",
+			voteKey: vKey,
+			selectionKey: sKey,
 			voteFirst: 43,
 			voteLast: 1000,
 			voteKeyDilution: 5,
