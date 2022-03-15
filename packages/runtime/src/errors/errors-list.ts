@@ -550,13 +550,13 @@ const transactionErrors = {
 		title: "Inner app call with version %tealVersion%.",
 		description: "Inner app call with version %tealVersion%",
 	},
-	INNER_APPL_DEEP_EXCEEDED: {
+	INNER_APP_DEEP_EXCEEDED: {
 		number: 1409,
 		message: "Inner transaction appl deep exceeded",
 		title: "Inner transaction appl deep exceeded.",
 		description: "Inner transaction appl deep exceeded",
 	},
-	INNER_APPL_SELF_CALL: {
+	INNER_APP_SELF_CALL: {
 		number: 1410,
 		message: "Inner transaction appl self-call",
 		title: "Inner transaction appl self-call.",

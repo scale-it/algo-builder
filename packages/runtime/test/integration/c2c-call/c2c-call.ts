@@ -79,7 +79,7 @@ describe("C2C call", function () {
 			fundToApp(alice, thirdApp);
 		});
 
-		it("should failed: inner call to app implemented in older teal", () => {
+		it("should fail: inner call to app implemented in older teal", () => {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -99,7 +99,7 @@ describe("C2C call", function () {
 			);
 		});
 
-		it("should failed: inner tx appl self-call", () => {
+		it("should fail: inner tx app self-call", () => {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -136,7 +136,7 @@ describe("C2C call", function () {
 				}
 			});
 
-			it("Should success: inner call with maximum depth = 8", () => {
+			it("Should succeed: inner call with maximum depth = 8", () => {
 				const execParams: types.ExecParams = {
 					type: types.TransactionType.CallApp,
 					sign: types.SignType.SecretKey,
@@ -152,7 +152,7 @@ describe("C2C call", function () {
 				assert.doesNotThrow(() => runtime.executeTx(execParams));
 			});
 
-			it("Should failed: inner call with depth > 8", () => {
+			it("Should fail: inner call with depth > 8", () => {
 				const execParams: types.ExecParams = {
 					type: types.TransactionType.CallApp,
 					sign: types.SignType.SecretKey,

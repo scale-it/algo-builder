@@ -38,7 +38,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 			encTx.clearProgram = execParams.clearProgram;
 		}
 
-		// convert appArgs to buffer to easier compare.
+		// convert appArgs to buffer for an easier comparison
 		if (execParams.type === types.TransactionType.CallApp) {
 			execParams.appArgs = parsing.parseAppArgs(execParams.appArgs);
 		}

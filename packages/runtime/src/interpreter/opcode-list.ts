@@ -4110,16 +4110,16 @@ export class ITxnSubmit extends Op {
 		const contractAddress = getApplicationAddress(appID);
 		const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
-		// only support call app(NoOpt) for appl transaction type.
+		// Supports only calling app(NoOpt) for app transaction type.
 		if (
 			this.interpreter.subTxn.type === TransactionTypeEnum.APPLICATION_CALL &&
 			!isEncTxApplicationCall(this.interpreter.subTxn)
 		) {
-			console.warn("Only support application call in this version");
+			console.warn("Only supports application call in this version");
 			return;
 		}
 
-		// this fee will use for pay in application call next time
+		// this fee will be used to pay for application call next time
 		if (isEncTxApplicationCall(this.interpreter.subTxn)) {
 			this.interpreter.subTxn.fee = feeBal;
 		}
@@ -4154,7 +4154,7 @@ export class ITxnSubmit extends Op {
 			// save executed tx
 			this.interpreter.innerTxns.push(this.interpreter.subTxn);
 		} catch (err: any) {
-			// revert to begining context
+			// revert to initial context
 			if (this.interpreter.runtime.remainCtx)
 				this.interpreter.runtime.ctx = cloneDeep(this.interpreter.runtime.remainCtx);
 			throw new RuntimeError(err.errorDescriptor, err.messageArguments);

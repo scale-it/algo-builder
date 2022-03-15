@@ -70,7 +70,7 @@ export class Ctx implements Context {
 		this.pooledApplCost = 0;
 		// inner transaction props
 		this.isInnerTx = false;
-		// initial appl call stack
+		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 	}
@@ -425,18 +425,18 @@ export class Ctx implements Context {
 	}
 
 	/**
-	 * Verify we can excute current inner transaction.
+	 * Verify if the current inner transaction can be executed
 	 */
-	verifyAndUpdateInnerApplCallStack(): void {
+	verifyAndUpdateInnerAppCallStack(): void {
 		// verify
 		if (!this.isInnerTx) return;
 
 		if (this.innerTxAppIDCallStack.length >= 8) {
-			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED);
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED);
 		}
 		const appID = this.tx.apid ?? 0;
 		if (appID > 0 && this.innerTxAppIDCallStack.find((id) => id === appID) !== undefined) {
-			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL);
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APP_SELF_CALL);
 		}
 
 		// update inner tx call stack
@@ -684,7 +684,7 @@ export class Ctx implements Context {
 		let r: TxReceipt;
 
 		this.verifyMinimumFees();
-		this.verifyAndUpdateInnerApplCallStack();
+		this.verifyAndUpdateInnerAppCallStack();
 		txParams.forEach((txParam, idx) => {
 			const fromAccountAddr = webTx.getFromAddress(txParam);
 			this.deductFee(fromAccountAddr, idx, txParam.payFlags);
@@ -770,7 +770,7 @@ export class Ctx implements Context {
 						);
 					} catch (error) {
 						// if transaction type is Clear Call,
-						// remove the app without throwing error (rejecting tx)
+						// remove the app without throwing an error (rejecting tx)
 						// tested by running on algorand network
 						// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
 					}

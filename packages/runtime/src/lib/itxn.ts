@@ -175,7 +175,7 @@ export function setInnerTxField(
   switch (field) {
     case 'Type': {
       const txType = txValue as string;
-      // check txType supported in current teal version or not
+      // check if txType is supported in current teal version
       if (
         !txTypes[tealVersion].has(txType)
       ) {
