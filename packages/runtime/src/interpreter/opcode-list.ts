@@ -3934,7 +3934,7 @@ export class ITxnBegin extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (this.interpreter.subTxn === []) {
+		if (this.interpreter.subTxn.length > 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
 			});
@@ -3985,7 +3985,7 @@ export class ITxnField extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const valToSet: StackElem = stack.pop();
 
-		if (this.interpreter.subTxn === []) {
+		if (this.interpreter.subTxn.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
@@ -4026,7 +4026,7 @@ export class ITxnSubmit extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (typeof this.interpreter.subTxn === "undefined") {
+		if (this.interpreter.subTxn.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
@@ -4035,7 +4035,6 @@ export class ITxnSubmit extends Op {
 		// calculate fee accross all txns
 		let totalFee = 0;
 		let totalPassTx = 0;
-
 		for (const t of this.interpreter.runtime.ctx.gtxs) {
 			totalFee += t.fee ?? 0;
 		}
@@ -4047,7 +4046,12 @@ export class ITxnSubmit extends Op {
 			totalPassTx += gt.length;
 		}
 
-		const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + totalPassTx + 1;
+		for (const t of this.interpreter.subTxn) {
+			totalFee += t.fee ?? 0;
+		}
+		totalPassTx += this.interpreter.subTxn.length;
+
+		const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + totalPassTx;
 
 		// fee too less accross pool
 		const feeBal = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
@@ -4612,7 +4616,7 @@ export class ITxnNext extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (this.interpreter.subTxn === []) {
+		if (this.interpreter.subTxn.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
 			});

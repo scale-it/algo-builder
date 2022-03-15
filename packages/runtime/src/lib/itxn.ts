@@ -1,5 +1,4 @@
-import { types } from "@algo-builder/web";
-import algosdk, { decodeAddress, getApplicationAddress, TransactionType } from "algosdk";
+import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
