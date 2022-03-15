@@ -15,6 +15,7 @@ import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
+	AcctParamsGet,
 	Add,
 	Addr,
 	Addw,
@@ -2382,7 +2383,8 @@ describe("Teal Opcodes", function () {
 		describe("Gtxn", function () {
 			before(function () {
 				const tx = interpreter.runtime.ctx.tx;
-				// a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// a) 'apas' represents 'foreignAssets', b) 
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
 				// https://developer.algorand.org/docs/reference/transactions/
 				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
@@ -6189,7 +6191,7 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("TEALv6 opcodes", function () {
+	describe("TEALv6: divw and bsqrt opcodes", function () {
 		let stack: Stack<StackElem>;
 
 		const initStack = (values: StackElem[]): Stack<StackElem> => {
@@ -6250,6 +6252,120 @@ describe("Teal Opcodes", function () {
 			// length of input more than 64
 			stack = initStack([bigintToBigEndianBytes(BigInt("0x" + "ff".repeat(100)))]);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED);
+		});
+	});
+
+
+	describe("Tealv6: acct_params_get opcode", function(){
+		const stack = new Stack<StackElem>();
+		let interpreter: Interpreter;
+		let alice: AccountStoreI;
+		let bob: AccountStoreI;
+		let op: AcctParamsGet;
+		const zeroBalanceAddr = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
+
+		this.beforeEach(() => {
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			[alice, bob] = interpreter.runtime.defaultAccounts()
+			// init tx
+			interpreter.runtime.ctx.tx = {...TXN_OBJ, apat: [
+				Buffer.from(decodeAddress(alice.address).publicKey), 
+				Buffer.from(decodeAddress(zeroBalanceAddr).publicKey)
+			]};
+			interpreter.tealVersion = MaxTEALVersion; 
+			interpreter.runtime.ctx.gtxs = [TXN_OBJ];
+			interpreter.tealVersion = 6;
+			stack.push(decodeAddress(alice.address).publicKey);
+		});	
+
+		it("Should return balance", () => {
+			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(stack.pop(), 1n); // balance > 0
+			assert.equal(stack.pop(), alice.balance());
+		});
+
+		it("Should return min balance", () => {
+			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(stack.pop(), 1n); // balance > 0
+			assert.equal(stack.pop(), BigInt(alice.minBalance));
+		});
+
+		it("Should return Auth Address", () => {
+			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(stack.pop(), 1n); // balance > 0
+			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
+		});
+
+		it("Shoud return Auth Address - rekey case", () => {
+			// set spend key for alice is bob
+			alice.rekeyTo(bob.address);
+			interpreter.runtime.ctx.state.accounts.set(alice.address, alice);
+			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(stack.pop(), 1n); // balance > 0
+			assert.deepEqual(stack.pop(), decodeAddress(bob.address).publicKey);
+		});
+
+		it("Should return balance with account own zero balance", () => {
+			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
+			op.execute(stack);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.equal(stack.pop(), 0n);
+		});
+	
+		it("Should return min balance with account own zero balance", () => {
+			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
+			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
+			op.execute(stack);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.equal(stack.pop(), BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
+		});
+
+		it("Should return Auth Address with account own zero balance", () => {
+			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
+			op.execute(stack);
+			assert.equal(stack.pop(), 0n); // balance = 0
+			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
+		});
+
+		it("Should throw error when query unknow field", () => {
+			expectRuntimeError(
+				() => new AcctParamsGet(["Miles"], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD
+			);
+		});
+
+		it("Should throw error if query account not in ref account list", () => {
+			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			stack.push(decodeAddress(bob.address).publicKey)
+
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+			)
+
+			// valid address but not in tx accounts list
+			stack.push(parsing.stringToBytes("01234567890123456789012345678901"));
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+			)
+		});
+
+		it("Should throw error if top element in stack is not an address", () => {
+			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			stack.push(parsing.stringToBytes("ABCDE"));
+
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.INVALID_ADDR
+			)
 		});
 	});
 });
