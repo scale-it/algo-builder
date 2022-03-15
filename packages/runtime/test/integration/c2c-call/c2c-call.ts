@@ -114,7 +114,7 @@ describe("C2C call", function () {
 
 			expectRuntimeError(
 				() => runtime.executeTx(execParams),
-				RUNTIME_ERRORS.TRANSACTION.INNER_APPL_SELF_CALL
+				RUNTIME_ERRORS.TRANSACTION.INNER_APP_SELF_CALL
 			);
 		});
 
@@ -167,7 +167,7 @@ describe("C2C call", function () {
 
 				expectRuntimeError(
 					() => runtime.executeTx(execParams),
-					RUNTIME_ERRORS.TRANSACTION.INNER_APPL_DEEP_EXCEEDED
+					RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED
 				);
 				// TODO: compare runtime store and ensure it not change.
 				assert.isUndefined(runtime.remainCtx);
@@ -194,7 +194,7 @@ describe("C2C call", function () {
 		it("Should not support other inner tx appl(not include appcall)", () => {
 			assert.doesNotThrow(() => runtime.executeTx(execParams));
 			assert.isTrue(
-				(console["warn"] as any).calledWith("Only support application call in this version")
+				(console["warn"] as any).calledWith("Only supports application call in this version")
 			);
 		});
 	});
