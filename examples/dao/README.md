@@ -65,6 +65,9 @@ We use functional notation to describe use cases we will implement.
   - _tx0_: Call to DAO App with _appArg_ == "clear_proposal".
   - _tx1_: Withdraw _gov_tokens_ from _depositLsig_ back to _proposalLsig_ (ASA transfer).
 
+- `withdraw_from_proposal()` - Withdraw the assets from the proposalLsig back to the owner. Receiver must be the owner of the proposalLsig. Transaction composition:
+ - _tx0_: Withdraw _gov_tokens_ from _proposalLsig_ back to _proposer_ (owner) (ASA transfer).
+
 ## Spec document
 
 Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl).
@@ -104,3 +107,7 @@ To clear vote record (from voter's account), fails if the proposal is still in p
 To clear proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
 
     yarn run algob run scripts/run/clear_proposal.js
+
+To withdraw assets from proposalLsig back to the owner (proposer), fails if the receiver is not the owner of the proposalLsig:
+
+    yarn run algob run scripts/run/withdraw_from_proposal.js

@@ -20,6 +20,7 @@ const {
 	executeBefore,
 } = require("../scripts/run/common/tx-params");
 const { getApplicationAddress } = require("algosdk");
+const { aliceAcc } = require("@algo-builder/algob/test/mocks/account");
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;
@@ -791,7 +792,7 @@ describe("DAO test", function () {
 		// verify 50 votes deposited
 		assert.deepEqual(depositAcc.getAssetHolding(govTokenID).amount, beforeBal + 50n);
 
-		/* --------------------  Register 100 Votes by A for proposalB (passes this time)  -------------------- */
+		/* ----------  Register 100 Votes by A for proposalB (passes this time)  ----------- */
 		// call to DAO app by voter (to register deposited votes)
 		const registerVoteParamForProposalB = {
 			...registerVoteParam,
@@ -925,6 +926,9 @@ describe("DAO test", function () {
 		// verify proposalALsig recieved back deposit of 15 tokens
 		assert.equal(proposalALsigAcc.getAssetHolding(govTokenID).amount, 15n);
 
+		// verify deposit was withdraw from depositAcc
+		assert.equal(depositAcc.getAssetHolding(govTokenID).amount, 0);
+
 		// verify proposal config is deleted from localstate
 		for (const key of [
 			"name",
@@ -944,5 +948,30 @@ describe("DAO test", function () {
 		]) {
 			assert.isUndefined(proposalALsigAcc.getLocalState(appID, key));
 		}
+
+		//verify that the funds from proposalLsig can only be withdrawed back to the owner
+		const withdrawTx = [
+			{
+				type: types.TransactionType.TransferAsset,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: proposalALsigAcc.address,
+				toAccountAddr: proposerA.address,
+				amount: 5,
+				lsig: proposalALsig,
+				assetID: govTokenID,
+				payFlags: {},
+			},
+		];
+		let proposerABalance = proposerA.getAssetHolding(govTokenID).amount;
+		let proposalLsigABalance = proposalALsigAcc.getAssetHolding(govTokenID).amount;
+
+		runtime.executeTx(withdrawTx);
+		syncAccounts();
+
+		assert.equal(proposerA.getAssetHolding(govTokenID).amount, proposerABalance + 5n);
+		assert.equal(
+			proposalALsigAcc.getAssetHolding(govTokenID).amount,
+			proposalLsigABalance - 5n
+		);
 	});
 });
