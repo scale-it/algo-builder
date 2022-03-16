@@ -130,7 +130,7 @@ export class WebMode {
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
+	async executeTx(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
 		let signedTxn;
 		let txInfo;
 		let txns: Transaction[] = [];
@@ -170,5 +170,9 @@ export class WebMode {
 			return await this.waitForConfirmation(txInfo.txId);
 		}
 		throw new Error("Transaction Error");
+	}
+	/** @deprecated */
+	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
+		return this.executeTx(execParams);
 	}
 }

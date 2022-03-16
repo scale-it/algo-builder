@@ -1,4 +1,4 @@
-import { executeTransaction } from "@algo-builder/algob";
+import { executeTx } from "@algo-builder/algob";
 import * as algob from "@algo-builder/algob";
 import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, types as wtypes } from "@algo-builder/web";
@@ -20,12 +20,12 @@ export function getDeployerAccount(
 	return account;
 }
 
-export async function executeTx(
+export async function WithdrawExecuteTx(
 	deployer: algob.types.Deployer,
 	txnParams: wtypes.ExecParams
 ): Promise<void> {
 	try {
-		await executeTransaction(deployer, txnParams);
+		await executeTx(deployer, txnParams);
 	} catch (e) {
 		if (wtypes.isRequestError(e)) {
 			console.error("Transaction Failed", e?.response?.error);

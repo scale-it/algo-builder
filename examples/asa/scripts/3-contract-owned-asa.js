@@ -7,7 +7,7 @@
  * - Create contract account (with app_id embedded/passed as a template param)
  * - Deploy ASA using both contracts
  */
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { mkParam } = require("./transfer/common");
 const { types } = require("@algo-builder/web");
 
@@ -15,7 +15,7 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 
-	await executeTransaction(
+	await executeTx(
 		deployer,
 		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" })
 	);
@@ -46,7 +46,7 @@ async function run(runtimeEnv, deployer) {
 	const statelessAccount = deployer.getLsig("StateLessASALsig");
 	console.log("stateless Account Address:", statelessAccount.address());
 
-	await executeTransaction(
+	await executeTx(
 		deployer,
 		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" })
 	);
@@ -80,12 +80,12 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await executeTransaction(deployer, txGroup);
+	await executeTx(deployer, txGroup);
 
 	// This should fail because maximum number of asa creation limit is set to 1
 	try {
 		txGroup[1].asaName = "alu";
-		await executeTransaction(deployer, txGroup);
+		await executeTx(deployer, txGroup);
 	} catch (e) {
 		console.log(e.response?.error);
 	}

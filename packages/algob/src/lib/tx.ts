@@ -277,7 +277,7 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
  * or TransactionAndSign object(SDK transaction object and signer parameters)
  */
-export async function executeTransaction(
+export async function executeTx(
 	deployer: Deployer,
 	transactions:
 		| (wtypes.ExecParams | wtypes.TransactionAndSign)
@@ -302,7 +302,7 @@ export async function executeTransaction(
 
 	if (isSDK && signedTxn) {
 		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.log(confirmedTx);
+		console.debug(confirmedTx);
 		return confirmedTx;
 	}
 
@@ -317,7 +317,7 @@ export async function executeTransaction(
 		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
 		const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
 		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.log(confirmedTx);
+		console.debug(confirmedTx);
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
 		}
@@ -329,6 +329,16 @@ export async function executeTransaction(
 
 		throw error;
 	}
+}
+
+/** @deprecated */
+export async function executeTransaction(
+	deployer: Deployer,
+	transactions:
+		| (wtypes.ExecParams | wtypes.TransactionAndSign)
+		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
+): Promise<ConfirmedTxInfo> {
+	return executeTx(deployer, transactions);
 }
 
 /**
@@ -354,6 +364,6 @@ export async function executeSignedTxnFromFile(
 		algosdk.decodeSignedTransaction(signedTxn)
 	);
 	const confirmedTx = await deployer.sendAndWait(signedTxn);
-	console.log(confirmedTx);
+	console.debug(confirmedTx);
 	return confirmedTx;
 }

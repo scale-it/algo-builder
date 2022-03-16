@@ -39,7 +39,8 @@ Added:
 - Teal V6 support:
   - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
-
+  - Add new opcode acct_params_get([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  
 ### Template improvements
 
 - Using App instead of Lsig (Smart Signature) in `examples/dao` to simplify deposit management.
@@ -77,7 +78,7 @@ Added:
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
-
+- Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.

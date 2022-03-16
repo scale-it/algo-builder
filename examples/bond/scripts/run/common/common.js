@@ -1,4 +1,4 @@
-const { executeTransaction, readAppGlobalState } = require("@algo-builder/algob");
+const { executeTx, readAppGlobalState } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { accounts } = require("./accounts");
 
@@ -41,7 +41,7 @@ async function fundAccount(deployer, accountAddress) {
 		amountMicroAlgos: 200e6,
 		payFlags: {},
 	};
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 }
 
 /**
@@ -72,7 +72,7 @@ async function optInTx(deployer, managerAcc, lsig, assetIndex) {
 			payFlags: {},
 		},
 	];
-	await executeTransaction(deployer, optInTx);
+	await executeTx(deployer, optInTx);
 }
 
 /**

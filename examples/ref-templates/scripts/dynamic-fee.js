@@ -1,4 +1,4 @@
-const { executeTransaction, mkTxnParams } = require("./common/common");
+const { executeTx, mkTxnParams } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
-	await executeTransaction(deployer, transactions);
+	await executeTx(deployer, transactions);
 
 	transactions = [
 		mkTxnParams(masterAccount, escrow, 1000, signedContract, { totalFee: 1000 }),
@@ -49,7 +49,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction PASS - Correct transaction Fee is used and closeRemainderTo is set to master
-	await executeTransaction(deployer, transactions);
+	await executeTx(deployer, transactions);
 }
 
 module.exports = { default: run };

@@ -1,4 +1,4 @@
-const { executeTransaction, readAppGlobalState, balanceOf } = require("@algo-builder/algob");
+const { executeTx, readAppGlobalState, balanceOf } = require("@algo-builder/algob");
 const {
 	asaDef,
 	fundAccount,
@@ -37,7 +37,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 		payFlags: {},
 	};
 	// Create B_[i+1]
-	const newAsaInfo = await executeTransaction(deployer, deployTx);
+	const newAsaInfo = await executeTx(deployer, deployTx);
 	console.log(newAsaInfo);
 	const newIndex = newAsaInfo["asset-index"];
 	tokenMap.set(newBondToken, newIndex);
@@ -80,7 +80,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 	);
 
 	console.log(`* Creating dex ${i}! *`);
-	await executeTransaction(deployer, groupTx);
+	await executeTx(deployer, groupTx);
 	console.log("Dex created!");
 	return newIndex;
 };

@@ -1,6 +1,6 @@
 const { readAppGlobalState } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { executeTransaction } = require("./common");
+const { executeTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
@@ -40,14 +40,14 @@ async function run(runtimeEnv, deployer) {
 
 	// Delete Application
 	console.log("Deleting Application");
-	await executeTransaction(deployer, txnParam);
+	await executeTx(deployer, txnParam);
 
 	txnParam.fromAccount = alice;
 	txnParam.type = types.TransactionType.ClearApp;
 
 	// Clear voter's account
 	console.log("Clearing Alice's Account");
-	await executeTransaction(deployer, txnParam);
+	await executeTx(deployer, txnParam);
 }
 
 module.exports = { default: run };

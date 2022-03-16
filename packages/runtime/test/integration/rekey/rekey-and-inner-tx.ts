@@ -54,7 +54,7 @@ describe("Rekey transaction and inner transaction ", function () {
 		this.beforeEach(() => {
 			// deploy application
 			const approvalProgramFileName = "approval-rekey.teal";
-			const clearProgramFileName = "clear.teal";
+			const clearProgramFileName = "clear-rekey.teal";
 			appID = runtime.deployApp(
 				approvalProgramFileName,
 				clearProgramFileName,

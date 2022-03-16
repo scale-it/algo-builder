@@ -1,4 +1,4 @@
-const { executeTransaction, mkTxnParams } = require("./common/common");
+const { executeTx, mkTxnParams } = require("./common/common");
 const { globalZeroAddress, convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
@@ -8,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 
 	// let's make sure john account is active and it has enough balance
 	const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: "funding account" });
-	await executeTransaction(deployer, {
+	await executeTx(deployer, {
 		...txnParams,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -41,11 +41,11 @@ async function run(runtimeEnv, deployer) {
 	txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
 
 	// Fails because wrong secret is provided
-	await executeTransaction(deployer, txnParams);
+	await executeTx(deployer, txnParams);
 
 	// Passes because right secret is provided
 	txnParams.args = [convert.stringToBytes(secret)];
-	await executeTransaction(deployer, txnParams);
+	await executeTx(deployer, txnParams);
 }
 
 module.exports = { default: run };
