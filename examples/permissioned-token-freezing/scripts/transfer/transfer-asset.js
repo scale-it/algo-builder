@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -60,7 +60,7 @@ async function run(runtimeEnv, deployer) {
 
 	console.log("* Transferring 1000 Assets from Alice to Bob *");
 	try {
-		await executeTransaction(deployer, txGroup);
+		await executeTx(deployer, txGroup);
 	} catch (error) {
 		console.log("Error Occurred: ", error.response.error);
 	}

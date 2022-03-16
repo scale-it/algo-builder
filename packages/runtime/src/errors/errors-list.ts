@@ -389,7 +389,7 @@ maximun uint128`,
 			"Account Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
 		title: "Account Field Error at line %line%",
 		description: `Account field unknown`,
-	}
+	},
 };
 
 const runtimeGeneralErrors = {

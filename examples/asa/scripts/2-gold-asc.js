@@ -1,4 +1,4 @@
-const { executeTransaction, balanceOf, signTransactions } = require("@algo-builder/algob");
+const { executeTx, balanceOf, signTransactions } = require("@algo-builder/algob");
 const { types, getSuggestedParams } = require("@algo-builder/web");
 const { mkParam } = require("./transfer/common");
 const { makeAssetTransferTxnWithSuggestedParams } = require("algosdk");
@@ -7,7 +7,7 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const goldOwner = deployer.accountsByName.get("alice");
 
-	await executeTransaction(
+	await executeTx(
 		deployer,
 		mkParam(masterAccount, goldOwner.addr, 200e6, { note: "funding account" })
 	);
@@ -58,7 +58,7 @@ async function run(runtimeEnv, deployer) {
 		fromAccount: goldOwner,
 	};
 
-	await executeTransaction(deployer, { transaction: tx, sign: sign });
+	await executeTx(deployer, { transaction: tx, sign: sign });
 	await balanceOf(deployer, lsig.address(), goldAssetID);
 
 	// To get raw signed transaction you may use `signTransactions` function

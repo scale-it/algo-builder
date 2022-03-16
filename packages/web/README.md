@@ -2,7 +2,7 @@
 
 `@algo-builder/web` package allows you to interact with contracts easily. It is designed to be used with web dapps as well as scripts and user programs.
 
-This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](algobuilder.dev/api/web/classes/web.html#waitForConfirmation), [`executeTransaction`](<(algobuilder.dev/api/web/classes/web.html#executeTransaction)>), [`signTransaction`](<(algobuilder.dev/api/web/classes/web.html#signTransaction)>), etc. These functions help sending transactions and building dapps.
+This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](algobuilder.dev/api/web/classes/web.html#waitForConfirmation), [`executeTx`](<(algobuilder.dev/api/web/classes/web.html#executeTx)>), [`signTransaction`](<(algobuilder.dev/api/web/classes/web.html#signTransaction)>), etc. These functions help sending transactions and building dapps.
 
 You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/docs/algocomponents/algobutton) to easily integrate with web wallets.
 
@@ -38,7 +38,7 @@ Now you can use it to execute a transaction:
       amountMicroAlgos: amount,
       payFlags: {},
     };
-    let response = await web.executeTransaction(txParams);
+    let response = await web.executeTx(txParams);
 
 This code will make the transaction, let the user sign it using algosigner and send it to the network.
 

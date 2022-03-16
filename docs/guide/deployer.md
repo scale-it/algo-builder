@@ -18,7 +18,7 @@ Deployer class has the following modes:
 
 - Run Mode: In run mode user can access/read checkpoints, create logs but cannot write(create) checkpoints. Files placed in nested folders (non-direct children) of `scripts/` folder are considered to be run in this mode. Ex: `scripts/transfer/run-script.js`.
 
-  **Note:** In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTransaction`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
+  **Note:** In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTx`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
 
 Read more about deployment and scripts in our [spec](https://paper.dropbox.com/doc/Algorand-builder-specs--A_yfjbGmtkx5BYMOy8Ha50~uAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621&h2=Scripts).
 
@@ -72,7 +72,7 @@ For opting in to ASA, `deployer` supports following methods:
   To opt in to ASA you can use either `Asset Index` or `name of the ASA`. Using Asset Index is useful when asset is not deployed using deployer.
 
 - There is one more method which you can use to opt-in, It can be used with group transactions also
-  - `executeTransaction` to opt-in single account or contract account to ASA.
+  - `executeTx` to opt-in single account or contract account to ASA.
   - Ex: To opt-in a single account, Params will look like this:
   ```js
   const execParam: ExecParams = {
@@ -121,8 +121,8 @@ For opting in to App, `deployer` supports the following methods:
 
   - To opt in to App you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
 
-- Like with ASA, we can also use `executeTransaction` to opt-in a single account or contract account to App.
-  - `executeTransaction` to opt-in single account or contract account to App.
+- Like with ASA, we can also use `executeTx` to opt-in a single account or contract account to App.
+  - `executeTx` to opt-in single account or contract account to App.
   - Ex: To opt-in a single account, Params will look like this:
   ```js
   const execParam: ExecParams = {
