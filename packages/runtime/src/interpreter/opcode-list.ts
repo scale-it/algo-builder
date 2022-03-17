@@ -37,7 +37,7 @@ import {
 	TxArrFields,
 	ZERO_ADDRESS,
 } from "../lib/constants";
-import { createBaseSubInnerTx, setInnerTxField } from "../lib/itxn";
+import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
 	assertLen,
@@ -3948,7 +3948,7 @@ export class ITxnBegin extends Op {
 			});
 		}
 
-		this.interpreter.subTxn = [createBaseSubInnerTx(this.interpreter, this.line)];
+		this.interpreter.subTxn = [addInnerTransaction(this.interpreter, this.line)];
 	}
 }
 
@@ -4032,33 +4032,15 @@ export class ITxnSubmit extends Op {
 			});
 		}
 
-		// calculate fee accross all txns
-		let totalFee = 0;
-		let totalPassTx = 0;
-		for (const t of this.interpreter.runtime.ctx.gtxs) {
-			totalFee += t.fee ?? 0;
-		}
-
-		for (const gt of this.interpreter.innerTxns) {
-			for (const t of gt) {
-				totalFee += t.fee ?? 0;
-			}
-			totalPassTx += gt.length;
-		}
-
-		for (const t of this.interpreter.subTxn) {
-			totalFee += t.fee ?? 0;
-		}
-		totalPassTx += this.interpreter.subTxn.length;
-
-		const totalTxCnt = this.interpreter.runtime.ctx.gtxs.length + totalPassTx;
+		// calucate remain fee after execute inner tx
+		const credit = calculateInnerTxCredit(this.interpreter, true);
 
 		// fee too less accross pool
-		const feeBal = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
+		const feeBal = credit.remainFee;
 		if (feeBal < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
-				required: ALGORAND_MIN_TX_FEE * totalTxCnt,
-				collected: totalFee,
+				required: credit.requiredFee,
+				collected: credit.collectedFee,
 			});
 		}
 
@@ -4630,6 +4612,6 @@ export class ITxnNext extends Op {
 			});
 		}
 
-		this.interpreter.subTxn.push(createBaseSubInnerTx(this.interpreter, this.line));
+		this.interpreter.subTxn.push(addInnerTransaction(this.interpreter, this.line));
 	}
 }

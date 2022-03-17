@@ -14,7 +14,7 @@ import {
 } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields } from "./txn";
+import { assetTxnFields, calculateFeeCredit } from "./txn";
 
 // requires their type as number
 const numberTxnFields: { [key: number]: Set<string> } = {
@@ -273,12 +273,51 @@ export function setInnerTxField(
 }
 
 /**
- * TODO: What I am supposed to do???
+ * Calculate remain fee after after execute inners Tx;
+ * @param interpeter current interpeter contain context
+ * @param includeSubTxn include remain fee of current subtxn
+ */
+export function calculateInnerTxCredit(interpeter: Interpreter, includeSubTxn = false) {
+	// fee remain in group tx
+	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
+	// fee remain in older inners tx
+	const executedInnerCredit = interpeter.innerTxns.map((inner) => calculateFeeCredit(inner));
+
+	const credit = executedInnerCredit.reduce((pre, curr) => {
+		pre.collectedFee += curr.collectedFee;
+		pre.requiredFee += curr.requiredFee;
+		return pre;
+	}, outnerCredit);
+
+	// when submit inner tx
+	if (includeSubTxn) {
+		const subTxnCredit = calculateFeeCredit(interpeter.subTxn);
+		credit.collectedFee += subTxnCredit.collectedFee;
+		credit.requiredFee += subTxnCredit.requiredFee;
+	}
+
+	credit.remainFee = credit.collectedFee - credit.requiredFee;
+
+	return credit;
+}
+
+// return 0 if transaction pay by pool fee
+// return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
+export function getInnerTxDefaultFee(interpeter: Interpreter): number {
+	// sum of outnerCredit.remain and executedInnerCredit remain
+	const creditFee = calculateInnerTxCredit(interpeter).remainFee;
+	// if remain fee is enough to pay current tx set default fee to zero
+	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
+	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;
+}
+
+/**
+ * Add new inner tx to inner tx group
  * @param interpreter interpeter execute current tx
  * @param line line number
  * @returns EncTx object
  */
-export function createBaseSubInnerTx(interpreter: Interpreter, line: number): EncTx {
+export function addInnerTransaction(interpreter: Interpreter, line: number): EncTx {
 	// get app, assert it exists
 	const appID = interpreter.runtime.ctx.tx.apid ?? 0;
 	interpreter.runtime.assertAppDefined(appID, interpreter.getApp(appID, line), line);
@@ -291,36 +330,11 @@ export function createBaseSubInnerTx(interpreter: Interpreter, line: number): En
 		line
 	);
 
-	// calculate feeCredit(extra fee) accross all txns
-	let totalFee = 0;
-	let totalPassTx = 0;
-
-	for (const t of interpreter.runtime.ctx.gtxs) {
-		totalFee += t.fee ?? 0;
-	}
-
-	for (const gt of interpreter.innerTxns) {
-		for (const t of gt) {
-			totalFee += t.fee ?? 0;
-		}
-		totalPassTx += gt.length;
-	}
-
-	const totalTxCnt = interpreter.runtime.ctx.gtxs.length + totalPassTx;
-	const feeCredit = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
-
-	let txFee;
-	if (feeCredit >= ALGORAND_MIN_TX_FEE) {
-		txFee = 0; // we have enough fee in pool
-	} else {
-		const diff = feeCredit - ALGORAND_MIN_TX_FEE;
-		txFee = diff >= 0 ? diff : ALGORAND_MIN_TX_FEE;
-	}
-
 	return {
 		// set sender, fee, fv, lv
 		snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
-		fee: txFee,
+		// user can change this fee
+		fee: getInnerTxDefaultFee(interpreter),
 		fv: interpreter.runtime.ctx.tx.fv,
 		lv: interpreter.runtime.ctx.tx.lv,
 		// to avoid type hack
