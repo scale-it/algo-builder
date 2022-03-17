@@ -35,4 +35,4 @@ tealCode: |
   return
 base64ToBytes:
   - 0
-SCParams: {}
+scParams: {}

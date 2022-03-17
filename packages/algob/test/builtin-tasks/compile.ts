@@ -128,6 +128,7 @@ describe("Compile task", () => {
 	it("should return correct ASCCache from CompileOp", async () => {
 		const result = await op.ensureCompiled(f3PY, true);
 		const expected = fs.readFileSync(path.join(ASSETS_DIR, "gold-asa-py-check.yaml"), "utf8");
+		assert.isDefined(result.scParams);
 		assert.deepEqual(YAML.stringify(result), expected);
 	});
 });
