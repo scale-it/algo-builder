@@ -10,7 +10,11 @@ import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
-import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
+import {
+	ALGORAND_MIN_TX_FEE,
+	MAX_GLOBAL_SCHEMA_ENTRIES,
+	MAX_LOCAL_SCHEMA_ENTRIES,
+} from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
@@ -328,6 +332,20 @@ export class Ctx implements Context {
 		}
 
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
+
+		//verify that MaxGlobalSchemaEntries <= 64 and MaxLocalSchemaEntries <= 16
+		const globalSchemaEntries = flags.globalInts + flags.globalBytes;
+		const localSchemaEntries = flags.localInts + flags.localBytes;
+
+		if (
+			localSchemaEntries > MAX_LOCAL_SCHEMA_ENTRIES &&
+			globalSchemaEntries > MAX_GLOBAL_SCHEMA_ENTRIES
+		) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED, {
+				localMax: MAX_LOCAL_SCHEMA_ENTRIES,
+				globalMax: MAX_GLOBAL_SCHEMA_ENTRIES,
+			});
+		}
 
 		// create app with id = 0 in globalApps for teal execution
 		const app = senderAcc.addApp(0, flags, approvalProgTEAL, clearProgTEAL);

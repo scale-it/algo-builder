@@ -510,6 +510,13 @@ const runtimeGeneralErrors = {
 		title: "Transaction cannot close account to its sender.",
 		description: "Transaction cannot close account to its sender",
 	},
+	MAX_SCHEMA_ENTRIES_EXCEEDED: {
+		number: 1508,
+		message: "Local/Global state keys has too many entries",
+		title: "Max schema entries exceeded",
+		description: `Local state keys entries cannot exceed %localMax% and global state key
+					  entires cannot exceed %globalMax.`,
+	},
 };
 
 const transactionErrors = {
