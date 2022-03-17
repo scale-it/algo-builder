@@ -49,6 +49,9 @@ export class CompileOp {
 		if (force === undefined) {
 			force = false;
 		}
+		if (scTmplParams === undefined) {
+			scTmplParams = {};
+		}
 
 		const filePath = getPathFromDirRecursive(ASSETS_DIR, filename);
 		if (filePath === undefined) {
@@ -77,7 +80,7 @@ export class CompileOp {
 			return a;
 		}
 		console.log("compiling", filename);
-		a = await this.compile(filename, teal, thash);
+		a = await this.compile(filename, teal, thash, scTmplParams);
 		const cacheFilename = path.join(CACHE_DIR, filename + ".yaml");
 		this.writeFile(cacheFilename, YAML.stringify(a));
 		return a;
@@ -113,7 +116,7 @@ export class CompileOp {
 		return this.algocl.compile(code).do();
 	}
 
-	async compile(filename: string, tealCode: string, tealHash: number): Promise<ASCCache> {
+	async compile(filename: string, tealCode: string, tealHash: number, SCParams: SCParams): Promise<ASCCache> {
 		try {
 			const co = await this.callCompiler(tealCode);
 			return {
@@ -125,6 +128,7 @@ export class CompileOp {
 				// compiled base64 converted into bytes
 				base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64")),
 				tealCode: tealCode,
+				SCParams: SCParams
 			};
 		} catch (e) {
 			if (types.isRequestError(e)) {
