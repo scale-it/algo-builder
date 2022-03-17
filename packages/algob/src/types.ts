@@ -717,7 +717,7 @@ export interface ASCCache {
 	srcHash: number; // source code hash
 	base64ToBytes: Uint8Array; // compiled base64 in bytes
 	tealCode: string;
-	SCParams: SCParams;
+	scParams: SCParams;
 }
 
 export interface AppCache {
