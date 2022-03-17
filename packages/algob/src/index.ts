@@ -20,7 +20,7 @@ import {
 	readAppGlobalState,
 	readAppLocalState,
 } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, signTransactions } from "./lib/tx";
+import { executeSignedTxnFromFile, executeTx, signTransactions } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
 
@@ -32,7 +32,7 @@ export {
 	loadAccountsFromFile,
 	loadAccountsFromFileSync,
 	loadAccountsFromEnv,
-	executeTransaction,
+	executeTx,
 	executeSignedTxnFromFile,
 	balanceOf,
 	printAssets,

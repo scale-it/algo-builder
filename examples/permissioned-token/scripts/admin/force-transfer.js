@@ -1,4 +1,4 @@
-const { balanceOf, executeTransaction } = require("@algo-builder/algob");
+const { balanceOf, executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 const accounts = require("../common/accounts");
@@ -81,7 +81,7 @@ async function forceTransfer(deployer, fromAddr, toAddr, amount) {
 
 	console.log(`* Transferring ${amount} tokens from
     [${fromAddr}] to [${toAddr}] *`);
-	await executeTransaction(deployer, forceTxGroup);
+	await executeTx(deployer, forceTxGroup);
 
 	console.log(`* ${toAddr}(receiver) asset holding: *`);
 	console.log(await balanceOf(deployer, toAddr, tesla.assetIndex));

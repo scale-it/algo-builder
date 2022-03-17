@@ -1,6 +1,6 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { executeTransaction } = require("../common/common");
+const { executeTx } = require("../common/common");
 const accounts = require("../common/accounts");
 
 // here instead of updating the asset reserve by modifyAsset tx,
@@ -19,7 +19,7 @@ async function updateReserveByRekeying(deployer, address) {
 	};
 
 	console.log(`* Rekeying reserve address from: ${owner.addr} to: ${address} *`);
-	await executeTransaction(deployer, rekeyReserveParam);
+	await executeTx(deployer, rekeyReserveParam);
 	console.log("* Rekeying Successful *");
 }
 
@@ -99,7 +99,7 @@ async function updateReserveByAssetConfig(deployer, address) {
 	];
 
 	console.log(`* Updating reserve address to: ${address} *`);
-	await executeTransaction(deployer, updateReserveParams);
+	await executeTx(deployer, updateReserveParams);
 	console.log("* Update Successful *");
 
 	console.log(

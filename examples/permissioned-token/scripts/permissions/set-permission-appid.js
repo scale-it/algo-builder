@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
 
@@ -22,7 +22,7 @@ async function run(runtimeEnv, deployer) {
 
 		// set new permissions app id in controller smart contract
 		// note: in current version, this replaces the previous appID in controller
-		await executeTransaction(deployer, {
+		await executeTx(deployer, {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
 			fromAccount: owner, // asa manager account

@@ -4,7 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
+`executeTx` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams` or `ExecParams[]` as parameter.
 If you pass an array of `ExecParams`, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
@@ -201,9 +201,9 @@ Ex:
 
 Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.
 
-## Sign and Send SDK Transaction object using `executeTransaction` function
+## Sign and Send SDK Transaction object using `executeTx` function
 
-`executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
+`executeTx` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
 
 ```
 const tx = makeAssetCreateTxn(
@@ -217,7 +217,7 @@ const transaction: wtypes.TransactionAndSign = {
   sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
 }
 
-const res = await executeTransaction(deployer, transaction);
+const res = await executeTx(deployer, transaction);
 ```
 
 You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.

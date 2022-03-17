@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { accounts } = require("./common/accounts.js");
 const { issuePrice, tokenMap, buyTxNode } = require("./common/common.js");
 const { redeem } = require("./redeem.js");
@@ -34,6 +34,6 @@ exports.epoch1 = async function (deployer) {
 	);
 
 	console.log("Elon buying 4 more bonds!");
-	await executeTransaction(deployer, groupTx);
+	await executeTx(deployer, groupTx);
 	console.log("Elon bought 4 more bonds!");
 };

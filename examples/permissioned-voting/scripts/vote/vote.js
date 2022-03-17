@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { convert } = require("@algo-builder/algob");
-const { executeTransaction } = require("./common");
+const { executeTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -8,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTransaction(deployer, {
+	await executeTx(deployer, {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -16,7 +16,7 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	});
-	await executeTransaction(deployer, {
+	await executeTx(deployer, {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -59,18 +59,18 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction Passes because Alice is registered voter and hasn't voted yet.
 	console.log("Vote being casted by Alice");
-	await executeTransaction(deployer, transactions);
+	await executeTx(deployer, transactions);
 
 	// Transaction Fails because Alice can only vote once.
 	console.log("Alice tries to cast vote again");
-	await executeTransaction(deployer, transactions);
+	await executeTx(deployer, transactions);
 
 	// Transaction Fails because bob is not registered voter.
 	console.log("Bob tries to cast vote");
 	transactions[0].fromAccount = bob;
 	transactions[1].fromAccount = bob;
 
-	await executeTransaction(deployer, transactions);
+	await executeTx(deployer, transactions);
 }
 
 module.exports = { default: run };

@@ -23,13 +23,13 @@ async function run(
 		amountMicroAlgos: 10e6, // 10 Algos
 		payFlags: { note: "funding account" },
 	};
-	// We need to copy, because the executeTransaction is async
+	// We need to copy, because the executeTx is async
 	const aliceFunding = Object.assign({}, bobFunding);
 	aliceFunding.toAccountAddr = alice.addr;
 	aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
 	await Promise.all([
-		algob.executeTransaction(deployer, bobFunding),
-		algob.executeTransaction(deployer, aliceFunding),
+		algob.executeTx(deployer, bobFunding),
+		algob.executeTx(deployer, aliceFunding),
 	]);
 
 	/** ** now bob creates and deploys the escrow account ****/
