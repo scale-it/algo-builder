@@ -338,7 +338,7 @@ export class Ctx implements Context {
 		const localSchemaEntries = flags.localInts + flags.localBytes;
 
 		if (
-			localSchemaEntries > MAX_LOCAL_SCHEMA_ENTRIES &&
+			localSchemaEntries > MAX_LOCAL_SCHEMA_ENTRIES ||
 			globalSchemaEntries > MAX_GLOBAL_SCHEMA_ENTRIES
 		) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED, {
