@@ -4599,7 +4599,7 @@ export class ITxnNext extends Op {
 
 	execute(_stack: TEALStack): void {
 		if (this.interpreter.subTxn.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
 		}

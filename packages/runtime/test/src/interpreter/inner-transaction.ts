@@ -6,7 +6,7 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum } from "../../../src/lib/constants";
 import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
@@ -1322,6 +1322,51 @@ describe("Inner Transactions", function () {
           return
         `;
 				expectRuntimeError(() => executeTEAL(invalidProg), RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR);
+			});
+		});
+
+		describe("itxn_next", () => {
+			this.beforeEach(() => {
+				setUpInterpreter(6, 1e9);
+			});
+
+			it("Should succeed: create inner group transactions", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 2000
+				itxn_field Fee
+				int 1
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+
+				assert.equal(interpreter.innerTxns.length, 0);
+				assert.equal(interpreter.subTxn.length, 2);
+			});
+
+			it("should fail: use itxn_next without start with itxn_begin", () => {
+				const prog = `
+					itxn_next
+					int 1
+					return
+				`;
+				expectRuntimeError(
+					() => executeTEAL(prog),
+					RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN
+				);
 			});
 		});
 	});
