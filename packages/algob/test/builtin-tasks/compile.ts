@@ -10,7 +10,7 @@ import YAML from "yaml";
 import { compile } from "../../src/builtin-tasks/compile";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { CompileOp } from "../../src/lib/compile";
-import type { ASCCache } from "../../src/types";
+import type { ASCCache, SCParams } from "../../src/types";
 import { useFixtureProjectCopy } from "../helpers/project";
 
 interface CompileIn {
@@ -23,7 +23,7 @@ class CompileOpMock extends CompileOp {
 	compiledFiles = [] as CompileIn[];
 	writtenFiles = [] as string[];
 
-	async compile(filename: string, _tealCode: string, tealHash: number): Promise<ASCCache> {
+	async compile(filename: string, _tealCode: string, tealHash: number, SCParams: SCParams): Promise<ASCCache> {
 		this.compiledFiles.push({ filename, tealHash });
 		this.timestamp++;
 		return {
@@ -34,6 +34,7 @@ class CompileOpMock extends CompileOp {
 			srcHash: tealHash,
 			tealCode: _tealCode,
 			base64ToBytes: new Uint8Array(1),
+			SCParams: SCParams
 		};
 	}
 
