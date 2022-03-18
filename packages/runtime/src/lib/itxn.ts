@@ -296,7 +296,7 @@ export function calculateInnerTxCredit(
 
 	// when submit inner tx(or group inner tx)
 	if (includeCurrentInnerTx) {
-		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxGroup);
+		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxnGroup);
 		credit.collectedFee += subTxnCredit.collectedFee;
 		credit.requiredFee += subTxnCredit.requiredFee;
 	}

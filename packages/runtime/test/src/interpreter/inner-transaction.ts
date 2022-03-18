@@ -34,7 +34,7 @@ describe("Inner Transactions", function () {
 		while (interpreter.stack.length() !== 0) {
 			interpreter.stack.pop();
 		}
-		interpreter.currentInnerTxGroup = [];
+		interpreter.currentInnerTxnGroup = [];
 		interpreter.runtime.ctx.pooledApplCost = 0;
 		interpreter.instructions = [];
 		interpreter.innerTxnGroups = [];
@@ -1354,7 +1354,7 @@ describe("Inner Transactions", function () {
 				assert.doesNotThrow(() => executeTEAL(prog));
 
 				assert.equal(interpreter.innerTxnGroups.length, 0);
-				assert.equal(interpreter.currentInnerTxGroup.length, 2);
+				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
 			});
 
 			it("Should fail: use itxn_next without start with itxn_begin", () => {
