@@ -15,7 +15,7 @@ export class RuntimeError extends Error {
 	}
 
   public readonly errorDescriptor: ErrorDescriptor;
-  public readonly messageArguments: AnyMap;
+  public readonly args: AnyMap;
   public readonly number: number;
   public readonly parent?: Error;
 
