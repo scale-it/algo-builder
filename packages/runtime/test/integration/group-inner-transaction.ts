@@ -15,7 +15,7 @@ describe("Group inner transaction", function () {
 
 	function syncAccounts(): void {
 		contractAcc = runtime.getAccount(appInfo.applicationAccount);
-		alice = runtime.getAccount(alice.address);
+		[alice] = runtime.defaultAccounts();
 	}
 	this.beforeEach(() => {
 		runtime = new Runtime([]);

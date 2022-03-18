@@ -1357,7 +1357,7 @@ describe("Inner Transactions", function () {
 				assert.equal(interpreter.currentInnerTxGroup.length, 2);
 			});
 
-			it("should fail: use itxn_next without start with itxn_begin", () => {
+			it("Should fail: use itxn_next without start with itxn_begin", () => {
 				const prog = `
 					itxn_next
 					int 1

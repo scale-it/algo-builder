@@ -4032,7 +4032,7 @@ export class ITxnSubmit extends Op {
 			});
 		}
 
-		// calucate remain fee after execute inner tx
+		// calculate remaining fee after executing an inner tx
 		const credit = calculateInnerTxCredit(this.interpreter, true);
 
 		// fee too less accross pool
