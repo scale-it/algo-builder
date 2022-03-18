@@ -14,7 +14,7 @@ import {
 } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields, calculateFeeCredit } from "./txn";
+import { assetTxnFields, calculateFeeCredit, CreditFeeType } from "./txn";
 
 // requires their type as number
 const numberTxnFields: { [key: number]: Set<string> } = {
@@ -277,7 +277,10 @@ export function setInnerTxField(
  * @param interpeter current interpeter contain context
  * @param includeCurrentInnerTx include remain fee of current inner tx group
  */
-export function calculateInnerTxCredit(interpeter: Interpreter, includeCurrentInnerTx = false) {
+export function calculateInnerTxCredit(
+	interpeter: Interpreter,
+	includeCurrentInnerTx = false
+): CreditFeeType {
 	// remaining fee in group tx
 	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
 	// remaining fee in older inners tx
@@ -298,7 +301,7 @@ export function calculateInnerTxCredit(interpeter: Interpreter, includeCurrentIn
 		credit.requiredFee += subTxnCredit.requiredFee;
 	}
 
-	credit.remainFee = credit.collectedFee - credit.requiredFee;
+	credit.remainingFee = credit.collectedFee - credit.requiredFee;
 
 	return credit;
 }
@@ -307,7 +310,7 @@ export function calculateInnerTxCredit(interpeter: Interpreter, includeCurrentIn
 // return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
 export function getInnerTxDefaultFee(interpeter: Interpreter): number {
 	// sum of outnerCredit.remain and executedInnerCredit remain
-	const creditFee = calculateInnerTxCredit(interpeter).remainFee;
+	const creditFee = calculateInnerTxCredit(interpeter).remainingFee;
 	// if remain fee is enough to pay current tx set default fee to zero
 	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
 	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;

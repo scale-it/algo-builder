@@ -417,7 +417,7 @@ export class Ctx implements Context {
 
 		const credit = calculateFeeCredit(this.gtxs);
 
-		if (credit.remainFee < 0) {
+		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
 				required: credit.requiredFee,
 				collected: credit.collectedFee,

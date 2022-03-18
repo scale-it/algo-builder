@@ -4035,9 +4035,8 @@ export class ITxnSubmit extends Op {
 		// calculate remaining fee after executing an inner tx
 		const credit = calculateInnerTxCredit(this.interpreter, true);
 
-		// fee too less accross pool
-		const feeBal = credit.remainFee;
-		if (feeBal < 0) {
+		// remaining fee is negative => can't paid for transaction => fail
+		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
 				required: credit.requiredFee,
 				collected: credit.collectedFee,
