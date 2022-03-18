@@ -1,14 +1,20 @@
-import { decodeAddress } from "algosdk";
+import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { MaxTxnNoteBytes, TxnFields, TxnTypeMap } from "../lib/constants";
+import {
+	ALGORAND_MIN_TX_FEE,
+	MaxTxnNoteBytes,
+	TransactionTypeEnum,
+	TxnFields,
+	TxnTypeMap,
+} from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields } from "./txn";
+import { assetTxnFields, calculateFeeCredit, CreditFeeType } from "./txn";
 
 // requires their type as number
 const numberTxnFields: { [key: number]: Set<string> } = {
@@ -264,4 +270,82 @@ export function setInnerTxField(
 	}
 
 	return subTxn;
+}
+
+/**
+ * Calculate remaining fee after executing an inner transaction;
+ * @param interpeter current interpeter contain context
+ * @param includeCurrentInnerTx include remaining fee of current inner tx group
+ */
+export function calculateInnerTxCredit(
+	interpeter: Interpreter,
+	includeCurrentInnerTx = false
+): CreditFeeType {
+	// remaining fee in group tx
+	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
+	// remaining fee in older inners tx
+	const executedInnerCredit = interpeter.innerTxnGroups.map((inner) =>
+		calculateFeeCredit(inner)
+	);
+
+	const credit = executedInnerCredit.reduce((pre, curr) => {
+		pre.collectedFee += curr.collectedFee;
+		pre.requiredFee += curr.requiredFee;
+		return pre;
+	}, outnerCredit);
+
+	// when submit inner tx(or group inner tx)
+	if (includeCurrentInnerTx) {
+		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxnGroup);
+		credit.collectedFee += subTxnCredit.collectedFee;
+		credit.requiredFee += subTxnCredit.requiredFee;
+	}
+
+	credit.remainingFee = credit.collectedFee - credit.requiredFee;
+
+	return credit;
+}
+
+// return 0 if transaction pay by pool fee
+// return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
+export function getInnerTxDefaultFee(interpeter: Interpreter): number {
+	// sum of outnerCredit.remaining and executedInnerCredit remaining
+	const creditFee = calculateInnerTxCredit(interpeter).remainingFee;
+	// if remaining fee is enough to pay current tx set default fee to zero
+	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
+	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;
+}
+
+/**
+ * Add new inner tx to inner tx group
+ * @param interpreter interpeter execute current tx
+ * @param line line number
+ * @returns EncTx object
+ */
+export function addInnerTransaction(interpreter: Interpreter, line: number): EncTx {
+	// get app, assert it exists
+	const appID = interpreter.runtime.ctx.tx.apid ?? 0;
+	interpreter.runtime.assertAppDefined(appID, interpreter.getApp(appID, line), line);
+
+	// get application's account
+	const address = getApplicationAddress(appID);
+	const applicationAccount = interpreter.runtime.assertAccountDefined(
+		address,
+		interpreter.runtime.ctx.state.accounts.get(address),
+		line
+	);
+
+	return {
+		// set sender, fee, fv, lv
+		snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
+		// user can change this fee
+		fee: getInnerTxDefaultFee(interpreter),
+		fv: interpreter.runtime.ctx.tx.fv,
+		lv: interpreter.runtime.ctx.tx.lv,
+		// to avoid type hack
+		gen: interpreter.runtime.ctx.tx.gen,
+		gh: interpreter.runtime.ctx.tx.gh,
+		txID: "",
+		type: TransactionTypeEnum.UNKNOWN,
+	};
 }

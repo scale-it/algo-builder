@@ -12,6 +12,7 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
+import { calculateFeeCredit } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -409,20 +410,17 @@ export class Ctx implements Context {
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
 	verifyMinimumFees(): void {
+		// pooled fee for inner tx is calculated at itx_submit
 		if (this.isInnerTx) {
 			return;
-		} // pooled fee for inner tx is calculated at itx_submit
-		let collected = 0;
-		for (const val of this.gtxs) {
-			if (val.fee === undefined) val.fee = 0;
-			collected += val.fee;
 		}
 
-		const required = this.gtxs.length * ALGORAND_MIN_TX_FEE;
-		if (collected < required) {
+		const credit = calculateFeeCredit(this.gtxs);
+
+		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
-				required: required,
-				collected: collected,
+				required: credit.requiredFee,
+				collected: credit.collectedFee,
 			});
 		}
 	}

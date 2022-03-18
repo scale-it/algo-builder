@@ -10,6 +10,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import {
+	ALGORAND_MIN_TX_FEE,
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
@@ -432,3 +433,29 @@ const _getAddress = (addr?: Uint8Array): string | undefined => {
 	}
 	return undefined;
 };
+
+export interface CreditFeeType {
+	remainingFee: number;
+	collectedFee: number;
+	requiredFee: number;
+}
+
+/**
+ *
+ * @param groupTx group transaction
+ * @returns remainingFee - fee remaining after execute group Tx
+ * 			collected fee - fee collected from group Tx
+ * 			required fee - fee require to execute group tx
+ */
+export function calculateFeeCredit(groupTx: EncTx[]): CreditFeeType {
+	let collectedFee = 0;
+	for (const tx of groupTx) {
+		collectedFee += tx.fee ?? 0;
+	}
+	const requiredFee = groupTx.length * ALGORAND_MIN_TX_FEE;
+	return {
+		remainingFee: collectedFee - requiredFee,
+		collectedFee,
+		requiredFee,
+	};
+}

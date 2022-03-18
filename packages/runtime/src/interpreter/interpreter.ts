@@ -62,8 +62,8 @@ export class Interpreter {
 	// It is used to provide sub routine functionality
 	callStack: Stack<number>;
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
-	subTxn: EncTx | undefined; // "current" inner transaction
-	innerTxns: EncTx[]; // executed inner transactions
+	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
+	innerTxnGroups: EncTx[][]; // executed inner transactions
 
 	constructor() {
 		this.stack = new Stack<StackElem>();
@@ -82,8 +82,8 @@ export class Interpreter {
 		this.runtime = <Runtime>{};
 		this.callStack = new Stack<number>();
 		this.labelMap = new Map<string, number>();
-		this.subTxn = undefined;
-		this.innerTxns = [];
+		this.currentInnerTxnGroup = [];
+		this.innerTxnGroups = [];
 	}
 
 	/**
