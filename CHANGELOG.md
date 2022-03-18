@@ -39,7 +39,7 @@ Added:
 - Teal V6 support:
   - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
-
+  - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
 ### Template improvements
 
 - Using App instead of Lsig (Smart Signature) in `examples/dao` to simplify deposit management.
