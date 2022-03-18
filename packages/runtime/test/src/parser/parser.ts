@@ -2020,16 +2020,15 @@ describe("Parser", function () {
 			});
 
 			it("itxn_next", () => {
-				Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
-					const res = opcodeFromSentence(
-						["itxn_next"],
-						1,
-						interpreter,
-						ExecutionMode.APPLICATION
-					);
-					const expected = new ITxnNext([], 1, interpreter);
-					assert.deepEqual(res, expected);
-				});
+				// can parse opcode
+				const res = opcodeFromSentence(
+					["itxn_next"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ITxnNext([], 1, interpreter);
+				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
