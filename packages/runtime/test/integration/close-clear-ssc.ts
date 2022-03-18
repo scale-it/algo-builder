@@ -144,7 +144,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		// verify app is not deleted from account's local state (as tx is rejected)
 		const res = john.getAppFromLocal(appID);
 		assert.isDefined(res);
-		// minimum balance should remain the same as closeOutSSC failed
+		// minimum balance should remaining the same as closeOutSSC failed
 		assert.notEqual(john.minBalance, initialJohnMinBalance);
 		assert.equal(john.minBalance, minBalanceAfterOptIn);
 	});

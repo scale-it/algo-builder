@@ -443,7 +443,7 @@ export interface CreditFeeType {
 /**
  *
  * @param groupTx group transaction
- * @returns remainFee - fee remain after execute group Tx
+ * @returns remainingFee - fee remaining after execute group Tx
  * 			collected fee - fee collected from group Tx
  * 			required fee - fee require to execute group tx
  */

@@ -275,7 +275,7 @@ export function setInnerTxField(
 /**
  * Calculate remaining fee after executing an inner transaction;
  * @param interpeter current interpeter contain context
- * @param includeCurrentInnerTx include remain fee of current inner tx group
+ * @param includeCurrentInnerTx include remaining fee of current inner tx group
  */
 export function calculateInnerTxCredit(
 	interpeter: Interpreter,
@@ -309,9 +309,9 @@ export function calculateInnerTxCredit(
 // return 0 if transaction pay by pool fee
 // return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
 export function getInnerTxDefaultFee(interpeter: Interpreter): number {
-	// sum of outnerCredit.remain and executedInnerCredit remain
+	// sum of outnerCredit.remaining and executedInnerCredit remaining
 	const creditFee = calculateInnerTxCredit(interpeter).remainingFee;
-	// if remain fee is enough to pay current tx set default fee to zero
+	// if remaining fee is enough to pay current tx set default fee to zero
 	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
 	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;
 }
