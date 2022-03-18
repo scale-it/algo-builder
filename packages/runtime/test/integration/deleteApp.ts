@@ -100,7 +100,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 		const res = runtime.getApp(appID);
 		assert.isDefined(res);
 
-		// min balance should remaining the same (as after adding app), since app deletion wasn't successfull
+		// min balance should remain the same (as after adding app), since app deletion wasn't successfull
 		assert.equal(runtime.getAccount(john.address).minBalance, minBalanceAfterDeployApp);
 	});
 });
