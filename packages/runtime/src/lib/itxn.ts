@@ -281,7 +281,9 @@ export function calculateInnerTxCredit(interpeter: Interpreter, includeCurrentIn
 	// remaining fee in group tx
 	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
 	// remaining fee in older inners tx
-	const executedInnerCredit = interpeter.innerTxns.map((inner) => calculateFeeCredit(inner));
+	const executedInnerCredit = interpeter.innerTxnGroups.map((inner) =>
+		calculateFeeCredit(inner)
+	);
 
 	const credit = executedInnerCredit.reduce((pre, curr) => {
 		pre.collectedFee += curr.collectedFee;

@@ -37,7 +37,7 @@ describe("Inner Transactions", function () {
 		interpreter.currentInnerTxGroup = [];
 		interpreter.runtime.ctx.pooledApplCost = 0;
 		interpreter.instructions = [];
-		interpreter.innerTxns = [];
+		interpreter.innerTxnGroups = [];
 		interpreter.instructionIndex = 0;
 		interpreter.runtime.ctx.tx = { ...TXN_OBJ, snd: Buffer.from(elonPk) };
 		interpreter.runtime.ctx.gtxs = [interpreter.runtime.ctx.tx];
@@ -1353,7 +1353,7 @@ describe("Inner Transactions", function () {
 				`;
 				assert.doesNotThrow(() => executeTEAL(prog));
 
-				assert.equal(interpreter.innerTxns.length, 0);
+				assert.equal(interpreter.innerTxnGroups.length, 0);
 				assert.equal(interpreter.currentInnerTxGroup.length, 2);
 			});
 

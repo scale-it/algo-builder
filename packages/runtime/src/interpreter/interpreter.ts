@@ -63,7 +63,7 @@ export class Interpreter {
 	callStack: Stack<number>;
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 	currentInnerTxGroup: EncTx[]; // "current" inner transaction
-	innerTxnGroups: EncTx[][]; 
+	innerTxnGroups: EncTx[][]; // executed inner transactions
 
 	constructor() {
 		this.stack = new Stack<StackElem>();
@@ -83,7 +83,7 @@ export class Interpreter {
 		this.callStack = new Stack<number>();
 		this.labelMap = new Map<string, number>();
 		this.currentInnerTxGroup = [];
-		this.innerTxns = [];
+		this.innerTxnGroups = [];
 	}
 
 	/**

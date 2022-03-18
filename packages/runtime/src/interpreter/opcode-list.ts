@@ -3940,10 +3940,10 @@ export class ITxnBegin extends Op {
 			});
 		}
 
-		if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+		if (this.interpreter.innerTxnGroups.length >= MAX_INNER_TRANSACTIONS) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
 				line: this.line,
-				len: this.interpreter.innerTxns.length + 1,
+				len: this.interpreter.innerTxnGroups.length + 1,
 				max: MAX_INNER_TRANSACTIONS,
 			});
 		}
@@ -4078,7 +4078,7 @@ export class ITxnSubmit extends Op {
 
 		// save executed tx, reset current tx
 		this.interpreter.runtime.ctx.isInnerTx = false;
-		this.interpreter.innerTxns.push(this.interpreter.currentInnerTxGroup);
+		this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxGroup);
 		this.interpreter.currentInnerTxGroup = [];
 	}
 }
@@ -4120,7 +4120,7 @@ export class ITxn extends Op {
 	}
 
 	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxns.length === 0) {
+		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
 				version: this.interpreter.tealVersion,
 				line: this.line,
@@ -4129,7 +4129,7 @@ export class ITxn extends Op {
 
 		let result;
 		// what is "last "
-		const groupTx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
 		const tx = groupTx[groupTx.length - 1];
 
 		switch (this.field) {
@@ -4203,13 +4203,13 @@ export class ITxna extends Op {
 	}
 
 	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxns.length === 0) {
+		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
 				version: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
-		const groupTx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
 		const tx = groupTx[groupTx.length - 1];
 		const result = txAppArg(
 			this.field,
@@ -4604,10 +4604,10 @@ export class ITxnNext extends Op {
 			});
 		}
 
-		if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+		if (this.interpreter.innerTxnGroups.length >= MAX_INNER_TRANSACTIONS) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
 				line: this.line,
-				len: this.interpreter.innerTxns.length + 1,
+				len: this.interpreter.innerTxnGroups.length + 1,
 				max: MAX_INNER_TRANSACTIONS,
 			});
 		}
