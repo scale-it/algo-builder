@@ -275,9 +275,9 @@ export function setInnerTxField(
 /**
  * Calculate remain fee after after execute inners Tx;
  * @param interpeter current interpeter contain context
- * @param includeSubTxn include remain fee of current subtxn
+ * @param includeCurrentInnerTx include remain fee of current inner tx group
  */
-export function calculateInnerTxCredit(interpeter: Interpreter, includeSubTxn = false) {
+export function calculateInnerTxCredit(interpeter: Interpreter, includeCurrentInnerTx = false) {
 	// fee remain in group tx
 	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
 	// fee remain in older inners tx
@@ -289,9 +289,9 @@ export function calculateInnerTxCredit(interpeter: Interpreter, includeSubTxn = 
 		return pre;
 	}, outnerCredit);
 
-	// when submit inner tx
-	if (includeSubTxn) {
-		const subTxnCredit = calculateFeeCredit(interpeter.subTxn);
+	// when submit inner tx(or group inner tx)
+	if (includeCurrentInnerTx) {
+		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxGroup);
 		credit.collectedFee += subTxnCredit.collectedFee;
 		credit.requiredFee += subTxnCredit.requiredFee;
 	}

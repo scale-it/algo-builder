@@ -3934,7 +3934,7 @@ export class ITxnBegin extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (this.interpreter.subTxn.length > 0) {
+		if (this.interpreter.currentInnerTxGroup.length > 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
 			});
@@ -3948,7 +3948,7 @@ export class ITxnBegin extends Op {
 			});
 		}
 
-		this.interpreter.subTxn = [addInnerTransaction(this.interpreter, this.line)];
+		this.interpreter.currentInnerTxGroup = [addInnerTransaction(this.interpreter, this.line)];
 	}
 }
 
@@ -3985,15 +3985,15 @@ export class ITxnField extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const valToSet: StackElem = stack.pop();
 
-		if (this.interpreter.subTxn.length === 0) {
+		if (this.interpreter.currentInnerTxGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
 		}
 
-		const subTxCnt = this.interpreter.subTxn.length - 1;
+		const subTxCnt = this.interpreter.currentInnerTxGroup.length - 1;
 		const updatedSubTx = setInnerTxField(
-			this.interpreter.subTxn[subTxCnt],
+			this.interpreter.currentInnerTxGroup[subTxCnt],
 			this.field,
 			valToSet,
 			this,
@@ -4001,7 +4001,7 @@ export class ITxnField extends Op {
 			this.line
 		);
 
-		this.interpreter.subTxn[subTxCnt] = updatedSubTx;
+		this.interpreter.currentInnerTxGroup[subTxCnt] = updatedSubTx;
 	}
 }
 
@@ -4026,7 +4026,7 @@ export class ITxnSubmit extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (this.interpreter.subTxn.length === 0) {
+		if (this.interpreter.currentInnerTxGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
@@ -4051,7 +4051,7 @@ export class ITxnSubmit extends Op {
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
-		const execParams = this.interpreter.subTxn.map((encTx) =>
+		const execParams = this.interpreter.currentInnerTxGroup.map((encTx) =>
 			encTxToExecParams(
 				encTx,
 				{
@@ -4067,8 +4067,8 @@ export class ITxnSubmit extends Op {
 		const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
 
 		// execute innner transaction
-		this.interpreter.runtime.ctx.tx = this.interpreter.subTxn[0];
-		this.interpreter.runtime.ctx.gtxs = this.interpreter.subTxn;
+		this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxGroup[0];
+		this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxGroup;
 		this.interpreter.runtime.ctx.isInnerTx = true;
 		this.interpreter.runtime.ctx.processTransactions(execParams);
 
@@ -4078,8 +4078,8 @@ export class ITxnSubmit extends Op {
 
 		// save executed tx, reset current tx
 		this.interpreter.runtime.ctx.isInnerTx = false;
-		this.interpreter.innerTxns.push(this.interpreter.subTxn);
-		this.interpreter.subTxn = [];
+		this.interpreter.innerTxns.push(this.interpreter.currentInnerTxGroup);
+		this.interpreter.currentInnerTxGroup = [];
 	}
 }
 
@@ -4598,7 +4598,7 @@ export class ITxnNext extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (this.interpreter.subTxn.length === 0) {
+		if (this.interpreter.currentInnerTxGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
@@ -4612,6 +4612,6 @@ export class ITxnNext extends Op {
 			});
 		}
 
-		this.interpreter.subTxn.push(addInnerTransaction(this.interpreter, this.line));
+		this.interpreter.currentInnerTxGroup.push(addInnerTransaction(this.interpreter, this.line));
 	}
 }
