@@ -37,8 +37,10 @@ Added:
     algob init --infrastructure
   ```
 - Teal V6 support:
-  - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
-  - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
+  - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
+  - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
+  - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626))
   - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
 ### Template improvements
 
@@ -77,7 +79,7 @@ Added:
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
-
+- Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.

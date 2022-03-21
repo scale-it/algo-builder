@@ -377,6 +377,26 @@ maximun uint128`,
 		title: "Execution mode not valid",
 		description: `Execution mode not valid`,
 	},
+	PROGRAM_VERSION_MISMATCH: {
+		number: 1055,
+		message: "program version mismatch %approvalVersion != %clearVersion",
+		title: "program version mismatch %approvalVersion != %clearVersion.",
+		description: "program version mismatch",
+	},
+	UNKNOWN_ACCT_FIELD: {
+		number: 1056,
+		message:
+			"Account Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
+		title: "Account Field Error at line %line%",
+		description: `Account field unknown`,
+	},
+	ITXN_NEXT_WITHOUT_ITXN_BEGIN: {
+		number: 1057,
+		message:
+			"itxn_next without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
+		title: "itxn_next without itxn_begin",
+		description: `itxn_next without itxn_begin`,
+	},
 };
 
 const runtimeGeneralErrors = {

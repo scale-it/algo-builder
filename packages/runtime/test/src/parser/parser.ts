@@ -4,6 +4,7 @@ import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
+	AcctParamsGet,
 	Add,
 	Addr,
 	Addw,
@@ -29,6 +30,7 @@ import {
 	Branch,
 	BranchIfNotZero,
 	BranchIfZero,
+	Bsqrt,
 	Btoi,
 	Byte,
 	Bytec,
@@ -75,6 +77,7 @@ import {
 	Itob,
 	ITxnBegin,
 	ITxnField,
+	ITxnNext,
 	ITxnSubmit,
 	Keccak256,
 	Label,
@@ -115,6 +118,7 @@ import {
 	Uncover,
 } from "../../../src/interpreter/opcode-list";
 import {
+	AcctParamQueryFields,
 	AppParamDefined,
 	MAX_UINT64,
 	MaxTEALVersion,
@@ -1990,6 +1994,53 @@ describe("Parser", function () {
 					RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
 				);
 			});
+
+			it("acct_params_get", () => {
+				Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
+					const res = opcodeFromSentence(
+						["acct_params_get", appParam],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new AcctParamsGet([appParam], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["acct_params_get", "unknow", "hello"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("itxn_next", () => {
+				// can parse opcode
+				const res = opcodeFromSentence(
+					["itxn_next"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ITxnNext([], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["itxn_next", "unknowfield"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
 		});
 	});
 
@@ -2303,6 +2354,21 @@ describe("Parser", function () {
 				new AppGlobalDel([], 16, interpreter),
 				new Int(["10"], 17),
 				new AppParamsGet(["AppCreator"], 18, interpreter),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should rreturn correct opcode list for `teal v6`", async () => {
+			const file = "teal-v6.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "6"], 1, interpreter),
+				new Divw([], 2),
+				new Bsqrt([], 3),
+				new Gloadss([], 4, interpreter),
+				new AcctParamsGet(["AcctBalance"], 5, interpreter),
 			];
 
 			assert.deepEqual(res, expected);

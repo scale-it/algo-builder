@@ -21,6 +21,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
+	AcctParamQueryFields,
 	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
@@ -38,7 +39,7 @@ import {
 	TxArrFields,
 	ZERO_ADDRESS,
 } from "../lib/constants";
-import { setInnerTxField } from "../lib/itxn";
+import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
 	assertLen,
@@ -3926,71 +3927,21 @@ export class ITxnBegin extends Op {
 	}
 
 	execute(_stack: TEALStack): void {
-		if (typeof this.interpreter.subTxn !== "undefined") {
+		if (this.interpreter.currentInnerTxnGroup.length > 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
 			});
 		}
 
-		if (this.interpreter.innerTxns.length >= MAX_INNER_TRANSACTIONS) {
+		if (this.interpreter.innerTxnGroups.length >= MAX_INNER_TRANSACTIONS) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
 				line: this.line,
-				len: this.interpreter.innerTxns.length + 1,
+				len: this.interpreter.innerTxnGroups.length + 1,
 				max: MAX_INNER_TRANSACTIONS,
 			});
 		}
 
-		// get app, assert it exists
-		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
-		this.interpreter.runtime.assertAppDefined(
-			appID,
-			this.interpreter.getApp(appID, this.line),
-			this.line
-		);
-
-		// get application's account
-		const address = getApplicationAddress(appID);
-		const applicationAccount = this.interpreter.runtime.assertAccountDefined(
-			address,
-			this.interpreter.runtime.ctx.state.accounts.get(address),
-			this.line
-		);
-
-		// calculate feeCredit(extra fee) accross all txns
-		let totalFee = 0;
-		for (const t of this.interpreter.runtime.ctx.gtxs) {
-			totalFee += t.fee ?? 0;
-		}
-		for (const t of this.interpreter.innerTxns) {
-			totalFee += t.fee ?? 0;
-		}
-
-		const totalTxCnt =
-			this.interpreter.runtime.ctx.gtxs.length + this.interpreter.innerTxns.length;
-		const feeCredit = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
-
-		let txFee;
-		if (feeCredit >= ALGORAND_MIN_TX_FEE) {
-			txFee = 0; // we have enough fee in pool
-		} else {
-			const diff = feeCredit - ALGORAND_MIN_TX_FEE;
-			txFee = diff >= 0 ? diff : ALGORAND_MIN_TX_FEE;
-		}
-
-		const txnParams = {
-			// set sender, fee, fv, lv
-			snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
-			fee: txFee,
-			fv: this.interpreter.runtime.ctx.tx.fv,
-			lv: this.interpreter.runtime.ctx.tx.lv,
-			// to avoid type hack
-			gen: this.interpreter.runtime.ctx.tx.gen,
-			gh: this.interpreter.runtime.ctx.tx.gh,
-			txID: "",
-			type: "",
-		};
-
-		this.interpreter.subTxn = txnParams;
+		this.interpreter.currentInnerTxnGroup = [addInnerTransaction(this.interpreter, this.line)];
 	}
 }
 
@@ -4027,14 +3978,15 @@ export class ITxnField extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const valToSet: StackElem = stack.pop();
 
-		if (typeof this.interpreter.subTxn === "undefined") {
+		if (this.interpreter.currentInnerTxnGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
 		}
 
+		const subTxCnt = this.interpreter.currentInnerTxnGroup.length - 1;
 		const updatedSubTx = setInnerTxField(
-			this.interpreter.subTxn,
+			this.interpreter.currentInnerTxnGroup[subTxCnt],
 			this.field,
 			valToSet,
 			this,
@@ -4042,7 +3994,7 @@ export class ITxnField extends Op {
 			this.line
 		);
 
-		this.interpreter.subTxn = updatedSubTx;
+		this.interpreter.currentInnerTxnGroup[subTxCnt] = updatedSubTx;
 	}
 }
 
@@ -4068,40 +4020,24 @@ export class ITxnSubmit extends Op {
 
 	// eslint-disable-next-line sonarjs/cognitive-complexity
 	execute(_stack: TEALStack): void {
-		if (typeof this.interpreter.subTxn === "undefined") {
+		if (this.interpreter.currentInnerTxnGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
 		}
 
-		// back up current context
-		if (this.interpreter.runtime.remainCtx === undefined) {
-			this.interpreter.runtime.remainCtx = cloneDeep(this.interpreter.runtime.ctx);
+		if (this.interpreter.runtime.parentCtx === undefined) {
+			this.interpreter.runtime.parentCtx = cloneDeep(this.interpreter.runtime.ctx);
 		}
 
-		// calculate fee accross all txns
-		let totalFee = 0;
-		for (const t of this.interpreter.runtime.ctx.gtxs) {
-			totalFee += t.fee ?? 0;
-		}
+		// calculate remaining fee after executing an inner tx
+		const credit = calculateInnerTxCredit(this.interpreter, true);
 
-		for (const t of this.interpreter.innerTxns) {
-			totalFee += t.fee ?? 0;
-		}
-
-		totalFee += this.interpreter.subTxn.fee ?? 0;
-
-		let totalTxCnt = this.interpreter.innerTxns.length + 1;
-		if (!this.interpreter.runtime.ctx.isInnerTx) {
-			totalTxCnt += this.interpreter.runtime.ctx.gtxs.length;
-		}
-
-		// fee too less accross pool
-		const feeBal = totalFee - ALGORAND_MIN_TX_FEE * totalTxCnt;
-		if (feeBal < 0) {
+		// remaining fee is negative => can't paid for transaction => fail
+		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
-				required: ALGORAND_MIN_TX_FEE * totalTxCnt,
-				collected: totalFee,
+				required: credit.requiredFee,
+				collected: credit.collectedFee,
 			});
 		}
 
@@ -4111,29 +4047,30 @@ export class ITxnSubmit extends Op {
 		const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
 		// Supports only calling app(NoOpt) for app transaction type.
-		if (
-			this.interpreter.subTxn.type === TransactionTypeEnum.APPLICATION_CALL &&
-			!isEncTxApplicationCall(this.interpreter.subTxn)
-		) {
-			console.warn("Only supports application call in this version");
-			return;
+		for (const tx of this.interpreter.currentInnerTxnGroup) {
+			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
+				console.warn("Only supports application call in this version");
+				return;
+			}
 		}
 
 		// this fee will be used to pay for application call next time
-		if (isEncTxApplicationCall(this.interpreter.subTxn)) {
-			this.interpreter.subTxn.fee = feeBal;
+		if (isEncTxApplicationCall(this.interpreter.currentInnerTxnGroup[0])) {
+			this.interpreter.currentInnerTxnGroup[0].fee = credit.remainingFee;
 		}
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
-		const execParams = encTxToExecParams(
-			this.interpreter.subTxn,
-			{
-				sign: types.SignType.SecretKey,
-				fromAccount: contractAccount,
-			},
-			this.interpreter.runtime.ctx,
-			this.line
+		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
+			encTxToExecParams(
+				encTx,
+				{
+					sign: types.SignType.SecretKey,
+					fromAccount: contractAccount,
+				},
+				this.interpreter.runtime.ctx,
+				this.line
+			)
 		);
 
 		try {
@@ -4141,27 +4078,28 @@ export class ITxnSubmit extends Op {
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
 			// set up context for inner transaction
-			this.interpreter.runtime.ctx.tx = this.interpreter.subTxn;
-			this.interpreter.runtime.ctx.gtxs = [this.interpreter.subTxn];
+			this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
+			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
 			// execute innner transaction
-			this.interpreter.runtime.ctx.processTransactions([execParams]);
-			// update current txns to base (top-level) after innerTx execution
+			this.interpreter.runtime.ctx.processTransactions(execParams);
 
+			// update current txns to base (top-level) after innerTx execution
 			this.interpreter.runtime.ctx.tx = baseCurrTx;
 			this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+
 			// save executed tx
-			this.interpreter.innerTxns.push(this.interpreter.subTxn);
+			this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxnGroup);
 		} catch (err: any) {
 			// revert to initial context
-			if (this.interpreter.runtime.remainCtx)
-				this.interpreter.runtime.ctx = cloneDeep(this.interpreter.runtime.remainCtx);
-			throw new RuntimeError(err.errorDescriptor, err.messageArguments);
+			if (this.interpreter.runtime.parentCtx)
+				this.interpreter.runtime.ctx = cloneDeep(this.interpreter.runtime.parentCtx);
+			throw new RuntimeError(err.errorDescriptor, err.args);
 		} finally {
-			this.interpreter.runtime.remainCtx = undefined;
+			this.interpreter.runtime.parentCtx = undefined;
 			this.interpreter.runtime.ctx.isInnerTx = false;
-			this.interpreter.subTxn = undefined;
+			this.interpreter.currentInnerTxnGroup = [];
 		}
 	}
 }
@@ -4203,7 +4141,7 @@ export class ITxn extends Op {
 	}
 
 	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxns.length === 0) {
+		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
 				version: this.interpreter.tealVersion,
 				line: this.line,
@@ -4211,7 +4149,9 @@ export class ITxn extends Op {
 		}
 
 		let result;
-		const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
+		// what is "last "
+		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
+		const tx = groupTx[groupTx.length - 1];
 
 		switch (this.field) {
 			case "Logs": {
@@ -4277,28 +4217,15 @@ export class ITxna extends Op {
 	}
 
 	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxns.length === 0) {
+		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
 				version: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
-
-		const tx = this.interpreter.innerTxns[this.interpreter.innerTxns.length - 1];
-
-		let result: StackElem;
-
-		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
-			// handle Logs
-			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
-			logs = logs.map((log) => convertToBuffer(log));
-			this.checkIndexBound(this.idx, logs, this.line);
-			result = logs[this.idx];
-		} else {
-			// handle other case
-			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-		}
+		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
+		const tx = groupTx[groupTx.length - 1];
+		const result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
 		stack.push(result);
 	}
 }
@@ -4588,5 +4515,112 @@ export class AppParamsGet extends Op {
 			stack.push(0n);
 			stack.push(0n);
 		}
+	}
+}
+export class AcctParamsGet extends Op {
+	readonly interpreter: Interpreter;
+	readonly line: number;
+	readonly field: string;
+	/**
+	 * @param args Expected arguments: [account_param]
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		this.interpreter = interpreter;
+		assertLen(args.length, 1, line);
+
+		if (
+			!AcctParamQueryFields[args[0]] ||
+			AcctParamQueryFields[args[0]].version > interpreter.tealVersion
+		) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD, {
+				field: args[0],
+				line: line,
+				tealV: interpreter.tealVersion,
+			});
+		}
+
+		this.field = args[0];
+	}
+
+	execute(stack: Stack<StackElem>): void {
+		this.assertMinStackLen(stack, 1, this.line);
+
+		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
+
+		// get account from current context
+		// not `create` flag = true
+		const accountInfo = this.interpreter.getAccount(acctAddress, this.line, true);
+
+		let value: StackElem = 0n;
+		switch (this.field) {
+			case "AcctBalance": {
+				value = BigInt(accountInfo.balance());
+				break;
+			}
+			case "AcctMinBalance": {
+				value = BigInt(accountInfo.minBalance);
+				break;
+			}
+			case "AcctAuthAddr": {
+				if (accountInfo.getSpendAddress() === accountInfo.address) {
+					value = ZERO_ADDRESS;
+				} else {
+					value = Buffer.from(decodeAddress(accountInfo.getSpendAddress()).publicKey);
+				}
+				break;
+			}
+		}
+		stack.push(value);
+
+		if (accountInfo.balance() > 0) {
+			stack.push(1n);
+		} else {
+			stack.push(0n);
+		}
+	}
+}
+
+// Pops: None
+// Pushes: None
+// Begin preparation of a new inner transaction in the same transaction group
+export class ITxnNext extends Op {
+	readonly interpreter: Interpreter;
+	readonly line: number;
+
+	/**
+	 * Stores index number according to the passed arguments
+	 * @param args Expected arguments: []
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, this.line);
+		this.interpreter = interpreter;
+	}
+
+	execute(_stack: TEALStack): void {
+		if (this.interpreter.currentInnerTxnGroup.length === 0) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN, {
+				line: this.line,
+			});
+		}
+
+		if (this.interpreter.innerTxnGroups.length >= MAX_INNER_TRANSACTIONS) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_INNER_TRANSACTIONS_EXCEEDED, {
+				line: this.line,
+				len: this.interpreter.innerTxnGroups.length + 1,
+				max: MAX_INNER_TRANSACTIONS,
+			});
+		}
+
+		this.interpreter.currentInnerTxnGroup.push(
+			addInnerTransaction(this.interpreter, this.line)
+		);
 	}
 }

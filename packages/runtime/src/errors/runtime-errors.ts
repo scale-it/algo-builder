@@ -14,10 +14,10 @@ export class RuntimeError extends Error {
 		return other !== undefined && other !== null && other._isRuntimeError === true;
 	}
 
-  public readonly errorDescriptor: ErrorDescriptor;
-  public readonly args: AnyMap;
-  public readonly number: number;
-  public readonly parent?: Error;
+	public readonly errorDescriptor: ErrorDescriptor;
+	public readonly args: AnyMap;
+	public readonly number: number;
+	public readonly parent?: Error;
 
 	private readonly _isRuntimeError: boolean;
 
@@ -33,13 +33,13 @@ export class RuntimeError extends Error {
 			messageArguments
 		);
 
-    super(String(prefix) + String(formattedMessage));
-    this.errorDescriptor = errorDescriptor;
-    this.number = errorDescriptor.number;
-    this.messageArguments = messageArguments;
-    if (parentError instanceof Error) {
-      this.parent = parentError;
-    }
+		super(String(prefix) + String(formattedMessage));
+		this.errorDescriptor = errorDescriptor;
+		this.number = errorDescriptor.number;
+		this.args = messageArguments;
+		if (parentError instanceof Error) {
+			this.parent = parentError;
+		}
 
 		this._isRuntimeError = true;
 		Object.setPrototypeOf(this, RuntimeError.prototype);

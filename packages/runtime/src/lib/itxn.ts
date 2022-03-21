@@ -1,24 +1,29 @@
-import { decodeAddress } from "algosdk";
+import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { MaxTxnNoteBytes, TxnFields } from "../lib/constants";
+import {
+	ALGORAND_MIN_TX_FEE,
+	MaxTxnNoteBytes,
+	TransactionTypeEnum,
+	TxnFields,
+} from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields } from "./txn";
+import { assetTxnFields, calculateFeeCredit, CreditFeeType } from "./txn";
 
 // supported types for inner tx (typeEnum -> type mapping)
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
-const TxnTypeMap: {[key: string]: {version: number, field: string | number}} = {
-  1: { version: 5, field: 'pay' },
-  2: { version: 6, field: 'keyreg' },
-  3: { version: 5, field: 'acfg' }, // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
-  4: { version: 5, field: 'axfer' }, // TransferAsset OR RevokeAsset,
-  5: { version: 5, field: 'afrz' },
-  6: { version: 6, field: 'appl' }
+const TxnTypeMap: { [key: string]: { version: number; field: string | number } } = {
+	1: { version: 5, field: "pay" },
+	2: { version: 6, field: "keyreg" },
+	3: { version: 5, field: "acfg" }, // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
+	4: { version: 5, field: "axfer" }, // TransferAsset OR RevokeAsset,
+	5: { version: 5, field: "afrz" },
+	6: { version: 6, field: "appl" },
 };
 
 // requires their type as number
@@ -30,7 +35,9 @@ const numberTxnFields: { [key: number]: Set<string> } = {
 	5: new Set(["Fee", "FreezeAssetFrozen", "ConfigAssetDecimals", "ConfigAssetDefaultFrozen"]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
-['VoteFirst', 'VoteLast', 'VoteKeyDilution', "Nonparticipation", "ApplicationID"].forEach(field => numberTxnFields[6].add(field));
+["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
+	(field) => numberTxnFields[6].add(field)
+);
 
 const uintTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -68,7 +75,14 @@ const byteTxnFields: { [key: number]: Set<string> } = {
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
-['VotePK', 'SelectionPK', 'Note', "ApplicationArgs", "ApprovalProgram", "ClearStateProgram"].forEach(field => byteTxnFields[6].add(field));
+[
+	"VotePK",
+	"SelectionPK",
+	"Note",
+	"ApplicationArgs",
+	"ApprovalProgram",
+	"ClearStateProgram",
+].forEach((field) => byteTxnFields[6].add(field));
 
 const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -110,8 +124,8 @@ const txTypes: { [key: number]: Set<string> } = {
 
 // supported keyreg on teal v6
 txTypes[6] = cloneDeep(txTypes[5]);
-txTypes[6].add('keyreg');
-txTypes[6].add('appl');
+txTypes[6].add("keyreg");
+txTypes[6].add("appl");
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -170,66 +184,64 @@ export function setInnerTxField(
 		});
 	}
 
-  // handle individual cases
-  let errMsg = "";
-  switch (field) {
-    case 'Type': {
-      const txType = txValue as string;
-      // check if txType is supported in current teal version
-      if (
-        !txTypes[tealVersion].has(txType)
-      ) {
-        errMsg = `${txType} is not a valid Type for itxn_field`;
-      }
-      break;
-    }
-    case 'TypeEnum': {
-      const txType = op.assertBigInt(val, line);
-      if (
-        TxnTypeMap[Number(txType)] === undefined ||
-        TxnTypeMap[Number(txType)].version > interpreter.tealVersion
-      ) {
-        errMsg = `TypeEnum ${Number(txType)}does not support`;
-      } else {
-        subTxn.type = String(TxnTypeMap[Number(txType)].field);
-      }
-      break;
-    }
-    case 'ConfigAssetDecimals': {
-      const assetDecimals = txValue as bigint;
-      if (assetDecimals > 19n || assetDecimals < 0n) {
-        errMsg = "Decimals must be between 0 (non divisible) and 19";
-      }
-      break;
-    }
-    case 'ConfigAssetMetadataHash': {
-      const assetMetadataHash = txValue as string;
-      if (assetMetadataHash.length !== 32) {
-        errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
-      }
-      break;
-    }
-    case 'ConfigAssetUnitName': {
-      const assetUnitName = txValue as string;
-      if (assetUnitName.length > 8) {
-        errMsg = "Unit name must not be longer than 8 bytes";
-      }
-      break;
-    }
-    case 'ConfigAssetName': {
-      const assetName = txValue as string;
-      if (assetName.length > 32) {
-        errMsg = "AssetName must not be longer than 8 bytes";
-      }
-      break;
-    }
-    case 'ConfigAssetURL': {
-      const assetURL = txValue as string;
-      if (assetURL.length > 96) {
-        errMsg = "URL must not be longer than 96 bytes";
-      }
-      break;
-    }
+	// handle individual cases
+	let errMsg = "";
+	switch (field) {
+		case "Type": {
+			const txType = txValue as string;
+			// check if txType is supported in current teal version
+			if (!txTypes[tealVersion].has(txType)) {
+				errMsg = `${txType} is not a valid Type for itxn_field`;
+			}
+			break;
+		}
+		case "TypeEnum": {
+			const txType = op.assertBigInt(val, line);
+			if (
+				TxnTypeMap[Number(txType)] === undefined ||
+				TxnTypeMap[Number(txType)].version > interpreter.tealVersion
+			) {
+				errMsg = `TypeEnum ${Number(txType)}does not support`;
+			} else {
+				subTxn.type = String(TxnTypeMap[Number(txType)].field);
+			}
+			break;
+		}
+		case "ConfigAssetDecimals": {
+			const assetDecimals = txValue as bigint;
+			if (assetDecimals > 19n || assetDecimals < 0n) {
+				errMsg = "Decimals must be between 0 (non divisible) and 19";
+			}
+			break;
+		}
+		case "ConfigAssetMetadataHash": {
+			const assetMetadataHash = txValue as string;
+			if (assetMetadataHash.length !== 32) {
+				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
+			}
+			break;
+		}
+		case "ConfigAssetUnitName": {
+			const assetUnitName = txValue as string;
+			if (assetUnitName.length > 8) {
+				errMsg = "Unit name must not be longer than 8 bytes";
+			}
+			break;
+		}
+		case "ConfigAssetName": {
+			const assetName = txValue as string;
+			if (assetName.length > 32) {
+				errMsg = "AssetName must not be longer than 8 bytes";
+			}
+			break;
+		}
+		case "ConfigAssetURL": {
+			const assetURL = txValue as string;
+			if (assetURL.length > 96) {
+				errMsg = "URL must not be longer than 96 bytes";
+			}
+			break;
+		}
 
 		case "VotePK": {
 			const votePk = txValue as string;
@@ -268,22 +280,100 @@ export function setInnerTxField(
 		});
 	}
 
-  // if everything goes well, set the [key, value]
-  if (encodedField === null) {
-    return subTxn; // could be for "TypeEnum"
-  } else if (assetTxnFields.has(field)) {
-    (subTxn as any).apar = (subTxn as any).apar ?? {};
-    (subTxn as any).apar[encodedField] = txValue;
-  } else {
-    if (field === 'ApplicationArgs') {
-      if ((subTxn as any)[encodedField] === undefined) {
-        (subTxn as any)[encodedField] = [];
-      }
-      (subTxn as any)[encodedField].push(txValue);
-    } else {
-      (subTxn as any)[encodedField] = txValue;
-    }
-  }
+	// if everything goes well, set the [key, value]
+	if (encodedField === null) {
+		return subTxn; // could be for "TypeEnum"
+	} else if (assetTxnFields.has(field)) {
+		(subTxn as any).apar = (subTxn as any).apar ?? {};
+		(subTxn as any).apar[encodedField] = txValue;
+	} else {
+		if (field === "ApplicationArgs") {
+			if ((subTxn as any)[encodedField] === undefined) {
+				(subTxn as any)[encodedField] = [];
+			}
+			(subTxn as any)[encodedField].push(txValue);
+		} else {
+			(subTxn as any)[encodedField] = txValue;
+		}
+	}
 
 	return subTxn;
+}
+
+/**
+ * Calculate remaining fee after executing an inner transaction;
+ * @param interpeter current interpeter contain context
+ * @param includeCurrentInnerTx include remaining fee of current inner tx group
+ */
+export function calculateInnerTxCredit(
+	interpeter: Interpreter,
+	includeCurrentInnerTx = false
+): CreditFeeType {
+	// remaining fee in group tx
+	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
+	// remaining fee in older inners tx
+	const executedInnerCredit = interpeter.innerTxnGroups.map((inner) =>
+		calculateFeeCredit(inner)
+	);
+
+	const credit = executedInnerCredit.reduce((pre, curr) => {
+		pre.collectedFee += curr.collectedFee;
+		pre.requiredFee += curr.requiredFee;
+		return pre;
+	}, outnerCredit);
+
+	// when submit inner tx(or group inner tx)
+	if (includeCurrentInnerTx) {
+		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxnGroup);
+		credit.collectedFee += subTxnCredit.collectedFee;
+		credit.requiredFee += subTxnCredit.requiredFee;
+	}
+
+	credit.remainingFee = credit.collectedFee - credit.requiredFee;
+
+	return credit;
+}
+
+// return 0 if transaction pay by pool fee
+// return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
+export function getInnerTxDefaultFee(interpeter: Interpreter): number {
+	// sum of outnerCredit.remaining and executedInnerCredit remaining
+	const creditFee = calculateInnerTxCredit(interpeter).remainingFee;
+	// if remaining fee is enough to pay current tx set default fee to zero
+	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
+	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;
+}
+
+/**
+ * Add new inner tx to inner tx group
+ * @param interpreter interpeter execute current tx
+ * @param line line number
+ * @returns EncTx object
+ */
+export function addInnerTransaction(interpreter: Interpreter, line: number): EncTx {
+	// get app, assert it exists
+	const appID = interpreter.runtime.ctx.tx.apid ?? 0;
+	interpreter.runtime.assertAppDefined(appID, interpreter.getApp(appID, line), line);
+
+	// get application's account
+	const address = getApplicationAddress(appID);
+	const applicationAccount = interpreter.runtime.assertAccountDefined(
+		address,
+		interpreter.runtime.ctx.state.accounts.get(address),
+		line
+	);
+
+	return {
+		// set sender, fee, fv, lv
+		snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
+		// user can change this fee
+		fee: getInnerTxDefaultFee(interpreter),
+		fv: interpreter.runtime.ctx.tx.fv,
+		lv: interpreter.runtime.ctx.tx.lv,
+		// to avoid type hack
+		gen: interpreter.runtime.ctx.tx.gen,
+		gh: interpreter.runtime.ctx.tx.gh,
+		txID: "",
+		type: TransactionTypeEnum.UNKNOWN,
+	};
 }

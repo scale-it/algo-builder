@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const accounts = require("./common/accounts");
 const { getClawbackParams } = require("./common/common");
@@ -43,7 +43,7 @@ async function setupClawback(runtimeEnv, deployer) {
 		fields: { clawback: clawbackAddress },
 		payFlags: { totalFee: 1000 },
 	};
-	await executeTransaction(deployer, assetConfigParams);
+	await executeTx(deployer, assetConfigParams);
 }
 
 module.exports = { default: setupClawback };

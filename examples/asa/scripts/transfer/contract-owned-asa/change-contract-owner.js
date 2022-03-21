@@ -3,7 +3,7 @@
  * This file demonstrates how to change owner of ASA owned by
  * smart contract account(stateless).
  */
-const { executeTransaction, convert } = require("@algo-builder/algob");
+const { executeTx, convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { mkParam } = require("../common");
 
@@ -12,10 +12,7 @@ async function run(runtimeEnv, deployer) {
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTransaction(
-		deployer,
-		mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" })
-	);
+	await executeTx(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
 
 	// Get AppInfo from checkpoint.
 	const appInfo = deployer.getApp("StatefulASA_App");
@@ -32,7 +29,7 @@ async function run(runtimeEnv, deployer) {
 		appArgs: appArgs,
 	};
 
-	await executeTransaction(deployer, tx);
+	await executeTx(deployer, tx);
 }
 
 module.exports = { default: run };

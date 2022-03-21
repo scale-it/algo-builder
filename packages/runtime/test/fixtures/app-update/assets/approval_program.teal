@@ -1,4 +1,4 @@
-#pragma version 4
+#pragma version 5
 txn ApplicationID
 int 0
 ==

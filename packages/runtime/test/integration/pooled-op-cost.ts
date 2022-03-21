@@ -22,7 +22,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramFileName = "pooled-opcode-budget.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramFileName = "clear-pooled-opcode-budget.teal";
 
 		flags = {
 			sender: john.account,

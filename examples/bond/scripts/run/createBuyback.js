@@ -1,4 +1,4 @@
-const { executeTransaction, convert } = require("@algo-builder/algob");
+const { executeTx, convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { tokenMap, optInTx, fundAccount } = require("./common/common");
 
@@ -33,6 +33,6 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
 	await optInTx(deployer, managerAcc, buybackLsig, bondToken);
 
 	console.log("Setting buyback address!");
-	await executeTransaction(deployer, buybackTx);
+	await executeTx(deployer, buybackTx);
 	console.log("Buyback address set successfully!");
 };

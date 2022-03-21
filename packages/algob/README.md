@@ -2,7 +2,7 @@
 
 Algob is the CLI (Command Line Interface) for Algo Builder. Think about it as an Ethereum Truffle but for Algorand projects.
 
-This package provides a variety of high level functions like, `executeTransaction`, `mkTxParams`, `Deployer`, etc. These functions help in making the development phase of algorand applications easier by acting as a middleware between the developer and `algosdk`.
+This package provides a variety of high level functions like, `executeTx`, `mkTxParams`, `Deployer`, etc. These functions help in making the development phase of algorand applications easier by acting as a middleware between the developer and `algosdk`.
 
 Please read the main [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
 

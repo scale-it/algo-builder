@@ -170,7 +170,7 @@ describe("C2C call", function () {
 					RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED
 				);
 				// TODO: compare runtime store and ensure it not change.
-				assert.isUndefined(runtime.remainCtx);
+				assert.isUndefined(runtime.parentCtx);
 			});
 		});
 	});

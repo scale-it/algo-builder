@@ -144,13 +144,15 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 	let runtime: Runtime;
 	let approvalProgramPassFileName: string;
 	let approvalProgramFailFileName: string;
-	let clearProgramFileName: string;
+	let clearProgramPassFileName: string;
+	let clearProgramFailFileName: string;
 	let flags: AppDeploymentFlags;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramPassFileName = "approval-pass.teal";
 		approvalProgramFailFileName = "approval-fail.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramPassFileName = "clear-pass.teal";
+		clearProgramFailFileName = "clear-fail.teal";
 
 		flags = {
 			sender: john.account,
@@ -163,7 +165,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 
 	it("should fail during create application if pragma version <= 3", function () {
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFailFileName, clearProgramFileName, flags, {}),
+			() => runtime.deployApp(approvalProgramFailFileName, clearProgramFailFileName, flags, {}),
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 		);
 	});
@@ -172,7 +174,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 		// same program with teal version == 4. Since cost is calculation during execution,
 		// this code will pass.
 		assert.doesNotThrow(() =>
-			runtime.deployApp(approvalProgramPassFileName, clearProgramFileName, flags, {})
+			runtime.deployApp(approvalProgramPassFileName, clearProgramPassFileName, flags, {})
 		);
 	});
 });

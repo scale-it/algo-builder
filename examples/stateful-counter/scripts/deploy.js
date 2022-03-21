@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -14,7 +14,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 	// transfer some algos to creator account
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.

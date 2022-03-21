@@ -1,11 +1,11 @@
-const { executeTransaction, convert } = require("@algo-builder/algob");
+const { executeTx, convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const donorAccount = deployer.accountsByName.get("john");
 
-	await executeTransaction(deployer, {
+	await executeTx(deployer, {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -44,7 +44,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	console.log("Donation transaction in process");
-	await executeTransaction(deployer, txGroup);
+	await executeTx(deployer, txGroup);
 	console.log("Donated!");
 }
 

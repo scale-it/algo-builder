@@ -26,6 +26,7 @@ import { getPackageJson, PackageJson } from "../util/package-info";
 import { ArgumentsParser } from "./arguments-parser";
 
 const log = debug("algob:core:cli");
+console.debug = log;
 
 // const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
 

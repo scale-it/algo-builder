@@ -97,7 +97,7 @@ algob>
 
 ![image](https://user-images.githubusercontent.com/33264364/122483007-45cb0b00-cfef-11eb-887b-0514be84579c.png)
 
-Now, we show how to use [`algob.executeTransaction`](https://github.com/scale-it/algo-builder/blob/develop/docs/guide/execute-transaction.md) to execute transactions in an Algorand Network.
+Now, we show how to use [`algob.executeTx`](https://github.com/scale-it/algo-builder/blob/develop/docs/guide/execute-transaction.md) to execute transactions in an Algorand Network.
 
 ## Transfer Algos
 
@@ -141,7 +141,7 @@ algob> algoTransferParams = {
 Executing the transaction above gives the following result:
 
 ```bash
-algob> await algob.executeTransaction(deployer, algoTransferParams);
+algob> await algob.executeTx(deployer, algoTransferParams);
 {
   'confirmed-round': 3727,
   'pool-error': '',
@@ -187,7 +187,7 @@ const rtypes = algob.runtime.types;
 const gold = deployer.asa.get('gold'); // asa info from checkpoint
 const goldOwner = deployer.accountsByName.get('alice');
 const john = deployer.accountsByName.get('john');
-algob.executeTransaction(deployer, {
+algob.executeTx(deployer, {
   type: rtypes.TransactionType.TransferAsset,
   sign: rtypes.SignType.SecretKey,
   fromAccount: goldOwner,
@@ -225,7 +225,7 @@ Here we will transfer some `algos` from a stateless smart contract ([`/assets/te
   ```
 
 - This address will be the sender(contract account mode) and receiver will be `john`.
-- Finally, we will transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
+- Finally, we will transfer some algos using `algob.executeTx(..)` function. Transaction will pass/fail according to asc logic.
 
 ```js
 // by file
@@ -262,7 +262,7 @@ const algoTxParam = {
 };
 
 // Transaction PASS - As according to .teal logic, amount should be <= 100
-algob.executeTransaction(deployer, algoTxParam);
+algob.executeTx(deployer, algoTxParam);
 
 {
   'confirmed-round': 4418,
@@ -302,7 +302,7 @@ const invalidTxnParams = {
 };
 
 // Transaction FAIL - rejected by logic. According to .teal logic, amount should be <= 100
-algob.executeTransaction(deployer, invalidTxnParams);
+algob.executeTx(deployer, invalidTxnParams);
 
 // rejected by logic
 Error: Bad Request
@@ -320,7 +320,7 @@ Here, we will first transfer some Algorand Standard Assets(ASA) from `goldOwner`
 `goldOwner` is the delegating authority here, as during deployment (`algob deploy`) the smart contract's logic signature was signed by this account (check `/scripts/2-gold-asc.js`).
 
 Logic signature (stored in checkpoint) is retreived using `deployer.getLsig('<file_name>.teal'`).
-Assets are transferred using `algob.executeTransaction({ type: TransactionType.TransferAsset, ...})`.
+Assets are transferred using `algob.executeTx({ type: TransactionType.TransferAsset, ...})`.
 
 Retreive lsig & assetId from checkpoint:
 
@@ -378,7 +378,7 @@ let validParams = {
 };
 
 // Transaction PASS
-algob.executeTransaction(deployer, validParams);
+algob.executeTx(deployer, validParams);
 
 {
   'confirmed-round': 4628,
@@ -391,7 +391,7 @@ algob> .editor
 validParams.amount = 1500;
 
 // Transaction FAIL
-algob.executeTransaction(deployer, validParams);
+algob.executeTx(deployer, validParams);
 
 Error: Bad Request
     at Request.callback (/home/ratik/Scale-it/algo-builder/node_modules/superagent/src/node/index.js:879:15)

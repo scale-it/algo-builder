@@ -1,4 +1,4 @@
-const { executeTransaction } = require("@algo-builder/algob");
+const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -15,9 +15,9 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200e6,
 		payFlags: {},
 	};
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 	algoTxnParams.toAccountAddr = bob.addr;
-	await executeTransaction(deployer, algoTxnParams);
+	await executeTx(deployer, algoTxnParams);
 
 	const asaInfo = await deployer.deployASA("gold", { creator: creator });
 	await deployer.optInAccountToASA("gold", "bob", {}); // asa optIn for bob

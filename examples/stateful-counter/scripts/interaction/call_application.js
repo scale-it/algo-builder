@@ -1,4 +1,4 @@
-const { readAppGlobalState, executeTransaction } = require("@algo-builder/algob");
+const { readAppGlobalState, executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -21,7 +21,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 
-	await executeTransaction(deployer, tx);
+	await executeTx(deployer, tx);
 
 	/* Uncomment below code to start debugger  */
 	// await new Tealdbg(deployer, tx)

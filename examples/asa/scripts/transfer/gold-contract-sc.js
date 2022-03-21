@@ -9,7 +9,7 @@
  */
 const { types } = require("@algo-builder/web");
 const { balanceOf } = require("@algo-builder/algob");
-const { executeTransaction } = require("./common");
+const { executeTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
@@ -30,12 +30,12 @@ async function run(runtimeEnv, deployer) {
 		payFlags: { totalFee: 1000 },
 	};
 	// Transaction PASS - As according to .teal logic, amount should be <= 100
-	await executeTransaction(deployer, algoTxParam);
+	await executeTx(deployer, algoTxParam);
 
 	// Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
 	const invalidParams = Object.assign({}, algoTxParam);
 	invalidParams.amountMicroAlgos = 200;
-	await executeTransaction(deployer, invalidParams);
+	await executeTx(deployer, invalidParams);
 
 	/* Transfer ASA 'gold' from contract account to user account */
 	const assetID = deployer.asa.get("gold").assetIndex;
@@ -51,14 +51,14 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// Transaction PASS - As according to .teal logic, asset amount should be <= 100
-	await executeTransaction(deployer, assetTxParam);
+	await executeTx(deployer, assetTxParam);
 	// print assetHolding of bob
 	console.log("Balance: ", await balanceOf(deployer, bob.addr, assetID));
 
 	// Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
 	const invalidTxParams = Object.assign({}, assetTxParam);
 	invalidTxParams.amount = 500;
-	await executeTransaction(deployer, invalidTxParams);
+	await executeTx(deployer, invalidTxParams);
 }
 
 module.exports = { default: run };

@@ -48,7 +48,7 @@ export class Runtime {
 	private store: State;
 	private _defaultAccounts: AccountStore[];
 	ctx: Context;
-	remainCtx?: Context;
+	parentCtx?: Context; // parent Ctx call to current inner Txns;
 	loadedAssetsDefs: types.ASADefs;
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
