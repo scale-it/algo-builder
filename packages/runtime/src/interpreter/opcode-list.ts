@@ -4058,11 +4058,6 @@ export class ITxnSubmit extends Op {
 			}
 		}
 
-		// // this fee will be used to pay for application call next time
-		// if (isEncTxApplicationCall(this.interpreter.currentInnerTxnGroup[0])) {
-		// 	this.interpreter.currentInnerTxnGroup[0].fee = credit.remainingFee;
-		// }
-
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
 		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
@@ -4097,10 +4092,7 @@ export class ITxnSubmit extends Op {
 			// save executed tx
 			this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxnGroup);
 		} catch (err: any) {
-			// revert to initial context
-			if (this.interpreter.runtime.parentCtx)
-				this.interpreter.runtime.ctx = cloneDeep(this.interpreter.runtime.parentCtx);
-
+			// throw new error
 			throw new RuntimeError(err.errorDescriptor, err.args);
 		} finally {
 			this.interpreter.runtime.parentCtx = undefined;
