@@ -7,24 +7,8 @@ async function withdrawFromProposal(deployer, proposalLsig, proposer, voterA) {
 	const govTokenID = deployer.asa.get("gov-token").assetIndex;
 	console.log("gov token id: ", govTokenID);
 
-	// Needed to add the fund operation for it to work.
-	// The regular flow just doesnt returns the ASA back to the proposalLsig
-	const fundProposalTx = [
-		{
-			type: types.TransactionType.TransferAsset,
-			sign: types.SignType.SecretKey,
-			fromAccount: proposer,
-			toAccountAddr: proposalLsig.address(),
-			amount: 10,
-			assetID: govTokenID,
-			payFlags: { totalFee: 1000 },
-		},
-	];
 	const withdrawTx = mkWithdrawFromProposalTx(proposer, govTokenID, proposalLsig, 10);
 	const withdrawTxFail = mkWithdrawFromProposalTx(voterA, govTokenID, proposalLsig, 10);
-
-	console.log(`* Funding proposalLsig ${proposalLsig.address()} *`);
-	await tryExecuteTx(deployer, fundProposalTx);
 
 	console.log(`* Withdrawing from proposalLsig ${proposalLsig.address()}  to owner account *`); //Should succeed
 	await tryExecuteTx(deployer, withdrawTx);
