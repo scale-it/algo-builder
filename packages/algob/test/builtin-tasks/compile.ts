@@ -62,6 +62,12 @@ describe("Compile task", () => {
 	const f4 = "gold-asa.teal";
 	const fhash = 2374470440; // murmur3 hash for f1 file
 
+	const scTmplParam = {
+		bob: '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ',
+		alice: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+		hash_image: 'QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc='
+	};
+
 	before(function () {
 		const isRoot = process.getuid && process.getuid() === 0;
 		if (isRoot) {
@@ -126,7 +132,7 @@ describe("Compile task", () => {
 	});
 
 	it("should return correct ASCCache from CompileOp", async () => {
-		const result = await op.ensureCompiled(f3PY, true);
+		const result = await op.ensureCompiled(f3PY, true, scTmplParam);
 		const expected = fs.readFileSync(path.join(ASSETS_DIR, "gold-asa-py-check.yaml"), "utf8");
 		assert.isDefined(result.scParams);
 		assert.deepEqual(YAML.stringify(result), expected);

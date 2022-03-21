@@ -122,7 +122,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 			srcHash: 123, // source code hash
 			base64ToBytes: new Uint8Array(1), // compiled base64 in bytes
 			tealCode: "TEAL", // teal code
-			scParams: {}
+			scParams: { //sc params
+				bob: '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ',
+				alice: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+				hash_image: 'QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc='
+			}
 		};
 	}
 
