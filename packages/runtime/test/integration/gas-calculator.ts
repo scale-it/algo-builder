@@ -15,7 +15,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 	let flags: AppDeploymentFlags;
 	let appID: number;
 	let appCallParam: types.AppCallsParam;
-	this.beforeAll(async function () {
+	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramFileName = "label-first-line.teal";
 		clearProgramFileName = "clear.teal";

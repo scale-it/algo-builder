@@ -16,10 +16,7 @@ async function run(runtimeEnv, deployer) {
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTx(
-		deployer,
-		mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" })
-	);
+	await executeTx(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
 
 	// Get AppInfo and AssetID from checkpoints.
 	const appInfo = deployer.getApp("StatefulASA_App");

@@ -21,10 +21,7 @@ async function run(runtimeEnv, deployer) {
 	// Here we fund the accounts with 5e6, 5e6 and 1e6 micro AlGOs.
 	const message = "funding account";
 	const promises = [
-		executeTx(
-			deployer,
-			mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })
-		),
+		executeTx(deployer, mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })),
 		executeTx(deployer, mkParam(masterAccount, john.addr, 5e6, { note: message })),
 		executeTx(deployer, mkParam(masterAccount, bob.addr, 1e6, { note: message })),
 	];

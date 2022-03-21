@@ -77,6 +77,7 @@ import {
 	Itob,
 	ITxnBegin,
 	ITxnField,
+	ITxnNext,
 	ITxnSubmit,
 	Keccak256,
 	Label,
@@ -2010,6 +2011,29 @@ describe("Parser", function () {
 					() =>
 						opcodeFromSentence(
 							["acct_params_get", "unknow", "hello"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("itxn_next", () => {
+				// can parse opcode
+				const res = opcodeFromSentence(
+					["itxn_next"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ITxnNext([], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["itxn_next", "unknowfield"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION

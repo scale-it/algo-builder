@@ -390,6 +390,13 @@ maximun uint128`,
 		title: "Account Field Error at line %line%",
 		description: `Account field unknown`,
 	},
+	ITXN_NEXT_WITHOUT_ITXN_BEGIN: {
+		number: 1057,
+		message:
+			"itxn_next without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
+		title: "itxn_next without itxn_begin",
+		description: `itxn_next without itxn_begin`,
+	},
 };
 
 const runtimeGeneralErrors = {
