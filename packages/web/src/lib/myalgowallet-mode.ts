@@ -1,4 +1,4 @@
-import MyAlgoConnect, { Accounts, Address, SignedTx } from "@randlabs/myalgo-connect";
+import { MyAlgoConnect, Accounts, Address, SignedTx } from "./myalgowallet-types";
 import algosdk, { Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
@@ -10,18 +10,24 @@ const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
 
 export class MyAlgoWalletSession {
-	readonly connector: MyAlgoConnect;
+	connector!: MyAlgoConnect;
 	private readonly algodClient: algosdk.Algodv2;
 	accounts: Accounts[] = [];
 	addresses: Address[] = [];
 
 	constructor(chain: string, connector?: MyAlgoConnect) {
 		this.algodClient = algoexplorerAlgod(chain);
-		if (connector) {
-			this.connector = connector;
-		} else {
-			this.connector = new MyAlgoConnect();
-		}
+		import("@randlabs/myalgo-connect")
+			.then((MyAlgoConnect) => {
+				if (connector) {
+					this.connector = connector;
+				} else {
+					this.connector = new MyAlgoConnect.default();
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	}
 
 	// https://connect.myalgo.com/docs/interactive-examples/Connect
