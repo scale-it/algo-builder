@@ -329,6 +329,8 @@ export function calculateInnerTxCredit(
 		credit.requiredFee += subTxnCredit.requiredFee;
 	}
 
+	// plus fee from outner
+	credit.collectedFee += interpeter.runtime.ctx.remainingFee;
 	credit.remainingFee = credit.collectedFee - credit.requiredFee;
 
 	return credit;

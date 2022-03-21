@@ -24,7 +24,7 @@ describe("C2C call", function () {
 			sign: types.SignType.SecretKey,
 			fromAccount: funder.account,
 			toAccountAddr: appInfo.applicationAccount,
-			amountMicroAlgos: 1e6,
+			amountMicroAlgos: 1e7,
 			payFlags: {
 				totalFee: 1000,
 			},
@@ -55,7 +55,7 @@ describe("C2C call", function () {
 		appCallArgs = ["str:call_method", "int:1"];
 	});
 
-	it("can call another application", () => {
+	it("should succeed: call another application", () => {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
@@ -70,6 +70,25 @@ describe("C2C call", function () {
 		const txReceipt = runtime.executeTx(execParams) as TxReceipt;
 		const logs = txReceipt.logs ?? [];
 		assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
+	});
+
+	it("should fail: call another application when not enough fee", () => {
+		const execParams: types.ExecParams = {
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			foreignApps: [secondApp.appID],
+			appID: firstApp.appID,
+			appArgs: appCallArgs,
+			payFlags: {
+				totalFee: 1000,
+			},
+		};
+
+		expectRuntimeError(
+			() => runtime.executeTx(execParams),
+			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+		);
 	});
 
 	describe("c2c call unhappy case", function () {
@@ -161,7 +180,7 @@ describe("C2C call", function () {
 					// include base app so depth = 9
 					appArgs: ["int:8", ...apps.map((info) => `int:${info.appID}`)],
 					payFlags: {
-						totalFee: 10000,
+						totalFee: 1000,
 					},
 				};
 

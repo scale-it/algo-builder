@@ -3984,9 +3984,9 @@ export class ITxnField extends Op {
 			});
 		}
 
-		const subTxCnt = this.interpreter.currentInnerTxnGroup.length - 1;
-		const updatedSubTx = setInnerTxField(
-			this.interpreter.currentInnerTxnGroup[subTxCnt],
+		const lastInnerTxID = this.interpreter.currentInnerTxnGroup.length - 1;
+		const lastInnerTx = setInnerTxField(
+			this.interpreter.currentInnerTxnGroup[lastInnerTxID],
 			this.field,
 			valToSet,
 			this,
@@ -3994,7 +3994,7 @@ export class ITxnField extends Op {
 			this.line
 		);
 
-		this.interpreter.currentInnerTxnGroup[subTxCnt] = updatedSubTx;
+		this.interpreter.currentInnerTxnGroup[lastInnerTxID] = lastInnerTx;
 	}
 }
 
@@ -4026,6 +4026,10 @@ export class ITxnSubmit extends Op {
 			});
 		}
 
+		if (!this.interpreter.runtime.ctx.isInnerTx) {
+			this.interpreter.runtime.ctx.remainingFee = 0;
+		}
+
 		if (this.interpreter.runtime.parentCtx === undefined) {
 			this.interpreter.runtime.parentCtx = cloneDeep(this.interpreter.runtime.ctx);
 		}
@@ -4054,10 +4058,10 @@ export class ITxnSubmit extends Op {
 			}
 		}
 
-		// this fee will be used to pay for application call next time
-		if (isEncTxApplicationCall(this.interpreter.currentInnerTxnGroup[0])) {
-			this.interpreter.currentInnerTxnGroup[0].fee = credit.remainingFee;
-		}
+		// // this fee will be used to pay for application call next time
+		// if (isEncTxApplicationCall(this.interpreter.currentInnerTxnGroup[0])) {
+		// 	this.interpreter.currentInnerTxnGroup[0].fee = credit.remainingFee;
+		// }
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
@@ -4077,6 +4081,7 @@ export class ITxnSubmit extends Op {
 			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
+			this.interpreter.runtime.ctx.remainingFee = credit.remainingFee;
 			// set up context for inner transaction
 			this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
 			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
@@ -4095,11 +4100,13 @@ export class ITxnSubmit extends Op {
 			// revert to initial context
 			if (this.interpreter.runtime.parentCtx)
 				this.interpreter.runtime.ctx = cloneDeep(this.interpreter.runtime.parentCtx);
+
 			throw new RuntimeError(err.errorDescriptor, err.args);
 		} finally {
 			this.interpreter.runtime.parentCtx = undefined;
 			this.interpreter.runtime.ctx.isInnerTx = false;
 			this.interpreter.currentInnerTxnGroup = [];
+			this.interpreter.runtime.ctx.remainingFee = 0;
 		}
 	}
 }
@@ -4224,8 +4231,19 @@ export class ITxna extends Op {
 			});
 		}
 		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
+		let result: StackElem;
+
 		const tx = groupTx[groupTx.length - 1];
-		const result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
+		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
+			// handle Logs
+			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
+			logs = logs.map((log) => convertToBuffer(log));
+			this.checkIndexBound(this.idx, logs, this.line);
+			result = logs[this.idx];
+		} else {
+			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
+		}
 		stack.push(result);
 	}
 }

@@ -151,6 +151,8 @@ export interface Context {
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	// save appID use inner tx call stack
 	innerTxAppIDCallStack: number[];
+	// remaining fee from pool
+	remainingFee: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;

@@ -50,6 +50,7 @@ export class Ctx implements Context {
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
+	remainingFee: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -76,6 +77,7 @@ export class Ctx implements Context {
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
+		this.remainingFee = 0;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {

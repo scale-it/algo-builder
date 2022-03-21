@@ -35,7 +35,7 @@ def call():
                 # Pass the selector as the first arg to trigger the `echo` method
                 TxnField.application_args: mk_next_args(),
                 # Set fee to 0 so caller has to cover it
-                TxnField.fee: Int(0),
+                TxnField.fee: Int(1000),
             }
         ),
         InnerTxnBuilder.Submit(),
