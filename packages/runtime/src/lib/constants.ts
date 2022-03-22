@@ -45,6 +45,7 @@ export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
 export const MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS = 50;
 
 //smart contract constraints
+// https://developer.algorand.org/docs/get-details/parameter_tables/
 export const MAX_GLOBAL_SCHEMA_ENTRIES = 64;
 export const MAX_LOCAL_SCHEMA_ENTRIES = 16;
 

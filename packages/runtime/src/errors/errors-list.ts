@@ -514,8 +514,8 @@ const runtimeGeneralErrors = {
 		number: 1508,
 		message: "Local/Global state keys has too many entries",
 		title: "Max schema entries exceeded",
-		description: `Local state keys entries cannot exceed %localMax% and global state key
-					  entires cannot exceed %globalMax.`,
+		description:
+			"Local key entires: used: %localState%, max: %localMax%. Global  key entires: used: %globalState, max: %globalMax%.",
 	},
 };
 

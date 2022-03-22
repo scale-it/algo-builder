@@ -342,7 +342,9 @@ export class Ctx implements Context {
 			globalSchemaEntries > MAX_GLOBAL_SCHEMA_ENTRIES
 		) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED, {
+				localState: localSchemaEntries,
 				localMax: MAX_LOCAL_SCHEMA_ENTRIES,
+				globalState: globalSchemaEntries,
 				globalMax: MAX_GLOBAL_SCHEMA_ENTRIES,
 			});
 		}
