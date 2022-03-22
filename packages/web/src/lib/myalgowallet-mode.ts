@@ -134,7 +134,7 @@ export class MyAlgoWalletSession {
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTransaction(
+	async executeTx(
 		execParams: ExecParams | ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
@@ -170,5 +170,11 @@ export class MyAlgoWalletSession {
 
 		console.log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
+	}
+	/** @deprecated */
+	async executeTransaction(
+		execParams: ExecParams | ExecParams[]
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		return this.executeTx(execParams);
 	}
 }
