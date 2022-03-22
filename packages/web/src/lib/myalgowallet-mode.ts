@@ -1,6 +1,13 @@
-import { MyAlgoConnect, Accounts, Address, SignedTx } from "./myalgowallet-types";
 import algosdk, { Transaction } from "algosdk";
-
+import type {
+	Accounts,
+	Address,
+	SignedTx,
+	ConnectionSettings,
+	AlgorandTxn,
+	EncodedTransaction,
+	Base64,
+} from "@randlabs/myalgo-connect";
 import { mkTxParams } from "..";
 import { ExecParams, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
@@ -8,6 +15,41 @@ import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
+
+interface MyAlgoConnect {
+	/**
+	 * @async
+	 * @description Receives user's accounts from MyAlgo.
+	 * @param {ConnectionSettings} [settings] Connection settings
+	 * @returns Returns an array of Algorand addresses.
+	 */
+	connect(settings?: ConnectionSettings): Promise<Accounts[]>;
+
+	/**
+	 * @async
+	 * @description Sign an Algorand Transaction.
+	 * @param transaction Expect a valid Algorand transaction
+	 * @returns Returns signed transaction
+	 */
+	signTransaction(transaction: AlgorandTxn | EncodedTransaction): Promise<SignedTx>;
+
+	/**
+	 * @async
+	 * @description Sign an Algorand Transaction.
+	 * @param transaction Expect a valid Algorand transaction array.
+	 * @returns Returns signed an array of signed transactions.
+	 */
+	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[]): Promise<SignedTx[]>;
+
+	/**
+	 * @async
+	 * @description Sign a teal program
+	 * @param logic Teal program
+	 * @param address Signer Address
+	 * @returns Returns signed teal
+	 */
+	signLogicSig(logic: Uint8Array | Base64, address: Address): Promise<Uint8Array>;
+}
 
 export class MyAlgoWalletSession {
 	connector!: MyAlgoConnect;
@@ -82,20 +124,10 @@ export class MyAlgoWalletSession {
 	private async waitForConfirmation(
 		txId: string
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		/* eslint no-constant-condition: ["error", { "checkLoops": false }] */
-		const response = await this.algodClient.status().do();
-		let lastround = response[LAST_ROUND];
-		while (true) {
-			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
-			if (pendingInfo["pool-error"]) {
-				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-			}
-			if (pendingInfo[CONFIRMED_ROUND] !== null && pendingInfo[CONFIRMED_ROUND] > 0) {
-				return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
-			}
-			lastround++;
-			await this.algodClient.statusAfterBlock(lastround).do();
-		}
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, 10);
+		if (pendingInfo["pool-error"]) {
+			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+		} else return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
 	}
 
 	/**
