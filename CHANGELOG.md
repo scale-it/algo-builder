@@ -41,6 +41,7 @@ Added:
   - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
   - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
   - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626))
+- Added support for saving smart contract template params in ASCCache.
   
 ### Template improvements
 
