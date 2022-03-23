@@ -91,6 +91,7 @@ import {
 	GetBit,
 	GetByte,
 	Gitxn,
+	Gitxna,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -2666,6 +2667,50 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(
 					() => new Gtxn(["0", "ConfigAssetClawback"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+				);
+			});
+		});
+		describe("Gitxna", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+				const tx = interpreter.runtime.ctx.tx;
+				// a) 'apas' represents 'foreignAssets', b)
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// https://developer.algorand.org/docs/reference/transactions/
+				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
+				interpreter.innerTxnGroups = [[tx, tx2]];
+			});
+
+			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+				// index 0 should push sender's address to stack from 1st tx
+				let op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				op = new Gitxna(["0", "Accounts", "2"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+			});
+
+			it("should throw error if field is not an array", function () {
+				execExpectError(
+					stack,
+					[],
+					new Gitxna(["1", "Accounts", "0"], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
 		});
