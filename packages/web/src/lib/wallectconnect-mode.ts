@@ -199,7 +199,9 @@ export class WallectConnectSession {
 		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-		} else return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		} else {
+		   return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		}
 	}
 
 	/**
