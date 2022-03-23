@@ -75,6 +75,7 @@ import {
 	Int,
 	Intc,
 	Itob,
+	ITxnas,
 	ITxnBegin,
 	ITxnField,
 	ITxnNext,
@@ -2041,6 +2042,33 @@ describe("Parser", function () {
 					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 				);
 			});
+
+			describe("itxnas opcode", () => {
+				it("Should succeed: create new itxnas opcode", () => {
+					// can parse opcode
+					const res = opcodeFromSentence(
+						["itxnas", "Accounts"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new ITxnas(["Accounts"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() => opcodeFromSentence(["itxnas"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(["itxnas", "Fee"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+				});
+			});
 		});
 	});
 
@@ -2369,6 +2397,7 @@ describe("Parser", function () {
 				new Bsqrt([], 3),
 				new Gloadss([], 4, interpreter),
 				new AcctParamsGet(["AcctBalance"], 5, interpreter),
+				new ITxnas(["Accounts"], 6, interpreter),
 			];
 
 			assert.deepEqual(res, expected);

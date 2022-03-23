@@ -99,6 +99,7 @@ import {
 	Itob,
 	ITxn,
 	ITxna,
+	ITxnas,
 	ITxnBegin,
 	ITxnField,
 	ITxnNext,
@@ -378,6 +379,7 @@ opCodeMap[6] = {
 	gloadss: Gloadss,
 	acct_params_get: AcctParamsGet,
 	itxn_next: ITxnNext,
+	itxnas: ITxnas,
 };
 
 // list of opcodes with exactly one parameter.
@@ -436,6 +438,7 @@ const interpreterReqList = new Set([
 	"gloadss",
 	"acct_params_get",
 	"itxn_next",
+	"itxnas",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -467,6 +470,7 @@ const applicationModeOps = new Set([
 	"itxna",
 	"gloadss",
 	"acct_params_get",
+	"itxnas",
 ]);
 
 // opcodes allowed in both application and signature mode
