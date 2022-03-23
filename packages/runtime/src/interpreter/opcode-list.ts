@@ -4631,13 +4631,13 @@ export class Gitxn extends Gtxn {
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super(args, line, interpreter);
+	}
+
+	execute(stack: TEALStack): void {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
-	}
-
-	execute(stack: TEALStack): void {
 		super.execute(stack);
 	}
 }
@@ -4657,13 +4657,13 @@ export class Gitxna extends Gtxna {
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super(args, line, interpreter);
+	}
+
+	execute(stack: TEALStack): void {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
-	}
-
-	execute(stack: TEALStack): void {
 		super.execute(stack);
 	}
 }

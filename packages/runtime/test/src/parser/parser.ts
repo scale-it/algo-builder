@@ -2147,6 +2147,7 @@ describe("Parser", function () {
 		let interpreter: Interpreter;
 		beforeEach(function () {
 			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
 			interpreter.tealVersion = 2;
 		});
 
@@ -2455,7 +2456,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should rreturn correct opcode list for `teal v6`", async () => {
+		it("should return correct opcode list for `teal v6`", async () => {
 			const file = "teal-v6.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
@@ -2465,6 +2466,9 @@ describe("Parser", function () {
 				new Bsqrt([], 3),
 				new Gloadss([], 4, interpreter),
 				new AcctParamsGet(["AcctBalance"], 5, interpreter),
+				new ITxnNext([], 6, interpreter),
+				new Gitxn(["0", "Fee"], 7, interpreter),
+				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
 			];
 
 			assert.deepEqual(res, expected);
