@@ -13,7 +13,7 @@ import {
 	TransactionInGroup,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
-import { ALGORAND_SIGN_TRANSACTION_REQUEST } from "./constants";
+import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -196,7 +196,7 @@ export class WallectConnectSession {
 	private async waitForConfirmation(
 		txId: string
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, 10);
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		} else return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;

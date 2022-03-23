@@ -12,6 +12,7 @@ import { mkTxParams } from "..";
 import { ExecParams, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { mkTransaction } from "./txn";
+import { WAIT_ROUNDS } from "./constants";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
@@ -124,7 +125,7 @@ export class MyAlgoWalletSession {
 	private async waitForConfirmation(
 		txId: string
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, 10);
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		} else return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
