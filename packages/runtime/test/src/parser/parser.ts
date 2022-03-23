@@ -62,6 +62,7 @@ import {
 	GetAssetHolding,
 	GetBit,
 	GetByte,
+	Gitxn,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -376,6 +377,7 @@ describe("Parser", function () {
 		beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.tealVersion = MaxTEALVersion;
+			interpreter.runtime = new Runtime([]);
 		});
 
 		it("should return correct opcode object for '+'", () => {
@@ -2039,6 +2041,42 @@ describe("Parser", function () {
 							ExecutionMode.APPLICATION
 						),
 					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gitxn", () => {
+				let res = opcodeFromSentence(
+					["gitxn", "0", "Fee"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				let expected = new Gitxn(["0", "Fee"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				res = opcodeFromSentence(
+					["gitxn", "0", "ApplicationArgs", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["gitxn", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gitxn", "1AA", "Fee"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
 				);
 			});
 		});
