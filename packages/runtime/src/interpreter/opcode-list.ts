@@ -4121,7 +4121,7 @@ export class ITxn extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				version: this.interpreter.tealVersion,
+				tealV: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
@@ -4204,7 +4204,7 @@ export class ITxna extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				version: this.interpreter.tealVersion,
+				tealV: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
@@ -4242,7 +4242,7 @@ export class ITxnas extends ITxna {
 		// TODO: should change idx type to bigint ???
 		// load idx from stack
 		this.idx = Number(this.assertBigInt(stack.pop(), this.line));
-		this.execute(stack);
+		super.execute(stack);
 	}
 }
 
