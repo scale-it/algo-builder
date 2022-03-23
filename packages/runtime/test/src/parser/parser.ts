@@ -1980,7 +1980,7 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("should return correct opcodes for tealv6 ops", function () {
+		describe("opcodes for tealv6 ops", function () {
 			this.beforeEach(() => {
 				interpreter.tealVersion = 6;
 			});

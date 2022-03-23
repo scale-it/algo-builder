@@ -2475,7 +2475,7 @@ describe("Teal Opcodes", function () {
 				interpreter.innerTxnGroups = [[tx, tx2]];
 			});
 
-			it("push fee from 2nd transaction in group", function () {
+			it("Should push fee from 2nd transaction in group", function () {
 				const op = new Gitxn(["1", "Fee"], 1, interpreter);
 				op.execute(stack);
 
@@ -2681,7 +2681,7 @@ describe("Teal Opcodes", function () {
 				interpreter.innerTxnGroups = [[tx, tx2]];
 			});
 
-			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				let op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
 				op.execute(stack);
