@@ -90,6 +90,7 @@ import {
 	GetAssetHolding,
 	GetBit,
 	GetByte,
+	Gitxn,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -2457,6 +2458,87 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
 				op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
+			});
+		});
+
+		describe("Gitxn", function () {
+			before(function () {
+				const tx = interpreter.runtime.ctx.tx;
+				// a) 'apas' represents 'foreignAssets', b)
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// https://developer.algorand.org/docs/reference/transactions/
+				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
+				interpreter.innerTxnGroups = [[tx, tx2]];
+			});
+
+			it("push fee from 2nd transaction in group", function () {
+				const op = new Gitxn(["1", "Fee"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.equal(2222n, stack.pop());
+			});
+
+			it("should push value from accounts or args array by index from tx group", function () {
+				let op = new Gitxn(["1", "Accounts", "0"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				op = new Gitxn(["1", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				op = new Gitxn(["1", "Accounts", "2"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+
+				op = new Gitxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+			});
+
+			it("should push value from assets or applications array by index from tx group", function () {
+				let op = new Gitxn(["1", "Assets", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
+
+				op = new Gitxn(["0", "Assets", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
+
+				op = new Gitxn(["1", "NumAssets"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(2n, stack.pop());
+
+				op = new Gitxn(["1", "NumApplications"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(3n, stack.pop());
+
+				// index 0 represent tx.apid (current application id)
+				op = new Gitxn(["1", "Applications", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
+
+				op = new Gitxn(["0", "Applications", "2"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());

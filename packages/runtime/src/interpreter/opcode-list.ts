@@ -4633,7 +4633,7 @@ export class Gitxn extends Gtxn {
 
 	execute(stack: TEALStack): void {
 		// change context to last inner txn submitted
-		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length;
+		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
 		super.execute(stack);
