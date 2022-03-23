@@ -82,6 +82,7 @@ import {
 	GetBit,
 	GetByte,
 	Gitxn,
+	Gitxna,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -380,6 +381,7 @@ opCodeMap[6] = {
 	acct_params_get: AcctParamsGet,
 	itxn_next: ITxnNext,
 	gitxn: Gitxn,
+	gitxna: Gitxna,
 };
 
 // list of opcodes with exactly one parameter.
@@ -439,6 +441,7 @@ const interpreterReqList = new Set([
 	"acct_params_get",
 	"itxn_next",
 	"gitxn",
+	"gitxna",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -472,6 +475,7 @@ const applicationModeOps = new Set([
 	"acct_params_get",
 	"itxn_next",
 	"gitxn",
+	"gitxna",
 ]);
 
 // TODO: Check where we can use `commonModeOps`

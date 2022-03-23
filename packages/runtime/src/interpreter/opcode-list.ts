@@ -1455,6 +1455,7 @@ export class Gtxna extends Op {
 	readonly interpreter: Interpreter;
 	readonly line: number;
 	fieldIdx: number; // array index
+	groupTxn: EncTx[];
 	protected txIdx: number; // transaction group index
 
 	/**
@@ -1477,14 +1478,15 @@ export class Gtxna extends Op {
 		this.txIdx = Number(args[0]); // transaction group index
 		this.field = args[1]; // field
 		this.fieldIdx = Number(args[2]); // transaction field array index
+		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
 		this.line = line;
 	}
 
 	execute(stack: TEALStack): void {
 		this.assertUint8(BigInt(this.txIdx), this.line);
-		this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
-		const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
+		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
+		const tx = this.groupTxn[this.txIdx];
 		const result = txAppArg(
 			this.field,
 			tx,
@@ -4616,8 +4618,8 @@ export class ITxnNext extends Op {
 	}
 }
 
+// Stack: ... → ..., any
 // field F of the Tth transaction in the last inner group submitted
-// push to stack [...stack, value of field F in Tth in the last inner group]
 export class Gitxn extends Gtxn {
 	/**
 	 * Sets `txIdx `field`, ` values according to the passed arguments.
@@ -4629,13 +4631,39 @@ export class Gitxn extends Gtxn {
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super(args, line, interpreter);
-	}
-
-	execute(stack: TEALStack): void {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
+	}
+
+	execute(stack: TEALStack): void {
+		super.execute(stack);
+	}
+}
+
+//Stack: ... → ..., any
+//Ith value of the array field F from the Tth transaction in the last inner group submitted
+export class Gitxna extends Gtxna {
+	/**
+	 * Sets `field`(Transaction Field), `fieldIdx`(Array Index) and
+	 * `txIdx`(Transaction Group Index) values according to the passed arguments.
+	 * @param args Expected arguments:
+	 *   [transaction group index, transaction field, transaction field array index]
+	 *   Note: Transaction field is expected as string instead of a number.
+	 *   For ex: `"Fee"` rather than `0`.
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super(args, line, interpreter);
+		// change context to last inner txn submitted
+		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
+		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
+		this.groupTxn = lastInnerTxnGroup;
+	}
+
+	execute(stack: TEALStack): void {
 		super.execute(stack);
 	}
 }

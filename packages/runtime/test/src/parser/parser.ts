@@ -63,6 +63,7 @@ import {
 	GetBit,
 	GetByte,
 	Gitxn,
+	Gitxna,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -1979,7 +1980,11 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("shoud return correct opcode for tealv6 ops", () => {
+		describe("should return correct opcodes for tealv6 ops", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+			});
+
 			it("gloadss", () => {
 				const res = opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Gloadss([], 1, interpreter);
@@ -2072,6 +2077,59 @@ describe("Parser", function () {
 					() =>
 						opcodeFromSentence(
 							["gitxn", "1AA", "Fee"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+			});
+
+			it("gitxna", () => {
+				let res = opcodeFromSentence(
+					["gitxna", "1", "Accounts", "1"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				let expected = new Gitxna(["1", "Accounts", "1"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				res = opcodeFromSentence(
+					["gitxna", "1", "ApplicationArgs", "4"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new Gitxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gitxna", "1", "Fee", "4"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gitxna", "1", "2", "3", "4"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gitxna", "1AB", "Fee", "4"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
