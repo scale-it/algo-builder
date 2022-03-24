@@ -27,7 +27,7 @@ async function run(runtimeEnv, deployer) {
 
 	await deployer.mkDelegatedLsig("dynamicFeeLsig", contractName, masterAccount, scInitParam); // sign contract
 	const signedContract = await deployer.getLsig("dynamicFeeLsig");
-	console.log("SIGn1 ", signedContract);
+	console.log("Smart Sign ", signedContract);
 
 	let transactions = [
 		mkTxnParams(masterAccount, escrow, 1000, signedContract, { totalFee: 1000 }),

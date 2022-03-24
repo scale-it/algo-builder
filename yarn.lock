@@ -2407,6 +2407,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^16.0.0":
+  version: 16.0.0
+  resolution: "dotenv@npm:16.0.0"
+  checksum: 664cebb51f0a9a1d1b930f51f0271e72e26d62feaecc9dc03df39453dd494b4e724809ca480fb3ec3213382b1ed3f791aaeb83569a137f9329ce58efd4853dbf
+  languageName: node
+  linkType: hard
+
 "download-git-repo@npm:^3.0.2":
   version: 3.0.2
   resolution: "download-git-repo@npm:3.0.2"
@@ -5557,6 +5564,7 @@ __metadata:
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
     algosdk: ^1.14.0
+    dotenv: ^16.0.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
