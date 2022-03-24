@@ -13,7 +13,7 @@ import {
 	TransactionInGroup,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
-import { ALGORAND_SIGN_TRANSACTION_REQUEST } from "./constants";
+import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -196,20 +196,11 @@ export class WallectConnectSession {
 	private async waitForConfirmation(
 		txId: string
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const response = await this.algodClient.status().do();
-		let lastround = response[LAST_ROUND];
-		/*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
-		while (true) {
-			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
-			if (pendingInfo["pool-error"]) {
-				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-			}
-			if (pendingInfo[CONFIRMED_ROUND] !== null && pendingInfo[CONFIRMED_ROUND] > 0) {
-				return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
-			}
-			lastround++;
-			await this.algodClient.statusAfterBlock(lastround).do();
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		if (pendingInfo["pool-error"]) {
+			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
+		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
 	}
 
 	/**
