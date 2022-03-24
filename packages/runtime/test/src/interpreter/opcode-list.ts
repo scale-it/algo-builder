@@ -92,6 +92,7 @@ import {
 	GetByte,
 	Gitxn,
 	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -2671,6 +2672,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 		});
+
 		describe("Gitxna", function () {
 			this.beforeEach(() => {
 				interpreter.tealVersion = 6;
@@ -2711,6 +2713,45 @@ describe("Teal Opcodes", function () {
 					stack,
 					[],
 					new Gitxna(["1", "Accounts", "0"], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+				);
+			});
+		});
+
+		describe("Gtxnas", function () {
+			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+				// index 0 should push sender's address to stack from 1st tx
+				stack.push(0n);
+				let op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				stack.push(1n);
+				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				stack.push(2n);
+				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+			});
+
+			it("should throw error if field is not an array", function () {
+				stack.push(0n);
+				execExpectError(
+					stack,
+					[],
+					new Gitxnas(["1", "Accounts"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});

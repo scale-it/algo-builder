@@ -2174,12 +2174,12 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxna", "1", "ApplicationArgs"],
+						["gitxnas", "1", "ApplicationArgs"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxna(["1", "ApplicationArgs"], 1, interpreter);
+					expected = new Gitxnas(["1", "ApplicationArgs"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2187,7 +2187,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxnas", "1", "Fee", "4"],
+								["gitxnas", "1", "Fee"],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
