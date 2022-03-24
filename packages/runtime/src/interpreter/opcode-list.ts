@@ -4142,7 +4142,7 @@ export class ITxn extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				version: this.interpreter.tealVersion,
+				tealVersion: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
@@ -4190,10 +4190,10 @@ export class ITxn extends Op {
 }
 
 export class ITxna extends Op {
-	readonly field: string;
-	readonly idx: number;
 	readonly interpreter: Interpreter;
 	readonly line: number;
+	readonly field: string;
+	idx: number;
 
 	/**
 	 * Sets `field` and `idx` values according to the passed arguments.
@@ -4218,7 +4218,7 @@ export class ITxna extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				version: this.interpreter.tealVersion,
+				tealVersion: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
@@ -4237,6 +4237,30 @@ export class ITxna extends Op {
 			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
 		}
 		stack.push(result);
+	}
+}
+
+// Stack: ..., A: uint64 → ..., any
+// Ath value of the array field F of the last inner transaction
+export class ITxnas extends ITxna {
+	/**
+	 * Sets `field` values according to the passed arguments.
+	 * @param args Expected arguments: [transaction field, transaction field array index]
+	 * // Note: Transaction field is expected as string instead of number.
+	 * For ex: `Fee` is expected and `0` is not expected.
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super([...args, mockTxIdx], line, interpreter);
+	}
+
+	execute(stack: TEALStack): void {
+		this.assertMinStackLen(stack, 1, this.line);
+		// TODO: should change idx type to bigint ???
+		// load idx from stack
+		this.idx = Number(this.assertBigInt(stack.pop(), this.line));
+		super.execute(stack);
 	}
 }
 
