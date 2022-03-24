@@ -64,6 +64,7 @@ import {
 	GetByte,
 	Gitxn,
 	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -2161,6 +2162,63 @@ describe("Parser", function () {
 				});
 			});
 
+			describe("gitxnas Opcode", () => {
+				it("Should succeed: create new gitxnas opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxnas", "1", "Accounts"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxnas(["1", "Accounts"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxna", "1", "ApplicationArgs"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxna(["1", "ApplicationArgs"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create gitxnas with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "Fee", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "2", "3"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1AB", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
+			});
+
 			describe("itxnas opcode", () => {
 				it("Should succeed: create new itxnas opcode", () => {
 					// can parse opcode
@@ -2519,7 +2577,8 @@ describe("Parser", function () {
 				new ITxnNext([], 6, interpreter),
 				new Gitxn(["0", "Fee"], 7, interpreter),
 				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
-				new ITxnas(["Accounts"], 9, interpreter),
+				new Gitxnas(["0", "Accounts"], 9, interpreter),
+				new ITxnas(["Accounts"], 10, interpreter),
 			];
 
 			assert.deepEqual(res, expected);
