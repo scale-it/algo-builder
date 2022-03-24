@@ -23,7 +23,12 @@ class CompileOpMock extends CompileOp {
 	compiledFiles = [] as CompileIn[];
 	writtenFiles = [] as string[];
 
-	async compile(filename: string, _tealCode: string, tealHash: number, scParams: SCParams): Promise<ASCCache> {
+	async compile(
+		filename: string,
+		_tealCode: string,
+		tealHash: number,
+		scParams: SCParams
+	): Promise<ASCCache> {
 		this.compiledFiles.push({ filename, tealHash });
 		this.timestamp++;
 		return {
@@ -34,7 +39,7 @@ class CompileOpMock extends CompileOp {
 			srcHash: tealHash,
 			tealCode: _tealCode,
 			base64ToBytes: new Uint8Array(1),
-			scParams: scParams
+			scParams: scParams,
 		};
 	}
 
@@ -63,9 +68,9 @@ describe("Compile task", () => {
 	const fhash = 2374470440; // murmur3 hash for f1 file
 
 	const scTmplParam = {
-		bob: '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ',
-		alice: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
-		hash_image: 'QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc='
+		bob: "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ",
+		alice: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
+		hash_image: "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=",
 	};
 
 	before(function () {
