@@ -83,6 +83,7 @@ import {
 	GetByte,
 	Gitxn,
 	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -383,6 +384,7 @@ opCodeMap[6] = {
 	itxn_next: ITxnNext,
 	gitxn: Gitxn,
 	gitxna: Gitxna,
+	gitxnas: Gitxnas,
 	itxnas: ITxnas,
 };
 
@@ -444,6 +446,7 @@ const interpreterReqList = new Set([
 	"itxn_next",
 	"gitxn",
 	"gitxna",
+	"gitxnas",
 	"itxnas",
 ]);
 
@@ -479,6 +482,7 @@ const applicationModeOps = new Set([
 	"itxn_next",
 	"gitxn",
 	"gitxna",
+	"gitxnas",
 	"itxnas",
 ]);
 

@@ -4691,3 +4691,27 @@ export class Gitxna extends Gtxna {
 		super.execute(stack);
 	}
 }
+
+export class Gitxnas extends Gtxnas {
+	/**
+	 * Sets `field`(Transaction Field), `fieldIdx`(Array Index) and
+	 * `txIdx`(Transaction Group Index) values according to the passed arguments.
+	 * @param args Expected arguments:
+	 *   [transaction group index, transaction field, transaction field array index]
+	 *   Note: Transaction field is expected as string instead of a number.
+	 *   For ex: `"Fee"` rather than `0`.
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super(args, line, interpreter);
+	}
+
+	execute(stack: TEALStack): void {
+		// change context to last inner txn submitted
+		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
+		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
+		this.groupTxn = lastInnerTxnGroup;
+		super.execute(stack);
+	}
+}
