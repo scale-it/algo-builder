@@ -14,6 +14,7 @@ import algosdk, {
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
+import cloneDeep from "lodash.clonedeep";
 import { Keccak } from "sha3";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -34,6 +35,7 @@ import {
 	MAX_UINT64,
 	MAX_UINT128,
 	MaxTEALVersion,
+	TransactionTypeEnum,
 	TxArrFields,
 	ZERO_ADDRESS,
 } from "../lib/constants";
@@ -51,7 +53,12 @@ import {
 	parseBinaryStrToBigInt,
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { encTxToExecParams, txAppArg, txnSpecbyField } from "../lib/txn";
+import {
+	encTxToExecParams,
+	isEncTxApplicationCall,
+	txAppArg,
+	txnSpecbyField,
+} from "../lib/txn";
 import {
 	DecodingMode,
 	EncodingType,
@@ -1315,7 +1322,7 @@ export class Txn extends Op {
 				this.interpreter.runtime.ctx.tx,
 				this.idx,
 				this,
-				this.interpreter.tealVersion,
+				this.interpreter,
 				this.line
 			);
 		} else {
@@ -1377,14 +1384,7 @@ export class Gtxn extends Op {
 
 		const tx = this.groupTxn[this.txIdx]; // current tx
 		if (this.txFieldIdx !== undefined) {
-			result = txAppArg(
-				this.field,
-				tx,
-				this.txFieldIdx,
-				this,
-				this.interpreter.tealVersion,
-				this.line
-			);
+			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
 			result = txnSpecbyField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
 		}
@@ -1432,7 +1432,7 @@ export class Txna extends Op {
 			this.interpreter.runtime.ctx.tx,
 			this.fieldIdx,
 			this,
-			this.interpreter.tealVersion,
+			this.interpreter,
 			this.line
 		);
 		stack.push(result);
@@ -1487,14 +1487,7 @@ export class Gtxna extends Op {
 		this.assertUint8(BigInt(this.txIdx), this.line);
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		const tx = this.groupTxn[this.txIdx];
-		const result = txAppArg(
-			this.field,
-			tx,
-			this.fieldIdx,
-			this,
-			this.interpreter.tealVersion,
-			this.line
-		);
+		const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter, this.line);
 		stack.push(result);
 	}
 }
@@ -3992,9 +3985,9 @@ export class ITxnField extends Op {
 			});
 		}
 
-		const subTxCnt = this.interpreter.currentInnerTxnGroup.length - 1;
-		const updatedSubTx = setInnerTxField(
-			this.interpreter.currentInnerTxnGroup[subTxCnt],
+		const lastInnerTxID = this.interpreter.currentInnerTxnGroup.length - 1;
+		const lastInnerTx = setInnerTxField(
+			this.interpreter.currentInnerTxnGroup[lastInnerTxID],
 			this.field,
 			valToSet,
 			this,
@@ -4002,7 +3995,7 @@ export class ITxnField extends Op {
 			this.line
 		);
 
-		this.interpreter.currentInnerTxnGroup[subTxCnt] = updatedSubTx;
+		this.interpreter.currentInnerTxnGroup[lastInnerTxID] = lastInnerTx;
 	}
 }
 
@@ -4026,11 +4019,20 @@ export class ITxnSubmit extends Op {
 		this.interpreter = interpreter;
 	}
 
+	// eslint-disable-next-line sonarjs/cognitive-complexity
 	execute(_stack: TEALStack): void {
 		if (this.interpreter.currentInnerTxnGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
+		}
+
+		if (!this.interpreter.runtime.ctx.isInnerTx) {
+			this.interpreter.runtime.ctx.remainingFee = 0;
+		}
+
+		if (this.interpreter.runtime.parentCtx === undefined) {
+			this.interpreter.runtime.parentCtx = cloneDeep(this.interpreter.runtime.ctx);
 		}
 
 		// calculate remaining fee after executing an inner tx
@@ -4049,6 +4051,14 @@ export class ITxnSubmit extends Op {
 		const contractAddress = getApplicationAddress(appID);
 		const contractAccount = this.interpreter.runtime.getAccount(contractAddress).account;
 
+		// Supports only calling app(NoOpt) for app transaction type.
+		for (const tx of this.interpreter.currentInnerTxnGroup) {
+			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
+				console.warn("Only supports application call in this version");
+				return;
+			}
+		}
+
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
 		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
@@ -4063,23 +4073,34 @@ export class ITxnSubmit extends Op {
 			)
 		);
 
-		const baseCurrTx = this.interpreter.runtime.ctx.tx;
-		const baseCurrTxGrp = this.interpreter.runtime.ctx.gtxs;
+		try {
+			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
+			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
-		// execute innner transaction
-		this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
-		this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
-		this.interpreter.runtime.ctx.isInnerTx = true;
-		this.interpreter.runtime.ctx.processTransactions(execParams);
+			this.interpreter.runtime.ctx.remainingFee = credit.remainingFee;
+			// set up context for inner transaction
+			this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
+			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
+			this.interpreter.runtime.ctx.isInnerTx = true;
 
-		// update current txns to base (top-level) after innerTx execution
-		this.interpreter.runtime.ctx.tx = baseCurrTx;
-		this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+			// execute innner transaction
+			this.interpreter.runtime.ctx.processTransactions(execParams);
 
-		// save executed tx, reset current tx
-		this.interpreter.runtime.ctx.isInnerTx = false;
-		this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxnGroup);
-		this.interpreter.currentInnerTxnGroup = [];
+			// update current txns to base (top-level) after innerTx execution
+			this.interpreter.runtime.ctx.tx = baseCurrTx;
+			this.interpreter.runtime.ctx.gtxs = baseCurrTxGrp;
+
+			// save executed tx
+			this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxnGroup);
+		} catch (err: any) {
+			// throw new error
+			throw new RuntimeError(err.errorDescriptor, err.args);
+		} finally {
+			this.interpreter.runtime.parentCtx = undefined;
+			this.interpreter.runtime.ctx.isInnerTx = false;
+			this.interpreter.currentInnerTxnGroup = [];
+			this.interpreter.runtime.ctx.remainingFee = 0;
+		}
 	}
 }
 
@@ -4156,14 +4177,7 @@ export class ITxn extends Op {
 				// similarly as Txn Op
 				if (this.idx !== undefined) {
 					// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
-					result = txAppArg(
-						this.field,
-						tx,
-						this.idx,
-						this,
-						this.interpreter.tealVersion,
-						this.line
-					);
+					result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
 				} else {
 					result = txnSpecbyField(this.field, tx, [tx], this.interpreter.tealVersion);
 				}
@@ -4210,15 +4224,19 @@ export class ITxna extends Op {
 			});
 		}
 		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
+		let result: StackElem;
+
 		const tx = groupTx[groupTx.length - 1];
-		const result = txAppArg(
-			this.field,
-			tx,
-			this.idx,
-			this,
-			this.interpreter.tealVersion,
-			this.line
-		);
+		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
+			// handle Logs
+			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
+			logs = logs.map((log) => convertToBuffer(log));
+			this.checkIndexBound(this.idx, logs, this.line);
+			result = logs[this.idx];
+		} else {
+			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
+		}
 		stack.push(result);
 	}
 }

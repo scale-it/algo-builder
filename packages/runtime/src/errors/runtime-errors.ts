@@ -15,6 +15,7 @@ export class RuntimeError extends Error {
 	}
 
 	public readonly errorDescriptor: ErrorDescriptor;
+	public readonly args: AnyMap;
 	public readonly number: number;
 	public readonly parent?: Error;
 
@@ -35,7 +36,7 @@ export class RuntimeError extends Error {
 		super(String(prefix) + String(formattedMessage));
 		this.errorDescriptor = errorDescriptor;
 		this.number = errorDescriptor.number;
-
+		this.args = messageArguments;
 		if (parentError instanceof Error) {
 			this.parent = parentError;
 		}

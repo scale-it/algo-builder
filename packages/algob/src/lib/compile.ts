@@ -116,7 +116,12 @@ export class CompileOp {
 		return this.algocl.compile(code).do();
 	}
 
-	async compile(filename: string, tealCode: string, tealHash: number, scParams: SCParams): Promise<ASCCache> {
+	async compile(
+		filename: string,
+		tealCode: string,
+		tealHash: number,
+		scParams: SCParams
+	): Promise<ASCCache> {
 		try {
 			const co = await this.callCompiler(tealCode);
 			return {
@@ -128,7 +133,7 @@ export class CompileOp {
 				// compiled base64 converted into bytes
 				base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64")),
 				tealCode: tealCode,
-				scParams: scParams
+				scParams: scParams,
 			};
 		} catch (e) {
 			if (types.isRequestError(e)) {
