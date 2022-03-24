@@ -4121,7 +4121,7 @@ export class ITxn extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealV: this.interpreter.tealVersion,
+				tealVersion: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
@@ -4204,7 +4204,7 @@ export class ITxna extends Op {
 	execute(stack: TEALStack): void {
 		if (this.interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealV: this.interpreter.tealVersion,
+				tealVersion: this.interpreter.tealVersion,
 				line: this.line,
 			});
 		}
