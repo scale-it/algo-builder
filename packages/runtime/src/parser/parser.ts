@@ -101,6 +101,7 @@ import {
 	Itob,
 	ITxn,
 	ITxna,
+	ITxnas,
 	ITxnBegin,
 	ITxnField,
 	ITxnNext,
@@ -382,6 +383,7 @@ opCodeMap[6] = {
 	itxn_next: ITxnNext,
 	gitxn: Gitxn,
 	gitxna: Gitxna,
+	itxnas: ITxnas,
 };
 
 // list of opcodes with exactly one parameter.
@@ -442,6 +444,7 @@ const interpreterReqList = new Set([
 	"itxn_next",
 	"gitxn",
 	"gitxna",
+	"itxnas",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -476,6 +479,7 @@ const applicationModeOps = new Set([
 	"itxn_next",
 	"gitxn",
 	"gitxna",
+	"itxnas",
 ]);
 
 // TODO: Check where we can use `commonModeOps`

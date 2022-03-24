@@ -340,7 +340,8 @@ maximun uint128`,
 	},
 	NO_INNER_TRANSACTION_AVAILABLE: {
 		number: 1049,
-		message: "No inner transaction available. Teal version: #%tealV%, [error-line: %line%]",
+		message:
+			"No inner transaction available. Teal version: #%tealVersion%, [error-line: %line%]",
 		title: "No inner transaction available.",
 		description: `No inner transaction available.`,
 	},
