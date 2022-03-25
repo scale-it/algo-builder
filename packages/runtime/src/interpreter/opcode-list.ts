@@ -1695,6 +1695,7 @@ export class Global extends Op {
 	execute(stack: TEALStack): void {
 		let result;
 		switch (this.field) {
+			//TODO: We forgot check teal version ???
 			case "GroupSize": {
 				result = this.interpreter.runtime.ctx.gtxs.length;
 				break;
@@ -1729,6 +1730,15 @@ export class Global extends Op {
 			case "CurrentApplicationAddress": {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				result = decodeAddress(getApplicationAddress(appID)).publicKey;
+				break;
+			}
+			case "CallerApplicationID": {
+				result = this.interpreter.runtime.ctx.getCallerApplicationID();
+				break;
+			}
+			case "CallerApplicationAddress": {
+				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
+				result = decodeAddress(callerAddress).publicKey;
 				break;
 			}
 			default: {
