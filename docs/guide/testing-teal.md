@@ -6,6 +6,13 @@ layout: splash
 
 [TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a stack based language that executes inside Algorand transactions to program logic signatures and smart contracts. `@algo-builder/runtime` provides a TypeScript and JavaScript, lightweight runtime and TEAL interpreter to test Algorand transactions, ASA and Smart Contracts.
 
+You can test your smart contracts and flows by starting a local node (see our [infrastructure](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) guide) and creating [_deploy_ and _run_](<(./deployer.md)>) scripts to automate the process of creating dapps and running them against the official Algorand implementation.
+
+However, this is not efficient for sustainable development. You need a proper automated test process, we strongly advice you to use our `@algo-builder/runtime` package and the testing framework. It essentially brings the unit and integration testing experience form traditional software development to Algorand smart contracts development.
+
+We strongly advice to always test your smart contract, and try to get 100% test coverage. The last thing you want is to get your contract _hacked_ and your _user assets stolen_.
+Note: 100% test coverage is strongly recommended, but it doesn't guarantee that your smart contracts are safe. For complex flow we still recommend you to [audit](https://algobuilder.dev/auditing.html) your solution.
+
 ## How it works
 
 The `@algo-builder/runtime` (TypeScript Algorand runtime) package has 4 major components:
@@ -421,7 +428,8 @@ TEAL files used for the below tests can be found in `/test/fixtures` in [runtime
 - [Boilerplate Stateless Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts)
 - [Escrow Account Test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts)
 - [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
-- Complex TEAL test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
-- [DAO Tests](https://github.com/scale-it/algo-builder/tree/master/examples/dao/test)
 
-See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) and [Interesting Test Suites](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#interesting-test-suites) for more interesting test suites.
+In our [templates](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#interesting-test-suites) you will find dapps with test suites, which serves as a good examples and place to learn. Notable mentions:
+
+- [DAO Tests](https://github.com/scale-it/algo-builder/tree/master/examples/dao/test)
+- Complex TEAL test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
