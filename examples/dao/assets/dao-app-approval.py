@@ -270,7 +270,7 @@ def approval_program(ARG_GOV_TOKEN):
         Return(Int(1))
     ])
 
-    # sender.deposit
+    # sender.deposit holds amount of vote token deposits
     sender_deposit = App.localGet(Int(0), Bytes("deposit"))
 
     # Records gov tokens deposited by user (sender)
@@ -438,18 +438,12 @@ def approval_program(ARG_GOV_TOKEN):
     clear_proposal = Seq([
         compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
         proposal_id,
-        # assert that there is a recorded proposal
         Assert(
             And(
+                Global.group_size() == Int(1),
+                # assert that there is a recorded proposal
                 proposal_id.hasValue() == Int(1),
-                Global.group_size() == Int(1),
-                basic_checks(Txn)
-            )
-        ),
-        Assert(
-            And(
-                # Assert amount of withdrawal is proposal.deposit & receiver is sender
-                Global.group_size() == Int(1),
+                basic_checks(Txn),
                 # assert that the voting is not active
                 Or(
                     # it’s past execution: proposal.executed == 1  || proposal.execute_before < now
@@ -463,6 +457,7 @@ def approval_program(ARG_GOV_TOKEN):
                         App.localGet(Int(0), Bytes("voting_end")) < Global.latest_timestamp()
                     ) == Int(1)
                 )
+
             )
         ),
         # return deposit back to proposal
@@ -471,7 +466,7 @@ def approval_program(ARG_GOV_TOKEN):
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
                 TxnField.xfer_asset: Int(ARG_GOV_TOKEN),
-                TxnField.asset_receiver: Txn.sender(),
+                TxnField.asset_receiver: Txn.sender(),  # proposal lsig
                 TxnField.asset_amount: App.globalGet(Bytes("deposit")),
                 # fees must be paid by proposal
                 TxnField.fee: Int(0)
