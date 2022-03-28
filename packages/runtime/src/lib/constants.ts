@@ -364,7 +364,12 @@ GlobalFields[5] = {
 };
 
 // global fields supported in tealv6
-GlobalFields[6] = { ...GlobalFields[5] };
+GlobalFields[6] = {
+	...GlobalFields[5],
+	OpcodeBudget: 0,
+	CallerApplicationID: null,
+	CallerApplicationAddress: null,
+};
 
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: { [key: number]: { [key: string]: number } } = {

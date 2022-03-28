@@ -1317,7 +1317,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Teal v6 update", function () {
-		this.beforeAll(() => {
+		this.beforeEach(() => {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
@@ -1370,7 +1370,7 @@ describe("Inner Transactions", function () {
 
 		describe("RekeyTo", () => {
 			let rekeyProgram: string;
-			this.beforeAll(() => {
+			this.beforeEach(() => {
 				setUpInterpreter(6);
 				rekeyProgram = `
           itxn_begin

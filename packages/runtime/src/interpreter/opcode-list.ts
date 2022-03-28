@@ -1695,7 +1695,6 @@ export class Global extends Op {
 	execute(stack: TEALStack): void {
 		let result;
 		switch (this.field) {
-			//TODO: We forgot check teal version ???
 			case "GroupSize": {
 				result = this.interpreter.runtime.ctx.gtxs.length;
 				break;
