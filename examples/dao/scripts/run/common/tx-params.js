@@ -108,12 +108,26 @@ function mkClearProposalTx(daoAppID, govTokenID, proposalLsig) {
 	};
 }
 
+function mkWithdrawFromProposalTx(receiverAccount, govTokenID, proposalLsig, amount) {
+	return {
+		type: types.TransactionType.TransferAsset,
+		sign: types.SignType.LogicSignature,
+		fromAccountAddr: proposalLsig.address(),
+		toAccountAddr: receiverAccount.addr,
+		amount: amount,
+		lsig: proposalLsig,
+		assetID: govTokenID,
+		payFlags: { totalFee: 1000 },
+	};
+}
+
 module.exports = {
 	mkProposalTx,
 	mkDepositVoteTokenTx,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
 	mkClearProposalTx,
+	mkWithdrawFromProposalTx,
 	now,
 	votingStart,
 	votingEnd,

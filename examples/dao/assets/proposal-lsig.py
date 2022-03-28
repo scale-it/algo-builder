@@ -12,12 +12,15 @@ def proposal_lsig(ARG_OWNER, ARG_DAO_APP_ID):
     """
 
     # check no rekeying and ensure sender is owner
-    def basic_owner_checks(txn: Txn):
-        return And(
-            txn.rekey_to() == Global.zero_address(),
-            # only owner can close ASA/ALGO
-            txn.sender() == Addr(ARG_OWNER),
+    def basic_owner_checks(txn: Txn): return And(
+        txn.rekey_to() == Global.zero_address(),
+
+        # only owner can close ASA/ALGO
+        Or(
+            txn.asset_receiver() == Addr(ARG_OWNER),
+            txn.receiver() == Addr(ARG_OWNER)
         )
+    )
 
     def basic_checks(txn: Txn):
         return And(
