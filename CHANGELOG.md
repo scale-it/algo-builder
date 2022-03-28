@@ -40,7 +40,8 @@ Added:
   - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
   - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
-  - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626))
+  - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626)).
+  - Add new opcode `gitxn`, `gitxna` and `gitxnas`.([#628](https://github.com/scale-it/algo-builder/pull/628)).
   - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
 
 - Added support for saving smart contract template params in ASCCache.

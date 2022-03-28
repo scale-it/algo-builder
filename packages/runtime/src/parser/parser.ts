@@ -81,6 +81,9 @@ import {
 	GetAssetHolding,
 	GetBit,
 	GetByte,
+	Gitxn,
+	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -379,6 +382,9 @@ opCodeMap[6] = {
 	gloadss: Gloadss,
 	acct_params_get: AcctParamsGet,
 	itxn_next: ITxnNext,
+	gitxn: Gitxn,
+	gitxna: Gitxna,
+	gitxnas: Gitxnas,
 	itxnas: ITxnas,
 };
 
@@ -438,6 +444,9 @@ const interpreterReqList = new Set([
 	"gloadss",
 	"acct_params_get",
 	"itxn_next",
+	"gitxn",
+	"gitxna",
+	"gitxnas",
 	"itxnas",
 ]);
 
@@ -470,9 +479,14 @@ const applicationModeOps = new Set([
 	"itxna",
 	"gloadss",
 	"acct_params_get",
+	"itxn_next",
+	"gitxn",
+	"gitxna",
+	"gitxnas",
 	"itxnas",
 ]);
 
+// TODO: Check where we can use `commonModeOps`
 // opcodes allowed in both application and signature mode
 const commonModeOps = new Set([
 	"err",
@@ -586,7 +600,6 @@ const commonModeOps = new Set([
 	"divw",
 	"bsqrt",
 	"gloadss",
-	"acct_params_get",
 ]);
 
 /**
