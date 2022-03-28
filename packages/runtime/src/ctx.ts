@@ -12,6 +12,7 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
+import { calculateFeeCredit } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -48,6 +49,8 @@ export class Ctx implements Context {
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
+	innerTxAppIDCallStack: number[];
+	remainingFee: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -71,7 +74,10 @@ export class Ctx implements Context {
 		this.pooledApplCost = 0;
 		// inner transaction props
 		this.isInnerTx = false;
+		// initial app call stack
+		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
+		this.remainingFee = 0;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {
@@ -409,33 +415,49 @@ export class Ctx implements Context {
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
 	verifyMinimumFees(): void {
+		// pooled fee for inner tx is calculated at itx_submit
 		if (this.isInnerTx) {
 			return;
-		} // pooled fee for inner tx is calculated at itx_submit
-		let collected = 0;
-		for (const val of this.gtxs) {
-			if (val.fee === undefined) val.fee = 0;
-			collected += val.fee;
 		}
 
-		const required = this.gtxs.length * ALGORAND_MIN_TX_FEE;
-		if (collected < required) {
+		const credit = calculateFeeCredit(this.gtxs);
+
+		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
-				required: required,
-				collected: collected,
+				required: credit.requiredFee,
+				collected: credit.collectedFee,
 			});
 		}
 	}
 
 	/**
 	 * Verify closeRemainderTo field is different than fromAccountAddr
-	 * @param txParam transaction param
+	 * @param txnParams transaction params
 	 */
-	verifyCloseRemainderTo(txParam: types.ExecParams): void {
-		if (!txParam.payFlags.closeRemainderTo) return;
-		if (txParam.payFlags.closeRemainderTo === webTx.getFromAddress(txParam)) {
-			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO);
+	verifyCloseRemainderTo(txnParams: types.ExecParams): void {
+		if (!txnParams.payFlags.closeRemainderTo) return;
+		if (txnParams.payFlags.closeRemainderTo === webTx.getFromAddress(txnParams)) {
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO);
 		}
+	}
+
+	/**
+	 * Verify if the current inner transaction can be executed
+	 */
+	verifyAndUpdateInnerAppCallStack(): void {
+		// verify
+		if (!this.isInnerTx) return;
+
+		if (this.innerTxAppIDCallStack.length >= 8) {
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED);
+		}
+		const appID = this.tx.apid ?? 0;
+		if (appID > 0 && this.innerTxAppIDCallStack.find((id) => id === appID) !== undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INNER_APP_SELF_CALL);
+		}
+
+		// update inner tx call stack
+		if (appID > 0) this.innerTxAppIDCallStack.push(appID);
 	}
 
 	/**
@@ -680,6 +702,7 @@ export class Ctx implements Context {
 		let r: TxReceipt;
 
 		this.verifyMinimumFees();
+		this.verifyAndUpdateInnerAppCallStack();
 		txParams.forEach((txParam, idx) => {
 			const fromAccountAddr = webTx.getFromAddress(txParam);
 			this.deductFee(fromAccountAddr, idx, txParam.payFlags);
@@ -764,8 +787,9 @@ export class Ctx implements Context {
 							this.debugStack
 						);
 					} catch (error) {
-						// if transaction type is Clear Call, remove the app without throwing error
-						// (rejecting tx) tested by running on algorand network
+						// if transaction type is Clear Call,
+						// remove the app without throwing an error (rejecting tx)
+						// tested by running on algorand network
 						// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
 					}
 
@@ -890,6 +914,13 @@ export class Ctx implements Context {
 			// apply rekey after pass all logic
 			this.rekeyTo(txParam);
 
+			if (this.isInnerTx) {
+				// pop current application in the inner app call stack
+				this.innerTxAppIDCallStack.pop();
+				if (this.innerTxAppIDCallStack.length === 1) {
+					this.runtime.ctx.innerTxAppIDCallStack.pop();
+				}
+			}
 			if (r) {
 				txReceipts.push(r);
 			}

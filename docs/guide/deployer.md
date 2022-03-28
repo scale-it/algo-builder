@@ -15,10 +15,16 @@ It will protect you from deploying same ASA or stateful smart contract twice. It
 Deployer class has the following modes:
 
 - Deploy Mode: In deploy mode user can write or read the checkpoints, create transaction logs. Files that are directly placed in `scripts/` folder are considered to be run in this mode. Ex: `scripts/deploy.js`
+  To run a script in the _deploy_ mode (the script will receive deployer instance in _deploy_ mode\_):
 
-- Run Mode: In run mode user can access/read checkpoints, create logs but cannot write(create) checkpoints. Files placed in nested folders (non-direct children) of `scripts/` folder are considered to be run in this mode. Ex: `scripts/transfer/run-script.js`.
+        yarn run algob deploy scripts/script_name.js
 
-  **Note:** In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTx`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
+- Run Mode: In run mode user can access/read checkpoints, create logs but cannot write(create) checkpoints. Files placed in nested folders (non-direct children, eg: `scripts/transfer/run-script.js`) of `scripts/` folder are considered to be run in this mode.
+  To run a script in the _run_ mode (the script will receive deployer instance in _run_ mode\_):
+
+        yarn run algob run scripts/transfer/run-script.js
+
+**Note:** In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTx`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
 
 Read more about deployment and scripts in our [spec](https://paper.dropbox.com/doc/Algorand-builder-specs--A_yfjbGmtkx5BYMOy8Ha50~uAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621&h2=Scripts).
 
@@ -27,8 +33,9 @@ Read more about deployment and scripts in our [spec](https://paper.dropbox.com/d
 When you initiate a new project, it will create a `sample-project` with the deployment script `scripts/0-sampleScript.js`,
 
 You can write deployment tasks synchronously and they'll be executed in the correct order.
+Below we will guide you how to use the deployer to create ASA and smart contracts. Please look at our [templates](https://github.com/scale-it/algo-builder/tree/master/examples) for more more details how to create to organize files in scripts directory. The [asa example](https://github.com/scale-it/algo-builder/tree/master/examples/asa) the best one to start.
 
-### ASA
+### Deploying ASA
 
     // ASA-1 will be deployed before ASA-2
     await deployer.deployASA("ASA-1", {...});

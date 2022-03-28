@@ -4,7 +4,7 @@ import { Account, Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
-import { ASCCache, ConfirmedTxInfo, FundASCFlags, LsigInfo } from "../../src/types";
+import { ASCCache, ConfirmedTxInfo, FundASCFlags, LsigInfo, SCParams } from "../../src/types";
 import {
 	MOCK_APPLICATION_ADDRESS,
 	mockAlgod,
@@ -111,7 +111,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 	async ensureCompiled(
 		name: string,
 		force?: boolean,
-		scInitParam?: unknown
+		scInitParam?: unknown,
+		scParams?: SCParams
 	): Promise<ASCCache> {
 		return {
 			filename: name,
@@ -121,6 +122,12 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 			srcHash: 123, // source code hash
 			base64ToBytes: new Uint8Array(1), // compiled base64 in bytes
 			tealCode: "TEAL", // teal code
+			scParams: {
+				//sc params
+				bob: "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ",
+				alice: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
+				hash_image: "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=",
+			},
 		};
 	}
 

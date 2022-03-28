@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
@@ -15,6 +13,7 @@ export const ALGORAND_MIN_TX_FEE = 1000;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
 export const MaxTEALVersion = 6;
+export const MinVersionSupportC2CCall = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for app schema
@@ -444,15 +443,6 @@ export const enum MathOp {
 	BitwiseXor,
 	BitwiseInvert,
 }
-
-// tealv5 supported types (typeEnum -> type mapping)
-// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
-export const TxnTypeMap: { [key: string]: string } = {
-	1: "pay",
-	3: "acfg", // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
-	4: "axfer", // TransferAsset OR RevokeAsset,
-	5: "afrz",
-};
 
 /**
  * https://developer.algorand.org/docs/get-details/dapps/avm/teal/specification/#typeenum-constants

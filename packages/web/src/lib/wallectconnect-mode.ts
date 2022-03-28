@@ -5,7 +5,6 @@ import algosdk, { Transaction } from "algosdk";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
-	ChainType,
 	ExecParams,
 	SessionConnectResponse,
 	SessionDisconnectResponse,
@@ -13,8 +12,8 @@ import {
 	SignTxnParams,
 	TransactionInGroup,
 } from "../types";
-import { clientForChain, mkTxParams } from "./api";
-import { ALGORAND_SIGN_TRANSACTION_REQUEST } from "./constants";
+import { algoexplorerAlgod, mkTxParams } from "./api";
+import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -25,8 +24,8 @@ export class WallectConnectSession {
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
 
-	constructor(chain: ChainType, connector?: WalletConnect) {
-		this.algodClient = clientForChain(chain);
+	constructor(chain: string, connector?: WalletConnect) {
+		this.algodClient = algoexplorerAlgod(chain);
 		if (connector) {
 			this.connector = connector;
 		} else {
@@ -80,9 +79,9 @@ export class WallectConnectSession {
 	 */
 	onConnect(handler: (error: Error | null, response: SessionConnectResponse) => unknown): void {
 		this.connector.on("connect", (err, payload) => {
-			const { wcPeerId, wcPeerMeta, wcAccounts }: SessionConnectResponse = payload.params[0];
-			this.wcAccounts = wcAccounts;
-			handler(err, { wcPeerId, wcPeerMeta, wcAccounts });
+			const { peerId, peerMeta, accounts }: SessionConnectResponse = payload.params[0];
+			this.wcAccounts = accounts;
+			handler(err, { peerId, peerMeta, accounts });
 		});
 	}
 
@@ -92,9 +91,9 @@ export class WallectConnectSession {
 	 */
 	onUpdate(handler: (error: Error | null, response: SessionUpdateResponse) => unknown): void {
 		this.connector.on("session_update", (err, payload) => {
-			const { wcAccounts }: SessionUpdateResponse = payload.params[0];
-			this.wcAccounts = wcAccounts;
-			handler(err, { wcAccounts });
+			const { accounts }: SessionUpdateResponse = payload.params[0];
+			this.wcAccounts = accounts;
+			handler(err, { accounts });
 		});
 	}
 
@@ -197,20 +196,11 @@ export class WallectConnectSession {
 	private async waitForConfirmation(
 		txId: string
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const response = await this.algodClient.status().do();
-		let lastround = response[LAST_ROUND];
-		// eslint-disable-next-line no-constant-condition
-		while (true) {
-			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
-			if (pendingInfo["pool-error"]) {
-				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-			}
-			if (pendingInfo[CONFIRMED_ROUND] !== null && pendingInfo[CONFIRMED_ROUND] > 0) {
-				return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
-			}
-			lastround++;
-			await this.algodClient.statusAfterBlock(lastround).do();
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		if (pendingInfo["pool-error"]) {
+			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
+		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
 	}
 
 	/**
