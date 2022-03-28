@@ -1030,11 +1030,18 @@ describe("Inner Transactions", function () {
 
 			executeTEAL(optin);
 
+			const holding = interpreter.runtime.ctx.state.accounts
+				.get(appAccAddr)
+				?.getAssetHolding(assetID1);
+			if (holding) {
+				holding.amount = 11n;
+			}
+
 			const teal =
 				`
         global CurrentApplicationAddress
         txn Accounts 1
-        int 100
+        int 10
       ` +
 				axfer +
 				`
@@ -1043,13 +1050,13 @@ describe("Inner Transactions", function () {
 
 			assert.doesNotThrow(() => executeTEAL(teal));
 
-			// 100 spent by app
+			// 10 spent by app
 			const verifySenderBalCode = `
         global CurrentApplicationAddress
         int ${assetID1}
         asset_holding_get AssetBalance
         assert
-        int 2900
+        int 1
         ==
       `;
 			assert.doesNotThrow(() => executeTEAL(verifySenderBalCode));
@@ -1060,7 +1067,7 @@ describe("Inner Transactions", function () {
         int ${assetID1}
         asset_holding_get AssetBalance
         assert
-        int 100
+        int 10
         ==
       `;
 			assert.doesNotThrow(() => executeTEAL(verifyReceiverBalCode));
@@ -1149,7 +1156,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
-			const lastAssetID = interpreter.runtime.ctx.createdAssetID;
+			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
 
 			const create = `
         itxn_begin
@@ -1198,6 +1205,10 @@ describe("Inner Transactions", function () {
 			// does not hold Asset
 			expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 
+			const john = interpreter.runtime.ctx.state.accounts.get(johnAddr);
+			if (john) {
+				john.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
+			}
 			// should freeze now
 			interpreter.runtime.optIntoASA(createdAssetID, johnAddr, {});
 			assert.doesNotThrow(() => executeTEAL(freeze));
@@ -1238,10 +1249,11 @@ describe("Inner Transactions", function () {
         log
         byte "c"
         log
+		return
       `;
 
 			assert.doesNotThrow(() => executeTEAL(log));
-			const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
+			const logs = interpreter.runtime.ctx.state.txReceipts.get(TXN_OBJ.txID)?.logs;
 			assert.isDefined(logs);
 
 			if (logs !== undefined) {
