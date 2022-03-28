@@ -2485,7 +2485,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(2222n, stack.pop());
 			});
 
-			it("should push value from accounts or args array by index from tx group", function () {
+			it("Should push value from accounts or args array by index from tx group", function () {
 				let op = new Gitxn(["1", "Accounts", "0"], 1, interpreter);
 				op.execute(stack);
 
