@@ -57,7 +57,7 @@ import {
 	encTxToExecParams,
 	isEncTxApplicationCall,
 	txAppArg,
-	txnSpecbyField,
+	txnSpecByField,
 } from "../lib/txn";
 import {
 	DecodingMode,
@@ -1326,7 +1326,7 @@ export class Txn extends Op {
 				this.line
 			);
 		} else {
-			result = txnSpecbyField(
+			result = txnSpecByField(
 				this.field,
 				this.interpreter.runtime.ctx.tx,
 				this.interpreter.runtime.ctx.gtxs,
@@ -4179,7 +4179,7 @@ export class ITxn extends Op {
 					// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
 					result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
 				} else {
-					result = txnSpecbyField(this.field, tx, [tx], this.interpreter.tealVersion);
+					result = txnSpecByField(this.field, tx, [tx], this.interpreter.tealVersion);
 				}
 
 				break;

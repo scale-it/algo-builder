@@ -79,7 +79,7 @@ export function checkIfAssetDeletionTx(txn: Transaction): boolean {
  * @param txns Transaction group
  * @param tealVersion version of TEAL
  */
-export function txnSpecbyField(
+export function txnSpecByField(
 	txField: string,
 	tx: EncTx,
 	gtxns: EncTx[],
