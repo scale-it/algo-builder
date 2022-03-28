@@ -6,7 +6,7 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum } from "../../../src/lib/constants";
 import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
@@ -51,7 +51,7 @@ describe("Inner Transactions", function () {
 
 	const setUpInterpreter = (
 		tealVersion: number,
-		appBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10
+		appBalance: number = ALGORAND_ACCOUNT_MIN_BALANCE
 	): void => {
 		// setup 1st account (to be used as sender)
 		elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
@@ -83,7 +83,7 @@ describe("Inner Transactions", function () {
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
-	this.beforeEach(() => setUpInterpreter(5));
+	this.beforeAll(() => setUpInterpreter(5));
 
 	describe("TestActionTypes", function () {
 		it("should fail: itxn_submit without itxn_begin", function () {
@@ -221,10 +221,6 @@ describe("Inner Transactions", function () {
 		it(`should fail: "insufficient balance" because app account is charged fee`, function () {
 			// set application account balance to minimum
 			applicationAccount.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
-			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-			if (acc) {
-				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
-			}
 
 			// (defaults make these 0 pay|axfer to zero address, from app account)
 			tealCode = `
@@ -499,7 +495,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAppPay", function () {
 		let pay: string;
-		this.beforeEach(() => {
+		this.beforeAll(() => {
 			pay = `
         itxn_begin
         itxn_field Amount
@@ -555,11 +551,6 @@ describe("Inner Transactions", function () {
 		// */
 
 		it(`should fail: insufficient balance`, function () {
-			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-			if (acc) {
-				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
-			}
-
 			const teal =
 				`
         global CurrentApplicationAddress
@@ -606,12 +597,10 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should test pay with closeRemTo`, function () {
-			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
+			const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 			if (acc) {
-				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
+				acc.amount = 1000000n;
 			}
-
-			const appBalance = interpreter.runtime.getAccount(appAccAddr).amount;
 
 			const teal = `
         itxn_begin
@@ -633,14 +622,13 @@ describe("Inner Transactions", function () {
 			assert.doesNotThrow(() => executeTEAL(verifyBal));
 
 			// assert receiver got most of the ALGO (minus fees)
-			// fee = 1000 by default
-			assert.equal(interpreter.runtime.ctx.getAccount(johnAddr)?.amount, appBalance - 1000n);
+			assert.equal(interpreter.runtime.ctx.getAccount(johnAddr)?.amount, 998000n);
 		});
 	});
 
 	describe("TestAppAssetOptIn", function () {
 		let axfer: string;
-		this.beforeEach(() => {
+		this.beforeAll(() => {
 			axfer = `
         itxn_begin
         int axfer
@@ -663,10 +651,6 @@ describe("Inner Transactions", function () {
 
 		it(`should fail: ref is passed but bal == 0`, function () {
 			TXN_OBJ.apas = [1, 9]; // set foreign asset
-			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-			if (acc) {
-				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
-			}
 			expectRuntimeError(
 				() => executeTEAL(axfer),
 				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
@@ -684,81 +668,60 @@ describe("Inner Transactions", function () {
 			expectRuntimeError(() => executeTEAL(axfer), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 		});
 
-		describe("check optin", function () {
-			let assetID: number;
-			this.beforeEach(() => {
-				assetID = 0;
-				const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
-				if (elonAcc) {
-					elonAcc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
-					assetID = interpreter.runtime.ctx.deployASADef(
-						"test-asa",
-						{ total: 10, decimals: 0, unitName: "TASA" },
-						elonAddr,
-						{ creator: { ...elonAcc.account, name: "elon" } }
-					).assetIndex;
-				}
-			});
+		it(`should test ASA optin, asa transfer`, function () {
+			const optin = `
+        itxn_begin
+        int axfer
+        itxn_field TypeEnum
+        int 9
+        itxn_field XferAsset
+        int 0
+        itxn_field AssetAmount
+        global CurrentApplicationAddress
+        itxn_field AssetReceiver
+        itxn_submit
+        int 1
+      `;
 
-			it("should fail: optin undefined asset", () => {
-				TXN_OBJ.apas = [1, 9, 100];
-				const optin = `
-			itxn_begin
-			int axfer
-			itxn_field TypeEnum
-			int 100
-			itxn_field XferAsset
-			int 0
-			itxn_field AssetAmount
-			global CurrentApplicationAddress
-			itxn_field AssetReceiver
-			itxn_submit
-			int 1
-		  `;
+			// does not exist
+			expectRuntimeError(() => executeTEAL(optin), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
 
-				// does not exist
-				expectRuntimeError(() => executeTEAL(optin), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
-			});
-			it(`should test ASA optin, asa transfer`, function () {
-				const optin = `
-			itxn_begin
-			int axfer
-			itxn_field TypeEnum
-			int ${assetID}
-			itxn_field XferAsset
-			int 0
-			itxn_field AssetAmount
-			global CurrentApplicationAddress
-			itxn_field AssetReceiver
-			itxn_submit
-			int 1
-		  `;
+			let assetID = 0;
+			const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
+			if (elonAcc) {
+				assetID = interpreter.runtime.ctx.deployASADef(
+					"test-asa",
+					{ total: 10, decimals: 0, unitName: "TASA" },
+					elonAddr,
+					{ creator: { ...elonAcc.account, name: "elon" } }
+				).assetIndex;
+			}
 
-				// passes
-				assert.doesNotThrow(() => executeTEAL(optin));
+			// passes
+			assert.doesNotThrow(() => executeTEAL(optin));
 
-				// opted in, but balance=0
-				expectRuntimeError(
-					() => executeTEAL(axfer),
-					RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS
-				);
+			// opted in, but balance=0
+			expectRuntimeError(
+				() => executeTEAL(axfer),
+				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS
+			);
 
-				// increase asa balance to 5
-				const holding = interpreter.runtime.ctx.state.accounts
-					.get(appAccAddr)
-					?.getAssetHolding(assetID);
-				if (holding) {
-					holding.amount = 5n;
-				}
+			// increase asa balance to 5
+			const holding = interpreter.runtime.ctx.state.accounts
+				.get(appAccAddr)
+				?.getAssetHolding(assetID);
+			if (holding) {
+				holding.amount = 5n;
+			}
 
-				executeTEAL(axfer);
-				executeTEAL(axfer);
-				expectRuntimeError(
-					() => executeTEAL(axfer), // already withdrawn 4, cannot withdraw 2 more
-					RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS
-				);
+			executeTEAL(axfer);
+			executeTEAL(axfer);
+			expectRuntimeError(
+				() => executeTEAL(axfer), // already withdrawn 4, cannot withdraw 2 more
+				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS
+			);
 
-				const verifyHolding = `
+			const verifyHolding = `
         global CurrentApplicationAddress
         int 1
         asset_holding_get AssetBalance
@@ -766,31 +729,12 @@ describe("Inner Transactions", function () {
         int 1
         ==
       `;
-				// verify ASA transfer
-				assert.doesNotThrow(() => executeTEAL(verifyHolding));
-			});
+			// verify ASA transfer
+			assert.doesNotThrow(() => executeTEAL(verifyHolding));
+		});
 
-			it(`should test ASA close`, function () {
-				const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
-				if (acc) {
-					acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
-				}
-				const optin = `
-			itxn_begin
-			int axfer
-			itxn_field TypeEnum
-			int ${assetID}
-			itxn_field XferAsset
-			int 0
-			itxn_field AssetAmount
-			global CurrentApplicationAddress
-			itxn_field AssetReceiver
-			itxn_submit
-			int 1
-		  `;
-
-				executeTEAL(optin);
-				const close = `
+		it(`should test ASA close`, function () {
+			const close = `
         itxn_begin
         int axfer
         itxn_field TypeEnum
@@ -805,9 +749,9 @@ describe("Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-				assert.doesNotThrow(() => executeTEAL(close));
+			assert.doesNotThrow(() => executeTEAL(close));
 
-				const verifyClose = `
+			const verifyClose = `
         global CurrentApplicationAddress
         int 1
         asset_holding_get AssetBalance
@@ -815,9 +759,8 @@ describe("Inner Transactions", function () {
         assert
         !
       `;
-				// verify ASA close
-				assert.doesNotThrow(() => executeTEAL(verifyClose));
-			});
+			// verify ASA close
+			assert.doesNotThrow(() => executeTEAL(verifyClose));
 		});
 	});
 
@@ -825,10 +768,9 @@ describe("Inner Transactions", function () {
 		let axfer: string;
 		let assetID1: number;
 		let assetID2: number;
-		this.beforeEach(() => {
+		this.beforeAll(() => {
 			const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 			if (elonAcc) {
-				elonAcc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
 				// in foreign-assets
 				assetID1 = interpreter.runtime.ctx.deployASADef(
 					"test-asa-1",
@@ -936,30 +878,9 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should fail: insufficient balance`, function () {
-			const john = interpreter.runtime.ctx.state.accounts.get(johnAddr);
-			if (john) {
-				john.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
-			}
-
 			// optin by txn Account1
-
-			// TODO: check what happend ???
 			interpreter.runtime.ctx.optIntoASA(assetID1, johnAddr, {});
-			const optin = `
-			itxn_begin
-			int axfer
-			itxn_field TypeEnum
-			int ${assetID1}
-			itxn_field XferAsset
-			int 0
-			itxn_field AssetAmount
-			global CurrentApplicationAddress
-			itxn_field AssetReceiver
-			itxn_submit
-			int 1
-		  `;
 
-			executeTEAL(optin);
 			const teal =
 				`
         global CurrentApplicationAddress
@@ -1009,54 +930,25 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should pass: inner transaction axfer`, function () {
-			const john = interpreter.runtime.ctx.state.accounts.get(johnAddr);
-			if (john) {
-				john.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
-			}
-			interpreter.runtime.ctx.optIntoASA(assetID1, johnAddr, {});
-			const optin = `
-			itxn_begin
-			int axfer
-			itxn_field TypeEnum
-			int ${assetID1}
-			itxn_field XferAsset
-			int 0
-			itxn_field AssetAmount
-			global CurrentApplicationAddress
-			itxn_field AssetReceiver
-			itxn_submit
-			int 1
-		  `;
-
-			executeTEAL(optin);
-
-			const holding = interpreter.runtime.ctx.state.accounts
-				.get(appAccAddr)
-				?.getAssetHolding(assetID1);
-			if (holding) {
-				holding.amount = 11n;
-			}
-
 			const teal =
 				`
         global CurrentApplicationAddress
         txn Accounts 1
-        int 10
+        int 100
       ` +
 				axfer +
 				`
         int 1
       `;
-
 			assert.doesNotThrow(() => executeTEAL(teal));
 
-			// 10 spent by app
+			// 100 spent by app
 			const verifySenderBalCode = `
         global CurrentApplicationAddress
         int ${assetID1}
         asset_holding_get AssetBalance
         assert
-        int 1
+        int 2900
         ==
       `;
 			assert.doesNotThrow(() => executeTEAL(verifySenderBalCode));
@@ -1067,7 +959,7 @@ describe("Inner Transactions", function () {
         int ${assetID1}
         asset_holding_get AssetBalance
         assert
-        int 10
+        int 100
         ==
       `;
 			assert.doesNotThrow(() => executeTEAL(verifyReceiverBalCode));
@@ -1156,7 +1048,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
-			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
+			const lastAssetID = interpreter.runtime.ctx.createdAssetID;
 
 			const create = `
         itxn_begin
@@ -1205,10 +1097,6 @@ describe("Inner Transactions", function () {
 			// does not hold Asset
 			expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 
-			const john = interpreter.runtime.ctx.state.accounts.get(johnAddr);
-			if (john) {
-				john.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
-			}
 			// should freeze now
 			interpreter.runtime.optIntoASA(createdAssetID, johnAddr, {});
 			assert.doesNotThrow(() => executeTEAL(freeze));
@@ -1249,11 +1137,10 @@ describe("Inner Transactions", function () {
         log
         byte "c"
         log
-		return
       `;
 
 			assert.doesNotThrow(() => executeTEAL(log));
-			const logs = interpreter.runtime.ctx.state.txReceipts.get(TXN_OBJ.txID)?.logs;
+			const logs = interpreter.runtime.getTxReceipt(TXN_OBJ.txID)?.logs;
 			assert.isDefined(logs);
 
 			if (logs !== undefined) {
@@ -1317,7 +1204,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Teal v6 update", function () {
-		this.beforeEach(() => {
+		this.beforeAll(() => {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
@@ -1370,7 +1257,7 @@ describe("Inner Transactions", function () {
 
 		describe("RekeyTo", () => {
 			let rekeyProgram: string;
-			this.beforeEach(() => {
+			this.beforeAll(() => {
 				setUpInterpreter(6);
 				rekeyProgram = `
           itxn_begin
