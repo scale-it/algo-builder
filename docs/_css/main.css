@@ -32,3 +32,9 @@
 #algo-donate-modal .modal-body {
   margin: auto;
 }
+
+/* must be applied to the wrapper div */
+.img-scroll {
+  overflow: scroll;
+  margin: 10px;
+}
