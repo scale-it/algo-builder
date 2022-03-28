@@ -1,11 +1,23 @@
 # ASA deployment using [Algo Builder](https://github.com/scale-it/algo-builder/)
 
-This project shows how to create Algorand Standard Asset (ASA).
-We will create gold and tesla assets. In algob, we recommend to
+This project shows how to use Algo Builder to:
+
+- organize your project
+- define Algorand Standard Asset (ASA)
+- create scripts and use `deployer` object to deploy assets and run transactions
+  For a template with test suite, browse the following [examples with tests](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#interesting-test-suites) list.
+
+We will create gold and tesla assets. We recommend to
 create assets using a specification file, as provided in `assets/asa.yaml`.
 
 Each of these assets are owned by their specific owner accounts.
-After the creation, a third account is opted-in in order to receive the assets.
+After the creation, we opt-in accounts in order to receive the assets.
+
+To deploy all assets simply run:
+
+    algob deploy
+
+It will go through all files in directly placed in the `scripts/` directory (so, it doesn't go recursively into the subdirectories) and run them in the _deploy_ mode. For more information about the deployer read the [deployer guide](https://algobuilder.dev/guide/deployer.html).
 
 Transfers can be executed by executing `algob run scripts/transfer/gold-to-john.js` and other scripts in `scripts/transfer/`.
 These scripts contain logic to transfer assets to `john-account` but other accounts can be configured as well.

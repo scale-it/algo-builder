@@ -1,8 +1,4 @@
-const {
-	executeTx,
-	readAppGlobalState,
-	readAppLocalState,
-} = require("@algo-builder/algob");
+const { executeTx, readAppGlobalState, readAppLocalState } = require("@algo-builder/algob");
 
 exports.executeTx = async function (deployer, txnParams) {
 	try {

@@ -340,7 +340,8 @@ maximun uint128`,
 	},
 	NO_INNER_TRANSACTION_AVAILABLE: {
 		number: 1049,
-		message: "No inner transaction available. Teal version: #%tealV%, [error-line: %line%]",
+		message:
+			"No inner transaction available. Teal version: #%tealVersion%, [error-line: %line%]",
 		title: "No inner transaction available.",
 		description: `No inner transaction available.`,
 	},
@@ -389,6 +390,13 @@ maximun uint128`,
 			"Account Field Error - Unknown Field:  %field% at line %line% for teal version #%tealV%",
 		title: "Account Field Error at line %line%",
 		description: `Account field unknown`,
+	},
+	ITXN_NEXT_WITHOUT_ITXN_BEGIN: {
+		number: 1057,
+		message:
+			"itxn_next without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
+		title: "itxn_next without itxn_begin",
+		description: `itxn_next without itxn_begin`,
 	},
 };
 
@@ -553,16 +561,40 @@ const transactionErrors = {
 		description: "Asset Holding Not Found",
 	},
 	ACCOUNT_ASSET_FROZEN: {
-		number: 1505,
+		number: 1405,
 		message: `Asset index %assetId% frozen for account %address%`,
 		title: "Asset Frozen",
 		description: "Asset Frozen for account",
 	},
 	FEES_NOT_ENOUGH: {
-		number: 1506,
+		number: 1406,
 		message: `Fee required %required% is greater than fee collected %collected%`,
 		title: "Not enough fees",
 		description: "Fees not enough to cover transaction cost",
+	},
+	INVALID_CLOSE_REMAINDER_TO: {
+		number: 1407,
+		message: "Transaction cannot close account to its sender",
+		title: "Transaction cannot close account to its sender.",
+		description: "Transaction cannot close account to its sender",
+	},
+	INNER_APP_CALL_INVALID_VERSION: {
+		number: 1408,
+		message: "Inner app call in older version %tealVersion%",
+		title: "Inner app call with version %tealVersion%.",
+		description: "Inner app call with version %tealVersion%",
+	},
+	INNER_APP_DEEP_EXCEEDED: {
+		number: 1409,
+		message: "Inner transaction appl deep exceeded",
+		title: "Inner transaction appl deep exceeded.",
+		description: "Inner transaction appl deep exceeded",
+	},
+	INNER_APP_SELF_CALL: {
+		number: 1410,
+		message: "Inner transaction appl self-call",
+		title: "Inner transaction appl self-call.",
+		description: "Inner transaction appl self-call",
 	},
 };
 

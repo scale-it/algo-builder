@@ -1,5 +1,3 @@
-import { number } from "zod";
-
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Interpreter } from "../interpreter/interpreter";
@@ -101,8 +99,10 @@ import {
 	Itob,
 	ITxn,
 	ITxna,
+	ITxnas,
 	ITxnBegin,
 	ITxnField,
+	ITxnNext,
 	ITxnSubmit,
 	Keccak256,
 	Label,
@@ -378,6 +378,8 @@ opCodeMap[6] = {
 	bsqrt: Bsqrt,
 	gloadss: Gloadss,
 	acct_params_get: AcctParamsGet,
+	itxn_next: ITxnNext,
+	itxnas: ITxnas,
 };
 
 // list of opcodes with exactly one parameter.
@@ -435,6 +437,8 @@ const interpreterReqList = new Set([
 	"app_params_get",
 	"gloadss",
 	"acct_params_get",
+	"itxn_next",
+	"itxnas",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -466,6 +470,7 @@ const applicationModeOps = new Set([
 	"itxna",
 	"gloadss",
 	"acct_params_get",
+	"itxnas",
 ]);
 
 // opcodes allowed in both application and signature mode

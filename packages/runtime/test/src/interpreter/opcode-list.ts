@@ -106,6 +106,7 @@ import {
 	Intc,
 	Intcblock,
 	Itob,
+	ITxnas,
 	Keccak256,
 	Label,
 	Len,
@@ -6367,6 +6368,40 @@ describe("Teal Opcodes", function () {
 			stack.push(parsing.stringToBytes("ABCDE"));
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
+		});
+	});
+
+	describe("Tealv6: itxnas opcode", function () {
+		let stack: Stack<StackElem>;
+		let interpreter: Interpreter;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+			interpreter = new Interpreter();
+			interpreter.tealVersion = 6;
+			interpreter.innerTxnGroups = [[TXN_OBJ, { ...TXN_OBJ, fee: 1000 }]];
+		});
+
+		it("Should succeed: query data use itxnas", () => {
+			const op = new ITxnas(["Accounts"], 1, interpreter);
+			stack.push(1n);
+			op.execute(stack);
+
+			assert.deepEqual(stack.pop(), TXN_OBJ.apat[0]);
+		});
+
+		it("Should fail: not any inner tx submited", () => {
+			interpreter.innerTxnGroups = [];
+			const op = new ITxnas(["Accounts"], 1, interpreter);
+			stack.push(1n);
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
+			);
+		});
+
+		it("Should fail: stack empty", () => {
+			const op = new ITxnas(["Accounts"], 1, interpreter);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 	});
 });

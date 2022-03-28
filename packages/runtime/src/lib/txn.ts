@@ -6,10 +6,12 @@ import {
 	Transaction,
 } from "algosdk";
 
+import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import {
+	ALGORAND_MIN_TX_FEE,
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
@@ -172,11 +174,14 @@ export function txAppArg(
 	tx: EncTx,
 	idx: number,
 	op: Op,
-	tealVersion: number,
+	interpreter: Interpreter,
 	line: number
 ): StackElem {
+	const tealVersion: number = interpreter.tealVersion;
+
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
+
 	if (!result) {
 		// handle defaults
 		return TxFieldDefaults[txField];
@@ -199,6 +204,7 @@ export function txAppArg(
 		} // during ssc deploy tx.app_id is 0
 		idx--;
 	}
+
 	op.checkIndexBound(idx, result, line);
 	return parseToStackElem(result[idx], txField);
 }
@@ -239,8 +245,17 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
 export function isEncTxApplicationCreate(txn: EncTx): boolean {
 	return (
 		txn.type === TransactionTypeEnum.APPLICATION_CALL &&
-		(txn.apan === 0 || txn.apan === undefined)
+		(txn.apan === 0 || txn.apan === undefined) &&
+		txn.apid === undefined
 	);
+}
+
+/**
+ * Check if given encoded transaction object is application call
+ * @param txn Encode EncTx Object
+ */
+export function isEncTxApplicationCall(txn: EncTx): boolean {
+	return txn.type === TransactionTypeEnum.APPLICATION_CALL && txn.apid !== undefined;
 }
 
 /**
@@ -283,10 +298,14 @@ export function encTxToExecParams(
 				execParams.type = types.TransactionType.DeployApp;
 				execParams.approvalProgram = encTx.approvalProgram;
 				execParams.clearProgram = encTx.clearProgram;
-				execParams.localInts = encTx.apgs?.nui;
-				execParams.localBytes = encTx.apgs?.nbs;
+				execParams.localInts = encTx.apls?.nui;
+				execParams.localBytes = encTx.apls?.nbs;
 				execParams.globalInts = encTx.apgs?.nui;
 				execParams.globalBytes = encTx.apgs?.nbs;
+			} else if (isEncTxApplicationCall(encTx)) {
+				execParams.type = types.TransactionType.CallApp;
+				execParams.appID = encTx.apid;
+				execParams.appArgs = encTx.apaa;
 			}
 			break;
 		}
@@ -432,3 +451,29 @@ const _getAddress = (addr?: Uint8Array): string | undefined => {
 	}
 	return undefined;
 };
+
+export interface CreditFeeType {
+	remainingFee: number;
+	collectedFee: number;
+	requiredFee: number;
+}
+
+/**
+ *
+ * @param groupTx group transaction
+ * @returns remainingFee - fee remaining after execute group Tx
+ * 			collected fee - fee collected from group Tx
+ * 			required fee - fee require to execute group tx
+ */
+export function calculateFeeCredit(groupTx: EncTx[]): CreditFeeType {
+	let collectedFee = 0;
+	for (const tx of groupTx) {
+		collectedFee += tx.fee ?? 0;
+	}
+	const requiredFee = groupTx.length * ALGORAND_MIN_TX_FEE;
+	return {
+		remainingFee: collectedFee - requiredFee,
+		collectedFee,
+		requiredFee,
+	};
+}

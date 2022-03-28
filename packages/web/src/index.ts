@@ -8,4 +8,5 @@ export { BuilderError, applyErrorMessageTemplate, parseAlgorandError } from "./e
 export { ERRORS, ErrorDescriptor, ERROR_RANGES } from "./errors/errors-list";
 export { WebMode } from "./lib/web-mode";
 export { WallectConnectSession } from "./lib/wallectconnect-mode";
+export { MyAlgoWalletSession } from "./lib/myalgowallet-mode";
 export { getSuggestedParams, mkTxParams } from "./lib/api";

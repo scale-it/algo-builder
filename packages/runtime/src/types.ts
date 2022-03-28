@@ -149,6 +149,10 @@ export interface Context {
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
+	// save appID use inner tx call stack
+	innerTxAppIDCallStack: number[];
+	// remaining fee from pool
+	remainingFee: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;

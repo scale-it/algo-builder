@@ -48,6 +48,7 @@ export class Runtime {
 	private store: State;
 	private _defaultAccounts: AccountStore[];
 	ctx: Context;
+	parentCtx?: Context; // parent Ctx call to current inner Txns;
 	loadedAssetsDefs: types.ASADefs;
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
@@ -77,7 +78,6 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-
 		this.round = 2;
 		this.timestamp = 1;
 	}

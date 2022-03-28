@@ -337,13 +337,13 @@ export enum ChainType {
 }
 
 export interface SessionConnectResponse {
-	wcPeerId: string;
-	wcPeerMeta?: IClientMeta;
-	wcAccounts: string[];
+	peerId: string;
+	peerMeta?: IClientMeta;
+	accounts: string[];
 }
 
 export interface SessionUpdateResponse {
-	wcAccounts: string[];
+	accounts: string[];
 }
 
 export interface SessionDisconnectResponse {

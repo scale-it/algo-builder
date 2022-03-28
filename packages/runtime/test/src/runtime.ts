@@ -124,7 +124,7 @@ describe("Transfer Algo Transaction", function () {
 						closeRemainderTo: alice.address,
 					},
 				}),
-			RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+			RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO
 		);
 	});
 
@@ -604,7 +604,7 @@ describe("Algorand Standard Assets", function () {
 					toAccountAddr: alice.address,
 					payFlags: { totalFee: 1000, closeRemainderTo: alice.address }, // transfer all assets of alice => john (using closeRemTo)
 				}),
-			RUNTIME_ERRORS.GENERAL.INVALID_CLOSE_REMAINDER_TO
+			RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO
 		);
 	});
 

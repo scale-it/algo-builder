@@ -70,7 +70,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			// should fail as we can only use clawback (since asset is default-frozen)
 			assert.throws(
 				() => ctx.runtime.executeTx(txParams),
-				`RUNTIME_ERR1505: Asset index ${ctx.assetIndex} frozen for account ${elon.address}`
+				`RUNTIME_ERR1405: Asset index ${ctx.assetIndex} frozen for account ${elon.address}`
 			);
 		});
 	});
@@ -440,7 +440,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			// should fail as we can only use clawback (since asset is default-frozen)
 			assert.throws(
 				() => ctx.runtime.executeTx(assetTransferParams),
-				`RUNTIME_ERR1505: Asset index ${ctx.assetIndex} frozen for account ${bob.address}`
+				`RUNTIME_ERR1405: Asset index ${ctx.assetIndex} frozen for account ${bob.address}`
 			);
 		});
 

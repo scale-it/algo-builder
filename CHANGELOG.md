@@ -37,13 +37,17 @@ Added:
     algob init --infrastructure
   ```
 - Teal V6 support:
-  - Add new opcode bsqrt and divw([##605](https://github.com/scale-it/algo-builder/pull/605)).
-  - Add new opcode gloadss([#606](https://github.com/scale-it/algo-builder/pull/606)).
-  - Add new opcode acct_params_get([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
+  - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
+  - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626))
+  - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
+
+- Added support for saving smart contract template params in ASCCache.
   
 ### Template improvements
 
-- Using App instead of Lsig (Smart Signature) in `examples/dao` to simplify deposit management.
+- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
 
 ### API breaking
 
