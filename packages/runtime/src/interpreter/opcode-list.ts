@@ -1386,7 +1386,7 @@ export class Gtxn extends Op {
 		if (this.txFieldIdx !== undefined) {
 			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
-			result = txnSpecbyField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
+			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
 		}
 		stack.push(result);
 	}

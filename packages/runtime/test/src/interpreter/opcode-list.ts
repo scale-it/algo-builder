@@ -2514,7 +2514,7 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
 			});
 
-			it("should push value from assets or applications array by index from tx group", function () {
+			it("Should push value from assets or applications array by index from tx group", function () {
 				let op = new Gitxn(["1", "Assets", "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
@@ -2708,7 +2708,7 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 			});
 
-			it("should throw error if field is not an array", function () {
+			it("Should throw an error if field is not an array", function () {
 				execExpectError(
 					stack,
 					[],
@@ -2719,7 +2719,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("Gtxnas", function () {
-			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
 				let op = new Gitxnas(["0", "Accounts"], 1, interpreter);

@@ -2014,7 +2014,7 @@ describe("Parser", function () {
 			});
 
 			describe("acct_params_get Opcode", function () {
-				it("should succeed: create new acct_params_get opcode", () => {
+				it("Should succeed: create new acct_params_get opcode", () => {
 					Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
 						const res = opcodeFromSentence(
 							["acct_params_get", appParam],
