@@ -2875,6 +2875,36 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(ZERO_ADDRESS, stack.pop());
 		});
 
+		describe("Tealv6 fields", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [1, 2];
+			});
+			it("Tealv6: CalllerApplicationAddress", () => {
+				// caller app id = 2
+				const op = new Global(["CallerApplicationAddress"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(decodeAddress(getApplicationAddress(2n)).publicKey, stack.pop());
+
+				// no caller
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [];
+				op.execute(stack);
+				assert.deepEqual(ZERO_ADDRESS, stack.pop());
+			});
+
+			it("Tealv6: CallerApplicationID", () => {
+				// caller app id = 2
+				const op = new Global(["CallerApplicationID"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(2n, stack.pop());
+
+				// no caller
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [];
+				op.execute(stack);
+				assert.equal(0n, stack.pop());
+			});
+		});
+
 		it("should throw error if global field is not present in teal version", function () {
 			interpreter.tealVersion = 1;
 
@@ -2907,6 +2937,16 @@ describe("Teal Opcodes", function () {
 			interpreter.tealVersion = 4;
 			expectRuntimeError(
 				() => new Global(["GroupID"], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+
+			interpreter.tealVersion = 5;
+			expectRuntimeError(
+				() => new Global(["CallerApplicationID"], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+			expectRuntimeError(
+				() => new Global(["CallerApplicationAddress"], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 		});

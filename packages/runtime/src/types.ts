@@ -157,6 +157,8 @@ export interface Context {
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;
 	getApp: (appID: number, line?: number) => SSCAttributesM;
+	getCallerApplicationID: () => number;
+	getCallerApplicationAddress: () => AccountAddress;
 	transferAlgo: (txnParam: types.AlgoTransferParam) => void;
 	verifyMinimumFees: () => void;
 	deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void;

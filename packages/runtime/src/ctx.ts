@@ -10,7 +10,7 @@ import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
-import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
+import { ALGORAND_MIN_TX_FEE, ZERO_ADDRESS_STR } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
@@ -192,6 +192,20 @@ export class Ctx implements Context {
 			this.state.accounts.get(accAddress)
 		);
 		return this.runtime.assertAppDefined(appID, account.getApp(appID));
+	}
+
+	getCallerApplicationID(): number {
+		let callerApplicationID = 0;
+		if (this.innerTxAppIDCallStack.length > 0) {
+			callerApplicationID = this.innerTxAppIDCallStack[this.innerTxAppIDCallStack.length - 1];
+		}
+		return callerApplicationID;
+	}
+
+	getCallerApplicationAddress(): AccountAddress {
+		const callerApplicationID = this.getCallerApplicationID();
+		if (callerApplicationID === 0) return ZERO_ADDRESS_STR;
+		return getApplicationAddress(callerApplicationID);
 	}
 
 	// transfer ALGO as per transaction parameters
