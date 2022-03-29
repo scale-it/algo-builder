@@ -20,6 +20,7 @@ import type {
 	SCParams,
 } from "../types";
 import { CompileOp } from "./compile";
+import { WAIT_ROUNDS } from "./constants";
 import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
@@ -124,20 +125,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	// https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
 	// Function used to wait for a tx confirmation
 	async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
-		const response = await this.algodClient.status().do();
-		let lastround = response["last-round"];
-		let maxTries = 6;
-		while (--maxTries > 0) {
-			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
-			if (pendingInfo["pool-error"]) {
-				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-			}
-			if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-				return pendingInfo as ConfirmedTxInfo;
-			}
-			lastround++;
-			// TODO: maybe we should use sleep?
-			await this.algodClient.statusAfterBlock(lastround).do();
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		if (pendingInfo["pool-error"]) {
+			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+		}
+		if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
+			return pendingInfo as ConfirmedTxInfo;
 		}
 		throw new Error("timeout");
 	}
