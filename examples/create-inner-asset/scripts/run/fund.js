@@ -20,6 +20,7 @@ async function run(runtimeEnv, deployer) {
 		localBytes: 0,
 		globalInts: 0,
 		globalBytes: 0,
+		appName: "NewApp", // TODO: better name ???
 		payFlags: {
 			totalFee: 1000,
 		},
@@ -52,6 +53,10 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	await executeTx(deployer, [createAppTxnParam, paymentTxnParam, proxyTxnParam]);
+
+	const newAppInfo = deployer.getApp("NewApp");
+
+	console.log(newAppInfo);
 }
 
 module.exports = { default: run };
