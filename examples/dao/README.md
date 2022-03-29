@@ -61,8 +61,8 @@ We use functional notation to describe use cases we will implement.
 
   - _tx0_: Call to DAO App with _appArg_ == ["clear_vote_record"]. `proposalLsig.address()` is passed as first external account.
 
-- `clear_proposal()` — Clears proposal record and returns back the deposit. Sender must be an account with a recorded proposal. Transaction composition:
-  - _tx0_: Call to DAO App with _appArg_ == "clear_proposal".
+- `close_proposal()` — Closes proposal record and returns back the deposit. Sender must be an account with a recorded proposal. Transaction composition:
+  - _tx0_: Call to DAO App with _appArg_ == "close_proposal".
   - _tx1_: Withdraw _gov_tokens_ from _depositLsig_ back to _proposalLsig_ (ASA transfer).
 
 - `withdraw_from_proposal()` - Withdraw the assets from the proposalLsig back to the owner. Receiver must be the owner of the proposalLsig. Transaction composition:
@@ -104,9 +104,9 @@ To clear vote record (from voter's account), fails if the proposal is still in p
 
     yarn run algob run scripts/run/clear_vote_record.js
 
-To clear proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
+To close proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
 
-    yarn run algob run scripts/run/clear_proposal.js
+    yarn run algob run scripts/run/close_proposal.js
 
 To withdraw assets from proposalLsig back to the owner (proposer), fails if the receiver is not the owner of the proposalLsig:
 

@@ -11,7 +11,7 @@ const {
 	executeBefore,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
-	mkClearProposalTx,
+	mkCloseProposalTx,
 } = require("../scripts/run/common/tx-params");
 
 const now = Math.round(new Date().getTime() / 1000);
@@ -610,7 +610,7 @@ describe("DAO - Failing Paths", function () {
 		});
 	});
 
-	describe("Clear Proposal", function () {
+	describe("Close Proposal", function () {
 		this.beforeAll(() => {
 			// set up context
 			setUpCtx();
@@ -625,37 +625,37 @@ describe("DAO - Failing Paths", function () {
 			ctx.runtime.setRoundAndTimestamp(10, executeBefore + 10);
 		});
 
-		let clearProposalTx;
+		let closeProposalTx;
 		this.beforeEach(() => {
-			clearProposalTx = mkClearProposalTx(ctx.daoAppID, ctx.govTokenID, ctx.proposalLsig);
+			closeProposalTx = mkCloseProposalTx(ctx.daoAppID, ctx.govTokenID, ctx.proposalLsig);
 		});
 
-		it("should reject clear_proposal if proposal is not recorded in lsig", () => {
-			assert.throws(() => ctx.executeTx(clearProposalTx), RUNTIME_ERR1009);
+		it("should reject close_proposal if proposal is not recorded in lsig", () => {
+			assert.throws(() => ctx.executeTx(closeProposalTx), RUNTIME_ERR1009);
 		});
 
-		it("should reject clear_proposal if group size is invalid", () => {
+		it("should reject close_proposal if group size is invalid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...clearProposalTx }, { ...clearProposalTx }]),
+				() => ctx.executeTx([{ ...closeProposalTx }, { ...closeProposalTx }]),
 				RUNTIME_ERR1009
 			);
 		});
 
-		it("should reject clear_proposal if fees not enough", () => {
+		it("should reject close_proposal if fees not enough", () => {
 			assert.throws(
-				() => ctx.executeTx({ ...clearProposalTx, payFlags: { totalFee: 1000 } }),
+				() => ctx.executeTx({ ...closeProposalTx, payFlags: { totalFee: 1000 } }),
 				RUNTIME_ERR1009
 			);
 		});
 
-		it("should reject clear_proposal if voting is active", () => {
+		it("should reject close_proposal if voting is active", () => {
 			// set current time between [votingStart, votingEnd]
 			ctx.runtime.setRoundAndTimestamp(
 				10,
 				votingStart + Math.round((votingEnd - votingStart) / 2)
 			);
 
-			assert.throws(() => ctx.executeTx(clearProposalTx), RUNTIME_ERR1009);
+			assert.throws(() => ctx.executeTx(closeProposalTx), RUNTIME_ERR1009);
 		});
 	});
 });

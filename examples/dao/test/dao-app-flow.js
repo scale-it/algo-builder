@@ -14,7 +14,7 @@ const {
 	mkDepositVoteTokenTx,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
-	mkClearProposalTx,
+	mkCloseProposalTx,
 	votingStart,
 	votingEnd,
 	executeBefore,
@@ -38,7 +38,7 @@ const initialBalance = 200e6;
  * + execute proposal
  * + withdraw vote deposit
  * + clear vote record
- * + clear proposal
+ * + close proposal
  * https://paper.dropbox.com/doc/Algo-DAO--BTR~tKj8P788NMZqnVfKwS7BAg-ncLdytuFa7EJrRerIASSl
  */
 describe("DAO test", function () {
@@ -252,7 +252,7 @@ describe("DAO test", function () {
 		 *   a) Call to DAO app + asset transfer (deposit_lsig => voter)
 		 *   b) voterA withdraws his 6 votes, voterB withdraws his 8 votes.
 		 * Clear Voting Record (by voterA & voterB)
-		 * Clear proposal:
+		 * Close proposal:
 		 *   a) optIn to Gov Token by proposalALsig
 		 *   b) Call to DAO app by proposalALsig + asset transfer transaction from depositAcc -> proposalALsig
 		 */
@@ -485,7 +485,7 @@ describe("DAO test", function () {
 		assert.isUndefined(voterA.getLocalState(appID, key));
 		assert.isUndefined(voterA.getLocalState(appID, key));
 
-		/* --------------------  Clear Proposal  -------------------- */
+		/* --------------------  Close Proposal  -------------------- */
 
 		// optIn to GovToken by proposalALsig (protected by proposerA account using opt-in lock)
 		const optInTx = [
@@ -511,8 +511,8 @@ describe("DAO test", function () {
 
 		assert.isDefined(proposalALsigAcc.getAssetHolding(govTokenID));
 
-		const clearProposalParam = mkClearProposalTx(appID, govTokenID, proposalALsig);
-		runtime.executeTx(clearProposalParam);
+		const closeProposalParam = mkCloseProposalTx(appID, govTokenID, proposalALsig);
+		runtime.executeTx(closeProposalParam);
 		syncAccounts();
 
 		// verify proposalALsig recieved back deposit of 15 tokens
@@ -818,12 +818,12 @@ describe("DAO test", function () {
 		assert.isUndefined(proposalBLsigAcc.getLocalState(appID, "no")); // we didn't vote for "no"
 	});
 
-	it("Should allow to clear proposal if it is passsed execution", () => {
+	it("Should allow to close proposal if it is passsed execution", () => {
 		/**
 		 * Flow:
 		 * + Setup DAO
 		 * + Add proposalA
-		 * + Clear proposalA (passes if past execution)
+		 * + Close proposalA (passes if past execution)
 		 */
 		setUpDAO();
 
@@ -893,7 +893,7 @@ describe("DAO test", function () {
 		// verify deposit recieved in depositAcc
 		assert.deepEqual(depositAcc.getAssetHolding(govTokenID).amount, beforeBal + 15n);
 
-		/* --------------------  Clear Proposal  -------------------- */
+		/* --------------------  Close Proposal  -------------------- */
 		// set time past executeBefore
 		runtime.setRoundAndTimestamp(5, executeBefore + 10);
 
@@ -921,8 +921,8 @@ describe("DAO test", function () {
 
 		assert.isDefined(proposalALsigAcc.getAssetHolding(govTokenID));
 
-		const clearProposalParam = mkClearProposalTx(appID, govTokenID, proposalALsig);
-		runtime.executeTx(clearProposalParam);
+		const closeProposalParam = mkCloseProposalTx(appID, govTokenID, proposalALsig);
+		runtime.executeTx(closeProposalParam);
 		syncAccounts();
 
 		// verify proposalALsig recieved back deposit of 15 tokens

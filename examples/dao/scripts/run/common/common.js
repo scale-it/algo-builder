@@ -58,7 +58,7 @@ const DAOActions = {
 	execute: "str:execute",
 	withdrawVoteDeposit: "str:withdraw_vote_deposit",
 	clearVoteRecord: "str:clear_vote_record",
-	clearProposal: "str:clear_proposal",
+	closeProposal: "str:close_proposal",
 };
 
 const ExampleProposalConfig = {

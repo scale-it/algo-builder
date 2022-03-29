@@ -16,7 +16,7 @@ def approval_program(ARG_GOV_TOKEN):
         execute                 executes a proposal
         withdraw_vote_deposit   unlock the deposit and withdraw tokens back to the user
         clear_vote_record       clears Sender local state by removing a record of vote cast from a not active proposal
-        clear_proposal          clears proposal record and returns back the deposit
+        close_proposal          closes proposal record and returns back the deposit
     """
 
     # check no rekeying, close remainder to, asset close to for a txn
@@ -432,10 +432,10 @@ def approval_program(ARG_GOV_TOKEN):
     # load proposal.id
     proposal_id = App.localGetEx(Int(0), Int(0), Bytes("id"))
 
-    # Clears proposal record and returns back the deposit. Arguments:
+    # Closes proposal record and returns back the deposit. Arguments:
     # NOTE: proposalLsig is Txn.sender. Expected Arguments:
     # * foreignAssets: [gov_token_id]
-    clear_proposal = Seq([
+    close_proposal = Seq([
         compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
         proposal_id,
         Assert(
@@ -473,7 +473,7 @@ def approval_program(ARG_GOV_TOKEN):
             }
         ),
         InnerTxnBuilder.Submit(),
-        # clear proposal record (sender == proposer_lsig)
+        # close proposal record (sender == proposer_lsig)
         App.localDel(Int(0), Bytes("name")),
         App.localDel(Int(0), Bytes("url")),
         App.localDel(Int(0), Bytes("url_hash")),
@@ -532,8 +532,8 @@ def approval_program(ARG_GOV_TOKEN):
         [Txn.application_args[0] == Bytes("withdraw_vote_deposit"), withdraw_vote_deposit],
         # Verifies clear_vote_record call, jumps to clear_vote_record branch.
         [Txn.application_args[0] == Bytes("clear_vote_record"), clear_vote_record],
-        # Verifies clear_proposal call, jumps to clear_proposal branch.
-        [Txn.application_args[0] == Bytes("clear_proposal"), clear_proposal]
+        # Verifies close_proposal call, jumps to close_proposal branch.
+        [Txn.application_args[0] == Bytes("close_proposal"), close_proposal]
     )
 
     return program

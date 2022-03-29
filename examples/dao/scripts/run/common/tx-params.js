@@ -95,7 +95,7 @@ function mkClearVoteRecordTx(daoAppID, voterAcc, proposalAddr) {
 	};
 }
 
-function mkClearProposalTx(daoAppID, govTokenID, proposalLsig) {
+function mkCloseProposalTx(daoAppID, govTokenID, proposalLsig) {
 	return {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.LogicSignature,
@@ -103,7 +103,7 @@ function mkClearProposalTx(daoAppID, govTokenID, proposalLsig) {
 		appID: daoAppID,
 		lsig: proposalLsig,
 		payFlags: { totalFee: 2000 },
-		appArgs: [DAOActions.clearProposal],
+		appArgs: [DAOActions.closeProposal],
 		foreignAssets: [govTokenID],
 	};
 }
@@ -126,7 +126,7 @@ module.exports = {
 	mkDepositVoteTokenTx,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
-	mkClearProposalTx,
+	mkCloseProposalTx,
 	mkWithdrawFromProposalTx,
 	now,
 	votingStart,
