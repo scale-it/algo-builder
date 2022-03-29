@@ -2077,6 +2077,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"create-inner-asset@workspace:examples/create-inner-asset":
+  version: 0.0.0-use.local
+  resolution: "create-inner-asset@workspace:examples/create-inner-asset"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
+    algosdk: ^1.14.0
+    dotenv: ^16.0.0
+    eslint: ^8.10.0
+    mocha: ^9.2.1
+  languageName: unknown
+  linkType: soft
+
 "create-require@npm:^1.1.0":
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
