@@ -11,7 +11,7 @@ const {
 	executeBefore,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
-	mkClearProposalTx,
+	mkCloseProposalTx,
 } = require("../scripts/run/common/tx-params");
 
 describe("DAO - Happy Paths", function () {
@@ -618,7 +618,7 @@ describe("DAO - Happy Paths", function () {
 		});
 	});
 
-	describe("Clear Proposal", function () {
+	describe("Close Proposal", function () {
 		this.beforeAll(() => {
 			// set up context
 			setUpCtx();
@@ -632,16 +632,16 @@ describe("DAO - Happy Paths", function () {
 			ctx.addProposal();
 		});
 
-		it("should clear proposal if proposal is recorded & voting is not active", () => {
+		it("should close proposal if proposal is recorded & voting is not active", () => {
 			// set current time after executeBefore
 			ctx.runtime.setRoundAndTimestamp(10, executeBefore + 10);
 
-			const clearProposalParam = mkClearProposalTx(
+			const closeProposalParam = mkCloseProposalTx(
 				ctx.daoAppID,
 				ctx.govTokenID,
 				ctx.proposalLsig
 			);
-			ctx.executeTx(clearProposalParam);
+			ctx.executeTx(closeProposalParam);
 			ctx.syncAccounts();
 
 			// verify proposalLsig recieved back deposit of 15 tokens

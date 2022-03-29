@@ -52,6 +52,11 @@ Added:
 
 ### API breaking
 
+- We have changed the naming convetion for the clearing proposal part of the DAO:
+  - Renamed `clearProposal` to `closeProposal`,
+  - Renamed `clear_proposal` to `close_proposal`,
+  - Renamed `mkClearProposalTx` to `mkCloseProposalTx`.
+
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
 
   - Application:
