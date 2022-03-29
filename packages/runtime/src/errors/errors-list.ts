@@ -512,6 +512,13 @@ const runtimeGeneralErrors = {
 		title: "Account Error at line %line%",
 		description: `Account and address mismatch in the current state`,
 	},
+	MAX_SCHEMA_ENTRIES_EXCEEDED: {
+		number: 1508,
+		message: "Local/Global state keys has too many entries",
+		title: "Max schema entries exceeded",
+		description:
+			"Local key entires: used: %localState%, max: %localMax%. Global  key entires: used: %globalState, max: %globalMax%.",
+	},
 };
 
 const transactionErrors = {

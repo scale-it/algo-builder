@@ -992,6 +992,46 @@ describe("Stateful Smart Contracts", function () {
 			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
 		);
 	});
+
+	it("Should throw and error when local schema entries exceeds the limit (AppDeploymentFlags)", () => {
+		const incorrectCreationFlags = {
+			sender: john.account,
+			globalBytes: 10,
+			globalInts: 10,
+			localBytes: 10,
+			localInts: 10,
+		};
+		expectRuntimeError(
+			() =>
+				runtime.deployApp(
+					approvalProgramFileName,
+					clearProgramFileName,
+					incorrectCreationFlags,
+					{}
+				),
+			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED
+		);
+	});
+
+	it("Should throw and error when global schema entries exceeds the limit (AppDeploymentFlags)", () => {
+		const incorrectCreationFlags = {
+			sender: john.account,
+			globalBytes: 36,
+			globalInts: 32,
+			localBytes: 1,
+			localInts: 1,
+		};
+		expectRuntimeError(
+			() =>
+				runtime.deployApp(
+					approvalProgramFileName,
+					clearProgramFileName,
+					incorrectCreationFlags,
+					{}
+				),
+			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED
+		);
+	});
 });
 
 describe("Deafult Accounts", function () {
