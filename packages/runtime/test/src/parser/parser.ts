@@ -62,6 +62,9 @@ import {
 	GetAssetHolding,
 	GetBit,
 	GetByte,
+	Gitxn,
+	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -377,6 +380,7 @@ describe("Parser", function () {
 		beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.tealVersion = MaxTEALVersion;
+			interpreter.runtime = new Runtime([]);
 		});
 
 		it("should return correct opcode object for '+'", () => {
@@ -1978,69 +1982,241 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("shoud return correct opcode for tealv6 ops", () => {
-			it("gloadss", () => {
-				const res = opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.APPLICATION);
-				const expected = new Gloadss([], 1, interpreter);
-
-				assert.deepEqual(res, expected);
-
-				expectRuntimeError(
-					() => opcodeFromSentence(["gloadss", "1"], 1, interpreter, ExecutionMode.APPLICATION),
-					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-				);
-
-				expectRuntimeError(
-					() => opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.SIGNATURE),
-					RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
-				);
+		describe("opcodes for tealv6 ops", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
 			});
 
-			it("acct_params_get", () => {
-				Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
+			describe("gloadss opcode", function () {
+				it("should succeed create gloadss", () => {
 					const res = opcodeFromSentence(
-						["acct_params_get", appParam],
+						["gloadss"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					const expected = new AcctParamsGet([appParam], 1, interpreter);
+					const expected = new Gloadss([], 1, interpreter);
+
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: create opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(["gloadss", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() => opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.SIGNATURE),
+						RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
+					);
+				});
+			});
+
+			describe("acct_params_get Opcode", function () {
+				it("Should succeed: create new acct_params_get opcode", () => {
+					Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
+						const res = opcodeFromSentence(
+							["acct_params_get", appParam],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						);
+						const expected = new AcctParamsGet([appParam], 1, interpreter);
+						assert.deepEqual(res, expected);
+					});
+				});
+				it("Should fail: create acct_params_get opcode with invalid parameter", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["acct_params_get", "unknow", "hello"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+				});
+			});
+
+			describe("itxn_next opcode", () => {
+				it("Should succeed: create new itxn_next opcode", () => {
+					// can parse opcode
+					const res = opcodeFromSentence(
+						["itxn_next"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new ITxnNext([], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: Create itxn_next with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["itxn_next", "unknowfield"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+				});
+			});
+
+			describe("gitxn Opcode", () => {
+				it("Should succeed: create new gitxn opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxn", "0", "Fee"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxn(["0", "Fee"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxn", "0", "ApplicationArgs", "0"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: create gitxn opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() => opcodeFromSentence(["gitxn", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxn", "1AA", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
+			});
+
+			describe("gitxna Opcode", () => {
+				it("Should succeed: create new gitxna opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxna", "1", "Accounts", "1"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxna(["1", "Accounts", "1"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxna", "1", "ApplicationArgs", "4"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxna(["1", "ApplicationArgs", "4"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
-				expectRuntimeError(
-					() =>
-						opcodeFromSentence(
-							["acct_params_get", "unknow", "hello"],
-							1,
-							interpreter,
-							ExecutionMode.APPLICATION
-						),
-					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-				);
+				it("Should fail: create gitxna with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1", "Fee", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1", "2", "3", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1AB", "Fee", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
 			});
 
-			it("itxn_next", () => {
-				// can parse opcode
-				const res = opcodeFromSentence(
-					["itxn_next"],
-					1,
-					interpreter,
-					ExecutionMode.APPLICATION
-				);
-				const expected = new ITxnNext([], 1, interpreter);
-				assert.deepEqual(res, expected);
+			describe("gitxnas Opcode", () => {
+				it("Should succeed: create new gitxnas opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxnas", "1", "Accounts"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxnas(["1", "Accounts"], 1, interpreter);
+					assert.deepEqual(res, expected);
 
-				expectRuntimeError(
-					() =>
-						opcodeFromSentence(
-							["itxn_next", "unknowfield"],
-							1,
-							interpreter,
-							ExecutionMode.APPLICATION
-						),
-					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-				);
+					res = opcodeFromSentence(
+						["gitxnas", "1", "ApplicationArgs"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxnas(["1", "ApplicationArgs"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create gitxnas with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "2", "3"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1AB", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
 			});
 
 			describe("itxnas opcode", () => {
@@ -2079,6 +2255,7 @@ describe("Parser", function () {
 		let interpreter: Interpreter;
 		beforeEach(function () {
 			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
 			interpreter.tealVersion = 2;
 		});
 
@@ -2387,7 +2564,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should rreturn correct opcode list for `teal v6`", async () => {
+		it("should return correct opcode list for `teal v6`", async () => {
 			const file = "teal-v6.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
@@ -2397,7 +2574,11 @@ describe("Parser", function () {
 				new Bsqrt([], 3),
 				new Gloadss([], 4, interpreter),
 				new AcctParamsGet(["AcctBalance"], 5, interpreter),
-				new ITxnas(["Accounts"], 6, interpreter),
+				new ITxnNext([], 6, interpreter),
+				new Gitxn(["0", "Fee"], 7, interpreter),
+				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
+				new Gitxnas(["0", "Accounts"], 9, interpreter),
+				new ITxnas(["Accounts"], 10, interpreter),
 			];
 
 			assert.deepEqual(res, expected);

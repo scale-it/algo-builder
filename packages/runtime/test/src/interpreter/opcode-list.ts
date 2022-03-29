@@ -90,6 +90,9 @@ import {
 	GetAssetHolding,
 	GetBit,
 	GetByte,
+	Gitxn,
+	Gitxna,
+	Gitxnas,
 	Gload,
 	Gloads,
 	Gloadss,
@@ -2464,6 +2467,87 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
+		describe("Gitxn", function () {
+			before(function () {
+				const tx = interpreter.runtime.ctx.tx;
+				// a) 'apas' represents 'foreignAssets', b)
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// https://developer.algorand.org/docs/reference/transactions/
+				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
+				interpreter.innerTxnGroups = [[tx, tx2]];
+			});
+
+			it("Should push fee from 2nd transaction in group", function () {
+				const op = new Gitxn(["1", "Fee"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.equal(2222n, stack.pop());
+			});
+
+			it("Should push value from accounts or args array by index from tx group", function () {
+				let op = new Gitxn(["1", "Accounts", "0"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				op = new Gitxn(["1", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				op = new Gitxn(["1", "Accounts", "2"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+
+				op = new Gitxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+			});
+
+			it("Should push value from assets or applications array by index from tx group", function () {
+				let op = new Gitxn(["1", "Assets", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
+
+				op = new Gitxn(["0", "Assets", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
+
+				op = new Gitxn(["1", "NumAssets"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(2n, stack.pop());
+
+				op = new Gitxn(["1", "NumApplications"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(3n, stack.pop());
+
+				// index 0 represent tx.apid (current application id)
+				op = new Gitxn(["1", "Applications", "0"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
+
+				op = new Gitxn(["0", "Applications", "2"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(1, stack.length());
+				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
+			});
+		});
+
 		describe("Txna", function () {
 			before(function () {
 				interpreter.runtime.ctx.tx.type = "pay";
@@ -2588,6 +2672,90 @@ describe("Teal Opcodes", function () {
 				);
 			});
 		});
+
+		describe("Gitxna", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+				const tx = interpreter.runtime.ctx.tx;
+				// a) 'apas' represents 'foreignAssets', b)
+				// 'apfa' represents 'foreignApps' (id's of foreign apps)
+				// https://developer.algorand.org/docs/reference/transactions/
+				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
+				interpreter.innerTxnGroups = [[tx, tx2]];
+			});
+
+			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+				// index 0 should push sender's address to stack from 1st tx
+				let op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				op = new Gitxna(["0", "Accounts", "2"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+			});
+
+			it("Should throw an error if field is not an array", function () {
+				execExpectError(
+					stack,
+					[],
+					new Gitxna(["1", "Accounts", "0"], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+				);
+			});
+		});
+
+		describe("Gtxnas", function () {
+			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+				// index 0 should push sender's address to stack from 1st tx
+				stack.push(0n);
+				let op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+				assert.equal(1, stack.length());
+				assert.deepEqual(senderPk, stack.pop());
+
+				// should push Accounts[0] to stack
+				stack.push(1n);
+				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+				// should push Accounts[1] to stack
+				stack.push(2n);
+				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op.execute(stack);
+
+				assert.equal(1, stack.length());
+				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+			});
+
+			it("should throw error if field is not an array", function () {
+				stack.push(0n);
+				execExpectError(
+					stack,
+					[],
+					new Gitxnas(["1", "Accounts"], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+				);
+			});
+		});
 	});
 
 	describe("Global Opcode", function () {
@@ -2707,6 +2875,36 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(ZERO_ADDRESS, stack.pop());
 		});
 
+		describe("Tealv6 fields", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [1, 2];
+			});
+			it("Tealv6: CalllerApplicationAddress", () => {
+				// caller app id = 2
+				const op = new Global(["CallerApplicationAddress"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(decodeAddress(getApplicationAddress(2n)).publicKey, stack.pop());
+
+				// no caller
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [];
+				op.execute(stack);
+				assert.deepEqual(ZERO_ADDRESS, stack.pop());
+			});
+
+			it("Tealv6: CallerApplicationID", () => {
+				// caller app id = 2
+				const op = new Global(["CallerApplicationID"], 1, interpreter);
+				op.execute(stack);
+				assert.equal(2n, stack.pop());
+
+				// no caller
+				interpreter.runtime.ctx.innerTxAppIDCallStack = [];
+				op.execute(stack);
+				assert.equal(0n, stack.pop());
+			});
+		});
+
 		it("should throw error if global field is not present in teal version", function () {
 			interpreter.tealVersion = 1;
 
@@ -2739,6 +2937,16 @@ describe("Teal Opcodes", function () {
 			interpreter.tealVersion = 4;
 			expectRuntimeError(
 				() => new Global(["GroupID"], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+
+			interpreter.tealVersion = 5;
+			expectRuntimeError(
+				() => new Global(["CallerApplicationID"], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+			expectRuntimeError(
+				() => new Global(["CallerApplicationAddress"], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 		});
