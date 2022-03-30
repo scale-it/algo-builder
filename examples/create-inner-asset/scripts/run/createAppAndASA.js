@@ -7,56 +7,56 @@ const { APP_NAME, accounts } = require("../setup");
 async function run(runtimeEnv, deployer) {
 	const { creator } = accounts(deployer);
 
-	const proxyAppInfo = deployer.getApp(APP_NAME);
+	const proxyAppInfo = deployer.getApp("MasterApp");
 
 	//  first tx in group: deploy app
 	const createAppTxnParam = {
 		type: types.TransactionType.DeployApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		approvalProgram: "app.py",
+		approvalProgram: "worker_app.py",
 		clearProgram: "clear.teal",
 		localInts: 0,
 		localBytes: 0,
 		globalInts: 0,
 		globalBytes: 0,
-		appName: "NewApp", // TODO: better name ???
 		payFlags: {
 			totalFee: 1000,
 		},
 	};
 
-	// second tx : payment
+	// second tx : create asset
 
-	const paymentTxnParam = {
-		type: types.TransactionType.TransferAlgo,
+	const createASATxnParam = {
+		type: types.TransactionType.DeployASA,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		toAccountAddr: proxyAppInfo.applicationAccount,
-		amountMicroAlgos: 2e5,
+		asaName: "gold",
 		payFlags: {
 			totalFee: 1000,
 		},
 	};
 
-	// third tx: call proxy app
+	// third tx: call master app
 
-	const proxyTxnParam = {
+	const masterTxnParam = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
 		appID: proxyAppInfo.appID,
-		appArgs: ["str:fund"],
+		appArgs: ["str:call_logs"],
 		payFlags: {
 			totalFee: 2000,
 		},
 	};
 
-	await executeTx(deployer, [createAppTxnParam, paymentTxnParam, proxyTxnParam]);
+	const receiptTx = await executeTx(deployer, [
+		createAppTxnParam,
+		createASATxnParam,
+		masterTxnParam,
+	]);
 
-	const newAppInfo = deployer.getApp("NewApp");
-
-	console.log(newAppInfo);
+	console.log(receiptTx);
 }
 
 module.exports = { default: run };

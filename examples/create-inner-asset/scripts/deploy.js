@@ -8,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 
 	// Create Application
 	const appInfo = await deployer.deployApp(
-		"app.py",
+		"master_app.py",
 		"clear.teal",
 		{
 			sender: creator,
@@ -19,7 +19,7 @@ async function run(runtimeEnv, deployer) {
 		},
 		{},
 		{},
-		APP_NAME
+		"MasterApp"
 	);
 
 	console.log(appInfo);

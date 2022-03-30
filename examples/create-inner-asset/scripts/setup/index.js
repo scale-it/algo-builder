@@ -1,5 +1,3 @@
-const APP_NAME = "FundApp";
-
 const accounts = (deployer) => {
 	return {
 		creator: deployer.accountsByName.get("master-account"),
@@ -7,6 +5,5 @@ const accounts = (deployer) => {
 };
 
 module.exports = {
-	APP_NAME,
 	accounts,
 };
