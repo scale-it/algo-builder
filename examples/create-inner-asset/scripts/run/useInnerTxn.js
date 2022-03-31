@@ -21,9 +21,11 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptTx = await executeTx(deployer, [masterTxnParam]);
+	const txReceipt = await executeTx(deployer, [masterTxnParam]);
 
-	console.log(receiptTx);
+	const logs = txReceipt.logs;
+	// Log asset id
+	console.log("New asset Id =", new TextDecoder().decode(logs[0]));
 }
 
 module.exports = { default: run };

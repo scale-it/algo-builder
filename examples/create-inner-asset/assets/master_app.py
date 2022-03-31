@@ -1,5 +1,5 @@
 from pyteal import *
-
+from pytealutils.strings import itoa
 
 @Subroutine(TealType.none)
 def created_by_group_txn():
@@ -56,7 +56,7 @@ def created_by_inner_txns():
 
     return Seq(
         create_asset_inner_txn,
-        Log(Itob(InnerTxn.created_asset_id())) # Log new asset id
+        Log(itoa(InnerTxn.created_asset_id())) # Log new asset id
     )
 
     
