@@ -43,11 +43,42 @@ def call_logs():
     )
 
 
+Subroutine(TealType.none)
+def created_by_inner_txns():
+
+    create_asset_inner_txn = Seq(
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields({
+            TxnField.type_enum: TxnType.AssetConfig,
+            TxnField.config_asset_total: Int(1000000),
+            TxnField.config_asset_decimals: Int(3),
+            TxnField.config_asset_unit_name: Bytes("oz"),
+            TxnField.config_asset_name: Bytes("Gold"),
+            TxnField.config_asset_url: Bytes("https://gold.rush"),
+            TxnField.config_asset_manager: Global.current_application_address(),
+            TxnField.config_asset_reserve: Global.current_application_address(),
+            TxnField.config_asset_freeze: Global.current_application_address(),
+            TxnField.config_asset_clawback: Global.current_application_address()
+        }),
+        InnerTxnBuilder.Submit(),
+    )  
+
+    return Seq(
+        create_asset_inner_txn,
+        Log(Itob(InnerTxn.created_asset_id()))
+    )
+
+    
+
 def approval():
     handlers = [
         [
             Txn.application_args[0] == Bytes("call_logs"),
             Return(Seq(call_logs(), Int(1))),
+        ],
+        [
+            Txn.application_args[0] == Bytes("create_by_inner_txn"),
+            Return(Seq(created_by_inner_txns(), Int(1))),
         ]
     ]
 
