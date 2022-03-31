@@ -136,7 +136,7 @@ describe("Bond token Tests", function () {
 			payFlags: {},
 			appArgs: appArgs,
 		};
-		runtime.executeTx(appCallParams);
+		runtime.executeTx([appCallParams]);
 
 		// verify issuer address
 		assert.isDefined(applicationId);
@@ -253,14 +253,16 @@ describe("Bond token Tests", function () {
 		// fund dex with some minimum balance first
 		runtime.fundLsig(master.account, buybackLsig.address(), minBalance + 10000);
 
-		const buybackTx = {
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: appManager.account,
-			appID: applicationId,
-			payFlags: {},
-			appArgs: ["str:set_buyback", convert.addressToPk(buybackLsig.address())],
-		};
+		const buybackTx = [
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: appManager.account,
+				appID: applicationId,
+				payFlags: {},
+				appArgs: ["str:set_buyback", convert.addressToPk(buybackLsig.address())],
+			},
+		];
 
 		optInLsigToBond(runtime, buybackLsig, bond2, appManager);
 
