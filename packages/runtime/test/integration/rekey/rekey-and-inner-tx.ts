@@ -76,7 +76,7 @@ describe("Rekey transaction and inner transaction ", function () {
 				payFlags: { totalFee: 1000 },
 			};
 
-			runtime.executeTx(fundAppParams);
+			runtime.executeTx([fundAppParams]);
 			syncAccounts();
 
 			// rekey to bob account
@@ -92,7 +92,7 @@ describe("Rekey transaction and inner transaction ", function () {
 				...appCallParams,
 				accounts: [alice.address],
 			};
-			runtime.executeTx(paymentTxParams);
+			runtime.executeTx([paymentTxParams]);
 			syncAccounts();
 		});
 
@@ -116,7 +116,7 @@ describe("Rekey transaction and inner transaction ", function () {
 					totalFee: fee,
 				},
 			};
-			runtime.executeTx(tranferAlgoTx);
+			runtime.executeTx([tranferAlgoTx]);
 
 			syncAccounts();
 			const applBalanceAfter = appAccount.amount;
@@ -145,7 +145,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			};
 			// should fail
 			expectRuntimeError(
-				() => runtime.executeTx(tranferAlgoTx),
+				() => runtime.executeTx([tranferAlgoTx]),
 				RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
 				rekeyMessageError(appAccount.getSpendAddress(), bob.address)
 			);
@@ -181,7 +181,7 @@ describe("Rekey transaction and inner transaction ", function () {
 				},
 			};
 
-			runtime.executeTx(txnParams);
+			runtime.executeTx([txnParams]);
 			syncAccounts();
 		});
 
@@ -206,7 +206,7 @@ describe("Rekey transaction and inner transaction ", function () {
 				},
 			};
 
-			runtime.executeTx(txnParams);
+			runtime.executeTx([txnParams]);
 			syncAccounts();
 
 			const masterBalanceAfter = master.amount;
@@ -237,7 +237,7 @@ describe("Rekey transaction and inner transaction ", function () {
 
 			// should failed
 			expectRuntimeError(
-				() => runtime.executeTx(txnParams),
+				() => runtime.executeTx([txnParams]),
 				RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT,
 				rekeyMessageError(bob.getSpendAddress(), getApplicationAddress(appID))
 			);

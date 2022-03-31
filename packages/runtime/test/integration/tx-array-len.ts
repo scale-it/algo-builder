@@ -57,7 +57,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 		}
 
 		expectRuntimeError(
-			() => runtime.executeTx({ ...txnParams, appArgs: appArgs }),
+			() => runtime.executeTx([{ ...txnParams, appArgs: appArgs }]),
 			RUNTIME_ERRORS.GENERAL.INVALID_APP_ARGS_LEN
 		);
 		expectRuntimeError(
@@ -70,7 +70,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 		);
 
 		appArgs.pop(); // len is 16 now
-		assert.doesNotThrow(() => runtime.executeTx({ ...txnParams, appArgs: appArgs }));
+		assert.doesNotThrow(() => runtime.executeTx([{ ...txnParams, appArgs: appArgs }]));
 	});
 
 	it("should throw error if tx.accounts array length > 4", function () {
@@ -83,7 +83,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 		];
 
 		expectRuntimeError(
-			() => runtime.executeTx({ ...txnParams, accounts: txAccounts }),
+			() => runtime.executeTx([{ ...txnParams, accounts: txAccounts }]),
 			RUNTIME_ERRORS.GENERAL.INVALID_TX_ACCOUNTS_LEN
 		);
 		expectRuntimeError(
@@ -96,7 +96,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 		);
 
 		txAccounts.pop(); // len is 4 now
-		assert.doesNotThrow(() => runtime.executeTx({ ...txnParams, accounts: txAccounts }));
+		assert.doesNotThrow(() => runtime.executeTx([{ ...txnParams, accounts: txAccounts }]));
 	});
 
 	it("should throw error if [tx.accounts + tx.foreignApps + tx.foreignAssets] array length exceeds 8", function () {
@@ -109,31 +109,37 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					...txParams,
-					foreignAssets: [...txParams.foreignAssets, 303], // exceeding total len by 1
-				}),
+				runtime.executeTx([
+					{
+						...txParams,
+						foreignAssets: [...txParams.foreignAssets, 303], // exceeding total len by 1
+					},
+				]),
 			RUNTIME_ERRORS.GENERAL.MAX_REFERENCES_EXCEEDED
 		);
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					...txParams,
-					foreignApps: [...txParams.foreignApps, 33], // exceeding len by 1
-				}),
+				runtime.executeTx([
+					{
+						...txParams,
+						foreignApps: [...txParams.foreignApps, 33], // exceeding len by 1
+					},
+				]),
 			RUNTIME_ERRORS.GENERAL.MAX_REFERENCES_EXCEEDED
 		);
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					...txParams,
-					accounts: [...txParams.accounts, bobAcc.addr],
-					foreignApps: undefined,
-				}),
+				runtime.executeTx([
+					{
+						...txParams,
+						accounts: [...txParams.accounts, bobAcc.addr],
+						foreignApps: undefined,
+					},
+				]),
 			RUNTIME_ERRORS.GENERAL.INVALID_TX_ACCOUNTS_LEN // in this case total len < 8, but accounts length is still limited to 4
 		);
 
-		assert.doesNotThrow(() => runtime.executeTx(txParams)); // should pass as total len is == 8
+		assert.doesNotThrow(() => runtime.executeTx([txParams])); // should pass as total len is == 8
 	});
 });
 

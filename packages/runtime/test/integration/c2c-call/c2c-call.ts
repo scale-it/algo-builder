@@ -29,7 +29,7 @@ describe("C2C call", function () {
 				totalFee: 1000,
 			},
 		};
-		runtime.executeTx(fundTx);
+		runtime.executeTx([fundTx]);
 	}
 
 	this.beforeEach(() => {
@@ -67,8 +67,8 @@ describe("C2C call", function () {
 				totalFee: 2000,
 			},
 		};
-		const txReceipt = runtime.executeTx(execParams) as TxReceipt;
-		const logs = txReceipt.logs ?? [];
+		const txReceipt = runtime.executeTx([execParams]);
+		const logs = txReceipt[0].logs ?? [];
 		assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
 	});
 
@@ -86,7 +86,7 @@ describe("C2C call", function () {
 		};
 
 		expectRuntimeError(
-			() => runtime.executeTx(execParams),
+			() => runtime.executeTx([execParams]),
 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
 		);
 	});
@@ -168,7 +168,7 @@ describe("C2C call", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.executeTx(execParams),
+				() => runtime.executeTx([execParams]),
 				RUNTIME_ERRORS.TRANSACTION.INNER_APP_CALL_INVALID_VERSION,
 				"RUNTIME_ERR1408: Inner app call in older version 5"
 			);
@@ -188,7 +188,7 @@ describe("C2C call", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.executeTx(execParams),
+				() => runtime.executeTx([execParams]),
 				RUNTIME_ERRORS.TRANSACTION.INNER_APP_SELF_CALL
 			);
 		});
@@ -224,7 +224,7 @@ describe("C2C call", function () {
 					},
 				};
 
-				assert.doesNotThrow(() => runtime.executeTx(execParams));
+				assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			});
 
 			it("Should fail: inner call with depth > 8", () => {
@@ -241,7 +241,7 @@ describe("C2C call", function () {
 				};
 
 				expectRuntimeError(
-					() => runtime.executeTx(execParams),
+					() => runtime.executeTx([execParams]),
 					RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED
 				);
 				// TODO: compare runtime store and ensure it not change.
@@ -267,7 +267,7 @@ describe("C2C call", function () {
 		});
 
 		it("Should not support other inner tx appl(not include appcall)", () => {
-			assert.doesNotThrow(() => runtime.executeTx(execParams));
+			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
 				(console["warn"] as any).calledWith("Only supports application call in this version")
 			);

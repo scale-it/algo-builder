@@ -41,7 +41,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
 	it("should fail during delete application if app id is not defined", function () {
 		expectRuntimeError(
-			() => runtime.executeTx(deleteParams),
+			() => runtime.executeTx([deleteParams]),
 			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
 		);
 	});
@@ -59,7 +59,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 			initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2))
 		);
 
-		runtime.executeTx({ ...deleteParams, appID: appID });
+		runtime.executeTx([{ ...deleteParams, appID: appID }]);
 
 		// verify app is deleted
 		expectRuntimeError(() => runtime.getApp(appID), RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND);
@@ -92,7 +92,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 		};
 
 		expectRuntimeError(
-			() => runtime.executeTx(deleteParams),
+			() => runtime.executeTx([deleteParams]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 

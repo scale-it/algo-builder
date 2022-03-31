@@ -58,7 +58,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			payFlags: { totalFee: 1000 },
 		};
 
-		runtime.executeTx(fundAppParams);
+		runtime.executeTx([fundAppParams]);
 		syncAccounts();
 
 		appCallParams = {
@@ -88,7 +88,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			appArgs: ["str:pay"],
 			accounts: [elon.address],
 		};
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 		syncAccounts();
 
 		assert.equal(john.balance(), johnBalBefore + BigInt(1e6) - 1000n);
@@ -106,7 +106,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			appArgs: ["str:pay_with_fee"],
 			accounts: [elon.address],
 		};
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 		syncAccounts();
 
 		assert.equal(elon.balance(), elonBalBefore + BigInt(3e6));
@@ -121,7 +121,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			payFlags: { totalFee: 1000 }, // not enough fees for inner txn
 		};
 		expectRuntimeError(
-			() => runtime.executeTx(paymentTxParams),
+			() => runtime.executeTx([paymentTxParams]),
 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
 		);
 	});
@@ -138,7 +138,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			accounts: [elon.address],
 			payFlags: { totalFee: 1000 + 1000 }, // enough fees for base txn & inner txn
 		};
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 		syncAccounts();
 
 		assert.equal(elon.balance(), elonBalBefore + BigInt(3e6));
@@ -158,7 +158,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			appArgs: ["str:pay"],
 			accounts: [elon.address],
 		};
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 		syncAccounts();
 
 		// note that only 3ALGO are deducted (and not fees)
@@ -177,7 +177,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 			appArgs: ["str:pay_with_close_rem_to"],
 			accounts: [bob.address],
 		};
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 		syncAccounts();
 
 		assert.equal(appAccount.balance(), 0n);

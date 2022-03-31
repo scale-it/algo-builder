@@ -819,7 +819,7 @@ export class Runtime {
 			amountMicroAlgos: amount,
 			payFlags: { totalFee: 1000 },
 		};
-		return this.executeTx([fundParam]) as TxReceipt;
+		return this.executeTx([fundParam])[0];
 	}
 
 	/**
@@ -877,7 +877,7 @@ export class Runtime {
 	executeTx(
 		txnParams: types.ExecParams[] | types.TransactionAndSign[],
 		debugStack?: number
-	): TxReceipt | TxReceipt[] {
+	): TxReceipt[] {
 		// TODO: union above and create new type in task below:
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
 		let tx, gtxs;
