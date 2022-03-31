@@ -2,7 +2,7 @@ from pyteal import *
 
 
 @Subroutine(TealType.none)
-def call_logs():
+def created_by_group_txn():
     app_create, asset_create, proxy_action = Gtxn[0], Gtxn[1], Gtxn[2]
     validate_txns = And(
         # group size 
@@ -29,18 +29,9 @@ def call_logs():
 
     return Seq(
         Assert(validate_txns),
-        InnerTxnBuilder.Begin(),
-        InnerTxnBuilder.SetFields(
-            {
-                TxnField.type_enum: TxnType.ApplicationCall,
-                TxnField.application_id: app_create.created_application_id(),
-                TxnField.application_args: [Bytes("logs"), created_appl_id, created_asset_id],
-                TxnField.fee: Int(0),  # make caller pay
-            }
-        ),
-        InnerTxnBuilder.Submit(),
-        Log(InnerTxn.logs[0])
-    )
+        Log(Itob(app_create.created_application_id())), # log new appl id
+        Log(Itob(asset_create.created_asset_id())) # log new asset id
+    ) 
 
 
 Subroutine(TealType.none)
@@ -65,7 +56,7 @@ def created_by_inner_txns():
 
     return Seq(
         create_asset_inner_txn,
-        Log(Itob(InnerTxn.created_asset_id()))
+        Log(Itob(InnerTxn.created_asset_id())) # Log new asset id
     )
 
     
@@ -73,8 +64,8 @@ def created_by_inner_txns():
 def approval():
     handlers = [
         [
-            Txn.application_args[0] == Bytes("call_logs"),
-            Return(Seq(call_logs(), Int(1))),
+            Txn.application_args[0] == Bytes("create_by_group_txn"),
+            Return(Seq(created_by_group_txn(), Int(1))),
         ],
         [
             Txn.application_args[0] == Bytes("create_by_inner_txn"),

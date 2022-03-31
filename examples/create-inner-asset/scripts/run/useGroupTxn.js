@@ -44,7 +44,7 @@ async function run(runtimeEnv, deployer) {
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
 		appID: proxyAppInfo.appID,
-		appArgs: ["str:call_logs"],
+		appArgs: ["str:create_by_group_txn"],
 		payFlags: {
 			totalFee: 2000,
 		},
