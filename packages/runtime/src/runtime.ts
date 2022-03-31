@@ -819,7 +819,7 @@ export class Runtime {
 			amountMicroAlgos: amount,
 			payFlags: { totalFee: 1000 },
 		};
-		return this.executeTx(fundParam) as TxReceipt;
+		return this.executeTx([fundParam]) as TxReceipt;
 	}
 
 	/**
@@ -875,28 +875,22 @@ export class Runtime {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	executeTx(
-		txnParams:
-			| types.ExecParams
-			| types.ExecParams[]
-			| types.TransactionAndSign
-			| types.TransactionAndSign[],
+		txnParams: types.ExecParams[] | types.TransactionAndSign[],
 		debugStack?: number
 	): TxReceipt | TxReceipt[] {
 		// TODO: union above and create new type in task below:
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
-		const txnParamerters = Array.isArray(txnParams) ? txnParams : [txnParams];
-
 		let tx, gtxs;
 
-		if (types.isSDKTransactionAndSign(txnParamerters[0])) {
-			const sdkTxns: EncTx[] = txnParamerters.map((txnParamerter): EncTx => {
+		if (types.isSDKTransactionAndSign(txnParams[0])) {
+			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
 				const txn = txnParamerter as types.TransactionAndSign;
 				return txn.transaction.get_obj_for_encoding() as EncTx;
 			});
 			tx = sdkTxns[0];
 			gtxs = sdkTxns;
 		} else {
-			for (const txnParamerter of txnParamerters) {
+			for (const txnParamerter of txnParams) {
 				const txn = txnParamerter as types.ExecParams;
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
@@ -911,7 +905,7 @@ export class Runtime {
 				}
 			}
 			// get current txn and txn group (as encoded obj)
-			[tx, gtxs] = this.createTxnContext(txnParamerters as types.ExecParams[]);
+			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
 		}
 
 		// validate first and last rounds
@@ -924,7 +918,7 @@ export class Runtime {
 
 		// Run TEAL program associated with each transaction and
 		// then execute the transaction without interacting with store.
-		const runtimeTxnParams: types.ExecParams[] = txnParamerters.map((txn) =>
+		const runtimeTxnParams: types.ExecParams[] = txnParams.map((txn) =>
 			types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
 		);
 
@@ -934,7 +928,7 @@ export class Runtime {
 		this.store = this.ctx.state;
 
 		// return transaction receipt(s)
-		return Array.isArray(txnParams) ? txReceipts : txReceipts[0];
+		return txReceipts;
 	}
 
 	/**
