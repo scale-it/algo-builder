@@ -78,7 +78,10 @@ const HttpNetworkType = z
 		// from: z.string().optional(),
 		host: z.string().optional(),
 		port: z.union([z.number(), z.string()]).optional(),
-		token: z.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType]).optional(),
+		token: z
+			.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType])
+			.nullable()
+			.optional(),
 		httpHeaders: HttpHeaders.optional(),
 		kmdCfg: KmdCfg.optional(),
 		indexerCfg: IndexerCfg.optional(),
@@ -156,7 +159,12 @@ export function getValidationErrors(config: any): CfgErrors {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
 			const token = hcfg.token;
-			if (typeof token === "string" && token.length < 10) {
+			if (
+				typeof token === "string" &&
+				token.length < 10 &&
+				host !== "https://node.testnet.algoexplorerapi.io" &&
+				host !== "https://node.algoexplorerapi.io"
+			) {
 				errors.push(net, "token", token, "string (with length > 10)");
 			} else if (typeof token !== "object" && typeof token !== "string") {
 				errors.push(net, "token", token, "string or object");

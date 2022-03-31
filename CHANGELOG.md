@@ -89,6 +89,8 @@ Added:
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
 - Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
+- Rename the executeTransaction to executeTx
+- Allow token can be empty if the host is mainet or testnet
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.

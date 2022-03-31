@@ -276,6 +276,30 @@ describe("Config validation", function () {
 						);
 					});
 
+					it("Token can be empty due to the testnet", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: "https://node.testnet.algoexplorerapi.io",
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
+					it("Token can be empty due to the mainet", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: "https://node.algoexplorerapi.io",
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
 					it("should pass with passing X-Algo-API-Token", function () {
 						const errors = getValidationErrors({
 							networks: {
