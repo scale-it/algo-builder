@@ -1,2 +1,6 @@
 nodenode_modules
+node_modules/
 .yarn
+.DS_Store
+.env
+artifacts
