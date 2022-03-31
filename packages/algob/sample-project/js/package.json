@@ -4,9 +4,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/mocha": "^9.1.0",
-		"mocha": "^9.1.3",
-		"ts-mocha": "^9.0.2"
+		"mocha": "^9.1.3"
 	},
 	"scripts": {
 		"algob": "algob"
