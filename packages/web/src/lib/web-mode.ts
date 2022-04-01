@@ -130,41 +130,28 @@ export class WebMode {
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTx(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
-		let signedTxn;
-		let txInfo;
+	async executeTx(execParams: ExecParams[]): Promise<JsonPayload> {
 		let txns: Transaction[] = [];
-		if (Array.isArray(execParams)) {
-			if (execParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(await mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
-			}
-
-			txns = algosdk.assignGroupID(txns);
-			const binaryTxs = txns.map((txn: Transaction) => {
-				return txn.toByte();
-			});
-			const base64Txs = binaryTxs.map((txn: Uint8Array) => {
-				return this.algoSigner.encoding.msgpackToBase64(txn);
-			});
-			const toBeSignedTxns = base64Txs.map((txn: string) => {
-				return { txn: txn };
-			});
-			signedTxn = await this.signTransaction(toBeSignedTxns);
-			txInfo = await this.sendGroupTransaction(signedTxn);
-		} else {
-			const txn = await mkTransaction(
-				execParams,
-				await this.getSuggestedParams(execParams.payFlags)
-			);
-
-			const toBeSignedTxn = this.algoSigner.encoding.msgpackToBase64(txn.toByte());
-			signedTxn = await this.signTransaction([{ txn: toBeSignedTxn }]);
-			txInfo = await this.sendTransaction(signedTxn[0]);
+		if (execParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
+
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+		}
+
+		txns = algosdk.assignGroupID(txns);
+		const binaryTxs = txns.map((txn: Transaction) => {
+			return txn.toByte();
+		});
+		const base64Txs = binaryTxs.map((txn: Uint8Array) => {
+			return this.algoSigner.encoding.msgpackToBase64(txn);
+		});
+		const toBeSignedTxns = base64Txs.map((txn: string) => {
+			return { txn: txn };
+		});
+		const signedTxn = await this.signTransaction(toBeSignedTxns);
+		const txInfo = await this.sendGroupTransaction(signedTxn);
 
 		if (txInfo && typeof txInfo.txId === "string") {
 			return await this.waitForConfirmation(txInfo.txId);
@@ -173,6 +160,7 @@ export class WebMode {
 	}
 	/** @deprecated */
 	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
-		return this.executeTx(execParams);
+		if (Array.isArray(execParams)) return this.executeTx(execParams);
+		else return this.executeTx([execParams]);
 	}
 }
