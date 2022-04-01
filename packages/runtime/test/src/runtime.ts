@@ -53,7 +53,7 @@ describe("Transfer Algo Transaction", function () {
 			},
 		};
 
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 		syncAccounts();
 
 		assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
@@ -76,7 +76,7 @@ describe("Transfer Algo Transaction", function () {
 			},
 		};
 
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 
 		syncAccounts();
 		assert.equal(alice.balance(), 0n);
@@ -100,7 +100,7 @@ describe("Transfer Algo Transaction", function () {
 			},
 		};
 
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 
 		syncAccounts();
 		assert.equal(alice.balance(), 0n);
@@ -113,17 +113,19 @@ describe("Transfer Algo Transaction", function () {
 		// throw error because closeReaminderTo invalid.
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					type: types.TransactionType.TransferAlgo,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account,
-					toAccountAddr: bob.address,
-					amountMicroAlgos: 0n,
-					payFlags: {
-						totalFee: fee,
-						closeRemainderTo: alice.address,
+				runtime.executeTx([
+					{
+						type: types.TransactionType.TransferAlgo,
+						sign: types.SignType.SecretKey,
+						fromAccount: alice.account,
+						toAccountAddr: bob.address,
+						amountMicroAlgos: 0n,
+						payFlags: {
+							totalFee: fee,
+							closeRemainderTo: alice.address,
+						},
 					},
-				}),
+				]),
 			RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO
 		);
 	});
@@ -145,7 +147,7 @@ describe("Transfer Algo Transaction", function () {
 				},
 			};
 
-			runtime.executeTx(transferAlgoTx);
+			runtime.executeTx([transferAlgoTx]);
 			// query new external account in runtime.
 			externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
 		});
@@ -166,7 +168,7 @@ describe("Transfer Algo Transaction", function () {
 				},
 			};
 
-			assert.doesNotThrow(() => runtime.executeTx(transferAlgoTx));
+			assert.doesNotThrow(() => runtime.executeTx([transferAlgoTx]));
 		});
 	});
 });
@@ -196,7 +198,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
 	it("should execute the lsig and verify john(delegated signature)", () => {
 		lsig.sign(john.account.sk);
-		runtime.executeTx(txParam);
+		runtime.executeTx([txParam]);
 
 		// balance should be updated because logic is verified and accepted
 		const bobAcc = runtime.getAccount(bob.address);
@@ -213,7 +215,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
 		// execute transaction (logic signature validation failed)
 		expectRuntimeError(
-			() => runtime.executeTx(invalidParams),
+			() => runtime.executeTx([invalidParams]),
 			RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
 		);
 	});
@@ -232,7 +234,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 		// - Signature successfully validated for john
 		// - But teal file logic is rejected
 		expectRuntimeError(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
@@ -279,7 +281,7 @@ describe("Rounds Test", function () {
 		txParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
 		runtime.setRoundAndTimestamp(20, 20);
 
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 
 		// get final state (updated accounts)
 		syncAccounts();
@@ -290,13 +292,16 @@ describe("Rounds Test", function () {
 	it("should fail if current round is not between first and last valid", () => {
 		runtime.setRoundAndTimestamp(3, 20);
 
-		expectRuntimeError(() => runtime.executeTx(txParams), RUNTIME_ERRORS.GENERAL.INVALID_ROUND);
+		expectRuntimeError(
+			() => runtime.executeTx([txParams]),
+			RUNTIME_ERRORS.GENERAL.INVALID_ROUND
+		);
 	});
 
 	it("should succeeded by default (no round requirement is passed)", () => {
 		txParams.payFlags = { totalFee: 1000 };
 
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 
 		// get final state (updated accounts)
 		syncAccounts();
@@ -419,7 +424,7 @@ describe("Algorand Standard Assets", function () {
 			},
 			payFlags: {},
 		};
-		runtime.executeTx(execParams);
+		runtime.executeTx([execParams]);
 		syncAccounts();
 
 		const res = runtime.getAssetInfoFromName("silver-12");
@@ -465,7 +470,7 @@ describe("Algorand Standard Assets", function () {
 			assetID: assetId,
 			payFlags: { totalFee: 1000 },
 		};
-		runtime.executeTx(optInParams);
+		runtime.executeTx([optInParams]);
 		syncAccounts();
 
 		const aliceAssetHolding = alice.getAssetHolding(assetId);
@@ -505,7 +510,7 @@ describe("Algorand Standard Assets", function () {
 		assert.isDefined(initialAliceAssets);
 
 		assetTransferParam.amount = 100n;
-		runtime.executeTx(assetTransferParam);
+		runtime.executeTx([assetTransferParam]);
 		syncAccounts();
 
 		if (initialJohnAssets && initialAliceAssets) {
@@ -529,16 +534,16 @@ describe("Algorand Standard Assets", function () {
 		assert.isDefined(res);
 		runtime.optIntoASA(assetId, alice.address, {});
 		// freezing asset holding for john
-		runtime.executeTx(freezeParam);
+		runtime.executeTx([freezeParam]);
 
 		expectRuntimeError(
-			() => runtime.executeTx(assetTransferParam),
+			() => runtime.executeTx([assetTransferParam]),
 			RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN
 		);
 
 		assetTransferParam.amount = 0n;
 		assert.doesNotThrow(
-			() => runtime.executeTx(assetTransferParam), // should pass successfully
+			() => runtime.executeTx([assetTransferParam]), // should pass successfully
 			`RUNTIME_ERR1505: Asset index 7 frozen for account ${john.address}`
 		);
 	});
@@ -550,11 +555,13 @@ describe("Algorand Standard Assets", function () {
 		runtime.optIntoASA(assetId, alice.address, {});
 
 		// transfer few assets to alice
-		runtime.executeTx({
-			...assetTransferParam,
-			toAccountAddr: alice.address,
-			amount: 30n,
-		});
+		runtime.executeTx([
+			{
+				...assetTransferParam,
+				toAccountAddr: alice.address,
+				amount: 30n,
+			},
+		]);
 
 		syncAccounts();
 		assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
@@ -563,13 +570,15 @@ describe("Algorand Standard Assets", function () {
 		assert.isDefined(initialJohnAssets);
 		assert.isDefined(initialAliceAssets);
 
-		runtime.executeTx({
-			...assetTransferParam,
-			sign: types.SignType.SecretKey,
-			fromAccount: alice.account,
-			toAccountAddr: alice.address,
-			payFlags: { totalFee: 1000, closeRemainderTo: john.address }, // transfer all assets of alice => john (using closeRemTo)
-		});
+		runtime.executeTx([
+			{
+				...assetTransferParam,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				toAccountAddr: alice.address,
+				payFlags: { totalFee: 1000, closeRemainderTo: john.address }, // transfer all assets of alice => john (using closeRemTo)
+			},
+		]);
 		syncAccounts();
 
 		assert.isUndefined(alice.getAssetHolding(assetId));
@@ -588,22 +597,26 @@ describe("Algorand Standard Assets", function () {
 		runtime.optIntoASA(assetId, alice.address, {});
 
 		// transfer few assets to alice
-		runtime.executeTx({
-			...assetTransferParam,
-			toAccountAddr: alice.address,
-			amount: 30n,
-		});
+		runtime.executeTx([
+			{
+				...assetTransferParam,
+				toAccountAddr: alice.address,
+				amount: 30n,
+			},
+		]);
 
 		// throw error because closeReaminderTo invalid.
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					...assetTransferParam,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account,
-					toAccountAddr: alice.address,
-					payFlags: { totalFee: 1000, closeRemainderTo: alice.address }, // transfer all assets of alice => john (using closeRemTo)
-				}),
+				runtime.executeTx([
+					{
+						...assetTransferParam,
+						sign: types.SignType.SecretKey,
+						fromAccount: alice.account,
+						toAccountAddr: alice.address,
+						payFlags: { totalFee: 1000, closeRemainderTo: alice.address }, // transfer all assets of alice => john (using closeRemTo)
+					},
+				]),
 			RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO
 		);
 	});
@@ -615,10 +628,12 @@ describe("Algorand Standard Assets", function () {
 
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
-					...assetTransferParam,
-					payFlags: { totalFee: 1000, closeRemainderTo: alice.address }, // creator of ASA trying to close asset holding to alice
-				}),
+				runtime.executeTx([
+					{
+						...assetTransferParam,
+						payFlags: { totalFee: 1000, closeRemainderTo: alice.address }, // creator of ASA trying to close asset holding to alice
+					},
+				]),
 			RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR
 		);
 	});
@@ -633,7 +648,7 @@ describe("Algorand Standard Assets", function () {
 			payFlags: {},
 		};
 		expectRuntimeError(
-			() => runtime.executeTx(modifyParam),
+			() => runtime.executeTx([modifyParam]),
 			RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
 		);
 	});
@@ -647,7 +662,7 @@ describe("Algorand Standard Assets", function () {
 			fields: modFields,
 			payFlags: {},
 		};
-		runtime.executeTx(modifyParam);
+		runtime.executeTx([modifyParam]);
 
 		const res = runtime.getAssetDef(assetId);
 		assert.equal(res.manager, bob.address);
@@ -677,7 +692,7 @@ describe("Algorand Standard Assets", function () {
 		};
 
 		expectRuntimeError(
-			() => runtime.executeTx(modifyParam),
+			() => runtime.executeTx([modifyParam]),
 			RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR
 		);
 	});
@@ -691,7 +706,10 @@ describe("Algorand Standard Assets", function () {
 			fields: modFields,
 			payFlags: {},
 		};
-		expectRuntimeError(() => runtime.executeTx(modifyParam), RUNTIME_ERRORS.ASA.MANAGER_ERROR);
+		expectRuntimeError(
+			() => runtime.executeTx([modifyParam]),
+			RUNTIME_ERRORS.ASA.MANAGER_ERROR
+		);
 	});
 
 	it("should fail because only freeze account can freeze asset", () => {
@@ -705,7 +723,7 @@ describe("Algorand Standard Assets", function () {
 			payFlags: {},
 		};
 
-		expectRuntimeError(() => runtime.executeTx(freezeParam), RUNTIME_ERRORS.ASA.FREEZE_ERROR);
+		expectRuntimeError(() => runtime.executeTx([freezeParam]), RUNTIME_ERRORS.ASA.FREEZE_ERROR);
 	});
 
 	it("should freeze asset", () => {
@@ -718,7 +736,7 @@ describe("Algorand Standard Assets", function () {
 			freezeState: true,
 			payFlags: {},
 		};
-		runtime.executeTx(freezeParam);
+		runtime.executeTx([freezeParam]);
 
 		const johnAssetHolding = runtime.getAssetHolding(assetId, john.address);
 		assert.equal(johnAssetHolding["is-frozen"], true);
@@ -735,7 +753,10 @@ describe("Algorand Standard Assets", function () {
 			amount: 1n,
 			payFlags: {},
 		};
-		expectRuntimeError(() => runtime.executeTx(revokeParam), RUNTIME_ERRORS.ASA.CLAWBACK_ERROR);
+		expectRuntimeError(
+			() => runtime.executeTx([revokeParam]),
+			RUNTIME_ERRORS.ASA.CLAWBACK_ERROR
+		);
 	});
 
 	it("should revoke assets", () => {
@@ -755,13 +776,13 @@ describe("Algorand Standard Assets", function () {
 		assetTransferParam.amount = 20n;
 		assetTransferParam.payFlags = {};
 
-		runtime.executeTx(assetTransferParam);
+		runtime.executeTx([assetTransferParam]);
 
 		let bobHolding = runtime.getAssetHolding(assetId, bob.address);
 		const beforeRevokeJohn = runtime.getAssetHolding(assetId, john.address).amount;
 		assert.equal(bobHolding.amount, assetTransferParam.amount);
 
-		runtime.executeTx(revokeParam);
+		runtime.executeTx([revokeParam]);
 
 		const johnHolding = runtime.getAssetHolding(assetId, john.address);
 		bobHolding = runtime.getAssetHolding(assetId, bob.address);
@@ -780,7 +801,10 @@ describe("Algorand Standard Assets", function () {
 			amount: 1n,
 			payFlags: {},
 		};
-		expectRuntimeError(() => runtime.executeTx(revokeParam), RUNTIME_ERRORS.ASA.CLAWBACK_ERROR);
+		expectRuntimeError(
+			() => runtime.executeTx([revokeParam]),
+			RUNTIME_ERRORS.ASA.CLAWBACK_ERROR
+		);
 	});
 
 	it("should throw error if trying to close asset holding by clawback", () => {
@@ -799,7 +823,7 @@ describe("Algorand Standard Assets", function () {
 		// opt-in to asset by alice
 		runtime.optIntoASA(assetId, alice.address, {});
 		expectRuntimeError(
-			() => runtime.executeTx(closebyClawbackParam),
+			() => runtime.executeTx([closebyClawbackParam]),
 			RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK
 		);
 	});
@@ -829,13 +853,13 @@ describe("Algorand Standard Assets", function () {
 		assetTransferParam.toAccountAddr = bob.address;
 		assetTransferParam.amount = 20n;
 		assetTransferParam.payFlags = {};
-		runtime.executeTx(assetTransferParam);
-		runtime.executeTx(freezeParam);
+		runtime.executeTx([assetTransferParam]);
+		runtime.executeTx([freezeParam]);
 		let bobHolding = runtime.getAssetHolding(assetId, bob.address);
 		const beforeRevokeJohn = runtime.getAssetHolding(assetId, john.address).amount;
 		assert.equal(bobHolding.amount, assetTransferParam.amount);
 
-		runtime.executeTx(revokeParam);
+		runtime.executeTx([revokeParam]);
 
 		const johnHolding = runtime.getAssetHolding(assetId, john.address);
 		bobHolding = runtime.getAssetHolding(assetId, bob.address);
@@ -851,7 +875,10 @@ describe("Algorand Standard Assets", function () {
 			assetID: assetId,
 			payFlags: {},
 		};
-		expectRuntimeError(() => runtime.executeTx(destroyParam), RUNTIME_ERRORS.ASA.MANAGER_ERROR);
+		expectRuntimeError(
+			() => runtime.executeTx([destroyParam]),
+			RUNTIME_ERRORS.ASA.MANAGER_ERROR
+		);
 	});
 
 	it("Should destroy asset", () => {
@@ -864,7 +891,7 @@ describe("Algorand Standard Assets", function () {
 			payFlags: {},
 		};
 
-		runtime.executeTx(destroyParam);
+		runtime.executeTx([destroyParam]);
 		syncAccounts();
 
 		expectRuntimeError(() => runtime.getAssetDef(assetId), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
@@ -885,10 +912,10 @@ describe("Algorand Standard Assets", function () {
 		assetTransferParam.toAccountAddr = bob.address;
 		assetTransferParam.amount = 20n;
 		assetTransferParam.payFlags = {};
-		runtime.executeTx(assetTransferParam);
+		runtime.executeTx([assetTransferParam]);
 
 		expectRuntimeError(
-			() => runtime.executeTx(destroyParam),
+			() => runtime.executeTx([destroyParam]),
 			RUNTIME_ERRORS.ASA.ASSET_TOTAL_ERROR
 		);
 	});
@@ -1075,7 +1102,7 @@ describe("Deafult Accounts", function () {
 			},
 		};
 
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 
 		syncAccounts();
 
@@ -1098,7 +1125,7 @@ describe("Deafult Accounts", function () {
 			},
 		};
 
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 		runtime.resetDefaultAccounts();
 		syncAccounts();
 
@@ -1118,7 +1145,7 @@ describe("Deafult Accounts", function () {
 				totalFee: fee,
 			},
 		};
-		runtime.executeTx(algoTransferTxParam);
+		runtime.executeTx([algoTransferTxParam]);
 		runtime.resetDefaultAccounts();
 		syncAccounts();
 

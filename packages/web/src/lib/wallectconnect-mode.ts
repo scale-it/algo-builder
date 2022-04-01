@@ -208,38 +208,28 @@ export class WallectConnectSession {
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
 	async executeTx(
-		execParams: ExecParams | ExecParams[]
+		execParams: ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
 		let txns: Transaction[] = [];
-		let confirmedTx: algosdk.modelsv2.PendingTransactionResponse;
-		if (Array.isArray(execParams)) {
-			if (execParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
-			}
-
-			txns = algosdk.assignGroupID(txns);
-			const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-				return { txn: txn, shouldSign: true };
-			});
-
-			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
-			// remove null values from signed txns array
-			// TODO: replace null values with "externally" signed txns, otherwise
-			// signedtxns with nulls will always fail!
-			signedTxn = signedTxn.filter((stxn) => stxn);
-			confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
-		} else {
-			const txn = mkTransaction(
-				execParams,
-				await mkTxParams(this.algodClient, execParams.payFlags)
-			);
-			signedTxn = await this.signTransaction(txn);
-			confirmedTx = await this.sendAndWait(signedTxn);
+		if (execParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		}
+
+		txns = algosdk.assignGroupID(txns);
+		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
+			return { txn: txn, shouldSign: true };
+		});
+
+		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+		// remove null values from signed txns array
+		// TODO: replace null values with "externally" signed txns, otherwise
+		// signedtxns with nulls will always fail!
+		signedTxn = signedTxn.filter((stxn) => stxn);
+		const confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
 
 		console.log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
@@ -248,6 +238,7 @@ export class WallectConnectSession {
 	async executeTransaction(
 		execParams: ExecParams | ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		return this.executeTx(execParams);
+		if (Array.isArray(execParams)) return this.executeTx(execParams);
+		else return this.executeTx([execParams]);
 	}
 }

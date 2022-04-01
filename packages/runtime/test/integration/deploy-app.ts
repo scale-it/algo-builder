@@ -75,7 +75,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			payFlags: {},
 		};
 
-		runtime.executeTx(execParams);
+		runtime.executeTx([execParams]);
 		syncAccount();
 
 		const res = runtime.getAppInfoFromName(approvalProgram, clearProgram);

@@ -28,8 +28,8 @@ async function run(
 	aliceFunding.toAccountAddr = alice.addr;
 	aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
 	await Promise.all([
-		algob.executeTx(deployer, bobFunding),
-		algob.executeTx(deployer, aliceFunding),
+		algob.executeTx(deployer, [bobFunding]),
+		algob.executeTx(deployer, [aliceFunding]),
 	]);
 
 	/** ** now bob creates and deploys the escrow account ****/

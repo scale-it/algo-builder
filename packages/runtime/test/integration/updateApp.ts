@@ -88,7 +88,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			appID: appID,
 			payFlags: { totalFee: 1000 },
 		};
-		runtime.executeTx(noOpParams);
+		runtime.executeTx([noOpParams]);
 		creator = runtime.getAccount(creator.address);
 
 		// check state set by the 'new' approval program

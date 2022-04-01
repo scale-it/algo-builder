@@ -643,7 +643,7 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject close_proposal if fees not enough", () => {
 			assert.throws(
-				() => ctx.executeTx({ ...closeProposalTx, payFlags: { totalFee: 1000 } }),
+				() => ctx.executeTx([{ ...closeProposalTx, payFlags: { totalFee: 1000 } }]),
 				RUNTIME_ERR1009
 			);
 		});

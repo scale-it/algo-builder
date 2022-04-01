@@ -371,7 +371,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 			accounts: [escrow.address], //  AppAccounts
 		};
 
-		assert.throws(() => runtime.executeTx(deleteTx), "RUNTIME_ERR1008: Index out of bound");
+		assert.throws(() => runtime.executeTx([deleteTx]), "RUNTIME_ERR1008: Index out of bound");
 	});
 
 	it("should fail on trying to update application where sender is not creator", () => {

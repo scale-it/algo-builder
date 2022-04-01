@@ -41,7 +41,7 @@ describe("TEAL: Execution modes", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.executeTx(txParams),
+				() => runtime.executeTx([txParams]),
 				RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
 			);
 		});
@@ -93,7 +93,7 @@ describe("TEAL: Execution modes", function () {
 				payFlags: { totalFee: fee },
 			};
 
-			assert.doesNotThrow(() => runtime.executeTx(txParams));
+			assert.doesNotThrow(() => runtime.executeTx([txParams]));
 		});
 	});
 });

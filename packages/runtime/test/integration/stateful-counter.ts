@@ -54,7 +54,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 	});
 
 	it("should set global and local counter to 1 on first call", function () {
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 
 		const globalCounter = runtime.getGlobalState(txParams.appID, key);
 		assert.equal(globalCounter, 1n);
@@ -73,7 +73,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 		assert.equal(globalCounter, 1n);
 		assert.equal(localCounter, 1n);
 
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 
 		// after execution the counters should be updated by +1
 		const newGlobalCounter = runtime.getGlobalState(txParams.appID, key);

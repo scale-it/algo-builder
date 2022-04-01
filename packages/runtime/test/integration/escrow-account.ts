@@ -54,14 +54,14 @@ describe("Logic Signature: Escrow Account", function () {
 	}
 
 	it("should fund escrow account", function () {
-		runtime.executeTx({
+		runtime.executeTx([{
 			type: types.TransactionType.TransferAlgo, // payment
 			sign: types.SignType.SecretKey,
 			fromAccount: admin.account,
 			toAccountAddr: escrow.address,
 			amountMicroAlgos: initialEscrowHolding,
 			payFlags: { totalFee: fee },
-		});
+		}]);
 
 		// check initial balance
 		syncAccounts();
@@ -70,7 +70,7 @@ describe("Logic Signature: Escrow Account", function () {
 	});
 
 	it("should withdraw funds from escrow if txn params are correct", function () {
-		runtime.executeTx(paymentTxParams);
+		runtime.executeTx([paymentTxParams]);
 
 		// check final state (updated accounts)
 		syncAccounts();
@@ -80,14 +80,14 @@ describe("Logic Signature: Escrow Account", function () {
 
 	it("should reject transaction if amount > 100", function () {
 		expectRuntimeError(
-			() => runtime.executeTx({ ...paymentTxParams, amountMicroAlgos: 500n }),
+			() => runtime.executeTx([{ ...paymentTxParams, amountMicroAlgos: 500n }]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
 
 	it("should reject transaction if Fee > 10000", function () {
 		expectRuntimeError(
-			() => runtime.executeTx({ ...paymentTxParams, payFlags: { totalFee: 0.1e6 } }),
+			() => runtime.executeTx([{ ...paymentTxParams, payFlags: { totalFee: 0.1e6 } }]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
@@ -95,12 +95,12 @@ describe("Logic Signature: Escrow Account", function () {
 	it("should reject transaction if type is not `pay`", function () {
 		expectRuntimeError(
 			() =>
-				runtime.executeTx({
+				runtime.executeTx([{
 					...paymentTxParams,
 					type: types.TransactionType.TransferAsset,
 					assetID: 1111,
 					amount: 10n, // asset amount
-				}),
+				}]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
@@ -108,7 +108,7 @@ describe("Logic Signature: Escrow Account", function () {
 	it("should reject transaction if receiver is not john", function () {
 		const bob = new AccountStore(100);
 		expectRuntimeError(
-			() => runtime.executeTx({ ...paymentTxParams, toAccountAddr: bob.address }),
+			() => runtime.executeTx([{ ...paymentTxParams, toAccountAddr: bob.address }]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
@@ -127,7 +127,7 @@ describe("Logic Signature: Escrow Account", function () {
 				closeRemainderTo: john.address,
 			},
 		};
-		runtime.executeTx(closeParams);
+		runtime.executeTx([closeParams]);
 
 		syncAccounts();
 		assert.equal(escrow.balance(), 0n);

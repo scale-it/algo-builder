@@ -21,7 +21,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 
-	await executeTx(deployer, tx);
+	await executeTx(deployer, [tx]);
 
 	/* Uncomment below code to start debugger  */
 	// await new Tealdbg(deployer, tx)
