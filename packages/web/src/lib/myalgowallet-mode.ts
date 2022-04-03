@@ -14,9 +14,7 @@ import { ExecParams, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { mkTransaction } from "./txn";
 import { WAIT_ROUNDS } from "./constants";
-
-const CONFIRMED_ROUND = "confirmed-round";
-const LAST_ROUND = "last-round";
+import { error, log } from "./logger";
 
 interface MyAlgoConnect {
 	/**
@@ -70,7 +68,7 @@ export class MyAlgoWalletSession {
 				}
 			})
 			.catch((err) => {
-				console.log(err);
+				error(err);
 			});
 	}
 
@@ -83,7 +81,7 @@ export class MyAlgoWalletSession {
 			});
 			this.addresses = this.accounts.map((account) => account.address);
 		} catch (err) {
-			throw new Error("Error while connecting to my algo wallet");
+			throw new Error("Error while connecting to MyAlgo Wallet");
 		}
 	}
 
@@ -170,8 +168,7 @@ export class MyAlgoWalletSession {
 			const Uint8ArraySignedTx = signedTxn.blob;
 			confirmedTx = await this.sendAndWait(Uint8ArraySignedTx);
 		}
-
-		console.log("confirmedTx: ", confirmedTx);
+		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
 	}
 	/** @deprecated */
