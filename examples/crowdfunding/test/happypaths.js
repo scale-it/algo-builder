@@ -321,14 +321,16 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		syncAccounts();
 
 		// let's close escrow account first
-		runtime.executeTx({
-			type: types.TransactionType.TransferAlgo,
-			sign: types.SignType.SecretKey,
-			fromAccount: escrow.account,
-			toAccountAddr: fundReceiver.address,
-			amountMicroAlgos: 0,
-			payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address },
-		});
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: escrow.account,
+				toAccountAddr: fundReceiver.address,
+				amountMicroAlgos: 0,
+				payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address },
+			},
+		]);
 		syncAccounts();
 
 		// escrow is already empty so we don't need a tx group
@@ -346,7 +348,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		const app = runtime.getApp(applicationId);
 		assert.isDefined(app);
 
-		runtime.executeTx(deleteTx);
+		runtime.executeTx([deleteTx]);
 
 		// app should be deleted now
 		try {

@@ -14,7 +14,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 	// transfer some algos to creator account
-	await executeTx(deployer, algoTxnParams);
+	await executeTx(deployer, [algoTxnParams]);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.

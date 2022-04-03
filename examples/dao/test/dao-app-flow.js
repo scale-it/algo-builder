@@ -143,7 +143,7 @@ describe("DAO test", function () {
 		};
 
 		console.log(`Funding DAO App (ID = ${appID})`);
-		runtime.executeTx(fundAppParameters);
+		runtime.executeTx([fundAppParameters]);
 
 		// setup lsig accounts
 		// Initialize issuer lsig with bond-app ID
@@ -181,15 +181,17 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
 
 		// opt in deposit account (dao app account) to gov_token asa
-		const optInToGovASAParam = {
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: creator.account,
-			appID: appID,
-			payFlags: { totalFee: 2000 },
-			foreignAssets: [govTokenID],
-			appArgs: ["str:optin_gov_token"],
-		};
+		const optInToGovASAParam = [
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: creator.account,
+				appID: appID,
+				payFlags: { totalFee: 2000 },
+				foreignAssets: [govTokenID],
+				appArgs: ["str:optin_gov_token"],
+			},
+		];
 		runtime.executeTx(optInToGovASAParam);
 		syncAccounts();
 
@@ -361,19 +363,23 @@ describe("DAO test", function () {
 		};
 
 		// voting by user A
-		const registerVoteA = {
-			...registerVoteParam,
-			fromAccount: voterA.account,
-			appArgs: [DAOActions.registerVote, `str:${Vote.YES}`],
-		};
+		const registerVoteA = [
+			{
+				...registerVoteParam,
+				fromAccount: voterA.account,
+				appArgs: [DAOActions.registerVote, `str:${Vote.YES}`],
+			},
+		];
 		runtime.executeTx(registerVoteA);
 
 		// voting by user B
-		const registerVoteB = {
-			...registerVoteParam,
-			fromAccount: voterB.account,
-			appArgs: [DAOActions.registerVote, `str:${Vote.ABSTAIN}`],
-		};
+		const registerVoteB = [
+			{
+				...registerVoteParam,
+				fromAccount: voterB.account,
+				appArgs: [DAOActions.registerVote, `str:${Vote.ABSTAIN}`],
+			},
+		];
 		runtime.executeTx(registerVoteB);
 		syncAccounts();
 
@@ -443,11 +449,11 @@ describe("DAO test", function () {
 
 		// withdraw 6 votes deposited by voterA
 		const withdrawVoteDepositA = mkWithdrawVoteDepositTx(appID, govTokenID, voterA.account, 6);
-		runtime.executeTx(withdrawVoteDepositA);
+		runtime.executeTx([withdrawVoteDepositA]);
 
 		// withdraw 8 votes deposited by voterB
 		const withdrawVoteDepositB = mkWithdrawVoteDepositTx(appID, govTokenID, voterB.account, 8);
-		runtime.executeTx(withdrawVoteDepositB);
+		runtime.executeTx([withdrawVoteDepositB]);
 		syncAccounts();
 
 		// verify sender.deposit is set
@@ -470,7 +476,7 @@ describe("DAO test", function () {
 			voterA.account,
 			proposalALsig.address()
 		);
-		runtime.executeTx(clearRecordVoterA);
+		runtime.executeTx([clearRecordVoterA]);
 
 		// clear voterB record
 		const clearRecordVoterB = mkClearVoteRecordTx(
@@ -478,7 +484,7 @@ describe("DAO test", function () {
 			voterB.account,
 			proposalALsig.address()
 		);
-		runtime.executeTx(clearRecordVoterB);
+		runtime.executeTx([clearRecordVoterB]);
 		syncAccounts();
 
 		// verify sender account has p_proposal removed after clear record
@@ -512,7 +518,7 @@ describe("DAO test", function () {
 		assert.isDefined(proposalALsigAcc.getAssetHolding(govTokenID));
 
 		const closeProposalParam = mkCloseProposalTx(appID, govTokenID, proposalALsig);
-		runtime.executeTx(closeProposalParam);
+		runtime.executeTx([closeProposalParam]);
 		syncAccounts();
 
 		// verify proposalALsig recieved back deposit of 15 tokens
@@ -638,15 +644,17 @@ describe("DAO test", function () {
 		runtime.setRoundAndTimestamp(10, Math.round((votingStart + votingEnd) / 2));
 
 		// call to DAO app by voter (to register deposited votes)
-		const registerVoteParam = {
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: voterA.account,
-			appID: appID,
-			payFlags: { totalFee: 2000 },
-			appArgs: [DAOActions.registerVote, `str:${Vote.YES}`],
-			accounts: [proposalALsig.address()],
-		};
+		const registerVoteParam = [
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: voterA.account,
+				appID: appID,
+				payFlags: { totalFee: 2000 },
+				appArgs: [DAOActions.registerVote, `str:${Vote.YES}`],
+				accounts: [proposalALsig.address()],
+			},
+		];
 		runtime.executeTx(registerVoteParam);
 		syncAccounts();
 
@@ -764,7 +772,7 @@ describe("DAO test", function () {
 			appArgs: [DAOActions.registerVote, `str:${Vote.ABSTAIN}`],
 			accounts: [proposalALsig.address()],
 		};
-		runtime.executeTx(registerVoteParam);
+		runtime.executeTx([registerVoteParam]);
 		syncAccounts();
 
 		// concatination of "p_" & proposalALsig.address
@@ -800,7 +808,7 @@ describe("DAO test", function () {
 			...registerVoteParam,
 			accounts: [proposalBLsig.address()],
 		};
-		runtime.executeTx(registerVoteParamForProposalB);
+		runtime.executeTx([registerVoteParamForProposalB]);
 		syncAccounts();
 
 		// concatination of "p_" & proposalBLsig.address
@@ -922,7 +930,7 @@ describe("DAO test", function () {
 		assert.isDefined(proposalALsigAcc.getAssetHolding(govTokenID));
 
 		const closeProposalParam = mkCloseProposalTx(appID, govTokenID, proposalALsig);
-		runtime.executeTx(closeProposalParam);
+		runtime.executeTx([closeProposalParam]);
 		syncAccounts();
 
 		// verify proposalALsig recieved back deposit of 15 tokens

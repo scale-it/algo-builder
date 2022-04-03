@@ -15,10 +15,9 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 
-	await executeTx(
-		deployer,
-		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" })
-	);
+	await executeTx(deployer, [
+		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" }),
+	]);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
@@ -46,10 +45,9 @@ async function run(runtimeEnv, deployer) {
 	const statelessAccount = deployer.getLsig("StateLessASALsig");
 	console.log("stateless Account Address:", statelessAccount.address());
 
-	await executeTx(
-		deployer,
-		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" })
-	);
+	await executeTx(deployer, [
+		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" }),
+	]);
 
 	const txGroup = [
 		// Stateful call

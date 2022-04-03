@@ -65,7 +65,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			payFlags: { totalFee: 1000 },
 		};
 
-		runtime.executeTx(fundAppParams);
+		runtime.executeTx([fundAppParams]);
 		syncAccounts();
 
 		appCallParams = {
@@ -90,7 +90,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			appArgs: ["str:opt_in_to_asa"],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(optInParams);
+		runtime.executeTx([optInParams]);
 		syncAccounts();
 
 		// transfer some ASA to app
@@ -103,7 +103,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			assetID: assetID,
 			payFlags: { totalFee: 1000 },
 		};
-		runtime.executeTx(asaTransferParam);
+		runtime.executeTx([asaTransferParam]);
 		syncAccounts();
 
 		runtime.optIntoASA(assetID, elon.address, {});
@@ -130,7 +130,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			foreignAssets: [assetID],
 		};
 		assert.throws(
-			() => runtime.executeTx(transferASAbyAppParam),
+			() => runtime.executeTx([transferASAbyAppParam]),
 			`RUNTIME_ERR1404: Account ${appAccount.address} doesn't hold asset index ${assetID}`
 		);
 	});
@@ -148,7 +148,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			accounts: [elon.address],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(transferASAbyAppParam);
+		runtime.executeTx([transferASAbyAppParam]);
 		syncAccounts();
 
 		// verify ASA transfer
@@ -173,7 +173,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			accounts: [elon.address],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify app holding removed and all ASA transferred to elon
@@ -194,7 +194,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			foreignAssets: [assetID],
 		};
 		assert.throws(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			`RUNTIME_ERR1506: Only Clawback account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can revoke asset`
 		);
 	});
@@ -216,7 +216,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			foreignAssets: [assetID],
 		};
 
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify 2 ASA are clawbacked from john -> elon
@@ -235,7 +235,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		};
 
 		assert.throws(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			`RUNTIME_ERR1505: Only Freeze account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can freeze asset`
 		);
 	});
@@ -253,7 +253,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		};
 
 		assert.throws(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			`RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${assetID}`
 		);
 	});
@@ -272,7 +272,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			accounts: [john.address],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// frozen
@@ -294,7 +294,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			accounts: [john.address],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify unfrozen
@@ -309,7 +309,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		};
 
 		assert.throws(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			`RUNTIME_ERR1504: Only Manager account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can modify or destroy asset`
 		);
 	});
@@ -327,7 +327,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			appArgs: ["str:delete_asa"],
 			foreignAssets: [assetID],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// assert ASA deleted
@@ -346,7 +346,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		};
 
 		assert.throws(
-			() => runtime.executeTx(txParams),
+			() => runtime.executeTx([txParams]),
 			`RUNTIME_ERR1504: Only Manager account WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY can modify or destroy asset`
 		);
 	});
@@ -366,7 +366,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			foreignAssets: [assetID],
 			accounts: [elon.address, charlie.address],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify fields modified (according to asc logic)
@@ -387,7 +387,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 			...appCallParams,
 			appArgs: ["str:deploy_asa"],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify asa created by contract
@@ -427,7 +427,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 				`addr:${charlie.address}`,
 			],
 		};
-		runtime.executeTx(txParams);
+		runtime.executeTx([txParams]);
 		syncAccounts();
 
 		// verify asa created by contract

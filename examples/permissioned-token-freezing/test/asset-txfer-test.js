@@ -142,7 +142,7 @@ describe("Test for transferring asset using custom logic", function () {
 			fields: assetModFields,
 			payFlags: { totalFee: 1000 },
 		};
-		runtime.executeTx(assetConfigParams);
+		runtime.executeTx([assetConfigParams]);
 
 		// verify clawback is updated & manager, freeze address is set to ""
 		assetDef = runtime.getAssetDef(assetId);
@@ -159,7 +159,7 @@ describe("Test for transferring asset using custom logic", function () {
 			},
 		};
 		try {
-			runtime.executeTx(newCfgParams);
+			runtime.executeTx([newCfgParams]);
 		} catch (e) {
 			console.log("[Expected] ", e.message); // cannot modify asset.
 		}
@@ -178,8 +178,8 @@ describe("Test for transferring asset using custom logic", function () {
 			accounts: [alice.address], //  AppAccounts
 		};
 
-		runtime.executeTx(setLevelParams); // set level for alice
-		runtime.executeTx({ ...setLevelParams, accounts: [bob.address] }); // set level for bob
+		runtime.executeTx([setLevelParams]); // set level for alice
+		runtime.executeTx([{ ...setLevelParams, accounts: [bob.address] }]); // set level for bob
 		syncAccounts();
 
 		// verify level is set in local-state
@@ -256,7 +256,7 @@ describe("Test for transferring asset using custom logic", function () {
 		};
 
 		try {
-			runtime.executeTx(setLevelParams);
+			runtime.executeTx([setLevelParams]);
 		} catch (e) {
 			console.log("[Expected as Sender(Bob) !== Creator(Alice)", e.errorDescriptor);
 		}

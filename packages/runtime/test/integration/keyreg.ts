@@ -41,7 +41,7 @@ describe("Key Registration transaction", function () {
 			voteKeyDilution: 5,
 			payFlags: { totalFee: 1000 },
 		};
-		const r = runtime.executeTx(txSKParams) as BaseTxReceipt;
+		const r = runtime.executeTx([txSKParams])[0] as BaseTxReceipt;
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
 		assert.isDefined(r.txID);
@@ -65,7 +65,7 @@ describe("Key Registration transaction", function () {
 			payFlags: { totalFee: 1000 },
 		};
 
-		const r = runtime.executeTx(txLsigParams) as BaseTxReceipt;
+		const r = runtime.executeTx([txLsigParams])[0] as BaseTxReceipt;
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
 		assert.isDefined(r.txID);

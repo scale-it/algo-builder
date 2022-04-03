@@ -100,7 +100,7 @@ class Context {
 		};
 
 		console.log(`Funding DAO App (ID = ${this.daoAppID})`);
-		this.runtime.executeTx(fundAppParameters);
+		this.runtime.executeTx([fundAppParameters]);
 	}
 
 	setUpLsig() {
@@ -137,7 +137,7 @@ class Context {
 			foreignAssets: [this.govTokenID],
 			appArgs: ["str:optin_gov_token"],
 		};
-		this.runtime.executeTx(optInToGovASAParam);
+		this.runtime.executeTx([optInToGovASAParam]);
 		this.syncAccounts();
 	}
 
@@ -182,7 +182,8 @@ class Context {
 	}
 
 	executeTx(txnParams) {
-		this.runtime.executeTx(txnParams);
+		if (Array.isArray(txnParams)) this.runtime.executeTx(txnParams);
+		else this.runtime.executeTx([txnParams]);
 	}
 
 	addProposal() {

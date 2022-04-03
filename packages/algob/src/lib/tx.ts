@@ -279,6 +279,50 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
  */
 export async function executeTx(
 	deployer: Deployer,
+	transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+): Promise<ConfirmedTxInfo> {
+	let isSDK = false;
+	let signedTxn;
+	if (transactions.length === 0) {
+		throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
+	}
+	if (wtypes.isSDKTransactionAndSign(transactions[0])) {
+		signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
+		isSDK = true;
+	}
+
+	if (isSDK && signedTxn) {
+		const confirmedTx = await deployer.sendAndWait(signedTxn);
+		console.debug(confirmedTx);
+		return confirmedTx;
+	}
+
+	const execParams = transactions as wtypes.ExecParams[];
+
+	deployer.assertCPNotDeleted(execParams);
+	try {
+		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
+		const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
+		const confirmedTx = await deployer.sendAndWait(signedTxn);
+		console.debug(confirmedTx);
+		if (deployer.isDeployMode) {
+			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
+		}
+		return confirmedTx;
+	} catch (error) {
+		if (deployer.isDeployMode) {
+			deployer.persistCP();
+		}
+
+		throw error;
+	}
+}
+
+/**
+ * @deprecated  Remove in next release
+ */
+export async function executeTransaction(
+	deployer: Deployer,
 	transactions:
 		| (wtypes.ExecParams | wtypes.TransactionAndSign)
 		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
@@ -329,16 +373,6 @@ export async function executeTx(
 
 		throw error;
 	}
-}
-
-/** @deprecated */
-export async function executeTransaction(
-	deployer: Deployer,
-	transactions:
-		| (wtypes.ExecParams | wtypes.TransactionAndSign)
-		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
-): Promise<ConfirmedTxInfo> {
-	return executeTx(deployer, transactions);
 }
 
 /**

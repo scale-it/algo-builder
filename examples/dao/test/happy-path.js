@@ -507,7 +507,7 @@ describe("DAO - Happy Paths", function () {
 
 			ctx.syncAccounts();
 
-			assert.doesNotThrow(() => ctx.executeTx({ ...executeProposalTx[0] }));
+			assert.doesNotThrow(() => ctx.executeTx([{ ...executeProposalTx[0] }]));
 			ctx.syncAccounts();
 
 			// verify executed is set to be true
