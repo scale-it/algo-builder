@@ -1,4 +1,5 @@
-declare var debug: debug.Debug & { debug: debug.Debug; default: debug.Debug };
+declare const debug: debug.Debug & { debug: debug.Debug; default: debug.Debug };
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace debug {
 	interface Debug {
 		(namespace: string): Debugger;
