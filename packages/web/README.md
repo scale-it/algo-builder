@@ -151,4 +151,4 @@ const daoAppInfo = await deployer.deployApp(
 const appInfo = deployer.getApp("DAO App");
 ```
 
-**Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
+**Note:** We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
