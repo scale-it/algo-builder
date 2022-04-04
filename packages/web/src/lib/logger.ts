@@ -49,4 +49,4 @@ warn.log = console.warn.bind(console);
 
 debug.enable("algob/web:*");
 
-export { log, error, warn };
+export { log, error, warn, debug };

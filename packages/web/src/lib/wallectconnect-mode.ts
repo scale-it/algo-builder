@@ -36,7 +36,7 @@ export class WallectConnectSession {
 
 		// if connection not already established, log message to create one
 		if (!this.connector.connected) {
-			log(`Connection not established, please use "this.create()" to create new session`);
+			warn(`Connection not established, please use "this.create()" to create new session`);
 		}
 		this.wcAccounts = this.connector.accounts;
 	}
