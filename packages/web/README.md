@@ -26,23 +26,23 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 You can connect to `web` package in your react app by using different wallets.
 
-1.  AlgoSigner:
+1.  ##### AlgoSigner:
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
         const connector = new WebMode(AlgoSigner, CHAIN_NAME);
 
-2.  MyAlgo Wallet:
+2. ##### MyAlgo Wallet:
     Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
 
          const connector = new MyAlgoWalletSession(CHAIN_NAME)
          await connector.connectToMyAlgo();
 
-3.  Wallet Connect:
-    Create an instance of the `WallectConnectSession` class by passing the chain name and create a session using `create` and then connect to it using `onConnect`.
+3. ##### Wallet Connect:
+    Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
 
-    const connector = new WallectConnectSession(CHAIN_NAME);
-    await connector.create(true);
-    connector.onConnect((error, response) => console.log(error, response));
+        const connector = new WallectConnectSession(CHAIN_NAME);
+        await connector.create(true);
+        connector.onConnect((error, response) => console.log(error, response));
 
 Now you can use it to execute a transaction:
 
