@@ -13,7 +13,6 @@ You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/d
 In the `@algo-builder/web` package we pass transaction [parameters](https://github.com/scale-it/algo-builder/blob/master/docs/guide/execute-transaction.md) in the same way as we do in `algob`.
 
 ## Wallets supported
-
 - AlgoSigner
 - My Algo Connect
 - Wallet Connect
@@ -118,6 +117,38 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+### deployApp
+`deployer.deployApp` deploys stateful smart contract.
+### Parameters:
+- approvalProgram:  approval program filename (must be present in assets folder)
+- clearProgram:  clear program filename (must be present in assets folder)
+- flags:  AppDeploymentFlags
+- payFlags:  Transaction Parameters
+- scTmplParams:  Smart contract template parameters (used only when compiling PyTEAL to TEAL). This is an optional parameter.
+- appName: name of the app to deploy. This name (if passed) will be used as
+the checkpoint "key", and app information will be stored agaisnt this name. This is an optional parameter.
+
+### deployApp example
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+	"dao-app-approval.py",
+	"dao-app-clear.py",
+	{
+		sender: creator,
+		localInts: 9,
+		localBytes: 7,
+		globalInts: 4,
+		globalBytes: 2,
+		appArgs: appArgs,
+	},
+	{},
+	{},
+	"DAO App"
+); // app name passed here
+
+// now during querying, you only need this app name
+const appInfo = deployer.getApp("DAO App");
 ```
 
 **Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
