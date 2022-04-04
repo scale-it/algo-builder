@@ -24,9 +24,25 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 ### Example
 
-To use `web` package in your react app, first you need to create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
+You can connect to `web` package in your react app by using different wallets.
 
-    const web = new WebMode(AlgoSigner, CHAIN_NAME);
+1.  AlgoSigner:
+    Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
+
+        const connector = new WebMode(AlgoSigner, CHAIN_NAME);
+
+2.  MyAlgo Wallet:
+    Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
+
+         const connector = new MyAlgoWalletSession(CHAIN_NAME)
+         await connector.connectToMyAlgo();
+
+3.  Wallet Connect:
+    Create an instance of the `WallectConnectSession` class by passing the chain name and create a session using `create` and then connect to it using `onConnect`.
+
+    const connector = new WallectConnectSession(CHAIN_NAME);
+    await connector.create(true);
+    connector.onConnect((error, response) => console.log(error, response));
 
 Now you can use it to execute a transaction:
 
@@ -38,10 +54,10 @@ Now you can use it to execute a transaction:
       amountMicroAlgos: amount,
       payFlags: {},
     };
-    let response = await web.executeTx(txParams);
+    let response = await connector.executeTx(txParams);
 
-This code will make the transaction, let the user sign it using algosigner and send it to the network.
+This code will make the transaction, let the user sign it using wallet selected and send it to the network.
 
-You can also use `web.sendTransaction()` or `web.signTransaction()` in a react app.
+You can also use `connector.sendTransaction()` or `connector.signTransaction()` in a react app.
 
 **Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
