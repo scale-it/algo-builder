@@ -155,6 +155,8 @@ export function getValidationErrors(config: any): CfgErrors {
 
 			const hcfg = ncfg as HttpNetworkConfig;
 			const host = hcfg.host;
+			const mainnetURL = "https://node.algoexplorerapi.io";
+			const testnetURL = "https://node.testnet.algoexplorerapi.io";
 			if (typeof host !== "string" || host === "" || !validateHostname(host)) {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
@@ -162,8 +164,8 @@ export function getValidationErrors(config: any): CfgErrors {
 			if (
 				typeof token === "string" &&
 				token.length < 10 &&
-				host !== "https://node.testnet.algoexplorerapi.io" &&
-				host !== "https://node.algoexplorerapi.io"
+				host !== testnetURL &&
+				host !== mainnetURL
 			) {
 				errors.push(net, "token", token, "string (with length > 10)");
 			} else if (typeof token !== "object" && typeof token !== "string") {
