@@ -24,7 +24,7 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 ### Example
 
-You can connect to `web` package in your react app by using different wallets.
+You can connect to `web` package in your react app by using different wallets. Currently supported wallets include: 
 
 1.  ##### AlgoSigner:
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
