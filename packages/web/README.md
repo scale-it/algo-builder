@@ -129,7 +129,7 @@ log("still goes to stdout, but via console.info now");
 - appName: name of the app to deploy. This name (if passed) will be used as
 the checkpoint "key", and app information will be stored agaisnt this name. This is an optional parameter.
 
-### deployApp example
+### Example
 ```js
 // deployment
 const daoAppInfo = await deployer.deployApp(
