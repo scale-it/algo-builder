@@ -46,7 +46,7 @@ You can also use `web.sendTransaction()` or `web.signTransaction()` in a react a
 
 **NOTE**:
 
-1. We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
+1. We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
 
 2. To enable debug dynamically call the `enable()` method :
    `enable(namespaces)`
