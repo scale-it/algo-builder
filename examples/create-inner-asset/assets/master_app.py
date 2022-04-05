@@ -3,8 +3,9 @@ from pytealutils.strings import itoa
 
 @Subroutine(TealType.none)
 def created_by_group_txn():
-    app_create, asset_create, proxy_action = Gtxn[0], Gtxn[1], Gtxn[2]
+    app_create, asset_create, this_tx = Gtxn[0], Gtxn[1], Gtxn[2]
     validate_txns = And(
+        Txn.group_index() == 2,  // check that this tx is the third transaction
         # group size 
         Global.group_size() == Int(3),
         # first tx is application create tx
