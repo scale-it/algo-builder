@@ -9,6 +9,7 @@ import {
 } from "../../../../src/internal/core/config/config-validation";
 import { expectBuilderError } from "../../../helpers/errors";
 import { account1 } from "../../../mocks/account";
+import { mainnetURL, testnetURL } from "./../../../../../web/src/lib/constants";
 
 const accountStatic = {
 	name: "staticAccount",
@@ -280,7 +281,7 @@ describe("Config validation", function () {
 						const errors = getValidationErrors({
 							networks: {
 								custom: {
-									host: "https://node.testnet.algoexplorerapi.io",
+									host: testnetURL,
 									token: "",
 								},
 							},
@@ -292,7 +293,7 @@ describe("Config validation", function () {
 						const errors = getValidationErrors({
 							networks: {
 								custom: {
-									host: "https://node.algoexplorerapi.io",
+									host: mainnetURL,
 									token: "",
 								},
 							},

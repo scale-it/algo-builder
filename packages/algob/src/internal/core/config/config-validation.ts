@@ -6,6 +6,7 @@ import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
+import { mainnetURL, testnetURL } from "./../../../../../web/src/lib/constants";
 import CfgErrors from "./config-errors";
 
 const AlgodTokenHeaderType = z.object({
@@ -155,8 +156,6 @@ export function getValidationErrors(config: any): CfgErrors {
 
 			const hcfg = ncfg as HttpNetworkConfig;
 			const host = hcfg.host;
-			const mainnetURL = "https://node.algoexplorerapi.io";
-			const testnetURL = "https://node.testnet.algoexplorerapi.io";
 			if (typeof host !== "string" || host === "" || !validateHostname(host)) {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
