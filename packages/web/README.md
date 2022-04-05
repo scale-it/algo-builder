@@ -119,6 +119,7 @@ error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
 ### deployApp
 `deployer.deployApp` deploys stateful smart contract.
+
 ### Parameters:
 - approvalProgram:  approval program filename (must be present in assets folder)
 - clearProgram:  clear program filename (must be present in assets folder)
