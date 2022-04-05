@@ -24,25 +24,32 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 ### Example
 
-You can connect to `web` package in your react app by using different wallets. Currently supported wallets include: 
+You can connect to `web` package in your react app by using different wallets. Currently supported wallets include:
 
 1.  ##### AlgoSigner:
+
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
-        const connector = new WebMode(AlgoSigner, CHAIN_NAME);
+        const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
 
-2. ##### MyAlgo Wallet:
+2.  ##### MyAlgo Wallet:
+
     Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
 
-         const connector = new MyAlgoWalletSession(CHAIN_NAME)
-         await connector.connectToMyAlgo();
+         ```js
+         const wcSession = new MyAlgoWalletSession(CHAIN_NAME)
+         await wcSession.connectToMyAlgo();
+         ```
 
-3. ##### Wallet Connect:
+3.  ##### Wallet Connect:
+
     Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
 
-        const connector = new WallectConnectSession(CHAIN_NAME);
-        await connector.create(true);
-        connector.onConnect((error, response) => console.log(error, response));
+    ```js
+    const wcSession = new WallectConnectSession(CHAIN_NAME);
+    await wcSession.create(true);
+    wcSession.onConnect((error, response) => console.log(error, response));
+    ```
 
 Now you can use it to execute a transaction:
 
@@ -54,10 +61,11 @@ Now you can use it to execute a transaction:
       amountMicroAlgos: amount,
       payFlags: {},
     };
-    let response = await connector.executeTx(txParams);
+    let response = await wcSession.executeTx(txParams);
 
 This code will make the transaction, let the user sign it using wallet selected and send it to the network.
 
-You can also use `connector.sendTransaction()` or `connector.signTransaction()` in a react app.
+You can also use `wcSession.sendTransaction()` or `wcSession.signTransaction()` in a react app.
+The example using these wallets can be found [here] (https://github.com/scale-it/algo-builder-templates/tree/master/shop)
 
 **Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
