@@ -3,6 +3,7 @@ import algosdk, { SuggestedParams, Transaction } from "algosdk";
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { ExecParams, TxParams } from "../types";
 import { mkTransaction } from "./txn";
+import { log } from "./logger";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
@@ -25,7 +26,7 @@ export class WebMode {
 			ledger: this.chainName,
 			path: "/v2/status",
 		});
-		console.log(response);
+		log(response);
 		let lastround = response[LAST_ROUND] as number;
 		// eslint-disable-next-line no-constant-condition
 		while (true) {

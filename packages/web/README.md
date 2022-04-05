@@ -68,4 +68,48 @@ This code will make the transaction, let the user sign it using wallet selected 
 You can also use `wcSession.sendTransaction()` or `wcSession.signTransaction()` in a react app.
 The example using these wallets can be found [here] (https://github.com/scale-it/algo-builder-templates/tree/master/shop)
 
-**Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
+**NOTE**:
+
+1. We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
+
+2. To enable debug dynamically call the `enable()` method :
+   `enable(namespaces)`
+   `namespaces` can include modes separated by a colon and wildcards.
+
+   To disable all namespaces use `disable()`method.
+   The functions returns the namespaces currently enabled (and skipped). This can be useful if you want to disable debugging temporarily without knowing what was enabled to begin with.
+
+```ts
+import debug from "./logger";
+debug.enable("test");
+console.log(1, debug.enabled("test"));
+
+debug.disable();
+console.log(2, debug.enabled("test"));
+```
+
+print:
+
+```
+1 true
+2 false
+```
+
+By default debug will log to stderr, however this can be configured per-namespace by overriding the log method:
+
+```ts
+import debug from "./logger";
+const error = debug("app:error");
+// by default stderr is used
+error("goes to stderr!");
+const log = debug("app:log");
+// set this namespace to log via console.log
+log.log = console.log.bind(console); // don't forget to bind to console!
+log("goes to stdout");
+error("still goes to stderr!");
+// set all output to go via console.info
+// overrides all per-namespace log settings
+debug.log = console.info.bind(console);
+error("now goes to stdout via console.info");
+log("still goes to stdout, but via console.info now");
+```
