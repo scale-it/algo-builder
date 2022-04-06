@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2, Transaction } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -488,6 +488,13 @@ export interface Deployer {
 	 * @param rawTxns Signed Transaction(s)
 	 */
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+
+	/**
+	 * Return receipts for each transaction in group txn
+	 * @param txns list transaction in group
+	 * @returns confirmed tx info of group
+	 */
+	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 
 	/**
 	 * Funds logic signature account (Contract Account).
