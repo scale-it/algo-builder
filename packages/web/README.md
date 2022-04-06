@@ -117,7 +117,9 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+
 ### deployApp
+
 `deployer.deployApp` deploys stateful smart contract.
 
 Parameters:
@@ -130,6 +132,7 @@ Parameters:
 the checkpoint "key", and app information will be stored agaisnt this name. This is an optional parameter.
 
 ### Example
+
 ```js
 // deployment
 const daoAppInfo = await deployer.deployApp(
