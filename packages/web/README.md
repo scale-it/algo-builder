@@ -145,8 +145,8 @@ const daoAppInfo = await deployer.deployApp(
 	},
 	{},
 	{},
-	"DAO App"
-); // app name passed here
+	"DAO App" // app name passed here
+);
 
 // now during querying, you only need this app name
 const appInfo = deployer.getApp("DAO App");
