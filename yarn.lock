@@ -2077,9 +2077,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-inner-asset@workspace:examples/create-inner-asset":
+"create-inner-asset@workspace:examples/inner-tx-create-assets":
   version: 0.0.0-use.local
-  resolution: "create-inner-asset@workspace:examples/create-inner-asset"
+  resolution: "create-inner-asset@workspace:examples/inner-tx-create-assets"
   dependencies:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
