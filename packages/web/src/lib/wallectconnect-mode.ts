@@ -6,16 +6,18 @@ import algosdk, { Transaction } from "algosdk";
 import { WalletTransaction } from "../algo-signer-types";
 import {
 	ExecParams,
+	isSDKTransactionAndSign,
 	SessionConnectResponse,
 	SessionDisconnectResponse,
 	SessionUpdateResponse,
 	SignTxnParams,
+	TransactionAndSign,
 	TransactionInGroup,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
-import { mkTransaction } from "./txn";
 import { error, log, warn } from "./logger";
+import { mkTransaction } from "./txn";
 
 export class WallectConnectSession {
 	readonly connector: WalletConnect;
@@ -201,20 +203,23 @@ export class WallectConnectSession {
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
-	 * @param execParams transaction parameters or atomic transaction parameters
+	 * @param transactions transaction parameters,  atomic transaction parameters
+	 *  or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
 	async executeTx(
-		execParams: ExecParams[]
+		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
 		let txns: Transaction[] = [];
-		if (execParams.length > 16) {
+		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		if (!isSDKTransactionAndSign(transactions[0])) {
+			const execParams = transactions as ExecParams[];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+			}
 		}
-
 		txns = algosdk.assignGroupID(txns);
 		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
 			return { txn: txn, shouldSign: true };

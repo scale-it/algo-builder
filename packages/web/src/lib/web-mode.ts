@@ -1,9 +1,9 @@
 import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
-import { ExecParams, TxParams } from "../types";
-import { mkTransaction } from "./txn";
+import { ExecParams, isSDKTransactionAndSign, TransactionAndSign, TxParams } from "../types";
 import { log } from "./logger";
+import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
@@ -129,18 +129,20 @@ export class WebMode {
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
-	 * @param execParams transaction parameters or atomic transaction parameters
+	 * @param transactions transaction parameters, atomic transaction parameters
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
-	async executeTx(execParams: ExecParams[]): Promise<JsonPayload> {
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<JsonPayload> {
 		let txns: Transaction[] = [];
-		if (execParams.length > 16) {
+		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+		if (!isSDKTransactionAndSign(transactions[0])) {
+			const execParams = transactions as ExecParams[];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+			}
 		}
-
 		txns = algosdk.assignGroupID(txns);
 		const binaryTxs = txns.map((txn: Transaction) => {
 			return txn.toByte();
