@@ -12,11 +12,6 @@ You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/d
 
 In the `@algo-builder/web` package we pass transaction [parameters](https://github.com/scale-it/algo-builder/blob/master/docs/guide/execute-transaction.md) in the same way as we do in `algob`.
 
-## Wallets supported
-- AlgoSigner
-- My Algo Connect
-- Wallet Connect
-
 ## Important links
 
 - [Home Page](https://algobuilder.dev/)
