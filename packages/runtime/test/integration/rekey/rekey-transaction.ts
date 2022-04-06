@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
+import { LogicSigAccount, multisigAddress, MultisigMetadata } from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -37,6 +37,9 @@ describe("Re-keying transactions", function () {
 	let runtime: Runtime;
 
 	let txParams: types.ExecParams;
+
+	let multiSigParams: MultisigMetadata;
+	let multSigAddr: string;
 
 	// fetch basic account informaton
 	function syncAccounts(): void {
@@ -102,6 +105,18 @@ describe("Re-keying transactions", function () {
 		mkTxAlgoTransferFromAccount(runtime, signer, from, from, 0n, {
 			totalFee: FEE,
 			rekeyTo: to.address,
+		});
+	}
+
+	function rekeyFromAccountToMultiSig(
+		runtime: Runtime,
+		signer: AccountStoreI,
+		from: AccountStoreI,
+		to: string
+	): void {
+		mkTxAlgoTransferFromAccount(runtime, signer, from, from, 0n, {
+			totalFee: FEE,
+			rekeyTo: to,
 		});
 	}
 
@@ -248,6 +263,15 @@ describe("Re-keying transactions", function () {
 		// fund to logic sign address
 		runtime.fundLsig(master.account, lsig.address(), 10e8);
 		runtime.fundLsig(master.account, cloneLsig.address(), 10e8);
+
+		//create multiSig account address
+		const addrs = [john.address, bob.address];
+		multiSigParams = {
+			version: 1,
+			threshold: 1,
+			addrs: addrs,
+		};
+		multSigAddr = multisigAddress(multiSigParams);
 
 		syncAccounts();
 	});
@@ -440,6 +464,20 @@ describe("Re-keying transactions", function () {
 
 		it("Check spend address", () => {
 			assert.equal(alice.getSpendAddress(), bob.address);
+		});
+	});
+	describe("Account to MultiSig", function () {
+		this.beforeEach(() => {
+			rekeyFromAccountToMultiSig(runtime, alice, alice, multSigAddr);
+		});
+
+		it("Spend address of alice account should change multiSig account", function () {
+			assert.isNotNull(alice.account.spend);
+			assert.equal(alice.getSpendAddress(), multSigAddr);
+		});
+
+		it("Should transfer ALGO if spend account provided", function () {
+			verifyTransferAlgoAuthByAccount(runtime, john, alice, bob, DEFAULT_AMOUNT);
 		});
 	});
 });
