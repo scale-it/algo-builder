@@ -120,7 +120,7 @@ log("still goes to stdout, but via console.info now");
 ### deployApp
 `deployer.deployApp` deploys stateful smart contract.
 
-### Parameters:
+Parameters:
 - approvalProgram:  approval program filename (must be present in assets folder)
 - clearProgram:  clear program filename (must be present in assets folder)
 - flags:  AppDeploymentFlags
