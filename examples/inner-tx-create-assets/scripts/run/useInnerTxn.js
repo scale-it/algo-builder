@@ -7,7 +7,7 @@ const { APP_NAME, accounts } = require("../setup");
 async function run(runtimeEnv, deployer) {
 	const { creator } = accounts(deployer);
 
-	const proxyAppInfo = deployer.getApp("MasterApp");
+	const proxyAppInfo = deployer.getApp("coordinator");
 
 	// create asset and log new asset id
 	const masterTxnParam = {

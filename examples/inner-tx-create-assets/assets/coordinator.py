@@ -1,3 +1,14 @@
+"""
+This smart contract doing:
+
+1. Demo create application, asset and use new appl and asset id after we create them 
+   by using group transaction.
+
+2. Demo create application, asset and use new appl and asset id after we create them 
+   by using group use inner transaction
+
+"""
+
 from pyteal import *
 from pytealutils.strings import itoa
 
@@ -5,7 +16,8 @@ from pytealutils.strings import itoa
 def created_by_group_txn():
     app_create, asset_create, this_tx = Gtxn[0], Gtxn[1], Gtxn[2]
     validate_txns = And(
-        Txn.group_index() == 2,  // check that this tx is the third transaction
+        # check that this tx is the third transaction
+        Txn.group_index() == Int(2), 
         # group size 
         Global.group_size() == Int(3),
         # first tx is application create tx
@@ -18,10 +30,10 @@ def created_by_group_txn():
         asset_create.xfer_asset() == Int(0),
         asset_create.close_remainder_to() == Global.zero_address(),
         # third tx is call proxy app tx
-        proxy_action.type_enum() == TxnType.ApplicationCall,
-        proxy_action.on_completion() == OnComplete.NoOp,
-        proxy_action.application_id() == Global.current_application_id(),
-        proxy_action.close_remainder_to() == Global.zero_address(),
+        this_tx.type_enum() == TxnType.ApplicationCall,
+        this_tx.on_completion() == OnComplete.NoOp,
+        this_tx.application_id() == Global.current_application_id(),
+        this_tx.close_remainder_to() == Global.zero_address(),
     )
 
     # Compute the newly created app address from the app id

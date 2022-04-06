@@ -7,14 +7,14 @@ const { APP_NAME, accounts } = require("../setup");
 async function run(runtimeEnv, deployer) {
 	const { creator } = accounts(deployer);
 
-	const proxyAppInfo = deployer.getApp("MasterApp");
+	const proxyAppInfo = deployer.getApp("coordinator");
 
 	//  first tx in group: deploy app
 	const createAppTxnParam = {
 		type: types.TransactionType.DeployApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		approvalProgram: "worker_app.py",
+		approvalProgram: "logger.py",
 		clearProgram: "clear.teal",
 		localInts: 0,
 		localBytes: 0,
