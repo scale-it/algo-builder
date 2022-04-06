@@ -112,4 +112,33 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+
+### deployApp
+
+`deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
+
+### Example
+
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+	"dao-app-approval.py",
+	"dao-app-clear.py",
+	{
+		sender: creator,
+		localInts: 9,
+		localBytes: 7,
+		globalInts: 4,
+		globalBytes: 2,
+		appArgs: appArgs,
+	},
+	{},
+	{},
+	"DAO App" // app name passed here
+);
+
+// now during querying, you only need this app name
+const appInfo = deployer.getApp("DAO App");
 ```
+
+**Note:** We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
