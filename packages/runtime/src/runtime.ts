@@ -952,7 +952,6 @@ export class Runtime {
 			txID: this.ctx.tx.txID,
 		};
 		this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
-
 		// reset pooled opcode cost for single tx, this is to handle singular functions
 		// which don't "initialize" a new ctx (eg. deployApp)
 		if (this.ctx.gtxs.length === 1) {

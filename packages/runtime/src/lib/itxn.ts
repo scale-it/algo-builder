@@ -305,35 +305,15 @@ export function setInnerTxField(
  * @param interpeter current interpeter contain context
  * @param includeCurrentInnerTx include remaining fee of current inner tx group
  */
-export function calculateInnerTxCredit(
-	interpeter: Interpreter,
-	includeCurrentInnerTx = false
-): CreditFeeType {
-	// remaining fee in group tx
-	const outnerCredit = calculateFeeCredit(interpeter.runtime.ctx.gtxs);
-	// remaining fee in older inners tx
-	const executedInnerCredit = interpeter.innerTxnGroups.map((inner) =>
-		calculateFeeCredit(inner)
-	);
-
-	const credit = executedInnerCredit.reduce((pre, curr) => {
-		pre.collectedFee += curr.collectedFee;
-		pre.requiredFee += curr.requiredFee;
-		return pre;
-	}, outnerCredit);
-
-	// when submit inner tx(or group inner tx)
-	if (includeCurrentInnerTx) {
-		const subTxnCredit = calculateFeeCredit(interpeter.currentInnerTxnGroup);
-		credit.collectedFee += subTxnCredit.collectedFee;
-		credit.requiredFee += subTxnCredit.requiredFee;
-	}
+export function calculateInnerTxCredit(interpeter: Interpreter): CreditFeeType {
+	// calculate curret txn group fee
+	const feeInfo = calculateFeeCredit(interpeter.currentInnerTxnGroup);
 
 	// plus fee from outner
-	credit.collectedFee += interpeter.runtime.ctx.remainingFee;
-	credit.remainingFee = credit.collectedFee - credit.requiredFee;
+	feeInfo.collectedFee += interpeter.runtime.ctx.remainingFee;
+	feeInfo.remainingFee = feeInfo.collectedFee - feeInfo.requiredFee;
 
-	return credit;
+	return feeInfo;
 }
 
 // return 0 if transaction pay by pool fee
