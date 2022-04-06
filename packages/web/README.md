@@ -120,16 +120,7 @@ log("still goes to stdout, but via console.info now");
 
 ### deployApp
 
-`deployer.deployApp` deploys stateful smart contract.
-
-Parameters:
-- approvalProgram:  approval program filename (must be present in assets folder)
-- clearProgram:  clear program filename (must be present in assets folder)
-- flags:  AppDeploymentFlags
-- payFlags:  Transaction Parameters
-- scTmplParams:  Smart contract template parameters (used only when compiling PyTEAL to TEAL). This is an optional parameter.
-- appName: name of the app to deploy. This name (if passed) will be used as
-the checkpoint "key", and app information will be stored agaisnt this name. This is an optional parameter.
+`deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
 
 ### Example
 
