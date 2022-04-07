@@ -5,7 +5,7 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { AccountStore, getProgram, Interpreter, parseASADef, parser, Runtime } from ".";
+import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";

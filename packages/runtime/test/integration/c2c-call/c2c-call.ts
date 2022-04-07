@@ -92,7 +92,7 @@ describe("C2C call", function () {
 	});
 
 	describe("Inner transaction in group", function () {
-		it("should succeed", () => {
+		it("should succeed: enough fee for 4 transaction call(4000 micro algo)", () => {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -116,7 +116,7 @@ describe("C2C call", function () {
 			]);
 		});
 
-		it("should fail", () => {
+		it("should fail because not enough fee (4 transaction call but only 3000 micro algo)", () => {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
