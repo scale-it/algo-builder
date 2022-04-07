@@ -13,9 +13,9 @@ Note: For each parameter `type` and `sign` fields are mandatory.
 - `type`: type of transaction
 - `sign`: sign type
 
-Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#execparams):
+Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams):
 
-### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
+### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
 ```js
   {
@@ -27,9 +27,10 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     payFlags: { totalFee: fee }  }
 ```
 
-- payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
+- payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.TxParams.html)
 
-### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
+### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
+
 
 ```js
   {
@@ -43,7 +44,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
+### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployASAParam)
 
 To deploy an ASA using `asa.yaml`:
 
@@ -78,7 +79,7 @@ To deploy an ASA without using `asa.yaml`:
   };
 ```
 
-### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinasaparam)
+### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#OptInASAParam)
 
 ```js
   {
@@ -90,7 +91,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Transfer Asset](https://algobuilder.dev/api/algob/modules/runtime.types.html#assettransferparam)
+### [Transfer Asset](https://algobuilder.dev/api/algob/modules/runtime.types.html#AssetTransferParam)
 
 ```js
   {
@@ -104,7 +105,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployappparam)
+### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployAppParam)
 
 ```js
   {
@@ -123,7 +124,7 @@ To deploy an ASA without using `asa.yaml`:
 
 - To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to App](https://algobuilder.dev/api/algob/modules/runtime.types.html#optintoappparam)
+### [Opt-In to App](https://algobuilder.dev/api/web/enums/types.TransactionType.html#OptInToApp)
 
 ```js
   {
@@ -135,7 +136,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
+### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
 
 ```js
   {
@@ -147,7 +148,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateappparam)
+### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#UpdateAppParam)
 
 ```js
   {
@@ -161,7 +162,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
+### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
 
 ```js
   {
@@ -203,7 +204,7 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 ## Sign and Send SDK Transaction object using `executeTx` function
 
-`executeTx` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
+`executeTx` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has `transaction` and `sign`. Ex:
 
 ```
 const tx = makeAssetCreateTxn(
@@ -224,7 +225,7 @@ You can check the implementation in [asa](https://github.com/scale-it/algo-build
 
 ## SignTransactions function
 
-This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) objects and returns raw signed transaction
+This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction
 
 ```
 const transaction: wtypes.TransactionAndSign = [{

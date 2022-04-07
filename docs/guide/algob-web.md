@@ -42,7 +42,7 @@ Contracts are present in `/assets`, scripts are present in `/scripts` folder, an
 
 ## Checkpoints
 
-In an `algob` project we persist [checkpoints](./algob-web-checkpoints.md). This is helpful to store deployment information (transaction IDs, asset indexes, etc.) for later use (in future scripts).
+In an `algob` project we persist [checkpoints](./execution-checkpoints.md). This is helpful to store deployment information (transaction IDs, asset indexes, etc.) for later use (in future scripts).
 
 - The checkpoint files are saved in `artifacts/scripts/` in a human-readable YAML format. Contains:
   - Deployed informaton (assetID, appID, creator, txID, etc.)
