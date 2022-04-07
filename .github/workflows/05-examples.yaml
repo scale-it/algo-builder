@@ -41,7 +41,7 @@ jobs:
           ./project-dev-script.sh create --typescript
           ./project-dev-script.sh exec test
 
-      - name: Create algo-builder ts project
+      - name: Create algo-builder js project
         working-directory: ./packages/algob
         run: |
           ./project-dev-script.sh create
