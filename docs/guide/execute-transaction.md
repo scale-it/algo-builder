@@ -124,7 +124,7 @@ To deploy an ASA without using `asa.yaml`:
 
 - To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to App](https://algobuilder.dev/api/web/enums/types.TransactionType.html#OptInToApp)
+### [Opt-In to App](https://algobuilder.dev/api/runtime/classes/Runtime.html#optInToApp)
 
 ```js
   {
