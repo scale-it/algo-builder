@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags, AppInfo, TxReceipt } from "../../../src/types";
+import { AccountStoreI, AppDeploymentFlags, AppInfo } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -91,61 +91,59 @@ describe("C2C call", function () {
 		);
 	});
 
-	// TODO: We don't handle the fee of inner group created by other tx in same group as well
-	// Should fix it in next patch release.
-	// https://www.pivotaltracker.com/n/projects/2452320/stories/181642443
-	// describe("Inner transaction in group", function() {
-	// 	it("should succeed", () => {
-	// 		const execParams: types.ExecParams = {
-	// 			type: types.TransactionType.CallApp,
-	// 			sign: types.SignType.SecretKey,
-	// 			fromAccount: alice.account,
-	// 			appID: firstApp.appID,
-	// 			foreignApps: [secondApp.appID],
-	// 			appArgs: ['str:call_method', `int:${1}`],
-	// 			payFlags: {
-	// 			totalFee: 1000
-	// 			}
-	// 		}
+	describe("Inner transaction in group", function () {
+		it("should succeed: enough fee for 4 transaction call(4000 micro algo)", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: firstApp.appID,
+				foreignApps: [secondApp.appID],
+				appArgs: appCallArgs,
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
 
-	// 		runtime.executeTx([
-	// 			execParams,
-	// 			{
-	// 				...execParams,
-	// 				appID: secondApp.appID,
-	// 				foreignApps: [firstApp.appID],
-	// 				payFlags: {totalFee: 3000}
-	// 			}
-	// 		]);
-	// 	});
+			runtime.executeTx([
+				execParams,
+				{
+					...execParams,
+					appID: secondApp.appID,
+					foreignApps: [firstApp.appID],
+					payFlags: { totalFee: 3000 },
+				},
+			]);
+		});
 
-	// 	it.skip("should fail", () => {
-	// 		const execParams: types.ExecParams = {
-	// 			type: types.TransactionType.CallApp,
-	// 			sign: types.SignType.SecretKey,
-	// 			fromAccount: alice.account,
-	// 			appID: firstApp.appID,
-	// 			foreignApps: [secondApp.appID],
-	// 			appArgs: ['str:call_method', `int:${1}`],
-	// 			payFlags: {
-	// 			totalFee: 1000
-	// 			}
-	// 		}
+		it("should fail because not enough fee (4 transaction call but only 3000 micro algo)", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: firstApp.appID,
+				foreignApps: [secondApp.appID],
+				appArgs: appCallArgs,
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
 
-	// 		expectRuntimeError(() =>
-	// 			runtime.executeTx([
-	// 				execParams,
-	// 				{
-	// 					...execParams,
-	// 					appID: secondApp.appID,
-	// 					foreignApps: [firstApp.appID],
-	// 					payFlags: {totalFee: 2000}
-	// 				}
-	// 			]),
-	// 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
-	// 		);
-	// 	})
-	// });
+			expectRuntimeError(
+				() =>
+					runtime.executeTx([
+						execParams,
+						{
+							...execParams,
+							appID: secondApp.appID,
+							foreignApps: [firstApp.appID],
+							payFlags: { totalFee: 2000 },
+						},
+					]),
+				RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+			);
+		});
+	});
 
 	describe("c2c call unhappy case", function () {
 		let thirdApp: AppInfo;
