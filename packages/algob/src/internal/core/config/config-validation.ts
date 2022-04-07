@@ -1,12 +1,11 @@
 import { parseZodError } from "@algo-builder/runtime";
-import { BuilderError, ERRORS } from "@algo-builder/web";
+import { BuilderError, ERRORS, mainnetURL, testnetURL } from "@algo-builder/web";
 import * as z from "zod";
 
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
-import { mainnetURL, testnetURL } from "./../../../../../web/src/lib/constants";
 import CfgErrors from "./config-errors";
 
 const AlgodTokenHeaderType = z.object({
@@ -160,15 +159,13 @@ export function getValidationErrors(config: any): CfgErrors {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
 			const token = hcfg.token;
-			if (
-				typeof token === "string" &&
-				token.length < 10 &&
-				host !== testnetURL &&
-				host !== mainnetURL
-			) {
-				errors.push(net, "token", token, "string (with length > 10)");
-			} else if (typeof token !== "object" && typeof token !== "string") {
-				errors.push(net, "token", token, "string or object");
+			const AllowHost = [testnetURL, mainnetURL];
+			if (!AllowHost.includes(host)) {
+				if (typeof token === "string" && token.length < 10) {
+					errors.push(net, "token", token, "string (with length > 10)");
+				} else if (typeof token !== "object" && typeof token !== "string") {
+					errors.push(net, "token", token, "string or object");
+				}
 			}
 
 			try {

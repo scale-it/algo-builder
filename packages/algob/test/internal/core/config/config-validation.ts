@@ -1,4 +1,4 @@
-import { ERRORS } from "@algo-builder/web";
+import { ERRORS, mainnetURL, testnetURL } from "@algo-builder/web";
 import { assert } from "chai";
 import deepmerge from "deepmerge";
 
@@ -9,7 +9,6 @@ import {
 } from "../../../../src/internal/core/config/config-validation";
 import { expectBuilderError } from "../../../helpers/errors";
 import { account1 } from "../../../mocks/account";
-import { mainnetURL, testnetURL } from "./../../../../../web/src/lib/constants";
 
 const accountStatic = {
 	name: "staticAccount",
