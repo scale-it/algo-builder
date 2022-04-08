@@ -1,0 +1,8 @@
+#pragma version 6
+int 1 
+int 2
++
+global OpcodeBudget
+int 19996
+==
+return 

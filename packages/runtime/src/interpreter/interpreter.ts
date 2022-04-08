@@ -68,13 +68,14 @@ export class Interpreter {
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
 	innerTxnGroups: EncTx[][]; // executed inner transactions
-
+	cost: number; // total code
 	constructor() {
 		this.stack = new Stack<StackElem>();
 		this.mode = ExecutionMode.APPLICATION;
 		this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
 		// total cost computed during code parsing, used in TEAL <= v3
 		this.gas = 0;
+		this.cost = 0;
 		// gas cost of each line used in TEAL >=4 (we accumulate gas when executing the code).
 		this.lineToCost = {};
 		this.length = 0; // code length
@@ -515,7 +516,7 @@ export class Interpreter {
 			this.assertValidTxArray();
 		}
 
-		let dynamicCost = 0;
+		const dynamicCost = 0;
 		const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as
 			| BaseTxReceipt
 			| AppInfo;
@@ -536,14 +537,14 @@ export class Interpreter {
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
-			dynamicCost += this.lineToCost[instruction.line];
+			this.cost += this.lineToCost[instruction.line];
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
 			}
 			if (this.tealVersion >= 4) {
 				if (this.mode === ExecutionMode.SIGNATURE) {
 					assertMaxCost(dynamicCost, this.mode);
-					txReceipt.gas = dynamicCost;
+					txReceipt.gas = this.cost;
 				} else {
 					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
 					assertMaxCost(

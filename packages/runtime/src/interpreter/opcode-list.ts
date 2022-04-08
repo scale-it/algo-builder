@@ -64,6 +64,7 @@ import {
 	DecodingMode,
 	EncodingType,
 	EncTx,
+	ExecutionMode,
 	StackElem,
 	TEALStack,
 	TxnType,
@@ -1744,7 +1745,9 @@ export class Global extends Op {
 			}
 
 			case "OpcodeBudget": {
-				result = this.interpreter.getBudget() - this.interpreter.runtime.ctx.pooledApplCost;
+				const maxBudget = this.interpreter.getBudget();
+				const currentTotalCost = this.interpreter.cost;
+				result = maxBudget - (currentTotalCost + 1); // include global OpcodeBudget
 				break;
 			}
 			default: {
