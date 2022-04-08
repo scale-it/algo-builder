@@ -50,6 +50,7 @@ jobs:
           rm -rf ./project-dev
           ./project-dev-script.sh create --typescript
           ./project-dev-script.sh exec test
+          cd ./project-dev && yarn build && cd ..
           ./project-dev-script.sh exec deploy
 
       - name: Create algo-builder js project
