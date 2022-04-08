@@ -35,15 +35,6 @@ jobs:
         run: python -m pip install pipenv
       - run: pipenv sync
 
-      - name: Create algo-builder ts project
-        working-directory: ./packages/algob
-        run: |
-          rm -rf ./project-dev
-          ./project-dev-script.sh create --typescript
-          ./project-dev-script.sh exec test
-          cd ./project-dev && npx tsc -b . && cd ..
-          ./project-dev-script.sh exec deploy
-
       - name: Install Algorand
         run: |
           sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
@@ -59,6 +50,7 @@ jobs:
           rm -rf ./project-dev
           ./project-dev-script.sh create --typescript
           ./project-dev-script.sh exec test
+          cd ./project-dev && npx tsc -b . && cd ..
           ./project-dev-script.sh exec deploy
 
       - name: Create algo-builder js project
