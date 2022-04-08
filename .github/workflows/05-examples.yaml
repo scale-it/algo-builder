@@ -41,7 +41,7 @@ jobs:
           rm -rf ./project-dev
           ./project-dev-script.sh create --typescript
           ./project-dev-script.sh exec test
-          cd ./project-dev && yarn tsc -b ./tsconfig.json
+          cd ./project-dev && npx tsc -b . && cd ..
           ./project-dev-script.sh exec deploy
 
       - name: Install Algorand
