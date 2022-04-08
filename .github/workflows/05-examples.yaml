@@ -49,17 +49,17 @@ jobs:
         run: |
           rm -rf ./project-dev
           ./project-dev-script.sh create --typescript
-          ./project-dev-script.sh exec test
+          pipenv run ./project-dev-script.sh exec test
           cd ./project-dev && npx tsc -b . && cd ..
-          ./project-dev-script.sh exec deploy
+          pipenv run ./project-dev-script.sh exec deploy
 
       - name: Create algo-builder js project
         working-directory: ./packages/algob
         run: |
           rm -rf ./project-dev
           ./project-dev-script.sh create
-          ./project-dev-script.sh exec test 
-          ./project-dev-script.sh exec deploy
+          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec deploy
 
       - name: Example ASA
         working-directory: ./examples/asa
