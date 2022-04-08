@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { AppDeploymentFlags } from "../../src/types";
+import { AccountStoreI, AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -76,5 +76,68 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 		];
 
 		assert.doesNotThrow(() => runtime.executeTx(passTxGroup));
+	});
+
+	describe("Combine with other transaction type", function () {
+		let transferTx: types.ExecParams;
+		let callAppTx: types.ExecParams;
+		let increaseBudgetTx: types.ExecParams;
+
+		this.beforeEach(async function () {
+			appID = runtime.deployApp(
+				"budget-opcode.teal",
+				"clearv6.teal",
+				{
+					sender: john.account,
+					globalBytes: 0,
+					globalInts: 0,
+					localBytes: 0,
+					localInts: 0,
+				},
+				{}
+			).appID;
+
+			transferTx = {
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: john.address,
+				amountMicroAlgos: 0,
+				payFlags: { totalFee: 1000 },
+			};
+
+			callAppTx = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appID,
+				appArgs: ["str:worker"],
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			increaseBudgetTx = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appID,
+				appArgs: ["str:budget"],
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+		});
+
+		it("Should succeed because enough budget when group 2 appl call transaction", () => {
+			assert.doesNotThrow(() => runtime.executeTx([increaseBudgetTx, callAppTx]));
+		});
+
+		it("Should failed because not enough budget when group appl call and non appl call", () => {
+			expectRuntimeError(
+				() => runtime.executeTx([callAppTx, transferTx]),
+				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
+			);
+		});
 	});
 });

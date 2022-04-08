@@ -34,6 +34,7 @@ import {
 	MAX_OUTPUT_BYTE_LEN,
 	MAX_UINT64,
 	MAX_UINT128,
+	MaxAppProgramCost,
 	MaxTEALVersion,
 	TransactionTypeEnum,
 	TxArrFields,
@@ -4066,6 +4067,13 @@ export class ITxnSubmit extends Op {
 			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
 				console.warn("Only supports application call in this version");
 				return;
+			}
+		}
+
+		// increase Budget when submit application call transaction
+		for (const tx of this.interpreter.currentInnerTxnGroup) {
+			if (tx.type === TransactionTypeEnum.APPLICATION_CALL) {
+				this.interpreter.runtime.ctx.budget += MaxAppProgramCost;
 			}
 		}
 
