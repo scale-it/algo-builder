@@ -42,6 +42,7 @@ import {
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
+	assertBase64,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -4740,5 +4741,33 @@ export class Gitxnas extends Gtxnas {
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
 		super.execute(stack);
+	}
+}
+
+/**
+ * Takes the last value from stack and if base64encoded, decodes it and push it back to the stack,
+ * othervise throws an error
+ * https://github.com/algorand/go-algorand/pull/3220
+ */
+export class Base64Decode extends Op {
+	readonly line: number;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, line);
+	}
+
+	execute(stack: TEALStack): void {
+		this.assertMinStackLen(stack, 1, this.line);
+		const last = this.assertBytes(stack.pop(), this.line);
+		assertBase64(convertToString(last), this.line);
+		const enc = new TextDecoder("utf-8");
+		const decoded = enc.decode(last);
+		stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
 	}
 }

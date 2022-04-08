@@ -36,6 +36,7 @@ import {
 	Args,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -6609,6 +6610,36 @@ describe("Teal Opcodes", function () {
 
 		it("Should fail: stack empty", () => {
 			const op = new ITxnas(["Accounts"], 1, interpreter);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+		});
+	});
+
+	describe("Tealv7: base64Decode opcode", function () {
+		let stack: Stack<StackElem>;
+		const encoded64Base = "Vml0YWxpaw==";
+		const decoded64Base = "Vitalik";
+		const toPush = Buffer.from(encoded64Base, "utf-8");
+		const expectedBytes = new Uint8Array(Buffer.from(decoded64Base, "utf-8"));
+
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should decode base64 encoded data and push it to stack", () => {
+			stack.push(toPush);
+			const op = new Base64Decode([], 0);
+			op.execute(stack);
+			assert.deepEqual(expectedBytes, stack.pop());
+		});
+
+		it("Should throw an error when last stack element is not base64 encoded", () => {
+			stack.push(expectedBytes);
+			const op = new Base64Decode([], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
+		});
+
+		it("Should throw an error when the stack is empty", () => {
+			const op = new Base64Decode([], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 	});
