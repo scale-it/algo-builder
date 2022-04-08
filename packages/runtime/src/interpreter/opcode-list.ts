@@ -1741,6 +1741,11 @@ export class Global extends Op {
 				result = decodeAddress(callerAddress).publicKey;
 				break;
 			}
+
+			case "OpcodeBudget": {
+				result = this.interpreter.getBudget() - this.interpreter.runtime.ctx.pooledApplCost;
+				break;
+			}
 			default: {
 				result = GlobalFields[this.interpreter.tealVersion][this.field];
 			}

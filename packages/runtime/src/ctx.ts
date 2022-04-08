@@ -14,6 +14,7 @@ import {
 	ALGORAND_MIN_TX_FEE,
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
+	MaxAppProgramCost,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
@@ -56,6 +57,7 @@ export class Ctx implements Context {
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
+	budget: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -83,6 +85,7 @@ export class Ctx implements Context {
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 		this.remainingFee = 0;
+		this.budget = MaxAppProgramCost;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {

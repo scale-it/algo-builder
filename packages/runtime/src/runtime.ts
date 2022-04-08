@@ -10,6 +10,7 @@ import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	MaxAppProgramCost,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
@@ -581,18 +582,7 @@ export class Runtime {
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
-		this.ctx.debugStack = debugStack;
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0
-		);
-
-		this.store = this.ctx.state;
-		return txReceipt;
+		return this.deployApp(approvalProgram, clearProgram, flags, payFlags, {}, debugStack);
 	}
 
 	/**
@@ -615,6 +605,7 @@ export class Runtime {
 	): AppInfo {
 		this.addCtxAppCreateTxn(flags, payFlags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MaxAppProgramCost;
 
 		const txReceipt = this.ctx.deployApp(
 			flags.sender.addr,
@@ -671,6 +662,7 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MaxAppProgramCost;
 		const txReceipt = this.ctx.optInToApp(accountAddr, appID, 0);
 
 		this.store = this.ctx.state;
@@ -727,6 +719,7 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MaxAppProgramCost;
 		const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
 
 		// If successful, Update programs and state
@@ -921,6 +914,16 @@ export class Runtime {
 		const runtimeTxnParams: types.ExecParams[] = txnParams.map((txn) =>
 			types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
 		);
+
+		// calculate budget for single/group tx
+		let applCallTxNumber = 0;
+		for (const tx of gtxs) {
+			if (tx.type === TransactionTypeEnum.APPLICATION_CALL) {
+				applCallTxNumber += 1;
+			}
+		}
+
+		this.ctx.budget = MaxAppProgramCost * applCallTxNumber;
 
 		const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
 

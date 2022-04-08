@@ -16,7 +16,7 @@ import {
 	ALGORAND_MAX_TX_ACCOUNTS_LEN,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	DEFAULT_STACK_ELEM,
-	MaxAppProgramCost,
+	LogicSigMaxCost,
 	MaxTEALVersion,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
@@ -49,6 +49,7 @@ import { Label } from "./opcode-list";
  */
 export class Interpreter {
 	readonly stack: TEALStack;
+	mode: ExecutionMode; // application or signature
 	tealVersion: number; // LogicSigVersion
 	lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
 	gas: number; // total gas cost of TEAL code
@@ -70,6 +71,7 @@ export class Interpreter {
 
 	constructor() {
 		this.stack = new Stack<StackElem>();
+		this.mode = ExecutionMode.APPLICATION;
 		this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
 		// total cost computed during code parsing, used in TEAL <= v3
 		this.gas = 0;
@@ -348,6 +350,14 @@ export class Interpreter {
 	}
 
 	/**
+	 * @returns budget of current single/group tx
+	 */
+	getBudget(): number {
+		if (this.mode === ExecutionMode.SIGNATURE) return LogicSigMaxCost;
+		else return this.runtime.ctx.budget;
+	}
+
+	/**
 	 * Description: moves instruction index to "label", throws error if label not found
 	 * @param label: branch label
 	 * @param line: line number
@@ -473,7 +483,8 @@ export class Interpreter {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	execute(program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
-		const result = this.executeWithResult(program, mode, runtime, debugStack);
+		this.mode = mode;
+		const result = this.executeWithResult(program, runtime, debugStack);
 		if (result !== undefined && typeof result === "bigint" && result > 0n) {
 			return;
 		}
@@ -484,7 +495,6 @@ export class Interpreter {
 	/**
 	 * This function executes TEAL code after parsing and returns the result of the program.
 	 * @param program: teal code
-	 * @param mode : execution mode of TEAL code (smart signature or contract)
 	 * @param runtime : runtime object
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
@@ -494,15 +504,14 @@ export class Interpreter {
 	 */
 	executeWithResult(
 		program: string,
-		mode: ExecutionMode,
 		runtime: Runtime,
 		debugStack?: number
 	): StackElem | undefined {
 		this.runtime = runtime;
-		this.instructions = parser(program, mode, this);
+		this.instructions = parser(program, this.mode, this);
 
 		this.mapLabelWithIndexes();
-		if (mode === ExecutionMode.APPLICATION) {
+		if (this.mode === ExecutionMode.APPLICATION) {
 			this.assertValidTxArray();
 		}
 
@@ -532,16 +541,15 @@ export class Interpreter {
 				txReceipt.gas = this.gas;
 			}
 			if (this.tealVersion >= 4) {
-				if (mode === ExecutionMode.SIGNATURE) {
-					assertMaxCost(dynamicCost, mode);
+				if (this.mode === ExecutionMode.SIGNATURE) {
+					assertMaxCost(dynamicCost, this.mode);
 					txReceipt.gas = dynamicCost;
 				} else {
 					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
-					const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,
-						maxPooledApplCost
+						this.getBudget()
 					);
 					txReceipt.gas = this.runtime.ctx.pooledApplCost;
 				}
