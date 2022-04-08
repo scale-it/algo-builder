@@ -1746,7 +1746,10 @@ export class Global extends Op {
 
 			case "OpcodeBudget": {
 				const maxBudget = this.interpreter.getBudget();
-				const currentTotalCost = this.interpreter.cost;
+				const currentTotalCost =
+					this.interpreter.mode === ExecutionMode.SIGNATURE
+						? this.interpreter.cost
+						: this.interpreter.runtime.ctx.pooledApplCost;
 				result = maxBudget - (currentTotalCost + 1); // include global OpcodeBudget
 				break;
 			}

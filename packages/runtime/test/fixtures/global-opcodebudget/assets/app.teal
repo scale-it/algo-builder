@@ -5,24 +5,24 @@ bz on_creation
 
 
 txna ApplicationArgs 0 
-byte "buff_with_group"
+byte "normal_tx"
 ==
-bnz buff_with_group
+bnz normal_tx
 
 txna ApplicationArgs 0 
-byte "buff_with_inner"
+byte "inner_tx"
 == 
-bnz buff_with_inner
+bnz inner_tx
 
 
-buff_with_group:
+normal_tx:
 global OpcodeBudget
 itob
 log
 int 1
 return 
 
-buff_with_inner:
+inner_tx:
 // call to dummy app
 itxn_begin
 int appl
@@ -34,9 +34,11 @@ itxn_field ApplicationID
 int 0
 itxn_field Fee
 itxn_submit
+
 global OpcodeBudget 
 itob
-log 
+log
+
 int 1
 return
 
