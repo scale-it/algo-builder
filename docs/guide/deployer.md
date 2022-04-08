@@ -116,9 +116,8 @@ Smart contracts must be stored in `assets` folder.
 
 The main difference between deploying an ASA and App is that ASA takes `asset-name` and `ASADeploymentFlags` as input and App takes `smart-contract-names` and `AppDeploymentFlags` as input.
 
-You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
-You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
-
+You can learn more about the flags from [Deployer API](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html);
+You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/).
 #### OptIn to App
 
 For opting in to App, `deployer` supports the following methods:
