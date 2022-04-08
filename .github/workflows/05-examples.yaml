@@ -44,6 +44,23 @@ jobs:
       - name: Setup Network
         run: cd infrastructure && make setup-private-net
 
+      - name: Create algo-builder ts project
+        working-directory: ./packages/algob
+        run: |
+          rm -rf ./project-dev
+          ./project-dev-script.sh create --typescript
+          pipenv run ./project-dev-script.sh exec test
+          cd ./project-dev && npx tsc -b . && cd ..
+          pipenv run ./project-dev-script.sh exec deploy
+
+      - name: Create algo-builder js project
+        working-directory: ./packages/algob
+        run: |
+          rm -rf ./project-dev
+          ./project-dev-script.sh create
+          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec deploy
+
       - name: Example ASA
         working-directory: ./examples/asa
         run: |
