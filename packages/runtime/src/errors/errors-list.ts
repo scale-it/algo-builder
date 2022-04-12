@@ -398,6 +398,12 @@ maximun uint128`,
 		title: "itxn_next without itxn_begin",
 		description: `itxn_next without itxn_begin`,
 	},
+	UNKNOWN_ENCODING: {
+		number: 1058,
+		message: "Encoding e must be {0, 1}, got :%encoding%, at line %line%",
+		title: "Unknown encoding",
+		description: "Unknown encoding",
+	},
 };
 
 const runtimeGeneralErrors = {

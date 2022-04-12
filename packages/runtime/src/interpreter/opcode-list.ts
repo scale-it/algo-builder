@@ -4751,15 +4751,21 @@ export class Gitxnas extends Gtxnas {
  */
 export class Base64Decode extends Op {
 	readonly line: number;
+	readonly encoding: number;
+
 	/**
 	 * Asserts 0 arguments are passed.
-	 * @param args Expected arguments: [] // none
+	 * @param args Expected arguments: [e], where e = {0, 1}.
 	 * @param line line number in TEAL file
 	 */
 	constructor(args: string[], line: number) {
 		super();
 		this.line = line;
-		assertLen(args.length, 0, line);
+		assertLen(args.length, 1, line);
+		this.encoding = Number(args[0]);
+		if(!(this.encoding === 0 || this.encoding === 1)){
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, { encoding: this.encoding, line: this.line });
+		}
 	}
 
 	execute(stack: TEALStack): void {
@@ -4768,6 +4774,10 @@ export class Base64Decode extends Op {
 		assertBase64(convertToString(last), this.line);
 		const enc = new TextDecoder("utf-8");
 		const decoded = enc.decode(last);
-		stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
+		if(this.encoding === 0){ // UrlEncoding
+			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64url")));
+		} else { // e === 1 StdEncoding
+			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
+		}
 	}
 }
