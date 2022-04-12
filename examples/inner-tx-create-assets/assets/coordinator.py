@@ -42,15 +42,18 @@ def created_by_group_txn():
 
     return Seq(
         Assert(validate_txns),
-        Log(Itob(app_create.created_application_id())), # log new appl id
-        Log(Itob(asset_create.created_asset_id())) # log new asset id
+        Log(itoa(app_create.created_application_id())), # log new appl id
+        Log(itoa(asset_create.created_asset_id())) # log new asset id
     ) 
 
 
 Subroutine(TealType.none)
 def created_by_inner_txns():
 
-    create_asset_inner_txn = Seq(
+    return Seq(
+        app_prog := AppParam.approvalProgram(Global.current_application_id()),
+        clear_prog := AppParam.clearStateProgram(Global.current_application_id()),
+        # create ASA
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields({
             TxnField.type_enum: TxnType.AssetConfig,
@@ -65,14 +68,20 @@ def created_by_inner_txns():
             TxnField.config_asset_clawback: Global.current_application_address()
         }),
         InnerTxnBuilder.Submit(),
+        Log(itoa(InnerTxn.created_asset_id())),  # Log new asset id
+        # create new application
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields({
+            TxnField.type_enum: TxnType.ApplicationCall,
+            TxnField.approval_program: app_prog.value(),
+            TxnField.clear_state_program: clear_prog.value(),
+            TxnField.fee: Int(0),
+        }),
+        InnerTxnBuilder.Submit(),
+        Log(itoa(InnerTxn.created_application_id())),  # Log new asset id
+
     )  
 
-    return Seq(
-        create_asset_inner_txn,
-        Log(itoa(InnerTxn.created_asset_id())) # Log new asset id
-    )
-
-    
 
 def approval():
     handlers = [

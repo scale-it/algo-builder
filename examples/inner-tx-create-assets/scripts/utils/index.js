@@ -4,6 +4,11 @@ const accounts = (deployer) => {
 	};
 };
 
+const decodeValue = (value) => {
+	return new TextDecoder().decode(value);
+};
+
 module.exports = {
 	accounts,
+	decodeValue,
 };

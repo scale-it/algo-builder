@@ -1,7 +1,8 @@
 const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { accounts } = require("./setup");
-const { ALGORAND_ACCOUNT_MIN_BALANCE } = require("@algo-builder/runtime");
+const { accounts } = require("./utils");
+
+const min_balance = 3000000;
 
 // Deploy new application
 async function run(runtimeEnv, deployer) {
@@ -32,7 +33,7 @@ async function run(runtimeEnv, deployer) {
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
 		toAccountAddr: appInfo.applicationAccount,
-		amountMicroAlgos: ALGORAND_ACCOUNT_MIN_BALANCE,
+		amountMicroAlgos: min_balance,
 		payFlags: {},
 	};
 	await executeTx(deployer, paymentTxnParam);

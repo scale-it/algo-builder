@@ -1,7 +1,7 @@
 const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { bytesToBigInt } = require("algosdk");
-const { accounts } = require("../setup");
+const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
 async function run(runtimeEnv, deployer) {
@@ -26,7 +26,6 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// second tx : create asset
-
 	const createASATxnParam = {
 		type: types.TransactionType.DeployASA,
 		sign: types.SignType.SecretKey,
@@ -38,7 +37,6 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// third tx: call master app
-
 	const masterTxnParam = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,
@@ -57,8 +55,8 @@ async function run(runtimeEnv, deployer) {
 	]);
 
 	const lastReceipt = receiptsTx[receiptsTx.length - 1];
-	console.log("new application id:", bytesToBigInt(lastReceipt.logs[0]).toString());
-	console.log("new asset id:", bytesToBigInt(lastReceipt.logs[1]).toString());
+	console.log("new application id:", decodeValue(lastReceipt.logs[0]));
+	console.log("new asset id:", decodeValue(lastReceipt.logs[1]));
 }
 
 module.exports = { default: run };

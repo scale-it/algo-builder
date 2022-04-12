@@ -1,7 +1,6 @@
 const { executeTx } = require("@algo-builder/algob");
-const { ALGORAND_ACCOUNT_MIN_BALANCE } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
-const { APP_NAME, accounts } = require("../setup");
+const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
 async function run(runtimeEnv, deployer) {
@@ -17,15 +16,18 @@ async function run(runtimeEnv, deployer) {
 		appID: proxyAppInfo.appID,
 		appArgs: ["str:create_by_inner_txn"],
 		payFlags: {
-			totalFee: 2000,
+			totalFee: 3000,
 		},
 	};
 
 	const txReceipt = await executeTx(deployer, [masterTxnParam]);
 
-	const logs = txReceipt.logs;
+	// only one transaction
+	const logs = txReceipt[0].logs;
 	// Log asset id
-	console.log("New asset Id =", new TextDecoder().decode(logs[0]));
+	console.log("New asset Id =", decodeValue(logs[0]));
+	// Log application id
+	console.log("New application Id =", decodeValue(logs[1]));
 }
 
 module.exports = { default: run };
