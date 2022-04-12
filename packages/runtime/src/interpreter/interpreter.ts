@@ -355,7 +355,7 @@ export class Interpreter {
 	 */
 	getBudget(): number {
 		if (this.mode === ExecutionMode.SIGNATURE) return LogicSigMaxCost;
-		else return this.runtime.ctx.budget;
+		return this.runtime.ctx.budget;
 	}
 
 	/**
