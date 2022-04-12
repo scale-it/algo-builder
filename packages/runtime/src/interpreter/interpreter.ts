@@ -16,7 +16,7 @@ import {
 	ALGORAND_MAX_TX_ACCOUNTS_LEN,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	DEFAULT_STACK_ELEM,
-	LogicSigMaxCost,
+	LOGIC_SIGN_MAX_COST,
 	MaxTEALVersion,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
@@ -354,7 +354,7 @@ export class Interpreter {
 	 * @returns budget of current single/group tx
 	 */
 	getBudget(): number {
-		if (this.mode === ExecutionMode.SIGNATURE) return LogicSigMaxCost;
+		if (this.mode === ExecutionMode.SIGNATURE) return LOGIC_SIGN_MAX_COST;
 		return this.runtime.ctx.budget;
 	}
 
