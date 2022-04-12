@@ -1,18 +1,13 @@
-import { parsing, tx, types } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, getProgram, Runtime } from "../../src/index";
-import { bigintToBigEndianBytes } from "../../src/lib/parsing";
 import { LogicSigAccount } from "../../src/logicsig";
-import { AccountStoreI, AppDeploymentFlags } from "../../src/types";
+import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
-import { expectRuntimeError } from "../helpers/runtime-errors";
 
-const STR_NORMAL_COST = "normal_cost";
-
-describe("TEALv5: Pooled Opcode Cost calculation", function () {
+describe("TEALv6: Global Opcode Budget", function () {
 	useFixture("global-opcodebudget");
 	const john = new AccountStore(10e6);
 
@@ -69,7 +64,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 		assert.doesNotThrow(() => runtime.executeTx([txnParam]));
 	});
 
-	describe("test on application", () => {
+	describe("Test on application", () => {
 		it("call application with single tx", () => {
 			txnParam = {
 				type: types.TransactionType.CallApp,

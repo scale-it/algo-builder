@@ -3,7 +3,6 @@
 txn ApplicationID
 bz on_creation
 
-
 txna ApplicationArgs 0 
 byte "normal_tx"
 ==
@@ -13,7 +12,6 @@ txna ApplicationArgs 0
 byte "inner_tx"
 == 
 bnz inner_tx
-
 
 normal_tx:
 global OpcodeBudget
