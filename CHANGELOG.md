@@ -45,7 +45,15 @@ Added:
   - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
 
 - Added support for saving smart contract template params in ASCCache.
-  
+
+- Return list of receipt for each txn in group txn. Example:
+
+```js
+  const receipts = algob.executeTx([txn0, txn1]); 
+  console.log("txn0 information: ", receipts[0]);
+  console.log("txn1 information: ", receipts[2]);
+```
+
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
