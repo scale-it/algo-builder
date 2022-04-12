@@ -9,12 +9,13 @@ async function run(runtimeEnv, deployer) {
 
 	const proxyAppInfo = deployer.getApp("coordinator");
 
-	//  first tx in group: deploy app
+	// first tx in group: deploy new app app
+	// btw we're using same code with coordinator contract.
 	const createAppTxnParam = {
 		type: types.TransactionType.DeployApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		approvalProgram: "logger.py",
+		approvalProgram: "coordinator.py",
 		clearProgram: "clear.teal",
 		localInts: 0,
 		localBytes: 0,
@@ -54,6 +55,7 @@ async function run(runtimeEnv, deployer) {
 		masterTxnParam,
 	]);
 
+	// log created asset id and application id
 	const lastReceipt = receiptsTx[receiptsTx.length - 1];
 	console.log("new application id:", decodeValue(lastReceipt.logs[0]));
 	console.log("new asset id:", decodeValue(lastReceipt.logs[1]));

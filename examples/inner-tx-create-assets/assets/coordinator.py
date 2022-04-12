@@ -1,11 +1,13 @@
 """
+NOTE: This is demo contracts, doesn't have security measures. Please don't use it in product.
+
 This smart contract doing:
 
 1. Demo create application, asset and use new appl and asset id after we create them 
    by using group transaction.
 
 2. Demo create application, asset and use new appl and asset id after we create them 
-   by using group use inner transaction
+   by using group use inner transaction.
 
 """
 
@@ -14,6 +16,12 @@ from pytealutils.strings import itoa
 
 @Subroutine(TealType.none)
 def created_by_group_txn():
+    """
+        User send a group transaction which:
+            - First transaction will create a new ASA transaction.
+            - Second transaction will create a new application Transaction.
+            - Third will `log` a new asset id and a new application id. 
+    """
     app_create, asset_create, this_tx = Gtxn[0], Gtxn[1], Gtxn[2]
     validate_txns = And(
         # check that this tx is the third transaction
@@ -49,7 +57,11 @@ def created_by_group_txn():
 
 Subroutine(TealType.none)
 def created_by_inner_txns():
-
+    """
+        This method will: 
+            1. Create new asset by used inner tx and log new asset id. 
+            2. Create new application and log new application id.
+    """
     return Seq(
         app_prog := AppParam.approvalProgram(Global.current_application_id()),
         clear_prog := AppParam.clearStateProgram(Global.current_application_id()),
