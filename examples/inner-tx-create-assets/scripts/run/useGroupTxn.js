@@ -1,7 +1,7 @@
 const { executeTx } = require("@algo-builder/algob");
-const { ALGORAND_ACCOUNT_MIN_BALANCE } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
-const { APP_NAME, accounts } = require("../setup");
+const { bytesToBigInt } = require("algosdk");
+const { accounts } = require("../setup");
 
 // Deploy new application
 async function run(runtimeEnv, deployer) {
@@ -50,13 +50,15 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptTx = await executeTx(deployer, [
+	const receiptsTx = await executeTx(deployer, [
 		createAppTxnParam,
 		createASATxnParam,
 		masterTxnParam,
 	]);
 
-	console.log(receiptTx);
+	const lastReceipt = receiptsTx[receiptsTx.length - 1];
+	console.log("new application id:", bytesToBigInt(lastReceipt.logs[0]).toString());
+	console.log("new asset id:", bytesToBigInt(lastReceipt.logs[1]).toString());
 }
 
 module.exports = { default: run };
