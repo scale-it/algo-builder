@@ -78,7 +78,7 @@ describe("Should execute SDK transaction object using runtime", function () {
 			};
 
 			const txAndSign = mkTransactionAndSign(runtime, execParams);
-			assert.doesNotThrow(() => runtime.executeTx(txAndSign));
+			assert.doesNotThrow(() => runtime.executeTx([txAndSign]));
 
 			const asaInfo = runtime.getAssetInfoFromName(asaName);
 			if (asaInfo) {
@@ -107,17 +107,17 @@ describe("Should execute SDK transaction object using runtime", function () {
 				fromAccount: alice.account,
 				approvalProgram: "counter-approval.teal",
 				clearProgram: "clear.teal",
-				localBytes: 10,
-				localInts: 10,
-				globalBytes: 10,
-				globalInts: 10,
+				localBytes: 1,
+				localInts: 1,
+				globalBytes: 1,
+				globalInts: 1,
 				payFlags: {
 					totalFee: fee,
 				},
 			};
 
 			const txAndSign = mkTransactionAndSign(runtime, execParams);
-			runtime.executeTx(txAndSign);
+			runtime.executeTx([txAndSign]);
 		});
 
 		it("Should check if application exists after deployment", () => {
@@ -141,7 +141,7 @@ describe("Should execute SDK transaction object using runtime", function () {
 
 			const txAndSign = mkTransactionAndSign(runtime, execParams);
 
-			assert.doesNotThrow(() => runtime.executeTx(txAndSign));
+			assert.doesNotThrow(() => runtime.executeTx([txAndSign]));
 		});
 	});
 });

@@ -291,7 +291,7 @@ describe("Crowdfunding Tests", function () {
 		const app = runtime.getApp(applicationId);
 		assert.isDefined(app); // verify app is present before delete tx
 
-		runtime.executeTx(deleteTx);
+		runtime.executeTx([deleteTx]);
 
 		// should throw error as app is deleted
 		try {

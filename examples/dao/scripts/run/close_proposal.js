@@ -1,20 +1,20 @@
 const { tryExecuteTx } = require("./common/common.js");
 const { types } = require("@algo-builder/web");
 const { accounts } = require("./common/accounts.js");
-const { mkClearProposalTx } = require("./common/tx-params.js");
+const { mkCloseProposalTx } = require("./common/tx-params.js");
 
-async function clearProposal(deployer, proposalLsig, depositAmt) {
+async function closeProposal(deployer, proposalLsig, depositAmt) {
 	const daoAppInfo = deployer.getApp("DAOApp");
 	const govToken = deployer.asa.get("gov-token");
 
-	console.log(`* Clearing proposal_lsig record ${proposalLsig.address()} *`);
-	const clearProposalParam = mkClearProposalTx(
+	console.log(`* Closing proposal_lsig ${proposalLsig.address()} *`);
+	const closeProposalParam = mkCloseProposalTx(
 		daoAppInfo.appID,
 		govToken.assetIndex,
 		proposalLsig
 	);
 
-	await tryExecuteTx(deployer, clearProposalParam);
+	await tryExecuteTx(deployer, closeProposalParam);
 }
 
 async function run(runtimeEnv, deployer) {
@@ -44,11 +44,11 @@ async function run(runtimeEnv, deployer) {
 	];
 	await tryExecuteTx(deployer, optInTx);
 
-	// Transaction FAIL: deposit amount is not the same as app.global("deposit")
-	await clearProposal(deployer, proposalLsig, 7);
+	// Transaction will FAIL: deposit amount is not the same as app.global("deposit")
+	await closeProposal(deployer, proposalLsig, 7);
 
-	// clear proposal record
-	await clearProposal(deployer, proposalLsig, 15);
+	// Transaction will SUCCEED
+	await closeProposal(deployer, proposalLsig, 15);
 }
 
 module.exports = { default: run };

@@ -34,15 +34,17 @@ describe("Sample Test", function () {
 		assert.equal(fundReceiver.balance(), minBalance);
 		assert.equal(master.balance(), masterBalance);
 
-		runtime.executeTx({
-			type: types.TransactionType.TransferAlgo,
-			sign: types.SignType.LogicSignature,
-			lsig: lsig,
-			fromAccountAddr: master.address,
-			toAccountAddr: fundReceiver.address,
-			amountMicroAlgos: amount,
-			payFlags: { totalFee: validTxFee },
-		});
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.LogicSignature,
+				lsig: lsig,
+				fromAccountAddr: master.address,
+				toAccountAddr: fundReceiver.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: validTxFee },
+			},
+		]);
 		syncAccounts();
 		assert.equal(fundReceiver.balance(), minBalance + amount);
 		assert.equal(master.balance(), masterBalance - amount - BigInt(validTxFee));
@@ -54,15 +56,17 @@ describe("Sample Test", function () {
 		const initialMasterBalance = master.balance();
 
 		try {
-			runtime.executeTx({
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.LogicSignature,
-				lsig: lsig,
-				fromAccountAddr: master.address,
-				toAccountAddr: fundReceiver.address,
-				amountMicroAlgos: amount,
-				payFlags: { totalFee: invalidTxFee },
-			});
+			runtime.executeTx([
+				{
+					type: types.TransactionType.TransferAlgo,
+					sign: types.SignType.LogicSignature,
+					lsig: lsig,
+					fromAccountAddr: master.address,
+					toAccountAddr: fundReceiver.address,
+					amountMicroAlgos: amount,
+					payFlags: { totalFee: invalidTxFee },
+				},
+			]);
 		} catch (error) {
 			console.log(error);
 		}

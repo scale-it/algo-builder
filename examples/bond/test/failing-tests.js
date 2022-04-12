@@ -136,7 +136,7 @@ describe("Bond token failing tests", function () {
 			payFlags: {},
 			appArgs: appArgs,
 		};
-		runtime.executeTx(appCallParams);
+		runtime.executeTx([appCallParams]);
 		optInLsigToBond(runtime, lsig, initialBond, appManager);
 		// Issue tokens to issuer from bond token creator
 		const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
@@ -148,6 +148,7 @@ describe("Bond token failing tests", function () {
 		runtime.optIntoASA(initialBond, elon.address, {});
 		try {
 			runtime.optInToApp(elon.address, applicationId, {}, {});
+			// eslint-disable-next-line no-empty
 		} catch (e) {} // can be already opted-in
 		const amount = 10;
 		const algoAmount = amount * 1000;
@@ -177,7 +178,7 @@ describe("Bond token failing tests", function () {
 			appArgs: appArgs,
 		};
 
-		assert.throws(() => runtime.executeTx(appCallParams), RUNTIME_ERR1009);
+		assert.throws(() => runtime.executeTx([appCallParams]), RUNTIME_ERR1009);
 	});
 
 	it("Issuer should not be able to send asa without calling bond-dapp", () => {
@@ -192,7 +193,7 @@ describe("Bond token failing tests", function () {
 			payFlags: { totalFee: 1000 },
 		};
 
-		assert.throws(() => runtime.executeTx(params), REJECTED_BY_LOGIC);
+		assert.throws(() => runtime.executeTx([params]), REJECTED_BY_LOGIC);
 	});
 
 	it("Opt-In to issuer lsig with single transaction should fail", () => {
@@ -205,7 +206,7 @@ describe("Bond token failing tests", function () {
 			payFlags: {},
 		};
 
-		assert.throws(() => runtime.executeTx(optInTx), REJECTED_BY_LOGIC);
+		assert.throws(() => runtime.executeTx([optInTx]), REJECTED_BY_LOGIC);
 	});
 
 	// Avoid spamming of asset id's in bond-dapp
@@ -244,7 +245,7 @@ describe("Bond token failing tests", function () {
 			appArgs: appArgs,
 		};
 
-		assert.throws(() => runtime.executeTx(appCallParams), RUNTIME_ERR1009);
+		assert.throws(() => runtime.executeTx([appCallParams]), RUNTIME_ERR1009);
 	});
 
 	it("should not issue shares to address other than issuer's address", () => {
@@ -258,7 +259,7 @@ describe("Bond token failing tests", function () {
 			payFlags: {},
 			appArgs: appArgs,
 		};
-		runtime.executeTx(appCallParams);
+		runtime.executeTx([appCallParams]);
 		optInLsigToBond(runtime, lsig, initialBond, appManager);
 		runtime.optIntoASA(initialBond, elon.address, {});
 

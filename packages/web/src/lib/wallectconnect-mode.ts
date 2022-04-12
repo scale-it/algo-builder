@@ -14,10 +14,8 @@ import {
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
+import { error, log, warn } from "./logger";
 import { mkTransaction } from "./txn";
-
-const CONFIRMED_ROUND = "confirmed-round";
-const LAST_ROUND = "last-round";
 
 export class WallectConnectSession {
 	readonly connector: WalletConnect;
@@ -38,9 +36,7 @@ export class WallectConnectSession {
 
 		// if connection not already established, log message to create one
 		if (!this.connector.connected) {
-			console.warn(
-				`Connection not established, please use "this.create()" to create new session`
-			);
+			warn(`Connection not established, please use "this.create()" to create new session`);
 		}
 		this.wcAccounts = this.connector.accounts;
 	}
@@ -56,10 +52,10 @@ export class WallectConnectSession {
 				try {
 					await this.close();
 				} catch (e) {
-					console.error("Can't close walletconnect connection", e);
+					error("Can't close walletconnect connection", e);
 				}
 			} else {
-				console.warn(`A session is already active`);
+				warn(`A session is already active`);
 				return;
 			}
 		}
@@ -169,7 +165,7 @@ export class WallectConnectSession {
 		});
 
 		const requestParams: SignTxnParams = [walletTxns];
-		console.log("requestParams ", requestParams);
+		log("requestParams ", requestParams);
 
 		if (message) {
 			requestParams.push({ message });
@@ -208,46 +204,37 @@ export class WallectConnectSession {
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
 	async executeTx(
-		execParams: ExecParams | ExecParams[]
+		execParams: ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
 		let txns: Transaction[] = [];
-		let confirmedTx: algosdk.modelsv2.PendingTransactionResponse;
-		if (Array.isArray(execParams)) {
-			if (execParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
-			}
-
-			txns = algosdk.assignGroupID(txns);
-			const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-				return { txn: txn, shouldSign: true };
-			});
-
-			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
-			// remove null values from signed txns array
-			// TODO: replace null values with "externally" signed txns, otherwise
-			// signedtxns with nulls will always fail!
-			signedTxn = signedTxn.filter((stxn) => stxn);
-			confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
-		} else {
-			const txn = mkTransaction(
-				execParams,
-				await mkTxParams(this.algodClient, execParams.payFlags)
-			);
-			signedTxn = await this.signTransaction(txn);
-			confirmedTx = await this.sendAndWait(signedTxn);
+		if (execParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
+		}
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
 		}
 
-		console.log("confirmedTx: ", confirmedTx);
+		txns = algosdk.assignGroupID(txns);
+		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
+			return { txn: txn, shouldSign: true };
+		});
+
+		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+		// remove null values from signed txns array
+		// TODO: replace null values with "externally" signed txns, otherwise
+		// signedtxns with nulls will always fail!
+		signedTxn = signedTxn.filter((stxn) => stxn);
+		const confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
+
+		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
 	}
 	/** @deprecated */
 	async executeTransaction(
 		execParams: ExecParams | ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		return this.executeTx(execParams);
+		if (Array.isArray(execParams)) return this.executeTx(execParams);
+		else return this.executeTx([execParams]);
 	}
 }

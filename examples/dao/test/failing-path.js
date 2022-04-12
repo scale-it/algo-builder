@@ -11,7 +11,7 @@ const {
 	executeBefore,
 	mkWithdrawVoteDepositTx,
 	mkClearVoteRecordTx,
-	mkClearProposalTx,
+	mkCloseProposalTx,
 } = require("../scripts/run/common/tx-params");
 
 const now = Math.round(new Date().getTime() / 1000);
@@ -20,6 +20,7 @@ const RUNTIME_ERR1009 = "RUNTIME_ERR1009: TEAL runtime encountered err opcode";
 const INDEX_OUT_OF_BOUND_ERR = "RUNTIME_ERR1008: Index out of bound";
 const INTEGER_UNDERFLOW_ERR = "Result of current operation caused integer underflow";
 const APP_NOT_FOUND = "RUNTIME_ERR1306: Application Index 9 not found or is invalid";
+const RUNTIME_ERR1406 = "Fee required 1000 is greater than fee collected 0";
 
 describe("DAO - Failing Paths", function () {
 	let master, creator, proposer, voterA, voterB;
@@ -77,7 +78,7 @@ describe("DAO - Failing Paths", function () {
 						...optInToGovASAParam,
 						payFlags: { totalFee: 1000 },
 					}),
-				"Fee required 2000 is greater than fee collected 1000"
+				RUNTIME_ERR1406
 			);
 		});
 	});
@@ -488,7 +489,7 @@ describe("DAO - Failing Paths", function () {
 		it("should reject withdrawal if total fees is not paid by sender", () => {
 			assert.throws(
 				() => ctx.executeTx({ ...withdrawVoteDepositTx, payFlags: { totalFee: 1000 } }),
-				"Fee required 2000 is greater than fee collected 1000"
+				RUNTIME_ERR1406
 			);
 		});
 
@@ -610,7 +611,7 @@ describe("DAO - Failing Paths", function () {
 		});
 	});
 
-	describe("Clear Proposal", function () {
+	describe("Close Proposal", function () {
 		this.beforeAll(() => {
 			// set up context
 			setUpCtx();
@@ -625,37 +626,37 @@ describe("DAO - Failing Paths", function () {
 			ctx.runtime.setRoundAndTimestamp(10, executeBefore + 10);
 		});
 
-		let clearProposalTx;
+		let closeProposalTx;
 		this.beforeEach(() => {
-			clearProposalTx = mkClearProposalTx(ctx.daoAppID, ctx.govTokenID, ctx.proposalLsig);
+			closeProposalTx = mkCloseProposalTx(ctx.daoAppID, ctx.govTokenID, ctx.proposalLsig);
 		});
 
-		it("should reject clear_proposal if proposal is not recorded in lsig", () => {
-			assert.throws(() => ctx.executeTx(clearProposalTx), RUNTIME_ERR1009);
+		it("should reject close_proposal if proposal is not recorded in lsig", () => {
+			assert.throws(() => ctx.executeTx(closeProposalTx), RUNTIME_ERR1009);
 		});
 
-		it("should reject clear_proposal if group size is invalid", () => {
+		it("should reject close_proposal if group size is invalid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...clearProposalTx }, { ...clearProposalTx }]),
+				() => ctx.executeTx([{ ...closeProposalTx }, { ...closeProposalTx }]),
 				RUNTIME_ERR1009
 			);
 		});
 
-		it("should reject clear_proposal if fees not enough", () => {
+		it("should reject close_proposal if fees not enough", () => {
 			assert.throws(
-				() => ctx.executeTx({ ...clearProposalTx, payFlags: { totalFee: 1000 } }),
+				() => ctx.executeTx([{ ...closeProposalTx, payFlags: { totalFee: 1000 } }]),
 				RUNTIME_ERR1009
 			);
 		});
 
-		it("should reject clear_proposal if voting is active", () => {
+		it("should reject close_proposal if voting is active", () => {
 			// set current time between [votingStart, votingEnd]
 			ctx.runtime.setRoundAndTimestamp(
 				10,
 				votingStart + Math.round((votingEnd - votingStart) / 2)
 			);
 
-			assert.throws(() => ctx.executeTx(clearProposalTx), RUNTIME_ERR1009);
+			assert.throws(() => ctx.executeTx(closeProposalTx), RUNTIME_ERR1009);
 		});
 	});
 });

@@ -50,7 +50,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
 	it("should fail during closeOut if app id is not defined", function () {
 		expectRuntimeError(
-			() => runtime.executeTx(closeOutParams),
+			() => runtime.executeTx([closeOutParams]),
 			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
 		);
 	});
@@ -72,7 +72,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 				(APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + SSC_VALUE_BYTES * 3)) // optInToApp increase
 		); // verify minimum balance raised after optIn
 
-		runtime.executeTx({ ...closeOutParams, appID: appID });
+		runtime.executeTx([{ ...closeOutParams, appID: appID }]);
 		syncAccount();
 		// verify app is deleted from local state
 		const localApp = john.getAppFromLocal(appID);
@@ -105,7 +105,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		closeOutParams.appID = appID;
 
 		expectRuntimeError(
-			() => runtime.executeTx(closeOutParams),
+			() => runtime.executeTx([closeOutParams]),
 			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
 		);
 		syncAccount();
@@ -137,7 +137,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		};
 
 		expectRuntimeError(
-			() => runtime.executeTx(invalidParams),
+			() => runtime.executeTx([invalidParams]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 
@@ -175,7 +175,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		let res = alice.getAppFromLocal(appID);
 		assert.isDefined(res);
 
-		runtime.executeTx(clearAppParams);
+		runtime.executeTx([clearAppParams]);
 
 		syncAccount();
 		// verify app is deleted from account's local state even if tx is rejected after execution

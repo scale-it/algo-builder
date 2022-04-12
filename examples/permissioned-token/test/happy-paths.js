@@ -107,15 +107,17 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		);
 		const currentPermManager = ctx.getAccount(permManagerAddr);
 		assert.notEqual(elon.address, currentPermManager.address); // verify elon is not current_perm_manager
-		const txn = {
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: currentPermManager.account, // perm_manager account
-			appID: ctx.permissionsappID,
-			payFlags: { totalFee: 1000 },
-			appArgs: ["str:change_permissions_manager"],
-			accounts: [elon.address],
-		};
+		const txn = [
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: currentPermManager.account, // perm_manager account
+				appID: ctx.permissionsappID,
+				payFlags: { totalFee: 1000 },
+				appArgs: ["str:change_permissions_manager"],
+				accounts: [elon.address],
+			},
+		];
 
 		// works as fromAccount is the current permissions manager
 		ctx.runtime.executeTx(txn);
@@ -375,7 +377,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		};
 
 		// works because fromAccount is the current permissions manager
-		ctx.runtime.executeTx(setPermTx);
+		ctx.runtime.executeTx([setPermTx]);
 		ctx.syncAccounts();
 
 		// verify app_id is updated in controller global state

@@ -25,7 +25,7 @@ export async function WithdrawExecuteTx(
 	txnParams: wtypes.ExecParams
 ): Promise<void> {
 	try {
-		await executeTx(deployer, txnParams);
+		await executeTx(deployer, [txnParams]);
 	} catch (e) {
 		if (wtypes.isRequestError(e)) {
 			console.error("Transaction Failed", e?.response?.error);

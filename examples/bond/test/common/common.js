@@ -104,7 +104,7 @@ function createDex(runtime, creatorAccount, managerAcc, i, master, issuerLsig) {
 		amountMicroAlgos: minBalance + 10000,
 		payFlags: {},
 	};
-	runtime.executeTx(fundDexParam);
+	runtime.executeTx([fundDexParam]);
 
 	optInLsigToBond(runtime, dexLsig, oldBond, managerAcc);
 	optInLsigToBond(runtime, dexLsig, newBond, managerAcc);

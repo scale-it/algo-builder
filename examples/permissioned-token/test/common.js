@@ -82,19 +82,21 @@ class Context {
 		fund(this.runtime, this.master, this.lsig.address());
 		const asaDef = this.runtime.getAssetDef(this.assetIndex);
 		// modify asset clawback
-		this.runtime.executeTx({
-			type: types.TransactionType.ModifyAsset,
-			sign: types.SignType.SecretKey,
-			fromAccount: sender.account,
-			assetID: this.assetIndex,
-			fields: {
-				manager: asaDef.manager,
-				reserve: asaDef.reserve,
-				freeze: asaDef.freeze,
-				clawback: this.lsig.address(),
+		this.runtime.executeTx([
+			{
+				type: types.TransactionType.ModifyAsset,
+				sign: types.SignType.SecretKey,
+				fromAccount: sender.account,
+				assetID: this.assetIndex,
+				fields: {
+					manager: asaDef.manager,
+					reserve: asaDef.reserve,
+					freeze: asaDef.freeze,
+					clawback: this.lsig.address(),
+				},
+				payFlags: { totalFee: 1000 },
 			},
-			payFlags: { totalFee: 1000 },
-		});
+		]);
 		this.optInToASA(this.lsig.address());
 	}
 
@@ -117,15 +119,17 @@ class Context {
 
 		// set permissions SSC app_id in controller app
 		const appArgs = ["str:set_permission", `int:${this.permissionsappID}`];
-		this.runtime.executeTx({
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: this.alice.account,
-			appID: this.controllerappID,
-			payFlags: { totalFee: 1000 },
-			appArgs: appArgs,
-			foreignAssets: [this.assetIndex],
-		});
+		this.runtime.executeTx([
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: this.alice.account,
+				appID: this.controllerappID,
+				payFlags: { totalFee: 1000 },
+				appArgs: appArgs,
+				foreignAssets: [this.assetIndex],
+			},
+		]);
 	}
 
 	getAccount(address) {
@@ -251,15 +255,17 @@ function issue(runtime, asaReserve, receiver, amount, controllerappID, assetInde
  * @param assetIndex token index to be killed
  */
 function killToken(runtime, asaManager, controllerappID, assetIndex) {
-	runtime.executeTx({
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: asaManager,
-		appID: controllerappID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:kill"],
-		foreignAssets: [assetIndex],
-	});
+	runtime.executeTx([
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: asaManager,
+			appID: controllerappID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:kill"],
+			foreignAssets: [assetIndex],
+		},
+	]);
 }
 
 /**
@@ -270,15 +276,17 @@ function killToken(runtime, asaManager, controllerappID, assetIndex) {
  * @param permissionsappID Permissions App ID
  */
 function whitelist(runtime, permManager, addrToWhitelist, permissionsappID) {
-	runtime.executeTx({
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: permManager,
-		appID: permissionsappID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:add_whitelist"],
-		accounts: [addrToWhitelist],
-	});
+	runtime.executeTx([
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: permManager,
+			appID: permissionsappID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:add_whitelist"],
+			accounts: [addrToWhitelist],
+		},
+	]);
 }
 
 /**
@@ -288,14 +296,16 @@ function whitelist(runtime, permManager, addrToWhitelist, permissionsappID) {
  * @param address Receiver Account Address
  */
 function fund(runtime, master, address) {
-	runtime.executeTx({
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: master.account,
-		toAccountAddr: address,
-		amountMicroAlgos: minBalance,
-		payFlags: {},
-	});
+	runtime.executeTx([
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: master.account,
+			toAccountAddr: address,
+			amountMicroAlgos: minBalance,
+			payFlags: {},
+		},
+	]);
 }
 
 /**
@@ -378,7 +388,7 @@ function optOut(runtime, asaCreatorAddr, account, assetIndex) {
 		amount: 0,
 		payFlags: { totalFee: 1000, closeRemainderTo: asaCreatorAddr },
 	};
-	runtime.executeTx(optOutParams);
+	runtime.executeTx([optOutParams]);
 }
 
 /**

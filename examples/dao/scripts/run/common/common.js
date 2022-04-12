@@ -3,7 +3,8 @@ const { types } = require("@algo-builder/web");
 
 async function tryExecuteTx(deployer, txnParams) {
 	try {
-		await executeTx(deployer, txnParams);
+		if (Array.isArray(txnParams)) await executeTx(deployer, txnParams);
+		else await executeTx(deployer, [txnParams]);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.body : e);
 	}
@@ -58,7 +59,7 @@ const DAOActions = {
 	execute: "str:execute",
 	withdrawVoteDeposit: "str:withdraw_vote_deposit",
 	clearVoteRecord: "str:clear_vote_record",
-	clearProposal: "str:clear_proposal",
+	closeProposal: "str:close_proposal",
 };
 
 const ExampleProposalConfig = {

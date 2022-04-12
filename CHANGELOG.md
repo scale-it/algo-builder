@@ -18,6 +18,7 @@ Features, Bug Fixes, Breaking Changes, Deprecated
 
 Added:
 
+- `logger` a debugging utility which returns a decorated version of console.error to which debug statements can be passed.
 - `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
 - `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
 - unit tests that cover new scenarios when `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
@@ -37,6 +38,7 @@ Added:
     algob init --infrastructure
   ```
 - Teal V6 support:
+
   - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
   - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
   - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
@@ -45,12 +47,26 @@ Added:
   - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
 
 - Added support for saving smart contract template params in ASCCache.
-  
+
+- Return list of receipts for each txn in group txn. Example:
+
+```js
+  const receipts = algob.executeTx([txn0, txn1]); 
+  console.log("txn0 information: ", receipts[0]);
+  console.log("txn1 information: ", receipts[2]);
+```
+
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
 
 ### API breaking
+
+- We have changed the naming convetion for the clearing proposal part of the DAO:
+
+  - Renamed `clearProposal` to `closeProposal`,
+  - Renamed `clear_proposal` to `close_proposal`,
+  - Renamed `mkClearProposalTx` to `mkCloseProposalTx`.
 
 - We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
 
@@ -78,12 +94,14 @@ Added:
 - `printGlobalStateSCC` renamed to `printGlobalStateApp`.
 
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
+- Only use list transaction in executeTx.
 
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
 - Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
+
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.

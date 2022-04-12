@@ -18,7 +18,7 @@ async function run(runtimeEnv, deployer) {
 		appArgs: [],
 	};
 
-	await executeTx(deployer, tx);
+	await executeTx(deployer, [tx]);
 	console.log("Application Deleted!!");
 }
 

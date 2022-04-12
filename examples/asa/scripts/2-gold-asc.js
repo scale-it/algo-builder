@@ -58,7 +58,7 @@ async function run(runtimeEnv, deployer) {
 		fromAccount: goldOwner,
 	};
 
-	await executeTx(deployer, { transaction: tx, sign: sign });
+	await executeTx(deployer, [{ transaction: tx, sign: sign }]);
 	await balanceOf(deployer, lsig.address(), goldAssetID);
 
 	// To get raw signed transaction you may use `signTransactions` function

@@ -4036,16 +4036,12 @@ export class ITxnSubmit extends Op {
 			});
 		}
 
-		if (!this.interpreter.runtime.ctx.isInnerTx) {
-			this.interpreter.runtime.ctx.remainingFee = 0;
-		}
-
 		if (this.interpreter.runtime.parentCtx === undefined) {
 			this.interpreter.runtime.parentCtx = cloneDeep(this.interpreter.runtime.ctx);
 		}
 
 		// calculate remaining fee after executing an inner tx
-		const credit = calculateInnerTxCredit(this.interpreter, true);
+		const credit = calculateInnerTxCredit(this.interpreter);
 
 		// remaining fee is negative => can't paid for transaction => fail
 		if (credit.remainingFee < 0) {
@@ -4108,7 +4104,6 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.parentCtx = undefined;
 			this.interpreter.runtime.ctx.isInnerTx = false;
 			this.interpreter.currentInnerTxnGroup = [];
-			this.interpreter.runtime.ctx.remainingFee = 0;
 		}
 	}
 }
