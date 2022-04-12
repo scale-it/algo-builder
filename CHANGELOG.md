@@ -48,7 +48,7 @@ Added:
 
 - Added support for saving smart contract template params in ASCCache.
 
-- Return list of receipt for each txn in group txn. Example:
+- Return list of receipts for each txn in group txn. Example:
 
 ```js
   const receipts = algob.executeTx([txn0, txn1]); 
