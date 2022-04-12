@@ -6,7 +6,6 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { Ctx } from "../ctx";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { AccountStore, Runtime } from "../index";
@@ -16,7 +15,7 @@ import {
 	ALGORAND_MAX_TX_ACCOUNTS_LEN,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	DEFAULT_STACK_ELEM,
-	LOGIC_SIGN_MAX_COST,
+	LOGIC_SIG_MAX_COST,
 	MaxTEALVersion,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
@@ -354,7 +353,7 @@ export class Interpreter {
 	 * @returns budget of current single/group tx
 	 */
 	getBudget(): number {
-		if (this.mode === ExecutionMode.SIGNATURE) return LOGIC_SIGN_MAX_COST;
+		if (this.mode === ExecutionMode.SIGNATURE) return LOGIC_SIG_MAX_COST;
 		return this.runtime.ctx.budget;
 	}
 

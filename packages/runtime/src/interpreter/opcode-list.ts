@@ -4077,11 +4077,10 @@ export class ITxnSubmit extends Op {
 		}
 
 		// increase Budget when submit application call transaction
-		for (const tx of this.interpreter.currentInnerTxnGroup) {
-			if (tx.type === TransactionTypeEnum.APPLICATION_CALL) {
-				this.interpreter.runtime.ctx.budget += MAX_APP_PROGRAM_COST;
-			}
-		}
+		const applCallTxNumber = this.interpreter.currentInnerTxnGroup.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
+		this.interpreter.runtime.ctx.budget += MAX_APP_PROGRAM_COST * applCallTxNumber;
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount

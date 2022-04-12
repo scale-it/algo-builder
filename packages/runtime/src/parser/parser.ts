@@ -148,7 +148,7 @@ import {
 	Uncover,
 } from "../interpreter/opcode-list";
 import {
-	LOGIC_SIGN_MAX_COST,
+	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
 	MAX_APP_PROGRAM_COST,
 	MaxAppProgramLen,
@@ -801,10 +801,10 @@ export function assertMaxCost(
 ): void {
 	if (mode === ExecutionMode.SIGNATURE) {
 		// check max cost (for stateless)
-		if (gas > LOGIC_SIGN_MAX_COST) {
+		if (gas > LOGIC_SIG_MAX_COST) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: LOGIC_SIGN_MAX_COST,
+				maxcost: LOGIC_SIG_MAX_COST,
 				mode: "Stateless",
 			});
 		}

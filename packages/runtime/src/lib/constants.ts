@@ -25,7 +25,7 @@ export const MAX_KEY_BYTES = 64; // max length of key
 export const MAX_KEY_VAL_BYTES = 128; // max combined length of key-value pair
 
 // values taken from [https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L691]
-export const LOGIC_SIGN_MAX_COST = 20000;
+export const LOGIC_SIG_MAX_COST = 20000;
 export const MAX_APP_PROGRAM_COST = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
