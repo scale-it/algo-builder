@@ -43,6 +43,7 @@ import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "..
 import { bigintSqrt } from "../lib/math";
 import {
 	assertBase64,
+	assertBase64Url,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -4745,16 +4746,15 @@ export class Gitxnas extends Gtxnas {
 }
 
 /**
- * Takes the last value from stack and if base64encoded, decodes it and push it back to the stack,
- * othervise throws an error
- * https://github.com/algorand/go-algorand/pull/3220
+ * Takes the last value from stack and if base64encoded, decodes it acording to the
+ * encoding e and pushes it back to the stack, otherwise throws an error
  */
 export class Base64Decode extends Op {
 	readonly line: number;
 	readonly encoding: number;
 
 	/**
-	 * Asserts 0 arguments are passed.
+	 * Asserts 1 argument is passed.
 	 * @param args Expected arguments: [e], where e = {0, 1}.
 	 * @param line line number in TEAL file
 	 */
@@ -4763,20 +4763,26 @@ export class Base64Decode extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.encoding = Number(args[0]);
-		if(!(this.encoding === 0 || this.encoding === 1)){
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, { encoding: this.encoding, line: this.line });
+		if (!(this.encoding === 0 || this.encoding === 1)) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
+				encoding: this.encoding,
+				line: this.line,
+			});
 		}
 	}
 
 	execute(stack: TEALStack): void {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBytes(stack.pop(), this.line);
-		assertBase64(convertToString(last), this.line);
 		const enc = new TextDecoder("utf-8");
 		const decoded = enc.decode(last);
-		if(this.encoding === 0){ // UrlEncoding
+		if (this.encoding === 0) {
+			// UrlEncoding
+			assertBase64Url(convertToString(last), this.line);
 			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64url")));
-		} else { // e === 1 StdEncoding
+		} else {
+			// e === 1 StdEncoding
+			assertBase64(convertToString(last), this.line);
 			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
 		}
 	}

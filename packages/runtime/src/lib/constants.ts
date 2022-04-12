@@ -322,6 +322,19 @@ export const reOct = /^0[0-8]+$/;
  */
 export const reBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
+/** is Base64Url regex
+ * ^                          # Start of input
+ * ([0-9a-zA-Z_-]{4})*        # Groups of 4 valid characters decode
+ *                            # to 24 bits of data for each group
+ * (                          # Either ending with:
+ *     ([0-9a-zA-Z_-]{2}==)   # two valid characters followed by ==
+ *     |                      # , or
+ *     ([0-9a-zA-Z_-]{3}=)    # three valid characters followed by =
+ * )?                         # , or nothing
+ * $                          # End of input
+ */
+export const reBase64Url = /^([0-9a-zA-Z_-]{4})*(([0-9a-zA-Z_-]{2}==)|([0-9a-zA-Z_-]{3}=))?$/;
+
 // A-Z and 2-7 repeated, with optional `=` at the end
 export const reBase32 = /^[A-Z2-7]+=*$/;
 
@@ -431,6 +444,11 @@ OpGasCost[5] = {
 OpGasCost[6] = {
 	...OpGasCost[5],
 	bsqrt: 40,
+};
+OpGasCost[7] = {
+	...OpGasCost[6],
+	//TODO: calculate the cost for the base64_decode opcode
+	// https://github.com/algorand/go-algorand/blob/master/data/transactions/logic/TEAL_opcodes.md#base64_decode-e
 };
 
 export const enum MathOp {

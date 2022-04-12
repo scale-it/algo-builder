@@ -404,6 +404,12 @@ maximun uint128`,
 		title: "Unknown encoding",
 		description: "Unknown encoding",
 	},
+	INVALID_BASE64URL: {
+		number: 1059,
+		message: "Invalid Base64Url Error - value %val% is not base64Url, Line: %line%",
+		title: PARSE_ERROR,
+		description: `value %exp% is not base64Url`,
+	},
 };
 
 const runtimeGeneralErrors = {

@@ -22,6 +22,7 @@ import {
 	Arg,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -2582,6 +2583,17 @@ describe("Parser", function () {
 			];
 
 			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for `teal v7`", async () => {
+			const file = "teal-v7.teal";
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "7"], 1, interpreter),
+				new Base64Decode(["0"], 2),
+			];
+
+			assert.deepEqual(expected, res);
 		});
 	});
 
