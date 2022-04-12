@@ -1,6 +1,8 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import { Account, Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
+import { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import { rejects } from "assert";
+import { resolve } from "path";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -10,6 +12,7 @@ import {
 	mockAlgod,
 	mockAssetInfo,
 	mockConfirmedTx,
+	mockPendingTransactionInformation,
 } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -31,6 +34,12 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
 	waitForConfirmation(_txID: string): Promise<ConfirmedTxInfo> {
 		return this.sendAndWait([]);
+	}
+
+	getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+		return new Promise((resolve, rejects) => {
+			resolve([mockPendingTransactionInformation]);
+		});
 	}
 
 	async deployASA(
