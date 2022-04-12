@@ -150,7 +150,7 @@ import {
 import {
 	LogicSigMaxCost,
 	LogicSigMaxSize,
-	MaxAppProgramCost,
+	MAX_APP_PROGRAM_COST,
 	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
@@ -809,11 +809,11 @@ export function assertMaxCost(
 			});
 		}
 	} else {
-		if (gas > (maxPooledApplCost ?? MaxAppProgramCost)) {
+		if (gas > (maxPooledApplCost ?? MAX_APP_PROGRAM_COST)) {
 			// check max cost (for stateful)
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: maxPooledApplCost ?? MaxAppProgramCost,
+				maxcost: maxPooledApplCost ?? MAX_APP_PROGRAM_COST,
 				mode: "Stateful",
 			});
 		}

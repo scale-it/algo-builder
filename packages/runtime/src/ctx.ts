@@ -12,9 +12,9 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MAX_APP_PROGRAM_COST,
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
-	MaxAppProgramCost,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
@@ -85,7 +85,7 @@ export class Ctx implements Context {
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 		this.remainingFee = 0;
-		this.budget = MaxAppProgramCost;
+		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {
