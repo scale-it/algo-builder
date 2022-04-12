@@ -14,10 +14,8 @@ import {
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
+import { error, log, warn } from "./logger";
 import { mkTransaction } from "./txn";
-
-const CONFIRMED_ROUND = "confirmed-round";
-const LAST_ROUND = "last-round";
 
 export class WallectConnectSession {
 	readonly connector: WalletConnect;
@@ -38,9 +36,7 @@ export class WallectConnectSession {
 
 		// if connection not already established, log message to create one
 		if (!this.connector.connected) {
-			console.warn(
-				`Connection not established, please use "this.create()" to create new session`
-			);
+			warn(`Connection not established, please use "this.create()" to create new session`);
 		}
 		this.wcAccounts = this.connector.accounts;
 	}
@@ -56,10 +52,10 @@ export class WallectConnectSession {
 				try {
 					await this.close();
 				} catch (e) {
-					console.error("Can't close walletconnect connection", e);
+					error("Can't close walletconnect connection", e);
 				}
 			} else {
-				console.warn(`A session is already active`);
+				warn(`A session is already active`);
 				return;
 			}
 		}
@@ -169,7 +165,7 @@ export class WallectConnectSession {
 		});
 
 		const requestParams: SignTxnParams = [walletTxns];
-		console.log("requestParams ", requestParams);
+		log("requestParams ", requestParams);
 
 		if (message) {
 			requestParams.push({ message });
@@ -231,7 +227,7 @@ export class WallectConnectSession {
 		signedTxn = signedTxn.filter((stxn) => stxn);
 		const confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
 
-		console.log("confirmedTx: ", confirmedTx);
+		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
 	}
 	/** @deprecated */

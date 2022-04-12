@@ -5,7 +5,7 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { AccountStore, getProgram, Interpreter, parseASADef, parser, Runtime } from ".";
+import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -14,7 +14,7 @@ import {
 	ALGORAND_MIN_TX_FEE,
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
-  ZERO_ADDRESS_STR
+	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit } from "./lib/txn";
@@ -456,7 +456,7 @@ export class Ctx implements Context {
 		}
 
 		const credit = calculateFeeCredit(this.gtxs);
-
+		this.remainingFee = credit.remainingFee;
 		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
 				required: credit.requiredFee,

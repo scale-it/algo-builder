@@ -122,7 +122,7 @@ You can extract private keys from KMD through mnemonic phrase using `goal` comma
     account with same name is already listed in given `network.accounts` then KMD loader will
     ignore that account. Similarly, account will be ignored if KMD wallet doesn't have a
     specified address.
-    Please see the [KmdCfg type](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.kmdcfg.html) documentation for details.
+    Please see the [KmdCfg type](https://algobuilder.dev/api/algob/interfaces/types.KmdCfg.html) documentation for details.
 
          // KMD credentials
          let kmdCfg = {

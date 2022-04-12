@@ -81,7 +81,8 @@ export function printSuggestedCommands(): void {
 	console.log(`  ${npx}${ALGOB_NAME} compile`);
 	console.log(`  ${npx}${ALGOB_NAME} test`);
 	console.log(`  ${npx}${ALGOB_NAME} node-info`);
-	console.log(`  node scripts/sample-script.js`);
+	console.log(`  ${npx}${ALGOB_NAME} deploy`);
+	console.log(`  ${npx}${ALGOB_NAME} run`);
 	console.log(`  ${npx}${ALGOB_NAME} help`);
 	console.log(`  ${npx}${ALGOB_NAME} console`);
 }
@@ -89,7 +90,7 @@ export function printSuggestedCommands(): void {
 async function printPluginInstallationInstructions(): Promise<void> {
 	console.log(`You need to install these dependencies to run the sample project:`);
 
-	const cmd = await npmInstallCmd();
+	const cmd = await installDevDependenciesCmd();
 
 	console.log(`  ${cmd.join(" ")}`);
 }
@@ -205,8 +206,12 @@ function isTypeScriptProject(): boolean {
 
 async function installRecommendedDependencies(): Promise<boolean> {
 	console.log("");
-	const installCmd = await npmInstallCmd();
-	return await installDependencies(installCmd[0], installCmd.slice(1));
+	const installDevDependCmd = await installDevDependenciesCmd();
+	const installDependCmd = await installDependenciesCmd();
+	return (
+		(await installDependencies(installDevDependCmd[0], installDevDependCmd.slice(1))) &&
+		(await installDependencies(installDependCmd[0], installDependCmd.slice(1)))
+	);
 }
 
 async function confirmPluginInstallation(): Promise<boolean> {
@@ -274,7 +279,7 @@ export async function installDependencies(
 	});
 }
 
-async function npmInstallCmd(): Promise<string[]> {
+async function installDevDependenciesCmd(): Promise<string[]> {
 	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
 	const sampleProjectDependencies = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
@@ -295,4 +300,25 @@ async function npmInstallCmd(): Promise<string[]> {
 	}
 
 	return [...npmInstall, "--save-dev", ...sampleProjectDependencies];
+}
+
+async function installDependenciesCmd(): Promise<string[]> {
+	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
+	const sampleProjectDependencies = ["@algo-builder/web"];
+
+	if (isYarnProject()) {
+		const cmd = ["yarn"];
+		if (isGlobal) {
+			cmd.push("global");
+		}
+		cmd.push("add", ...sampleProjectDependencies);
+		return cmd;
+	}
+
+	const npmInstall = ["npm", "install"];
+	if (isGlobal) {
+		npmInstall.push("--global");
+	}
+
+	return [...npmInstall, ...sampleProjectDependencies];
 }
