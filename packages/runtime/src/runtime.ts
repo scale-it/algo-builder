@@ -916,12 +916,9 @@ export class Runtime {
 		);
 
 		// calculate budget for single/group tx
-		let applCallTxNumber = 0;
-		for (const tx of gtxs) {
-			if (tx.type === TransactionTypeEnum.APPLICATION_CALL) {
-				applCallTxNumber += 1;
-			}
-		}
+		const applCallTxNumber = gtxs.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
 
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
 
