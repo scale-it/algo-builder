@@ -83,7 +83,6 @@ Added:
 - `printGlobalStateSCC` renamed to `printGlobalStateApp`.
 
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
-- Only use list transaction in executeTx.
 
 ### Bug fixes
 

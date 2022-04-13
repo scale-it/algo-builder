@@ -300,6 +300,18 @@ describe("Config validation", function () {
 						assert.isEmpty(errors.toString());
 					});
 
+					it("Token can be empty", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: "http://localhost",
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
 					it("should pass with passing X-Algo-API-Token", function () {
 						const errors = getValidationErrors({
 							networks: {

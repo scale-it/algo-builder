@@ -159,13 +159,8 @@ export function getValidationErrors(config: any): CfgErrors {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
 			const token = hcfg.token;
-			const AllowHost = [testnetURL, mainnetURL];
-			if (!AllowHost.includes(host)) {
-				if (typeof token === "string" && token.length < 10) {
-					errors.push(net, "token", token, "string (with length > 10)");
-				} else if (typeof token !== "object" && typeof token !== "string") {
-					errors.push(net, "token", token, "string or object");
-				}
+			if (typeof token !== "object" && typeof token !== "string") {
+				errors.push(net, "token", token, "string or object");
 			}
 
 			try {
