@@ -94,7 +94,7 @@ describe("Re-keying transactions", function () {
 		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
-
+    //TODO: delete this function and make use of the function below rekeyFromAccountToMultiSig
 	// rekey normal account
 	function rekeyFromAccount(
 		runtime: Runtime,
@@ -107,7 +107,8 @@ describe("Re-keying transactions", function () {
 			rekeyTo: to.address,
 		});
 	}
-
+    //TODO: change name to rekey from Account, check if there is a type for address instead of string
+	//there is a type accountAddress from web https://algobuilder.dev/api/web/modules/types.html#AccountAddress
 	function rekeyFromAccountToMultiSig(
 		runtime: Runtime,
 		signer: AccountStoreI,
