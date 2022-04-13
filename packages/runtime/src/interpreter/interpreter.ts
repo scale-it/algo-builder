@@ -513,7 +513,8 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			instruction.execute(this.stack);
+			//TODO: this function should return cost 
+			let cost = instruction.execute(this.stack);
 
 			if (
 				this.runtime.ctx.isInnerTx &&
@@ -527,16 +528,19 @@ export class Interpreter {
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
-			dynamicCost += this.lineToCost[instruction.line];
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
-			}
-			if (this.tealVersion >= 4) {
+			} else {
+				//TODO: after updating the opcodes execute to return cost check if we can remove that 
+				if(cost === undefined){
+					cost = this.lineToCost[instruction.line];
+				}
+				dynamicCost += cost;
 				if (mode === ExecutionMode.SIGNATURE) {
 					assertMaxCost(dynamicCost, mode);
 					txReceipt.gas = dynamicCost;
 				} else {
-					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+					this.runtime.ctx.pooledApplCost += cost;
 					const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
