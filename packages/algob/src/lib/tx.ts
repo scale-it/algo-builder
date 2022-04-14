@@ -280,7 +280,7 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
 export async function executeTx(
 	deployer: Deployer,
 	transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-): Promise<ConfirmedTxInfo> {
+): Promise<ConfirmedTxInfo[]> {
 	let isSDK = false;
 	let signedTxn;
 	if (transactions.length === 0) {
@@ -292,9 +292,10 @@ export async function executeTx(
 	}
 
 	if (isSDK && signedTxn) {
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		return confirmedTx;
+		await deployer.sendAndWait(signedTxn);
+		return await deployer.getReceiptTxns(
+			(transactions as wtypes.TransactionAndSign[]).map((txn) => txn.transaction)
+		);
 	}
 
 	const execParams = transactions as wtypes.ExecParams[];
@@ -303,7 +304,8 @@ export async function executeTx(
 	try {
 		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
 		const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
+		await deployer.sendAndWait(signedTxn);
+		const confirmedTx = await deployer.getReceiptTxns(txns);
 		console.debug(confirmedTx);
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);

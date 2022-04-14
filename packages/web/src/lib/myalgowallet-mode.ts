@@ -13,8 +13,8 @@ import { mkTxParams } from "..";
 import { ExecParams, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
-import { mkTransaction } from "./txn";
 import { error, log } from "./logger";
+import { mkTransaction } from "./txn";
 
 interface MyAlgoConnect {
 	/**

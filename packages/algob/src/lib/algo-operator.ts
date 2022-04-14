@@ -6,7 +6,12 @@ import {
 	tx as webTx,
 	types as wtypes,
 } from "@algo-builder/web";
-import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, {
+	getApplicationAddress,
+	LogicSigAccount,
+	modelsv2,
+	Transaction,
+} from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -102,6 +107,7 @@ export interface AlgoOperator {
 	) => Promise<void>;
 	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -133,6 +139,17 @@ export class AlgoOperatorImpl implements AlgoOperator {
 			return pendingInfo as ConfirmedTxInfo;
 		}
 		throw new Error("timeout");
+	}
+
+	// Get receipts of group txn
+	async getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+		const receipts = await Promise.all(
+			txns.map((txn) => {
+				return this.algodClient.pendingTransactionInformation(txn.txID()).do();
+			})
+		);
+
+		return receipts as ConfirmedTxInfo[];
 	}
 
 	/**

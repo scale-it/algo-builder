@@ -142,4 +142,12 @@ export const mockApplicationResponse = {
 	},
 };
 
+export const mockPendingTransactionInformation = {
+	"confirmed-round": 1,
+	"asset-index": 1,
+	"application-index": 1,
+	"global-state-delta": "string",
+	"local-state-delta": "string",
+};
+
 export const mockLsig: LogicSigAccount = new LogicSigAccount(mockProgram, []);
