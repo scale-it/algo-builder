@@ -6,7 +6,12 @@ import {
 	tx as webTx,
 	types as wtypes,
 } from "@algo-builder/web";
-import algosdk, { getApplicationAddress, LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, {
+	getApplicationAddress,
+	LogicSigAccount,
+	modelsv2,
+	Transaction,
+} from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -20,6 +25,7 @@ import type {
 	SCParams,
 } from "../types";
 import { CompileOp } from "./compile";
+import { WAIT_ROUNDS } from "./constants";
 import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
@@ -101,6 +107,7 @@ export interface AlgoOperator {
 	) => Promise<void>;
 	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -124,22 +131,25 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	// https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
 	// Function used to wait for a tx confirmation
 	async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
-		const response = await this.algodClient.status().do();
-		let lastround = response["last-round"];
-		let maxTries = 6;
-		while (--maxTries > 0) {
-			const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
-			if (pendingInfo["pool-error"]) {
-				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
-			}
-			if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-				return pendingInfo as ConfirmedTxInfo;
-			}
-			lastround++;
-			// TODO: maybe we should use sleep?
-			await this.algodClient.statusAfterBlock(lastround).do();
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		if (pendingInfo["pool-error"]) {
+			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+		}
+		if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
+			return pendingInfo as ConfirmedTxInfo;
 		}
 		throw new Error("timeout");
+	}
+
+	// Get receipts of group txn
+	async getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+		const receipts = await Promise.all(
+			txns.map((txn) => {
+				return this.algodClient.pendingTransactionInformation(txn.txID()).do();
+			})
+		);
+
+		return receipts as ConfirmedTxInfo[];
 	}
 
 	/**

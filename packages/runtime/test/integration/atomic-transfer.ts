@@ -265,15 +265,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 	it("should not revoke asset if payment fails", () => {
 		// transfer asset to alice
-		runtime.executeTx({
-			type: types.TransactionType.TransferAsset,
-			sign: types.SignType.SecretKey,
-			fromAccount: john.account,
-			toAccountAddr: alice.account.addr,
-			amount: 20,
-			assetID: assetId,
-			payFlags: { totalFee: 1000 },
-		});
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAsset,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: alice.account.addr,
+				amount: 20,
+				assetID: assetId,
+				payFlags: { totalFee: 1000 },
+			},
+		]);
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.RevokeAsset,
@@ -392,13 +394,15 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 	it("should fail asset payment, and algo payment if ssc call fails", () => {
 		// close out from app
-		runtime.executeTx({
-			type: types.TransactionType.ClearApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: john.account,
-			appID: appID,
-			payFlags: { totalFee: 1000 },
-		});
+		runtime.executeTx([
+			{
+				type: types.TransactionType.ClearApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appID,
+				payFlags: { totalFee: 1000 },
+			},
+		]);
 		syncAccounts();
 		const txGroup: types.ExecParams[] = [
 			{

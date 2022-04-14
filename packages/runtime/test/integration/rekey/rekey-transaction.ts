@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
 import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
@@ -65,7 +66,7 @@ describe("Re-keying transactions", function () {
 			payFlags: payFlags,
 		};
 
-		runtime.executeTx(txParam);
+		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
 
@@ -87,7 +88,7 @@ describe("Re-keying transactions", function () {
 			amountMicroAlgos: algoAmount,
 			payFlags: payFlags,
 		};
-		runtime.executeTx(txParam);
+		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
 
@@ -433,7 +434,7 @@ describe("Re-keying transactions", function () {
 					rekeyTo: bob.address,
 				},
 			};
-			runtime.executeTx(txParams);
+			runtime.executeTx([txParams]);
 			syncAccounts();
 		});
 

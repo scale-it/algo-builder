@@ -30,7 +30,7 @@ async function run(runtimeEnv, deployer) {
 		fields: { clawback: escrowAddress }, // only pass the field you want to update
 		payFlags: { totalFee: 1000 },
 	};
-	await executeTx(deployer, assetConfigParams);
+	await executeTx(deployer, [assetConfigParams]);
 
 	/** now lock the asset by clearing the manager and freeze account **/
 	console.log("* Locking the manager and freeze address *");
@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 		...assetConfigParams,
 		fields: { manager: "", freeze: "" },
 	};
-	await executeTx(deployer, assetLockParams);
+	await executeTx(deployer, [assetLockParams]);
 }
 
 module.exports = { default: run };

@@ -178,7 +178,7 @@ algob> await algob.executeTx(deployer, algoTransferParams);
 
 We will transfer a single unit of `gold` ASA (which we deployed during the setup) from `goldOwner` to `john`. Relevant code can be found in `/scrips/transfer/gold-to-john.js`.
 
-Let's use `.editor` mode of REPL to write & execute multiple lines of code at once:-
+Let's use `.editor` mode of REPL to write & execute multiple lines of code at once:
 
 ```bash
 algob> .editor

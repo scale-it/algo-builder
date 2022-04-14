@@ -21,11 +21,13 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	console.log("* Setting level 2 for Alice and Bob *");
-	await executeTx(deployer, setLevelParams);
-	await executeTx(deployer, {
-		...setLevelParams,
-		accounts: [bob.addr],
-	});
+	await executeTx(deployer, [setLevelParams]);
+	await executeTx(deployer, [
+		{
+			...setLevelParams,
+			accounts: [bob.addr],
+		},
+	]);
 
 	/* uncomment below code to debug (start a debugging session) line 24 */
 	// await new Tealdbg(deployer, setLevelParams)

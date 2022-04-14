@@ -12,11 +12,9 @@ import algosdk, { Transaction } from "algosdk";
 import { mkTxParams } from "..";
 import { ExecParams, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
-import { mkTransaction } from "./txn";
 import { WAIT_ROUNDS } from "./constants";
-
-const CONFIRMED_ROUND = "confirmed-round";
-const LAST_ROUND = "last-round";
+import { error, log } from "./logger";
+import { mkTransaction } from "./txn";
 
 interface MyAlgoConnect {
 	/**
@@ -70,7 +68,7 @@ export class MyAlgoWalletSession {
 				}
 			})
 			.catch((err) => {
-				console.log(err);
+				error(err);
 			});
 	}
 
@@ -83,7 +81,7 @@ export class MyAlgoWalletSession {
 			});
 			this.addresses = this.accounts.map((account) => account.address);
 		} catch (err) {
-			throw new Error("Error while connecting to my algo wallet");
+			throw new Error("Error while connecting to MyAlgo Wallet");
 		}
 	}
 
@@ -138,46 +136,36 @@ export class MyAlgoWalletSession {
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
 	async executeTx(
-		execParams: ExecParams | ExecParams[]
+		execParams: ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let signedTxn;
 		let txns: Transaction[] = [];
-		let confirmedTx: algosdk.modelsv2.PendingTransactionResponse;
-		if (Array.isArray(execParams)) {
-			if (execParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
-			}
-
-			txns = algosdk.assignGroupID(txns);
-			const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-				return { txn: txn, shouldSign: true };
-			});
-
-			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
-
-			signedTxn = signedTxn.filter((stxn) => stxn);
-			const Uint8ArraySignedTx = signedTxn.map((stxn) => stxn.blob);
-			confirmedTx = await this.sendAndWait(Uint8ArraySignedTx);
-		} else {
-			const txn = mkTransaction(
-				execParams,
-				await mkTxParams(this.algodClient, execParams.payFlags)
-			);
-			signedTxn = await this.signTransaction(txn);
-			const Uint8ArraySignedTx = signedTxn.blob;
-			confirmedTx = await this.sendAndWait(Uint8ArraySignedTx);
+		if (execParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
+		}
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
 		}
 
-		console.log("confirmedTx: ", confirmedTx);
+		txns = algosdk.assignGroupID(txns);
+		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
+			return { txn: txn, shouldSign: true };
+		});
+
+		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+
+		signedTxn = signedTxn.filter((stxn) => stxn);
+		const Uint8ArraySignedTx = signedTxn.map((stxn) => stxn.blob);
+		const confirmedTx = await this.sendAndWait(Uint8ArraySignedTx);
+
+		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
 	}
 	/** @deprecated */
 	async executeTransaction(
 		execParams: ExecParams | ExecParams[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		return this.executeTx(execParams);
+		if (Array.isArray(execParams)) return this.executeTx(execParams);
+		else return this.executeTx([execParams]);
 	}
 }

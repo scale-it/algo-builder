@@ -57,15 +57,17 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			// Opt-in to ASA by receiver
 			ctx.optInToASA(elon.address);
 
-			const txParams = {
-				type: types.TransactionType.TransferAsset,
-				sign: types.SignType.SecretKey,
-				fromAccount: asaReserve.account,
-				toAccountAddr: elon.address,
-				amount: 20n,
-				assetID: ctx.assetIndex,
-				payFlags: {},
-			};
+			const txParams = [
+				{
+					type: types.TransactionType.TransferAsset,
+					sign: types.SignType.SecretKey,
+					fromAccount: asaReserve.account,
+					toAccountAddr: elon.address,
+					amount: 20n,
+					assetID: ctx.assetIndex,
+					payFlags: {},
+				},
+			];
 
 			// should fail as we can only use clawback (since asset is default-frozen)
 			assert.throws(
@@ -113,7 +115,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 
 			// Fails because elon is not opted in
 			assert.throws(
-				() => ctx.runtime.executeTx({ ...whitelistParams }),
+				() => ctx.runtime.executeTx([{ ...whitelistParams }]),
 				`RUNTIME_ERR1306: Application Index ${ctx.permissionsappID} not found or is invalid`
 			);
 		});
@@ -128,10 +130,12 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.notEqual(permManager.address, bob.address); // verify bob is not permissions manager
 			assert.throws(
 				() =>
-					ctx.runtime.executeTx({
-						...whitelistParams,
-						fromAccount: bob.account, // Bob is not the asset manager
-					}),
+					ctx.runtime.executeTx([
+						{
+							...whitelistParams,
+							fromAccount: bob.account, // Bob is not the asset manager
+						},
+					]),
 				RUNTIME_ERR1009
 			);
 		});
@@ -157,15 +161,17 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			const permManager = ctx.getAccount(permManagerAddr);
 			assert.notEqual(permManager.address, bob.address); // verify bob is not current permissions manager
 
-			const txParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: bob.account,
-				appID: ctx.permissionsappID,
-				payFlags: { totalFee: 1000 },
-				appArgs: ["str:change_permissions_manager"],
-				accounts: [elon.address],
-			};
+			const txParams = [
+				{
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: bob.account,
+					appID: ctx.permissionsappID,
+					payFlags: { totalFee: 1000 },
+					appArgs: ["str:change_permissions_manager"],
+					accounts: [elon.address],
+				},
+			];
 			assert.throws(
 				() => ctx.runtime.executeTx(txParams), // fails as fromAccount is not the current permissions manager
 				RUNTIME_ERR1009
@@ -240,7 +246,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 
 			// fails if only trying to use clawback transaction to transfer asset
-			assert.throws(() => ctx.runtime.executeTx(forceTxGroup[1]), INDEX_OUT_OF_BOUND_ERR);
+			assert.throws(() => ctx.runtime.executeTx([forceTxGroup[1]]), INDEX_OUT_OF_BOUND_ERR);
 
 			// fails as paying fees of clawback-lsig is skipped
 			assert.throws(
@@ -404,7 +410,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 
 			// fails if only trying to use clawback transaction to transfer asset
-			assert.throws(() => ctx.runtime.executeTx(txGroup[1]), INDEX_OUT_OF_BOUND_ERR);
+			assert.throws(() => ctx.runtime.executeTx([txGroup[1]]), INDEX_OUT_OF_BOUND_ERR);
 
 			// fails as paying fees of clawback-lsig is skipped
 			assert.throws(
@@ -439,7 +445,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 
 			// should fail as we can only use clawback (since asset is default-frozen)
 			assert.throws(
-				() => ctx.runtime.executeTx(assetTransferParams),
+				() => ctx.runtime.executeTx([assetTransferParams]),
 				`RUNTIME_ERR1405: Asset index ${ctx.assetIndex} frozen for account ${bob.address}`
 			);
 		});
@@ -718,12 +724,12 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.notEqual(asaManager.address, ctx.elon.address);
 
 			setPermissionsParams.fromAccount = ctx.elon.account;
-			assert.throws(() => ctx.runtime.executeTx(setPermissionsParams), RUNTIME_ERR1009);
+			assert.throws(() => ctx.runtime.executeTx([setPermissionsParams]), RUNTIME_ERR1009);
 		});
 
 		it("should reject if application args are incorrect", () => {
 			setPermissionsParams.appArgs = ["str:set_Permission", `int:${ctx.permissionsappID}`];
-			assert.throws(() => ctx.runtime.executeTx(setPermissionsParams), RUNTIME_ERR1009);
+			assert.throws(() => ctx.runtime.executeTx([setPermissionsParams]), RUNTIME_ERR1009);
 		});
 
 		/*
@@ -737,7 +743,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			}).assetIndex;
 
 			setPermissionsParams.foreignAssets = [newAssetId];
-			assert.throws(() => ctx.runtime.executeTx(setPermissionsParams), RUNTIME_ERR1009);
+			assert.throws(() => ctx.runtime.executeTx([setPermissionsParams]), RUNTIME_ERR1009);
 		});
 	});
 });

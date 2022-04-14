@@ -37,7 +37,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 		payFlags: {},
 	};
 	// Create B_[i+1]
-	const newAsaInfo = await executeTx(deployer, deployTx);
+	const newAsaInfo = (await executeTx(deployer, deployTx))[0];
 	console.log(newAsaInfo);
 	const newIndex = newAsaInfo["asset-index"];
 	tokenMap.set(newBondToken, newIndex);

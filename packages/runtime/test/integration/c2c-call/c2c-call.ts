@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags, AppInfo, TxReceipt } from "../../../src/types";
+import { AccountStoreI, AppDeploymentFlags, AppInfo } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -29,7 +29,7 @@ describe("C2C call", function () {
 				totalFee: 1000,
 			},
 		};
-		runtime.executeTx(fundTx);
+		runtime.executeTx([fundTx]);
 	}
 
 	this.beforeEach(() => {
@@ -67,8 +67,8 @@ describe("C2C call", function () {
 				totalFee: 2000,
 			},
 		};
-		const txReceipt = runtime.executeTx(execParams) as TxReceipt;
-		const logs = txReceipt.logs ?? [];
+		const txReceipt = runtime.executeTx([execParams]);
+		const logs = txReceipt[0].logs ?? [];
 		assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
 	});
 
@@ -86,66 +86,64 @@ describe("C2C call", function () {
 		};
 
 		expectRuntimeError(
-			() => runtime.executeTx(execParams),
+			() => runtime.executeTx([execParams]),
 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
 		);
 	});
 
-	// TODO: We don't handle the fee of inner group created by other tx in same group as well
-	// Should fix it in next patch release.
-	// https://www.pivotaltracker.com/n/projects/2452320/stories/181642443
-	// describe("Inner transaction in group", function() {
-	// 	it("should succeed", () => {
-	// 		const execParams: types.ExecParams = {
-	// 			type: types.TransactionType.CallApp,
-	// 			sign: types.SignType.SecretKey,
-	// 			fromAccount: alice.account,
-	// 			appID: firstApp.appID,
-	// 			foreignApps: [secondApp.appID],
-	// 			appArgs: ['str:call_method', `int:${1}`],
-	// 			payFlags: {
-	// 			totalFee: 1000
-	// 			}
-	// 		}
+	describe("Inner transaction in group", function () {
+		it("should succeed: enough fee for 4 transaction call(4000 micro algo)", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: firstApp.appID,
+				foreignApps: [secondApp.appID],
+				appArgs: appCallArgs,
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
 
-	// 		runtime.executeTx([
-	// 			execParams,
-	// 			{
-	// 				...execParams,
-	// 				appID: secondApp.appID,
-	// 				foreignApps: [firstApp.appID],
-	// 				payFlags: {totalFee: 3000}
-	// 			}
-	// 		]);
-	// 	});
+			runtime.executeTx([
+				execParams,
+				{
+					...execParams,
+					appID: secondApp.appID,
+					foreignApps: [firstApp.appID],
+					payFlags: { totalFee: 3000 },
+				},
+			]);
+		});
 
-	// 	it.skip("should fail", () => {
-	// 		const execParams: types.ExecParams = {
-	// 			type: types.TransactionType.CallApp,
-	// 			sign: types.SignType.SecretKey,
-	// 			fromAccount: alice.account,
-	// 			appID: firstApp.appID,
-	// 			foreignApps: [secondApp.appID],
-	// 			appArgs: ['str:call_method', `int:${1}`],
-	// 			payFlags: {
-	// 			totalFee: 1000
-	// 			}
-	// 		}
+		it("should fail because not enough fee (4 transaction call but only 3000 micro algo)", () => {
+			const execParams: types.ExecParams = {
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				appID: firstApp.appID,
+				foreignApps: [secondApp.appID],
+				appArgs: appCallArgs,
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
 
-	// 		expectRuntimeError(() =>
-	// 			runtime.executeTx([
-	// 				execParams,
-	// 				{
-	// 					...execParams,
-	// 					appID: secondApp.appID,
-	// 					foreignApps: [firstApp.appID],
-	// 					payFlags: {totalFee: 2000}
-	// 				}
-	// 			]),
-	// 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
-	// 		);
-	// 	})
-	// });
+			expectRuntimeError(
+				() =>
+					runtime.executeTx([
+						execParams,
+						{
+							...execParams,
+							appID: secondApp.appID,
+							foreignApps: [firstApp.appID],
+							payFlags: { totalFee: 2000 },
+						},
+					]),
+				RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+			);
+		});
+	});
 
 	describe("c2c call unhappy case", function () {
 		let thirdApp: AppInfo;
@@ -168,7 +166,7 @@ describe("C2C call", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.executeTx(execParams),
+				() => runtime.executeTx([execParams]),
 				RUNTIME_ERRORS.TRANSACTION.INNER_APP_CALL_INVALID_VERSION,
 				"RUNTIME_ERR1408: Inner app call in older version 5"
 			);
@@ -188,7 +186,7 @@ describe("C2C call", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.executeTx(execParams),
+				() => runtime.executeTx([execParams]),
 				RUNTIME_ERRORS.TRANSACTION.INNER_APP_SELF_CALL
 			);
 		});
@@ -224,7 +222,7 @@ describe("C2C call", function () {
 					},
 				};
 
-				assert.doesNotThrow(() => runtime.executeTx(execParams));
+				assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			});
 
 			it("Should fail: inner call with depth > 8", () => {
@@ -241,7 +239,7 @@ describe("C2C call", function () {
 				};
 
 				expectRuntimeError(
-					() => runtime.executeTx(execParams),
+					() => runtime.executeTx([execParams]),
 					RUNTIME_ERRORS.TRANSACTION.INNER_APP_DEEP_EXCEEDED
 				);
 				// TODO: compare runtime store and ensure it not change.
@@ -267,7 +265,7 @@ describe("C2C call", function () {
 		});
 
 		it("Should not support other inner tx appl(not include appcall)", () => {
-			assert.doesNotThrow(() => runtime.executeTx(execParams));
+			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
 				(console["warn"] as any).calledWith("Only supports application call in this version")
 			);

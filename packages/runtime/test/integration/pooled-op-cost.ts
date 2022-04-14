@@ -46,7 +46,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 
 	it("should fail on application call if total pooled cost exceeds", function () {
 		expectRuntimeError(
-			() => runtime.executeTx(appCallParam), // exceeded on single
+			() => runtime.executeTx([appCallParam]), // exceeded on single
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 		);
 

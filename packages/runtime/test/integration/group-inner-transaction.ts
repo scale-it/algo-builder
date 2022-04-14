@@ -45,7 +45,7 @@ describe("Group inner transaction", function () {
 			},
 		};
 
-		runtime.executeTx(txnParams);
+		runtime.executeTx([txnParams]);
 		syncAccounts();
 	});
 
@@ -63,7 +63,7 @@ describe("Group inner transaction", function () {
 				totalFee: 1000,
 			},
 		};
-		assert.doesNotThrow(() => runtime.executeTx(txnParams));
+		assert.doesNotThrow(() => runtime.executeTx([txnParams]));
 
 		syncAccounts();
 
