@@ -24,9 +24,7 @@ async function run(runtimeEnv, deployer) {
 
 	// only one transaction
 	const logs = txReceipt[0].logs;
-	// Log asset id
 	console.log("New asset Id =", decodeValue(logs[0]));
-	// Log application id
 	console.log("New application Id =", decodeValue(logs[1]));
 }
 

@@ -9,7 +9,7 @@ async function run(runtimeEnv, deployer) {
 
 	const proxyAppInfo = deployer.getApp("coordinator");
 
-	// first tx in group: deploy new app app
+	// first tx in group: deploy new app
 	// btw we're using same code with coordinator contract.
 	const createAppTxnParam = {
 		type: types.TransactionType.DeployApp,

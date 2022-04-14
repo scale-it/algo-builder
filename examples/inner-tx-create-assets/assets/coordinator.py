@@ -1,7 +1,7 @@
 """
-NOTE: This is demo contracts, doesn't have security measures. Please don't use it in product.
+NOTE: This is  a demo contract, doesn't have security measures. Please don't use it in production
 
-This smart contract doing:
+This smart contract does:
 
 1. Demo create application, asset and use new appl and asset id after we create them 
    by using group transaction.
