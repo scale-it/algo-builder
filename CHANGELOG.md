@@ -48,7 +48,6 @@ Added:
 
 - Added support for saving smart contract template params in ASCCache.
 
-- Return list of receipts for each txn in group txn. Example:
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
