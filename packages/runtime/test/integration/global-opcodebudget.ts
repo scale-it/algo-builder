@@ -7,6 +7,11 @@ import { LogicSigAccount } from "../../src/logicsig";
 import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
+
+function decodeNum(num: bigint): string {
+	return new TextDecoder().decode(parsing.uint64ToBigEndian(num));
+}
+
 describe("TEALv6: Global Opcode Budget", function () {
 	useFixture("global-opcodebudget");
 	const john = new AccountStore(10e6);
@@ -78,14 +83,10 @@ describe("TEALv6: Global Opcode Budget", function () {
 			};
 
 			const receipts = runtime.executeTx([txnParam]);
-			if (receipts[0].logs) {
-				assert.deepEqual(
-					receipts[0].logs[0],
-					new TextDecoder().decode(parsing.uint64ToBigEndian(693n))
-				);
-			} else {
-				assert.isTrue("false");
-			}
+			assert.deepEqual(
+				receipts[0].logs?.at(0),
+				decodeNum(693n)
+			);
 		});
 
 		it("call application with group tx", () => {
@@ -104,14 +105,10 @@ describe("TEALv6: Global Opcode Budget", function () {
 				...txnParam,
 			};
 			const receipts = runtime.executeTx([txnParam, buffTx]);
-			if (receipts[0].logs) {
-				assert.deepEqual(
-					receipts[0].logs[0],
-					new TextDecoder().decode(parsing.uint64ToBigEndian(1393n))
-				);
-			} else {
-				assert.fail("log is undefined");
-			}
+			assert.deepEqual(
+				receipts[0].logs?.at(0),
+				decodeNum(1393n)
+			);
 		});
 
 		it("call application with inside inner tx", () => {
@@ -128,14 +125,10 @@ describe("TEALv6: Global Opcode Budget", function () {
 			};
 
 			const receipts = runtime.executeTx([txnParam]);
-			if (receipts[0].logs) {
-				assert.deepEqual(
-					receipts[0].logs[0],
-					new TextDecoder().decode(parsing.uint64ToBigEndian(1396n))
-				);
-			} else {
-				assert.fail("log is undefined");
-			}
+			assert.deepEqual(
+				receipts[0].logs?.at(0),
+				decodeNum(1396n)
+			);
 		});
 	});
 });
