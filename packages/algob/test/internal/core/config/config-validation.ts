@@ -1,4 +1,4 @@
-import { ERRORS } from "@algo-builder/web";
+import { ERRORS, mainnetURL, testnetURL } from "@algo-builder/web";
 import { assert } from "chai";
 import deepmerge from "deepmerge";
 
@@ -274,6 +274,54 @@ describe("Config validation", function () {
 							errors.toString(),
 							/config.networks.custom.token - Expected a value of type string/
 						);
+					});
+
+					it("Token can be empty due to the testnet", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: testnetURL,
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
+					it("Token can be empty due to the mainet", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: mainnetURL,
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
+					it("Token can be empty", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: "http://localhost",
+									token: "",
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
+					});
+
+					it("Token can be null", function () {
+						const errors = getValidationErrors({
+							networks: {
+								custom: {
+									host: "http://localhost",
+									token: null,
+								},
+							},
+						});
+						assert.isEmpty(errors.toString());
 					});
 
 					it("should pass with passing X-Algo-API-Token", function () {
