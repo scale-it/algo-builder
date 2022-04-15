@@ -48,6 +48,10 @@ Added:
 
 - Added support for saving smart contract template params in ASCCache.
 
+
+- `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `. 
+
+
 - Return list of receipts for each txn in group txn. Example:
 
 ```js
@@ -55,6 +59,7 @@ Added:
   console.log("txn0 information: ", receipts[0]);
   console.log("txn1 information: ", receipts[2]);
 ```
+
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
