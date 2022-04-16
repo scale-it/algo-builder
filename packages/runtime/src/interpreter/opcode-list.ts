@@ -4234,8 +4234,7 @@ export class ITxna extends Op {
 		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
 			// handle Logs
 			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
-			logs = logs.map((log) => convertToBuffer(log));
+			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			this.checkIndexBound(this.idx, logs, this.line);
 			result = logs[this.idx];
 		} else {
@@ -4435,7 +4434,7 @@ export class Log extends Op {
 				});
 			}
 
-			txReceipt.logs.push(convertToString(logByte));
+			txReceipt.logs.push(logByte);
 		}
 	}
 }
