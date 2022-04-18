@@ -20,6 +20,7 @@ async function run(runtimeEnv, deployer) {
 	const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
+	const daoName = "DAO";
 
 	const appArgs = [
 		`int:${deposit}`,
@@ -27,6 +28,7 @@ async function run(runtimeEnv, deployer) {
 		`int:${minDuration}`,
 		`int:${maxDuration}`,
 		`str:${url}`,
+		`str:${daoName}`,
 	];
 	const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
 	// Create Application

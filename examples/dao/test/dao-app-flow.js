@@ -106,6 +106,7 @@ describe("DAO test", function () {
 	const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
+	const daoName = "DAO";
 
 	function setUpDAO() {
 		govTokenID = runtime.addAsset("gov-token", {
@@ -118,6 +119,7 @@ describe("DAO test", function () {
 			`int:${minDuration}`,
 			`int:${maxDuration}`,
 			`str:${url}`,
+			`str:${daoName}`,
 		];
 
 		const approvalFileName = "dao-app-approval.py";
