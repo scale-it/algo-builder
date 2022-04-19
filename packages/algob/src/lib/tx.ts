@@ -309,6 +309,8 @@ export async function executeTx(
 		console.debug(confirmedTx);
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
+		} else {
+			console.warn("deploy app/asset not allowed in run mode")
 		}
 		return confirmedTx;
 	} catch (error) {
