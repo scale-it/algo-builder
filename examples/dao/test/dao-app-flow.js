@@ -181,6 +181,7 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("min_duration"), BigInt(minDuration));
 		assert.deepEqual(getGlobal("max_duration"), BigInt(maxDuration));
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
+		assert.deepEqual(getGlobal("dao_name"), parsing.stringToBytes(daoName));
 
 		// opt in deposit account (dao app account) to gov_token asa
 		const optInToGovASAParam = [
