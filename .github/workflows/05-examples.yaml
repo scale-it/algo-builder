@@ -160,5 +160,5 @@ jobs:
         working-directory: ./examples/inner-tx-create-assets
         run: |
           pipenv run yarn algob deploy 
-          pipenv run yarn run algob run ./scripts/run/useInnerTxn.js
-          pipenv run yarn run algob run ./scripts/run/useGroupTxn.js
+          pipenv run yarn algob run ./scripts/run/useInnerTxn.js
+          pipenv run yarn algob run ./scripts/run/useGroupTxn.js
