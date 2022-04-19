@@ -3,11 +3,11 @@ NOTE: This is  a demo contract, doesn't have security measures. Please don't use
 
 This smart contract does:
 
-1. Demo create application, asset and use new appl and asset id after we create them 
+1. Creates an application, an asset and uses new application id and asset id after we create them
    by using group transaction.
 
-2. Demo create application, asset and use new appl and asset id after we create them 
-   by using group use inner transaction.
+2. Creates an application, an asset and uses new application id and asset id after we create them
+   by using use inner transactions.
 
 """
 
