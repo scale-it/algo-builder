@@ -1,5 +1,6 @@
 import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
+import { types } from "..";
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { ExecParams, TxParams } from "../types";
 import { log } from "./logger";
@@ -142,15 +143,25 @@ export class WebMode {
 		}
 
 		txns = algosdk.assignGroupID(txns);
-		const binaryTxs = txns.map((txn: Transaction) => {
+
+		const binaryTxs = txns.map((txn: Transaction, txnId: number) => {
+			const signer: types.Sign = execParams[txnId];
+			if (signer.sign === types.SignType.LogicSignature) {
+				signer.lsig.lsig.args = signer.args ?? [];
+				return algosdk.signLogicSigTransaction(txn, signer.lsig).blob;
+			}
 			return txn.toByte();
 		});
+
 		const base64Txs = binaryTxs.map((txn: Uint8Array) => {
 			return this.algoSigner.encoding.msgpackToBase64(txn);
 		});
-		const toBeSignedTxns = base64Txs.map((txn: string) => {
-			return { txn: txn };
+		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
+			return execParams[txnId].sign === types.SignType.LogicSignature
+				? { txn: txn }
+				: { txn: txn, signer: [] };
 		});
+
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
 		const txInfo = await this.sendGroupTransaction(signedTxn);
 
@@ -159,6 +170,7 @@ export class WebMode {
 		}
 		throw new Error("Transaction Error");
 	}
+
 	/** @deprecated */
 	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
 		if (Array.isArray(execParams)) return this.executeTx(execParams);
