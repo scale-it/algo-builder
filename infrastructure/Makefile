@@ -1,5 +1,7 @@
 # https://developer.algorand.org/tutorials/create-private-network/
 
+# check platform
+PLATFORM := $(shell uname -s)
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
@@ -9,12 +11,18 @@ export INDEXER_REMOTE_REPO = https://github.com/algorand/indexer.git
 export INDEXER_PATH = ~/.algorand-indexer-download
 # path to indexer .tar file (https://github.com/algorand/indexer/releases) for local setup
 export INDEXER_LATEST_VERSION = 2.10.0
-export INDEXER_LINUX_TAR_NAME = algorand-indexer_linux_amd64_$(INDEXER_LATEST_VERSION).tar.bz2
-export INDEXER_LINUX_TAR_URL = https://github.com/algorand/indexer/releases/download/$(INDEXER_LATEST_VERSION)/$(INDEXER_LINUX_TAR_NAME)
+export INDEXER_TAR_NAME = algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION).tar.bz2
+export INDEXER_TAR_URL = https://github.com/algorand/indexer/releases/download/$(INDEXER_LATEST_VERSION)/$(INDEXER_TAR_NAME)
 # default postgres config vars
 export POSTGRES_UNAME = algorand
 export POSTGRES_DBNAME = pgdb
 export POSTGRES_PASS = indexer
+
+ifeq ($(PLATFORM),Darwin)
+	export OS = "darwin"
+else
+	export OS = "linux"
+endif
 
 setup-private-net: create-private-net start-private-net setup-master-account status-private-net
 recreate-private-net: stop-private-net delete-private-net setup-private-net
@@ -166,11 +174,11 @@ start-indexer:
 # https://developer.algorand.org/docs/run-a-node/setup/indexer/#extract-the-binaries-to-a-specific-directory
 	mkdir -p $(INDEXER_PATH)
 # download and unzip .tar file
-	@if ! [ -f $(INDEXER_PATH)/$(INDEXER_LINUX_TAR_NAME) ]; then \
-		wget $(INDEXER_LINUX_TAR_URL) -P $(INDEXER_PATH); \
-		cd $(INDEXER_PATH); tar -xf $(INDEXER_LINUX_TAR_NAME) -C $(INDEXER_PATH); fi
+	@if ! [ -f $(INDEXER_PATH)/$(INDEXER_TAR_NAME) ]; then \
+		wget $(INDEXER_TAR_URL) -P $(INDEXER_PATH); \
+		cd $(INDEXER_PATH); tar -xf $(INDEXER_TAR_NAME) -C $(INDEXER_PATH); fi
 # Start indexer by providing database connection info and path to algod node
-	$(INDEXER_PATH)/algorand-indexer_linux_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode --dev-mode
+	$(INDEXER_PATH)/algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode --dev-mode
 
 recreate-indexer: recreate-indexer-db start-indexer
 
