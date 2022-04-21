@@ -144,25 +144,35 @@ export class WebMode {
 
 		txns = algosdk.assignGroupID(txns);
 
-		const binaryTxs = txns.map((txn: Transaction, txnId: number) => {
-			const signer: types.Sign = execParams[txnId];
-			if (signer.sign === types.SignType.LogicSignature) {
-				signer.lsig.lsig.args = signer.args ?? [];
-				return algosdk.signLogicSigTransaction(txn, signer.lsig).blob;
-			}
+		const binaryTxs = txns.map((txn: Transaction) => {
 			return txn.toByte();
 		});
 
 		const base64Txs = binaryTxs.map((txn: Uint8Array) => {
 			return this.algoSigner.encoding.msgpackToBase64(txn);
 		});
+
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === types.SignType.LogicSignature
-				? { txn: txn }
-				: { txn: txn, signer: [] };
+				? { txn: txn, signers: [] }
+				: { txn: txn };
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
+
+		// sign smart signature transaction
+		for (let i = 0; i < txns.length; ++i) {
+			const singer: types.Sign = execParams[i];
+			if (singer.sign === types.SignType.LogicSignature) {
+				singer.lsig.lsig.args = singer.args ?? [];
+				const lsigTxn = algosdk.signLogicSigTransaction(txns[i], singer.lsig);
+				signedTxn[i] = {
+					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
+					txID: lsigTxn.txID,
+				};
+			}
+		}
+
 		const txInfo = await this.sendGroupTransaction(signedTxn);
 
 		if (txInfo && typeof txInfo.txId === "string") {
