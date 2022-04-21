@@ -1,8 +1,7 @@
 import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
-import { types } from "..";
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
-import { ExecParams, TxParams } from "../types";
+import { ExecParams, Sign, SignType, TxParams } from "../types";
 import { log } from "./logger";
 import { mkTransaction } from "./txn";
 
@@ -153,7 +152,7 @@ export class WebMode {
 		});
 
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
-			return execParams[txnId].sign === types.SignType.LogicSignature
+			return execParams[txnId].sign === SignType.LogicSignature
 				? { txn: txn, signers: [] }
 				: { txn: txn };
 		});
@@ -161,12 +160,12 @@ export class WebMode {
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
 
 		// sign smart signature transaction
-		for (let i = 0; i < txns.length; ++i) {
-			const singer: types.Sign = execParams[i];
-			if (singer.sign === types.SignType.LogicSignature) {
+		for (const [txnId, txn] of txns.entries()) {
+			const singer: Sign = execParams[txnId];
+			if (singer.sign === SignType.LogicSignature) {
 				singer.lsig.lsig.args = singer.args ?? [];
-				const lsigTxn = algosdk.signLogicSigTransaction(txns[i], singer.lsig);
-				signedTxn[i] = {
+				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
+				signedTxn[txnId] = {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
 					txID: lsigTxn.txID,
 				};
