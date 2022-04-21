@@ -954,7 +954,7 @@ export class Runtime {
 		this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
 		// reset pooled opcode cost for single tx, this is to handle singular functions
 		// which don't "initialize" a new ctx (eg. deployApp)
-		if (this.ctx.gtxs.length === 1) {
+		if (this.ctx.gtxs.length === 1 && !this.ctx.isInnerTx) {
 			this.ctx.pooledApplCost = 0;
 		}
 		interpreter.execute(program, executionMode, this, debugStack);

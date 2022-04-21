@@ -117,7 +117,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 			const receipts = runtime.executeTx([txnParam]);
 			const logs = receipts[0].logs ?? [];
-			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 1396n);
+			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 1376n);
 		});
 	});
 });
