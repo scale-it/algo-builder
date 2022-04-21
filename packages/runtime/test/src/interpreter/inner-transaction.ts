@@ -1145,10 +1145,10 @@ describe("Inner Transactions", function () {
 
 			if (logs !== undefined) {
 				for (let i = 0; i < 30; ++i) {
-					assert.equal(logs[i], "a");
+					assert.deepEqual(logs[i], new Uint8Array([97]));
 				}
-				assert.equal(logs[30], "b");
-				assert.equal(logs[31], "c");
+				assert.deepEqual(logs[30], new Uint8Array([98]));
+				assert.deepEqual(logs[31], new Uint8Array([99]));
 			}
 		});
 

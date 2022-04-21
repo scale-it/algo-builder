@@ -1,4 +1,5 @@
 import { types } from "@algo-builder/web";
+import algosdk from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -69,7 +70,7 @@ describe("C2C call", function () {
 		};
 		const txReceipt = runtime.executeTx([execParams]);
 		const logs = txReceipt[0].logs ?? [];
-		assert.deepEqual(logs[0].substring(6), "Call from applicatiton");
+		assert.deepEqual(new TextDecoder().decode(logs[0]).substring(6), "Call from applicatiton");
 	});
 
 	it("should fail: call another application when not enough fee", () => {

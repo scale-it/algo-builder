@@ -48,6 +48,10 @@ Added:
 
 - Added support for saving smart contract template params in ASCCache.
 
+
+- `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `. 
+
+
 - Return list of receipts for each txn in group txn. Example:
 
 ```js
@@ -95,13 +99,13 @@ Added:
 
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
 - Only use list transaction in executeTx.
-
+- Rename the executeTransaction to executeTx
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
 - Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
-
+- Allow token to be empty
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.

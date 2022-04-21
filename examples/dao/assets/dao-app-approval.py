@@ -7,7 +7,7 @@ from pyteal import *
 def approval_program(ARG_GOV_TOKEN):
     """
     A stateful app with governance rules. Stores
-    deposit, min_support, min_duration, max_duration, url.
+    deposit, min_support, min_duration, max_duration, url, dao_name.
 
     Commands:
         add_proposal            Save proposal record in lsig
@@ -136,11 +136,13 @@ def approval_program(ARG_GOV_TOKEN):
     max_duration = Bytes("max_duration")
     # a url with more information about the DAO
     url = Bytes("url")
+     # dao name
+    dao_name = Bytes("dao_name")
 
 
     # initialization
     # Expected arguments:
-    #   [deposit, min_support, min_duration, max_duration, url]
+    #   [deposit, min_support, min_duration, max_duration, url, dao_name]
     on_initialize = Seq([
         Assert(
             And(
@@ -155,6 +157,7 @@ def approval_program(ARG_GOV_TOKEN):
         App.globalPut(min_duration, Btoi(Txn.application_args[2])),
         App.globalPut(max_duration, Btoi(Txn.application_args[3])),
         App.globalPut(url, Txn.application_args[4]),
+        App.globalPut(dao_name, Txn.application_args[5]),
         Return(Int(1))
     ])
 

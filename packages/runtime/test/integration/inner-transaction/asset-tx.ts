@@ -17,6 +17,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 	let bob = new AccountStore(minBalance + fee);
 	const charlie = new AccountStore(minBalance + fee); // random account - not exist in runtime env.
 	let appAccount: AccountStoreI; // initialized later
+	const strAsa = "str:freeze_asa";
 
 	let runtime: Runtime;
 	let approvalProgramFileName: string;
@@ -229,7 +230,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 	it("should fail on asset freeze if asset freeze !== application account", function () {
 		const txParams = {
 			...appCallParams,
-			appArgs: ["str:freeze_asa"],
+			appArgs: [strAsa],
 			accounts: [john.address],
 			foreignAssets: [assetID],
 		};
@@ -247,7 +248,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
 		const txParams = {
 			...appCallParams,
-			appArgs: ["str:freeze_asa"],
+			appArgs: [strAsa],
 			accounts: [elon.address], // elon is not optedin
 			foreignAssets: [assetID],
 		};
@@ -268,7 +269,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 
 		const txParams = {
 			...appCallParams,
-			appArgs: ["str:freeze_asa"],
+			appArgs: [strAsa],
 			accounts: [john.address],
 			foreignAssets: [assetID],
 		};

@@ -1,10 +1,11 @@
 import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk";
 
 import { ChainType, TxParams } from "../types";
+import { mainnetURL, testnetURL } from "./constants";
 
 export function algoexplorerAlgod(chain: string): algosdk.Algodv2 {
-	const mainnetAlgoExplorer = new Algodv2("", "https://algoexplorerapi.io", "");
-	const testnetAlgoExplorer = new Algodv2("", "https://node.testnet.algoexplorerapi.io", "");
+	const mainnetAlgoExplorer = new Algodv2("", mainnetURL, "");
+	const testnetAlgoExplorer = new Algodv2("", testnetURL, "");
 	switch (chain) {
 		case ChainType.MainNet:
 			return mainnetAlgoExplorer;
