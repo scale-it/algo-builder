@@ -882,7 +882,8 @@ export function parser(
 	return opCodeList;
 }
 
-export function intConstantOptimizable(ops: Operator[], interpreter: Interpreter): boolean {
+// check algorand is auto added intcblock for optimize size contract
+export function isAddIntcblock(ops: Operator[], interpreter: Interpreter): boolean {
 	if (interpreter.tealVersion < 4) return false;
 	if (ops[0] instanceof Intcblock || ops[1] instanceof Intcblock) return false;
 	const intCount: { [key: string]: number } = {};
@@ -903,10 +904,8 @@ export function intConstantOptimizable(ops: Operator[], interpreter: Interpreter
 	return false;
 }
 
-export function byteConstantConstOptimizable(
-	ops: Operator[],
-	interpreter: Interpreter
-): boolean {
+// check algorand is auto added byteblock for optimize size contract
+export function isAddedBytecblock(ops: Operator[], interpreter: Interpreter): boolean {
 	if (interpreter.tealVersion < 4) return false;
 	if (ops[0] instanceof Bytecblock || ops[1] instanceof Bytecblock) return false;
 	const byteCount: { [key: string]: number } = {};

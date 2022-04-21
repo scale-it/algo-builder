@@ -22,12 +22,7 @@ import {
 } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import {
-	assertMaxCost,
-	byteConstantConstOptimizable,
-	intConstantOptimizable,
-	parser,
-} from "../parser/parser";
+import { assertMaxCost, isAddedBytecblock, isAddIntcblock, parser } from "../parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
@@ -529,12 +524,12 @@ export class Interpreter {
 		// It's mean algorand will automatic add intcblock and bytecblock when need.
 		// => cost will increase 1 or 2 depened on context.
 
-		if (intConstantOptimizable(this.instructions, this)) {
+		if (isAddIntcblock(this.instructions, this)) {
 			this.runtime.ctx.pooledApplCost += 1;
 			this.cost += 1;
 		}
 
-		if (byteConstantConstOptimizable(this.instructions, this)) {
+		if (isAddedBytecblock(this.instructions, this)) {
 			this.runtime.ctx.pooledApplCost += 1;
 			this.cost += 1;
 		}
