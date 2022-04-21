@@ -1,16 +1,11 @@
-import { parsing, types } from "@algo-builder/web";
-import { getApplicationAddress } from "algosdk";
+import { types } from "@algo-builder/web";
+import algosdk, { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
 import { AccountStore, getProgram, Runtime } from "../../src/index";
 import { LogicSigAccount } from "../../src/logicsig";
 import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
-
-
-function decodeNum(num: bigint): string {
-	return new TextDecoder().decode(parsing.uint64ToBigEndian(num));
-}
 
 describe("TEALv6: Global Opcode Budget", function () {
 	useFixture("global-opcodebudget");
@@ -83,10 +78,8 @@ describe("TEALv6: Global Opcode Budget", function () {
 			};
 
 			const receipts = runtime.executeTx([txnParam]);
-			assert.deepEqual(
-				receipts[0].logs?.at(0),
-				decodeNum(693n)
-			);
+			const logs = receipts[0].logs ?? [];
+			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 692n);
 		});
 
 		it("call application with group tx", () => {
@@ -105,10 +98,8 @@ describe("TEALv6: Global Opcode Budget", function () {
 				...txnParam,
 			};
 			const receipts = runtime.executeTx([txnParam, buffTx]);
-			assert.deepEqual(
-				receipts[0].logs?.at(0),
-				decodeNum(1393n)
-			);
+			const logs = receipts[0].logs ?? [];
+			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 1392n);
 		});
 
 		it("call application with inside inner tx", () => {
@@ -125,10 +116,8 @@ describe("TEALv6: Global Opcode Budget", function () {
 			};
 
 			const receipts = runtime.executeTx([txnParam]);
-			assert.deepEqual(
-				receipts[0].logs?.at(0),
-				decodeNum(1396n)
-			);
+			const logs = receipts[0].logs ?? [];
+			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 1396n);
 		});
 	});
 });

@@ -882,6 +882,51 @@ export function parser(
 	return opCodeList;
 }
 
+export function intConstantOptimizable(ops: Operator[], interpreter: Interpreter): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Intcblock || ops[1] instanceof Intcblock) return false;
+	const intCount: { [key: string]: number } = {};
+	for (const int of interpreter.intcblock) {
+		intCount[int.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Int) {
+			if (intCount[op.uint64.toString()] === undefined) {
+				intCount[op.uint64.toString()] = 0;
+			}
+			intCount[op.uint64.toString()] += 1;
+			if (intCount[op.uint64.toString()] >= 2) return true;
+		}
+	}
+
+	return false;
+}
+
+export function byteConstantConstOptimizable(
+	ops: Operator[],
+	interpreter: Interpreter
+): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Bytecblock || ops[1] instanceof Bytecblock) return false;
+	const byteCount: { [key: string]: number } = {};
+	for (const byte of interpreter.bytecblock) {
+		byteCount[byte.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Byte) {
+			if (byteCount[op.str] === undefined) {
+				byteCount[op.str] = 0;
+			}
+			byteCount[op.str] += 1;
+			if (byteCount[op.str] >= 2) return true;
+		}
+	}
+
+	return false;
+}
+
 /**
  *
  * @param program teal program

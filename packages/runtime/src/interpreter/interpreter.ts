@@ -22,7 +22,12 @@ import {
 } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { assertMaxCost, parser } from "../parser/parser";
+import {
+	assertMaxCost,
+	byteConstantConstOptimizable,
+	intConstantOptimizable,
+	parser,
+} from "../parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
@@ -515,10 +520,24 @@ export class Interpreter {
 			this.assertValidTxArray();
 		}
 
-		const dynamicCost = 0;
 		const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as
 			| BaseTxReceipt
 			| AppInfo;
+
+		// algorand optimize constract size by using intcblock and bytecblock
+		// to avoid push 2 same values in teal contract
+		// It's mean algorand will automatic add intcblock and bytecblock when need.
+		// => cost will increase 1 or 2 depened on context.
+
+		if (intConstantOptimizable(this.instructions, this)) {
+			this.runtime.ctx.pooledApplCost += 1;
+			this.cost += 1;
+		}
+
+		if (byteConstantConstOptimizable(this.instructions, this)) {
+			this.runtime.ctx.pooledApplCost += 1;
+			this.cost += 1;
+		}
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
@@ -542,7 +561,7 @@ export class Interpreter {
 			}
 			if (this.tealVersion >= 4) {
 				if (this.mode === ExecutionMode.SIGNATURE) {
-					assertMaxCost(dynamicCost, this.mode);
+					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
 					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
