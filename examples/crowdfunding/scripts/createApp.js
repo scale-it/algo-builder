@@ -1,4 +1,4 @@
-const { executeTx, convert } = require("@algo-builder/algob");
+const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -14,9 +14,9 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	};
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 	algoTxnParams.toAccountAddr = donorAccount.addr;
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 
 	// Get begin date to pass in
 	const beginDate = Math.round(new Date().getTime() / 1000);

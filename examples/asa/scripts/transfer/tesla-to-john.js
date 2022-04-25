@@ -1,4 +1,4 @@
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -7,7 +7,7 @@ async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
 	const elon = deployer.accountsByName.get("elon-musk");
 
-	await executeTx(deployer, {
+	await deployer.executeTx({
 		type: types.TransactionType.TransferAsset,
 		sign: types.SignType.SecretKey,
 		fromAccount: elon,

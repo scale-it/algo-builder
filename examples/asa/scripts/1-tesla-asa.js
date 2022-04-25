@@ -1,4 +1,4 @@
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { mkParam } = require("./transfer/common");
 
 /*
@@ -15,12 +15,10 @@ async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
 
 	// activate elon account
-	await executeTx(
-		deployer,
+	await deployer.executeTx(
 		mkParam(masterAccount, elon.addr, 40e6, { note: "funding account" })
 	);
-	await executeTx(
-		deployer,
+	await deployer.executeTx(
 		mkParam(masterAccount, john.addr, 40e6, { note: "funding account" })
 	);
 

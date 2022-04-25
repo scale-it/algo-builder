@@ -13,7 +13,12 @@ import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
+import {
+	CheckpointFunctionsImpl,
+	persistCheckpoint,
+	registerCheckpoints,
+} from "../lib/script-checkpoints";
+import { makeAndSignTx, signTransactions } from "../lib/tx";
 import type {
 	AppCache,
 	ASCCache,
@@ -869,6 +874,50 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		this.registerSSCInfo(cpKey, sscInfo);
 		return sscInfo;
 	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<ConfirmedTxInfo> {
+		let isSDK = false;
+		let signedTxn;
+		if (transactions.length === 0) {
+			throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
+		}
+		if (wtypes.isSDKTransactionAndSign(transactions[0])) {
+			signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
+			isSDK = true;
+		}
+
+		if (isSDK && signedTxn) {
+			const confirmedTx = await this.sendAndWait(signedTxn);
+			console.debug(confirmedTx);
+			return confirmedTx;
+		}
+
+		const execParams = transactions as wtypes.ExecParams[];
+
+		this.assertCPNotDeleted(execParams);
+		try {
+			const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
+			const [txns, signedTxn] = await makeAndSignTx(this, execParams, txIdxMap);
+			const confirmedTx = await this.sendAndWait(signedTxn);
+			console.debug(confirmedTx);
+			await registerCheckpoints(this, execParams, txns, txIdxMap);
+
+			return confirmedTx;
+		} catch (error) {
+			this.persistCP();
+			throw error;
+		}
+	}
 }
 
 /**
@@ -1044,5 +1093,42 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 			this.txWriter,
 			scTmplParams
 		);
+	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<ConfirmedTxInfo> {
+		let isSDK = false;
+		let signedTxn;
+		if (transactions.length === 0) {
+			throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
+		}
+		if (wtypes.isSDKTransactionAndSign(transactions[0])) {
+			signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
+			isSDK = true;
+		}
+
+		if (isSDK && signedTxn) {
+			const confirmedTx = await this.sendAndWait(signedTxn);
+			console.debug(confirmedTx);
+			return confirmedTx;
+		}
+
+		const execParams = transactions as wtypes.ExecParams[];
+
+		this.assertCPNotDeleted(execParams);
+		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
+		const [_, signedTxns] = await makeAndSignTx(this, execParams, txIdxMap);
+		const confirmedTx = await this.sendAndWait(signedTxns);
+		console.debug(confirmedTx);
+		return confirmedTx;
 	}
 }

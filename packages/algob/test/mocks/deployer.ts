@@ -259,4 +259,9 @@ export class FakeDeployer implements Deployer {
 	): Promise<void> {
 		throw new Error("not implemented.");
 	}
+	executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<ConfirmedTxInfo> {
+		throw new Error("Not implemented");
+	}
 }

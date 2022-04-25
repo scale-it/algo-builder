@@ -27,10 +27,7 @@ async function run(
 	const aliceFunding = Object.assign({}, bobFunding);
 	aliceFunding.toAccountAddr = alice.addr;
 	aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
-	await Promise.all([
-		algob.executeTx(deployer, [bobFunding]),
-		algob.executeTx(deployer, [aliceFunding]),
-	]);
+	await Promise.all([deployer.executeTx([bobFunding]), deployer.executeTx([aliceFunding])]);
 
 	/** ** now bob creates and deploys the escrow account ****/
 	console.log("hash of the secret:", scTmplParams.hash_image);
