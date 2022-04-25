@@ -392,3 +392,8 @@ export interface SCParams {
 export interface ReplaceParams {
 	[key: string]: string;
 }
+
+export enum Base64Encoding {
+	URL = 0,
+	STD = 1,
+}

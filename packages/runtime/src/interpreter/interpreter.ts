@@ -513,8 +513,8 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			//TODO: this function should return cost 
-			let cost = instruction.execute(this.stack);
+			//TODO: this function should return cost
+			let cost = +instruction.execute(this.stack);
 
 			if (
 				this.runtime.ctx.isInnerTx &&
@@ -531,8 +531,8 @@ export class Interpreter {
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
 			} else {
-				//TODO: after updating the opcodes execute to return cost check if we can remove that 
-				if(cost === undefined){
+				//TODO: after updating the opcodes execute to return cost check if we can remove that
+				if (cost === undefined) {
 					cost = this.lineToCost[instruction.line];
 				}
 				dynamicCost += cost;

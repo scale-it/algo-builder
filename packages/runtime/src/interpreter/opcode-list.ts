@@ -62,6 +62,7 @@ import {
 	txnSpecByField,
 } from "../lib/txn";
 import {
+	Base64Encoding,
 	DecodingMode,
 	EncodingType,
 	EncTx,
@@ -4751,7 +4752,7 @@ export class Gitxnas extends Gtxnas {
  */
 export class Base64Decode extends Op {
 	readonly line: number;
-	readonly encoding: number;
+	readonly encoding: Base64Encoding;
 
 	/**
 	 * Asserts 1 argument is passed.
@@ -4763,12 +4764,13 @@ export class Base64Decode extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.encoding = Number(args[0]);
-		if (!(this.encoding === 0 || this.encoding === 1)) {
+		if (!(Number(args[0]) in Base64Encoding)) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
-				encoding: this.encoding,
+				encoding: Number(args[0]),
 				line: this.line,
 			});
 		}
+		this.encoding = Number(args[0]);
 	}
 
 	execute(stack: TEALStack): void {
@@ -4776,14 +4778,15 @@ export class Base64Decode extends Op {
 		const last = this.assertBytes(stack.pop(), this.line);
 		const enc = new TextDecoder("utf-8");
 		const decoded = enc.decode(last);
-		if (this.encoding === 0) {
-			// UrlEncoding
-			assertBase64Url(convertToString(last), this.line);
-			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64url")));
-		} else {
-			// e === 1 StdEncoding
-			assertBase64(convertToString(last), this.line);
-			stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
+		switch (this.encoding) {
+			case Base64Encoding.URL:
+				assertBase64Url(convertToString(last), this.line);
+				stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64url")));
+				break;
+			case Base64Encoding.STD:
+				assertBase64(convertToString(last), this.line);
+				stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
+				break;
 		}
 	}
 }
