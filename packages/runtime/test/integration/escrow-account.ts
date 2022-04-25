@@ -54,14 +54,16 @@ describe("Logic Signature: Escrow Account", function () {
 	}
 
 	it("should fund escrow account", function () {
-		runtime.executeTx([{
-			type: types.TransactionType.TransferAlgo, // payment
-			sign: types.SignType.SecretKey,
-			fromAccount: admin.account,
-			toAccountAddr: escrow.address,
-			amountMicroAlgos: initialEscrowHolding,
-			payFlags: { totalFee: fee },
-		}]);
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAlgo, // payment
+				sign: types.SignType.SecretKey,
+				fromAccount: admin.account,
+				toAccountAddr: escrow.address,
+				amountMicroAlgos: initialEscrowHolding,
+				payFlags: { totalFee: fee },
+			},
+		]);
 
 		// check initial balance
 		syncAccounts();
@@ -95,12 +97,14 @@ describe("Logic Signature: Escrow Account", function () {
 	it("should reject transaction if type is not `pay`", function () {
 		expectRuntimeError(
 			() =>
-				runtime.executeTx([{
-					...paymentTxParams,
-					type: types.TransactionType.TransferAsset,
-					assetID: 1111,
-					amount: 10n, // asset amount
-				}]),
+				runtime.executeTx([
+					{
+						...paymentTxParams,
+						type: types.TransactionType.TransferAsset,
+						assetID: 1111,
+						amount: 10n, // asset amount
+					},
+				]),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});

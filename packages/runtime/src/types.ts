@@ -95,7 +95,7 @@ export interface BaseTxReceipt {
 	txn: EncTx;
 	txID: string;
 	gas?: number;
-	logs?: string[];
+	logs?: Uint8Array[];
 }
 
 export type TxReceipt = BaseTxReceipt | AppInfo | ASAInfo;
@@ -123,7 +123,7 @@ export interface DeployedAssetInfo {
 export interface ASAInfo extends DeployedAssetInfo {
 	assetIndex: number;
 	assetDef: types.ASADef;
-	logs?: string[];
+	logs?: Uint8Array[];
 }
 
 // Stateful smart contract deployment information (log)
@@ -133,7 +133,7 @@ export interface AppInfo extends DeployedAssetInfo {
 	timestamp: number;
 	approvalFile: string;
 	clearFile: string;
-	logs?: string[];
+	logs?: Uint8Array[];
 	gas?: number; // used in runtime
 }
 
@@ -146,6 +146,7 @@ export interface Context {
 	gtxs: EncTx[]; // all transactions
 	args?: Uint8Array[];
 	debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+	budget: number;
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction

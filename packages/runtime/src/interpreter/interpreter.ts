@@ -6,7 +6,6 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { Ctx } from "../ctx";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { AccountStore, Runtime } from "../index";
@@ -16,14 +15,14 @@ import {
 	ALGORAND_MAX_TX_ACCOUNTS_LEN,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	DEFAULT_STACK_ELEM,
-	MaxAppProgramCost,
+	LOGIC_SIG_MAX_COST,
 	MaxTEALVersion,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
 } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { assertMaxCost, parser } from "../parser/parser";
+import { assertMaxCost, isAddedBytecblock, isAddIntcblock, parser } from "../parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
@@ -49,6 +48,7 @@ import { Label } from "./opcode-list";
  */
 export class Interpreter {
 	readonly stack: TEALStack;
+	mode: ExecutionMode; // application or signature
 	tealVersion: number; // LogicSigVersion
 	lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
 	gas: number; // total gas cost of TEAL code
@@ -67,12 +67,14 @@ export class Interpreter {
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
 	innerTxnGroups: EncTx[][]; // executed inner transactions
-
+	cost: number; // total code
 	constructor() {
 		this.stack = new Stack<StackElem>();
+		this.mode = ExecutionMode.APPLICATION;
 		this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
 		// total cost computed during code parsing, used in TEAL <= v3
 		this.gas = 0;
+		this.cost = 0;
 		// gas cost of each line used in TEAL >=4 (we accumulate gas when executing the code).
 		this.lineToCost = {};
 		this.length = 0; // code length
@@ -348,6 +350,14 @@ export class Interpreter {
 	}
 
 	/**
+	 * @returns budget of current single/group tx
+	 */
+	getBudget(): number {
+		if (this.mode === ExecutionMode.SIGNATURE) return LOGIC_SIG_MAX_COST;
+		return this.runtime.ctx.budget;
+	}
+
+	/**
 	 * Description: moves instruction index to "label", throws error if label not found
 	 * @param label: branch label
 	 * @param line: line number
@@ -473,7 +483,8 @@ export class Interpreter {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	execute(program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
-		const result = this.executeWithResult(program, mode, runtime, debugStack);
+		this.mode = mode;
+		const result = this.executeWithResult(program, runtime, debugStack);
 		if (result !== undefined && typeof result === "bigint" && result > 0n) {
 			return;
 		}
@@ -484,7 +495,6 @@ export class Interpreter {
 	/**
 	 * This function executes TEAL code after parsing and returns the result of the program.
 	 * @param program: teal code
-	 * @param mode : execution mode of TEAL code (smart signature or contract)
 	 * @param runtime : runtime object
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
@@ -494,22 +504,35 @@ export class Interpreter {
 	 */
 	executeWithResult(
 		program: string,
-		mode: ExecutionMode,
 		runtime: Runtime,
 		debugStack?: number
 	): StackElem | undefined {
 		this.runtime = runtime;
-		this.instructions = parser(program, mode, this);
+		this.instructions = parser(program, this.mode, this);
 
 		this.mapLabelWithIndexes();
-		if (mode === ExecutionMode.APPLICATION) {
+		if (this.mode === ExecutionMode.APPLICATION) {
 			this.assertValidTxArray();
 		}
 
-		let dynamicCost = 0;
 		const txReceipt = this.runtime.ctx.state.txReceipts.get(this.runtime.ctx.tx.txID) as
 			| BaseTxReceipt
 			| AppInfo;
+
+		// algorand optimize constract size by using intcblock and bytecblock
+		// to avoid push 2 same values in teal contract
+		// It's mean algorand will automatic add intcblock and bytecblock when need.
+		// => cost will increase 1 or 2 depened on context.
+
+		if (isAddIntcblock(this.instructions, this)) {
+			this.runtime.ctx.pooledApplCost += 1;
+			this.cost += 1;
+		}
+
+		if (isAddedBytecblock(this.instructions, this)) {
+			this.runtime.ctx.pooledApplCost += 1;
+			this.cost += 1;
+		}
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
@@ -545,7 +568,7 @@ export class Interpreter {
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,
-						maxPooledApplCost
+						this.getBudget()
 					);
 					txReceipt.gas = this.runtime.ctx.pooledApplCost;
 				}

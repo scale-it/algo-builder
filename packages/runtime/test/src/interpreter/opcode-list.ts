@@ -6213,7 +6213,11 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 
 				txInfo = interpreter.runtime.ctx.state.txReceipts.get(txID);
-				assert.deepEqual(txInfo?.logs, ["Hello", "Friend?", "That's lame"]);
+				assert.deepEqual(txInfo?.logs, [
+					parsing.stringToBytes("Hello"),
+					parsing.stringToBytes("Friend?"),
+					parsing.stringToBytes("That's lame"),
+				]);
 			});
 
 			it("should throw error with uint64", function () {

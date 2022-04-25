@@ -5,16 +5,17 @@ import {
 	modelsv2,
 } from "algosdk";
 
-import { AccountStore, getProgram, Interpreter, parseASADef, parser, Runtime } from ".";
+import { AccountStore, getProgram, parseASADef, Runtime } from ".";
 import { RuntimeAccount } from "./account";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MAX_APP_PROGRAM_COST,
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
-  ZERO_ADDRESS_STR
+	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit } from "./lib/txn";
@@ -56,6 +57,7 @@ export class Ctx implements Context {
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
+	budget: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -83,6 +85,7 @@ export class Ctx implements Context {
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 		this.remainingFee = 0;
+		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {
@@ -456,7 +459,7 @@ export class Ctx implements Context {
 		}
 
 		const credit = calculateFeeCredit(this.gtxs);
-
+		this.remainingFee = credit.remainingFee;
 		if (credit.remainingFee < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH, {
 				required: credit.requiredFee,

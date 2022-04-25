@@ -14,8 +14,8 @@ import {
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
-import { mkTransaction } from "./txn";
 import { error, log, warn } from "./logger";
+import { mkTransaction } from "./txn";
 
 export class WallectConnectSession {
 	readonly connector: WalletConnect;

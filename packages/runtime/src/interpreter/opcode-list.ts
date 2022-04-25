@@ -28,6 +28,7 @@ import {
 	AssetParamMap,
 	GlobalFields,
 	MathOp,
+	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
 	MAX_INNER_TRANSACTIONS,
 	MAX_INPUT_BYTE_LEN,
@@ -66,6 +67,7 @@ import {
 	DecodingMode,
 	EncodingType,
 	EncTx,
+	ExecutionMode,
 	StackElem,
 	TEALStack,
 	TxnType,
@@ -1742,6 +1744,16 @@ export class Global extends Op {
 			case "CallerApplicationAddress": {
 				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
 				result = decodeAddress(callerAddress).publicKey;
+				break;
+			}
+
+			case "OpcodeBudget": {
+				const maxBudget = this.interpreter.getBudget();
+				const currentTotalCost =
+					this.interpreter.mode === ExecutionMode.SIGNATURE
+						? this.interpreter.cost
+						: this.interpreter.runtime.ctx.pooledApplCost;
+				result = maxBudget - (currentTotalCost + 1); // include global OpcodeBudget
 				break;
 			}
 			default: {
@@ -4039,16 +4051,12 @@ export class ITxnSubmit extends Op {
 			});
 		}
 
-		if (!this.interpreter.runtime.ctx.isInnerTx) {
-			this.interpreter.runtime.ctx.remainingFee = 0;
-		}
-
 		if (this.interpreter.runtime.parentCtx === undefined) {
 			this.interpreter.runtime.parentCtx = cloneDeep(this.interpreter.runtime.ctx);
 		}
 
 		// calculate remaining fee after executing an inner tx
-		const credit = calculateInnerTxCredit(this.interpreter, true);
+		const credit = calculateInnerTxCredit(this.interpreter);
 
 		// remaining fee is negative => can't paid for transaction => fail
 		if (credit.remainingFee < 0) {
@@ -4070,6 +4078,12 @@ export class ITxnSubmit extends Op {
 				return;
 			}
 		}
+
+		// increase Budget when submit application call transaction
+		const applCallTxNumber = this.interpreter.currentInnerTxnGroup.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
+		this.interpreter.runtime.ctx.budget += MAX_APP_PROGRAM_COST * applCallTxNumber;
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
@@ -4111,7 +4125,6 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.parentCtx = undefined;
 			this.interpreter.runtime.ctx.isInnerTx = false;
 			this.interpreter.currentInnerTxnGroup = [];
-			this.interpreter.runtime.ctx.remainingFee = 0;
 		}
 	}
 }
@@ -4242,8 +4255,7 @@ export class ITxna extends Op {
 		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
 			// handle Logs
 			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
-			logs = logs.map((log) => convertToBuffer(log));
+			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			this.checkIndexBound(this.idx, logs, this.line);
 			result = logs[this.idx];
 		} else {
@@ -4443,7 +4455,7 @@ export class Log extends Op {
 				});
 			}
 
-			txReceipt.logs.push(convertToString(logByte));
+			txReceipt.logs.push(logByte);
 		}
 	}
 }
