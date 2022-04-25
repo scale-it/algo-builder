@@ -70,12 +70,14 @@ class Context {
 		const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 		const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 		const url = "www.my-url.com";
+		const daoName = "DAO";
 		const daoAppArgs = [
 			`int:${deposit}`,
 			`int:${minSupport}`,
 			`int:${minDuration}`,
 			`int:${maxDuration}`,
 			`str:${url}`,
+			`str:${daoName}`,
 		];
 
 		this.daoAppID = this.runtime.deployApp(

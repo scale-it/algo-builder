@@ -6,7 +6,7 @@ This package provides a class `WebMode` which has variety of high level function
 
 You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/docs/algocomponents/algobutton) to easily integrate with web wallets.
 
-### Relation to algob
+## Relation to algob
 
 `algob` uses `@algo-builder/web` package. However It is not possible to use `algob` directly in a web app, because `algob` uses nodejs file system. Therefore we created a lightweight `@algo-builder/web` package to provide common functionality and support dapp development.
 
@@ -22,17 +22,17 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 `@algo-builder/web` can be included as a library using `yarn add @algo-builder/web` and then import it using `import * from '@algo-builder/web'`.
 
-### Example
+## Example
 
 You can connect to `web` package in your react app by using different wallets. Currently supported wallets include:
 
-1.  ##### AlgoSigner:
+1.  ### AlgoSigner:
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
         const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
 
-2.  ##### MyAlgo Wallet:
+2.  ### MyAlgo Wallet:
 
     Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
 
@@ -41,7 +41,7 @@ You can connect to `web` package in your react app by using different wallets. C
          await wcSession.connectToMyAlgo();
          ```
 
-3.  ##### Wallet Connect:
+3.  ### Wallet Connect:
 
     Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
 
@@ -112,4 +112,33 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+
+## deployApp
+
+`deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
+
+## Example
+
+```js
+// deployment
+const daoAppInfo = await deployer.deployApp(
+	"dao-app-approval.py",
+	"dao-app-clear.py",
+	{
+		sender: creator,
+		localInts: 9,
+		localBytes: 7,
+		globalInts: 4,
+		globalBytes: 2,
+		appArgs: appArgs,
+	},
+	{},
+	{},
+	"DAO App" // app name passed here
+);
+
+// now during querying, you only need this app name
+const appInfo = deployer.getApp("DAO App");
 ```
+
+**Note:** We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.

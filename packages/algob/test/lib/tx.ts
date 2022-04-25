@@ -17,7 +17,13 @@ import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
 import { aliceAcc, bobAcc } from "../mocks/account";
-import { mockAssetInfo, mockGenesisInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
+import {
+	mockAssetInfo,
+	mockGenesisInfo,
+	mockLsig,
+	mockPendingTransactionInformation,
+	mockSuggestedParam,
+} from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 describe("Note in TxParams", () => {
@@ -65,7 +71,7 @@ describe("Opt-In to ASA", () => {
 	let deployer: Deployer;
 	let execParams: wtypes.OptInASAParam;
 	let algod: AlgoOperatorDryRunImpl;
-	let expected: ConfirmedTxInfo;
+	let expected: ConfirmedTxInfo[];
 	beforeEach(async () => {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
@@ -81,13 +87,16 @@ describe("Opt-In to ASA", () => {
 			assetID: 1,
 		};
 		stubAlgodGenesisAndTxParams(algod.algodClient);
-		expected = {
-			"confirmed-round": 1,
-			"asset-index": 1,
-			"application-index": 1,
-			"global-state-delta": "string",
-			"local-state-delta": "string",
-		};
+
+		expected = [
+			{
+				"confirmed-round": 1,
+				"asset-index": 1,
+				"application-index": 1,
+				"global-state-delta": "string",
+				"local-state-delta": "string",
+			},
+		];
 	});
 
 	afterEach(() => {
@@ -692,7 +701,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await deployer.executeTx([execParams]);
+		const [appInfo] = await deployer.executeTx([execParams]);
 
 		deployer = new DeployerRunMode(deployerCfg);
 		execParams = {
@@ -742,7 +751,7 @@ describe("Update transaction test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await deployer.executeTx([execParams]);
+		const [appInfo] = await deployer.executeTx([execParams]);
 
 		// should not be stored in checkpoint if in run mode
 		expectBuilderError(
@@ -816,7 +825,7 @@ describe("Update transaction test in run mode", () => {
 			globalBytes: 1,
 			payFlags: {},
 		};
-		const appInfo = await deployer.executeTx([execParams]);
+		const [appInfo] = await deployer.executeTx([execParams]);
 		expectBuilderError(
 			() => deployer.getAppByFile("approval.teal", "clear.teal"),
 			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
@@ -925,7 +934,7 @@ describe("SDK Transaction object", () => {
 
 		const res = await deployer.executeTx([transaction]);
 		assert.isDefined(res);
-		assert.equal(res["confirmed-round"], 1);
-		assert.equal(res["asset-index"], 1);
+		assert.equal(res[0]["confirmed-round"], 1);
+		assert.equal(res[0]["asset-index"], 1);
 	});
 });

@@ -5,7 +5,7 @@ import {
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
+import type { EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -489,6 +489,15 @@ class DeployerBasicMode {
 			});
 		}
 		return app;
+	}
+
+	/**
+	 * Return receipts for each transaction in group txn
+	 * @param txns list transaction in group
+	 * @returns confirmed tx info of group
+	 */
+	async getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+		return await this.algoOp.getReceiptTxns(txns);
 	}
 }
 

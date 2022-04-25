@@ -12,7 +12,7 @@ Check our [`/examples/multisig`](https://github.com/scale-it/algo-builder/tree/m
 
 In real world scenario, if we're executing transactions using a multisignature account, then to approve these transactions, min no. of signatures (by algorand account secret key) <= threshold are required. So, these transactions will involve an interaction of many users (accounts comprising of the multisig).
 
-`algob` provides `sign-multisig` command to append current user's signature to the transaction file, and outputs the signed transaction in a new file (eg. `signed_out.txn`). Now, current user(say `john`) can either pass this file to another user, or if minimum signatures are met, then you can use [`executeSignedTxFromFile`](https://algobuilder.dev/api/algob/modules.html#executesignedtxnfromfile) function to successfully send transaction to network.
+`algob` provides `sign-multisig` command to append current user's signature to the transaction file, and outputs the signed transaction in a new file (eg. `signed_out.txn`). Now, current user(say `john`) can either pass this file to another user, or if minimum signatures are met, then you can use [`executeSignedTxFromFile`](https://algobuilder.dev/api/algob/modules.html#executeSignedTxnFromFile) function to successfully send transaction to network.
 
 ## Example Usage
 
@@ -48,7 +48,7 @@ Additional flags passed are described below (note that these are required only i
 - `--thr <threshold>`: Multisig threshold.
 - `--addrs <addr1>,<addr2>..<addrN>`: Comma separated addresses comprising of the multsig (addr1,addr2,..). Order is important.
 
-Alternatively, you can also use [`signMultiSig`](https://algobuilder.dev/api/algob/modules.html#signmultisig) function to create a new multisignature transaction, or append a signature to an existing one in a transaction.
+Alternatively, you can also use [`signMultiSig`](https://algobuilder.dev/api/algob/modules.html#signMultiSig) function to create a new multisignature transaction, or append a signature to an existing one in a transaction.
 
 ### Group transaction
 

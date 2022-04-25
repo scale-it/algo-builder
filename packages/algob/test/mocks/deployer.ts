@@ -263,5 +263,8 @@ export class FakeDeployer implements Deployer {
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
 	): Promise<ConfirmedTxInfo> {
 		throw new Error("Not implemented");
+
+	getReceiptTxns(txns: algosdk.Transaction[]): Promise<ConfirmedTxInfo[]> {
+		throw new Error("not implemented");
 	}
 }
