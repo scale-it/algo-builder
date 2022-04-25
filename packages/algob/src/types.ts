@@ -722,7 +722,7 @@ export interface Deployer {
 	 */
 	executeTx: (
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	) => Promise<ConfirmedTxInfo>;
+	) => Promise<ConfirmedTxInfo[]>;
 }
 
 // ************************

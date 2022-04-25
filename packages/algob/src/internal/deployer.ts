@@ -888,13 +888,14 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
 	 * will be signed and sent to network. User can use SDK functions to create transactions.
 	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param deployer Deployer
 	 * @param transactionParam transaction parameters or atomic transaction parameters
 	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
 	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
 	async executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo> {
+	): Promise<ConfirmedTxInfo[]> {
 		let isSDK = false;
 		let signedTxn;
 		if (transactions.length === 0) {
@@ -906,9 +907,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		}
 
 		if (isSDK && signedTxn) {
-			const confirmedTx = await this.sendAndWait(signedTxn);
-			console.debug(confirmedTx);
-			return confirmedTx;
+			await this.sendAndWait(signedTxn);
+			return await this.getReceiptTxns(
+				(transactions as wtypes.TransactionAndSign[]).map((txn) => txn.transaction)
+			);
 		}
 
 		const execParams = transactions as wtypes.ExecParams[];
@@ -917,10 +919,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		try {
 			const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
 			const [txns, signedTxn] = await makeAndSignTx(this, execParams, txIdxMap);
-			const confirmedTx = await this.sendAndWait(signedTxn);
+			await this.sendAndWait(signedTxn);
+			const confirmedTx = await this.getReceiptTxns(txns);
 			console.debug(confirmedTx);
 			await registerCheckpoints(this, execParams, txns, txIdxMap);
-
 			return confirmedTx;
 		} catch (error) {
 			this.persistCP();
@@ -1108,13 +1110,14 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
 	 * will be signed and sent to network. User can use SDK functions to create transactions.
 	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param deployer Deployer
 	 * @param transactionParam transaction parameters or atomic transaction parameters
 	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
 	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
 	async executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo> {
+	): Promise<ConfirmedTxInfo[]> {
 		let isSDK = false;
 		let signedTxn;
 		if (transactions.length === 0) {
@@ -1126,17 +1129,19 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 		}
 
 		if (isSDK && signedTxn) {
-			const confirmedTx = await this.sendAndWait(signedTxn);
-			console.debug(confirmedTx);
-			return confirmedTx;
+			await this.sendAndWait(signedTxn);
+			return await this.getReceiptTxns(
+				(transactions as wtypes.TransactionAndSign[]).map((txn) => txn.transaction)
+			);
 		}
 
 		const execParams = transactions as wtypes.ExecParams[];
 
 		this.assertCPNotDeleted(execParams);
 		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-		const [_, signedTxns] = await makeAndSignTx(this, execParams, txIdxMap);
-		const confirmedTx = await this.sendAndWait(signedTxns);
+		const [txns, signedTxns] = await makeAndSignTx(this, execParams, txIdxMap);
+		await this.sendAndWait(signedTxns);
+		const confirmedTx = await this.getReceiptTxns(txns);
 		console.debug(confirmedTx);
 		return confirmedTx;
 	}

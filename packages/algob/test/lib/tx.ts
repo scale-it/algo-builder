@@ -106,6 +106,7 @@ describe("Opt-In to ASA", () => {
 
 	it("should opt-in to asa using asset id as number", async () => {
 		const res = await deployer.executeTx([execParams]);
+
 		assert.deepEqual(res, expected);
 	});
 

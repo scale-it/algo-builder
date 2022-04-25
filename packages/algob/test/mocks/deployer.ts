@@ -259,10 +259,12 @@ export class FakeDeployer implements Deployer {
 	): Promise<void> {
 		throw new Error("not implemented.");
 	}
+
 	executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo> {
+	): Promise<ConfirmedTxInfo[]> {
 		throw new Error("Not implemented");
+	}
 
 	getReceiptTxns(txns: algosdk.Transaction[]): Promise<ConfirmedTxInfo[]> {
 		throw new Error("not implemented");
