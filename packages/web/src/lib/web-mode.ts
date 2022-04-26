@@ -1,7 +1,7 @@
 import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
-import { ExecParams, TxParams } from "../types";
+import { ExecParams, isSDKTransactionAndSign, TransactionAndSign, TxParams } from "../types";
 import { log } from "./logger";
 import { mkTransaction } from "./txn";
 
@@ -21,7 +21,9 @@ export class WebMode {
 	 * wait for confirmation for transaction using transaction id
 	 * @param txId Transaction id
 	 */
-	async waitForConfirmation(txId: string): Promise<JsonPayload> {
+	async waitForConfirmation(
+		txId: string
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const response = await this.algoSigner.algod({
 			ledger: this.chainName,
 			path: "/v2/status",
@@ -38,7 +40,7 @@ export class WebMode {
 				pendingInfo[CONFIRMED_ROUND] !== null &&
 				(pendingInfo[CONFIRMED_ROUND] as number) > 0
 			) {
-				return pendingInfo;
+				return pendingInfo as unknown as algosdk.modelsv2.PendingTransactionResponse;
 			}
 			// TODO: maybe we should use "sleep" instead of pinging a node again?
 			lastround++;
@@ -129,18 +131,22 @@ export class WebMode {
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
-	 * @param execParams transaction parameters or atomic transaction parameters
+	 * @param transactions transaction parameters, atomic transaction parameters
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
-	async executeTx(execParams: ExecParams[]): Promise<JsonPayload> {
+	async executeTx(
+		transactions: ExecParams[] | TransactionAndSign[]
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let txns: Transaction[] = [];
-		if (execParams.length > 16) {
+		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+		if (!isSDKTransactionAndSign(transactions[0])) {
+			const execParams = transactions as ExecParams[];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+			}
 		}
-
 		txns = algosdk.assignGroupID(txns);
 		const binaryTxs = txns.map((txn: Transaction) => {
 			return txn.toByte();
@@ -161,7 +167,7 @@ export class WebMode {
 	}
 	/** @deprecated */
 	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams);
-		else return this.executeTx([execParams]);
+		if (Array.isArray(execParams)) return this.executeTx(execParams) as unknown as JsonPayload;
+		else return this.executeTx([execParams]) as unknown as JsonPayload;
 	}
 }
