@@ -536,8 +536,8 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			//TODO: this function should return cost
-			let cost = +instruction.execute(this.stack);
+			//TODO this should return cost
+			const costFromExecute = instruction.execute(this.stack);
 
 			if (
 				this.runtime.ctx.isInnerTx &&
@@ -551,20 +551,20 @@ export class Interpreter {
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
+			if (costFromExecute === undefined) {
+				this.cost += this.lineToCost[instruction.line];
+			} else {
+				this.cost = costFromExecute;
+			}
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
-			} else {
-				//TODO: after updating the opcodes execute to return cost check if we can remove that
-				if (cost === undefined) {
-					cost = this.lineToCost[instruction.line];
-				}
-				dynamicCost += cost;
-				if (mode === ExecutionMode.SIGNATURE) {
-					assertMaxCost(dynamicCost, mode);
-					txReceipt.gas = dynamicCost;
+			}
+			if (this.tealVersion >= 4) {
+				if (this.mode === ExecutionMode.SIGNATURE) {
+					assertMaxCost(this.cost, this.mode);
+					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += cost;
-					const maxPooledApplCost = MaxAppProgramCost * this.runtime.ctx.gtxs.length;
+					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,
