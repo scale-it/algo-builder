@@ -100,6 +100,8 @@ Added:
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
 - Only use list transaction in executeTx.
 - Rename the executeTransaction to executeTx
+
+- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` . 
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
