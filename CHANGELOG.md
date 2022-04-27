@@ -100,6 +100,9 @@ Added:
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
 - Only use list transaction in executeTx.
 - Rename the executeTransaction to executeTx
+
+- The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is 
+recommended to use the method from `Deployer` rather than the function dirrectly. 
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
