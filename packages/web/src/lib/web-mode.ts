@@ -3,6 +3,7 @@ import algosdk, { SuggestedParams, Transaction } from "algosdk";
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
 import { ExecParams, isSDKTransactionAndSign, TransactionAndSign, TxParams } from "../types";
+import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
 import { mkTransaction } from "./txn";
 
@@ -30,9 +31,10 @@ export class WebMode {
 			path: "/v2/status",
 		});
 		log(response);
-		let lastround = response[LAST_ROUND] as number;
+		const startRound = response[LAST_ROUND] as number;
+		let currentRound = startRound;
 		// eslint-disable-next-line no-constant-condition
-		while (true) {
+		while (currentRound < startRound + WAIT_ROUNDS) {
 			const pendingInfo = await this.algoSigner.algod({
 				ledger: this.chainName,
 				path: `/v2/transactions/pending/${txId}`,
@@ -44,12 +46,13 @@ export class WebMode {
 				return pendingInfo as unknown as algosdk.modelsv2.PendingTransactionResponse;
 			}
 			// TODO: maybe we should use "sleep" instead of pinging a node again?
-			lastround++;
+			currentRound += 1;
 			await this.algoSigner.algod({
 				ledger: this.chainName,
-				path: `/v2/status/wait-for-block-after/${lastround}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
+				path: `/v2/status/wait-for-block-after/${currentRound}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
 			});
 		}
+		throw new Error(`Transaction not confirmed after ${WAIT_ROUNDS} rounds`);
 	}
 
 	/**
