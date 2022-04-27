@@ -1,6 +1,7 @@
 import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
+import { BuilderError, ERRORS } from "../errors/errors";
 import { ExecParams, isSDKTransactionAndSign, TransactionAndSign, TxParams } from "../types";
 import { log } from "./logger";
 import { mkTransaction } from "./txn";
@@ -138,8 +139,10 @@ export class WebMode {
 		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		let txns: Transaction[] = [];
-		if (transactions.length > 16) {
-			throw new Error("Maximum size of an atomic transfer group is 16");
+		if (transactions.length > 16 || transactions.length == 0) {
+			throw new BuilderError(ERRORS.GENERAL.TRANSACTION_LENGTH_ERROR, {
+				length: transactions.length,
+			});
 		}
 		if (!isSDKTransactionAndSign(transactions[0])) {
 			const execParams = transactions as ExecParams[];
