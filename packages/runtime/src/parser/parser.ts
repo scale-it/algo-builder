@@ -457,7 +457,6 @@ const interpreterReqList = new Set([
 	"gitxna",
 	"gitxnas",
 	"itxnas",
-	"base64_decode",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);

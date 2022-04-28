@@ -4764,7 +4764,7 @@ export class Gitxnas extends Gtxnas {
  */
 export class Base64Decode extends Op {
 	readonly line: number;
-	readonly encoding: Base64Encoding;
+	readonly encoding: BufferEncoding;
 
 	/**
 	 * Asserts 1 argument is passed.
@@ -4778,11 +4778,11 @@ export class Base64Decode extends Op {
 		const argument = args[0];
 		switch (argument) {
 			case "URLEncoding": {
-				this.encoding = 0;
+				this.encoding = "base64url";
 				break;
 			}
 			case "StdEncoding": {
-				this.encoding = 1;
+				this.encoding = "base64";
 				break;
 			}
 			default: {
@@ -4800,14 +4800,13 @@ export class Base64Decode extends Op {
 		const enc = new TextDecoder("utf-8");
 		const decoded = enc.decode(last);
 		switch (this.encoding) {
-			case Base64Encoding.URL:
+			case "base64url":
 				assertBase64Url(convertToString(last), this.line);
-				stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64url")));
 				break;
-			case Base64Encoding.STD:
+			case "base64":
 				assertBase64(convertToString(last), this.line);
-				stack.push(new Uint8Array(Buffer.from(decoded.toString(), "base64")));
 				break;
 		}
+		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
 	}
 }
