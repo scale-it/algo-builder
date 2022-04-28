@@ -101,7 +101,7 @@ export class Pragma extends Op {
 			interpreter.tealVersion = this.version;
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
-				expected: "till #4",
+				expected: MaxTEALVersion,
 				got: args.join(" "),
 				line: line,
 			});

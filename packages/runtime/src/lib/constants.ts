@@ -12,7 +12,7 @@ export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
-export const MaxTEALVersion = 6;
+export const MaxTEALVersion = 7;
 export const MinVersionSupportC2CCall = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
@@ -152,6 +152,10 @@ TxnFields[6] = {
 	...TxnFields[5],
 };
 
+TxnFields[7] = {
+	...TxnFields[6],
+};
+
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
 	1: {},
 	2: {},
@@ -169,6 +173,10 @@ ITxnFields[6] = {
 	...ITxnFields[5],
 };
 
+ITxnFields[7] = {
+	...ITxnFields[6],
+};
+
 // transaction fields of type array
 export const TxArrFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -178,6 +186,7 @@ TxArrFields[3] = new Set([...TxArrFields[2], "Assets", "Applications"]);
 TxArrFields[4] = cloneDeep(TxArrFields[3]);
 TxArrFields[5] = cloneDeep(TxArrFields[4]);
 TxArrFields[6] = cloneDeep(TxArrFields[5]);
+TxArrFields[7] = cloneDeep(TxArrFields[6]);
 
 // itxn fields of type array
 export const ITxArrFields: { [key: number]: Set<string> } = {
@@ -189,6 +198,7 @@ export const ITxArrFields: { [key: number]: Set<string> } = {
 };
 
 ITxArrFields[6] = cloneDeep(ITxArrFields[5]);
+ITxArrFields[7] = cloneDeep(ITxArrFields[6]);
 
 export const TxFieldDefaults: { [key: string]: any } = {
 	Sender: ZERO_ADDRESS,
@@ -275,6 +285,7 @@ AssetParamMap[5] = {
 };
 
 AssetParamMap[6] = { ...AssetParamMap[5] };
+AssetParamMap[7] = { ...AssetParamMap[6] };
 
 // app param use for app_params_get opcode
 export const AppParamDefined: { [key: number]: Set<string> } = {
@@ -296,6 +307,7 @@ export const AppParamDefined: { [key: number]: Set<string> } = {
 };
 
 AppParamDefined[6] = cloneDeep(AppParamDefined[5]);
+AppParamDefined[7] = cloneDeep(AppParamDefined[6]);
 
 // param use for query acct_params_get opcode
 
@@ -387,6 +399,10 @@ GlobalFields[6] = {
 	OpcodeBudget: 0,
 	CallerApplicationID: null,
 	CallerApplicationAddress: null,
+};
+
+GlobalFields[7] = {
+	...GlobalFields[6],
 };
 
 // creating map for opcodes whose cost is other than 1

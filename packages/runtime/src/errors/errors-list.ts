@@ -126,7 +126,8 @@ by an index that does not exist.`,
 	},
 	PRAGMA_VERSION_ERROR: {
 		number: 1017,
-		message: "Pragma version Error - Expected version: %expected%, got: %got%, Line: %line%",
+		message:
+			"Pragma version Error - Expected version up to: %expected%, got: %got%, Line: %line%",
 		title: PARSE_ERROR,
 		description: ``,
 	},

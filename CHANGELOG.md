@@ -62,6 +62,7 @@ Added:
   console.log("txn1 information: ", receipts[2]);
 ```
 
+
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
