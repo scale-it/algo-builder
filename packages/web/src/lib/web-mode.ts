@@ -154,7 +154,7 @@ export class WebMode {
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
 				? { txn: txn, signers: [] }
-				: { txn: txn, signers: [getFromAddress(execParams[txnId])] };
+				: { txn: txn };
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
