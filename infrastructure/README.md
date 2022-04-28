@@ -151,7 +151,7 @@ By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on l
 
 ### Installation with docker
 
-The Indexer automatic start when you run sandbox algorand.
+The Indexer starts automatically when you run sandbox algorand.
 
 ### Installation on local
 
