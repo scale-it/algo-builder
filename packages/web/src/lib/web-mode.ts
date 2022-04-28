@@ -3,7 +3,7 @@ import algosdk, { SuggestedParams, Transaction } from "algosdk";
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { ExecParams, Sign, SignType, TxParams } from "../types";
 import { log } from "./logger";
-import { mkTransaction } from "./txn";
+import { getFromAddress, mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
@@ -154,7 +154,7 @@ export class WebMode {
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
 				? { txn: txn, signers: [] }
-				: { txn: txn };
+				: { txn: txn, signers: [getFromAddress(execParams[txnId])] };
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
