@@ -130,21 +130,6 @@ remove-reach:
 	$(REACH_PATH)/reach docker-reset
 	rm -r $(REACH_PATH)
 
-## --- Indexer jobs (docker based)--- ##
-
-indexer-docker-up:
-# clone indexer git repo: https://github.com/algorand/indexer.git and pull
-	@[ -d $(INDEXER_PATH) ] || git clone $(INDEXER_REMOTE_REPO) $(INDEXER_PATH)
-	(cd $(INDEXER_PATH); git reset --hard; git pull;)
-	@cd $(INDEXER_PATH) && docker-compose up
-
-indexer-docker-down:
-# stop and remove indexer containers and images
-	@if ! [ -d $(INDEXER_PATH) ]; then	\
-		echo "Repo not found: $(INDEXER_PATH) does not exist."; exit 1; fi
-	@(cd $(INDEXER_PATH); docker-compose down -v --rmi all --remove-orphans;)
-	rm -rf $(INDEXER_PATH)
-
 ## --- Indexer jobs (local based)--- ##
 
 setup-postgresql:
