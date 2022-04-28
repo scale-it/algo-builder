@@ -6633,29 +6633,29 @@ describe("Teal Opcodes", function () {
 
 		it("Should decode base64 encoded data and push it to stack", () => {
 			stack.push(toPushUrl);
-			const opUrl = new Base64Decode(["0"], 0);
+			const opUrl = new Base64Decode(["URLEncoding"], 0);
 			opUrl.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 			stack.push(toPushStd);
-			const opStd = new Base64Decode(["1"], 0);
+			const opStd = new Base64Decode(["StdEncoding"], 0);
 			opStd.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 		});
 
 		it("Should throw an error when last stack element is not base64 encoded", () => {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseUrl, "utf-8")));
-			const op = new Base64Decode(["1"], 0);
+			const op = new Base64Decode(["StdEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
 		});
 
 		it("Should throw an error when last stack element is not base64Url encoded", () => {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseStd, "utf-8")));
-			const op = new Base64Decode(["0"], 0);
+			const op = new Base64Decode(["URLEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64URL);
 		});
 
 		it("Should throw an error when the stack is empty", () => {
-			const op = new Base64Decode(["1"], 0);
+			const op = new Base64Decode(["StdEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 

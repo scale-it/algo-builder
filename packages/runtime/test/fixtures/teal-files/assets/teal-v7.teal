@@ -1,2 +1,2 @@
 #pragma version 7
-base64_decode 0
+base64_decode URLEncoding

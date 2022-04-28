@@ -401,7 +401,7 @@ maximun uint128`,
 	},
 	UNKNOWN_ENCODING: {
 		number: 1058,
-		message: "Encoding e must be {0, 1}, got :%encoding%, at line %line%",
+		message: "Encoding e must be {URLEncoding, StdEncoding}, got :%encoding%, at line %line%",
 		title: "Unknown encoding",
 		description: "Unknown encoding",
 	},

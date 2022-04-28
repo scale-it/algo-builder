@@ -2597,7 +2597,7 @@ describe("Parser", function () {
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
-				new Base64Decode(["0"], 2),
+				new Base64Decode(["URLEncoding"], 2),
 			];
 
 			assert.deepEqual(expected, res);

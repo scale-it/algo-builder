@@ -4768,21 +4768,30 @@ export class Base64Decode extends Op {
 
 	/**
 	 * Asserts 1 argument is passed.
-	 * @param args Expected arguments: [e], where e = {0, 1}.
+	 * @param args Expected arguments: [e], where e = {URLEncoding, StdEncoding}.
 	 * @param line line number in TEAL file
 	 */
 	constructor(args: string[], line: number) {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.encoding = Number(args[0]);
-		if (!(Number(args[0]) in Base64Encoding)) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
-				encoding: Number(args[0]),
-				line: this.line,
-			});
+		const argument = args[0];
+		switch (argument) {
+			case "URLEncoding": {
+				this.encoding = 0;
+				break;
+			}
+			case "StdEncoding": {
+				this.encoding = 1;
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
+					encoding: argument,
+					line: this.line,
+				});
+			}
 		}
-		this.encoding = Number(args[0]);
 	}
 
 	execute(stack: TEALStack): void {
