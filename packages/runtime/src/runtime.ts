@@ -10,6 +10,7 @@ import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
@@ -581,18 +582,7 @@ export class Runtime {
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
-		this.ctx.debugStack = debugStack;
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0
-		);
-
-		this.store = this.ctx.state;
-		return txReceipt;
+		return this.deployApp(approvalProgram, clearProgram, flags, payFlags, {}, debugStack);
 	}
 
 	/**
@@ -615,6 +605,7 @@ export class Runtime {
 	): AppInfo {
 		this.addCtxAppCreateTxn(flags, payFlags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
 
 		const txReceipt = this.ctx.deployApp(
 			flags.sender.addr,
@@ -671,6 +662,7 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
 		const txReceipt = this.ctx.optInToApp(accountAddr, appID, 0);
 
 		this.store = this.ctx.state;
@@ -727,6 +719,7 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
 		const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
 
 		// If successful, Update programs and state
@@ -922,6 +915,13 @@ export class Runtime {
 			types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
 		);
 
+		// calculate budget for single/group tx
+		const applCallTxNumber = gtxs.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
+
+		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
+
 		const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
 
 		// update store only if all the transactions are passed
@@ -954,7 +954,7 @@ export class Runtime {
 		this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
 		// reset pooled opcode cost for single tx, this is to handle singular functions
 		// which don't "initialize" a new ctx (eg. deployApp)
-		if (this.ctx.gtxs.length === 1) {
+		if (this.ctx.gtxs.length === 1 && !this.ctx.isInnerTx) {
 			this.ctx.pooledApplCost = 0;
 		}
 		interpreter.execute(program, executionMode, this, debugStack);

@@ -103,6 +103,9 @@ Added:
 
 - The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is 
 recommended to use the method from `Deployer` rather than the function dirrectly. 
+
+- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` . 
+
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
