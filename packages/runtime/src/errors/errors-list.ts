@@ -126,7 +126,8 @@ by an index that does not exist.`,
 	},
 	PRAGMA_VERSION_ERROR: {
 		number: 1017,
-		message: "Pragma version Error - Expected version: %expected%, got: %got%, Line: %line%",
+		message:
+			"Pragma version Error - Expected version up to: %expected%, got: %got%, Line: %line%",
 		title: PARSE_ERROR,
 		description: ``,
 	},
@@ -397,6 +398,18 @@ maximun uint128`,
 			"itxn_next without itxn_begin: trying to submit an inner transaction without begin, at line %line%",
 		title: "itxn_next without itxn_begin",
 		description: `itxn_next without itxn_begin`,
+	},
+	UNKNOWN_ENCODING: {
+		number: 1058,
+		message: "Encoding e must be {URLEncoding, StdEncoding}, got :%encoding%, at line %line%",
+		title: "Unknown encoding",
+		description: "Unknown encoding",
+	},
+	INVALID_BASE64URL: {
+		number: 1059,
+		message: "Invalid Base64Url Error - value %val% is not base64Url, Line: %line%",
+		title: PARSE_ERROR,
+		description: `value %exp% is not base64Url`,
 	},
 };
 

@@ -536,7 +536,8 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			instruction.execute(this.stack);
+			//TODO this should return cost
+			const costFromExecute = instruction.execute(this.stack);
 
 			if (
 				this.runtime.ctx.isInnerTx &&
@@ -550,7 +551,11 @@ export class Interpreter {
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
-			this.cost += this.lineToCost[instruction.line];
+			if (costFromExecute === undefined) {
+				this.cost += this.lineToCost[instruction.line];
+			} else {
+				this.cost = costFromExecute;
+			}
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
 			}

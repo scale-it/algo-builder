@@ -21,6 +21,7 @@ import {
 	Args,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -386,6 +387,14 @@ opCodeMap[6] = {
 	gitxna: Gitxna,
 	gitxnas: Gitxnas,
 	itxnas: ITxnas,
+};
+
+/**
+ * TEALv7
+ */
+opCodeMap[7] = {
+	...opCodeMap[6],
+	base64_decode: Base64Decode,
 };
 
 // list of opcodes with exactly one parameter.

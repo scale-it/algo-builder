@@ -36,6 +36,7 @@ import {
 	Args,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -6614,6 +6615,61 @@ describe("Teal Opcodes", function () {
 		it("Should fail: stack empty", () => {
 			const op = new ITxnas(["Accounts"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+		});
+	});
+
+	describe("Tealv7: base64Decode opcode", function () {
+		let stack: Stack<StackElem>;
+		const encoded64BaseStd = "YWJjMTIzIT8kKiYoKSctPUB+";
+		const encoded64BaseUrl = "YWJjMTIzIT8kKiYoKSctPUB-";
+		const decoded64Base = "abc123!?$*&()'-=@~";
+		const toPushStd = Buffer.from(encoded64BaseStd, "utf-8");
+		const toPushUrl = Buffer.from(encoded64BaseUrl, "utf-8");
+		const expectedBytes = new Uint8Array(Buffer.from(decoded64Base, "utf-8"));
+
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should decode base64 encoded data and push it to stack", () => {
+			stack.push(toPushUrl);
+			const opUrl = new Base64Decode(["URLEncoding"], 0);
+			opUrl.execute(stack);
+			assert.deepEqual(expectedBytes, stack.pop());
+			stack.push(toPushStd);
+			const opStd = new Base64Decode(["StdEncoding"], 0);
+			opStd.execute(stack);
+			assert.deepEqual(expectedBytes, stack.pop());
+		});
+
+		it("Should throw an error when last stack element is not base64 encoded", () => {
+			stack.push(new Uint8Array(Buffer.from(encoded64BaseUrl, "utf-8")));
+			const op = new Base64Decode(["StdEncoding"], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
+		});
+
+		it("Should throw an error when last stack element is not base64Url encoded", () => {
+			stack.push(new Uint8Array(Buffer.from(encoded64BaseStd, "utf-8")));
+			const op = new Base64Decode(["URLEncoding"], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64URL);
+		});
+
+		it("Should throw an error when the stack is empty", () => {
+			const op = new Base64Decode(["StdEncoding"], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+		});
+
+		it("Should throw an error when argument not in bound", () => {
+			stack.push(toPushStd);
+			expectRuntimeError(
+				() => new Base64Decode(["3"], 0),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING
+			);
+		});
+
+		it("Should throw an error when argument not provided", () => {
+			stack.push(toPushStd);
+			expectRuntimeError(() => new Base64Decode([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
 	});
 });

@@ -48,6 +48,8 @@ Added:
 
 - Added support for saving smart contract template params in ASCCache.
 
+- Teal v7 support:
+  - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
 - `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `. 
 
@@ -59,6 +61,7 @@ Added:
   console.log("txn0 information: ", receipts[0]);
   console.log("txn1 information: ", receipts[2]);
 ```
+
 
 ### Template improvements
 

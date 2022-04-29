@@ -43,6 +43,8 @@ import {
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
+	assertBase64,
+	assertBase64Url,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -61,6 +63,7 @@ import {
 	txnSpecByField,
 } from "../lib/txn";
 import {
+	Base64Encoding,
 	DecodingMode,
 	EncodingType,
 	EncTx,
@@ -98,7 +101,7 @@ export class Pragma extends Op {
 			interpreter.tealVersion = this.version;
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
-				expected: "till #4",
+				expected: MaxTEALVersion,
 				got: args.join(" "),
 				line: line,
 			});
@@ -4752,5 +4755,58 @@ export class Gitxnas extends Gtxnas {
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
 		super.execute(stack);
+	}
+}
+
+/**
+ * Takes the last value from stack and if base64encoded, decodes it acording to the
+ * encoding e and pushes it back to the stack, otherwise throws an error
+ */
+export class Base64Decode extends Op {
+	readonly line: number;
+	readonly encoding: BufferEncoding;
+
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {URLEncoding, StdEncoding}.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		switch (argument) {
+			case "URLEncoding": {
+				this.encoding = "base64url";
+				break;
+			}
+			case "StdEncoding": {
+				this.encoding = "base64";
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
+					encoding: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+
+	execute(stack: TEALStack): void {
+		this.assertMinStackLen(stack, 1, this.line);
+		const last = this.assertBytes(stack.pop(), this.line);
+		const enc = new TextDecoder("utf-8");
+		const decoded = enc.decode(last);
+		switch (this.encoding) {
+			case "base64url":
+				assertBase64Url(convertToString(last), this.line);
+				break;
+			case "base64":
+				assertBase64(convertToString(last), this.line);
+				break;
+		}
+		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
 	}
 }
