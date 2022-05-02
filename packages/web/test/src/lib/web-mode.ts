@@ -1,4 +1,5 @@
 import algosdk, { Account } from "algosdk";
+import assert from "assert";
 
 import { types, WebMode } from "../../../src";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
@@ -23,7 +24,8 @@ describe("Webmode test", function () {
 			amountMicroAlgos: 10000n,
 			payFlags: {},
 		};
-		const ans = await webMode.executeTx([txnParams]);
-		console.log(ans);
+		assert.doesNotThrow(async () => {
+			await webMode.executeTx([txnParams]);
+		});
 	});
 });

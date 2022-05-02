@@ -151,6 +151,7 @@ export class WebMode {
 			return this.algoSigner.encoding.msgpackToBase64(txn);
 		});
 
+		// with logic signature we don't need signers.
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
 				? { txn: txn, signers: [] }
@@ -167,7 +168,7 @@ export class WebMode {
 				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
 				signedTxn[txnId] = {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
-					txID: lsigTxn.txID,
+					txId: lsigTxn.txID,
 				};
 			}
 		}
