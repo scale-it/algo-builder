@@ -151,14 +151,7 @@ By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on l
 
 ### Installation with docker
 
-**Prerequisite:** Make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages).
-
-Following make jobs are provided:
-
-1. `indexer-docker-up`: Clones the indexer repo to `~/.algorand-indexer` and runs `docker-compose up` on the [docker-compose.yml](https://github.com/algorand/indexer/blob/develop/docker-compose.yml) file. Starts two services: [`indexer`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L4)(on port `8980`) & [`indexer-db`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L17)(on port `5432`).
-2. `indexer-docker-down`: Stops and removes indexer related container and images.
-
-**NOTE:** Docker based setup runs indexer in a "[read-only](https://github.com/algorand/indexer/blob/develop/docker/run.sh#L10)" mode, without connecting to the private-net `algod` node. Read more about this mode [here](https://github.com/algorand/indexer#read-only).
+The Indexer starts automatically when you run Algorand Sandbox.
 
 ### Installation on local
 

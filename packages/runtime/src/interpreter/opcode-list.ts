@@ -28,6 +28,7 @@ import {
 	AssetParamMap,
 	GlobalFields,
 	MathOp,
+	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
 	MAX_INNER_TRANSACTIONS,
 	MAX_INPUT_BYTE_LEN,
@@ -42,6 +43,8 @@ import {
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
+	assertBase64,
+	assertBase64Url,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -60,9 +63,11 @@ import {
 	txnSpecByField,
 } from "../lib/txn";
 import {
+	Base64Encoding,
 	DecodingMode,
 	EncodingType,
 	EncTx,
+	ExecutionMode,
 	StackElem,
 	TEALStack,
 	TxnType,
@@ -96,7 +101,7 @@ export class Pragma extends Op {
 			interpreter.tealVersion = this.version;
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
-				expected: "till #4",
+				expected: MaxTEALVersion,
 				got: args.join(" "),
 				line: line,
 			});
@@ -1739,6 +1744,16 @@ export class Global extends Op {
 			case "CallerApplicationAddress": {
 				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
 				result = decodeAddress(callerAddress).publicKey;
+				break;
+			}
+
+			case "OpcodeBudget": {
+				const maxBudget = this.interpreter.getBudget();
+				const currentTotalCost =
+					this.interpreter.mode === ExecutionMode.SIGNATURE
+						? this.interpreter.cost
+						: this.interpreter.runtime.ctx.pooledApplCost;
+				result = maxBudget - (currentTotalCost + 1); // include global OpcodeBudget
 				break;
 			}
 			default: {
@@ -4064,6 +4079,12 @@ export class ITxnSubmit extends Op {
 			}
 		}
 
+		// increase Budget when submit application call transaction
+		const applCallTxNumber = this.interpreter.currentInnerTxnGroup.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
+		this.interpreter.runtime.ctx.budget += MAX_APP_PROGRAM_COST * applCallTxNumber;
+
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
 		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
@@ -4734,5 +4755,58 @@ export class Gitxnas extends Gtxnas {
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
 		super.execute(stack);
+	}
+}
+
+/**
+ * Takes the last value from stack and if base64encoded, decodes it acording to the
+ * encoding e and pushes it back to the stack, otherwise throws an error
+ */
+export class Base64Decode extends Op {
+	readonly line: number;
+	readonly encoding: BufferEncoding;
+
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {URLEncoding, StdEncoding}.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		switch (argument) {
+			case "URLEncoding": {
+				this.encoding = "base64url";
+				break;
+			}
+			case "StdEncoding": {
+				this.encoding = "base64";
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
+					encoding: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+
+	execute(stack: TEALStack): void {
+		this.assertMinStackLen(stack, 1, this.line);
+		const last = this.assertBytes(stack.pop(), this.line);
+		const enc = new TextDecoder("utf-8");
+		const decoded = enc.decode(last);
+		switch (this.encoding) {
+			case "base64url":
+				assertBase64Url(convertToString(last), this.line);
+				break;
+			case "base64":
+				assertBase64(convertToString(last), this.line);
+				break;
+		}
+		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
 	}
 }

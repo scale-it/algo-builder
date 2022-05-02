@@ -21,6 +21,7 @@ import {
 	Args,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -148,9 +149,9 @@ import {
 	Uncover,
 } from "../interpreter/opcode-list";
 import {
-	LogicSigMaxCost,
+	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
-	MaxAppProgramCost,
+	MAX_APP_PROGRAM_COST,
 	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
@@ -386,6 +387,14 @@ opCodeMap[6] = {
 	gitxna: Gitxna,
 	gitxnas: Gitxnas,
 	itxnas: ITxnas,
+};
+
+/**
+ * TEALv7
+ */
+opCodeMap[7] = {
+	...opCodeMap[6],
+	base64_decode: Base64Decode,
 };
 
 // list of opcodes with exactly one parameter.
@@ -801,19 +810,19 @@ export function assertMaxCost(
 ): void {
 	if (mode === ExecutionMode.SIGNATURE) {
 		// check max cost (for stateless)
-		if (gas > LogicSigMaxCost) {
+		if (gas > LOGIC_SIG_MAX_COST) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: LogicSigMaxCost,
+				maxcost: LOGIC_SIG_MAX_COST,
 				mode: "Stateless",
 			});
 		}
 	} else {
-		if (gas > (maxPooledApplCost ?? MaxAppProgramCost)) {
+		if (gas > (maxPooledApplCost ?? MAX_APP_PROGRAM_COST)) {
 			// check max cost (for stateful)
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: maxPooledApplCost ?? MaxAppProgramCost,
+				maxcost: maxPooledApplCost ?? MAX_APP_PROGRAM_COST,
 				mode: "Stateful",
 			});
 		}
@@ -880,6 +889,50 @@ export function parser(
 	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
 	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
+}
+
+// check algorand is auto added intcblock for optimize size contract
+export function isAddIntcblock(ops: Operator[], interpreter: Interpreter): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Intcblock || ops[1] instanceof Intcblock) return false;
+	const intCount: { [key: string]: number } = {};
+	for (const int of interpreter.intcblock) {
+		intCount[int.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Int) {
+			if (intCount[op.uint64.toString()] === undefined) {
+				intCount[op.uint64.toString()] = 0;
+			}
+			intCount[op.uint64.toString()] += 1;
+			if (intCount[op.uint64.toString()] >= 2) return true;
+		}
+	}
+
+	return false;
+}
+
+// check algorand is auto added byteblock for optimize size contract
+export function isAddedBytecblock(ops: Operator[], interpreter: Interpreter): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Bytecblock || ops[1] instanceof Bytecblock) return false;
+	const byteCount: { [key: string]: number } = {};
+	for (const byte of interpreter.bytecblock) {
+		byteCount[byte.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Byte) {
+			if (byteCount[op.str] === undefined) {
+				byteCount[op.str] = 0;
+			}
+			byteCount[op.str] += 1;
+			if (byteCount[op.str] >= 2) return true;
+		}
+	}
+
+	return false;
 }
 
 /**

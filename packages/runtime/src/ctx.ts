@@ -12,6 +12,7 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { validateOptInAccNames } from "./lib/asa";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MAX_APP_PROGRAM_COST,
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
@@ -56,6 +57,7 @@ export class Ctx implements Context {
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
+	budget: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 
 	constructor(
@@ -83,6 +85,7 @@ export class Ctx implements Context {
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
 		this.remainingFee = 0;
+		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {

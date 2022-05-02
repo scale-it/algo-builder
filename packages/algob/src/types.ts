@@ -711,6 +711,18 @@ export interface Deployer {
 	 * @param execParams Transaction execution parameters
 	 */
 	assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void;
+
+	/** Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	executeTx: (
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	) => Promise<ConfirmedTxInfo[]>;
 }
 
 // ************************

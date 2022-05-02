@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { tokenMap, couponValue, redeemCouponTx } = require("./common/common.js");
 
 /**
@@ -33,6 +32,6 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
 	);
 
 	console.log(`* Redeeming ${amount} tokens for ${buyerAccount.name} from Dex: ${dex}!`);
-	await executeTx(deployer, groupTx);
+	await deployer.executeTx(groupTx);
 	console.log("Tokens redeemed!");
 };

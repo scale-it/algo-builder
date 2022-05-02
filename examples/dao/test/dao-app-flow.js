@@ -106,6 +106,7 @@ describe("DAO test", function () {
 	const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
+	const daoName = "DAO";
 
 	function setUpDAO() {
 		govTokenID = runtime.addAsset("gov-token", {
@@ -118,6 +119,7 @@ describe("DAO test", function () {
 			`int:${minDuration}`,
 			`int:${maxDuration}`,
 			`str:${url}`,
+			`str:${daoName}`,
 		];
 
 		const approvalFileName = "dao-app-approval.py";
@@ -179,6 +181,7 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("min_duration"), BigInt(minDuration));
 		assert.deepEqual(getGlobal("max_duration"), BigInt(maxDuration));
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
+		assert.deepEqual(getGlobal("dao_name"), parsing.stringToBytes(daoName));
 
 		// opt in deposit account (dao app account) to gov_token asa
 		const optInToGovASAParam = [

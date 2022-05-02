@@ -1,8 +1,8 @@
-const { executeTx, readAppGlobalState, readAppLocalState } = require("@algo-builder/algob");
+const { readAppGlobalState, readAppLocalState } = require("@algo-builder/algob");
 
 exports.executeTx = async function (deployer, txnParams) {
 	try {
-		await executeTx(deployer, txnParams);
+		await deployer.executeTx(deployer, txnParams);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 	}
