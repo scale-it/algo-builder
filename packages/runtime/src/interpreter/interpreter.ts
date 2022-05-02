@@ -564,8 +564,7 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					//TODO here we need some updating probably the if else statement from above
-					this.runtime.ctx.pooledApplCost += this.cost;
+					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,
