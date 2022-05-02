@@ -3575,8 +3575,8 @@ export class Extract3 extends Op {
 
 	execute(stack: TEALStack): void {
 		this.assertMinStackLen(stack, 3, this.line);
-		const length = this.assertUInt8(stack.pop(), this.line);
-		const start = this.assertUInt8(stack.pop(), this.line);
+		const length = Number(this.assertBigInt(stack.pop(), this.line));
+		const start = Number(this.assertBigInt(stack.pop(), this.line));
 		const array = this.assertBytes(stack.pop(), this.line);
 
 		stack.push(this.opExtractImpl(array, start, length));
@@ -3611,7 +3611,7 @@ class ExtractUintN extends Op {
 
 	execute(stack: TEALStack): void {
 		this.assertMinStackLen(stack, 2, this.line);
-		const start = this.assertUInt8(stack.pop(), this.line);
+		const start = Number(this.assertBigInt(stack.pop(), this.line));
 		const array = this.assertBytes(stack.pop(), this.line);
 
 		const sliced = this.opExtractImpl(array, start, this.extractBytes); // extract n bytes

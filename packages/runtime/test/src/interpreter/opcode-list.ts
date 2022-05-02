@@ -5650,6 +5650,7 @@ describe("Teal Opcodes", function () {
 
 	describe("Tealv5: Extract opcodes", () => {
 		const stack = new Stack<StackElem>();
+		const longByte = parsing.stringToBytes("a".repeat(400));
 
 		it("extract", () => {
 			stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
@@ -5664,6 +5665,13 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 
 			assert.deepEqual(stack.pop(), new Uint8Array([23, 2, 4]));
+
+			// big bytes(length = 400)
+			stack.push(longByte);
+			op = new Extract(["300", "10"], 1);
+			op.execute(stack);
+
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("a".repeat(10)));
 
 			stack.push(new Uint8Array([12, 23]));
 			op = new Extract(["1", "10"], 1);
@@ -5685,6 +5693,14 @@ describe("Teal Opcodes", function () {
 
 			assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
 
+			stack.push(longByte);
+			stack.push(300n);
+			stack.push(10n);
+			op = new Extract3([], 1);
+			op.execute(stack);
+
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("a".repeat(10)));
+
 			stack.push(new Uint8Array([12, 23]));
 			stack.push(1n);
 			stack.push(10n);
@@ -5700,7 +5716,16 @@ describe("Teal Opcodes", function () {
 			const op = new ExtractUint16([], 1);
 			op.execute(stack);
 
-			const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4]));
+			let expected = bigEndianBytesToBigInt(new Uint8Array([3, 4]));
+			assert.equal(stack.pop(), expected);
+
+			// long byte
+			stack.push(longByte);
+			stack.push(300n);
+
+			op.execute(stack);
+
+			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97]));
 			assert.equal(stack.pop(), expected);
 
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
@@ -5716,7 +5741,15 @@ describe("Teal Opcodes", function () {
 			const op = new ExtractUint32([], 1);
 			op.execute(stack);
 
-			const expected = bigEndianBytesToBigInt(new Uint8Array([2, 3, 4, 5]));
+			let expected = bigEndianBytesToBigInt(new Uint8Array([2, 3, 4, 5]));
+			assert.equal(stack.pop(), expected);
+
+			stack.push(longByte);
+			stack.push(300n);
+
+			op.execute(stack);
+
+			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97, 97, 97]));
 			assert.equal(stack.pop(), expected);
 
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
@@ -5732,7 +5765,15 @@ describe("Teal Opcodes", function () {
 			const op = new ExtractUint64([], 1);
 			op.execute(stack);
 
-			const expected = bigEndianBytesToBigInt(new Uint8Array([3, 4, 5, 6, 7, 8, 9, 10]));
+			let expected = bigEndianBytesToBigInt(new Uint8Array([3, 4, 5, 6, 7, 8, 9, 10]));
+			assert.equal(stack.pop(), expected);
+
+			stack.push(longByte);
+			stack.push(300n);
+
+			op.execute(stack);
+
+			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97, 97, 97, 97, 97, 97, 97]));
 			assert.equal(stack.pop(), expected);
 
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
