@@ -554,7 +554,7 @@ export class Interpreter {
 			if (costFromExecute === undefined) {
 				this.cost += this.lineToCost[instruction.line];
 			} else {
-				this.cost = costFromExecute;
+				this.cost += costFromExecute;
 			}
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
@@ -564,7 +564,8 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+					//TODO here we need some updating probably the if else statement from above
+					this.runtime.ctx.pooledApplCost += this.cost;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,

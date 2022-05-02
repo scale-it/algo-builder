@@ -6667,6 +6667,41 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
+		it("Should calculate the correct cost", () => {
+			let toPush = Buffer.from("", "utf-8");
+			stack.push(toPush);
+			let op = new Base64Decode(["URLEncoding"], 0);
+			let cost = op.execute(stack);
+			assert.deepEqual(1, cost); // base64_decode cost = 1
+
+			toPush = Buffer.from(
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
+				"utf-8"
+			);
+			stack.push(toPush);
+			op = new Base64Decode(["URLEncoding"], 0);
+			cost = op.execute(stack);
+			assert.deepEqual(5, cost); // base64_decode cost = 5 (64 bytes -> 1 + 64/16)
+
+			toPush = Buffer.from(
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567",
+				"utf-8"
+			);
+			stack.push(toPush);
+			op = new Base64Decode(["URLEncoding"], 0);
+			cost = op.execute(stack);
+			assert.deepEqual(5, cost); // base64_decode cost = 5 (60 bytes -> 1 + ceil(60/16))
+
+			toPush = Buffer.from(
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_AA==",
+				"utf-8"
+			);
+			stack.push(toPush);
+			op = new Base64Decode(["URLEncoding"], 0);
+			cost = op.execute(stack);
+			assert.deepEqual(6, cost); // base64_decode cost = 6 (68 bytes -> 1 + ceil(68/16))
+		});
+
 		it("Should throw an error when argument not provided", () => {
 			stack.push(toPushStd);
 			expectRuntimeError(() => new Base64Decode([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);

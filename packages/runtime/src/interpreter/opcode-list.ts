@@ -4794,9 +4794,10 @@ export class Base64Decode extends Op {
 		}
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBytes(stack.pop(), this.line);
+		const cost = 1 + Math.ceil(last.length / 16);
 		const enc = new TextDecoder("utf-8");
 		const decoded = enc.decode(last);
 		switch (this.encoding) {
@@ -4808,5 +4809,6 @@ export class Base64Decode extends Op {
 				break;
 		}
 		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
+		return cost;
 	}
 }
