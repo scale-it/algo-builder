@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -18,7 +17,7 @@ async function run(runtimeEnv, deployer) {
 		appArgs: [],
 	};
 
-	await executeTx(deployer, [tx]);
+	await deployer.executeTx([tx]);
 	console.log("Application Deleted!!");
 }
 

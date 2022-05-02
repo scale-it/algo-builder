@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { mkParam } = require("./transfer/common");
 /*
 	Create "gold" Algorand Standard Asset (ASA).
@@ -21,9 +21,9 @@ async function run(runtimeEnv, deployer) {
 	// Here we fund the accounts with 5e6, 5e6 and 1e6 micro AlGOs.
 	const message = "funding account";
 	const promises = [
-		executeTx(deployer, mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })),
-		executeTx(deployer, mkParam(masterAccount, john.addr, 5e6, { note: message })),
-		executeTx(deployer, mkParam(masterAccount, bob.addr, 1e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, john.addr, 5e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, bob.addr, 1e6, { note: message })),
 	];
 	await Promise.all(promises);
 

@@ -13,7 +13,12 @@ import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
+import {
+	CheckpointFunctionsImpl,
+	persistCheckpoint,
+	registerCheckpoints,
+} from "../lib/script-checkpoints";
+import { executeTx, makeAndSignTx, signTransactions } from "../lib/tx";
 import type {
 	AppCache,
 	ASCCache,
@@ -495,7 +500,6 @@ class DeployerBasicMode {
 		return await this.algoOp.getReceiptTxns(txns);
 	}
 }
-
 /**
  * This class is what user interacts with in deploy task
  */
@@ -878,6 +882,20 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		this.registerSSCInfo(cpKey, sscInfo);
 		return sscInfo;
 	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactions transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<ConfirmedTxInfo[]> {
+		return await executeTx(this, transactions);
+	}
 }
 
 /**
@@ -1053,5 +1071,19 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 			this.txWriter,
 			scTmplParams
 		);
+	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactions transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<ConfirmedTxInfo[]> {
+		return await executeTx(this, transactions);
 	}
 }

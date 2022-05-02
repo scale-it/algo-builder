@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const accounts = require("./common/accounts");
 
@@ -49,7 +48,7 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
 	try {
 		const appArgs = ["str:set_permission", `int:${permissionAppInfo.appID}`];
 
-		await executeTx(deployer, {
+		await deployer.executeTx({
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
 			fromAccount: owner, // asa manager account
