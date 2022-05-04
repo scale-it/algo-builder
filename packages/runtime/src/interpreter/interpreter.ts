@@ -536,9 +536,6 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			//TODO this should return cost
-			const costFromExecute = instruction.execute(this.stack);
-
 			if (
 				this.runtime.ctx.isInnerTx &&
 				this.runtime.ctx.tx.type === TransactionTypeEnum.APPLICATION_CALL &&
@@ -548,14 +545,12 @@ export class Interpreter {
 					tealVersion: this.tealVersion,
 				});
 			}
+			const costFromExecute = instruction.execute(this.stack);
+			const cost = costFromExecute === undefined ? 1 : costFromExecute;
+			this.cost += cost;
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
-			if (costFromExecute === undefined) {
-				this.cost += this.lineToCost[instruction.line];
-			} else {
-				this.cost = costFromExecute;
-			}
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
 			}
@@ -564,7 +559,7 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+					this.runtime.ctx.pooledApplCost += cost;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,

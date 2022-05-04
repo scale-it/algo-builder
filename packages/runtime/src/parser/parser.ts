@@ -45,8 +45,8 @@ import {
 	Bytecblock,
 	ByteDiv,
 	ByteEqualTo,
+	ByteGreaterThan,
 	ByteGreaterThanEqualTo,
-	ByteGreatorThan,
 	ByteLessThan,
 	ByteLessThanEqualTo,
 	ByteMod,
@@ -314,7 +314,7 @@ opCodeMap[4] = {
 	"b/": ByteDiv,
 	"b%": ByteMod,
 	"b<": ByteLessThan,
-	"b>": ByteGreatorThan,
+	"b>": ByteGreaterThan,
 	"b<=": ByteLessThanEqualTo,
 	"b>=": ByteGreaterThanEqualTo,
 	"b==": ByteEqualTo,
@@ -457,6 +457,9 @@ const interpreterReqList = new Set([
 	"gitxna",
 	"gitxnas",
 	"itxnas",
+	"sha256",
+	"sha512_256",
+	"keccak256",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);

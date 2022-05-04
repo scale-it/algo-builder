@@ -2448,9 +2448,9 @@ describe("Parser", function () {
 		it("Should return correct opcode list for 'Crypto opcodes'", async () => {
 			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
-				new Sha256([], 1),
-				new Keccak256([], 2),
-				new Sha512_256([], 3),
+				new Sha256([], 1, interpreter),
+				new Keccak256([], 2, interpreter),
+				new Sha512_256([], 3, interpreter),
 				new Ed25519verify([], 4),
 			];
 			assert.deepEqual(res, expected);
