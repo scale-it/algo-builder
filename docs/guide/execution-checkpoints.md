@@ -16,6 +16,7 @@ Editing is possible but duplicate asset names are not allowed (since it prevents
 Please refer to the [Checkpoints Spec](https://paper.dropbox.com/published/Algorand-builder-specs--A7njBF~7_VHYy0l3m3RAKgYVBg-c4ycJtlcmEaRIbptAPqNYS6#:h2=Deployment-Checkpoints) for more details.
 
 ## Usage
+
 To retrieve checkpoint data in a script user can call deployer's functions (script parameter).
 Overwriting of checkpoint data from scripts is only allowed when `--force` is used.
 
@@ -23,10 +24,12 @@ Some of its functions provide way to check whether a future checkpoint already d
 
 Other deployer's methods can provide more information about currently visible assets (scripts are prevented to view checkpoints of other scripts that are going to be run in the future (by name)).
 These fields provide a way to view ASA and ASC1 information that was saved in the currently visible checkpoints:
+
 ```
 deployer.asa
 deployer.asc
 ```
+
 They return JS Maps where asset name (string) points to asset information (see `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts)).
 These maps shouldn't be edited by the script itself.
 Other deployer functions do that.
@@ -39,14 +42,14 @@ deployer.getCheckpointKV(key: string)
 ```
 
 All deployment related functions from `deployer` will automatically add transaction related information to metadata.
-However, if a deployment script doesn't use `deployer` deployment functions (for example if we have a deployment script which funds basic accounts), then a checkpoint will be empty and won't be stored. So, consecutive run of `algob deploy` will re-execute that script. If we want to **assure  script checkpoints** (and script re-execution) then a user MUST call `deployer.addCheckpointKV` in each script where he doesn't call deployer deployment functions explicitly.
+However, if a deployment script doesn't use `deployer` deployment functions (for example if we have a deployment script which funds basic accounts), then a checkpoint will be empty and won't be stored. So, consecutive run of `algob deploy` will re-execute that script. If we want to **assure script checkpoints** (and script re-execution) then a user MUST call `deployer.addCheckpointKV` in each script where he doesn't call deployer deployment functions explicitly.
 
 The checkpoint files are only saved after a successful `deploy` task. The data is not saved if an error happens. There is one checkpoint per deployment script.
 
 When reading metadata (`deployer.getCheckpointKV`) we browses all checkpoints from all files.
 
-
 ## YAML file structure
+
 As it's possible to work on multiple networks (`--network` switch) it's possible to have distinct chain states in their respective networks.
 Every checkpoint file is defined as a network name pointing into an object of checkpoint object values.
 
@@ -69,7 +72,7 @@ Make sure that your local `algob` version matches the version from the link.
 
 We can update App on algorand blockchain, therefore we store checkpoints for App in a nested form.
 structure for the same is:
-        `program-name-key` -> `timestamp` -> `AppInfo`.
+`program-name-key` -> `timestamp` -> `AppInfo`.
 Consider a case when App is updated with same programs, this is the case where we append to checkpoint with different timestamp, txConfirmation but same `program-name-key`.
 
 While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is used.
@@ -77,22 +80,25 @@ While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is 
 ## Checkpoint storage for logic signature(Lsig)
 
 - For logic signature in contract mode: You may use `addLsigCheckpoint` function to store lsigInfo in checkpoint.
-- To load logic signature in contract mode: You may use `getContractLsig` function.
+- To load logic signature in contract mode: You may use `deployer.getLsig` function.
 - Ex:
+
 ```js
 // store checkpoint
-deployer.mkContractLsig(contractName);
+deployer.mkContractLsig(lsigName, contractFileName);
 // load checkpoint
-deployer.getContractLsig(contractName);
+deployer.deployer.getLsig(lsigName);
 ```
+
 - For delegated logic signature `algob` stores checkpoints automatically.
-- To load delegated logic signature you may use `getDelegatedLsig` function.
+- To load delegated logic signature you may use `getLsig` function.
 - Ex:
+
 ```js
 // store checkpoint
-deployer.mkDelegatedLsig(contractName);
+deployer.mkDelegatedLsig(lsigName, contractFileName, signer);
 // load checkpoint
-deployer.getDelegatedLsig(contractName);
+deployer.getLsig(lsigName);
 ```
 
 ## Checkpoint storage `delete` boolean

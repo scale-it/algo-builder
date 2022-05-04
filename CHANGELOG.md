@@ -10,56 +10,137 @@ Organize change log in the following section (in that order):
 Features, Bug Fixes, Breaking Changes, Deprecated
 -->
 
-
 # CHANGELOG
 
 ## Unreleased
 
 ### Features
 
-- Used app account instead of `deposit_lsig` in `examples/dao`
+Added:
+
+- `logger` a debugging utility which returns a decorated version of console.error to which debug statements can be passed.
+- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
+- `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
+- unit tests that cover new scenarios when `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
+  Changed:
+- `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+- The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
+- Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
+- Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in _signature_ mode, and parser will reject the execution if run in application mode.
 - Support RekeyTo field in the inner transaction for TEAL v6.
+- Support `keyreg` transaction in inner transaction.
 - Added following functions in `deployer` API
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
-  * `getLsigByName`: returns lsig info stored in checkpoint by name
-  * `fundLsigByName`: funds logic signature by name.
-- Updated `mkDelegatedLsig`, `mkContractLsig` to take one more optional parameter: `lsigName`. This will also save in a checkpoint the compiled lsig name.
+  - `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
 - Support `RekeyTo` field in the inner transaction for TEAL v6.
 - Enable transfer ALGO to implicit account.
-- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag.
-Example:
+- You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag. Example:
+  ```bash
+    algob init --infrastructure
+  ```
+- Teal V6 support:
 
-```bash
-  algob init --infrastructure
+  - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
+  - Add new opcode `gloadss`([#606](https://github.com/scale-it/algo-builder/pull/606)).
+  - Add new opcode `acct_params_get`([#618](https://github.com/scale-it/algo-builder/pull/618)).
+  - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626)).
+  - Add new opcode `gitxn`, `gitxna` and `gitxnas`.([#628](https://github.com/scale-it/algo-builder/pull/628)).
+  - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
+
+- Added support for saving smart contract template params in ASCCache.
+
+- Teal v7 support:
+  - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
+
+- `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `. 
+
+
+- Return list of receipts for each txn in group txn. Example:
+
+```js
+  const receipts = algob.executeTx([txn0, txn1]); 
+  console.log("txn0 information: ", receipts[0]);
+  console.log("txn1 information: ", receipts[2]);
 ```
+
+
+### Template improvements
+
+- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
+
+### API breaking
+
+- We have changed the naming convetion for the clearing proposal part of the DAO:
+
+  - Renamed `clearProposal` to `closeProposal`,
+  - Renamed `clear_proposal` to `close_proposal`,
+  - Renamed `mkClearProposalTx` to `mkCloseProposalTx`.
+
+- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
+
+  - Application:
+
+    - Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    - New `getApp(appName)` function queries app info using the app name.
+
+  - Smart signatures:
+    - Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
+    - New `getApp(appName)` function queries app info using the app name.
+    - Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
+    - Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
+      - `mkDelegatedLsig(lsigName, fileName, signer)`
+      - `mkContractLsig(lsigName, fileName)`.
+        Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
+
+  For reference you can check out `examples/asa`.
+
+- Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
+- Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
+- Updated `txId` key in returned App/ASA info to `txID`.
+
+- `printLocalStateSCC` renamed to `printLocalStateApp`.
+- `printGlobalStateSCC` renamed to `printGlobalStateApp`.
+
+- The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
+- Only use list transaction in executeTx.
+- Rename the executeTransaction to executeTx
+
+- The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is 
+recommended to use the method from `Deployer` rather than the function dirrectly. 
+
+- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` . 
 
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
-- When close account should remove auth/spend address. Fixed in  [#575](https://github.com/scale-it/algo-builder/pull/575).
+- When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
+- Approval program and clear propram should throw error if they are mismatch version. Fixed in [#620](https://github.com/scale-it/algo-builder/pull/620)
+- Allow token to be empty.
+- Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
+- Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
 
 ### Infrastructure
 
--  Support for run command `setup-master-account` and `sandbox-setup-master-account` more than one time.
+- Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
 
 ## v3.2.0 2022-02-03
 
 ### Features
 
 - Added following functions in `deployer` API
-  * `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
-  * `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name.
+  - `compileASC`: alias to `deloyer.ensureCompiled`. The latter is now marked deprecated and `compileASC` should be used instead.
+  - `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name.
 - Added `sandbox-up-dev` and `sandbox-reset` commands into Makefile in `infrastructure/`.
 - Use strict parsing rules when decoding PyTEAL teamplate parameters using `algobpy`. Previously, on decode failure, the script was continuing with partially updated template params, now we fail with an exception.
 
 Dependencies:
+
 - Updated `algosdk` to `v1.13.1`
 
 ### Bug Fixes
 
 - Int Pseudo-Ops can't start with 0x(hex) or 0(oct) prefix. (#562)
 - Add missing opcode `bitlen` and `app_params_get`.
-- In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in  [#569](https://github.com/scale-it/algo-builder/pull/569).
+- In the inner transaction, `snd` always the application address. However, it can be set to an arbitrary address. Fixed in [#569](https://github.com/scale-it/algo-builder/pull/569).
 
 ### Notes
 

@@ -1,0 +1,10 @@
+#pragma version 5
+// fails if: application mode opcode{log} is used in signature mode (logicsig)
+int 1
+int 2
++
+pop
+byte "logging..."
+log
+int 1
+return

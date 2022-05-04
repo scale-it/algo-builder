@@ -1,35 +1,35 @@
-const { tryExecuteTx, Vote } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
-const { accounts, getProposalLsig } = require('./common/accounts.js');
+const { tryExecuteTx, Vote } = require("./common/common.js");
+const { types } = require("@algo-builder/web");
+const { accounts } = require("./common/accounts.js");
 
-async function registerVote (deployer, voterAcc, proposalAddr, voteType) {
-  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+async function registerVote(deployer, voterAcc, proposalAddr, voteType) {
+	const daoAppInfo = deployer.getApp("DAOApp");
 
-  console.log(`* Register votes by ${voterAcc.addr} *`);
-  // call to DAO app by voter (to register deposited votes)
-  const registerVoteParam = {
-    type: types.TransactionType.CallApp,
-    sign: types.SignType.SecretKey,
-    fromAccount: voterAcc,
-    appID: daoAppInfo.appID,
-    payFlags: { totalFee: 2000 },
-    appArgs: ['str:register_vote', `str:${voteType}`],
-    accounts: [proposalAddr]
-  };
+	console.log(`* Register votes by ${voterAcc.addr} *`);
+	// call to DAO app by voter (to register deposited votes)
+	const registerVoteParam = {
+		type: types.TransactionType.CallApp,
+		sign: types.SignType.SecretKey,
+		fromAccount: voterAcc,
+		appID: daoAppInfo.appID,
+		payFlags: { totalFee: 2000 },
+		appArgs: ["str:register_vote", `str:${voteType}`],
+		accounts: [proposalAddr],
+	};
 
-  await tryExecuteTx(deployer, registerVoteParam);
+	await tryExecuteTx(deployer, registerVoteParam);
 }
 
-async function run (runtimeEnv, deployer) {
-  const { _, __, voterA, voterB } = accounts(deployer);
-  const proposalLsig = await getProposalLsig(deployer);
+async function run(runtimeEnv, deployer) {
+	const { _, __, voterA, voterB } = accounts(deployer);
+	const proposalLsig = deployer.getLsig("proposalLsig");
 
-  // register votes (deposited in ./deposit_vote_token.js)
-  await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
-  await registerVote(deployer, voterB, proposalLsig.address(), Vote.ABSTAIN);
+	// register votes (deposited in ./deposit_vote_token.js)
+	await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
+	await registerVote(deployer, voterB, proposalLsig.address(), Vote.ABSTAIN);
 
-  // Transaction FAIL: voterA tries to register deposited votes again
-  await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
+	// Transaction FAIL: voterA tries to register deposited votes again
+	await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
 }
 
 module.exports = { default: run };

@@ -1,33 +1,43 @@
 #header .heading-brand {
-    float: left;
-    max-width:100%;
-    direction: rtl;
+	float: left;
+	max-width: 100%;
+	direction: rtl;
+}
+#header .logo-img {
+	max-width: 100%;
 }
 #header .btn {
-    margin-top: 20px;
-    float: right;
+	margin-top: 20px;
+	margin-left: 15px;
+	float: right;
 }
 
 .first-section {
-    font-size:x-large;
-    margin-bottom: 50px;
+	font-size: x-large;
+	margin-bottom: 50px;
 }
 
 .first-section .doc-links .btn {
-    margin: 8px;
+	margin: 8px;
 }
 
 .first-section a {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .algo-address {
-    background: #ffe;
-    border: 1px solid #664;
-    border-radius: 16px;
-    padding: 0.01em 16px;
+	background: #ffe;
+	border: 1px solid #664;
+	border-radius: 16px;
+	padding: 0.01em 16px;
+	word-wrap: break-word;
 }
 
 #algo-donate-modal .modal-body {
-    margin: auto;
+	margin: auto;
+}
+
+.audit-img {
+	max-width: 100%;
+	margin: 25px auto;
 }

@@ -7,7 +7,7 @@ from pyteal import *
 def approval_program(ARG_GOV_TOKEN):
     """
     A stateful app with governance rules. Stores
-    deposit, min_support, min_duration, max_duration, url.
+    deposit, min_support, min_duration, max_duration, url, dao_name.
 
     Commands:
         add_proposal            Save proposal record in lsig
@@ -16,7 +16,7 @@ def approval_program(ARG_GOV_TOKEN):
         execute                 executes a proposal
         withdraw_vote_deposit   unlock the deposit and withdraw tokens back to the user
         clear_vote_record       clears Sender local state by removing a record of vote cast from a not active proposal
-        clear_proposal          clears proposal record and returns back the deposit
+        close_proposal          closes proposal record and returns back the deposit
     """
 
     # check no rekeying, close remainder to, asset close to for a txn
@@ -136,11 +136,13 @@ def approval_program(ARG_GOV_TOKEN):
     max_duration = Bytes("max_duration")
     # a url with more information about the DAO
     url = Bytes("url")
+     # dao name
+    dao_name = Bytes("dao_name")
 
 
     # initialization
     # Expected arguments:
-    #   [deposit, min_support, min_duration, max_duration, url]
+    #   [deposit, min_support, min_duration, max_duration, url, dao_name]
     on_initialize = Seq([
         Assert(
             And(
@@ -155,6 +157,7 @@ def approval_program(ARG_GOV_TOKEN):
         App.globalPut(min_duration, Btoi(Txn.application_args[2])),
         App.globalPut(max_duration, Btoi(Txn.application_args[3])),
         App.globalPut(url, Txn.application_args[4]),
+        App.globalPut(dao_name, Txn.application_args[5]),
         Return(Int(1))
     ])
 
@@ -270,7 +273,7 @@ def approval_program(ARG_GOV_TOKEN):
         Return(Int(1))
     ])
 
-    # sender.deposit
+    # sender.deposit holds amount of vote token deposits
     sender_deposit = App.localGet(Int(0), Bytes("deposit"))
 
     # Records gov tokens deposited by user (sender)
@@ -432,24 +435,18 @@ def approval_program(ARG_GOV_TOKEN):
     # load proposal.id
     proposal_id = App.localGetEx(Int(0), Int(0), Bytes("id"))
 
-    # Clears proposal record and returns back the deposit. Arguments:
+    # Closes proposal record and returns back the deposit. Arguments:
     # NOTE: proposalLsig is Txn.sender. Expected Arguments:
     # * foreignAssets: [gov_token_id]
-    clear_proposal = Seq([
+    close_proposal = Seq([
         compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
         proposal_id,
-        # assert that there is a recorded proposal
         Assert(
             And(
+                Global.group_size() == Int(1),
+                # assert that there is a recorded proposal
                 proposal_id.hasValue() == Int(1),
-                Global.group_size() == Int(1),
-                basic_checks(Txn)
-            )
-        ),
-        Assert(
-            And(
-                # Assert amount of withdrawal is proposal.deposit & receiver is sender
-                Global.group_size() == Int(1),
+                basic_checks(Txn),
                 # assert that the voting is not active
                 Or(
                     # it’s past execution: proposal.executed == 1  || proposal.execute_before < now
@@ -463,6 +460,7 @@ def approval_program(ARG_GOV_TOKEN):
                         App.localGet(Int(0), Bytes("voting_end")) < Global.latest_timestamp()
                     ) == Int(1)
                 )
+
             )
         ),
         # return deposit back to proposal
@@ -471,14 +469,14 @@ def approval_program(ARG_GOV_TOKEN):
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
                 TxnField.xfer_asset: Int(ARG_GOV_TOKEN),
-                TxnField.asset_receiver: Txn.sender(),
+                TxnField.asset_receiver: Txn.sender(),  # proposal lsig
                 TxnField.asset_amount: App.globalGet(Bytes("deposit")),
                 # fees must be paid by proposal
                 TxnField.fee: Int(0)
             }
         ),
         InnerTxnBuilder.Submit(),
-        # clear proposal record (sender == proposer_lsig)
+        # close proposal record (sender == proposer_lsig)
         App.localDel(Int(0), Bytes("name")),
         App.localDel(Int(0), Bytes("url")),
         App.localDel(Int(0), Bytes("url_hash")),
@@ -537,8 +535,8 @@ def approval_program(ARG_GOV_TOKEN):
         [Txn.application_args[0] == Bytes("withdraw_vote_deposit"), withdraw_vote_deposit],
         # Verifies clear_vote_record call, jumps to clear_vote_record branch.
         [Txn.application_args[0] == Bytes("clear_vote_record"), clear_vote_record],
-        # Verifies clear_proposal call, jumps to clear_proposal branch.
-        [Txn.application_args[0] == Bytes("clear_proposal"), clear_proposal]
+        # Verifies close_proposal call, jumps to close_proposal branch.
+        [Txn.application_args[0] == Bytes("close_proposal"), close_proposal]
     )
 
     return program

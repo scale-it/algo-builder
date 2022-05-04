@@ -7,16 +7,16 @@ import type { Algodv2, modelsv2 } from "algosdk";
  * @param accountAddress account to return assetholding info
  * @param assetID asset index
  */
-export async function getAssetHolding (
-  algodClient: Algodv2,
-  accountAddress: string,
-  assetID: number
+export async function getAssetHolding(
+	algodClient: Algodv2,
+	accountAddress: string,
+	assetID: number
 ): Promise<modelsv2.AssetHolding | undefined> {
-  const accountInfo = await algodClient.accountInformation(accountAddress).do();
-  for (const asset of accountInfo.assets) {
-    if (asset["asset-id"] === assetID) {
-      return asset;
-    }
-  }
-  return undefined;
+	const accountInfo = await algodClient.accountInformation(accountAddress).do();
+	for (const asset of accountInfo.assets) {
+		if (asset["asset-id"] === assetID) {
+			return asset;
+		}
+	}
+	return undefined;
 }
