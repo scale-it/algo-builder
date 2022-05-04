@@ -5690,7 +5690,6 @@ describe("Teal Opcodes", function () {
 			stack.push(3n);
 			let op = new Extract3([], 1);
 			op.execute(stack);
-
 			assert.deepEqual(stack.pop(), new Uint8Array([23, 3, 2]));
 
 			stack.push(longByte);
@@ -5698,7 +5697,6 @@ describe("Teal Opcodes", function () {
 			stack.push(10n);
 			op = new Extract3([], 1);
 			op.execute(stack);
-
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("a".repeat(10)));
 
 			stack.push(new Uint8Array([12, 23]));
@@ -5712,73 +5710,61 @@ describe("Teal Opcodes", function () {
 		it("extract_uint16", () => {
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
 			stack.push(2n);
-
 			const op = new ExtractUint16([], 1);
 			op.execute(stack);
-
 			let expected = bigEndianBytesToBigInt(new Uint8Array([3, 4]));
 			assert.equal(stack.pop(), expected);
 
 			// long byte
 			stack.push(longByte);
 			stack.push(300n);
-
 			op.execute(stack);
-
 			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97]));
 			assert.equal(stack.pop(), expected);
 
+			// throw error
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
 			stack.push(4n);
-
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
 		it("extract_uint32", () => {
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
 			stack.push(1n);
-
 			const op = new ExtractUint32([], 1);
 			op.execute(stack);
-
 			let expected = bigEndianBytesToBigInt(new Uint8Array([2, 3, 4, 5]));
 			assert.equal(stack.pop(), expected);
 
+			// long bytes
 			stack.push(longByte);
 			stack.push(300n);
-
 			op.execute(stack);
-
 			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97, 97, 97]));
 			assert.equal(stack.pop(), expected);
 
+			// throw error
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
 			stack.push(4n);
-
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
 		it("extract_uint64", () => {
 			stack.push(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
 			stack.push(2n);
-
 			const op = new ExtractUint64([], 1);
 			op.execute(stack);
-
 			let expected = bigEndianBytesToBigInt(new Uint8Array([3, 4, 5, 6, 7, 8, 9, 10]));
 			assert.equal(stack.pop(), expected);
 
 			stack.push(longByte);
 			stack.push(300n);
-
 			op.execute(stack);
-
 			expected = bigEndianBytesToBigInt(new Uint8Array([97, 97, 97, 97, 97, 97, 97, 97]));
 			assert.equal(stack.pop(), expected);
 
 			stack.push(new Uint8Array([1, 2, 3, 4, 5]));
 			stack.push(8n);
-
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 	});
