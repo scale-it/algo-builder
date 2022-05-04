@@ -6,6 +6,7 @@ import {
 	GlobalFields,
 	ITxArrFields,
 	ITxnFields,
+	MathOp,
 	MAX_UINT6,
 	MAX_UINT8,
 	MAX_UINT64,
@@ -18,6 +19,9 @@ import {
 import type { TEALStack } from "../types";
 
 export class Op {
+	execute(stack: TEALStack, op?: MathOp): number | void {
+		return 1;
+	}
 	/**
 	 * assert stack length is atleast minLen
 	 * @param stack TEAL stack
