@@ -116,6 +116,7 @@ recommended to use the method from `Deployer` rather than the function dirrectly
 - Approval program and clear propram should throw error if they are mismatch version. Fixed in [#620](https://github.com/scale-it/algo-builder/pull/620)
 - Allow token to be empty.
 - Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
+- Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
 
 ### Infrastructure
 
