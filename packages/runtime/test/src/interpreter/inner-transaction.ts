@@ -6,8 +6,8 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum } from "../../../src/lib/constants";
-import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { AccountAddress, AccountStoreI, ExecutionMode, TxOnComplete } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -76,10 +76,10 @@ describe("Inner Transactions", function () {
 		reset();
 	};
 
-	const executeTEAL = (tealCode: string): void => {
+	const executeTEAL = (tealCode: string, onComplete = TxOnComplete.NoOp): void => {
 		// reset interpreter
 		reset();
-
+		interpreter.runtime.ctx.tx.apan = Number(onComplete);
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
@@ -282,6 +282,28 @@ describe("Inner Transactions", function () {
 			expectRuntimeError(
 				() => executeTEAL(tealCode),
 				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+			);
+		});
+
+		it("should fail: issue itxn when clear state txn", function () {
+			// increase balance
+			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
+			if (acc) {
+				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
+			}
+
+			interpreter.runtime.ctx.tx.apan = Number(TxOnComplete.ClearState);
+			tealCode = `
+			itxn_begin
+			byte "pay"
+			itxn_field Type
+			itxn_submit
+			int 1
+			`;
+
+			expectRuntimeError(
+				() => executeTEAL(tealCode, TxOnComplete.ClearState),
+				RUNTIME_ERRORS.TEAL.ISSUE_ITXN_WHEN_CLEAR_PROGRAM
 			);
 		});
 

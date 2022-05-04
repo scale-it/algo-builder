@@ -411,6 +411,12 @@ maximun uint128`,
 		title: PARSE_ERROR,
 		description: `value %exp% is not base64Url`,
 	},
+	ISSUE_ITXN_WHEN_CLEAR_PROGRAM: {
+		number: 1060,
+		message: "Clear state programs cannot issue inner transactions.",
+		title: "Clear state programs cannot issue inner transactions.",
+		description: "Clear state programs cannot issue inner transactions",
+	},
 };
 
 const runtimeGeneralErrors = {
