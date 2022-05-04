@@ -413,9 +413,9 @@ maximun uint128`,
 	},
 	ISSUE_ITXN_WHEN_CLEAR_PROGRAM: {
 		number: 1060,
-		message: "Clear state programs can not issue inner transactions.",
-		title: "Clear state programs can not issue inner transactions.",
-		description: "Clear state programs can not issue inner transactions",
+		message: "Clear state programs cannot issue inner transactions.",
+		title: "Clear state programs cannot issue inner transactions.",
+		description: "Clear state programs cannot issue inner transactions",
 	},
 };
 
