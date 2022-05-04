@@ -463,8 +463,6 @@ OpGasCost[6] = {
 };
 OpGasCost[7] = {
 	...OpGasCost[6],
-	//TODO: calculate the cost for the base64_decode opcode
-	// https://github.com/algorand/go-algorand/blob/master/data/transactions/logic/TEAL_opcodes.md#base64_decode-e
 };
 
 export const enum MathOp {

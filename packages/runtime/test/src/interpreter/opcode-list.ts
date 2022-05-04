@@ -57,8 +57,8 @@ import {
 	Bytecblock,
 	ByteDiv,
 	ByteEqualTo,
+	ByteGreaterThan,
 	ByteGreaterThanEqualTo,
-	ByteGreatorThan,
 	ByteLessThan,
 	ByteLessThanEqualTo,
 	ByteMod,
@@ -872,10 +872,11 @@ describe("Teal Opcodes", function () {
 
 	describe("Sha256", function () {
 		const stack = new Stack<StackElem>();
+		const interpreter = new Interpreter();
 
 		it("should return correct hash for Sha256", () => {
 			stack.push(parsing.stringToBytes("MESSAGE"));
-			const op = new Sha256([], 1);
+			const op = new Sha256([], 1, interpreter);
 			op.execute(stack);
 
 			const expected = Buffer.from(
@@ -889,21 +890,32 @@ describe("Teal Opcodes", function () {
 
 		it(
 			"should throw invalid type error sha256",
-			execExpectError(stack, [1n], new Sha256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+			execExpectError(
+				stack,
+				[1n],
+				new Sha256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
 		);
 
 		it(
 			"should throw error with Sha256 if stack is below min length",
-			execExpectError(stack, [], new Sha256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+			execExpectError(
+				stack,
+				[],
+				new Sha256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
 		);
 	});
 
 	describe("Sha512_256", function () {
 		const stack = new Stack<StackElem>();
+		const interpreter = new Interpreter();
 
 		it("should return correct hash for Sha512_256", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
-			const op = new Sha512_256([], 1);
+			const op = new Sha512_256([], 1, interpreter);
 			op.execute(stack);
 
 			const expected = Buffer.from(
@@ -917,21 +929,32 @@ describe("Teal Opcodes", function () {
 
 		it(
 			"should throw invalid type error sha512_256",
-			execExpectError(stack, [1n], new Sha512_256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+			execExpectError(
+				stack,
+				[1n],
+				new Sha512_256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
 		);
 
 		it(
 			"should throw error with Sha512_256 if stack is below min length",
-			execExpectError(stack, [], new Sha512_256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+			execExpectError(
+				stack,
+				[],
+				new Sha512_256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
 		);
 	});
 
 	describe("keccak256", function () {
 		const stack = new Stack<StackElem>();
+		const interpreter = new Interpreter();
 
 		it("should return correct hash for keccak256", function () {
 			stack.push(parsing.stringToBytes("ALGORAND"));
-			const op = new Keccak256([], 1);
+			const op = new Keccak256([], 1, interpreter);
 			op.execute(stack);
 
 			// http://emn178.github.io/online-tools/keccak_256.html
@@ -946,12 +969,22 @@ describe("Teal Opcodes", function () {
 
 		it(
 			"should throw invalid type error Keccak256",
-			execExpectError(stack, [1n], new Keccak256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+			execExpectError(
+				stack,
+				[1n],
+				new Keccak256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
 		);
 
 		it(
 			"should throw error with keccak256 if stack is below min length",
-			execExpectError(stack, [], new Keccak256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+			execExpectError(
+				stack,
+				[],
+				new Keccak256([], 1, interpreter),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
 		);
 	});
 
@@ -5159,28 +5192,28 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteGreatorThan", () => {
+		describe("ByteGreaterThan", () => {
 			const stack = new Stack<StackElem>();
 
-			it("should push 0/1 depending on value of two byte arrays for ByteGreatorThan", function () {
+			it("should push 0/1 depending on value of two byte arrays for ByteGreaterThan", function () {
 				// A is not greator B
 				stack.push(parsing.stringToBytes("A"));
 				stack.push(parsing.stringToBytes("B"));
-				let op = new ByteGreatorThan([], 0);
+				let op = new ByteGreaterThan([], 0);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), 0n);
 
 				// B > A
 				stack.push(parsing.stringToBytes("B"));
 				stack.push(parsing.stringToBytes("A"));
-				op = new ByteGreatorThan([], 0);
+				op = new ByteGreaterThan([], 0);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), 1n);
 
 				// A is not greator than A
 				stack.push(parsing.stringToBytes("A"));
 				stack.push(parsing.stringToBytes("A"));
-				op = new ByteGreatorThan([], 0);
+				op = new ByteGreaterThan([], 0);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), 0n);
 			});

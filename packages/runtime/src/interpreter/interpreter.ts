@@ -546,8 +546,7 @@ export class Interpreter {
 				});
 			}
 			const costFromExecute = instruction.execute(this.stack);
-			const cost =
-				costFromExecute === undefined ? this.lineToCost[instruction.line] : costFromExecute;
+			const cost = costFromExecute === undefined ? 1 : costFromExecute;
 			this.cost += cost;
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution

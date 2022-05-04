@@ -63,7 +63,6 @@ import {
 	txnSpecByField,
 } from "../lib/txn";
 import {
-	Base64Encoding,
 	DecodingMode,
 	EncodingType,
 	EncTx,
@@ -113,9 +112,9 @@ export class Pragma extends Op {
 		return this.version;
 	}
 
-	execute(
-		_stack: TEALStack
-	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
+	execute(_stack: TEALStack): number {
+		return 0;
+	} /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -133,10 +132,11 @@ export class Len extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBytes(stack.pop(), this.line);
 		stack.push(BigInt(last.length));
+		return 1;
 	}
 }
 
@@ -601,18 +601,21 @@ export class Err extends Op {
 // push to stack [...stack, bytes]
 export class Sha256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const hash = sha256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
@@ -620,6 +623,11 @@ export class Sha256 extends Op {
 		const hashedOutput = Buffer.from(hash.hex(), "hex");
 		const arrByte = Uint8Array.from(hashedOutput);
 		stack.push(arrByte);
+		if (this.interpreter.tealVersion > 1) {
+			return 35;
+		} else {
+			return 7;
+		}
 	}
 }
 
@@ -627,18 +635,21 @@ export class Sha256 extends Op {
 // push to stack [...stack, bytes]
 export class Sha512_256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const hash = sha512_256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
@@ -646,6 +657,11 @@ export class Sha512_256 extends Op {
 		const hashedOutput = Buffer.from(hash.hex(), "hex");
 		const arrByte = Uint8Array.from(hashedOutput);
 		stack.push(arrByte);
+		if (this.interpreter.tealVersion > 1) {
+			return 45;
+		} else {
+			return 9;
+		}
 	}
 }
 
@@ -654,18 +670,21 @@ export class Sha512_256 extends Op {
 // push to stack [...stack, bytes]
 export class Keccak256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBytes(stack.pop(), this.line);
 
@@ -673,6 +692,11 @@ export class Keccak256 extends Op {
 		hash.update(convertToString(top));
 		const arrByte = Uint8Array.from(hash.digest());
 		stack.push(arrByte);
+		if (this.interpreter.tealVersion > 1) {
+			return 130;
+		} else {
+			return 26;
+		}
 	}
 }
 
@@ -692,7 +716,7 @@ export class Ed25519verify extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const pubkey = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
@@ -705,6 +729,7 @@ export class Ed25519verify extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return 1900;
 	}
 }
 
@@ -1515,9 +1540,9 @@ export class Label extends Op {
 		this.line = line;
 	}
 
-	execute(
-		_stack: TEALStack
-	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
+	execute(_stack: TEALStack): number {
+		return 0;
+	} /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // branch unconditionally to label - Tealv <= 3
@@ -3085,8 +3110,9 @@ export class ByteOp extends Op {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteAdd extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.Add);
+		return 10;
 	}
 }
 
@@ -3095,8 +3121,9 @@ export class ByteAdd extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteSub extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.Sub);
+		return 10;
 	}
 }
 
@@ -3104,8 +3131,9 @@ export class ByteSub extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteMul extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.Mul);
+		return 20;
 	}
 }
 
@@ -3114,8 +3142,9 @@ export class ByteMul extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteDiv extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.Div);
+		return 20;
 	}
 }
 
@@ -3124,15 +3153,16 @@ export class ByteDiv extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteMod extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.Mod);
+		return 20;
 	}
 }
 
 // A is greater than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
-export class ByteGreatorThan extends ByteOp {
+export class ByteGreaterThan extends ByteOp {
 	execute(stack: TEALStack): void {
 		super.execute(stack, MathOp.GreaterThan);
 	}
@@ -3189,8 +3219,9 @@ export class ByteNotEqualTo extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseOr extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.BitwiseOr);
+		return 6;
 	}
 }
 
@@ -3198,8 +3229,9 @@ export class ByteBitwiseOr extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseAnd extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.BitwiseAnd);
+		return 6;
 	}
 }
 
@@ -3207,8 +3239,9 @@ export class ByteBitwiseAnd extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseXor extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		super.execute(stack, MathOp.BitwiseXor);
+		return 6;
 	}
 }
 
@@ -3216,10 +3249,11 @@ export class ByteBitwiseXor extends ByteOp {
 // Pops: ... stack, []byte
 // push to stack [...stack, byte[]]
 export class ByteBitwiseInvert extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
 		stack.push(byteA.map((b) => 255 - b));
+		return 4;
 	}
 }
 
@@ -3252,7 +3286,7 @@ export class Bsqrt extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 
 		const value = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
@@ -3262,6 +3296,8 @@ export class Bsqrt extends Op {
 		const bigintResult = bigintSqrt(bigintValue);
 
 		stack.push(bigintToBigEndianBytes(bigintResult));
+
+		return 40;
 	}
 }
 /**
@@ -3687,7 +3723,7 @@ export class EcdsaVerify extends Op {
 	 * All values are big-endian encoded. The signed data must be 32 bytes long,
 	 * and signatures in lower-S form are only accepted.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 5, this.line);
 		const pubkeyE = this.assertBytes(stack.pop(), this.line);
 		const pubkeyD = this.assertBytes(stack.pop(), this.line);
@@ -3711,6 +3747,8 @@ export class EcdsaVerify extends Op {
 		const signature = { r: signatureB, s: signatureC };
 
 		this.pushBooleanCheck(stack, key.verify(data, signature));
+
+		return 1700;
 	}
 }
 
@@ -3737,7 +3775,7 @@ export class EcdsaPkDecompress extends Op {
 	 * The 33 byte public key in a compressed form to be decompressed into X and Y (top)
 	 * components. All values are big-endian encoded.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
 
@@ -3755,6 +3793,8 @@ export class EcdsaPkDecompress extends Op {
 
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
+
+		return 650;
 	}
 }
 
@@ -3782,7 +3822,7 @@ export class EcdsaPkRecover extends Op {
 	 * expected on the stack and used to deriver a public key. All values are
 	 * big-endian encoded. The signed data must be 32 bytes long.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 4, this.line);
 		const signatureD = this.assertBytes(stack.pop(), this.line);
 		const signatureC = this.assertBytes(stack.pop(), this.line);
@@ -3804,6 +3844,8 @@ export class EcdsaPkRecover extends Op {
 
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
+
+		return 2000;
 	}
 }
 
