@@ -3966,6 +3966,11 @@ export class ITxnBegin extends Op {
 			});
 		}
 
+		// cannot issue itxn when clear state application.
+		if (this.interpreter.runtime.ctx.tx.apan === Number(TxOnComplete.ClearState)) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ISSUE_ITXN_WHEN_CLEAR_PROGRAM);
+		}
+
 		this.interpreter.currentInnerTxnGroup = [addInnerTransaction(this.interpreter, this.line)];
 	}
 }
