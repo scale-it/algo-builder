@@ -15,7 +15,7 @@ describe("Webmode test", function () {
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
 	});
 
-	it("#executeTx", async function () {
+	it("Should executeTx without throwing an error", async function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
