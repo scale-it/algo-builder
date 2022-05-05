@@ -1,6 +1,7 @@
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Interpreter } from "../interpreter/interpreter";
+import { Op } from "../interpreter/opcode";
 import {
 	AcctParamsGet,
 	Add,
@@ -156,7 +157,7 @@ import {
 	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
-import { ExecutionMode, Operator } from "../types";
+import { ExecutionMode } from "../types";
 
 // teal v1 opcodes
 const opCodeMap: { [key: number]: { [key: string]: any } } = {
@@ -716,7 +717,7 @@ export function opcodeFromSentence(
 	counter: number,
 	interpreter: Interpreter,
 	mode: ExecutionMode
-): Operator {
+): Op {
 	let opCode = words[0];
 	const tealVersion = interpreter.tealVersion;
 
@@ -861,12 +862,8 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
  * @param mode : execution mode of TEAL code (Stateless or Application)
  * @param interpreter: interpreter object
  */
-export function parser(
-	program: string,
-	mode: ExecutionMode,
-	interpreter: Interpreter
-): Operator[] {
-	const opCodeList = [] as Operator[];
+export function parser(program: string, mode: ExecutionMode, interpreter: Interpreter): Op[] {
+	const opCodeList: Op[] = [];
 	let counter = 0;
 
 	const lines = program.split("\n");
@@ -895,7 +892,7 @@ export function parser(
 }
 
 // check algorand is auto added intcblock for optimize size contract
-export function isAddIntcblock(ops: Operator[], interpreter: Interpreter): boolean {
+export function isAddIntcblock(ops: Op[], interpreter: Interpreter): boolean {
 	if (interpreter.tealVersion < 4) return false;
 	if (ops[0] instanceof Intcblock || ops[1] instanceof Intcblock) return false;
 	const intCount: { [key: string]: number } = {};
@@ -917,7 +914,7 @@ export function isAddIntcblock(ops: Operator[], interpreter: Interpreter): boole
 }
 
 // check algorand is auto added byteblock for optimize size contract
-export function isAddedBytecblock(ops: Operator[], interpreter: Interpreter): boolean {
+export function isAddedBytecblock(ops: Op[], interpreter: Interpreter): boolean {
 	if (interpreter.tealVersion < 4) return false;
 	if (ops[0] instanceof Bytecblock || ops[1] instanceof Bytecblock) return false;
 	const byteCount: { [key: string]: number } = {};

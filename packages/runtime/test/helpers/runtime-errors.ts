@@ -2,13 +2,14 @@ import { assert, AssertionError } from "chai";
 
 import { ErrorDescriptor } from "../../src/errors/errors-list";
 import { RuntimeError } from "../../src/errors/runtime-errors";
-import type { Operator, StackElem, TEALStack } from "../../src/types";
+import { Op } from "../../src/interpreter/opcode";
+import type { StackElem, TEALStack } from "../../src/types";
 
 // takes string array and executes opcode to expect teal error
 export function execExpectError(
 	stack: TEALStack,
 	strs: StackElem[],
-	op: Operator,
+	op: Op,
 	err: ErrorDescriptor
 ): () => void {
 	return () => {
@@ -51,6 +52,7 @@ export function expectRuntimeError(
 	);
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function expectRuntimeErrorAsync(
 	f: () => Promise<any>,
 	errorDescriptor: ErrorDescriptor,

@@ -1,14 +1,15 @@
 import { parsing } from "@algo-builder/web";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { Op } from "../../../src/interpreter/opcode";
+import { Len } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 describe("Teal Opcodes basic assertions", function () {
-	const op = new Op();
+	//Could be any other opcode. Its only for testing the base abstract class functionalities
+	const op = new Len([], 1);
 
 	it("check uint64 overflow", function () {
 		const max = MAX_UINT64 + BigInt("5");
