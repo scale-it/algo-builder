@@ -59,17 +59,16 @@ export class MyAlgoWalletSession {
 
 	constructor(chain: string, connector?: MyAlgoConnect) {
 		this.algodClient = algoexplorerAlgod(chain);
-		import("@randlabs/myalgo-connect")
-			.then((MyAlgoConnect) => {
-				if (connector) {
-					this.connector = connector;
-				} else {
-					this.connector = new MyAlgoConnect.default();
-				}
-			})
-			.catch((err) => {
-				error(err);
-			});
+		try {
+			var MyAlgoConnect = require("@randlabs/myalgo-connect");
+			if (connector) {
+				this.connector = connector;
+			} else {
+				this.connector = new MyAlgoConnect();
+			}
+		} catch (err) {
+			error(err);
+		}
 	}
 
 	// https://connect.myalgo.com/docs/interactive-examples/Connect
