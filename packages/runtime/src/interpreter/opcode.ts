@@ -19,6 +19,8 @@ import {
 import type { TEALStack } from "../types";
 
 export abstract class Op {
+	//line number in TEAL file
+	abstract line: number;
 	/**
 	 * executes the opcode and returns its cost if different from 1
 	 * @param stack TEAL stack

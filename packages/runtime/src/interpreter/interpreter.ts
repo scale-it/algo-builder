@@ -417,8 +417,8 @@ export class Interpreter {
 		console.info(
 			"stack(depth = %s) for opcode %s at line %s:",
 			debugStack,
-			instruction.constructor.name
-			// instruction.line
+			instruction.constructor.name,
+			instruction.line
 		);
 		const stack = this.stack.debug(debugStack);
 		for (const top of stack) {
