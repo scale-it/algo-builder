@@ -863,7 +863,7 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
  * @param interpreter: interpreter object
  */
 export function parser(program: string, mode: ExecutionMode, interpreter: Interpreter): Op[] {
-	const opCodeList = [] as Op[];
+	const opCodeList: Op[] = [];
 	let counter = 0;
 
 	const lines = program.split("\n");
