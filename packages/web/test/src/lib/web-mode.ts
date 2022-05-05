@@ -4,7 +4,7 @@ import assert from "assert";
 import { types, WebMode } from "../../../src";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
 
-describe("Webmode test", function () {
+describe("Webmode - Algosigner test cases ", function () {
 	let webMode: WebMode;
 	let sender: Account;
 	let receiver: Account;

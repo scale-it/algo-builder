@@ -1,7 +1,4 @@
 /* eslint-disable sonarjs/no-identical-functions */
-import { unknown } from "zod";
-
-import { WallectConnectSession } from "../../src";
 import {
 	AlgoSigner,
 	Encoding,
@@ -96,7 +93,7 @@ export class AlgoSignerMock implements AlgoSigner {
 
 	signTxn(transactions: WalletTransaction[], error?: RequestErrors): Promise<JsonPayload> {
 		return new Promise((resolve, reject) => {
-			const result = Array(WallectConnectSession.length);
+			const result = Array(transactions.length);
 			for (let txnId = 0; txnId < transactions.length; ++txnId) {
 				result[txnId] = {
 					txID: "tx-id",
