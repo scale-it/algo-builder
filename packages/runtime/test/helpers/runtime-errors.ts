@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { assert, AssertionError } from "chai";
 
 import { ErrorDescriptor } from "../../src/errors/errors-list";
@@ -53,6 +52,7 @@ export function expectRuntimeError(
 	);
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function expectRuntimeErrorAsync(
 	f: () => Promise<any>,
 	errorDescriptor: ErrorDescriptor,

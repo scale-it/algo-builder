@@ -18,10 +18,15 @@ import {
 } from "../lib/constants";
 import type { TEALStack } from "../types";
 
-export class Op {
-	execute(stack: TEALStack, op?: MathOp): number | void {
-		return 1;
-	}
+export abstract class Op {
+	/**
+	 * executes the opcode and returns its cost if different from 1
+	 * @param stack TEAL stack
+	 * @param op math operator for the ByteOp class
+	 * @returns either the cost or if cost is default (equal to 1) void;
+	 */
+	abstract execute(stack: TEALStack, op?: MathOp): number | void;
+
 	/**
 	 * assert stack length is atleast minLen
 	 * @param stack TEAL stack
