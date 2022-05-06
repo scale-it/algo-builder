@@ -2,7 +2,14 @@ import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
-import { ExecParams, isSDKTransactionAndSign, TransactionAndSign, TxParams } from "../types";
+import {
+	ExecParams,
+	isSDKTransactionAndSign,
+	Sign,
+	SignType,
+	TransactionAndSign,
+	TxParams,
+} from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
 import { mkTransaction } from "./txn";
@@ -147,23 +154,47 @@ export class WebMode {
 				length: transactions.length,
 			});
 		}
-		if (!isSDKTransactionAndSign(transactions[0])) {
-			const execParams = transactions as ExecParams[];
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
-			}
+
+		if (isSDKTransactionAndSign(transactions[0]))
+			throw new Error("We don't support this case now");
+
+		const execParams = transactions as ExecParams[];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
 		}
+
 		txns = algosdk.assignGroupID(txns);
+
 		const binaryTxs = txns.map((txn: Transaction) => {
 			return txn.toByte();
 		});
+
 		const base64Txs = binaryTxs.map((txn: Uint8Array) => {
 			return this.algoSigner.encoding.msgpackToBase64(txn);
 		});
-		const toBeSignedTxns = base64Txs.map((txn: string) => {
-			return { txn: txn };
+
+		// with logic signature we don't need signers.
+		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
+			return execParams[txnId].sign === SignType.LogicSignature
+				? { txn: txn, signers: [] }
+				: { txn: txn };
 		});
+
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
+
+		// sign smart signature transaction
+		for (const [txnId, txn] of txns.entries()) {
+			const singer: Sign = execParams[txnId];
+			if (singer.sign === SignType.LogicSignature) {
+				singer.lsig.lsig.args = singer.args ?? [];
+				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
+				signedTxn[txnId] = {
+					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
+					txId: lsigTxn.txID,
+				};
+			}
+		}
+
 		const txInfo = await this.sendGroupTransaction(signedTxn);
 
 		if (txInfo && typeof txInfo.txId === "string") {
@@ -171,6 +202,7 @@ export class WebMode {
 		}
 		throw new Error("Transaction Error");
 	}
+
 	/** @deprecated */
 	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
 		if (Array.isArray(execParams)) return this.executeTx(execParams) as unknown as JsonPayload;

@@ -115,7 +115,7 @@ export enum JsonRpcMethod {
 }
 
 export interface JsonPayload {
-	[key: string]: string | number | WalletTransaction[] | JsonPayload | undefined;
+	[key: string]: string | number | Array<WalletTransaction> | JsonPayload | undefined;
 }
 
 export interface JsonRpcBody {
