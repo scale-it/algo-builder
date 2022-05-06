@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 // Deploy new application
@@ -35,7 +34,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 
-	await executeTx(deployer, paymentTxnParam);
+	await deployer.executeTx(paymentTxnParam);
 }
 
 module.exports = { default: run };
