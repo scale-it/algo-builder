@@ -610,7 +610,7 @@ const transactionErrors = {
 		description: "Inner transaction appl self-call",
 	},
 	TRANSACTION_ALREADY_IN_LEDGER: {
-		number: 1415,
+		number: 1411,
 		message: "Transaction already in ledger",
 		title: "Transaction already in ledger",
 		description: "Transaction already in ledger.",
