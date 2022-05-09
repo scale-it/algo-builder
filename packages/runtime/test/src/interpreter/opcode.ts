@@ -1,4 +1,5 @@
 import { parsing } from "@algo-builder/web";
+import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Len } from "../../../src/interpreter/opcode-list";
@@ -44,5 +45,11 @@ describe("Teal Opcodes basic assertions", function () {
 			() => op.assertMinStackLen(stack, stackLen, lineNumber),
 			RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 		);
+	});
+
+	it("Should return correct cost", function () {
+		const stack = new Stack<StackElem>();
+		stack.push(parsing.stringToBytes("arg_0"));
+		assert.equal(1, op.execute(stack));
 	});
 });

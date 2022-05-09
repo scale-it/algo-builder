@@ -27,7 +27,11 @@ export abstract class Op {
 	 * @param op math operator for the ByteOp class
 	 * @returns either the cost or if cost is default (equal to 1) void;
 	 */
-	abstract execute(stack: TEALStack, op?: MathOp): number | void;
+	abstract execute(stack: TEALStack, op?: MathOp): number;
+
+	computeCost(): number {
+		return 1;
+	}
 
 	/**
 	 * assert stack length is atleast minLen

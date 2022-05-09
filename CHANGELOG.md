@@ -62,8 +62,7 @@ Added:
   console.log("txn1 information: ", receipts[2]);
 ```
 
-- Now every opcode class that has a different cost than 1 returns it from its `execute` method. So the method returns either `void` or a `number`
-correspodning to the actual cost of the opcode. 
+- Every opcode class has been updated and now their `execute` method returns its cost. 
 
 
 ### Template improvements

@@ -545,8 +545,7 @@ export class Interpreter {
 				});
 			}
 			const costFromExecute = instruction.execute(this.stack);
-			const cost = costFromExecute === undefined ? 1 : costFromExecute;
-			this.cost += cost;
+			this.cost += costFromExecute;
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
@@ -558,7 +557,7 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += cost;
+					this.runtime.ctx.pooledApplCost += costFromExecute;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,
