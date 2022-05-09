@@ -706,11 +706,7 @@ export class Keccak256 extends Op {
 	}
 
 	computeCost(): number {
-		if (this.interpreter.tealVersion > 1) {
-			return 130;
-		} else {
-			return 26;
-		}
+                return (this.interpreter.tealVersion > 1) ? 130 : 26;
 	}
 
 	execute(stack: TEALStack): number {
