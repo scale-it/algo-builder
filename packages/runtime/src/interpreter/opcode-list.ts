@@ -637,11 +637,7 @@ export class Sha256 extends Op {
 	}
 
 	computeCost(): number {
-		if (this.interpreter.tealVersion > 1) {
-			return 35;
-		} else {
-			return 7;
-		}
+		return (this.interpreter.tealVersion > 1) ? 35 : 7;
 	}
 
 	execute(stack: TEALStack): number {
