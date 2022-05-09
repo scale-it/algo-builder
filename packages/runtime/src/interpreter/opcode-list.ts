@@ -132,11 +132,10 @@ export class Len extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): number {
+	execute(stack: TEALStack): void {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBytes(stack.pop(), this.line);
 		stack.push(BigInt(last.length));
-		return 1;
 	}
 }
 
