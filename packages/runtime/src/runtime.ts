@@ -226,10 +226,10 @@ export class Runtime {
 		}
 	}
 
-	validateDupTxn(gtxns: EncTx[]): void {
+	validateNoDupTxn(gtxns: EncTx[]): void {
 		for (const txn of gtxns) {
-			const count = gtxns.filter((anotherTxn) => anotherTxn.txID === txn.txID).length;
-			if (count > 1) {
+			const isDuplicate = gtxns.filter((anotherTxn) => anotherTxn.txID === txn.txID).length > 1;
+			if (isDuplicate) {
 				throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.TRANSACTION_ALREADY_IN_LEDGER);
 			}
 		}
@@ -912,8 +912,8 @@ export class Runtime {
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
-		// validate duplication txns
-		this.validateDupTxn(gtxs);
+		// validate no duplication txns
+		this.validateNoDupTxn(gtxs);
 		// initialize context before each execution
 		// Prepare shared space at each execution of transaction/s.
 		// state is a deep copy of store
