@@ -37,6 +37,7 @@ import {
 	MAX_UINT64,
 	MAX_UINT128,
 	MaxTEALVersion,
+	OpGasCost,
 	TransactionTypeEnum,
 	TxArrFields,
 	ZERO_ADDRESS,
@@ -637,7 +638,7 @@ export class Sha256 extends Op {
 	}
 
 	computeCost(): number {
-		return (this.interpreter.tealVersion > 1) ? 35 : 7;
+		return OpGasCost[this.interpreter.tealVersion]["sha256"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -671,7 +672,7 @@ export class Sha512_256 extends Op {
 	}
 
 	computeCost(): number {
-		return (this.interpreter.tealVersion > 1) ? 45 : 9;
+		return OpGasCost[this.interpreter.tealVersion]["sha512_256"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -706,7 +707,7 @@ export class Keccak256 extends Op {
 	}
 
 	computeCost(): number {
-                return (this.interpreter.tealVersion > 1) ? 130 : 26;
+		return OpGasCost[this.interpreter.tealVersion]["keccak256"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -738,7 +739,7 @@ export class Ed25519verify extends Op {
 	}
 
 	computeCost(): number {
-		return 1900;
+		return OpGasCost[1]["ed25519verify"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -1248,12 +1249,10 @@ export class Dup2 extends Op {
 		this.assertMinStackLen(stack, 2, this.line);
 		const lastValueA = stack.pop();
 		const lastValueB = stack.pop();
-
 		stack.push(lastValueB);
 		stack.push(lastValueA);
 		stack.push(lastValueB);
 		stack.push(lastValueA);
-
 		return this.computeCost();
 	}
 }
@@ -1286,7 +1285,6 @@ export class Concat extends Op {
 		c.set(valueB);
 		c.set(valueA, valueB.length);
 		stack.push(c);
-
 		return this.computeCost();
 	}
 }
@@ -1321,10 +1319,8 @@ export class Substring extends Op {
 		const end = this.assertUint8(this.end, this.line);
 		const start = this.assertUint8(this.start, this.line);
 		const byteString = this.assertBytes(stack.pop(), this.line);
-
 		const subString = this.subString(byteString, start, end, this.line);
 		stack.push(subString);
-
 		return this.computeCost();
 	}
 }
@@ -1351,10 +1347,8 @@ export class Substring3 extends Op {
 		const end = this.assertBigInt(stack.pop(), this.line);
 		const start = this.assertBigInt(stack.pop(), this.line);
 		const byteString = this.assertBytes(stack.pop(), this.line);
-
 		const subString = this.subString(byteString, start, end, this.line);
 		stack.push(subString);
-
 		return this.computeCost();
 	}
 }
@@ -1416,7 +1410,6 @@ export class Txn extends Op {
 			);
 		}
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -1454,7 +1447,6 @@ export class Gtxn extends Op {
 		}
 		assertOnlyDigits(args[0], line);
 		this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
-
 		this.txIdx = Number(args[0]); // transaction group index
 		this.field = args[1]; // field
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
@@ -1473,7 +1465,6 @@ export class Gtxn extends Op {
 			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
 		}
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -1522,7 +1513,6 @@ export class Txna extends Op {
 			this.line
 		);
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -1577,7 +1567,6 @@ export class Gtxna extends Op {
 		const tx = this.groupTxn[this.txIdx];
 		const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter, this.line);
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -1643,7 +1632,6 @@ export class Branch extends Op {
 export class Branchv4 extends Branch {
 	execute(_stack: TEALStack): number {
 		this.interpreter.jumpToLabel(this.label, this.line);
-
 		return this.computeCost();
 	}
 }
@@ -1676,7 +1664,6 @@ export class BranchIfZero extends Op {
 		if (last === 0n) {
 			this.interpreter.jumpForward(this.label, this.line);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -1725,7 +1712,6 @@ export class BranchIfNotZero extends Op {
 		if (last !== 0n) {
 			this.interpreter.jumpForward(this.label, this.line);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -1863,13 +1849,11 @@ export class Global extends Op {
 				result = GlobalFields[this.interpreter.tealVersion][this.field];
 			}
 		}
-
 		if (typeof result === "number") {
 			stack.push(BigInt(result));
 		} else {
 			stack.push(result);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -1910,7 +1894,6 @@ export class AppOptedIn extends Op {
 		} else {
 			stack.push(0n);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -1949,7 +1932,6 @@ export class AppLocalGet extends Op {
 		} else {
 			stack.push(0n); // The value is zero if the key does not exist.
 		}
-
 		return this.computeCost();
 	}
 }
@@ -1989,7 +1971,6 @@ export class AppLocalGetEx extends Op {
 			stack.push(0n); // The value is zero if the key does not exist.
 			stack.push(0n); // did_exist_flag
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2025,7 +2006,6 @@ export class AppGlobalGet extends Op {
 		} else {
 			stack.push(0n); // The value is zero if the key does not exist.
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2067,7 +2047,6 @@ export class AppGlobalGetEx extends Op {
 			stack.push(0n); // The value is zero if the key does not exist.
 			stack.push(0n); // did_exist_flag
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2109,7 +2088,6 @@ export class AppLocalPut extends Op {
 			this.line
 		);
 		acc.appsLocalState.set(appID, localState);
-
 		return this.computeCost();
 	}
 }
@@ -2140,7 +2118,6 @@ export class AppGlobalPut extends Op {
 
 		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0; // if undefined use 0 as default
 		this.interpreter.setGlobalState(appID, key, value, this.line);
-
 		return this.computeCost();
 	}
 }
@@ -2180,7 +2157,6 @@ export class AppLocalDel extends Op {
 			acc = this.interpreter.runtime.assertAccountDefined(account.address, acc, this.line);
 			acc.appsLocalState.set(appID, localState);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2215,7 +2191,6 @@ export class AppGlobalDel extends Op {
 			const globalState = app["global-state"];
 			globalState.delete(key.toString());
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2247,9 +2222,7 @@ export class Balance extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const accountRef: StackElem = stack.pop();
 		const acc = this.interpreter.getAccount(accountRef, this.line);
-
 		stack.push(BigInt(acc.balance()));
-
 		return this.computeCost();
 	}
 }
@@ -2275,7 +2248,6 @@ export class GetAssetHolding extends Op {
 		this.interpreter = interpreter;
 		this.line = line;
 		assertLen(args.length, 1, line);
-
 		this.field = args[0];
 	}
 
@@ -2308,10 +2280,8 @@ export class GetAssetHolding extends Op {
 			default:
 				throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_FIELD_TYPE, { line: this.line });
 		}
-
 		stack.push(value);
 		stack.push(1n);
-
 		return this.computeCost();
 	}
 }
@@ -2433,7 +2403,6 @@ export class Int extends Op {
 
 	execute(stack: TEALStack): number {
 		stack.push(this.uint64);
-
 		return this.computeCost();
 	}
 }
@@ -2459,7 +2428,6 @@ export class Byte extends Op {
 	execute(stack: TEALStack): number {
 		const buffer = convertToBuffer(this.str, this.encoding);
 		stack.push(new Uint8Array(buffer));
-
 		return this.computeCost();
 	}
 }
@@ -2488,7 +2456,6 @@ export class Addr extends Op {
 	execute(stack: TEALStack): number {
 		const addr = decodeAddress(this.addr);
 		stack.push(addr.publicKey);
-
 		return this.computeCost();
 	}
 }
@@ -2516,7 +2483,6 @@ export class Assert extends Op {
 		if (top === 0n) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2548,7 +2514,6 @@ export class PushInt extends Op {
 
 	execute(stack: TEALStack): number {
 		stack.push(this.uint64);
-
 		return this.computeCost();
 	}
 }
@@ -2585,7 +2550,6 @@ export class PushBytes extends Op {
 	execute(stack: TEALStack): number {
 		const buffer = convertToBuffer(this.str, this.encoding);
 		stack.push(new Uint8Array(buffer));
-
 		return this.computeCost();
 	}
 }
@@ -2612,7 +2576,6 @@ export class Swap extends Op {
 		const b = stack.pop();
 		stack.push(a);
 		stack.push(b);
-
 		return this.computeCost();
 	}
 }
@@ -2675,7 +2638,6 @@ export class SetBit extends Op {
 			}
 			stack.push(target);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2717,7 +2679,6 @@ export class GetBit extends Op {
 			const str = binary.padStart(8, "0");
 			stack.push(BigInt(str[targetBit]));
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2751,7 +2712,6 @@ export class SetByte extends Op {
 
 		target[Number(index)] = Number(smallInteger);
 		stack.push(target);
-
 		return this.computeCost();
 	}
 }
@@ -2821,7 +2781,6 @@ export class Dig extends Op {
 			stack.push(tempStack.pop());
 		}
 		stack.push(target as StackElem);
-
 		return this.computeCost();
 	}
 }
@@ -2854,7 +2813,6 @@ export class Select extends Op {
 		} else {
 			stack.push(isZeroSelection);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -2888,7 +2846,6 @@ export class Gtxns extends Gtxn {
 		this.assertUint8(top, this.line);
 		this.txIdx = Number(top);
 		super.execute(stack);
-
 		return this.computeCost();
 	}
 }
@@ -2952,9 +2909,7 @@ export class MinBalance extends Op {
 		this.assertMinStackLen(stack, 1, this.line);
 		const accountRef: StackElem = stack.pop();
 		const acc = this.interpreter.getAccount(accountRef, this.line);
-
 		stack.push(BigInt(acc.minBalance));
-
 		return this.computeCost();
 	}
 }
@@ -3000,7 +2955,6 @@ export class Gload extends Op {
 		}
 		this.checkIndexBound(this.scratchIndex, scratch, this.line);
 		stack.push(scratch[this.scratchIndex]);
-
 		return this.computeCost();
 	}
 }
@@ -3084,7 +3038,6 @@ export class Callsub extends Op {
 		this.interpreter.callStack.push(this.interpreter.instructionIndex);
 		// immediately jumps to the label passed to the opcode.
 		this.interpreter.jumpToLabel(this.label, this.line);
-
 		return this.computeCost();
 	}
 }
@@ -3121,7 +3074,6 @@ export class Retsub extends Op {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY, { line: this.line });
 		}
 		this.interpreter.instructionIndex = this.interpreter.callStack.pop();
-
 		return this.computeCost();
 	}
 }
@@ -3147,17 +3099,17 @@ export class ByteOp extends Op {
 		switch (this.op) {
 			case MathOp.Add:
 			case MathOp.Sub: {
-				return 10;
+				return OpGasCost[4]["b+"];
 			}
 			case MathOp.Mul:
 			case MathOp.Div:
 			case MathOp.Mod: {
-				return 20;
+				return OpGasCost[4]["b*"];
 			}
 			case MathOp.BitwiseOr:
 			case MathOp.BitwiseAnd:
 			case MathOp.BitwiseXor: {
-				return 6;
+				return OpGasCost[4]["b|"];
 			}
 			default: {
 				return 1;
@@ -3265,7 +3217,6 @@ export class ByteOp extends Op {
 				stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
 			}
 		}
-
 		return this.computeCost();
 	}
 }
@@ -3407,7 +3358,7 @@ export class ByteBitwiseXor extends ByteOp {
 // push to stack [...stack, byte[]]
 export class ByteBitwiseInvert extends ByteOp {
 	computeCost(): number {
-		return 4;
+		return OpGasCost[4]["b~"];
 	}
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
@@ -3449,20 +3400,17 @@ export class Bsqrt extends Op {
 	}
 
 	computeCost(): number {
-		return 40;
+		return OpGasCost[6]["bsqrt"];
 	}
 
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
-
 		const value = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
 		// convert to bigint
 		const bigintValue = bigEndianBytesToBigInt(value);
 		// compute sqrt
 		const bigintResult = bigintSqrt(bigintValue);
-
 		stack.push(bigintToBigEndianBytes(bigintResult));
-
 		return this.computeCost();
 	}
 }
@@ -3522,7 +3470,6 @@ export class DivModw extends Op {
 
 		stack.push(high);
 		stack.push(low);
-
 		return this.computeCost();
 	}
 }
@@ -3546,16 +3493,12 @@ export class Exp extends Op {
 	execute(stack: TEALStack): number {
 		const b = this.assertBigInt(stack.pop(), this.line);
 		const a = this.assertBigInt(stack.pop(), this.line);
-
 		if (a === 0n && b === 0n) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
 		}
-
 		const res = a ** b;
 		this.checkOverflow(res, this.line, MAX_UINT64);
-
 		stack.push(res);
-
 		return this.computeCost();
 	}
 }
@@ -3666,7 +3609,6 @@ export class Sqrt extends Op {
 		const value = this.assertBigInt(stack.pop(), this.line);
 		const result = bigintSqrt(value);
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -3703,7 +3645,6 @@ export class Gaid extends Op {
 		}
 
 		stack.push(BigInt(knowableID));
-
 		return this.computeCost();
 	}
 }
@@ -3765,9 +3706,7 @@ export class Extract extends Op {
 		if (this.length === 0) {
 			this.length = array.length - this.start;
 		}
-
 		stack.push(this.opExtractImpl(array, this.start, this.length));
-
 		return this.computeCost();
 	}
 }
@@ -3797,7 +3736,6 @@ export class Extract3 extends Op {
 		const start = Number(this.assertBigInt(stack.pop(), this.line));
 		const array = this.assertBytes(stack.pop(), this.line);
 		stack.push(this.opExtractImpl(array, start, length));
-
 		return this.computeCost();
 	}
 }
@@ -3835,7 +3773,6 @@ class ExtractUintN extends Op {
 
 		const sliced = this.opExtractImpl(array, start, this.extractBytes); // extract n bytes
 		stack.push(bigEndianBytesToBigInt(sliced));
-
 		return this.computeCost();
 	}
 }
@@ -3861,7 +3798,6 @@ export class ExtractUint16 extends ExtractUintN {
 // If B+4 is larger than the array length, the program fails
 export class ExtractUint32 extends ExtractUintN {
 	extractBytes = 4;
-
 	execute(stack: TEALStack): number {
 		return super.execute(stack);
 	}
@@ -3902,7 +3838,7 @@ export class EcdsaVerify extends Op {
 	}
 
 	computeCost(): number {
-		return 1700;
+		return OpGasCost[5]["ecdsa_verify"];
 	}
 
 	/**
@@ -3934,9 +3870,7 @@ export class EcdsaVerify extends Op {
 		};
 		const key = ec.keyFromPublic(pub);
 		const signature = { r: signatureB, s: signatureC };
-
 		this.pushBooleanCheck(stack, key.verify(data, signature));
-
 		return this.computeCost();
 	}
 }
@@ -3961,7 +3895,7 @@ export class EcdsaPkDecompress extends Op {
 	}
 
 	computeCost(): number {
-		return 650;
+		return OpGasCost[6]["ecdsa_pk_decompress"];
 	}
 
 	/**
@@ -3983,10 +3917,8 @@ export class EcdsaPkDecompress extends Op {
 		const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, "hex").getPublic();
 		const x = publicKeyUncompressed.getX();
 		const y = publicKeyUncompressed.getY();
-
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
-
 		return this.computeCost();
 	}
 }
@@ -4011,7 +3943,7 @@ export class EcdsaPkRecover extends Op {
 	}
 
 	computeCost(): number {
-		return 2000;
+		return OpGasCost[6]["ecdsa_pk_recover"];
 	}
 
 	/**
@@ -4038,10 +3970,8 @@ export class EcdsaPkRecover extends Op {
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
 		const y = pubKey.getY();
-
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
-
 		return this.computeCost();
 	}
 }
@@ -4078,7 +4008,6 @@ export class Cover extends Op {
 		for (let i = this.nthInStack - 1; i >= 0; --i) {
 			stack.push(temp[i]);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -4171,7 +4100,6 @@ export class Stores extends Op {
 		const index = this.assertBigInt(stack.pop(), this.line);
 		this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
 		this.interpreter.scratch[Number(index)] = value;
-
 		return this.computeCost();
 	}
 }
@@ -4215,9 +4143,7 @@ export class ITxnBegin extends Op {
 		if (this.interpreter.runtime.ctx.tx.apan === Number(TxOnComplete.ClearState)) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ISSUE_ITXN_WHEN_CLEAR_PROGRAM);
 		}
-
 		this.interpreter.currentInnerTxnGroup = [addInnerTransaction(this.interpreter, this.line)];
-
 		return this.computeCost();
 	}
 }
@@ -4466,9 +4392,7 @@ export class ITxn extends Op {
 				break;
 			}
 		}
-
 		stack.push(result);
-
 		return this.computeCost();
 	}
 }
@@ -4717,7 +4641,6 @@ export class Log extends Op {
 
 			txReceipt.logs.push(logByte);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -4756,9 +4679,7 @@ export class BitLen extends Op {
 				bitlen += value[0].toString(2).length;
 			}
 		}
-
 		stack.push(BigInt(bitlen));
-
 		return this.computeCost();
 	}
 }
@@ -4838,7 +4759,6 @@ export class AppParamsGet extends Op {
 			stack.push(0n);
 			stack.push(0n);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -4906,7 +4826,6 @@ export class AcctParamsGet extends Op {
 		} else {
 			stack.push(0n);
 		}
-
 		return this.computeCost();
 	}
 }
@@ -4949,7 +4868,6 @@ export class ITxnNext extends Op {
 		this.interpreter.currentInnerTxnGroup.push(
 			addInnerTransaction(this.interpreter, this.line)
 		);
-
 		return this.computeCost();
 	}
 }
