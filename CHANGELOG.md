@@ -62,6 +62,8 @@ Added:
   console.log("txn1 information: ", receipts[2]);
 ```
 
+- Every opcode class has been updated and now their `execute` method returns its cost. 
+
 
 ### Template improvements
 
