@@ -671,11 +671,7 @@ export class Sha512_256 extends Op {
 	}
 
 	computeCost(): number {
-		if (this.interpreter.tealVersion > 1) {
-			return 45;
-		} else {
-			return 9;
-		}
+		return (this.interpreter.tealVersion > 1) ? 45 : 9;
 	}
 
 	execute(stack: TEALStack): number {
