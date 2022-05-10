@@ -321,9 +321,8 @@ describe("Send duplicate transaction", function () {
 	let paymentTxn: types.AlgoTransferParam;
 
 	this.beforeEach(() => {
-		alice = new AccountStore(minBalance * 10n);
-		bob = new AccountStore(minBalance * 10n);
-		runtime = new Runtime([alice, bob]);
+		runtime = new Runtime([]);
+		[alice, bob] = runtime.defaultAccounts();
 		paymentTxn = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,

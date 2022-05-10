@@ -226,7 +226,11 @@ export class Runtime {
 		}
 	}
 
-	validateNoDupTxn(gtxns: EncTx[]): void {
+	/**
+	 * Ensure no duplicate transaction in group txn
+	 * @param gtxns group transaction
+	 */
+	assertNoDuplicateTransaction(gtxns: EncTx[]): void {
 		for (const txn of gtxns) {
 			const isDuplicate = gtxns.filter((anotherTxn) => anotherTxn.txID === txn.txID).length > 1;
 			if (isDuplicate) {
@@ -913,7 +917,7 @@ export class Runtime {
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
 		// checks if the transactions are not duplicated
-		this.validateNoDupTxn(gtxs);
+		this.assertNoDuplicateTransaction(gtxs);
 		// initialize context before each execution
 		// Prepare shared space at each execution of transaction/s.
 		// state is a deep copy of store
