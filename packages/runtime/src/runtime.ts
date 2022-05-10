@@ -912,7 +912,7 @@ export class Runtime {
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
-		// validate no duplication txns
+		// checks if the transactions are not duplicated
 		this.validateNoDupTxn(gtxs);
 		// initialize context before each execution
 		// Prepare shared space at each execution of transaction/s.

@@ -336,7 +336,7 @@ describe("Send duplicate transaction", function () {
 		};
 	});
 
-	it("Should fail send duplicate transaction in group", () => {
+	it("Should throw an error when sending duplicate tx in a group", () => {
 		const groupTx = [paymentTxn, { ...paymentTxn }];
 
 		expectRuntimeError(
@@ -345,7 +345,7 @@ describe("Send duplicate transaction", function () {
 		);
 	});
 
-	it("Should work when add different note filed", () => {
+	it("Should not throw an error when add different note filed", () => {
 		const groupTx = [paymentTxn, { ...paymentTxn, payFlags: { note: "salt" } }];
 
 		assert.doesNotThrow(() => runtime.executeTx(groupTx));
