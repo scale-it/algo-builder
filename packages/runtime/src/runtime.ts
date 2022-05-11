@@ -1,5 +1,15 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { decodeAddress, modelsv2 } from "algosdk";
+import { addressToPk } from "@algo-builder/web/build/lib/parsing";
+import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/web/build/types";
+import algosdk, {
+	Address,
+	decodeAddress,
+	modelsv2,
+	OnApplicationComplete,
+	SignedTransaction,
+	Transaction,
+	TransactionParams,
+} from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
@@ -9,14 +19,15 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
+	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
-import { transactionAndSignToExecParams } from "./lib/txn";
-import { LogicSigAccount } from "./logicsig";
+import { encTxToExecParams, transactionAndSignToExecParams } from "./lib/txn";
+import { LogicSig, LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
 	AccountAddress,
@@ -871,8 +882,6 @@ export class Runtime {
 		txnParams: types.ExecParams[] | types.TransactionAndSign[],
 		debugStack?: number
 	): TxReceipt[] {
-		// TODO: union above and create new type in task below:
-		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
 		let tx, gtxs;
 
 		if (types.isSDKTransactionAndSign(txnParams[0])) {
@@ -963,5 +972,87 @@ export class Runtime {
 			this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
 		}
 		return txReceipt;
+	}
+
+	sendSignedTransaction(signedTransaction: SignedTransaction) {
+		// this.verifySignature(signedTransaction);
+		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+		let signerAccount;
+		let fromAccountAddr;
+		if (signedTransaction.txn.reKeyTo === undefined) {
+			signerAccount = this.getAccount(
+				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
+			).account;
+		} else {
+			signerAccount = this.getAccount(
+				algosdk.encodeAddress(signedTransaction.txn.reKeyTo.publicKey)
+			).account;
+			fromAccountAddr = this.getAccount(
+				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
+			).account.addr;
+		}
+		encodedTxnObj.txID = signedTransaction.txn.txID();
+		let execParams;
+		if (typeof signedTransaction.sig !== "undefined") {
+			//Transaction signature
+			execParams = encTxToExecParams(
+				encodedTxnObj,
+				{ sign: SignType.SecretKey, fromAccount: signerAccount },
+				this.ctx
+			);
+		} else if (typeof signedTransaction.sgnr !== "undefined") {
+			//The signer, if signing with a different key than the Transaction type from property indicates
+			execParams = encTxToExecParams(
+				encodedTxnObj,
+				{
+					sign: SignType.SecretKey,
+					fromAccount: signerAccount,
+					fromAccountAddr: fromAccountAddr,
+				},
+				this.ctx
+			);
+		} else if (typeof signedTransaction.lsig !== "undefined") {
+			//Logic signature
+			throw new Error("Lsig not supported");
+		} else if (typeof signedTransaction.msig !== "undefined") {
+			// Multisig structure
+			throw new Error("Lsig not supported");
+		}
+		if (execParams === undefined) {
+			throw new Error("Signature type not supported");
+		}
+		this.ctx = new Ctx(cloneDeep(this.store), encodedTxnObj, [encodedTxnObj], [], this);
+		this.ctx.processTransactions([execParams]);
+		this.store = this.ctx.state;
+	}
+
+	verifySignature(signedTransaction: SignedTransaction) {
+		let isValid = false;
+		if (typeof signedTransaction.sig !== "undefined") {
+			//Transaction signature
+			isValid = algosdk.verifyBytes(
+				signedTransaction.txn.bytesToSign(),
+				signedTransaction.sig,
+				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
+			);
+		} else if (
+			typeof signedTransaction.sgnr !== "undefined" &&
+			typeof signedTransaction.txn.reKeyTo !== "undefined"
+		) {
+			isValid = algosdk.verifyBytes(
+				signedTransaction.txn.bytesToSign(),
+				signedTransaction.sgnr,
+				signedTransaction.txn.reKeyTo.toString()
+			);
+		} else if (typeof signedTransaction.lsig !== "undefined") {
+			//Logic signature
+			isValid = false;
+		} else if (typeof signedTransaction.msig !== "undefined") {
+			// Multisig structure
+			isValid = false;
+		}
+		if (!isValid) {
+			throw new Error("Signature is not valid");
+		}
 	}
 }

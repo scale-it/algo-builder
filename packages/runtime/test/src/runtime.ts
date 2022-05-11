@@ -1,4 +1,5 @@
 import { types } from "@algo-builder/web";
+import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
@@ -6,6 +7,7 @@ import sinon from "sinon";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
 import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
@@ -1150,5 +1152,59 @@ describe("Deafult Accounts", function () {
 		syncAccounts();
 
 		assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
+	});
+});
+
+describe("Algo Trasnfer using sendSignedTransaction", function () {
+	let alice: AccountStore;
+	let bob: AccountStore;
+	let runtime: Runtime;
+	const amount = 1e6;
+	const fee = 1000;
+
+	this.beforeEach(() => {
+		runtime = new Runtime([]);
+		[alice, bob] = runtime.defaultAccounts();
+	});
+
+	it("Should send signedTransacion from one account to another", () => {
+		// Create transaction
+		const initialAliceBalance = alice.balance();
+		const initialBobBalance = bob.balance();
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: alice.account.addr,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(alice.account.sk));
+		// Send the transaction
+		runtime.sendSignedTransaction(signedTransaction);
+		[alice, bob] = runtime.defaultAccounts();
+		assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+	});
+
+	it("Should close alice account and send all the balance to bob the account", () => {
+		// Create transaction
+		const initialAliceBalance = alice.balance();
+		const initialBobBalance = bob.balance();
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: alice.account.addr,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+			closeRemainderTo: bob.address,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(alice.account.sk));
+		// Send the transaction
+		runtime.sendSignedTransaction(signedTransaction);
+		[alice, bob] = runtime.defaultAccounts();
+		assert.equal(0n, alice.balance());
+		assert.equal(initialBobBalance + initialAliceBalance - BigInt(fee), bob.balance());
 	});
 });
