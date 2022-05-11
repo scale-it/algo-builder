@@ -310,6 +310,47 @@ describe("Rounds Test", function () {
 	});
 });
 
+describe("Send duplicate transaction", function () {
+	const amount = minBalance;
+	const fee = 1000;
+
+	let alice: AccountStoreI;
+	let bob: AccountStoreI;
+
+	let runtime: Runtime;
+	let paymentTxn: types.AlgoTransferParam;
+
+	this.beforeEach(() => {
+		runtime = new Runtime([]);
+		[alice, bob] = runtime.defaultAccounts();
+		paymentTxn = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.address,
+			amountMicroAlgos: amount,
+			payFlags: {
+				totalFee: fee,
+			},
+		};
+	});
+
+	it("Should throw an error when sending duplicate tx in a group", () => {
+		const groupTx = [paymentTxn, { ...paymentTxn }];
+
+		expectRuntimeError(
+			() => runtime.executeTx(groupTx),
+			RUNTIME_ERRORS.TRANSACTION.TRANSACTION_ALREADY_IN_LEDGER
+		);
+	});
+
+	it("Should not throw an error when add different note filed", () => {
+		const groupTx = [paymentTxn, { ...paymentTxn, payFlags: { note: "salt" } }];
+
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
+	});
+});
+
 describe("Algorand Standard Assets", function () {
 	useFixture("asa-check");
 	let john = new AccountStore(minBalance);
