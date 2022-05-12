@@ -52,7 +52,7 @@ You can connect to `web` package in your react app by using different wallets. C
     ```
 
 Now you can use it to execute a transaction:
-
+```javascript
     const txParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -62,6 +62,7 @@ Now you can use it to execute a transaction:
       payFlags: {},
     };
     let response = await wcSession.executeTx(txParams);
+```
 
 This code will make the transaction, let the user sign it using wallet selected and send it to the network.
 
@@ -90,7 +91,7 @@ console.log(2, debug.enabled("test"));
 
 print:
 
-```
+```bash
 1 true
 2 false
 ```
@@ -112,14 +113,15 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+```
 
 ## deployApp
 
 `deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
 
-## Example
+### Example
 
-```js
+```javascript
 // deployment
 const daoAppInfo = await deployer.deployApp(
 	"dao-app-approval.py",
