@@ -44,16 +44,30 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	it("initialize new account for deployed app(s)", function () {
 		// deploy new app
 		const appIdX = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			appCreationFlags,
+			john.account,
+			{
+				metaType: types.MetaType.STRING,
+				approvalProgramSource: approvalProgram,
+				clearProgramSource: clearProgram,
+				globalBytes: 1,
+				globalInts: 1,
+				localBytes: 1,
+				localInts: 1,
+			},
 			{}
 		).appID;
 
 		const appIdY = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			appCreationFlags,
+			john.account,
+			{
+				metaType: types.MetaType.STRING,
+				approvalProgramSource: approvalProgram,
+				clearProgramSource: clearProgram,
+				globalBytes: 1,
+				globalInts: 1,
+				localBytes: 1,
+				localInts: 1,
+			},
 			{}
 		).appID;
 
@@ -66,12 +80,15 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	it("initialize new account for app(s) deployed using executeTx", function () {
 		// create new app
 		const execParams: types.DeployAppParam = {
-			...appCreationFlags,
 			type: types.TransactionType.DeployApp,
 			sign: types.SignType.SecretKey,
 			fromAccount: john.account,
-			approvalProgram: approvalProgram,
-			clearProgram: clearProgram,
+			appDef: {
+				...appCreationFlags,
+				metaType: types.MetaType.STRING,
+				approvalProgramSource: approvalProgram,
+				clearProgramSource: clearProgram,
+			},
 			payFlags: {},
 		};
 

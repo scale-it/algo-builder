@@ -169,20 +169,45 @@ export type DeployASAParam = BasicParams & {
 	overrideAsaDef?: Partial<ASADef>;
 };
 
-export type DeployAppParam = BasicParams &
-	AppOptionalFlags & {
-		type: TransactionType.DeployApp;
-		approvalProgram: string;
-		clearProgram: string;
-		localInts: number;
-		localBytes: number;
-		globalInts: number;
-		globalBytes: number;
-		extraPages?: number;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
-	};
+export enum MetaType {
+	FILE,
+	STRING,
+	BYTES,
+}
+
+export type SourceFile = {
+	metaType: MetaType.FILE;
+	approvalProgramPath: string;
+	clearProgramPath: string;
+};
+
+export type SourceString = {
+	metaType: MetaType.STRING;
+	approvalProgramSource: string;
+	clearProgramSource: string;
+};
+
+export type SourceBytes = {
+	metaType: MetaType.BYTES;
+	approvalProgram: Uint8Array;
+	clearProgram: Uint8Array;
+};
+
+export type SourceContract = SourceFile | SourceString | SourceBytes;
+
+export type AppDef = SourceContract & {
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+	appName?: string; // name of app to store info against in checkpoint
+} & AppOptionalFlags;
+
+export type DeployAppParam = BasicParams & {
+	type: TransactionType.DeployApp;
+	appDef: AppDef;
+};
 
 export type UpdateAppParam = BasicParams &
 	AppOptionalFlags & {

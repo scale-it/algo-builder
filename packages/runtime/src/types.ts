@@ -190,9 +190,7 @@ export interface Context {
 	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
-		flags: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string,
+		sourceContract: types.AppDef,
 		idx: number,
 		scTmplParams?: SCParams
 	) => AppInfo;

@@ -1,5 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { decodeAddress, modelsv2 } from "algosdk";
+import algosdk, { Account as AccountSDK, decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
@@ -539,23 +539,27 @@ export class Runtime {
 	}
 
 	// creates new application transaction object and update context
-	addCtxAppCreateTxn(flags: AppDeploymentFlags, payFlags: types.TxParams): void {
+	addCtxAppCreateTxn(
+		creator: AccountSDK,
+		appDef: types.AppDef,
+		payFlags: types.TxParams
+	): void {
 		const txn = algosdk.makeApplicationCreateTxn(
-			flags.sender.addr,
+			creator.addr,
 			mockSuggestedParams(payFlags, this.round),
 			algosdk.OnApplicationComplete.NoOpOC,
 			new Uint8Array(32), // mock approval program
 			new Uint8Array(32), // mock clear progam
-			flags.localInts,
-			flags.localBytes,
-			flags.globalInts,
-			flags.globalBytes,
-			parsing.parseAppArgs(flags.appArgs),
-			flags.accounts,
-			flags.foreignApps,
-			flags.foreignAssets,
-			flags.note,
-			flags.lease,
+			appDef.localInts,
+			appDef.localBytes,
+			appDef.globalInts,
+			appDef.globalBytes,
+			parsing.parseAppArgs(appDef.appArgs),
+			appDef.accounts,
+			appDef.foreignApps,
+			appDef.foreignAssets,
+			appDef.note,
+			appDef.lease,
 			payFlags.rekeyTo
 		);
 
@@ -582,7 +586,7 @@ export class Runtime {
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
-		return this.deployApp(approvalProgram, clearProgram, flags, payFlags, {}, debugStack);
+		throw new Error("We remove this function now");
 	}
 
 	/**
@@ -596,25 +600,17 @@ export class Runtime {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: AppDeploymentFlags,
+		sender: AccountSDK,
+		appDef: types.AppDef,
 		payFlags: types.TxParams,
 		scTmplParams?: SCParams,
 		debugStack?: number
 	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
+		this.addCtxAppCreateTxn(sender, appDef, payFlags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
 
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0,
-			scTmplParams
-		);
+		const txReceipt = this.ctx.deployApp(sender.addr, appDef, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;
 	}
@@ -883,22 +879,28 @@ export class Runtime {
 			tx = sdkTxns[0];
 			gtxs = sdkTxns;
 		} else {
-			for (const txnParamerter of txnParams) {
-				const txn = txnParamerter as types.ExecParams;
+			const txns = txnParams.map((txnParamerter) => {
+				const txn = cloneDeep(txnParamerter) as types.ExecParams;
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
 						if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
 						break;
 					}
 					case types.TransactionType.DeployApp: {
-						txn.approvalProg = new Uint8Array(32); // mock approval program
-						txn.clearProg = new Uint8Array(32); // mock clear program
+						txn.appDef = {
+							...txn.appDef,
+							metaType: types.MetaType.BYTES,
+							approvalProgram: new Uint8Array(32),
+							clearProgram: new Uint8Array(32),
+						};
 						break;
 					}
 				}
-			}
+				return txn;
+			});
+
 			// get current txn and txn group (as encoded obj)
-			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
+			[tx, gtxs] = this.createTxnContext(txns as types.ExecParams[]);
 		}
 
 		// validate first and last rounds
