@@ -29,29 +29,30 @@ You can connect to `web` package in your react app by using different wallets. C
 1.  ### AlgoSigner:
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
-
-        const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
-
+```js
+    const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+```
 2.  ### MyAlgo Wallet:
 
     Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
 
-         ```js
-         const wcSession = new MyAlgoWalletSession(CHAIN_NAME)
-         await wcSession.connectToMyAlgo();
-         ```
+```js
+    const wcSession = new MyAlgoWalletSession(CHAIN_NAME)
+    await wcSession.connectToMyAlgo();
+```
 
 3.  ### Wallet Connect:
 
     Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
 
-    ```js
+```js
     const wcSession = new WallectConnectSession(CHAIN_NAME);
     await wcSession.create(true);
     wcSession.onConnect((error, response) => console.log(error, response));
-    ```
+```
 
 Now you can use it to execute a transaction:
+
 ```javascript
     const txParams = {
       type: types.TransactionType.TransferAlgo,
