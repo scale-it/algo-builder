@@ -65,7 +65,7 @@ Now you can use it to execute a transaction:
     let response = await wcSession.executeTx(txParams);
 ```
 
-This code will make the transaction, let the user sign it using wallet selected and send it to the network.
+This code will create the transaction, let the user sign it using selected wallet and send it to the network.
 
 You can also use `wcSession.sendTransaction()` or `wcSession.signTransaction()` in a react app.
 The example using these wallets can be found [here] (https://github.com/scale-it/algo-builder-templates/tree/master/shop)
