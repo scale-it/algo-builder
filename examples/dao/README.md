@@ -68,6 +68,12 @@ We use functional notation to describe use cases we will implement.
 - `withdraw_from_proposal()` - Withdraw the assets from the proposalLsig back to the owner. Receiver must be the owner of the proposalLsig. Transaction composition:
  - _tx0_: Withdraw _gov_tokens_ from _proposalLsig_ back to _proposer_ (owner) (ASA transfer).
 
+## Setup Sigma Dao
+
+Setup the sigma_daos table. Indexer should be running before executing below script.
+
+    psql -U algorand -d pgdb -a -f setup_sigma_dao.sql
+
 ## Spec document
 
 Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl).
