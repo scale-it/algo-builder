@@ -1,5 +1,6 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { assert } from "chai";
+import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "../../src/account";
 import { mockSuggestedParams } from "../../src/mock/tx";
@@ -25,7 +26,21 @@ describe("Should execute SDK transaction object using runtime", function () {
 		execParams: types.ExecParams
 	): types.TransactionAndSign {
 		const suggestedParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
-		const transaction = webTx.mkTransaction(execParams, suggestedParams) as any;
+		let transaction;
+
+		if (execParams.type == types.TransactionType.DeployApp) {
+			const cloneExecParams = cloneDeep(execParams);
+			cloneExecParams.appDefinition = {
+				...cloneExecParams.appDefinition,
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+			};
+			transaction = webTx.mkTransaction(cloneExecParams, suggestedParams) as any;
+		} else {
+			transaction = webTx.mkTransaction(execParams, suggestedParams) as any;
+		}
+
 		let sign: types.Sign;
 
 		// extract `sign` from execParams

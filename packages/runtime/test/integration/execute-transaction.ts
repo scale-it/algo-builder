@@ -43,10 +43,11 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 	function setupApp(): void {
 		// deploy new app
 		runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
+			john.account,
 			{
-				sender: john.account,
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName,
+				clearProgramFileName,
 				globalBytes: 32,
 				globalInts: 32,
 				localBytes: 8,
@@ -146,12 +147,15 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				type: types.TransactionType.DeployApp,
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
-				approvalProgram: approvalProgramFileName,
-				clearProgram: clearProgramFileName,
-				localInts: 1,
-				localBytes: 1,
-				globalInts: 1,
-				globalBytes: 1,
+				appDefinition: {
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName,
+					clearProgramFileName,
+					localInts: 1,
+					localBytes: 1,
+					globalInts: 1,
+					globalBytes: 1,
+				},
 				payFlags: { totalFee: 1000 },
 			},
 		];
@@ -176,12 +180,15 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				type: types.TransactionType.DeployApp,
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
-				approvalProgram: approvalProgram,
-				clearProgram: clearProgram,
-				localInts: 1,
-				localBytes: 1,
-				globalInts: 1,
-				globalBytes: 1,
+				appDefinition: {
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName,
+					clearProgramFileName,
+					localInts: 1,
+					localBytes: 1,
+					globalInts: 1,
+					globalBytes: 1,
+				},
 				payFlags: {},
 			},
 		];

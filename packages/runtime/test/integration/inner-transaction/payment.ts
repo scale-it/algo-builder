@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
+import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -22,7 +22,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 	let runtime: Runtime;
 	let approvalProgramFileName: string;
 	let clearProgramFileName: string;
-	let appCreationFlags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinitionFromFile;
 	let appID: number;
 	let appCallParams: types.ExecParams;
 	this.beforeAll(function () {
@@ -30,8 +30,10 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 		approvalProgramFileName = "approval-payment.py";
 		clearProgramFileName = "clear.teal";
 
-		appCreationFlags = {
-			sender: john.account,
+		appDefinition = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -40,12 +42,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 	});
 
 	this.beforeEach(() => {
-		appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			appCreationFlags,
-			{}
-		).appID;
+		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
 		// fund app (escrow belonging to app) with 10 ALGO

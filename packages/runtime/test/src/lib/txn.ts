@@ -33,9 +33,13 @@ describe("Convert encoded Txn to ExecParams", function () {
 			fromAccount: execParams.fromAccount,
 		};
 		// add approvalProgram and clearProgram to encTx
+		// TODO: recheck it
 		if (execParams.type === types.TransactionType.DeployApp) {
-			encTx.approvalProgram = execParams.approvalProgram;
-			encTx.clearProgram = execParams.clearProgram;
+			encTx.metaType = execParams.appDefinition.metaType;
+			if (execParams.appDefinition.metaType === types.MetaType.FILE) {
+				encTx.approvalProgram = execParams.appDefinition.approvalProgramFileName;
+				encTx.clearProgram = execParams.appDefinition.clearProgramFileName;
+			}
 		}
 
 		// convert appArgs to buffer for an easier comparison
@@ -172,12 +176,15 @@ describe("Convert encoded Txn to ExecParams", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
-				approvalProgram: "counter-approval.teal",
-				clearProgram: "clear.teal",
-				globalBytes: 1,
-				globalInts: 1,
-				localBytes: 1,
-				localInts: 1,
+				appDefinition: {
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName: "counter-approval.teal",
+					clearProgramFileName: "clear.teal",
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+				},
 				payFlags: {
 					totalFee: 1000,
 				},

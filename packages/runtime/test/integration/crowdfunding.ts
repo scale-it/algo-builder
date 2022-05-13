@@ -1,9 +1,9 @@
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { AppDeploymentFlags, StackElem } from "../../src/types";
+import { StackElem } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -14,14 +14,16 @@ describe("Crowdfunding basic tests", function () {
 	let runtime: Runtime;
 	let approvalProgramFileName: string;
 	let clearProgramFileName: string;
-	let flags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramFileName = "crowdfunding.teal";
 		clearProgramFileName = "clear.teal";
 
-		flags = {
-			sender: john.account,
+		appDefinition = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			globalBytes: 32,
 			globalInts: 32,
 			localBytes: 8,
@@ -32,13 +34,13 @@ describe("Crowdfunding basic tests", function () {
 	it("should fail during create application if 0 args are passed", function () {
 		// create new app
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 	});
 
 	it("should create application and update global state if correct args are passed", function () {
-		const validFlags: AppDeploymentFlags = Object.assign({}, flags);
+		const validAppDefinition: types.AppDefinition = Object.assign({}, appDefinition);
 
 		// Get begin date to pass in
 		const beginDate = new Date();
@@ -62,9 +64,8 @@ describe("Crowdfunding basic tests", function () {
 
 		const johnMinBalance = john.minBalance;
 		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...validFlags, appArgs: appArgs },
+			john.account,
+			{ ...validAppDefinition, appArgs: appArgs },
 			{}
 		).appID;
 		// verify sender's min balance increased after creating application

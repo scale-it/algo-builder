@@ -43,6 +43,7 @@ export interface EncTx extends EncodedTransaction {
 	txID: string;
 	// user should push raw string TEAL code - not compiled code
 	// for approvalProgram and clearProgram
+	metaType?: types.MetaType;
 	approvalProgram?: string;
 	clearProgram?: string;
 }

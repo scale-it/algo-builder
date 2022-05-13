@@ -24,8 +24,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	let newApprovalProgram: string;
 	let clearProgram: string;
 	let appID: number;
-	const flags = {
-		sender: creator.account,
+	const storageConfig = {
 		globalBytes: 4,
 		globalInts: 4,
 		localBytes: 2,
@@ -52,9 +51,13 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 	it("should update application", function () {
 		appID = runtime.deployApp(
-			oldApprovalProgramFileName,
-			clearProgramFileName,
-			flags,
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName: oldApprovalProgramFileName,
+				clearProgramFileName,
+				...storageConfig,
+			},
 			{}
 		).appID;
 		runtime.optInToApp(creator.address, appID, {}, {});
@@ -105,9 +108,13 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	it("should not update application if logic is rejected", function () {
 		// create app
 		appID = runtime.deployApp(
-			oldApprovalProgramFileName,
-			clearProgramFileName,
-			flags,
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName: oldApprovalProgramFileName,
+				clearProgramFileName,
+				...storageConfig,
+			},
 			{}
 		).appID;
 		runtime.optInToApp(creator.address, appID, {}, {});

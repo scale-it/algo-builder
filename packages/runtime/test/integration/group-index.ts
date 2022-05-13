@@ -16,7 +16,7 @@ describe("Current Transaction Tests", function () {
 	let applicationId1: number, applicationId2: number;
 	let approvalProgramFileName: string, clearProgramFileName: string;
 
-	const flags = {
+	const storageConfig = {
 		localInts: 0,
 		localBytes: 0,
 		globalInts: 0,
@@ -33,21 +33,27 @@ describe("Current Transaction Tests", function () {
 	});
 
 	function setupApps(): void {
-		const creationFlags = Object.assign({}, flags);
-
 		// deploy first application
 		applicationId1 = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, sender: creator.account },
+			creator.account,
+			{
+				...storageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName,
+				clearProgramFileName,
+			},
 			{}
 		).appID;
 
 		// deploy second application
 		applicationId2 = runtime.deployApp(
-			"test2.teal",
-			clearProgramFileName,
-			{ ...creationFlags, sender: creator.account },
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName: "test2.teal",
+				clearProgramFileName,
+				...storageConfig,
+			},
 			{}
 		).appID;
 	}

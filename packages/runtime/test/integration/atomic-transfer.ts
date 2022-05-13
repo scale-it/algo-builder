@@ -31,10 +31,11 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 		// deploy a new app
 		appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
+			john.account,
 			{
-				sender: john.account,
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName,
+				clearProgramFileName,
 				globalBytes: 32,
 				globalInts: 32,
 				localBytes: 8,

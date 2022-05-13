@@ -29,15 +29,18 @@ describe("App Update Test", function () {
 		clearProgramFileName = "clear_program.teal";
 		approvalProgram = getProgram(approvalProgramFileName);
 		clearProgram = getProgram(clearProgramFileName);
-		const flags = {
-			sender: john.account,
+
+		const flags: types.AppDefinition = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			globalBytes: 5,
 			globalInts: 5,
 			localBytes: 5,
 			localInts: 5,
 		};
 
-		appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}).appID;
+		appID = runtime.deployApp(john.account, flags, {}).appID;
 
 		groupTx = [
 			{

@@ -17,17 +17,22 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 	let approvalProgramFileName: string;
 	let clearProgramFileName: string;
 	let deleteParams: types.AppCallsParam;
-	const flags = {
-		sender: john.account,
-		globalBytes: 2,
-		globalInts: 2,
-		localBytes: 3,
-		localInts: 3,
-	};
+	let appDefinition: types.AppDefinitionFromFile;
+
 	this.beforeAll(async function () {
 		runtime = new Runtime([john, alice]); // setup test
 		approvalProgramFileName = "deleteApp.teal";
 		clearProgramFileName = "clear.teal";
+
+		appDefinition = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
+			globalBytes: 2,
+			globalInts: 2,
+			localBytes: 3,
+			localInts: 3,
+		};
 
 		deleteParams = {
 			type: types.TransactionType.DeleteApp,
@@ -48,12 +53,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
 	it("should delete application", function () {
 		const initialMinBalance = john.minBalance;
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			flags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		assert.equal(
 			runtime.getAccount(john.address).minBalance,
 			initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2))
@@ -69,12 +69,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
 	it("should not delete application if logic is rejected", function () {
 		const initialMinBalance = john.minBalance;
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			flags,
-			{}
-		).appID; // create app
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID; // create app
 
 		const minBalanceAfterDeployApp = runtime.getAccount(john.address).minBalance;
 		assert.equal(

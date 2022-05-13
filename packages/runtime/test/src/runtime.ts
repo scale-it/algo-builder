@@ -927,64 +927,58 @@ describe("Stateful Smart Contracts", function () {
 	let runtime: Runtime;
 	let approvalProgramFileName: string;
 	let clearProgramFileName: string;
+	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeEach(() => {
 		runtime = new Runtime([john]);
 		approvalProgramFileName = "counter-approval.teal";
 		clearProgramFileName = "clear.teal";
+
+		appDefinition = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
+			globalBytes: 32,
+			globalInts: 32,
+			localBytes: 8,
+			localInts: 8,
+		};
 	});
-	const creationFlags = {
-		sender: john.account,
-		globalBytes: 32,
-		globalInts: 32,
-		localBytes: 8,
-		localInts: 8,
-	};
 
 	it("Should not create application if approval program is empty", () => {
-		approvalProgramFileName = "empty-app.teal";
+		appDefinition.approvalProgramFileName = "empty-app.teal";
 
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
 		);
 	});
 
 	it("Should not create application if clear program is empty", () => {
-		clearProgramFileName = "empty-app.teal";
+		appDefinition.clearProgramFileName = "empty-app.teal";
 
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
 		);
 	});
 
 	it("Should create application", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		const app = runtime.getApp(appID);
 		assert.isDefined(app);
 	});
 
 	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", () => {
-		clearProgramFileName = "clearv6.teal";
+		appDefinition.clearProgramFileName = "clearv6.teal";
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
 		);
 	});
 
 	it("Should not update application if approval or clear program is empty", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		expectRuntimeError(
 			() => runtime.updateApp(john.address, appID, "", clearProgramFileName, {}, {}),
@@ -998,12 +992,7 @@ describe("Stateful Smart Contracts", function () {
 	});
 
 	it("Should not update application if approval and clear program not match", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		clearProgramFileName = "clearv6.teal";
 		expectRuntimeError(
@@ -1020,9 +1009,8 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should throw and error when local schema entries exceeds the limit (AppDeploymentFlags)", () => {
+	it("Should throw and error when local schema entries exceeds the limit (AppDefinition)", () => {
 		const incorrectCreationFlags = {
-			sender: john.account,
 			globalBytes: 10,
 			globalInts: 10,
 			localBytes: 10,
@@ -1031,18 +1019,21 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(
-					approvalProgramFileName,
-					clearProgramFileName,
-					incorrectCreationFlags,
+					john.account,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFileName,
+						clearProgramFileName,
+						...incorrectCreationFlags,
+					},
 					{}
 				),
 			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED
 		);
 	});
 
-	it("Should throw and error when global schema entries exceeds the limit (AppDeploymentFlags)", () => {
+	it("Should throw and error when global schema entries exceeds the limit (AppDefinition)", () => {
 		const incorrectCreationFlags = {
-			sender: john.account,
 			globalBytes: 36,
 			globalInts: 32,
 			localBytes: 1,
@@ -1051,9 +1042,13 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(
-					approvalProgramFileName,
-					clearProgramFileName,
-					incorrectCreationFlags,
+					john.account,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFileName,
+						clearProgramFileName,
+						...incorrectCreationFlags,
+					},
 					{}
 				),
 			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED

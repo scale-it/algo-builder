@@ -4,7 +4,7 @@ import { assert } from "chai";
 
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
+import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -23,7 +23,7 @@ describe("Rekey transaction and inner transaction ", function () {
 	let appAccount: AccountStoreI; // application account
 
 	let runtime: Runtime;
-	let appDeployFlag: AppDeploymentFlags;
+	let storageConfig: types.StorageConfig;
 	let appID: number;
 	let appCallParams: types.ExecParams;
 
@@ -41,8 +41,7 @@ describe("Rekey transaction and inner transaction ", function () {
 		bob = new AccountStore(minBalance);
 		runtime = new Runtime([master, alice, bob]);
 
-		appDeployFlag = {
-			sender: master.account,
+		storageConfig = {
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -56,9 +55,13 @@ describe("Rekey transaction and inner transaction ", function () {
 			const approvalProgramFileName = "approval-rekey.teal";
 			const clearProgramFileName = "clear-rekey.teal";
 			appID = runtime.deployApp(
-				approvalProgramFileName,
-				clearProgramFileName,
-				appDeployFlag,
+				master.account,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName,
+					clearProgramFileName,
+					...storageConfig,
+				},
 				{}
 			).appID;
 
@@ -160,9 +163,13 @@ describe("Rekey transaction and inner transaction ", function () {
 			const approvalProgramFileName = "rekey-approval-payment.py";
 			const clearProgramFileName = "clear.teal";
 			appID = runtime.deployApp(
-				approvalProgramFileName,
-				clearProgramFileName,
-				appDeployFlag,
+				master.account,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName,
+					clearProgramFileName,
+					...storageConfig,
+				},
 				{}
 			).appID;
 			// query application account

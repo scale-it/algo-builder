@@ -22,10 +22,11 @@ describe("Group inner transaction", function () {
 		[alice] = runtime.defaultAccounts();
 
 		appInfo = runtime.deployApp(
-			"group.py",
-			"clear.teal",
+			alice.account,
 			{
-				sender: alice.account,
+				metaType: types.MetaType.FILE,
+				approvalProgramFileName: "group.py",
+				clearProgramFileName: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,
