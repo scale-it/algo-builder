@@ -158,6 +158,7 @@ def approval_program(ARG_GOV_TOKEN):
         App.globalPut(max_duration, Btoi(Txn.application_args[3])),
         App.globalPut(url, Txn.application_args[4]),
         App.globalPut(dao_name, Txn.application_args[5]),
+        Log(Bytes("SigmaDAO created")),
         Return(Int(1))
     ])
 
