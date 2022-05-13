@@ -1,4 +1,3 @@
-import { types } from "@algo-builder/algob";
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
@@ -7,6 +6,7 @@ import algosdk, { Transaction } from "algosdk";
 import { WalletTransaction } from "../algo-signer-types";
 import {
 	ExecParams,
+	HttpNetworkConfig,
 	isSDKTransactionAndSign,
 	SessionConnectResponse,
 	SessionDisconnectResponse,
@@ -25,7 +25,7 @@ export class WallectConnectSession {
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
 
-	constructor(walletURL: types.HttpNetworkConfig, connector?: WalletConnect) {
+	constructor(walletURL: HttpNetworkConfig, connector?: WalletConnect) {
 		this.algodClient = algoexplorerAlgod(walletURL);
 		if (connector) {
 			this.connector = connector;
