@@ -609,6 +609,12 @@ const transactionErrors = {
 		title: "Inner transaction appl self-call.",
 		description: "Inner transaction appl self-call",
 	},
+	TRANSACTION_ALREADY_IN_LEDGER: {
+		number: 1411,
+		message: "Transaction already in ledger",
+		title: "Transaction already in ledger",
+		description: "Transaction already in ledger.",
+	},
 };
 
 const runtimeAsaErrors = {
