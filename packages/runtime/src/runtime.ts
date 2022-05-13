@@ -605,7 +605,6 @@ export class Runtime {
 		this.addCtxAppCreateTxn(sender, appDef, payFlags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
-
 		const txReceipt = this.ctx.deployApp(sender.addr, appDef, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;

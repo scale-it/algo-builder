@@ -45,8 +45,9 @@ describe("Should execute SDK transaction object using runtime", function () {
 		// inject approval and clear program in string format to transaction object.
 		// TODO: Should we create disassemble method to convert Uint8Array program format to string???
 		if (execParams.type === types.TransactionType.DeployApp) {
-			transaction.approvalProgram = execParams.approvalProgram;
-			transaction.clearProgram = execParams.clearProgram;
+			const appDef = execParams.appDefinition as types.AppDefinitionFromFile;
+			transaction.approvalProgram = appDef.approvalProgramFileName;
+			transaction.clearProgram = appDef.clearProgramFileName;
 		}
 		return {
 			transaction,
@@ -105,12 +106,15 @@ describe("Should execute SDK transaction object using runtime", function () {
 				type: types.TransactionType.DeployApp,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				approvalProgram: "counter-approval.teal",
-				clearProgram: "clear.teal",
-				localBytes: 1,
-				localInts: 1,
-				globalBytes: 1,
-				globalInts: 1,
+				appDefinition: {
+					metaType: types.MetaType.FILE,
+					approvalProgramFileName: "counter-approval.teal",
+					clearProgramFileName: "clear.teal",
+					localBytes: 1,
+					localInts: 1,
+					globalBytes: 1,
+					globalInts: 1,
+				},
 				payFlags: {
 					totalFee: fee,
 				},

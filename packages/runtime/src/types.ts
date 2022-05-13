@@ -190,7 +190,7 @@ export interface Context {
 	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
-		sourceContract: types.AppDefinition,
+		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	) => AppInfo;
@@ -261,12 +261,7 @@ export interface AccountStoreI {
 	getSpendAddress: () => AccountAddress;
 	getApp: (appID: number) => SSCAttributesM | undefined;
 	getAppFromLocal: (appID: number) => AppLocalStateM | undefined;
-	addApp: (
-		appID: number,
-		params: types.AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string
-	) => CreatedAppM;
+	addApp: (appID: number, appDefinition: types.AppDefinitionFromSource) => CreatedAppM;
 	getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined;
 	getAssetHolding: (assetId: number) => AssetHoldingM | undefined;
 	addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams;

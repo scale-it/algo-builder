@@ -319,19 +319,19 @@ export class Ctx implements Context {
 
 	/**
 	 * deploy a new application and returns application id
-	 * @param fromAccountAddr creator account address
+	 * @param creatorAddr creator account address
 	 * @param appDefinition source of approval and clear program
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 * NOTE When creating or opting into an app, the minimum balance grows before the app code runs
 	 */
 	deployApp(
-		fromAccountAddr: AccountAddress,
+		creatorAddr: AccountAddress,
 		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	): AppInfo {
-		const senderAcc = this.getAccount(fromAccountAddr);
+		const senderAcc = this.getAccount(creatorAddr);
 
 		if (appDefinition.metaType === types.MetaType.BYTES) {
 			throw new Error("not support this format");
@@ -383,12 +383,12 @@ export class Ctx implements Context {
 		}
 
 		// create app with id = 0 in globalApps for teal execution
-		const app = senderAcc.addApp(
-			0,
-			{ ...appDefinition, sender: senderAcc.account },
-			approvalProgTEAL,
-			clearProgTEAL
-		);
+		const app = senderAcc.addApp(0, {
+			...appDefinition,
+			metaType: types.MetaType.STRING,
+			approvalProgramCode: approvalProgTEAL,
+			clearProgramCode: clearProgTEAL,
+		});
 		this.assertAccBalAboveMin(senderAcc.address);
 		this.state.accounts.set(senderAcc.address, senderAcc);
 		this.state.globalApps.set(app.id, senderAcc.address);
