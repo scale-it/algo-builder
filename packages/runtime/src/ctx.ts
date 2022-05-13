@@ -340,22 +340,22 @@ export class Ctx implements Context {
 		const approvalFile =
 			appDefinition.metaType === types.MetaType.FILE
 				? appDefinition.approvalProgramFileName
-				: appDefinition.approvalProgramSource;
+				: appDefinition.approvalProgramCode;
 
 		const clearFile =
 			appDefinition.metaType === types.MetaType.FILE
 				? appDefinition.clearProgramFileName
-				: appDefinition.clearProgramSource;
+				: appDefinition.clearProgramCode;
 
 		const approvalProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
 				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
-				: appDefinition.approvalProgramSource;
+				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
 				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
-				: appDefinition.clearProgramSource;
+				: appDefinition.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);

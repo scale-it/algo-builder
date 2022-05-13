@@ -193,21 +193,21 @@ export type AppDefinitionFromFile = StorageConfig &
 export type AppDefinitionFromSource = StorageConfig &
 	AppOptionalFlags & {
 		metaType: MetaType.STRING;
-		approvalProgramSource: string;
-		clearProgramSource: string;
+		approvalProgramCode: string;
+		clearProgramCode: string;
 	};
 
-export type AppDefinitionFromBytes = StorageConfig &
+export type AppDefinitionFromSourceCompiled = StorageConfig &
 	AppOptionalFlags & {
 		metaType: MetaType.BYTES;
-		approvalProgram: Uint8Array;
-		clearProgram: Uint8Array;
+		approvalProgramBytes: Uint8Array;
+		clearProgramBytes: Uint8Array;
 	};
 
 export type AppDefinition =
 	| AppDefinitionFromFile
 	| AppDefinitionFromSource
-	| AppDefinitionFromBytes;
+	| AppDefinitionFromSourceCompiled;
 
 export type DeployAppParam = BasicParams & {
 	type: TransactionType.DeployApp;

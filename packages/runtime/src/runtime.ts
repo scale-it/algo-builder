@@ -581,7 +581,7 @@ export class Runtime {
 	addApp(
 		approvalProgram: string,
 		clearProgram: string,
-		flags: types.AppOptionalFlags,
+		flags: types.AppDeploymentFlags,
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
@@ -590,9 +590,6 @@ export class Runtime {
 
 	/**
 	 * deploy a new application and returns application id
-	 * @param approvalProgram application approval program (TEAL code or program filename)
-	 * @param clearProgram application clear program (TEAL code or program filename)
-	 * @param flags SSCDeployment flags
 	 * @param payFlags Transaction parameters
 	 * @param scTmplParams Smart Contract template parameters
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
@@ -889,8 +886,8 @@ export class Runtime {
 						txn.appDefinition = {
 							...txn.appDefinition,
 							metaType: types.MetaType.BYTES,
-							approvalProgram: new Uint8Array(32),
-							clearProgram: new Uint8Array(32),
+							approvalProgramBytes: new Uint8Array(32),
+							clearProgramBytes: new Uint8Array(32),
 						};
 						break;
 					}
