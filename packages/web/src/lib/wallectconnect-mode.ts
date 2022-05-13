@@ -24,8 +24,8 @@ export class WallectConnectSession {
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
 
-	constructor(chain: string, connector?: WalletConnect) {
-		this.algodClient = algoexplorerAlgod(chain);
+	constructor(walletURL: any, connector?: WalletConnect) {
+		this.algodClient = algoexplorerAlgod(walletURL);
 		if (connector) {
 			this.connector = connector;
 		} else {

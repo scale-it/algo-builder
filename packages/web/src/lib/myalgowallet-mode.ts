@@ -57,8 +57,8 @@ export class MyAlgoWalletSession {
 	accounts: Accounts[] = [];
 	addresses: Address[] = [];
 
-	constructor(chain: string, connector?: MyAlgoConnect) {
-		this.algodClient = algoexplorerAlgod(chain);
+	constructor(walletURL: any, connector?: MyAlgoConnect) {
+		this.algodClient = algoexplorerAlgod(walletURL);
 		try {
 			const MyAlgoConnect = require("@randlabs/myalgo-connect"); // eslint-disable-line @typescript-eslint/no-var-requires
 			if (connector) {
