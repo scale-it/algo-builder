@@ -241,7 +241,7 @@ export function mkTransaction(
 		}
 		case TransactionType.DeployApp: {
 			const onComplete = algosdk.OnApplicationComplete.NoOpOC;
-			const appDef = execParams.appDef;
+			const appDef = execParams.appDefinition;
 			if (appDef.metaType === MetaType.BYTES) {
 				const tx = algosdk.makeApplicationCreateTxn(
 					fromAccountAddr,

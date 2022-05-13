@@ -190,7 +190,7 @@ export interface Context {
 	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
-		sourceContract: types.AppDef,
+		sourceContract: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	) => AppInfo;
@@ -263,7 +263,7 @@ export interface AccountStoreI {
 	getAppFromLocal: (appID: number) => AppLocalStateM | undefined;
 	addApp: (
 		appID: number,
-		params: AppDeploymentFlags,
+		params: types.AppDeploymentFlags,
 		approvalProgram: string,
 		clearProgram: string
 	) => CreatedAppM;
@@ -314,7 +314,7 @@ export enum ExecutionMode {
 
 /**
  * Stateful Smart contract flags for specifying sender and schema */
-export interface AppDeploymentFlags extends AppOptionalFlags {
+export interface types extends AppOptionalFlags {
 	sender: AccountSDK;
 	localInts: number;
 	localBytes: number;

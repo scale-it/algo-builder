@@ -19,7 +19,6 @@ import { assertValidSchema } from "./lib/stateful";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppLocalStateM,
 	AssetHoldingM,
 	CreatedAppM,
@@ -341,7 +340,7 @@ export class AccountStore implements AccountStoreI {
 	 */
 	addApp(
 		appID: number,
-		params: AppDeploymentFlags,
+		params: types.AppDeploymentFlags,
 		approvalProgram: string,
 		clearProgram: string
 	): CreatedAppM {
@@ -454,7 +453,7 @@ class App {
 	// NOTE - approval and clear program must be the TEAL code as string
 	constructor(
 		appID: number,
-		params: AppDeploymentFlags,
+		params: types.AppDeploymentFlags,
 		approvalProgram: string,
 		clearProgram: string
 	) {

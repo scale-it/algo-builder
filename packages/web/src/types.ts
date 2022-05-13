@@ -174,39 +174,44 @@ export enum MetaType {
 	STRING,
 	BYTES,
 }
-
-export type SourceFile = {
-	metaType: MetaType.FILE;
-	approvalProgramPath: string;
-	clearProgramPath: string;
-};
-
-export type SourceString = {
-	metaType: MetaType.STRING;
-	approvalProgramSource: string;
-	clearProgramSource: string;
-};
-
-export type SourceBytes = {
-	metaType: MetaType.BYTES;
-	approvalProgram: Uint8Array;
-	clearProgram: Uint8Array;
-};
-
-export type SourceContract = SourceFile | SourceString | SourceBytes;
-
-export type AppDef = SourceContract & {
+export type StorageConfig = {
 	localInts: number;
 	localBytes: number;
 	globalInts: number;
 	globalBytes: number;
 	extraPages?: number;
 	appName?: string; // name of app to store info against in checkpoint
-} & AppOptionalFlags;
+};
+
+export type AppDefinitionFromFile = StorageConfig &
+	AppOptionalFlags & {
+		metaType: MetaType.FILE;
+		approvalProgramFileName: string;
+		clearProgramFileName: string;
+	};
+
+export type AppDefinitionFromSource = StorageConfig &
+	AppOptionalFlags & {
+		metaType: MetaType.STRING;
+		approvalProgramSource: string;
+		clearProgramSource: string;
+	};
+
+export type AppDefinitionFromBytes = StorageConfig &
+	AppOptionalFlags & {
+		metaType: MetaType.BYTES;
+		approvalProgram: Uint8Array;
+		clearProgram: Uint8Array;
+	};
+
+export type AppDefinition =
+	| AppDefinitionFromFile
+	| AppDefinitionFromSource
+	| AppDefinitionFromBytes;
 
 export type DeployAppParam = BasicParams & {
 	type: TransactionType.DeployApp;
-	appDef: AppDef;
+	appDefinition: AppDefinition;
 };
 
 export type UpdateAppParam = BasicParams &

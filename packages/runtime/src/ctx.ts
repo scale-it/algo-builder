@@ -24,7 +24,6 @@ import { getProgramVersion } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	ASADeploymentFlags,
 	ASAInfo,
@@ -321,42 +320,42 @@ export class Ctx implements Context {
 	/**
 	 * deploy a new application and returns application id
 	 * @param fromAccountAddr creator account address
-	 * @param appDef source of approval and clear program
+	 * @param appDefinition source of approval and clear program
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 * NOTE When creating or opting into an app, the minimum balance grows before the app code runs
 	 */
 	deployApp(
 		fromAccountAddr: AccountAddress,
-		appDef: types.AppDef,
+		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	): AppInfo {
 		const senderAcc = this.getAccount(fromAccountAddr);
 
-		if (appDef.metaType === types.MetaType.BYTES) {
+		if (appDefinition.metaType === types.MetaType.BYTES) {
 			throw new Error("not support this format");
 		}
 
 		const approvalFile =
-			appDef.metaType === types.MetaType.FILE
-				? appDef.approvalProgramPath
-				: appDef.approvalProgramSource;
+			appDefinition.metaType === types.MetaType.FILE
+				? appDefinition.approvalProgramFileName
+				: appDefinition.approvalProgramSource;
 
 		const clearFile =
-			appDef.metaType === types.MetaType.FILE
-				? appDef.clearProgramPath
-				: appDef.clearProgramSource;
+			appDefinition.metaType === types.MetaType.FILE
+				? appDefinition.clearProgramFileName
+				: appDefinition.clearProgramSource;
 
 		const approvalProgTEAL =
-			appDef.metaType === types.MetaType.FILE
-				? getProgram(appDef.approvalProgramPath, scTmplParams)
-				: appDef.approvalProgramSource;
+			appDefinition.metaType === types.MetaType.FILE
+				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
+				: appDefinition.approvalProgramSource;
 
 		const clearProgTEAL =
-			appDef.metaType === types.MetaType.FILE
-				? getProgram(appDef.clearProgramPath, scTmplParams)
-				: appDef.clearProgramSource;
+			appDefinition.metaType === types.MetaType.FILE
+				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
+				: appDefinition.clearProgramSource;
 
 		if (approvalProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
@@ -368,8 +367,8 @@ export class Ctx implements Context {
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 
 		//verify that MaxGlobalSchemaEntries <= 64 and MaxLocalSchemaEntries <= 16
-		const globalSchemaEntries = appDef.globalInts + appDef.globalBytes;
-		const localSchemaEntries = appDef.localInts + appDef.localBytes;
+		const globalSchemaEntries = appDefinition.globalInts + appDefinition.globalBytes;
+		const localSchemaEntries = appDefinition.localInts + appDefinition.localBytes;
 
 		if (
 			localSchemaEntries > MAX_LOCAL_SCHEMA_ENTRIES ||
@@ -386,7 +385,7 @@ export class Ctx implements Context {
 		// create app with id = 0 in globalApps for teal execution
 		const app = senderAcc.addApp(
 			0,
-			{ ...appDef, sender: senderAcc.account },
+			{ ...appDefinition, sender: senderAcc.account },
 			approvalProgTEAL,
 			clearProgTEAL
 		);
@@ -932,17 +931,8 @@ export class Ctx implements Context {
 					break;
 				}
 				case types.TransactionType.DeployApp: {
-					const senderAcc = this.getAccount(fromAccountAddr);
-					const flags: AppDeploymentFlags = {
-						sender: senderAcc.account,
-						localInts: txParam.appDef.localInts,
-						localBytes: txParam.appDef.localBytes,
-						globalInts: txParam.appDef.globalInts,
-						globalBytes: txParam.appDef.globalBytes,
-					};
 					this.tx = this.gtxs[idx]; // update current tx to the requested index
-
-					r = this.deployApp(fromAccountAddr, txParam.appDef, idx);
+					r = this.deployApp(fromAccountAddr, txParam.appDefinition, idx);
 					this.knowableID.set(idx, r.appID);
 					break;
 				}

@@ -21,7 +21,6 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	AppOptionalFlags,
 	ASADeploymentFlags,
@@ -541,7 +540,7 @@ export class Runtime {
 	// creates new application transaction object and update context
 	addCtxAppCreateTxn(
 		creator: AccountSDK,
-		appDef: types.AppDef,
+		appDef: types.AppDefinition,
 		payFlags: types.TxParams
 	): void {
 		const txn = algosdk.makeApplicationCreateTxn(
@@ -582,7 +581,7 @@ export class Runtime {
 	addApp(
 		approvalProgram: string,
 		clearProgram: string,
-		flags: AppDeploymentFlags,
+		flags: types.AppOptionalFlags,
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
@@ -601,7 +600,7 @@ export class Runtime {
 	 */
 	deployApp(
 		sender: AccountSDK,
-		appDef: types.AppDef,
+		appDef: types.AppDefinition,
 		payFlags: types.TxParams,
 		scTmplParams?: SCParams,
 		debugStack?: number
@@ -887,8 +886,8 @@ export class Runtime {
 						break;
 					}
 					case types.TransactionType.DeployApp: {
-						txn.appDef = {
-							...txn.appDef,
+						txn.appDefinition = {
+							...txn.appDefinition,
 							metaType: types.MetaType.BYTES,
 							approvalProgram: new Uint8Array(32),
 							clearProgram: new Uint8Array(32),
