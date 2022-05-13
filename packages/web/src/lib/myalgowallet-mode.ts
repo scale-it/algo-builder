@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/algob";
 import type {
 	Accounts,
 	Address,
@@ -57,7 +58,7 @@ export class MyAlgoWalletSession {
 	accounts: Accounts[] = [];
 	addresses: Address[] = [];
 
-	constructor(walletURL: any, connector?: MyAlgoConnect) {
+	constructor(walletURL: types.HttpNetworkConfig, connector?: MyAlgoConnect) {
 		this.algodClient = algoexplorerAlgod(walletURL);
 		try {
 			const MyAlgoConnect = require("@randlabs/myalgo-connect"); // eslint-disable-line @typescript-eslint/no-var-requires

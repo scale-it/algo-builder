@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/algob";
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
@@ -24,7 +25,7 @@ export class WallectConnectSession {
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
 
-	constructor(walletURL: any, connector?: WalletConnect) {
+	constructor(walletURL: types.HttpNetworkConfig, connector?: WalletConnect) {
 		this.algodClient = algoexplorerAlgod(walletURL);
 		if (connector) {
 			this.connector = connector;
