@@ -48,6 +48,7 @@ import {
 	State,
 	TxReceipt,
 } from "./types";
+const nacl = require('algosdk/dist/cjs/src/nacl/naclWrappers');
 
 export class Runtime {
 	/**
@@ -879,19 +880,19 @@ export class Runtime {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	executeTx(
-		txnParams: types.ExecParams[] | types.TransactionAndSign[],
+		txnParams: types.ExecParams[] | algosdk.SignedTransaction[],
 		debugStack?: number
 	): TxReceipt[] {
 		let tx, gtxs;
 
-		if (types.isSDKTransactionAndSign(txnParams[0])) {
-			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
-				const txn = txnParamerter as types.TransactionAndSign;
-				return txn.transaction.get_obj_for_encoding() as EncTx;
-			});
-			tx = sdkTxns[0];
-			gtxs = sdkTxns;
-		} else {
+		// if (types.isSDKTransactionAndSign(txnParams[0])) {
+		// 	const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
+		// 		const txn = txnParamerter as types.TransactionAndSign;
+		// 		return txn.transaction.get_obj_for_encoding() as EncTx;
+		// 	});
+		// 	tx = sdkTxns[0];
+		// 	gtxs = sdkTxns;
+		// } else {
 			for (const txnParamerter of txnParams) {
 				const txn = txnParamerter as types.ExecParams;
 				switch (txn.type) {
@@ -908,7 +909,7 @@ export class Runtime {
 			}
 			// get current txn and txn group (as encoded obj)
 			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
-		}
+		
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
@@ -975,7 +976,7 @@ export class Runtime {
 	}
 
 	sendSignedTransaction(signedTransaction: SignedTransaction) {
-		// this.verifySignature(signedTransaction);
+		this.verifySignature(signedTransaction);
 		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
 		let signerAccount;
 		let fromAccountAddr;
@@ -1029,12 +1030,13 @@ export class Runtime {
 	verifySignature(signedTransaction: SignedTransaction) {
 		let isValid = false;
 		if (typeof signedTransaction.sig !== "undefined") {
+			isValid = nacl.verify(Uint8Array.from(signedTransaction.txn.bytesToSign()), signedTransaction.sig, signedTransaction.txn.from.publicKey);
 			//Transaction signature
-			isValid = algosdk.verifyBytes(
-				signedTransaction.txn.bytesToSign(),
-				signedTransaction.sig,
-				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
-			);
+			// isValid = algosdk.verifyBytes(
+			// 	signedTransaction.txn.bytesToSign(),
+			// 	signedTransaction.sig,
+			// 	algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
+			// );
 		} else if (
 			typeof signedTransaction.sgnr !== "undefined" &&
 			typeof signedTransaction.txn.reKeyTo !== "undefined"

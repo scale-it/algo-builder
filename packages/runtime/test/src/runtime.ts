@@ -1208,3 +1208,57 @@ describe("Algo Trasnfer using sendSignedTransaction", function () {
 		assert.equal(initialBobBalance + initialAliceBalance - BigInt(fee), bob.balance());
 	});
 });
+
+describe("Logic Signature Transaction in Runtime using sendSignedTransaction", function () {
+	useFixture("basic-teal");
+	let alice: AccountStore;
+	let bob: AccountStore;
+	let john: AccountStore;
+	let runtime: Runtime;
+	const amount = 1e6;
+	const fee = 1000;;
+	let lsig: LogicSigAccount;
+	let txParam: types.ExecParams;
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+		[alice, bob, john] = runtime.defaultAccounts();
+		lsig = runtime.loadLogic(programName);
+		lsig.sign(john.account.sk);
+	});
+
+	// it("should execute the lsig and verify john(delegated signature)", () => {
+	// 	const initialJohnBalance = john.balance();
+	// 	const initialBobBalance = bob.balance();
+	// 	const suggestedParams = mockSuggestedParams({ totalFee: fee, }, runtime.getRound());
+	// 	let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+	// 		from: john.address,
+	// 		to: bob.address,
+	// 		amount: amount,
+	// 		suggestedParams: suggestedParams,
+	// 	});
+	// 	// Sign the transaction
+	// 	const signedTransaction = algosdk.decodeSignedTransaction(algosdk.signLogicSigTransactionObject(txn, lsig).blob);
+	// 	// Send the transaction
+	// 	runtime.sendSignedTransaction(signedTransaction);
+	// 	[john, bob] = runtime.defaultAccounts();
+	// 	assert.equal(initialJohnBalance - BigInt(amount) - BigInt(fee), john.balance());
+	// 	assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+	// });
+
+	// it("should not verify signature because alice sent it", () => {
+	// 	const suggestedParams = mockSuggestedParams({ totalFee: fee, }, runtime.getRound());
+	// 	let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+	// 		from: john.address,
+	// 		to: bob.address,
+	// 		amount: amount,
+	// 		suggestedParams: suggestedParams,
+	// 	});
+	// 	// Sign the transaction
+	// 	const signedTransaction = algosdk.decodeSignedTransaction(algosdk.signLogicSigTransactionObject(txn, lsig).blob);
+	// 	// Send the transaction
+	// 	expectRuntimeError(
+	// 		() => runtime.sendSignedTransaction(signedTransaction),
+	// 		RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+	// 	);
+	// });
+});
