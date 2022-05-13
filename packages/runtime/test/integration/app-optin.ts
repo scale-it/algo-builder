@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { Account } from "algosdk";
 import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";
@@ -18,11 +17,10 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 	let clearProgramFileName: string;
 	let appID: number;
 	let appDefinition: types.AppDefinitionFromFile;
-	let creator: Account;
+
 	this.beforeAll(function () {
 		runtime = new Runtime([alice, john]); // setup test
 		clearProgramFileName = "clear.teal";
-		creator = john.account;
 		appDefinition = {
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
@@ -39,7 +37,11 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 	it("should opt-in to app successfully and update local state", function () {
 		// deploy new app
 		approvalProgramFileName = "accept-optin.teal";
-		appID = runtime.deployApp(creator, { ...appDefinition, approvalProgramFileName }, {}).appID;
+		appID = runtime.deployApp(
+			john.account,
+			{ ...appDefinition, approvalProgramFileName },
+			{}
+		).appID;
 
 		// opt-in (should be accepted)
 		assert.doesNotThrow(() => runtime.optInToApp(john.address, appID, {}, {}));
@@ -53,7 +55,11 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 	it("should reject opt-in to app", function () {
 		// deploy new app
 		approvalProgramFileName = "reject-optin.teal";
-		appID = runtime.deployApp(creator, { ...appDefinition, approvalProgramFileName }, {}).appID;
+		appID = runtime.deployApp(
+			john.account,
+			{ ...appDefinition, approvalProgramFileName },
+			{}
+		).appID;
 
 		// verify local state not present BEFORE optin
 		assert.isUndefined(alice.appsLocalState.get(appID));

@@ -349,7 +349,7 @@ export class Ctx implements Context {
 
 		const approvalProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
+				? getProgram(appDefinition.approvalProgramFileName, scTmplParams)
 				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
