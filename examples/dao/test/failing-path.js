@@ -495,7 +495,14 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject withdrawal if groupsize not valid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...withdrawVoteDepositTx }, { ...withdrawVoteDepositTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...withdrawVoteDepositTx },
+						{
+							...withdrawVoteDepositTx,
+							payFlags: { ...withdrawVoteDepositTx.payFlags, note: "salt" },
+						},
+					]),
 				RUNTIME_ERR1009
 			);
 		});
@@ -605,7 +612,11 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject tx if groupSize !== 1", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...clearVoteRecordTx }, { ...clearVoteRecordTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...clearVoteRecordTx },
+						{ ...clearVoteRecordTx, payFlags: { totalFee: 1000, note: "salt" } },
+					]),
 				RUNTIME_ERR1009
 			);
 		});
@@ -637,7 +648,11 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject close_proposal if group size is invalid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...closeProposalTx }, { ...closeProposalTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...closeProposalTx },
+						{ ...closeProposalTx, payFlags: { totalFee: 1000, note: "salt" } },
+					]),
 				RUNTIME_ERR1009
 			);
 		});

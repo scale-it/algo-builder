@@ -38,7 +38,9 @@ describe("TEALv4: shared space between contracts", function () {
 				localBytes: 1,
 				globalInts: 1,
 				globalBytes: 1,
-				payFlags: {},
+				payFlags: {
+					note: "first Txn",
+				},
 			},
 			{
 				type: types.TransactionType.DeployApp,
@@ -50,7 +52,9 @@ describe("TEALv4: shared space between contracts", function () {
 				localBytes: 1,
 				globalInts: 1,
 				globalBytes: 1,
-				payFlags: {},
+				payFlags: {
+					note: "second Txn",
+				},
 			},
 		];
 	});
