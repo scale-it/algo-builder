@@ -158,16 +158,32 @@ async function mkTx(
 			break;
 		}
 		case wtypes.TransactionType.DeployApp: {
-			const name = txn.appName ?? String(txn.approvalProgram) + "-" + String(txn.clearProgram);
-			deployer.assertNoApp(name);
-			const approval = await deployer.compileASC(txn.approvalProgram);
-			const clear = await deployer.compileASC(txn.clearProgram);
-			txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-			txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-			txIdxMap.set(index, [
-				name,
-				{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
-			]);
+			const appDefinition = txn.appDefinition;
+			if (appDefinition.metaType === wtypes.MetaType.FILE) {
+				const name =
+					appDefinition.appName ??
+					String(appDefinition.approvalProgramFileName) +
+						"-" +
+						String(appDefinition.clearProgramFileName);
+				deployer.assertNoApp(name);
+				const approval = await deployer.compileASC(appDefinition.approvalProgramFileName);
+				const clear = await deployer.compileASC(appDefinition.clearProgramFileName);
+				const approvalProgramBytes = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+				const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+
+				txn.appDefinition = {
+					...appDefinition,
+					metaType: wtypes.MetaType.BYTES,
+					approvalProgramBytes,
+					clearProgramBytes,
+				};
+				txIdxMap.set(index, [
+					name,
+					{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
+				]);
+			} else {
+				throw new Error("Not support");
+			}
 			break;
 		}
 		case wtypes.TransactionType.UpdateApp: {

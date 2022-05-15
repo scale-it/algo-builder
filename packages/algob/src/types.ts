@@ -558,9 +558,8 @@ export interface Deployer {
 	 * the checkpoint "key", and app information will be stored agaisnt this name
 	 */
 	deployApp: (
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scTmplParams?: SCParams,
 		appName?: string

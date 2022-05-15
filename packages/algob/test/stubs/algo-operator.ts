@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import algosdk, { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import { rejects } from "assert";
 import { resolve } from "path";
 
@@ -74,16 +74,15 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scInitParam?: unknown,
 		appName?: string
 	): Promise<rtypes.AppInfo> {
 		return {
-			creator: String(flags.sender.addr) + "-get-address-dry-run",
+			creator: String(creator.addr) + "-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,
 			txID: "tx-id-dry-run",
 			confirmedRound: -1,

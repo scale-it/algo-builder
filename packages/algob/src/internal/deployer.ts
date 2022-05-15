@@ -5,7 +5,7 @@ import {
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import type { Account, EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -795,22 +795,21 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
-		const name = appName ?? approvalProgram + "-" + clearProgram;
+		const name =
+			appDefinition.appName ??
+			appDefinition.approvalProgramFileName + "-" + appDefinition.clearProgramFileName;
 
 		this.assertNoApp(name);
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.deployApp(
-				approvalProgram,
-				clearProgram,
-				flags,
+				creator,
+				appDefinition,
 				payFlags,
 				this.txWriter,
 				scTmplParams
@@ -1019,9 +1018,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scInitParam?: unknown,
 		appName?: string

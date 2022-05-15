@@ -138,6 +138,15 @@ export interface AppInfo extends DeployedAssetInfo {
 	gas?: number; // used in runtime
 }
 
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+}
+
 // describes interpreter's local context (state + txns)
 export interface Context {
 	state: State;
@@ -349,6 +358,17 @@ export interface AppOptionalFlags {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// you can learn more about these parameters from here.(https://developer.algorand.org/docs/reference/transactions/#application-call-transaction)
+}
+
+/**
+ * Stateful Smart contract flags for specifying sender and schema */
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
 }
 
 export interface AnyMap {

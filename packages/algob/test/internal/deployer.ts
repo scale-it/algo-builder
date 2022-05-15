@@ -176,12 +176,20 @@ describe("DeployerDeployMode", () => {
 
 		const sscFlags = {
 			sender: deployer.accounts[0],
-			localInts: 1,
-			globalInts: 1,
-			localBytes: 1,
-			globalBytes: 1,
 		};
-		const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {});
+		const sscInfo = await deployer.deployApp(
+			deployer.accounts[0],
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "app",
+				clearProgramFileName: "clear",
+				localInts: 1,
+				globalInts: 1,
+				localBytes: 1,
+				globalBytes: 1,
+			},
+			{}
+		);
 		assert.deepEqual(sscInfo, {
 			creator: "addr-1-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -266,14 +274,18 @@ describe("DeployerDeployMode", () => {
 			clearFile: "clear-file.py",
 		});
 
-		const sscFlags = {
-			sender: deployer.accounts[0],
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			metaType: wtypes.MetaType.FILE,
+			approvalProgramFileName: "app",
+			clearProgramFileName: "clear",
 			localInts: 1,
 			globalInts: 1,
 			localBytes: 1,
 			globalBytes: 1,
+			appName: "myapp",
 		};
-		const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {}, {}, "my-app");
+
+		const sscInfo = await deployer.deployApp(deployer.accounts[0], appDefinition, {});
 		assert.deepEqual(sscInfo, {
 			creator: "addr-1-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,

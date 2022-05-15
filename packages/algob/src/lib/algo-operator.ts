@@ -7,6 +7,7 @@ import {
 	types as wtypes,
 } from "@algo-builder/web";
 import algosdk, {
+	Account,
 	getApplicationAddress,
 	LogicSigAccount,
 	modelsv2,
@@ -55,9 +56,8 @@ export interface AlgoOperator {
 		scTmplParams?: SCParams
 	) => Promise<LsigInfo>;
 	deployApp: (
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
@@ -369,51 +369,59 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	 * Function to deploy Stateful Smart Contract
 	 * @param approvalProgram name of file in which approval program is stored
 	 * @param clearProgram name of file in which clear program is stored
-	 * @param flags         AppDeploymentFlags
+	 * @param appDefinition         AppDeploymentFlags
 	 * @param payFlags      TxParams
 	 * @param txWriter
 	 * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
 	 */
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		const params = await mkTxParams(this.algodClient, payFlags);
 
-		const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
-		const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-		const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
-		const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+		const app = await this.ensureCompiled(
+			appDefinition.approvalProgramFileName,
+			false,
+			scTmplParams
+		);
+		const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
+		const clear = await this.ensureCompiled(
+			appDefinition.clearProgramFileName,
+			false,
+			scTmplParams
+		);
+		const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
 		const execParam: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
-			fromAccount: flags.sender,
-			approvalProgram: approvalProgram,
-			clearProgram: clearProgram,
-			approvalProg: approvalProg,
-			clearProg: clearProg,
+			fromAccount: creator,
+			appDefinition: {
+				metaType: wtypes.MetaType.BYTES,
+				approvalProgramBytes,
+				clearProgramBytes,
+				localInts: appDefinition.localInts,
+				localBytes: appDefinition.localBytes,
+				globalInts: appDefinition.globalInts,
+				globalBytes: appDefinition.globalBytes,
+				extraPages: appDefinition.extraPages,
+				accounts: appDefinition.accounts,
+				foreignApps: appDefinition.foreignApps,
+				foreignAssets: appDefinition.foreignAssets,
+				appArgs: appDefinition.appArgs,
+				note: appDefinition.note,
+				lease: appDefinition.lease,
+			},
 			payFlags: payFlags,
-			localInts: flags.localInts,
-			localBytes: flags.localBytes,
-			globalInts: flags.globalInts,
-			globalBytes: flags.globalBytes,
-			extraPages: flags.extraPages,
-			accounts: flags.accounts,
-			foreignApps: flags.foreignApps,
-			foreignAssets: flags.foreignAssets,
-			appArgs: flags.appArgs,
-			note: flags.note,
-			lease: flags.lease,
 		};
 
 		const txn = webTx.mkTransaction(execParam, params);
 		const txId = txn.txID().toString();
-		const signedTxn = txn.signTxn(flags.sender.sk);
+		const signedTxn = txn.signTxn(creator.sk);
 
 		const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 		const confirmedTxInfo = await this.waitForConfirmation(txId);
@@ -425,15 +433,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		txWriter.push(message, confirmedTxInfo);
 
 		return {
-			creator: flags.sender.addr,
+			creator: creator.addr,
 			txID: txInfo.txId,
 			confirmedRound: Number(confirmedTxInfo[confirmedRound]),
 			appID: Number(appId),
 			applicationAccount: getApplicationAddress(Number(appId)),
 			timestamp: Math.round(+new Date() / 1000),
 			deleted: false,
-			approvalFile: approvalProgram,
-			clearFile: clearProgram,
+			approvalFile: appDefinition.approvalProgramFileName,
+			clearFile: appDefinition.clearProgramFileName,
 		};
 	}
 

@@ -247,14 +247,16 @@ describe("Delete ASA and SSC", () => {
 	});
 
 	it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
-		const flags: types.AppDeploymentFlags = {
-			sender: bobAcc,
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
+			approvalProgramFileName: "approval.teal",
+			clearProgramFileName: "clear.teal",
 		};
-		const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
+		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		const execParams: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
@@ -310,14 +312,16 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParams]);
 
 		// deploy and delete app
-		const flags: types.AppDeploymentFlags = {
-			sender: bobAcc,
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
+			approvalProgramFileName: "approval.teal",
+			clearProgramFileName: "clear.teal",
 		};
-		const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
+		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		appID = info.appID;
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
@@ -644,12 +648,15 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		await deployer.executeTx([execParams]);
@@ -667,14 +674,17 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+				appName: "dao-app",
+			},
 			payFlags: {},
-			appName: "dao-app",
 		};
 		await deployer.executeTx([execParams]);
 
@@ -694,12 +704,15 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
@@ -744,12 +757,15 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
@@ -784,12 +800,15 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		await deployer.executeTx([execParams]);
@@ -818,12 +837,15 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFileName: "approval.teal",
+				clearProgramFileName: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
