@@ -119,12 +119,8 @@ recommended to use the method from `Deployer` rather than the function dirrectly
 - Allow token to be empty.
 - Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
 - Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
-<<<<<<< HEAD
 - Wallet contructor come from a parameter
-
-=======
 - Restirct duplicate transaction in group transaction. 
->>>>>>> 32c24d7f3d8b4154dcc56cb4ce86c4d6ed8ce928
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
