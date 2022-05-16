@@ -30,6 +30,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		clearProgramFileName = "clear.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,

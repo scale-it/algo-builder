@@ -6344,6 +6344,7 @@ describe("Teal Opcodes", function () {
 			appID = runtime.deployApp(
 				alan.account,
 				{
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName: "counter-approval.teal",
 					clearProgramFileName: "clear.teal",

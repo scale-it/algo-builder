@@ -42,6 +42,7 @@ describe("Rekey transaction and inner transaction ", function () {
 		runtime = new Runtime([master, alice, bob]);
 
 		storageConfig = {
+			appName: "app",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,

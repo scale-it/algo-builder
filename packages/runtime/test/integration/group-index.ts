@@ -17,6 +17,7 @@ describe("Current Transaction Tests", function () {
 	let approvalProgramFileName: string, clearProgramFileName: string;
 
 	const storageConfig = {
+		appName: "app",
 		localInts: 0,
 		localBytes: 0,
 		globalInts: 0,

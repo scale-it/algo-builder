@@ -887,6 +887,7 @@ export class Runtime {
 							metaType: types.MetaType.BYTES,
 							approvalProgramBytes: new Uint8Array(32),
 							clearProgramBytes: new Uint8Array(32),
+							appName: "Mock",
 						};
 						break;
 					}

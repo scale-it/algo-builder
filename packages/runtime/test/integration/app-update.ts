@@ -30,7 +30,8 @@ describe("App Update Test", function () {
 		approvalProgram = getProgram(approvalProgramFileName);
 		clearProgram = getProgram(clearProgramFileName);
 
-		const flags: types.AppDefinition = {
+		const appDefinition: types.AppDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,
@@ -40,7 +41,7 @@ describe("App Update Test", function () {
 			localInts: 5,
 		};
 
-		appID = runtime.deployApp(john.account, flags, {}).appID;
+		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		groupTx = [
 			{

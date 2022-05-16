@@ -28,6 +28,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		clearProgram = getProgram(clearProgramFileName);
 
 		storageConfig = {
+			appName: "app",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,

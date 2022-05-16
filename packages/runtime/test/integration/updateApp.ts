@@ -25,6 +25,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	let clearProgram: string;
 	let appID: number;
 	const storageConfig = {
+		appName: "app",
 		globalBytes: 4,
 		globalInts: 4,
 		localBytes: 2,

@@ -21,6 +21,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 		appDefinition = {
 			metaType: types.MetaType.FILE,
+			appName: "app",
 			approvalProgramFileName: "app.teal",
 			clearProgramFileName: "clear.teal",
 			globalBytes: 1,

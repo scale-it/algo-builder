@@ -24,6 +24,7 @@ describe("TEALv4: Sub routine", function () {
 		clearProgramFileName = "clear.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName: approvalProgramPassFileName,
 			clearProgramFileName,

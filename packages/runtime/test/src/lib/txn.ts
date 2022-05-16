@@ -177,6 +177,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
 				appDefinition: {
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName: "counter-approval.teal",
 					clearProgramFileName: "clear.teal",

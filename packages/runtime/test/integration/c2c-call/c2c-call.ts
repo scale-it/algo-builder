@@ -36,6 +36,7 @@ describe("C2C call", function () {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName: "c2c-call.py",
 			clearProgramFileName: "clear.teal",

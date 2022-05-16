@@ -26,6 +26,7 @@ describe("TEALv4: Loops", function () {
 		clearProgramV3 = "clearv3.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName: approvalProgramPassFileName,
 			clearProgramFileName,

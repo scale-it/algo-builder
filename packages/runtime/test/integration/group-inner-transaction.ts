@@ -24,6 +24,7 @@ describe("Group inner transaction", function () {
 		appInfo = runtime.deployApp(
 			alice.account,
 			{
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName: "group.py",
 				clearProgramFileName: "clear.teal",

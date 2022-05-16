@@ -32,6 +32,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		clearProgramFileName = "clear.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,

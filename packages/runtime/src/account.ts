@@ -333,9 +333,7 @@ export class AccountStore implements AccountStoreI {
 	 * Deploy application in account's state
 	 * check maximum account creation limit
 	 * @param appID application index
-	 * @param params SSCDeployment Flags
-	 * @param approvalProgram application approval program
-	 * @param clearProgram application clear program
+	 * @param appDefinition application definition metadata
 	 * NOTE - approval and clear program must be the TEAL code as string
 	 */
 	addApp(appID: number, appDefinition: types.AppDefinitionFromSource): CreatedAppM {

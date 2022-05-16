@@ -33,6 +33,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		appID = runtime.deployApp(
 			john.account,
 			{
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName,
 				clearProgramFileName,

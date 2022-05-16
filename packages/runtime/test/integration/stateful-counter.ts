@@ -31,6 +31,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 		txParams.appID = runtime.deployApp(
 			john.account,
 			{
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName,
 				clearProgramFileName,

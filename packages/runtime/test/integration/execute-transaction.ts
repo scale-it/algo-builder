@@ -45,6 +45,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		runtime.deployApp(
 			john.account,
 			{
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName,
 				clearProgramFileName,
@@ -148,6 +149,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: {
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName,
 					clearProgramFileName,
@@ -181,6 +183,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: {
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName,
 					clearProgramFileName,

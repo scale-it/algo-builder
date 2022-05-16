@@ -24,6 +24,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 		clearProgramFileName = "clear-pooled-opcode-budget.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,
@@ -88,6 +89,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 			appID = runtime.deployApp(
 				john.account,
 				{
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName: "budget-opcode.teal",
 					clearProgramFileName: "clearv6.teal",

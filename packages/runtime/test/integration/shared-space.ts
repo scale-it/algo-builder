@@ -31,6 +31,7 @@ describe("TEALv4: shared space between contracts", function () {
 		clearProgram = getProgram("clear.teal");
 
 		firstAppDefinition = {
+			appName: "firstApp",
 			metaType: types.MetaType.STRING,
 			approvalProgramCode: approvalProgram1,
 			clearProgramCode: clearProgram,
@@ -41,6 +42,7 @@ describe("TEALv4: shared space between contracts", function () {
 		};
 
 		secondAppDefinition = {
+			appName: "SecondApp",
 			metaType: types.MetaType.STRING,
 			approvalProgramCode: approvalProgram2,
 			clearProgramCode: clearProgram,

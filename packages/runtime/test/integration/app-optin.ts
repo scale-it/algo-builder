@@ -22,6 +22,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 		runtime = new Runtime([alice, john]); // setup test
 		clearProgramFileName = "clear.teal";
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,

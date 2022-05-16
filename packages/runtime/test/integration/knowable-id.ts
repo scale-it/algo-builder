@@ -38,6 +38,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: {
+					appName: "firstApp",
 					metaType: types.MetaType.STRING,
 					approvalProgramCode: approvalProgram,
 					clearProgramCode: clearProgram,
@@ -53,6 +54,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: {
+					appName: "secondApp",
 					metaType: types.MetaType.STRING,
 					approvalProgramCode: approvalProgramPass,
 					clearProgramCode: clearProgram,
@@ -90,6 +92,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: {
+					appName: "app",
 					metaType: types.MetaType.STRING,
 					approvalProgramCode: approvalProgramFail,
 					clearProgramCode: clearProgram,

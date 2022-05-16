@@ -48,6 +48,7 @@ describe("TEAL: Execution modes", function () {
 
 		it("should pass in application mode", function () {
 			const appDefinition: types.AppDefinition = {
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName: "sig-mode.teal",
 				clearProgramFileName: "clear.teal",
@@ -65,6 +66,7 @@ describe("TEAL: Execution modes", function () {
 	describe("Signature ops used in application mode", function () {
 		it("should fail in application mode if Signature mode opcode is used", function () {
 			const appDefinition: types.AppDefinition = {
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName: "app-mode.teal",
 				clearProgramFileName: "clear.teal",

@@ -122,6 +122,7 @@ describe("Should execute SDK transaction object using runtime", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
 				appDefinition: {
+					appName: "app",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName: "counter-approval.teal",
 					clearProgramFileName: "clear.teal",

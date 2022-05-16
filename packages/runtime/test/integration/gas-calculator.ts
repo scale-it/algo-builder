@@ -20,6 +20,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 		clearProgramFileName = "clear.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,

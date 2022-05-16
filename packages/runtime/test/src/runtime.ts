@@ -934,6 +934,7 @@ describe("Stateful Smart Contracts", function () {
 		clearProgramFileName = "clear.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName,
 			clearProgramFileName,
@@ -1021,6 +1022,7 @@ describe("Stateful Smart Contracts", function () {
 				runtime.deployApp(
 					john.account,
 					{
+						appName: "app",
 						metaType: types.MetaType.FILE,
 						approvalProgramFileName,
 						clearProgramFileName,
@@ -1044,6 +1046,7 @@ describe("Stateful Smart Contracts", function () {
 				runtime.deployApp(
 					john.account,
 					{
+						appName: "app",
 						metaType: types.MetaType.FILE,
 						approvalProgramFileName,
 						clearProgramFileName,

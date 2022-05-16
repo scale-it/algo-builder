@@ -35,6 +35,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 		txnParams.appID = runtime.deployApp(
 			john.account,
 			{
+				appName: "app",
 				metaType: types.MetaType.FILE,
 				approvalProgramFileName,
 				clearProgramFileName,
@@ -161,6 +162,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 		clearProgramFailFileName = "clear-fail.teal";
 
 		appDefinition = {
+			appName: "app",
 			metaType: types.MetaType.FILE,
 			approvalProgramFileName: approvalProgramFailFileName,
 			clearProgramFileName: clearProgramFailFileName,
