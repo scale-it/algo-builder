@@ -61,6 +61,7 @@ import {
 import { Stack } from "../lib/stack";
 import {
 	encTxToExecParams,
+	executeITxn,
 	isEncTxApplicationCall,
 	txAppArg,
 	txnSpecByField,
@@ -4342,85 +4343,16 @@ export class ITxn extends Op {
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
 			this.idx = Number(args[1]);
+		} else {
+			assertLen(args.length, 1, line);
 		}
-		//  else {
-		// 	assertLen(args.length, 1, line);
-		// }
-		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-
 		this.field = args[0]; // field
 		this.interpreter = interpreter;
 	}
 
 	execute(stack: TEALStack): number {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-
-		let result: StackElem;
-		// what is "last"
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		const tx = groupTx[groupTx.length - 1];
-
-		switch (this.field) {
-			case "Logs": {
-				if (
-					this.interpreter.tealVersion >= 5 &&
-					this.idx !== undefined &&
-					this.interpreter.mode == ExecutionMode.APPLICATION
-				) {
-					// handle Logs
-					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-					const logs: Uint8Array[] = txReceipt?.logs ?? [];
-					this.checkIndexBound(this.idx, logs, this.line);
-					result = logs[this.idx];
-				} else {
-					result = 0n;
-				}
-				break;
-			}
-			case "NumLogs": {
-				if (
-					this.interpreter.tealVersion >= 5 &&
-					this.idx !== undefined &&
-					this.interpreter.mode == ExecutionMode.APPLICATION
-				) {
-					// handle Logs
-					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-					const logs: Uint8Array[] = txReceipt?.logs ?? [];
-					this.checkIndexBound(this.idx, logs, this.line);
-					result = BigInt(logs[this.idx].length);
-				} else {
-					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-					const logs: Uint8Array[] = txReceipt?.logs ?? [];
-					result = BigInt(logs.length);
-				}
-				break;
-			}
-			case "CreatedAssetID": {
-				result = BigInt(this.interpreter.runtime.ctx.createdAssetID);
-				break;
-			}
-			case "CreatedApplicationID": {
-				result = 0n; // can we create an app in inner-tx?
-				break;
-			}
-			default: {
-				// similarly as Txn Op
-				if (this.idx !== undefined) {
-					// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
-					result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-				} else {
-					result = txnSpecByField(this.field, tx, [tx], this.interpreter.tealVersion);
-				}
-
-				break;
-			}
-		}
-		stack.push(result);
+		this.assertIsInnerTransaction(this.interpreter);
+		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
 }
@@ -4452,27 +4384,8 @@ export class ITxna extends Op {
 	}
 
 	execute(stack: TEALStack): number {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		let result: StackElem;
-
-		const tx = groupTx[groupTx.length - 1];
-		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
-			// handle Logs
-			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			const logs: Uint8Array[] = txReceipt?.logs ?? [];
-			this.checkIndexBound(this.idx, logs, this.line);
-			result = logs[this.idx];
-		} else {
-			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-		}
-		stack.push(result);
-
+		this.assertIsInnerTransaction(this.interpreter);
+		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
 }
