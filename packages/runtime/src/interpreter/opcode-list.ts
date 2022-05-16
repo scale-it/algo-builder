@@ -28,6 +28,7 @@ import {
 	AppParamDefined,
 	AssetParamMap,
 	GlobalFields,
+	ITxArrFields,
 	MathOp,
 	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
@@ -4333,14 +4334,18 @@ export class ITxn extends Op {
 		this.idx = undefined;
 
 		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-		if (TxArrFields[interpreter.tealVersion].has(args[0])) {
+		if (
+			TxArrFields[interpreter.tealVersion].has(args[0]) ||
+			ITxArrFields[interpreter.tealVersion].has(args[0])
+		) {
 			// eg. itxn Accounts 1
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
 			this.idx = Number(args[1]);
-		} else {
-			assertLen(args.length, 1, line);
 		}
+		//  else {
+		// 	assertLen(args.length, 1, line);
+		// }
 		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
 
 		this.field = args[0]; // field
@@ -4355,21 +4360,44 @@ export class ITxn extends Op {
 			});
 		}
 
-		let result;
-		// what is "last "
+		let result: StackElem;
+		// what is "last"
 		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
 		const tx = groupTx[groupTx.length - 1];
 
 		switch (this.field) {
 			case "Logs": {
-				// TODO handle this after log opcode is implemented
-				// https://www.pivotaltracker.com/story/show/179855820
-				result = 0n;
+				if (
+					this.interpreter.tealVersion >= 5 &&
+					this.idx !== undefined &&
+					this.interpreter.mode == ExecutionMode.APPLICATION
+				) {
+					// handle Logs
+					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+					const logs: Uint8Array[] = txReceipt?.logs ?? [];
+					this.checkIndexBound(this.idx, logs, this.line);
+					result = logs[this.idx];
+				} else {
+					result = 0n;
+				}
 				break;
 			}
 			case "NumLogs": {
-				// TODO handle this after log opcode is implemented
-				result = 0n;
+				if (
+					this.interpreter.tealVersion >= 5 &&
+					this.idx !== undefined &&
+					this.interpreter.mode == ExecutionMode.APPLICATION
+				) {
+					// handle Logs
+					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+					const logs: Uint8Array[] = txReceipt?.logs ?? [];
+					this.checkIndexBound(this.idx, logs, this.line);
+					result = BigInt(logs[this.idx].length);
+				} else {
+					const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+					const logs: Uint8Array[] = txReceipt?.logs ?? [];
+					result = BigInt(logs.length);
+				}
 				break;
 			}
 			case "CreatedAssetID": {
@@ -4614,7 +4642,7 @@ export class Log extends Op {
 		const logByte = this.assertBytes(stack.pop(), this.line);
 		const txID = this.interpreter.runtime.ctx.tx.txID;
 		const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
-		// for Log opcode we assume receipt is alway exist
+		// for Log opcode we assume receipt always exists
 		// TODO: recheck when log opcode failed
 		if (txReceipt) {
 			if (txReceipt.logs === undefined) {
