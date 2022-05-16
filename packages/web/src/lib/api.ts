@@ -1,8 +1,8 @@
 import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk";
 
-import { TxParams } from "../types";
+import { HttpNetworkConfig, TxParams } from "../types";
 
-export function algoexplorerAlgod(walletURL: any): algosdk.Algodv2 {
+export function algoexplorerAlgod(walletURL: HttpNetworkConfig): algosdk.Algodv2 {
 	return new Algodv2(walletURL.token, walletURL.server, walletURL.port);
 }
 

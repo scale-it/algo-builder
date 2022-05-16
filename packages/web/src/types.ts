@@ -380,7 +380,7 @@ export interface CustomTokenHeader {
 }
 
 export interface HttpNetworkConfig {
-	host: string; // with optional http o https prefix
+	server: string; // with optional http o https prefix
 	port: string | number;
 	token: string | AlgodTokenHeader | CustomTokenHeader;
 	httpHeaders?: { [name: string]: string };
