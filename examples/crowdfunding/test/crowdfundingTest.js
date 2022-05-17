@@ -16,7 +16,7 @@ describe("Crowdfunding Tests", function () {
 	let donor = new AccountStore(initialDonorBalance);
 
 	let runtime;
-	let flags;
+	let appDefinition;
 	let applicationId;
 	const crowdFundApprovalFileName = "crowdFundApproval.teal";
 	const crowdFundClearFileName = "crowdFundClear.teal";
@@ -27,8 +27,11 @@ describe("Crowdfunding Tests", function () {
 	this.beforeAll(async function () {
 		runtime = new Runtime([master, creator, escrow, donor]);
 
-		flags = {
-			sender: creator.account,
+		appDefinition = {
+			appName: "crowdFundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: crowdFundApprovalFileName,
+			clearProgramFileName: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -41,8 +44,11 @@ describe("Crowdfunding Tests", function () {
 		donor = new AccountStore(initialDonorBalance);
 		runtime = new Runtime([master, creator, escrow, donor]);
 
-		flags = {
-			sender: creator.account,
+		appDefinition = {
+			appName: "crowdFundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: crowdFundApprovalFileName,
+			clearProgramFileName: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -91,13 +97,12 @@ describe("Crowdfunding Tests", function () {
 		 * Note: - In this example timestamps are commented because it is possible
 		 * that network timestamp and system timestamp may not be in sync.
 		 */
-		const creationFlags = Object.assign({}, flags);
+		const appDef = Object.assign({}, appDefinition);
 
 		// create application
 		applicationId = runtime.deployApp(
-			crowdFundApprovalFileName,
-			crowdFundClearFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDef, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -303,12 +308,11 @@ describe("Crowdfunding Tests", function () {
 
 	it("should be rejected by logic when claiming funds if goal is not met", () => {
 		// create application
-		const creationFlags = Object.assign({}, flags);
+		const appDef = Object.assign({}, appDefinition);
 
 		const applicationId = runtime.deployApp(
-			crowdFundApprovalFileName,
-			crowdFundClearFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDef, appArgs: creationArgs },
 			{}
 		).appID;
 

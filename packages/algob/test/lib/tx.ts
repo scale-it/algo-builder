@@ -268,7 +268,7 @@ describe("Delete ASA and SSC", () => {
 
 		await deployer.executeTx([execParams]);
 
-		const res = deployer.getAppByFile("approval.teal", "clear.teal");
+		const res = deployer.getApp("app");
 		assert.isDefined(res);
 		if (res) assert.equal(res.deleted, true);
 	});
@@ -665,10 +665,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 		await deployer.executeTx([execParams]);
 
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
 	it("should deploy application in deploy mode and save info by name", async () => {
@@ -693,12 +690,6 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
 		// able to retrieve info by "appName"
 		assert.isDefined(deployer.getApp("dao-app"));
-
-		// do note that traditional way doesn't work if appName is passed
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
 	});
 
 	it("should delete application in run mode", async () => {
@@ -732,7 +723,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
 		await deployer.executeTx([execParams]);
 
-		const res = deployer.getAppByFile("approval.teal", "clear.teal");
+		const res = deployer.getApp("app");
 		assert.isDefined(res);
 		assert.equal(res?.deleted, false);
 	});
@@ -776,10 +767,7 @@ describe("Update transaction test in run mode", () => {
 		const [appInfo] = await deployer.executeTx([execParams]);
 
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 
 		execParams = {
 			type: wtypes.TransactionType.UpdateApp,
@@ -793,10 +781,7 @@ describe("Update transaction test in run mode", () => {
 
 		await deployer.executeTx([execParams]);
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
 	it("deploy in deploy mode, update in run mode", async () => {
@@ -818,7 +803,7 @@ describe("Update transaction test in run mode", () => {
 			payFlags: {},
 		};
 		await deployer.executeTx([execParams]);
-		const appInfo = deployer.getAppByFile("approval.teal", "clear.teal");
+		const appInfo = deployer.getApp("app");
 		assert.isDefined(appInfo);
 
 		deployer = new DeployerRunMode(deployerCfg);
@@ -834,7 +819,7 @@ describe("Update transaction test in run mode", () => {
 			};
 
 			await deployer.executeTx([execParams]);
-			assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
+			assert.deepEqual(appInfo, deployer.getApp("app"));
 		}
 	});
 
@@ -856,10 +841,7 @@ describe("Update transaction test in run mode", () => {
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 
 		deployer = new DeployerDeployMode(deployerCfg);
 		execParams = {
@@ -869,12 +851,13 @@ describe("Update transaction test in run mode", () => {
 			appID: appInfo["application-index"],
 			newApprovalProgram: "approval.teal",
 			newClearProgram: "clear.teal",
+			appName: "app",
 			payFlags: {},
 		};
 
 		await deployer.executeTx([execParams]);
 		// checkpoint is stored for the update
-		assert.isDefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+		assert.isDefined(deployer.getApp("app"));
 	});
 });
 

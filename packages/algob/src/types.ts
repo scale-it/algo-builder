@@ -659,10 +659,6 @@ export interface Deployer {
 	loadMultiSig: (name: string) => Promise<LogicSig>;
 
 	/**
-	 * Queries a stateful smart contract info from checkpoint. */
-	getAppByFile: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined;
-
-	/**
 	 * Queries a stateful smart contract info from checkpoint name
 	 * passed by user during deployment */
 	getApp: (appName: string) => rtypes.AppInfo;

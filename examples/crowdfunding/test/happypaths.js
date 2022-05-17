@@ -25,7 +25,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 	let escrow, escrowLsig; // initialized later
 
 	let runtime;
-	let creationFlags;
+	let appDef;
 	let applicationId;
 	const approvalProgramFileName = "crowdFundApproval.teal";
 	const clearProgramFileName = "crowdFundClear.teal";
@@ -36,8 +36,11 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 	this.beforeAll(async function () {
 		runtime = new Runtime([master, creator, donor]);
 
-		creationFlags = {
-			sender: creator.account,
+		appDef = {
+			appName: "crowdFundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -67,7 +70,13 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		runtime = new Runtime([master, creator, donor, fundReceiver]);
 
 		applicationId = 1;
-		creator.addApp(applicationId, creationFlags, approvalProgram, clearProgram);
+		// addApp only work with AppDefinition from Source
+		creator.addApp(applicationId, {
+			...appDef,
+			metaType: types.MetaType.STRING,
+			approvalProgramCode: approvalProgram,
+			clearProgramCode: clearProgram,
+		});
 		runtime.store.globalApps.set(applicationId, creator.address);
 
 		// set creation args in global state
@@ -108,9 +117,8 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 
 		// deploy application
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDef, appArgs: creationArgs },
 			{}
 		).appID;
 

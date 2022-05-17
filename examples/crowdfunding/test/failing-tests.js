@@ -55,8 +55,11 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 			convert.addressToPk(creator.address),
 			convert.uint64ToBigEndian(fundCloseDate.getTime()),
 		];
-		const creationFlags = {
-			sender: creator.account,
+		const appDef = {
+			appName: "crowdFundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -65,9 +68,8 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 
 		// deploy application
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDef, appArgs: creationArgs },
 			{}
 		).appID;
 

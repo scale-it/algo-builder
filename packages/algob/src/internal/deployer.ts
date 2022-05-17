@@ -148,15 +148,6 @@ class DeployerBasicMode {
 
 	/**
 	 * Loads stateful smart contract info from checkpoint
-	 * @param approvalFileName Approval program file name
-	 * @param clearFileName clear program file name
-	 */
-	getAppByFile(approvalFileName: string, clearFileName: string): rtypes.AppInfo {
-		return this.assertAppExistsInCP(approvalFileName + "-" + clearFileName);
-	}
-
-	/**
-	 * Loads stateful smart contract info from checkpoint
 	 * @param appName name of the app (defined by user during deployment)
 	 */
 	getApp(appName: string): rtypes.AppInfo {
