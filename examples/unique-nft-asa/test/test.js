@@ -15,7 +15,7 @@ describe("Unique NFT ASA tests", function () {
 	let statelessLsigAcc; //
 
 	let runtime;
-	let creationFlags;
+	let appDef;
 	let nftAppID;
 	let createNftTxGroup;
 	let transferNftTxGroup;
@@ -26,20 +26,17 @@ describe("Unique NFT ASA tests", function () {
 		runtime = new Runtime([master]);
 		[creator, bob] = runtime.defaultAccounts();
 
-		creationFlags = {
-			sender: creator.account,
+		appDef = {
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName,
+			clearProgramFileName,
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 0,
 			globalBytes: 0,
 		};
 
-		nftAppID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		nftAppID = runtime.deployApp(creator.account, appDef, {}).appID;
 
 		// setup stateless lsig
 		const statelessLsigProg = getProgram("stateless.py", {
