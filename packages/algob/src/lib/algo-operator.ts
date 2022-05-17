@@ -388,7 +388,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	): Promise<rtypes.AppInfo> {
 		const params = await mkTxParams(this.algodClient, payFlags);
 
-		let execParam: wtypes.ExecParams;
+		let appDef: wtypes.AppDefinitionFromSourceCompiled;
 
 		const appName = appDefinition.appName;
 		let approvalProgramFileName = appName + " - " + "approval-program.teal";
@@ -403,6 +403,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 					scTmplParams
 				);
 				const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
+
 				const clear = await this.ensureCompiled(
 					appDefinition.clearProgramFileName,
 					"",
@@ -414,17 +415,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				approvalProgramFileName = appDefinition.approvalProgramFileName;
 				clearProgramFileName = appDefinition.clearProgramFileName;
 
-				execParam = {
-					type: wtypes.TransactionType.DeployApp,
-					sign: wtypes.SignType.SecretKey,
-					fromAccount: creator,
-					appDefinition: {
-						...appDefinition,
-						metaType: wtypes.MetaType.BYTES,
-						approvalProgramBytes,
-						clearProgramBytes,
-					},
-					payFlags: payFlags,
+				appDef = {
+					...appDefinition,
+					metaType: wtypes.MetaType.BYTES,
+					approvalProgramBytes,
+					clearProgramBytes,
 				};
 				break;
 			}
@@ -447,31 +442,27 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
 				const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-				execParam = {
-					type: wtypes.TransactionType.DeployApp,
-					sign: wtypes.SignType.SecretKey,
-					fromAccount: creator,
-					appDefinition: {
-						...appDefinition,
-						metaType: wtypes.MetaType.BYTES,
-						approvalProgramBytes,
-						clearProgramBytes,
-					},
-					payFlags: payFlags,
+				appDef = {
+					...appDefinition,
+					metaType: wtypes.MetaType.BYTES,
+					approvalProgramBytes,
+					clearProgramBytes,
 				};
 				break;
 			}
 			case wtypes.MetaType.BYTES: {
-				execParam = {
-					type: wtypes.TransactionType.DeployApp,
-					sign: wtypes.SignType.SecretKey,
-					fromAccount: creator,
-					appDefinition,
-					payFlags,
-				};
+				appDef = appDefinition;
 				break;
 			}
 		}
+
+		const execParam: wtypes.DeployAppParam = {
+			type: wtypes.TransactionType.DeployApp,
+			sign: wtypes.SignType.SecretKey,
+			fromAccount: creator,
+			appDefinition: appDef,
+			payFlags: payFlags,
+		};
 
 		const txn = webTx.mkTransaction(execParam, params);
 		const txId = txn.txID().toString();
