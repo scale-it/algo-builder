@@ -1,5 +1,6 @@
 import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
+import cloneDeep from "lodash.clonedeep";
 import { encodeBase64 } from "tweetnacl-ts";
 
 import { AccountStore } from "../../../src";
@@ -27,13 +28,26 @@ describe("Convert encoded Txn to ExecParams", function () {
 		runtime: Runtime,
 		execParams: types.ExecParams
 	): void {
-		const [encTx] = runtime.createTxnContext(execParams);
 		const sign = {
 			sign: types.SignType.SecretKey,
 			fromAccount: execParams.fromAccount,
 		};
+
+		const cloneExecParams = cloneDeep(execParams);
+
+		if (cloneExecParams.type === types.TransactionType.DeployApp) {
+			cloneExecParams.appDefinition = {
+				...cloneExecParams.appDefinition,
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+				appName: "Mock",
+			};
+		}
 		// add approvalProgram and clearProgram to encTx
 		// TODO: recheck it
+		const [encTx] = runtime.createTxnContext(cloneExecParams);
+
 		if (execParams.type === types.TransactionType.DeployApp) {
 			encTx.metaType = execParams.appDefinition.metaType;
 			if (execParams.appDefinition.metaType === types.MetaType.FILE) {
@@ -177,7 +191,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
 				appDefinition: {
-					appName: "app",
+					appName: "Mock",
 					metaType: types.MetaType.FILE,
 					approvalProgramFileName: "counter-approval.teal",
 					clearProgramFileName: "clear.teal",
