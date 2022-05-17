@@ -174,15 +174,13 @@ describe("DeployerDeployMode", () => {
 			clearFile: "clear-file.py",
 		});
 
-		const sscFlags = {
-			sender: deployer.accounts[0],
-		};
 		const sscInfo = await deployer.deployApp(
 			deployer.accounts[0],
 			{
+				appName: "appInfo",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "app",
-				clearProgramFileName: "clear",
+				approvalProgramFileName: "app.teal",
+				clearProgramFileName: "clear.teal",
 				localInts: 1,
 				globalInts: 1,
 				localBytes: 1,

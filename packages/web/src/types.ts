@@ -180,7 +180,7 @@ export type StorageConfig = {
 	globalInts: number;
 	globalBytes: number;
 	extraPages?: number;
-	appName?: string; // name of app to store info against in checkpoint
+	appName: string; // name of app to store info against in checkpoint, now it's required
 };
 
 export type AppDefinitionFromFile = StorageConfig &

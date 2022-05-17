@@ -248,6 +248,7 @@ describe("Delete ASA and SSC", () => {
 
 	it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
 		const appDefinition: wtypes.AppDefinitionFromFile = {
+			appName: "app",
 			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
@@ -313,6 +314,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 
 		// deploy and delete app
 		const appDefinition: wtypes.AppDefinitionFromFile = {
+			appName: "app",
 			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
@@ -649,6 +651,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appDefinition: {
+				appName: "app",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "approval.teal",
 				clearProgramFileName: "clear.teal",
@@ -705,6 +708,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appDefinition: {
+				appName: "app",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "approval.teal",
 				clearProgramFileName: "clear.teal",
@@ -758,6 +762,7 @@ describe("Update transaction test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appDefinition: {
+				appName: "app",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "approval.teal",
 				clearProgramFileName: "clear.teal",
@@ -801,6 +806,7 @@ describe("Update transaction test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appDefinition: {
+				appName: "app",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "approval.teal",
 				clearProgramFileName: "clear.teal",
@@ -838,6 +844,7 @@ describe("Update transaction test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appDefinition: {
+				appName: "app",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "approval.teal",
 				clearProgramFileName: "clear.teal",

@@ -225,7 +225,7 @@ class DeployerBasicMode {
 	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
 	 */
 	compileASC(name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
-		return this.algoOp.ensureCompiled(name, force, scTmplParams);
+		return this.algoOp.ensureCompiled(name, "", force, scTmplParams);
 	}
 
 	/**
@@ -796,13 +796,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 */
 	async deployApp(
 		creator: Account,
-		appDefinition: wtypes.AppDefinitionFromFile,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
-		const name =
-			appDefinition.appName ??
-			appDefinition.approvalProgramFileName + "-" + appDefinition.clearProgramFileName;
+		const name = appDefinition.appName;
 
 		this.assertNoApp(name);
 		let sscInfo = {} as rtypes.AppInfo;

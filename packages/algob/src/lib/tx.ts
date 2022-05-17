@@ -176,6 +176,7 @@ async function mkTx(
 					metaType: wtypes.MetaType.BYTES,
 					approvalProgramBytes,
 					clearProgramBytes,
+					appName: name,
 				};
 				txIdxMap.set(index, [
 					name,

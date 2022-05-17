@@ -37,7 +37,7 @@ export async function getLsig(
 	scTmplParams?: SCParams
 ): Promise<LogicSigAccount> {
 	const compileOp = new CompileOp(algodClient);
-	const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
+	const result: ASCCache = await compileOp.ensureCompiled(name, "", false, scTmplParams);
 	return await _lsigFromRes(result);
 }
 

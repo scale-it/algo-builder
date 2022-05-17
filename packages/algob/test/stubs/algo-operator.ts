@@ -1,8 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
 import algosdk, { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } from "algosdk";
-import { rejects } from "assert";
-import { resolve } from "path";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -75,7 +73,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
 	async deployApp(
 		creator: algosdk.Account,
-		appDefinition: wtypes.AppDefinitionFromFile,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scInitParam?: unknown,
@@ -118,6 +116,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
 	async ensureCompiled(
 		name: string,
+		source: string,
 		force?: boolean,
 		scInitParam?: unknown,
 		scParams?: SCParams

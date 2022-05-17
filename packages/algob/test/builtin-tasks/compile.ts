@@ -137,7 +137,7 @@ describe("Compile task", () => {
 	});
 
 	it("should return correct ASCCache from CompileOp", async () => {
-		const result = await op.ensureCompiled(f3PY, true, scTmplParam);
+		const result = await op.ensureCompiled(f3PY, "", true, scTmplParam);
 		const expected = fs.readFileSync(path.join(ASSETS_DIR, "gold-asa-py-check.yaml"), "utf8");
 		assert.isDefined(result.scParams);
 		assert.deepEqual(YAML.stringify(result), expected);
@@ -187,13 +187,13 @@ describe("Support External Parameters in PyTEAL program", () => {
 		assert.lengthOf(op.writtenFiles, 0);
 
 		// On third run, should compile on third run because external parameters passed
-		result = await op.ensureCompiled(stateless, false, scInitParam);
+		result = await op.ensureCompiled(stateless, "", false, scInitParam);
 		const newStatelessHash = result.srcHash;
 		// Different Hash because external parameters are passed
 		// and they are different than initial parameters
 		console.log(statelessHash, newStatelessHash);
 
-		result = await op.ensureCompiled(stateful, false, scInitParam);
+		result = await op.ensureCompiled(stateful, "", false, scInitParam);
 
 		writtenFiles = [];
 		for (const fn of [stateless, stateful]) {
@@ -224,7 +224,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
 			TMPL_AMOUNT: 1000n,
 		};
 
-		const result = await op.ensureCompiled(stateless, false, scTmplParam);
+		const result = await op.ensureCompiled(stateless, "", false, scTmplParam);
 
 		const expected = fs.readFileSync("expected-stateless.teal", "utf-8");
 		assert.equal(result.tealCode, expected);
@@ -236,7 +236,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
 			TMPL_AMOUNT: 100n,
 		};
 
-		const result = await op.ensureCompiled(stateful, false, scTmplParam);
+		const result = await op.ensureCompiled(stateful, "", false, scTmplParam);
 
 		const expected = fs.readFileSync("expected-stateful.teal", "utf-8");
 		assert.equal(result.tealCode, expected);
