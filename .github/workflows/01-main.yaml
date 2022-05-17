@@ -36,8 +36,8 @@ jobs:
         run: yarn build
 
       - name: Setup Python
-        uses: actions/checkout@v3
-        uses: actions/setup-python@v3
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v3
         with:
           python-version: "3.10"
           cache: "pipenv"
