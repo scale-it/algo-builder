@@ -785,13 +785,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
 	/**
 	 * Deploys Algorand Stateful Smart Contract
-	 * @param approvalProgram filename which has approval program
-	 * @param clearProgram filename which has clear program
-	 * @param flags AppDeploymentFlags
 	 * @param payFlags Transaction Params
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
-	 * @param appName name of the app to deploy. This name (if passed) will be used as
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async deployApp(

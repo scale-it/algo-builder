@@ -177,7 +177,7 @@ describe("DeployerDeployMode", () => {
 		const sscInfo = await deployer.deployApp(
 			deployer.accounts[0],
 			{
-				appName: "appInfo",
+				appName: "app-clear",
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFileName: "app.teal",
 				clearProgramFileName: "clear.teal",
@@ -280,7 +280,7 @@ describe("DeployerDeployMode", () => {
 			globalInts: 1,
 			localBytes: 1,
 			globalBytes: 1,
-			appName: "myapp",
+			appName: "my-app",
 		};
 
 		const sscInfo = await deployer.deployApp(deployer.accounts[0], appDefinition, {});
