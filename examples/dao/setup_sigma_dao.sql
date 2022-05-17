@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS sigma_daos (
   app_id bigint PRIMARY KEY, -- application id
   app_params jsonb, -- application params with approval etc.
-  token_id bigint, -- token id
+  token_id bigint -- token id
 );
 
 -- create a procedure to handle the trigger (update_app) action
