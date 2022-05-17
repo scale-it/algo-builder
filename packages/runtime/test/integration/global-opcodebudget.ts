@@ -102,6 +102,10 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 			const buffTx = {
 				...txnParam,
+				payFlags: {
+					totalFee: 1000,
+					note: "salt",
+				},
 			};
 			const receipts = runtime.executeTx([txnParam, buffTx]);
 			const logs = receipts[0].logs ?? [];

@@ -212,6 +212,7 @@ describe("Teal Opcodes", function () {
 
 	describe("Pragma", () => {
 		const interpreter = new Interpreter();
+		const stack = new Stack<StackElem>();
 		it("should store pragma version", () => {
 			const op = new Pragma(["version", "2"], 1, interpreter);
 			assert.equal(op.version, 2);
@@ -222,6 +223,10 @@ describe("Teal Opcodes", function () {
 				() => new Pragma(["version", "2", "some-value"], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
+		});
+		it("Should return correct cost", () => {
+			const op = new Pragma(["version", "3"], 1, interpreter);
+			assert.equal(0, op.execute(stack));
 		});
 	});
 
@@ -907,6 +912,17 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 1;
+			let op = new Sha256([], 1, interpreter);
+			assert.equal(7, op.execute(stack));
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 2;
+			op = new Sha256([], 1, interpreter);
+			assert.equal(35, op.execute(stack));
+		});
 	});
 
 	describe("Sha512_256", function () {
@@ -946,6 +962,17 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 1;
+			let op = new Sha512_256([], 1, interpreter);
+			assert.equal(9, op.execute(stack));
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 2;
+			op = new Sha512_256([], 1, interpreter);
+			assert.equal(45, op.execute(stack));
+		});
 	});
 
 	describe("keccak256", function () {
@@ -986,6 +1013,17 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 1;
+			let op = new Keccak256([], 1, interpreter);
+			assert.equal(26, op.execute(stack));
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			interpreter.tealVersion = 2;
+			op = new Keccak256([], 1, interpreter);
+			assert.equal(130, op.execute(stack));
+		});
 	});
 
 	describe("Ed25519verify", function () {
@@ -1041,6 +1079,19 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
+
+		it("Should return correct cost", () => {
+			const account = generateAccount();
+			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signed = signBytes(toSign, account.sk);
+
+			stack.push(toSign); // data
+			stack.push(signed); // signature
+			stack.push(decodeAddress(account.addr).publicKey); // pk
+
+			const op = new Ed25519verify([], 1);
+			assert.equal(1900, op.execute(stack));
+		});
 	});
 
 	describe("LessThan", function () {
@@ -4969,6 +5020,13 @@ describe("Teal Opcodes", function () {
 				"should throw error if ByteAdd is used with int",
 				execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 			);
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteAdd([], 0);
+				assert.equal(10, op.execute(stack));
+			});
 		});
 
 		describe("ByteSub", () => {
@@ -5037,6 +5095,13 @@ describe("Teal Opcodes", function () {
 				"should throw error if ByteSub is used with int",
 				execExpectError(stack, [1n, 2n], new ByteSub([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 			);
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteSub([], 0);
+				assert.equal(10, op.execute(stack));
+			});
 		});
 
 		describe("ByteMul", () => {
@@ -5082,6 +5147,13 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteMul([], 0);
+				assert.equal(20, op.execute(stack));
+			});
+
 			// rest of tests for all opcodes are common, which should be covered by b+, b-
 		});
 
@@ -5123,6 +5195,13 @@ describe("Teal Opcodes", function () {
 				const op = new ByteDiv([], 0);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ZERO_DIV);
 			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteDiv([], 0);
+				assert.equal(20, op.execute(stack));
+			});
 		});
 
 		describe("ByteMod", () => {
@@ -5162,6 +5241,13 @@ describe("Teal Opcodes", function () {
 				stack.push(hexToByte("0x00"));
 				const op = new ByteMod([], 0);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ZERO_DIV);
+			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteMod([], 0);
+				assert.equal(20, op.execute(stack));
 			});
 		});
 
@@ -5355,6 +5441,13 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), hexToByte("0x00f1"));
 			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteBitwiseOr([], 0);
+				assert.equal(6, op.execute(stack));
+			});
 		});
 
 		describe("ByteBitwiseAnd", () => {
@@ -5400,6 +5493,13 @@ describe("Teal Opcodes", function () {
 						35, 69, 118, 1, 35, 69, 118, 1, 35, 69, 118,
 					])
 				);
+			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteBitwiseAnd([], 0);
+				assert.equal(6, op.execute(stack));
 			});
 		});
 
@@ -5447,6 +5547,13 @@ describe("Teal Opcodes", function () {
 					])
 				);
 			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteBitwiseXor([], 0);
+				assert.equal(6, op.execute(stack));
+			});
 		});
 
 		describe("ByteBitwiseInvert", () => {
@@ -5480,6 +5587,13 @@ describe("Teal Opcodes", function () {
 						220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
 					])
 				);
+			});
+
+			it("Should calculate correct cost", () => {
+				stack.push(hexToByte("0x01"));
+				stack.push(hexToByte("0x01"));
+				const op = new ByteBitwiseInvert([], 0);
+				assert.equal(4, op.execute(stack));
 			});
 		});
 
@@ -5927,6 +6041,30 @@ describe("Teal Opcodes", function () {
 			op = new EcdsaPkRecover(["2"], 1);
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+		});
+
+		it("Should calculate correct cost", () => {
+			//EdcsaVerify
+			stack.push(msgHash);
+			stack.push(signature.r.toBuffer());
+			stack.push(signature.s.toBuffer());
+			stack.push(pkX);
+			stack.push(pkY);
+			let op = new EcdsaVerify(["0"], 1);
+			assert.equal(1700, op.execute(stack));
+			//EcdsaPkDecompress
+			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
+			stack.push(Buffer.from(compressed, "hex"));
+			op = new EcdsaPkDecompress(["0"], 1);
+			assert.equal(650, op.execute(stack));
+
+			//EcdsaPkRecover
+			stack.push(msgHash);
+			stack.push(BigInt(signature.recoveryParam ?? 0n));
+			stack.push(signature.r.toBuffer());
+			stack.push(signature.s.toBuffer());
+			op = new EcdsaPkRecover(["0"], 1);
+			assert.equal(2000, op.execute(stack));
 		});
 	});
 
@@ -6534,6 +6672,12 @@ describe("Teal Opcodes", function () {
 			// length of input more than 64
 			stack = initStack([bigintToBigEndianBytes(BigInt("0x" + "ff".repeat(100)))]);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED);
+		});
+
+		it("Should calculate correct cost", () => {
+			stack.push(bigintToBigEndianBytes(0n));
+			const op = new Bsqrt([], 0);
+			assert.equal(40, op.execute(stack));
 		});
 	});
 

@@ -30,7 +30,6 @@ import {
 	BaseTxReceipt,
 	EncTx,
 	ExecutionMode,
-	Operator,
 	SSCAttributesM,
 	StackElem,
 	TEALStack,
@@ -58,7 +57,7 @@ export class Interpreter {
 	intcblock: BigInt[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
-	instructions: Operator[];
+	instructions: Op[];
 	instructionIndex: number;
 	runtime: Runtime;
 	// The call stack is separate from the data stack. Only callsub and retsub manipulate it.
@@ -411,7 +410,7 @@ export class Interpreter {
 	 * @param instruction interpreter opcode instance
 	 * @param debugStack max no. of elements to print from top of stack
 	 */
-	printStack(instruction: Operator, debugStack?: number): void {
+	printStack(instruction: Op, debugStack?: number): void {
 		if (!debugStack) {
 			return;
 		}
@@ -546,8 +545,7 @@ export class Interpreter {
 				});
 			}
 			const costFromExecute = instruction.execute(this.stack);
-			const cost = costFromExecute === undefined ? 1 : costFromExecute;
-			this.cost += cost;
+			this.cost += costFromExecute;
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
@@ -559,7 +557,7 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += cost;
+					this.runtime.ctx.pooledApplCost += costFromExecute;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,

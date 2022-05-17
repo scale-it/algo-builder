@@ -58,14 +58,14 @@ describe("TEALv4: shared space between contracts", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: firstAppDefinition,
-				payFlags: {},
+				payFlags: { note: "first Tx" },
 			},
 			{
 				type: types.TransactionType.DeployApp,
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				appDefinition: secondAppDefinition,
-				payFlags: {},
+				payFlags: { note: "second Tx" },
 			},
 		];
 	});

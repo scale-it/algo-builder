@@ -364,6 +364,7 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 export enum ChainType {
 	MainNet = "MainNet",
 	TestNet = "TestNet",
+	BetaNet = "BetaNet",
 }
 
 export interface SessionConnectResponse {

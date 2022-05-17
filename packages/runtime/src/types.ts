@@ -20,20 +20,6 @@ import {
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
 
-export type Operator =
-	| Len
-	| Add
-	| Sub
-	| Mul
-	| Div
-	| Arg
-	| Bytecblock
-	| Bytec
-	| Addr
-	| Int
-	| Byte
-	| Pragma;
-
 export type AppArgs = Array<string | number>;
 
 export type StackElem = bigint | Uint8Array;

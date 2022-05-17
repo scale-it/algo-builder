@@ -52,29 +52,41 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 		);
 
-		// exceed even with 3 "normal transactions"
+		// exceed even with 3 "normal transactions", add note to make txn different with each other
 		expectRuntimeError(
 			() =>
 				runtime.executeTx([
 					appCallParam,
-					{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-					{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-					{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
+					{
+						...appCallParam,
+						appArgs: [`str:${STR_NORMAL_COST}`],
+						payFlags: { note: "salt 0" },
+					},
+					{
+						...appCallParam,
+						appArgs: [`str:${STR_NORMAL_COST}`],
+						payFlags: { note: "salt 1" },
+					},
+					{
+						...appCallParam,
+						appArgs: [`str:${STR_NORMAL_COST}`],
+						payFlags: { note: "salt 2" },
+					},
 				]), // exceeded on single
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 		);
 	});
 
 	it("should pass on app call with total pooled cost if enough transactions are present in group", function () {
-		// enough normal cost transactions in group
+		// enough normal cost transactions in group, add note to make txn different with each other
 		const passTxGroup = [
 			appCallParam,
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
-			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`] },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 0" } },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 1" } },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 2" } },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 3" } },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 4" } },
+			{ ...appCallParam, appArgs: [`str:${STR_NORMAL_COST}`], payFlags: { note: "salt 5" } },
 		];
 
 		assert.doesNotThrow(() => runtime.executeTx(passTxGroup));

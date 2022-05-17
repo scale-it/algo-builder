@@ -1,16 +1,19 @@
 import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk";
 
 import { ChainType, TxParams } from "../types";
-import { mainnetURL, testnetURL } from "./constants";
+import { betanetURL, mainnetURL, testnetURL } from "./constants";
 
 export function algoexplorerAlgod(chain: string): algosdk.Algodv2 {
 	const mainnetAlgoExplorer = new Algodv2("", mainnetURL, "");
 	const testnetAlgoExplorer = new Algodv2("", testnetURL, "");
+	const betanetAlgoExplorer = new Algodv2("", betanetURL, "");
 	switch (chain) {
 		case ChainType.MainNet:
 			return mainnetAlgoExplorer;
 		case ChainType.TestNet:
 			return testnetAlgoExplorer;
+		case ChainType.BetaNet:
+			return betanetAlgoExplorer;
 		default:
 			throw new Error(`Unknown chain type: ${chain}`);
 	}
