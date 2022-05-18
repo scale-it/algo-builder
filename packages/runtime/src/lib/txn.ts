@@ -496,12 +496,8 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 	const groupTx = op.interpreter.innerTxnGroups[op.interpreter.innerTxnGroups.length - 1];
 	const tx = groupTx[groupTx.length - 1];
 	let result: StackElem;
-	if (
-		op.idx === undefined &&
-		op.interpreter.tealVersion >= 5 &&
-		op.interpreter.mode == ExecutionMode.APPLICATION
-	) {
-		//itxn
+	if (op.idx === undefined) {
+		//itxn only supported arguments
 		switch (op.field) {
 			case "NumLogs": {
 				const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
@@ -522,7 +518,7 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 				break;
 			}
 		}
-	} else if (op.idx !== undefined && op.interpreter.tealVersion >= 5 && op.interpreter.mode) {
+	} else {
 		if (op.field === "Logs") {
 			// handle Logs
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
@@ -532,8 +528,6 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 		} else {
 			result = txAppArg(op.field, tx, op.idx, op, op.interpreter, op.line);
 		}
-	} else {
-		throw new Error("unsupported action");
 	}
 	return result;
 }

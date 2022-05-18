@@ -6866,7 +6866,7 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
 			);
 		});
-		it("Should put the lenght of logs on top of the stack", () => {
+		it("Should put the number of logs on top of the stack", () => {
 			const op = new ITxn(["NumLogs"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1n, stack.pop());
