@@ -19,21 +19,21 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	let alice = new AccountStore(minBalance + 1000);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let closeOutParams: types.AppCallsParam;
 	let appDefinition: types.AppDefinitionFromFile;
 
 	this.beforeAll(async function () {
 		runtime = new Runtime([john, alice]); // setup test
-		approvalProgramFileName = "close-clear-ssc.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "close-clear-ssc.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 2,
 			globalInts: 2,
 			localBytes: 3,
@@ -147,7 +147,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		const rejectClearProgramFileName = "rejectClear.teal";
 		const appID = runtime.deployApp(
 			john.account,
-			{ ...appDefinition, clearProgramFileName: rejectClearProgramFileName },
+			{ ...appDefinition, clearProgramFilename: rejectClearProgramFileName },
 			{}
 		).appID;
 

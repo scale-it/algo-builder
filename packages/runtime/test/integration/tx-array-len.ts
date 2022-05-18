@@ -24,12 +24,12 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 	};
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
 		// deploy a new app
 		txnParams.appID = runtime.deployApp(
@@ -37,8 +37,8 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 			{
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 2,
 				globalInts: 2,
 				localBytes: 3,
@@ -164,8 +164,8 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: approvalProgramFailFileName,
-			clearProgramFileName: clearProgramFailFileName,
+			approvalProgramFilename: approvalProgramFailFileName,
+			clearProgramFilename: clearProgramFailFileName,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -183,8 +183,8 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 	it("should pass during create application if pragma version >= 4", function () {
 		// same program with teal version == 4. Since cost is calculation during execution,
 		// this code will pass.
-		appDefinition.approvalProgramFileName = approvalProgramPassFileName;
-		appDefinition.clearProgramFileName = clearProgramPassFileName;
+		appDefinition.approvalProgramFilename = approvalProgramPassFileName;
+		appDefinition.clearProgramFilename = clearProgramPassFileName;
 		assert.doesNotThrow(() => runtime.deployApp(john.account, appDefinition, {}));
 	});
 });

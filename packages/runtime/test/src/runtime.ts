@@ -966,19 +966,19 @@ describe("Stateful Smart Contracts", function () {
 	useFixture("stateful");
 	const john = new AccountStore(minBalance);
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeEach(() => {
 		runtime = new Runtime([john]);
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 32,
 			globalInts: 32,
 			localBytes: 8,
@@ -987,7 +987,7 @@ describe("Stateful Smart Contracts", function () {
 	});
 
 	it("Should not create application if approval program is empty", () => {
-		appDefinition.approvalProgramFileName = "empty-app.teal";
+		appDefinition.approvalProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
@@ -996,7 +996,7 @@ describe("Stateful Smart Contracts", function () {
 	});
 
 	it("Should not create application if clear program is empty", () => {
-		appDefinition.clearProgramFileName = "empty-app.teal";
+		appDefinition.clearProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
@@ -1012,7 +1012,7 @@ describe("Stateful Smart Contracts", function () {
 	});
 
 	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", () => {
-		appDefinition.clearProgramFileName = "clearv6.teal";
+		appDefinition.clearProgramFilename = "clearv6.teal";
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
@@ -1023,12 +1023,12 @@ describe("Stateful Smart Contracts", function () {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, "", clearProgramFileName, {}, {}),
+			() => runtime.updateApp(john.address, appID, "", clearProgramFilename, {}, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
 		);
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
+			() => runtime.updateApp(john.address, appID, approvalProgramFilename, "", {}, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
 		);
 	});
@@ -1036,14 +1036,14 @@ describe("Stateful Smart Contracts", function () {
 	it("Should not update application if approval and clear program not match", () => {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
-		clearProgramFileName = "clearv6.teal";
+		clearProgramFilename = "clearv6.teal";
 		expectRuntimeError(
 			() =>
 				runtime.updateApp(
 					john.address,
 					appID,
-					approvalProgramFileName,
-					clearProgramFileName,
+					approvalProgramFilename,
+					clearProgramFilename,
 					{},
 					{}
 				),
@@ -1065,8 +1065,8 @@ describe("Stateful Smart Contracts", function () {
 					{
 						appName: "app",
 						metaType: types.MetaType.FILE,
-						approvalProgramFileName,
-						clearProgramFileName,
+						approvalProgramFilename,
+						clearProgramFilename,
 						...incorrectCreationFlags,
 					},
 					{}
@@ -1089,8 +1089,8 @@ describe("Stateful Smart Contracts", function () {
 					{
 						appName: "app",
 						metaType: types.MetaType.FILE,
-						approvalProgramFileName,
-						clearProgramFileName,
+						approvalProgramFilename,
+						clearProgramFilename,
 						...incorrectCreationFlags,
 					},
 					{}

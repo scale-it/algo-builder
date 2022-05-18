@@ -51,8 +51,8 @@ describe("Convert encoded Txn to ExecParams", function () {
 		if (execParams.type === types.TransactionType.DeployApp) {
 			encTx.metaType = execParams.appDefinition.metaType;
 			if (execParams.appDefinition.metaType === types.MetaType.FILE) {
-				encTx.approvalProgram = execParams.appDefinition.approvalProgramFileName;
-				encTx.clearProgram = execParams.appDefinition.clearProgramFileName;
+				encTx.approvalProgram = execParams.appDefinition.approvalProgramFilename;
+				encTx.clearProgram = execParams.appDefinition.clearProgramFilename;
 			}
 		}
 
@@ -193,8 +193,8 @@ describe("Convert encoded Txn to ExecParams", function () {
 				appDefinition: {
 					appName: "Mock",
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName: "counter-approval.teal",
-					clearProgramFileName: "clear.teal",
+					approvalProgramFilename: "counter-approval.teal",
+					clearProgramFilename: "clear.teal",
 					globalBytes: 1,
 					globalInts: 1,
 					localBytes: 1,

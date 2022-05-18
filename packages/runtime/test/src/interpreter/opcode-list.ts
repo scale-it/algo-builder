@@ -6484,8 +6484,8 @@ describe("Teal Opcodes", function () {
 				{
 					appName: "app",
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName: "counter-approval.teal",
-					clearProgramFileName: "clear.teal",
+					approvalProgramFilename: "counter-approval.teal",
+					clearProgramFilename: "clear.teal",
 					globalInts: 1,
 					globalBytes: 2,
 					localInts: 3,

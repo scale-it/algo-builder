@@ -34,8 +34,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "PermissionedTokenApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "poi-approval.teal", // approval program
-			clearProgramFileName: "poi-clear.teal", // clear program
+			approvalProgramFilename: "poi-approval.teal", // approval program
+			clearProgramFilename: "poi-clear.teal", // clear program
 			localInts: 1, // to store level of asset for account
 			localBytes: 0,
 			globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset

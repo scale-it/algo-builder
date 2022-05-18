@@ -17,8 +17,8 @@ async function setupNewPermissionsApp(runtimeEnv, deployer) {
 		{
 			appName: "PermissionNewApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "permissions_new.teal", // new permissions contract
-			clearProgramFileName: "clear_state_program.py",
+			approvalProgramFilename: "permissions_new.teal", // new permissions contract
+			clearProgramFilename: "clear_state_program.py",
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 0,

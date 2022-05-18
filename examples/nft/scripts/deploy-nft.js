@@ -25,8 +25,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "nft",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "nft_approval.py",
-			clearProgramFileName: "nft_clear_state.py",
+			approvalProgramFilename: "nft_approval.py",
+			clearProgramFilename: "nft_clear_state.py",
 			localInts: 16,
 			globalInts: 1,
 			globalBytes: 63,

@@ -27,11 +27,11 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 	let runtime;
 	let appDef;
 	let applicationId;
-	const approvalProgramFileName = "crowdFundApproval.teal";
-	const clearProgramFileName = "crowdFundClear.teal";
+	const approvalProgramFilename = "crowdFundApproval.teal";
+	const clearProgramFilename = "crowdFundClear.teal";
 
-	const approvalProgram = getProgram(approvalProgramFileName);
-	const clearProgram = getProgram(clearProgramFileName);
+	const approvalProgram = getProgram(approvalProgramFilename);
+	const clearProgram = getProgram(clearProgramFilename);
 
 	this.beforeAll(async function () {
 		runtime = new Runtime([master, creator, donor]);
@@ -39,8 +39,8 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		appDef = {
 			appName: "crowdFundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -73,7 +73,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		// addApp only work with AppDefinition from Source
 		creator.addApp(applicationId, {
 			...appDef,
-			metaType: types.MetaType.STRING,
+			metaType: types.MetaType.SOURCE_CODE,
 			approvalProgramCode: approvalProgram,
 			clearProgramCode: clearProgram,
 		});

@@ -19,8 +19,8 @@ describe("Test for transferring asset using custom logic", function () {
 	let applicationId;
 	let assetId;
 	let assetDef;
-	const approvalProgramFileName = "poi-approval.teal";
-	const clearProgramFileName = "poi-clear.teal";
+	const approvalProgramFilename = "poi-approval.teal";
+	const clearProgramFilename = "poi-clear.teal";
 
 	this.beforeEach(async function () {
 		alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
@@ -65,8 +65,8 @@ describe("Test for transferring asset using custom logic", function () {
 			{
 				...appStorageConfig,
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				appName: "app",
 				appArgs: creationArgs,
 			},
@@ -284,8 +284,8 @@ describe("Test for transferring asset using custom logic", function () {
 			{
 				...appStorageConfig,
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				appName: "app",
 				appArgs: creationArgs,
 			},

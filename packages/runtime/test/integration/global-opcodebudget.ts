@@ -22,8 +22,8 @@ describe("TEALv6: Global Opcode Budget", function () {
 		appDefinition = {
 			metaType: types.MetaType.FILE,
 			appName: "app",
-			approvalProgramFileName: "app.teal",
-			clearProgramFileName: "clear.teal",
+			approvalProgramFilename: "app.teal",
+			clearProgramFilename: "clear.teal",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -34,7 +34,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 		dummyAppID = runtime.deployApp(
 			john.account,
-			{ ...appDefinition, approvalProgramFileName: "dummy-app.teal" },
+			{ ...appDefinition, approvalProgramFilename: "dummy-app.teal" },
 			{}
 		).appID;
 

@@ -39,7 +39,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				fromAccount: john.account,
 				appDefinition: {
 					appName: "firstApp",
-					metaType: types.MetaType.STRING,
+					metaType: types.MetaType.SOURCE_CODE,
 					approvalProgramCode: approvalProgram,
 					clearProgramCode: clearProgram,
 					localInts: 1,
@@ -55,7 +55,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				fromAccount: john.account,
 				appDefinition: {
 					appName: "secondApp",
-					metaType: types.MetaType.STRING,
+					metaType: types.MetaType.SOURCE_CODE,
 					approvalProgramCode: approvalProgramPass,
 					clearProgramCode: clearProgram,
 					localInts: 1,
@@ -93,7 +93,7 @@ describe("TEALv4: Knowable creatable ID", function () {
 				fromAccount: john.account,
 				appDefinition: {
 					appName: "app",
-					metaType: types.MetaType.STRING,
+					metaType: types.MetaType.SOURCE_CODE,
 					approvalProgramCode: approvalProgramFail,
 					clearProgramCode: clearProgram,
 					localInts: 1,

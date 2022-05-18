@@ -25,8 +25,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "StatefulASA_App",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "5-contract-asa-stateful.py", // approval program
-			clearProgramFileName: "5-clear.py", // clear program
+			approvalProgramFilename: "5-contract-asa-stateful.py", // approval program
+			clearProgramFilename: "5-clear.py", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,

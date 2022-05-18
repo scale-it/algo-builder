@@ -23,8 +23,8 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
 		{
 			appName: "Permissions",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "permissions.py", // approval program
-			clearProgramFileName: "clear_state_program.py", // clear program
+			approvalProgramFilename: "permissions.py", // approval program
+			clearProgramFilename: "clear_state_program.py", // clear program
 			localInts: 1, // 1 to store whitelisted status in local state
 			localBytes: 0,
 			globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts

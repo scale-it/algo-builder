@@ -30,8 +30,8 @@ describe("Crowdfunding Tests", function () {
 		appDefinition = {
 			appName: "crowdFundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: crowdFundApprovalFileName,
-			clearProgramFileName: crowdFundClearFileName,
+			approvalProgramFilename: crowdFundApprovalFileName,
+			clearProgramFilename: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -47,8 +47,8 @@ describe("Crowdfunding Tests", function () {
 		appDefinition = {
 			appName: "crowdFundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: crowdFundApprovalFileName,
-			clearProgramFileName: crowdFundClearFileName,
+			approvalProgramFilename: crowdFundApprovalFileName,
+			clearProgramFilename: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,

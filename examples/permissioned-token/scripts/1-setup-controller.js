@@ -25,8 +25,8 @@ async function setupControllerSSC(runtimeEnv, deployer) {
 		{
 			appName: "Controller",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "controller.py", // approval program
-			clearProgramFileName: "clear_state_program.py", // clear program
+			approvalProgramFilename: "controller.py", // approval program
+			clearProgramFilename: "clear_state_program.py", // clear program
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 2, // 1 to store kill_status, 1 for storing permissions_app_id

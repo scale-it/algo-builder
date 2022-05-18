@@ -12,19 +12,19 @@ describe("Crowdfunding basic tests", function () {
 	const john = new AccountStore(10e6);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "crowdfunding.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "crowdfunding.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 32,
 			globalInts: 32,
 			localBytes: 8,

@@ -41,8 +41,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "CrowdfundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "crowdFundApproval.teal", // approval program
-			clearProgramFileName: "crowdFundClear.teal", // clear program
+			approvalProgramFilename: "crowdFundApproval.teal", // approval program
+			clearProgramFilename: "crowdFundClear.teal", // clear program
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,

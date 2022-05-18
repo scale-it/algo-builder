@@ -58,8 +58,8 @@ class Context {
 		const appDef = {
 			appName: "controler",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: controllerProgram,
-			clearProgramFileName: clearProgram,
+			approvalProgramFilename: controllerProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 2,
@@ -106,8 +106,8 @@ class Context {
 		const appDef = {
 			appName: "Permissions",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: permissionsProgram,
-			clearProgramFileName: clearProgram,
+			approvalProgramFilename: permissionsProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 2,

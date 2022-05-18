@@ -43,8 +43,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "BondApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "bond-dapp-stateful.py",
-			clearProgramFileName: "bond-dapp-clear.py",
+			approvalProgramFilename: "bond-dapp-stateful.py",
+			clearProgramFilename: "bond-dapp-clear.py",
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 8,

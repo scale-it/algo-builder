@@ -20,21 +20,21 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 	let appAccount: AccountStoreI; // initialized later
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	let appID: number;
 	let appCallParams: types.ExecParams;
 	this.beforeAll(function () {
 		runtime = new Runtime([master, john, elon, bob]); // setup test
-		approvalProgramFileName = "approval-payment.py";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "approval-payment.py";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,

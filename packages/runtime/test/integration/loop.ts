@@ -14,7 +14,7 @@ describe("TEALv4: Loops", function () {
 	let approvalProgramPassFileName: string;
 	let approvalProgramFailFileName: string;
 	let approvalProgramFail1FileName: string;
-	let clearProgramFileName: string;
+	let clearProgramFilename: string;
 	let clearProgramV3: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeAll(async function () {
@@ -22,14 +22,14 @@ describe("TEALv4: Loops", function () {
 		approvalProgramPassFileName = "approval-pass.teal";
 		approvalProgramFailFileName = "approval-fail.teal";
 		approvalProgramFail1FileName = "approval-fail-1.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramFilename = "clear.teal";
 		clearProgramV3 = "clearv3.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: approvalProgramPassFileName,
-			clearProgramFileName,
+			approvalProgramFilename: approvalProgramPassFileName,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -48,7 +48,7 @@ describe("TEALv4: Loops", function () {
 			() =>
 				runtime.deployApp(
 					john.account,
-					{ ...appDefinition, approvalProgramFileName: approvalProgramFailFileName },
+					{ ...appDefinition, approvalProgramFilename: approvalProgramFailFileName },
 					{}
 				),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
@@ -63,8 +63,8 @@ describe("TEALv4: Loops", function () {
 					john.account,
 					{
 						...appDefinition,
-						approvalProgramFileName: approvalProgramFail1FileName,
-						clearProgramFileName: clearProgramV3,
+						approvalProgramFilename: approvalProgramFail1FileName,
+						clearProgramFilename: clearProgramV3,
 					},
 					{}
 				),
@@ -80,7 +80,7 @@ describe("TEALv4: Loops", function () {
 				john.account,
 				{
 					...appDefinition,
-					approvalProgramFileName: approvalProgramPassFileName,
+					approvalProgramFilename: approvalProgramPassFileName,
 				},
 				{}
 			)

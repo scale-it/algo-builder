@@ -56,8 +56,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "PermissionedVotingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "permissioned-voting-approval.py",
-			clearProgramFileName: "permissioned-voting-clear.py",
+			approvalProgramFilename: "permissioned-voting-approval.py",
+			clearProgramFilename: "permissioned-voting-clear.py",
 			localInts: 0,
 			localBytes: 1,
 			globalInts: 6,

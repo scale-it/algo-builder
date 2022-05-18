@@ -37,8 +37,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "DAOApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "dao-app-approval.py",
-			clearProgramFileName: "dao-app-clear.py",
+			approvalProgramFilename: "dao-app-approval.py",
+			clearProgramFilename: "dao-app-clear.py",
 			localInts: 9,
 			localBytes: 7,
 			globalInts: 4,

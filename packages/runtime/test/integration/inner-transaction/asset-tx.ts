@@ -20,22 +20,22 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 	const strAsa = "str:freeze_asa";
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	let appID: number;
 	let assetID: number;
 	let appCallParams: types.ExecParams;
 	this.beforeAll(function () {
 		runtime = new Runtime([master, john, elon, bob]); // setup test
-		approvalProgramFileName = "approval-asset-tx.py";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "approval-asset-tx.py";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,

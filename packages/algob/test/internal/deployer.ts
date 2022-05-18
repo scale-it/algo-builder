@@ -179,8 +179,8 @@ describe("DeployerDeployMode", () => {
 			{
 				appName: "app-clear",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "app.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "app.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				globalInts: 1,
 				localBytes: 1,
@@ -274,8 +274,8 @@ describe("DeployerDeployMode", () => {
 
 		const appDefinition: wtypes.AppDefinitionFromFile = {
 			metaType: wtypes.MetaType.FILE,
-			approvalProgramFileName: "app",
-			clearProgramFileName: "clear",
+			approvalProgramFilename: "app",
+			clearProgramFilename: "clear",
 			localInts: 1,
 			globalInts: 1,
 			localBytes: 1,

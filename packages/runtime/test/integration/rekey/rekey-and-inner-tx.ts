@@ -53,14 +53,14 @@ describe("Rekey transaction and inner transaction ", function () {
 	describe("Apply Inner transaction when rekey application to account", function () {
 		this.beforeEach(() => {
 			// deploy application
-			const approvalProgramFileName = "approval-rekey.teal";
-			const clearProgramFileName = "clear-rekey.teal";
+			const approvalProgramFilename = "approval-rekey.teal";
+			const clearProgramFilename = "clear-rekey.teal";
 			appID = runtime.deployApp(
 				master.account,
 				{
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName,
-					clearProgramFileName,
+					approvalProgramFilename,
+					clearProgramFilename,
 					...storageConfig,
 				},
 				{}
@@ -161,14 +161,14 @@ describe("Rekey transaction and inner transaction ", function () {
 
 		this.beforeEach(() => {
 			// deploy app
-			const approvalProgramFileName = "rekey-approval-payment.py";
-			const clearProgramFileName = "clear.teal";
+			const approvalProgramFilename = "rekey-approval-payment.py";
+			const clearProgramFilename = "clear.teal";
 			appID = runtime.deployApp(
 				master.account,
 				{
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName,
-					clearProgramFileName,
+					approvalProgramFilename,
+					clearProgramFilename,
 					...storageConfig,
 				},
 				{}

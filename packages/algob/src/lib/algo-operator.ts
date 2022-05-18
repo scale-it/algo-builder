@@ -391,13 +391,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		let appDef: wtypes.AppDefinitionFromSourceCompiled;
 
 		const appName = appDefinition.appName;
-		let approvalProgramFileName = appName + " - " + "approval-program.teal";
-		let clearProgramFileName = appName + " - " + "clear-program.teal";
+		let approvalProgramFilename = appName + " - " + "approval-program.teal";
+		let clearProgramFilename = appName + " - " + "clear-program.teal";
 
 		switch (appDefinition.metaType) {
 			case wtypes.MetaType.FILE: {
 				const app = await this.ensureCompiled(
-					appDefinition.approvalProgramFileName,
+					appDefinition.approvalProgramFilename,
 					"",
 					false,
 					scTmplParams
@@ -405,15 +405,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
 
 				const clear = await this.ensureCompiled(
-					appDefinition.clearProgramFileName,
+					appDefinition.clearProgramFilename,
 					"",
 					false,
 					scTmplParams
 				);
 				const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-				approvalProgramFileName = appDefinition.approvalProgramFileName;
-				clearProgramFileName = appDefinition.clearProgramFileName;
+				approvalProgramFilename = appDefinition.approvalProgramFilename;
+				clearProgramFilename = appDefinition.clearProgramFilename;
 
 				appDef = {
 					...appDefinition,
@@ -424,16 +424,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				break;
 			}
 
-			case wtypes.MetaType.STRING: {
+			case wtypes.MetaType.SOURCE_CODE: {
 				const app = await this.ensureCompiled(
-					clearProgramFileName,
+					clearProgramFilename,
 					appDefinition.approvalProgramCode,
 					false,
 					scTmplParams
 				);
 
 				const clear = await this.ensureCompiled(
-					clearProgramFileName,
+					clearProgramFilename,
 					appDefinition.clearProgramCode,
 					false,
 					scTmplParams
@@ -485,8 +485,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 			applicationAccount: getApplicationAddress(Number(appId)),
 			timestamp: Math.round(+new Date() / 1000),
 			deleted: false,
-			approvalFile: approvalProgramFileName,
-			clearFile: clearProgramFileName,
+			approvalFile: approvalProgramFilename,
+			clearFile: clearProgramFilename,
 		};
 	}
 

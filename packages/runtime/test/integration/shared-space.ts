@@ -32,7 +32,7 @@ describe("TEALv4: shared space between contracts", function () {
 
 		firstAppDefinition = {
 			appName: "firstApp",
-			metaType: types.MetaType.STRING,
+			metaType: types.MetaType.SOURCE_CODE,
 			approvalProgramCode: approvalProgram1,
 			clearProgramCode: clearProgram,
 			localInts: 1,
@@ -43,7 +43,7 @@ describe("TEALv4: shared space between contracts", function () {
 
 		secondAppDefinition = {
 			appName: "SecondApp",
-			metaType: types.MetaType.STRING,
+			metaType: types.MetaType.SOURCE_CODE,
 			approvalProgramCode: approvalProgram2,
 			clearProgramCode: clearProgram,
 			localInts: 1,

@@ -26,8 +26,8 @@ describe("Group inner transaction", function () {
 			{
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: "group.py",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "group.py",
+				clearProgramFilename: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,

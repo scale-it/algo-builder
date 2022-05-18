@@ -50,8 +50,8 @@ describe("TEAL: Execution modes", function () {
 			const appDefinition: types.AppDefinition = {
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: "sig-mode.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "sig-mode.teal",
+				clearProgramFilename: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,
@@ -68,8 +68,8 @@ describe("TEAL: Execution modes", function () {
 			const appDefinition: types.AppDefinition = {
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: "app-mode.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "app-mode.teal",
+				clearProgramFilename: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,

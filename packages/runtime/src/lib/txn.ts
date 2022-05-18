@@ -298,8 +298,8 @@ export function encTxToExecParams(
 				const appDefinition: types.AppDefinition = {
 					appName: "Mock",
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName: encTx.approvalProgram as string,
-					clearProgramFileName: encTx.clearProgram as string,
+					approvalProgramFilename: encTx.approvalProgram as string,
+					clearProgramFilename: encTx.clearProgram as string,
 					localInts: encTx.apls?.nui as number,
 					localBytes: encTx.apls?.nbs as number,
 					globalInts: encTx.apgs?.nui as number,

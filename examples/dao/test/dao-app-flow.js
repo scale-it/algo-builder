@@ -121,8 +121,8 @@ describe("DAO test", function () {
 			`str:${daoName}`,
 		];
 
-		const approvalProgramFileName = "dao-app-approval.py";
-		const clearProgramFileName = "dao-app-clear.py";
+		const approvalProgramFilename = "dao-app-approval.py";
+		const clearProgramFilename = "dao-app-clear.py";
 		const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
 		// deploy application
 		appID = runtime.deployApp(
@@ -131,8 +131,8 @@ describe("DAO test", function () {
 				...appStorageConfig,
 				appName: "daoApp",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				appArgs: daoAppArgs,
 			},
 			{},

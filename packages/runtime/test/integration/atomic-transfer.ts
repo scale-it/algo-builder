@@ -13,8 +13,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 	let john: AccountStore;
 	let alice: AccountStore;
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let assetId: number;
 	let appID: number;
 
@@ -26,8 +26,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
 		}).assetIndex;
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
 		// deploy a new app
 		appID = runtime.deployApp(
@@ -35,8 +35,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 			{
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 32,
 				globalInts: 32,
 				localBytes: 8,

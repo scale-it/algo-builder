@@ -13,8 +13,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 	let john: AccountStore;
 	let alice: AccountStore;
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let approvalProgram: string;
 	let clearProgram: string;
 	let assetId: number;
@@ -24,8 +24,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		alice = new AccountStore(initialBalance);
 		runtime = new Runtime([john, alice]); // setup test
 
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 	});
 
 	function syncAccounts(): void {
@@ -47,8 +47,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			{
 				appName: "app",
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 32,
 				globalInts: 32,
 				localBytes: 8,
@@ -151,8 +151,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				appDefinition: {
 					appName: "app",
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName,
-					clearProgramFileName,
+					approvalProgramFilename,
+					clearProgramFilename,
 					localInts: 1,
 					localBytes: 1,
 					globalInts: 1,
@@ -185,8 +185,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				appDefinition: {
 					appName: "app",
 					metaType: types.MetaType.FILE,
-					approvalProgramFileName,
-					clearProgramFileName,
+					approvalProgramFilename,
+					clearProgramFilename,
 					localInts: 1,
 					localBytes: 1,
 					globalInts: 1,
@@ -202,14 +202,14 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		);
 
 		// verify app doesn't exist in map
-		const res = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
+		const res = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
 		assert.isUndefined(res);
 	});
 
 	it("Should opt-in to app, through execute transaction", () => {
 		setupApp();
 		syncAccounts();
-		const appInfo = runtime.getAppInfoFromName(approvalProgramFileName, clearProgramFileName);
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
 		assert.isDefined(appInfo);
 		let tx: types.ExecParams[];
 		if (appInfo !== undefined) {

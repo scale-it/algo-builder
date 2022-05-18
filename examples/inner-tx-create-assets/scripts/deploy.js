@@ -14,8 +14,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "coordinator",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "coordinator.py",
-			clearProgramFileName: "clear.teal",
+			approvalProgramFilename: "coordinator.py",
+			clearProgramFilename: "clear.teal",
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 0,

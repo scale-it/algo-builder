@@ -254,8 +254,8 @@ describe("Delete ASA and SSC", () => {
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
-			approvalProgramFileName: "approval.teal",
-			clearProgramFileName: "clear.teal",
+			approvalProgramFilename: "approval.teal",
+			clearProgramFilename: "clear.teal",
 		};
 		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		const execParams: wtypes.AppCallsParam = {
@@ -320,8 +320,8 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
-			approvalProgramFileName: "approval.teal",
-			clearProgramFileName: "clear.teal",
+			approvalProgramFilename: "approval.teal",
+			clearProgramFilename: "clear.teal",
 		};
 		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		appID = info.appID;
@@ -653,8 +653,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			appDefinition: {
 				appName: "app",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,
@@ -676,8 +676,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			fromAccount: bobAcc,
 			appDefinition: {
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,
@@ -701,8 +701,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			appDefinition: {
 				appName: "app",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,
@@ -755,8 +755,8 @@ describe("Update transaction test in run mode", () => {
 			appDefinition: {
 				appName: "app",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,
@@ -793,8 +793,8 @@ describe("Update transaction test in run mode", () => {
 			appDefinition: {
 				appName: "app",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,
@@ -831,8 +831,8 @@ describe("Update transaction test in run mode", () => {
 			appDefinition: {
 				appName: "app",
 				metaType: wtypes.MetaType.FILE,
-				approvalProgramFileName: "approval.teal",
-				clearProgramFileName: "clear.teal",
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
 				localInts: 1,
 				localBytes: 1,
 				globalInts: 1,

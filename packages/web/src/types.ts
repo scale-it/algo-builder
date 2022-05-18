@@ -171,7 +171,7 @@ export type DeployASAParam = BasicParams & {
 
 export enum MetaType {
 	FILE,
-	STRING,
+	SOURCE_CODE,
 	BYTES,
 }
 export type StorageConfig = {
@@ -186,13 +186,13 @@ export type StorageConfig = {
 export type AppDefinitionFromFile = StorageConfig &
 	AppOptionalFlags & {
 		metaType: MetaType.FILE;
-		approvalProgramFileName: string;
-		clearProgramFileName: string;
+		approvalProgramFilename: string;
+		clearProgramFilename: string;
 	};
 
 export type AppDefinitionFromSource = StorageConfig &
 	AppOptionalFlags & {
-		metaType: MetaType.STRING;
+		metaType: MetaType.SOURCE_CODE;
 		approvalProgramCode: string;
 		clearProgramCode: string;
 	};

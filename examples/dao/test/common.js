@@ -61,8 +61,8 @@ class Context {
 		const appDef = {
 			appName: "daoApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: daoApprovalProgramFileName,
-			clearProgramFileName: daoClearStateProgramFileName,
+			approvalProgramFilename: daoApprovalProgramFileName,
+			clearProgramFilename: daoClearStateProgramFileName,
 			localInts: 9,
 			localBytes: 7,
 			globalInts: 4,

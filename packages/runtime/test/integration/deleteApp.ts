@@ -14,21 +14,21 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 	const alice = new AccountStore(minBalance + 1000);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let deleteParams: types.AppCallsParam;
 	let appDefinition: types.AppDefinitionFromFile;
 
 	this.beforeAll(async function () {
 		runtime = new Runtime([john, alice]); // setup test
-		approvalProgramFileName = "deleteApp.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "deleteApp.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 2,
 			globalInts: 2,
 			localBytes: 3,

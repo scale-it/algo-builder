@@ -18,7 +18,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	let runtime: Runtime;
 	let oldApprovalProgramFileName: string;
 	let newApprovalProgramFileName: string;
-	let clearProgramFileName: string;
+	let clearProgramFilename: string;
 
 	let oldApprovalProgram: string;
 	let newApprovalProgram: string;
@@ -36,11 +36,11 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		oldApprovalProgramFileName = "oldapproval.teal";
 		newApprovalProgramFileName = "newapproval.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramFilename = "clear.teal";
 
 		oldApprovalProgram = getProgram(oldApprovalProgramFileName);
 		newApprovalProgram = getProgram(newApprovalProgramFileName);
-		clearProgram = getProgram(clearProgramFileName);
+		clearProgram = getProgram(clearProgramFilename);
 	});
 
 	it("should fail during update application if app id is not defined", function () {
@@ -55,8 +55,8 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			creator.account,
 			{
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: oldApprovalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
 				...storageConfig,
 			},
 			{}
@@ -112,8 +112,8 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			creator.account,
 			{
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: oldApprovalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
 				...storageConfig,
 			},
 			{}

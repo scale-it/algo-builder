@@ -104,7 +104,7 @@ describe("Bond token failing tests", function () {
 			{
 				...appDef,
 				appName: "bond",
-				metaType: types.MetaType.STRING,
+				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
 				appArgs: creationArgs,

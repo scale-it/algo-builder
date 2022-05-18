@@ -9,21 +9,21 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 	const john = new AccountStore(10e6);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinition;
 	let appID: number;
 	let appCallParam: types.AppCallsParam;
 	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "label-first-line.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "label-first-line.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,

@@ -25,10 +25,10 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 	let lsig;
 	let escrowAddress;
 	const rejectMsg = "RUNTIME_ERR1007: Teal code rejected by logic";
-	const approvalProgramFileName = "crowdFundApproval.teal";
-	const clearProgramFileName = "crowdFundClear.teal";
-	const approvalProgram = getProgram(approvalProgramFileName);
-	const clearProgram = getProgram(clearProgramFileName);
+	const approvalProgramFilename = "crowdFundApproval.teal";
+	const clearProgramFilename = "crowdFundClear.teal";
+	const approvalProgram = getProgram(approvalProgramFilename);
+	const clearProgram = getProgram(clearProgramFilename);
 	// Create new runtime and application before each test.
 	this.beforeEach(() => {
 		runtime = new Runtime([master, creator, donor]);
@@ -58,8 +58,8 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		const appDef = {
 			appName: "crowdFundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,

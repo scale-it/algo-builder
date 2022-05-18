@@ -162,12 +162,12 @@ async function mkTx(
 			if (appDefinition.metaType === wtypes.MetaType.FILE) {
 				const name =
 					appDefinition.appName ??
-					String(appDefinition.approvalProgramFileName) +
+					String(appDefinition.approvalProgramFilename) +
 						"-" +
-						String(appDefinition.clearProgramFileName);
+						String(appDefinition.clearProgramFilename);
 				deployer.assertNoApp(name);
-				const approval = await deployer.compileASC(appDefinition.approvalProgramFileName);
-				const clear = await deployer.compileASC(appDefinition.clearProgramFileName);
+				const approval = await deployer.compileASC(appDefinition.approvalProgramFilename);
+				const clear = await deployer.compileASC(appDefinition.clearProgramFilename);
 				const approvalProgramBytes = new Uint8Array(Buffer.from(approval.compiled, "base64"));
 				const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 

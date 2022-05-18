@@ -14,7 +14,7 @@ describe("Current Transaction Tests", function () {
 	let runtime: Runtime;
 	let master: AccountStore, creator: AccountStore;
 	let applicationId1: number, applicationId2: number;
-	let approvalProgramFileName: string, clearProgramFileName: string;
+	let approvalProgramFilename: string, clearProgramFilename: string;
 
 	const storageConfig = {
 		appName: "app",
@@ -29,8 +29,8 @@ describe("Current Transaction Tests", function () {
 		creator = new AccountStore(initialCreatorBalance);
 
 		runtime = new Runtime([master, creator]);
-		approvalProgramFileName = "test1.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "test1.teal";
+		clearProgramFilename = "clear.teal";
 	});
 
 	function setupApps(): void {
@@ -40,8 +40,8 @@ describe("Current Transaction Tests", function () {
 			{
 				...storageConfig,
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 			},
 			{}
 		).appID;
@@ -51,8 +51,8 @@ describe("Current Transaction Tests", function () {
 			creator.account,
 			{
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName: "test2.teal",
-				clearProgramFileName,
+				approvalProgramFilename: "test2.teal",
+				clearProgramFilename,
 				...storageConfig,
 			},
 			{}

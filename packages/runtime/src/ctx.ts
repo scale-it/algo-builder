@@ -339,22 +339,22 @@ export class Ctx implements Context {
 
 		const approvalFile =
 			appDefinition.metaType === types.MetaType.FILE
-				? appDefinition.approvalProgramFileName
+				? appDefinition.approvalProgramFilename
 				: appDefinition.approvalProgramCode;
 
 		const clearFile =
 			appDefinition.metaType === types.MetaType.FILE
-				? appDefinition.clearProgramFileName
+				? appDefinition.clearProgramFilename
 				: appDefinition.clearProgramCode;
 
 		const approvalProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.approvalProgramFileName, scTmplParams)
+				? getProgram(appDefinition.approvalProgramFilename, scTmplParams)
 				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.clearProgramFileName, scTmplParams)
+				? getProgram(appDefinition.clearProgramFilename, scTmplParams)
 				: appDefinition.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
@@ -385,7 +385,7 @@ export class Ctx implements Context {
 		// create app with id = 0 in globalApps for teal execution
 		const app = senderAcc.addApp(0, {
 			...appDefinition,
-			metaType: types.MetaType.STRING,
+			metaType: types.MetaType.SOURCE_CODE,
 			approvalProgramCode: approvalProgTEAL,
 			clearProgramCode: clearProgTEAL,
 			appName: "Mock",

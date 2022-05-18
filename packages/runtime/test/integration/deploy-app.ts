@@ -14,18 +14,18 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	let john = new AccountStore(minBalance + fee);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let approvalProgram: string;
 	let clearProgram: string;
 	let storageConfig: types.StorageConfig;
 	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
-		approvalProgram = getProgram(approvalProgramFileName);
-		clearProgram = getProgram(clearProgramFileName);
+		approvalProgram = getProgram(approvalProgramFilename);
+		clearProgram = getProgram(clearProgramFilename);
 
 		storageConfig = {
 			appName: "app",
@@ -46,8 +46,8 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			john.account,
 			{
 				metaType: types.MetaType.FILE,
-				approvalProgramFileName,
-				clearProgramFileName,
+				approvalProgramFilename,
+				clearProgramFilename,
 				...storageConfig,
 			},
 			{}
@@ -56,7 +56,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		const appIdY = runtime.deployApp(
 			john.account,
 			{
-				metaType: types.MetaType.STRING,
+				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
 				...storageConfig,
@@ -78,7 +78,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			fromAccount: john.account,
 			appDefinition: {
 				...storageConfig,
-				metaType: types.MetaType.STRING,
+				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
 			},

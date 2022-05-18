@@ -96,7 +96,7 @@ describe("Bond token Tests", function () {
 			{
 				...creationFlags,
 				appName: "bond",
-				metaType: types.MetaType.STRING,
+				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
 				appArgs: creationArgs,

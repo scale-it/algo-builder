@@ -22,8 +22,8 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "CounterApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: "approval_program.teal", // approval program
-			clearProgramFileName: "clear_program.teal", // clear program
+			approvalProgramFilename: "approval_program.teal", // approval program
+			clearProgramFilename: "clear_program.teal", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,

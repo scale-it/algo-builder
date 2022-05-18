@@ -19,8 +19,8 @@ describe("Unique NFT ASA tests", function () {
 	let nftAppID;
 	let createNftTxGroup;
 	let transferNftTxGroup;
-	const approvalProgramFileName = "nft-app-approval.py";
-	const clearProgramFileName = "nft-app-clear.py";
+	const approvalProgramFilename = "nft-app-approval.py";
+	const clearProgramFilename = "nft-app-clear.py";
 
 	this.beforeEach(async function () {
 		runtime = new Runtime([master]);
@@ -28,8 +28,8 @@ describe("Unique NFT ASA tests", function () {
 
 		appDef = {
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 0,

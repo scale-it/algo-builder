@@ -14,20 +14,20 @@ describe("TEALv4: Sub routine", function () {
 	let approvalProgramPassFileName: string;
 	let approvalProgramFailFileName: string;
 	let approvalProgramFail1FileName: string;
-	let clearProgramFileName: string;
+	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramPassFileName = "approval-pass.teal";
 		approvalProgramFailFileName = "approval-fail.teal";
 		approvalProgramFail1FileName = "approval-fail-1.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramFilename = "clear.teal";
 
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName: approvalProgramPassFileName,
-			clearProgramFileName,
+			approvalProgramFilename: approvalProgramPassFileName,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -43,7 +43,7 @@ describe("TEALv4: Sub routine", function () {
 
 	it("should fail during create application", function () {
 		// this fails because in last condition we check if over subroutine section was executed
-		appDefinition.approvalProgramFileName = approvalProgramFailFileName;
+		appDefinition.approvalProgramFilename = approvalProgramFailFileName;
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
@@ -52,7 +52,7 @@ describe("TEALv4: Sub routine", function () {
 
 	it("should fail during create application", function () {
 		// this fails because there is no callsub before retsub(therefore callstack is empty)
-		appDefinition.approvalProgramFileName = approvalProgramFail1FileName;
+		appDefinition.approvalProgramFilename = approvalProgramFail1FileName;
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY
@@ -60,7 +60,7 @@ describe("TEALv4: Sub routine", function () {
 	});
 
 	it("should calculate correct fibonacci number", () => {
-		appDefinition.approvalProgramFileName = "fibonacci.teal";
+		appDefinition.approvalProgramFilename = "fibonacci.teal";
 		let appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		// 5th fibonacci
@@ -91,7 +91,7 @@ describe("TEALv4: Sub routine", function () {
 
 	it("should throw cost exceed error", () => {
 		appDefinition.appArgs = ["int:9"];
-		appDefinition.approvalProgramFileName = "fibonacci.teal";
+		appDefinition.approvalProgramFilename = "fibonacci.teal";
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED

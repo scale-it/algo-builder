@@ -15,8 +15,8 @@ describe("App Update Test", function () {
 	const alice = new AccountStore(minBalance + 1000);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let approvalProgram: string;
 	let clearProgram: string;
 	let appID: number;
@@ -25,16 +25,16 @@ describe("App Update Test", function () {
 	this.beforeEach(async function () {
 		runtime = new Runtime([john, alice]); // setup test
 
-		approvalProgramFileName = "approval_program.py";
-		clearProgramFileName = "clear_program.teal";
-		approvalProgram = getProgram(approvalProgramFileName);
-		clearProgram = getProgram(clearProgramFileName);
+		approvalProgramFilename = "approval_program.py";
+		clearProgramFilename = "clear_program.teal";
+		approvalProgram = getProgram(approvalProgramFilename);
+		clearProgram = getProgram(clearProgramFilename);
 
 		const appDefinition: types.AppDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFileName,
-			clearProgramFileName,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 5,
 			globalInts: 5,
 			localBytes: 5,
