@@ -12,4 +12,4 @@ tealer = {editable = true, ref = "dev", git = "https://github.com/crytic/tealer.
 [dev-packages]
 
 [requires]
-python_version = "3"
+python_version = "3.10"
