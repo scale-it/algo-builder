@@ -10,7 +10,7 @@ import type {
 import algosdk, { Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
-import { ExecParams, TransactionInGroup } from "../types";
+import { ExecParams, HttpNetworkConfig, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
 import { error, log } from "./logger";
@@ -57,8 +57,8 @@ export class MyAlgoWalletSession {
 	accounts: Accounts[] = [];
 	addresses: Address[] = [];
 
-	constructor(chain: string, connector?: MyAlgoConnect) {
-		this.algodClient = algoexplorerAlgod(chain);
+	constructor(walletURL: HttpNetworkConfig, connector?: MyAlgoConnect) {
+		this.algodClient = algoexplorerAlgod(walletURL);
 		try {
 			const MyAlgoConnect = require("@randlabs/myalgo-connect"); // eslint-disable-line @typescript-eslint/no-var-requires
 			if (connector) {
