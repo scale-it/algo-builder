@@ -30,19 +30,19 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	const sscInfo = await deployer.deployApp(
-		"poi-approval.teal", // approval program
-		"poi-clear.teal", // clear program
+		creator,
 		{
-			sender: creator,
+			appName: "PermissionedTokenApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "poi-approval.teal", // approval program
+			clearProgramFileName: "poi-clear.teal", // clear program
 			localInts: 1, // to store level of asset for account
 			localBytes: 0,
 			globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset
 			globalBytes: 1, // to store creator address
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"PermissionedTokenApp"
+		{}
 	);
 
 	console.log(sscInfo);

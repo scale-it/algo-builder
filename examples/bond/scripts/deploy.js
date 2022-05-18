@@ -39,10 +39,12 @@ async function run(runtimeEnv, deployer) {
 	};
 	// Create Application
 	const bondAppInfo = await deployer.deployApp(
-		"bond-dapp-stateful.py",
-		"bond-dapp-clear.py",
+		managerAcc,
 		{
-			sender: managerAcc,
+			appName: "bond",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "bond-dapp-stateful.py",
+			clearProgramFileName: "bond-dapp-clear.py",
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 8,

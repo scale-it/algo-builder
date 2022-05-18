@@ -52,19 +52,19 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const res = await deployer.deployApp(
-		"permissioned-voting-approval.py",
-		"permissioned-voting-clear.py",
+		votingAdminAccount,
 		{
-			sender: votingAdminAccount,
+			appName: "PermissionedVotingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "permissioned-voting-approval.py",
+			clearProgramFileName: "permissioned-voting-clear.py",
 			localInts: 0,
 			localBytes: 1,
 			globalInts: 6,
 			globalBytes: 1,
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"PermissionedVotingApp"
+		{}
 	);
 
 	console.log(res);

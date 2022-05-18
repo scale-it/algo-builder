@@ -1,3 +1,4 @@
+const { types } = require("@algo-builder/web");
 const { fundAccount, accounts, p } = require("./run/common/common.js");
 
 async function run(runtimeEnv, deployer) {
@@ -8,10 +9,12 @@ async function run(runtimeEnv, deployer) {
 
 	// Create App
 	const nftAppInfo = await deployer.deployApp(
-		"nft-app-approval.py",
-		"nft-app-clear.py",
+		creator,
 		{
-			sender: creator,
+			appName: "NftApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "nft-app-approval.py",
+			clearProgramFileName: "nft-app-clear.py",
 			localInts: 1, // p
 			localBytes: 1, // creator
 		},

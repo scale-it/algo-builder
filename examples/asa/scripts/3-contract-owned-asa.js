@@ -21,18 +21,18 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const appInfo = await deployer.deployApp(
-		"5-contract-asa-stateful.py", // approval program
-		"5-clear.py", // clear program
+		alice,
 		{
-			sender: alice,
+			appName: "StatefulASA_App",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "5-contract-asa-stateful.py", // approval program
+			clearProgramFileName: "5-clear.py", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,
 			globalBytes: 1,
 		},
-		{},
-		{},
-		"StatefulASA_App"
+		{}
 	);
 
 	console.log(appInfo);

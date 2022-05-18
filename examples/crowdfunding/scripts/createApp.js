@@ -37,19 +37,19 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const appInfo = await deployer.deployApp(
-		"crowdFundApproval.teal", // approval program
-		"crowdFundClear.teal", // clear program
+		creatorAccount,
 		{
-			sender: creatorAccount,
+			appName: "CrowdfundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFileName: "crowdFundApproval.teal", // approval program
+			clearProgramFileName: "crowdFundClear.teal", // clear program
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
 			globalBytes: 3,
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"CrowdfundingApp"
+		{}
 	);
 
 	console.log(appInfo);

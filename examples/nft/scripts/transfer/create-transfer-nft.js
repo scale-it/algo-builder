@@ -10,7 +10,7 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const john = deployer.accountsByName.get("john");
 
-	const appInfo = await deployer.getAppByFile("nft_approval.py", "nft_clear_state.py");
+	const appInfo = await deployer.getApp("nft");
 	const appID = appInfo.appID;
 	console.log(appInfo);
 
