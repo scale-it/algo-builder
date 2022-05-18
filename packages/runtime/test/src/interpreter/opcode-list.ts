@@ -6845,13 +6845,13 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put on top of the stack logs from innerTx", () => {
-			const op = new ITxn(["Logs", TXN_OBJ.txID], 1, interpreter);
+			const op = new ITxn(["Logs", "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
 		it("Should throw an error, no inner transaction", () => {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxn(["Logs", TXN_OBJ.txID], 1, interpreter);
+			const op = new ITxn(["Logs", "0"], 1, interpreter);
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
