@@ -34,7 +34,7 @@ You can connect to `web` package in your react app by using different wallets. C
 ```
 2.  ### MyAlgo Wallet:
 
-    Create an instance of the `MyAlgoWalletSession` class by passing the wallet URL and connect it using `connectToMyAlgo`.
+    Create an instance of the `MyAlgoWalletSession` class by passing the wallet URL(token, server, port) and connect it using `connectToMyAlgo`.
 
 
     ```js
@@ -50,7 +50,7 @@ You can connect to `web` package in your react app by using different wallets. C
 
 3.  ### Wallet Connect:
 
-    Create an instance of the `WallectConnectSession` class by passing the wallet URL and create a new session using `create` and connect to it using `onConnect`.
+    Create an instance of the `WallectConnectSession` class by passing the wallet URL(token, server, port) and create a new session using `create` and connect to it using `onConnect`.
 
 
     ```js
