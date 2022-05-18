@@ -74,5 +74,6 @@ def issuer_lsig():
 
     return program
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(issuer_lsig(), Mode.Signature, version = 4))
+    print(compileTeal(issuer_lsig(), Mode.Signature, version = 5, optimize=optimize_options))

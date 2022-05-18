@@ -60,5 +60,6 @@ def dex_lsig():
 
     return program
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(dex_lsig(), Mode.Signature, version = 4))
+    print(compileTeal(dex_lsig(), Mode.Signature, version = 5, optimize=optimize_options))

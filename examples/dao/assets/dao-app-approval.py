@@ -551,4 +551,5 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 5))
+    optimize_options = OptimizeOptions(scratch_slots=True)
+    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 5, optimize=optimize_options))
