@@ -496,37 +496,34 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 	const groupTx = op.interpreter.innerTxnGroups[op.interpreter.innerTxnGroups.length - 1];
 	const tx = groupTx[groupTx.length - 1];
 	let result: StackElem;
-	if (op.idx === undefined) {
-		//itxn only supported arguments
-		switch (op.field) {
-			case "NumLogs": {
-				const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-				const logs: Uint8Array[] = txReceipt?.logs ?? [];
-				result = BigInt(logs.length);
-				break;
-			}
-			case "CreatedAssetID": {
-				result = BigInt(op.interpreter.runtime.ctx.createdAssetID);
-				break;
-			}
-			case "CreatedApplicationID": {
-				result = 0n; // can we create an app in inner-tx?
-				break;
-			}
-			default: {
-				result = txnSpecByField(op.field, tx, [tx], op.interpreter.tealVersion);
-				break;
-			}
-		}
-	} else {
-		if (op.field === "Logs") {
-			// handle Logs
+	switch (op.field) {
+		case "Logs": {
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			op.checkIndexBound(op.idx, logs, op.line);
 			result = logs[op.idx];
-		} else {
-			result = txAppArg(op.field, tx, op.idx, op, op.interpreter, op.line);
+			break;
+		}
+		case "NumLogs": {
+			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+			const logs: Uint8Array[] = txReceipt?.logs ?? [];
+			result = BigInt(logs.length);
+			break;
+		}
+		case "CreatedAssetID": {
+			result = BigInt(op.interpreter.runtime.ctx.createdAssetID);
+			break;
+		}
+		case "CreatedApplicationID": {
+			result = 0n; // can we create an app in inner-tx?
+			break;
+		}
+		default: {
+			result = txnSpecByField(op.field, tx, [tx], op.interpreter.tealVersion);
+			if (result === undefined || Object(result).length === 0) {
+				result = txAppArg(op.field, tx, op.idx, op, op.interpreter, op.line);
+				break;
+			}
 		}
 	}
 	return result;

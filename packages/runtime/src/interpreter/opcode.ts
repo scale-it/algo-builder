@@ -360,7 +360,7 @@ export abstract class Op {
 	 * asserts if inner transaction exists
 	 * @param interpreter interpreter
 	 */
-	assertIsInnerTransaction(interpreter: Interpreter) {
+	assertInnerTransactionExists(interpreter: Interpreter) {
 		if (interpreter.innerTxnGroups.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
 				tealVersion: interpreter.tealVersion,

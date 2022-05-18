@@ -4317,7 +4317,7 @@ export class ITxnSubmit extends Op {
 // push to stack [...stack, transaction field]
 export class ITxn extends Op {
 	readonly field: string;
-	readonly idx: number | undefined;
+	readonly idx: number;
 	readonly interpreter: Interpreter;
 	readonly line: number;
 
@@ -4332,8 +4332,7 @@ export class ITxn extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
-		this.idx = undefined;
-
+		this.idx = -1;
 		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
 		if (
 			TxArrFields[interpreter.tealVersion].has(args[0]) ||
@@ -4351,7 +4350,7 @@ export class ITxn extends Op {
 	}
 
 	execute(stack: TEALStack): number {
-		this.assertIsInnerTransaction(this.interpreter);
+		this.assertInnerTransactionExists(this.interpreter);
 		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
@@ -4384,7 +4383,7 @@ export class ITxna extends Op {
 	}
 
 	execute(stack: TEALStack): number {
-		this.assertIsInnerTransaction(this.interpreter);
+		this.assertInnerTransactionExists(this.interpreter);
 		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
