@@ -1,6 +1,6 @@
 -- #Note: Indexer should be running before executing the queries present in this file
 -- Indexer schema:
---  https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline
+--  https://github.com/algorand/indexer/blob/develop/idb/postgres/internal/schema/setup_postgres.sql
 
 -- create a sigma_daos table if does not exit already.
 CREATE TABLE IF NOT EXISTS sigma_daos (
