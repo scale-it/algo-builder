@@ -460,7 +460,7 @@ export class Runtime {
 	/**
 	 * Create Asset in Runtime using asa.yaml
 	 * @deprecated `deployASA` should be used instead
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	addAsset(asa: string, flags: ASADeploymentFlags): ASAInfo {
@@ -469,7 +469,7 @@ export class Runtime {
 
 	/**
 	 * Deploy Asset in Runtime using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASA(asa: string, flags: ASADeploymentFlags): ASAInfo {
@@ -492,7 +492,7 @@ export class Runtime {
 
 	/**
 	 * Deploy Asset in Runtime without using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
@@ -505,8 +505,8 @@ export class Runtime {
 
 	/**
 	 * Opt-In to all accounts given in asa.yaml to a specific asset.
-	 * @param name Asset name
 	 * @param assetID Asset Index
+	 * @param accounts list account opt to asa
 	 */
 	optInToASAMultiple(assetID: number, accounts?: string[]): void {
 		if (accounts === undefined) {
@@ -702,10 +702,10 @@ export class Runtime {
 
 	/**
 	 * Update application
+	 * @param appName application Name. Note in runtime application name just placeholder params
 	 * @param senderAddr sender address
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param newAppCode new application source code
 	 * @param payFlags Transaction parameters
 	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
 	 * @param debugStack: if passed then TEAL Stack is logged to console after

@@ -189,7 +189,7 @@ class DeployerBasicMode {
 
 	/**
 	 * Loads logic signature from cache for contract mode. This helps user to avoid
-	 * passing template parameters always during loading logic signature.
+	 * passing templaste parameters always during loading logic signature.
 	 * @param name ASC name
 	 * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
 	 * @deprecated this function will be removed in the next release. Use mkContractLsig to
@@ -219,6 +219,13 @@ class DeployerBasicMode {
 		return this.algoOp.ensureCompiled(name, "", force, scTmplParams);
 	}
 
+	/**
+	 * Return application in bytes source format
+	 * @param appName app name
+	 * @param source
+	 * @param scTmplParams
+	 * @returns application in bytes format
+	 */
 	compileApplication(
 		appName: string,
 		source: wtypes.SmartContract,
@@ -823,8 +830,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID ID of the application being configured or empty if creating
-	 * @param newApprovalProgram New Approval Program filename
-	 * @param newClearProgram New Clear Program filename
+	 * @param newAppcode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)

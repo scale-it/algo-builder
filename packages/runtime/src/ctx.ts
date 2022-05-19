@@ -388,8 +388,8 @@ export class Ctx implements Context {
 			metaType: types.MetaType.SOURCE_CODE,
 			approvalProgramCode: approvalProgTEAL,
 			clearProgramCode: clearProgTEAL,
-			appName: "Mock",
 		});
+
 		this.assertAccBalAboveMin(senderAcc.address);
 		this.state.accounts.set(senderAcc.address, senderAcc);
 		this.state.globalApps.set(app.id, senderAcc.address);

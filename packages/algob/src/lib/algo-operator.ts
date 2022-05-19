@@ -589,6 +589,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		return await this.compileOp.ensureCompiled(name, source, force, scTmplParams);
 	}
 
+	/**
+	 * Return application in bytes source format
+	 * @param appName app name
+	 * @param source
+	 * @param scTmplParams
+	 * @returns application in bytes format
+	 */
 	async compileApplication(
 		appName: string,
 		source: wtypes.SmartContract,
@@ -613,9 +620,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		}
 
 		const app = await this.ensureCompiled(approvalFile, approvalSource, false, scTmplParams);
-
 		const clear = await this.ensureCompiled(clearFile, clearSource, false, scTmplParams);
 
+		// convert to base64 format
 		const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
 		const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
