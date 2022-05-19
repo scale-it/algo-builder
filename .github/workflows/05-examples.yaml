@@ -11,7 +11,7 @@ on:
       - develop
 
 jobs:
-  run-examples:
+  run-examples-patch-1:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -111,8 +111,38 @@ jobs:
           pipenv run yarn algob run scripts/admin/kill.js
           pipenv run yarn algob run scripts/user/opt-out.js
 
-      - name: Recreate Network
-        run: cd infrastructure && make recreate-private-net
+  run-examples-patch-2:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: "16"
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build packages
+        run: yarn build
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+          cache: "pipenv"
+      - name: Install pipenv
+        run: python -m pip install pipenv
+      - run: pipenv sync
+
+      - name: Install Algorand
+        run: |
+          sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+          curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+          sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+          sudo apt-get update && sudo apt-get install -y algorand
+      - name: Setup Network
+        run: cd infrastructure && make setup-private-net
 
       - name: Example permissioned-token-freezing
         working-directory: ./examples/permissioned-token-freezing
@@ -146,6 +176,48 @@ jobs:
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/run/add_proposal.js
           pipenv run yarn algob run scripts/run/deposit_vote_token.js
+
+      - name: Recreate Network
+        run: cd infrastructure && make recreate-private-net
+
+      - name: Example unique-nft-asa
+        working-directory: ./examples/unique-nft-asa
+        run: |
+          pipenv run yarn algob deploy
+          pipenv run yarn algob run scripts/run/transfer-nft.js
+
+  run-examples-patch-3:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: "16"
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install
+      - name: Build packages
+        run: yarn build
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+          cache: "pipenv"
+      - name: Install pipenv
+        run: python -m pip install pipenv
+      - run: pipenv sync
+
+      - name: Install Algorand
+        run: |
+          sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+          curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+          sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+          sudo apt-get update && sudo apt-get install -y algorand
+      - name: Setup Network
+        run: cd infrastructure && make setup-private-net
 
       - name: Recreate Network
         run: cd infrastructure && make recreate-private-net
