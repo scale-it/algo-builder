@@ -70,7 +70,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		runtime = new Runtime([master, creator, donor, fundReceiver]);
 
 		applicationId = 1;
-		// addApp only work with AppDefinition from Source
+		// addApp only works with AppDefinition from Source
 		creator.addApp(applicationId, {
 			...appDef,
 			metaType: types.MetaType.SOURCE_CODE,
