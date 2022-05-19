@@ -55,8 +55,8 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 			convert.addressToPk(creator.address),
 			convert.uint64ToBigEndian(fundCloseDate.getTime()),
 		];
-		const appDef = {
-			appName: "crowdFundingApp",
+		const appDefinition = {
+			appName: "crowdfundingApp",
 			metaType: types.MetaType.FILE,
 			approvalProgramFilename,
 			clearProgramFilename,
@@ -69,7 +69,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		// deploy application
 		applicationId = runtime.deployApp(
 			creator.account,
-			{ ...appDef, appArgs: creationArgs },
+			{ ...appDefinition, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -110,7 +110,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		runtime.updateApp(
-			"crowdFundingApp",
+			"crowdfundingApp",
 			creator.address,
 			applicationId,
 			{

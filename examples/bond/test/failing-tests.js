@@ -88,7 +88,7 @@ describe("Bond token failing tests", function () {
 			creator: { ...bondTokenCreator.account, name: "bond-token-creator" },
 		}).assetIndex;
 
-		const appDef = Object.assign({}, appStorageConfig);
+		const appDefinition = Object.assign({}, appStorageConfig);
 		const creationArgs = [
 			appManagerPk,
 			bondCreator,
@@ -102,7 +102,7 @@ describe("Bond token failing tests", function () {
 		applicationId = runtime.deployApp(
 			appManager.account,
 			{
-				...appDef,
+				...appDefinition,
 				appName: "bond",
 				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,

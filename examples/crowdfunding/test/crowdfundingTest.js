@@ -18,19 +18,19 @@ describe("Crowdfunding Tests", function () {
 	let runtime;
 	let appDefinition;
 	let applicationId;
-	const crowdFundApprovalFileName = "crowdFundApproval.teal";
+	const crowdfundApprovalFileName = "crowdFundApproval.teal";
 	const crowdFundClearFileName = "crowdFundClear.teal";
 
-	const crowdFundApprovalProgram = getProgram(crowdFundApprovalFileName);
+	const crowdFundApprovalProgram = getProgram(crowdfundApprovalFileName);
 	const crowdFundClearProgram = getProgram(crowdFundClearFileName);
 
 	this.beforeAll(async function () {
 		runtime = new Runtime([master, creator, escrow, donor]);
 
 		appDefinition = {
-			appName: "crowdFundingApp",
+			appName: "crowdfundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFilename: crowdFundApprovalFileName,
+			approvalProgramFilename: crowdfundApprovalFileName,
 			clearProgramFilename: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
@@ -45,9 +45,9 @@ describe("Crowdfunding Tests", function () {
 		runtime = new Runtime([master, creator, escrow, donor]);
 
 		appDefinition = {
-			appName: "crowdFundingApp",
+			appName: "crowdfundingApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFilename: crowdFundApprovalFileName,
+			approvalProgramFilename: crowdfundApprovalFileName,
 			clearProgramFilename: crowdFundClearFileName,
 			localInts: 1,
 			localBytes: 0,
@@ -97,12 +97,11 @@ describe("Crowdfunding Tests", function () {
 		 * Note: - In this example timestamps are commented because it is possible
 		 * that network timestamp and system timestamp may not be in sync.
 		 */
-		const appDef = Object.assign({}, appDefinition);
 
 		// create application
 		applicationId = runtime.deployApp(
 			creator.account,
-			{ ...appDef, appArgs: creationArgs },
+			{ ...appDefinition, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -133,7 +132,7 @@ describe("Crowdfunding Tests", function () {
 		let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		runtime.updateApp(
-			appDef.appName,
+			appDefinition.appName,
 			creator.address,
 			applicationId,
 			{
@@ -311,12 +310,9 @@ describe("Crowdfunding Tests", function () {
 	});
 
 	it("should be rejected by logic when claiming funds if goal is not met", () => {
-		// create application
-		const appDef = Object.assign({}, appDefinition);
-
 		const applicationId = runtime.deployApp(
 			creator.account,
-			{ ...appDef, appArgs: creationArgs },
+			{ ...appDefinition, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -332,12 +328,12 @@ describe("Crowdfunding Tests", function () {
 		// update application with correct escrow account address
 		let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 		runtime.updateApp(
-			appDef.appName,
+			appDefinition.appName,
 			creator.address,
 			applicationId,
 			{
 				metaType: types.MetaType.FILE,
-				approvalProgramFilename: crowdFundApprovalFileName,
+				approvalProgramFilename: crowdfundApprovalFileName,
 				clearProgramFilename: crowdFundClearFileName,
 			},
 			{},

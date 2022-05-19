@@ -447,8 +447,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID index of the application being configured
-	 * @param newApprovalProgram New Approval Program filename
-	 * @param newClearProgram New Clear Program filename
+	 * @param newAppCode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param txWriter - transaction log writer
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters

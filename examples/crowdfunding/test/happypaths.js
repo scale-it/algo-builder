@@ -37,7 +37,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		runtime = new Runtime([master, creator, donor]);
 
 		appDef = {
-			appName: "crowdFundingApp",
+			appName: "crowdfundingApp",
 			metaType: types.MetaType.FILE,
 			approvalProgramFilename,
 			clearProgramFilename,
