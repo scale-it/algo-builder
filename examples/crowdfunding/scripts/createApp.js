@@ -69,11 +69,15 @@ async function run(runtimeEnv, deployer) {
 	appArgs = [convert.addressToPk(escrowAccount.address())];
 
 	const updatedRes = await deployer.updateApp(
+		"CrowdfundingApp",
 		creatorAccount,
 		{}, // pay flags
 		applicationID,
-		"crowdFundApproval.teal",
-		"crowdFundClear.teal",
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "crowdFundApproval.teal",
+			clearProgramFilename: "crowdFundClear.teal",
+		},
 		{ appArgs: appArgs }
 	);
 	console.log("Application Updated: ", updatedRes);

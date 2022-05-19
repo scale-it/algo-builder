@@ -393,7 +393,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	): Promise<rtypes.AppInfo> {
 		const params = await mkTxParams(this.algodClient, payFlags);
 
-		const appProgramBytes = await this.compileApplication(appDefinition.appName, appDefinition);
+		const appProgramBytes = await this.compileApplication(
+			appDefinition.appName,
+			appDefinition,
+			scTmplParams
+		);
 
 		const execParam: wtypes.DeployAppParam = {
 			type: wtypes.TransactionType.DeployApp,
