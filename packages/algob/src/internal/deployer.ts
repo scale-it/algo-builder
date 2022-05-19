@@ -219,6 +219,14 @@ class DeployerBasicMode {
 		return this.algoOp.ensureCompiled(name, "", force, scTmplParams);
 	}
 
+	compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceBytes> {
+		return this.algoOp.compileApplication(appName, source, scTmplParams);
+	}
+
 	/**
 	 * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
 	 * @param name App/Lsig name used during deployment
@@ -824,34 +832,33 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		this.assertCPNotDeleted({
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
+			appName,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
-		const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
+		const cpKey = appName;
 
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.updateApp(
+				appName,
 				sender,
 				payFlags,
 				appID,
-				newApprovalProgram,
-				newClearProgram,
+				newAppCode,
 				flags,
 				this.txWriter,
 				scTmplParams
@@ -1020,18 +1027,16 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Sender account
 	 * @param payFlags transaction parameters
 	 * @param appID application index
-	 * @param newApprovalProgram new approval program name
-	 * @param newClearProgram new clear program name
 	 * @param flags SSC optional flags
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
@@ -1039,17 +1044,17 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			appName,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
 		return await this.algoOp.updateApp(
+			appName,
 			sender,
 			payFlags,
 			appID,
-			newApprovalProgram,
-			newClearProgram,
+			newAppCode,
 			flags,
 			this.txWriter,
 			scTmplParams

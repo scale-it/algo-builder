@@ -268,21 +268,25 @@ export function mkTransaction(
 			}
 		}
 		case TransactionType.UpdateApp: {
-			const tx = algosdk.makeApplicationUpdateTxn(
-				fromAccountAddr,
-				suggestedParams,
-				execParams.appID,
-				execParams.approvalProg ? execParams.approvalProg : new Uint8Array(8).fill(0),
-				execParams.clearProg ? execParams.clearProg : new Uint8Array(8).fill(0),
-				parseAppArgs(execParams.appArgs),
-				execParams.accounts,
-				execParams.foreignApps,
-				execParams.foreignAssets,
-				note,
-				execParams.lease,
-				execParams.payFlags.rekeyTo
-			);
-			return updateTxFee(execParams.payFlags, tx);
+			if (execParams.newAppCode.metaType === MetaType.BYTES) {
+				const tx = algosdk.makeApplicationUpdateTxn(
+					fromAccountAddr,
+					suggestedParams,
+					execParams.appID,
+					execParams.newAppCode.approvalProgramBytes,
+					execParams.newAppCode.clearProgramBytes,
+					parseAppArgs(execParams.appArgs),
+					execParams.accounts,
+					execParams.foreignApps,
+					execParams.foreignAssets,
+					note,
+					execParams.lease,
+					execParams.payFlags.rekeyTo
+				);
+				return updateTxFee(execParams.payFlags, tx);
+			} else {
+				throw new Error("Not support");
+			}
 		}
 		case TransactionType.OptInToApp: {
 			const tx = algosdk.makeApplicationOptInTxn(

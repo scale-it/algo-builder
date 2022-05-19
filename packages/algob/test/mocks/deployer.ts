@@ -140,6 +140,14 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
+	async compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceBytes> {
+		throw new Error("Not implemented");
+	}
+
 	async getDeployedASC(name: string): Promise<ASCCache | undefined> {
 		throw new Error("Not implemented");
 	}
@@ -201,14 +209,13 @@ export class FakeDeployer implements Deployer {
 	}
 
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		throw new Error("Not implemented");
 	}

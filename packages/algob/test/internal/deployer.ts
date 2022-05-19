@@ -224,11 +224,15 @@ describe("DeployerDeployMode", () => {
 		});
 
 		const updatedInfo = await deployer.updateApp(
+			"app-clear",
 			deployer.accounts[0],
 			{},
 			33,
-			"app",
-			"clear",
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "app",
+				clearProgramFilename: "clear",
+			},
 			{}
 		);
 		assert.deepEqual(updatedInfo, {
@@ -320,14 +324,17 @@ describe("DeployerDeployMode", () => {
 		});
 
 		const updatedInfo = await deployer.updateApp(
+			"my-app",
 			deployer.accounts[0],
 			{},
 			33,
-			"app",
-			"clear",
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "app",
+				clearProgramFilename: "clear",
+			},
 			{},
-			{},
-			"my-app"
+			{}
 		);
 		assert.deepEqual(updatedInfo, {
 			creator: "addr-1-get-address-dry-run",

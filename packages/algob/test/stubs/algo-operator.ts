@@ -93,11 +93,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 	}
 
 	async updateApp(
+		appName: string,
 		sender: Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		txWriter: txWriter
 	): Promise<rtypes.AppInfo> {
@@ -135,6 +135,18 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 				alice: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 				hash_image: "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=",
 			},
+		};
+	}
+
+	async compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceBytes> {
+		return {
+			metaType: wtypes.MetaType.BYTES,
+			approvalProgramBytes: new Uint8Array(32).fill(0),
+			clearProgramBytes: new Uint8Array(32).fill(0),
 		};
 	}
 

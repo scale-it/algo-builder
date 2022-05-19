@@ -183,26 +183,31 @@ export type StorageConfig = {
 	appName: string; // name of app to store info against in checkpoint, now it's required
 };
 
-export type AppDefinitionFromFile = StorageConfig &
-	AppOptionalFlags & {
-		metaType: MetaType.FILE;
-		approvalProgramFilename: string;
-		clearProgramFilename: string;
-	};
+export type SourceFile = {
+	metaType: MetaType.FILE;
+	approvalProgramFilename: string;
+	clearProgramFilename: string;
+};
 
-export type AppDefinitionFromSource = StorageConfig &
-	AppOptionalFlags & {
-		metaType: MetaType.SOURCE_CODE;
-		approvalProgramCode: string;
-		clearProgramCode: string;
-	};
+export type SourceCode = {
+	metaType: MetaType.SOURCE_CODE;
+	approvalProgramCode: string;
+	clearProgramCode: string;
+};
 
-export type AppDefinitionFromSourceCompiled = StorageConfig &
-	AppOptionalFlags & {
-		metaType: MetaType.BYTES;
-		approvalProgramBytes: Uint8Array;
-		clearProgramBytes: Uint8Array;
-	};
+export type SourceBytes = {
+	metaType: MetaType.BYTES;
+	approvalProgramBytes: Uint8Array;
+	clearProgramBytes: Uint8Array;
+};
+
+export type SmartContract = SourceFile | SourceCode | SourceBytes;
+
+export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
+
+export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
+
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceBytes;
 
 export type AppDefinition =
 	| AppDefinitionFromFile
@@ -218,11 +223,8 @@ export type UpdateAppParam = BasicParams &
 	AppOptionalFlags & {
 		type: TransactionType.UpdateApp;
 		appID: number;
-		newApprovalProgram: string;
-		newClearProgram: string;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
+		newAppCode: SmartContract;
+		appName: string; // name of app to store info against in checkpoint
 	};
 
 export type AppCallsParam = BasicParams &

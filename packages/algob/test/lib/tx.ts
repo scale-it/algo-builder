@@ -379,13 +379,35 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 	it("should throw error with update app function, if app exist and deleted", async () => {
 		await expectBuilderErrorAsync(
 			async () =>
-				await deployer.updateApp(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
+				await deployer.updateApp(
+					"app",
+					bobAcc,
+					{},
+					appID,
+					{
+						metaType: wtypes.MetaType.FILE,
+						approvalProgramFilename: "approval.teal",
+						clearProgramFilename: "clear.teal",
+					},
+					{}
+				),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
 
 	it("should pass with update app functions, if app doesn't exist in checkpoint", async () => {
-		await deployer.updateApp(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
+		await deployer.updateApp(
+			"app",
+			bobAcc,
+			{},
+			123,
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
+			{}
+		);
 	});
 
 	it("should fail if user tries to opt-in through execute tx", async () => {
@@ -513,9 +535,13 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			payFlags: {},
+			appName: "my-app",
 			appID: appID,
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
 		};
 		await expectBuilderErrorAsync(
 			async () => await deployer.executeTx([execParam]),
@@ -770,12 +796,16 @@ describe("Update transaction test in run mode", () => {
 		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 
 		execParams = {
+			appName: "app",
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appID: appInfo["application-index"],
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
 			payFlags: {},
 		};
 
@@ -809,12 +839,16 @@ describe("Update transaction test in run mode", () => {
 		deployer = new DeployerRunMode(deployerCfg);
 		if (appInfo) {
 			execParams = {
+				appName: "app",
 				type: wtypes.TransactionType.UpdateApp,
 				sign: wtypes.SignType.SecretKey,
 				fromAccount: bobAcc,
 				appID: appInfo.appID,
-				newApprovalProgram: "approval.teal",
-				newClearProgram: "clear.teal",
+				newAppCode: {
+					metaType: wtypes.MetaType.FILE,
+					approvalProgramFilename: "approval.teal",
+					clearProgramFilename: "clear.teal",
+				},
 				payFlags: {},
 			};
 
@@ -849,8 +883,11 @@ describe("Update transaction test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appID: appInfo["application-index"],
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
 			appName: "app",
 			payFlags: {},
 		};

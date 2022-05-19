@@ -159,41 +159,23 @@ async function mkTx(
 		}
 		case wtypes.TransactionType.DeployApp: {
 			const appDefinition = txn.appDefinition;
-			if (appDefinition.metaType === wtypes.MetaType.FILE) {
-				const name =
-					appDefinition.appName ??
-					String(appDefinition.approvalProgramFilename) +
-						"-" +
-						String(appDefinition.clearProgramFilename);
-				deployer.assertNoApp(name);
-				const approval = await deployer.compileASC(appDefinition.approvalProgramFilename);
-				const clear = await deployer.compileASC(appDefinition.clearProgramFilename);
-				const approvalProgramBytes = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-				const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+			const name = appDefinition.appName;
+			deployer.assertNoApp(name);
+			const appProgramBytes = await deployer.compileApplication(name, appDefinition);
+			txn.appDefinition = {
+				...appDefinition,
+				...appProgramBytes,
+			};
 
-				txn.appDefinition = {
-					...appDefinition,
-					metaType: wtypes.MetaType.BYTES,
-					approvalProgramBytes,
-					clearProgramBytes,
-					appName: name,
-				};
-				txIdxMap.set(index, [
-					name,
-					{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
-				]);
-			} else {
-				throw new Error("Not support");
-			}
+			txIdxMap.set(index, [
+				name,
+				{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
+			]);
 			break;
 		}
 		case wtypes.TransactionType.UpdateApp: {
-			const cpKey =
-				txn.appName ?? String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
-			const approval = await deployer.compileASC(txn.newApprovalProgram);
-			const clear = await deployer.compileASC(txn.newClearProgram);
-			txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-			txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+			const cpKey = txn.appName;
+			txn.newAppCode = await deployer.compileApplication(txn.appName, txn.newAppCode);
 			txIdxMap.set(index, [
 				cpKey,
 				{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
