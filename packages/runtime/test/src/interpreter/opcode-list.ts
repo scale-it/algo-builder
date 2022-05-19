@@ -6849,6 +6849,7 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
+
 		it("Should throw an error, no inner transaction", () => {
 			interpreter.innerTxnGroups = [];
 			const op = new ITxn(["Logs", "0"], 1, interpreter);
@@ -6866,6 +6867,7 @@ describe("Teal Opcodes", function () {
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
 			);
 		});
+
 		it("Should put the number of logs on top of the stack", () => {
 			const op = new ITxn(["NumLogs"], 1, interpreter);
 			op.execute(stack);
