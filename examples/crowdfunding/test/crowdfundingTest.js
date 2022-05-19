@@ -133,10 +133,14 @@ describe("Crowdfunding Tests", function () {
 		let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		runtime.updateApp(
+			appDef.appName,
 			creator.address,
 			applicationId,
-			crowdFundApprovalProgram,
-			crowdFundClearProgram,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: crowdFundApprovalProgram,
+				clearProgramCode: crowdFundClearProgram,
+			},
 			{},
 			{ appArgs: appArgs }
 		);
@@ -328,10 +332,14 @@ describe("Crowdfunding Tests", function () {
 		// update application with correct escrow account address
 		let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 		runtime.updateApp(
+			appDef.appName,
 			creator.address,
 			applicationId,
-			crowdFundApprovalFileName,
-			crowdFundClearFileName,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: crowdFundApprovalFileName,
+				clearProgramFilename: crowdFundClearFileName,
+			},
 			{},
 			{ appArgs: appArgs }
 		);

@@ -139,10 +139,14 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 
 		const escrowPk = convert.addressToPk(escrow.address);
 		runtime.updateApp(
+			appDef.appName,
 			creator.address,
 			applicationId,
-			approvalProgram,
-			clearProgram,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+			},
 			{},
 			{
 				appArgs: [escrowPk],

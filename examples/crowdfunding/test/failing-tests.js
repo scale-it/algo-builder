@@ -110,10 +110,14 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		runtime.updateApp(
+			"crowdFundingApp",
 			creator.address,
 			applicationId,
-			approvalProgram,
-			clearProgram,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+			},
 			{},
 			{ appArgs: appArgs }
 		);
@@ -382,10 +386,14 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(
 			() =>
 				runtime.updateApp(
+					"appName",
 					donor.address,
 					applicationId,
-					approvalProgram,
-					clearProgram,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: approvalProgram,
+						clearProgramCode: clearProgram,
+					},
 					{},
 					{ appArgs: appArgs }
 				),
