@@ -219,9 +219,6 @@ jobs:
       - name: Setup Network
         run: cd infrastructure && make setup-private-net
 
-      - name: Recreate Network
-        run: cd infrastructure && make recreate-private-net
-
       - name: Example unique-nft-asa
         working-directory: ./examples/unique-nft-asa
         run: |
