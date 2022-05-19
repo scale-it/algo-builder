@@ -45,7 +45,19 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 	it("should fail during update application if app id is not defined", function () {
 		expectRuntimeError(
-			() => runtime.updateApp(creator.address, 1111, oldApprovalProgram, clearProgram, {}, {}),
+			() =>
+				runtime.updateApp(
+					"app",
+					creator.address,
+					1111,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename: oldApprovalProgramFileName,
+						clearProgramFilename: clearProgramFilename,
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
 		);
 	});
@@ -69,7 +81,18 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.deepEqual(app[approvalStr], oldApprovalProgram);
 		assert.deepEqual(app["clear-state-program"], clearProgram);
 
-		runtime.updateApp(creator.address, appID, newApprovalProgram, clearProgram, {}, {});
+		runtime.updateApp(
+			storageConfig.appName,
+			creator.address,
+			appID,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: newApprovalProgram,
+				clearProgramCode: clearProgram,
+			},
+			{},
+			{}
+		);
 		app = runtime.getApp(appID);
 
 		// check if program & state is updated after tx execution
@@ -126,7 +149,19 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		// update should be rejected because sender is not creator
 		expectRuntimeError(
-			() => runtime.updateApp(alice.address, appID, newApprovalProgram, clearProgram, {}, {}),
+			() =>
+				runtime.updateApp(
+					storageConfig.appName,
+					alice.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: newApprovalProgram,
+						clearProgramCode: clearProgram,
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 

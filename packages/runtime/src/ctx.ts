@@ -695,20 +695,23 @@ export class Ctx implements Context {
 	 */
 	updateApp(
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		appSourceCode: types.SmartContract,
 		idx: number,
 		scTmplParams?: SCParams
 	): TxReceipt {
+		if (appSourceCode.metaType === types.MetaType.BYTES) {
+			throw new Error("not support this format");
+		}
+
 		const approvalProgTEAL =
-			approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt)
-				? getProgram(approvalProgram, scTmplParams)
-				: approvalProgram;
+			appSourceCode.metaType === types.MetaType.FILE
+				? getProgram(appSourceCode.approvalProgramFilename, scTmplParams)
+				: appSourceCode.approvalProgramCode;
 
 		const clearProgTEAL =
-			clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt)
-				? getProgram(clearProgram, scTmplParams)
-				: clearProgram;
+			appSourceCode.metaType === types.MetaType.FILE
+				? getProgram(appSourceCode.clearProgramFilename, scTmplParams)
+				: appSourceCode.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
@@ -818,12 +821,7 @@ export class Ctx implements Context {
 				case types.TransactionType.UpdateApp: {
 					this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-					r = this.updateApp(
-						txParam.appID,
-						txParam.newApprovalProgram,
-						txParam.newClearProgram,
-						idx
-					);
+					r = this.updateApp(txParam.appID, txParam.newAppCode, idx);
 					break;
 				}
 				case types.TransactionType.ClearApp: {

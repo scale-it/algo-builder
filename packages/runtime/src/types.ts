@@ -193,8 +193,7 @@ export interface Context {
 	optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt;
 	updateApp: (
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		appSourceCode: types.SmartContract,
 		idx: number,
 		scTmplParams?: SCParams
 	) => TxReceipt;

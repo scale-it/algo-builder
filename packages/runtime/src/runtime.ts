@@ -712,10 +712,10 @@ export class Runtime {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	updateApp(
+		appName: string,
 		senderAddr: string,
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		newAppCode: types.SmartContract,
 		payFlags: types.TxParams,
 		flags: AppOptionalFlags,
 		scTmplParams?: SCParams,
@@ -724,7 +724,7 @@ export class Runtime {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
-		const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
+		const txReceipt = this.ctx.updateApp(appID, newAppCode, 0, scTmplParams);
 
 		// If successful, Update programs and state
 		this.store = this.ctx.state;
@@ -887,8 +887,14 @@ export class Runtime {
 			tx = sdkTxns[0];
 			gtxs = sdkTxns;
 		} else {
+			const dummySource: types.SourceBytes = {
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+			};
+
 			const txns = txnParams.map((txnParamerter) => {
-				const txn = cloneDeep(txnParamerter) as types.ExecParams;
+				const txn = cloneDeep(txnParamerter as types.ExecParams);
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
 						if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
@@ -897,11 +903,12 @@ export class Runtime {
 					case types.TransactionType.DeployApp: {
 						txn.appDefinition = {
 							...txn.appDefinition,
-							metaType: types.MetaType.BYTES,
-							approvalProgramBytes: new Uint8Array(32),
-							clearProgramBytes: new Uint8Array(32),
-							appName: "Mock",
+							...dummySource,
 						};
+						break;
+					}
+					case types.TransactionType.UpdateApp: {
+						txn.newAppCode = dummySource;
 						break;
 					}
 				}

@@ -3,6 +3,7 @@ import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
+import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
@@ -1023,12 +1024,36 @@ describe("Stateful Smart Contracts", function () {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, "", clearProgramFilename, {}, {}),
+			() =>
+				runtime.updateApp(
+					appDefinition.appName,
+					john.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: "",
+						clearProgramCode: getProgram(clearProgramFilename),
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
 		);
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, approvalProgramFilename, "", {}, {}),
+			() =>
+				runtime.updateApp(
+					appDefinition.appName,
+					john.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: getProgram(approvalProgramFilename),
+						clearProgramCode: "",
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
 		);
 	});
@@ -1040,10 +1065,14 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() =>
 				runtime.updateApp(
+					appDefinition.appName,
 					john.address,
 					appID,
-					approvalProgramFilename,
-					clearProgramFilename,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename,
+						clearProgramFilename,
+					},
 					{},
 					{}
 				),
