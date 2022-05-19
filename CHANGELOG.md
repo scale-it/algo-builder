@@ -71,6 +71,145 @@ console.log("txn1 information: ", receipts[2]);
 
 ### API breaking
 
+- We add `SmartContract` types for describe the application source code. Details: 
+```ts
+  // from file
+  type SourceFile = {
+    metaType: MetaType.FILE;
+    approvalProgramFilename: string;
+    clearProgramFilename: string;
+  };
+
+  // from raw teal source code.
+  type SourceCode = {
+    metaType: MetaType.SOURCE_CODE;
+    approvalProgramCode: string;
+    clearProgramCode: string;
+  };
+
+  // from compiled source code. 
+  type SourceBytes = {
+    metaType: MetaType.BYTES;
+    approvalProgramBytes: Uint8Array;
+    clearProgramBytes: Uint8Array;
+  };
+```
+
+- We change ``: Details(please check packages/web/src/types.ts):
+
+```ts
+
+export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
+
+export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
+
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceBytes;
+
+export type AppDefinition =
+	| AppDefinitionFromFile
+	| AppDefinitionFromSource
+	| AppDefinitionFromSourceCompiled;
+
+export type DeployAppParam = BasicParams & {
+	type: TransactionType.DeployApp;
+	appDefinition: AppDefinition;
+};
+```
+
+- We have updated parameters of `deployApp` method: 
+```ts
+/// old
+  /**
+	 * deploy a new application and returns application id
+	 * @param approvalProgram application approval program (TEAL code or program filename)
+	 * @param clearProgram application clear program (TEAL code or program filename)
+	 * @param flags SSCDeployment flags
+	 * @param payFlags Transaction parameters
+	 * @param scTmplParams Smart Contract template parameters
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	deployApp(
+		approvalProgram: string,
+		clearProgram: string,
+		flags: AppDeploymentFlags,
+		payFlags: types.TxParams,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	): {...}
+
+/// new 
+	/**
+	 * deploy a new application and returns application id
+	 * @param payFlags Transaction parameters
+	 * @param appDefinition app definition
+	 * @param scTmplParams Smart Contract template parameters
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	deployApp(
+		sender: AccountSDK,
+		appDefinition: types.AppDefinition,
+		payFlags: types.TxParams,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	):
+```
+
+- We have changed the parameters of `updateApp` method. Details: 
+
+```ts
+  // old
+	/**
+	 * Update application
+	 * @param senderAddr sender address
+	 * @param appID application Id
+	 * @param approvalProgram new approval program (TEAL code or program filename)
+	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param payFlags Transaction parameters
+	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	updateApp(
+		senderAddr: string,
+		appID: number,
+		approvalProgram: string,
+		clearProgram: string,
+		payFlags: types.TxParams,
+		flags: AppOptionalFlags,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	)
+
+  // new 
+  /**
+	 * Update application
+	 * @param appName application Name. Note in runtime application name just placeholder params
+	 * @param senderAddr sender address
+	 * @param appID application Id
+	 * @param newAppCode new application source code
+	 * @param payFlags Transaction parameters
+	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	updateApp(
+		appName: string,
+		senderAddr: string,
+		appID: number,
+		newAppCode: types.SmartContract,
+		payFlags: types.TxParams,
+		flags: AppOptionalFlags,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	)
+```
+
+- The `appName` field is required now. We can use `deployer.getApp(appName)` to get checkpoint data of application. In web-mode, you can set it empty.
+
+- We removed `runtime.addApp`, `deployer.getAppByFile` methods.
+
 - We have changed the naming convetion for the clearing proposal part of the DAO:
 
   - Renamed `clearProposal` to `closeProposal`,

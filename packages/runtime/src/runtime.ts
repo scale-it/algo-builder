@@ -604,6 +604,7 @@ export class Runtime {
 	/**
 	 * deploy a new application and returns application id
 	 * @param payFlags Transaction parameters
+	 * @param appDefinition app definition
 	 * @param scTmplParams Smart Contract template parameters
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
