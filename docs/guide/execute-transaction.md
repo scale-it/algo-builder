@@ -4,8 +4,8 @@ layout: splash
 
 # Execute Transaction
 
-`executeTx` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams` or `ExecParams[]` as parameter.
-If you pass an array of `ExecParams`, it will be considered as `atomic transaction`.
+`executeTx` is a high level method of Deployer  which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` as parameter.
+If the lenght of `ExecParams` array is greater than one, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
 Note: For each parameter `type` and `sign` fields are mandatory.
@@ -218,7 +218,7 @@ const transaction: wtypes.TransactionAndSign = {
   sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
 }
 
-const res = await executeTx(deployer, transaction);
+const res = await deployer.executeTx([transaction]);
 ```
 
 You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.

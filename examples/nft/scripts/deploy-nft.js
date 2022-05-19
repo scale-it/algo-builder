@@ -18,7 +18,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: { note: "funding account" },
 	};
 
-	await executeTx(deployer, algoTxnParams); // fund john
+	await deployer.executeTx(algoTxnParams); // fund john
 
 	await deployer.deployApp(
 		"nft_approval.py",

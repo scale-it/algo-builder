@@ -22,7 +22,7 @@ async function changePermissionsManager(deployer, permissionsManager, address) {
 	};
 
 	console.log(`\n* Updating permissions manager to: ${address} *`);
-	await executeTx(deployer, changePerManagerParams);
+	await deployer.executeTx(changePerManagerParams);
 }
 
 async function run(runtimeEnv, deployer) {

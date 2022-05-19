@@ -36,7 +36,7 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: min_balance,
 		payFlags: {},
 	};
-	await executeTx(deployer, paymentTxnParam);
+	await deployer.executeTx(paymentTxnParam);
 }
 
 module.exports = { default: run };

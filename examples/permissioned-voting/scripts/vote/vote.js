@@ -8,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTx(deployer, {
+	await deployer.executeTx({
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -16,7 +16,7 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	});
-	await executeTx(deployer, {
+	await deployer.executeTx({
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -59,18 +59,18 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction Passes because Alice is registered voter and hasn't voted yet.
 	console.log("Vote being casted by Alice");
-	await executeTx(deployer, transactions);
+	await deployer.executeTx(transactions);
 
 	// Transaction Fails because Alice can only vote once.
 	console.log("Alice tries to cast vote again");
-	await executeTx(deployer, transactions);
+	await deployer.executeTx(transactions);
 
 	// Transaction Fails because bob is not registered voter.
 	console.log("Bob tries to cast vote");
 	transactions[0].fromAccount = bob;
 	transactions[1].fromAccount = bob;
 
-	await executeTx(deployer, transactions);
+	await deployer.executeTx(transactions);
 }
 
 module.exports = { default: run };

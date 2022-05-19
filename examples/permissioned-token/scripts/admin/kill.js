@@ -26,7 +26,7 @@ async function kill(deployer) {
 	};
 
 	console.log("* Kill Token: tesla *");
-	await executeTx(deployer, killParams);
+	await deployer.executeTx(killParams);
 }
 
 async function run(runtimeEnv, deployer) {

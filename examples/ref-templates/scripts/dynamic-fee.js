@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
-	await executeTx(deployer, transactions);
+	await deployer.executeTx(transactions);
 
 	transactions = [
 		mkTxnParams(masterAccount, escrow, 1000, signedContract, { totalFee: 1000 }),
@@ -49,7 +49,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction PASS - Correct transaction Fee is used and closeRemainderTo is set to master
-	await executeTx(deployer, transactions);
+	await deployer.executeTx(transactions);
 }
 
 module.exports = { default: run };

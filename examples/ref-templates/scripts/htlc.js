@@ -8,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 
 	// let's make sure john account is active and it has enough balance
 	const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: "funding account" });
-	await executeTx(deployer, {
+	await deployer.executeTx({
 		...txnParams,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -41,11 +41,11 @@ async function run(runtimeEnv, deployer) {
 	txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
 
 	// Fails because wrong secret is provided
-	await executeTx(deployer, txnParams);
+	await deployer.executeTx(txnParams);
 
 	// Passes because right secret is provided
 	txnParams.args = [convert.stringToBytes(secret)];
-	await executeTx(deployer, txnParams);
+	await deployer.executeTx(txnParams);
 }
 
 module.exports = { default: run };

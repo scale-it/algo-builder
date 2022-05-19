@@ -49,7 +49,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptsTx = await executeTx(deployer, [
+	const receiptsTx = await deployer.executeTx([
 		createAppTxnParam,
 		createASATxnParam,
 		masterTxnParam,

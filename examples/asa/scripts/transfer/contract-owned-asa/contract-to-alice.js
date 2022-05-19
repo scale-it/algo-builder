@@ -16,7 +16,7 @@ async function run(runtimeEnv, deployer) {
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTx(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
+	await deployer.executeTx(mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
 
 	// Get AppInfo and AssetID from checkpoints.
 	const appInfo = deployer.getApp("StatefulASA_App");
@@ -49,21 +49,21 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await executeTx(deployer, txGroup);
+	await deployer.executeTx(txGroup);
 	// print assetHolding of alice
 	console.log("Alice assetHolding balance: ", await balanceOf(deployer, alice.addr, assetID));
 
 	try {
 		// tx FAIL: trying to receive asset from another account
 		txGroup[0].fromAccount = bob;
-		await executeTx(deployer, txGroup);
+		await deployer.executeTx(txGroup);
 	} catch (e) {
 		console.error(e);
 	}
 
 	try {
 		// tx FAIL: trying to send asset directly without calling stateful smart contract
-		await executeTx(deployer, {
+		await deployer.executeTx({
 			type: types.TransactionType.TransferAsset,
 			sign: types.SignType.LogicSignature,
 			fromAccountAddr: lsig.address(),

@@ -29,7 +29,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 		appArgs,
 	};
-	await executeTx(deployer, txnParam); // creates new nft (with id = 1)
+	await deployer.executeTx(txnParam); // creates new nft (with id = 1)
 
 	// print Global Count after creation
 	await printGlobalNFT(deployer, masterAccount.addr, appID);
@@ -56,7 +56,7 @@ async function run(runtimeEnv, deployer) {
 		accounts: [masterAccount.addr, john.addr],
 		appArgs,
 	};
-	await executeTx(deployer, txnParam);
+	await deployer.executeTx(txnParam);
 
 	await printLocalNFT(deployer, masterAccount.addr, appID);
 	await printLocalNFT(deployer, john.addr, appID);

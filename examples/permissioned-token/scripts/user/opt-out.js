@@ -28,7 +28,7 @@ async function optOut(deployer, account) {
 	};
 
 	console.log(`* Opting out [${account.name}:${account.addr}] from token 'tesla' *`);
-	await executeTx(deployer, optOutParams);
+	await deployer.executeTx(optOutParams);
 }
 
 async function run(runtimeEnv, deployer) {

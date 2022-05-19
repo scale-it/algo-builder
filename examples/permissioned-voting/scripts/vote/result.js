@@ -40,14 +40,14 @@ async function run(runtimeEnv, deployer) {
 
 	// Delete Application
 	console.log("Deleting Application");
-	await executeTx(deployer, txnParam);
+	await deployer.executeTx(txnParam);
 
 	txnParam.fromAccount = alice;
 	txnParam.type = types.TransactionType.ClearApp;
 
 	// Clear voter's account
 	console.log("Clearing Alice's Account");
-	await executeTx(deployer, txnParam);
+	await deployer.executeTx(txnParam);
 }
 
 module.exports = { default: run };

@@ -20,7 +20,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const txReceipt = await executeTx(deployer, [masterTxnParam]);
+	const txReceipt = await deployer.executeTx([masterTxnParam]);
 
 	// only one transaction
 	const logs = txReceipt[0].logs;

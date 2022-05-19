@@ -13,7 +13,7 @@ async function run(runtimeEnv, deployer) {
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTx(deployer, mkParam(masterAccount, bob.addr, 5e6, { note: "Funding" }));
+	await deployer.executeTx(mkParam(masterAccount, bob.addr, 5e6, { note: "Funding" }));
 	// Get AppInfo and AssetID from checkpoints.
 	const appInfo = deployer.getApp("StatefulASA_App");
 	const lsig = deployer.getLsig("StateLessASALsig");
@@ -44,14 +44,14 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await executeTx(deployer, txGroup);
+	await deployer.executeTx(txGroup);
 	// print assetHolding of alice
 	console.log("Alice assetHolding balance: ", await balanceOf(deployer, alice.addr, assetID));
 
 	try {
 		// tx FAIL: trying to receive asset from initial owner account
 		txGroup[0].fromAccount = alice;
-		await executeTx(deployer, txGroup);
+		await deployer.executeTx(txGroup);
 	} catch (e) {
 		console.error(e);
 	}
