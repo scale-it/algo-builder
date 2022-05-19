@@ -122,9 +122,9 @@ def approval():
         *handlers,
     )
 
-
+optimize_options = OptimizeOptions(scratch_slots=True)
 def get_approval():
-    return compileTeal(approval(), mode=Mode.Application, version=6)
+    return compileTeal(approval(), mode=Mode.Application, version=6, optimize=optimize_options)
 
 
 if __name__ == "__main__":

@@ -103,10 +103,11 @@ if __name__ == "__main__":
     # Overwrite params if sys.argv[1] is passed
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
-
+    
+    optimize_options = OptimizeOptions(scratch_slots=True)
     print(compileTeal(dynamic_fee(
         params["ARG_AMT"],
         Addr(params["ARG_CLS"]),
         params["ARG_FV"],
         params["ARG_LV"],
-        Bytes("base64", params["ARG_LEASE"])), Mode.Signature, version = 4))
+        Bytes("base64", params["ARG_LEASE"])), Mode.Signature, version = 5, optimize=optimize_options))

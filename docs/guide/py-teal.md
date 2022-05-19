@@ -65,9 +65,12 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
     if(len(sys.argv) > 1):
       scParam = parse_params(sys.argv[1], scParam)
 
+    # Implement optimizer for improving performance and reducing resource consumption
+    optimize_options = OptimizeOptions(scratch_slots=True)
+
     print(compileTeal(dynamic_fee(
       scParam["ARG_AMT"],
-      Addr(scParam["ARG_CLS"]), Mode.Signature))
+      Addr(scParam["ARG_CLS"]), Mode.Signature, optimize=optimize_options))
   ```
 
 #### In scripts

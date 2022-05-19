@@ -37,4 +37,5 @@ if __name__ == "__main__":
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
 
-  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Application))
+  optimize_options = OptimizeOptions(scratch_slots=True)
+  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Application, optimize=optimize_options))
