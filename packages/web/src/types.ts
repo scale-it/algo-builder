@@ -370,3 +370,18 @@ export interface TransactionInGroup {
 	msig?: WalletMultisigMetadata;
 	message?: string;
 }
+
+export interface AlgodTokenHeader {
+	"X-Algo-API-Token": string;
+}
+
+export interface CustomTokenHeader {
+	[headerName: string]: string;
+}
+
+export interface HttpNetworkConfig {
+	server: string; // with optional http o https prefix
+	port: string | number;
+	token: string | AlgodTokenHeader | CustomTokenHeader;
+	httpHeaders?: { [name: string]: string };
+}

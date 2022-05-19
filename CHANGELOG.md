@@ -49,23 +49,23 @@ Added:
 - Added support for saving smart contract template params in ASCCache.
 
 - Teal v7 support:
-  - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
-- `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `. 
+  - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
 - Added missing implementation for `itxn` and moved the common code from `itxn`, `itxna` and `itxnas` to a common function.
 
+- `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `.
 
 - Return list of receipts for each txn in group txn. Example:
 
 ```js
-  const receipts = algob.executeTx([txn0, txn1]); 
-  console.log("txn0 information: ", receipts[0]);
-  console.log("txn1 information: ", receipts[2]);
+const receipts = algob.executeTx([txn0, txn1]);
+console.log("txn0 information: ", receipts[0]);
+console.log("txn1 information: ", receipts[2]);
 ```
 
-- Every opcode class has been updated and now their `execute` method returns its cost. 
-
+- Every opcode class has been updated and now their `execute` method returns its cost.
+- Upgraded PyTEAL version [`0.13.0`](https://github.com/algorand/pyteal/releases/tag/v0.13.0) in Pipfile.
 
 ### Template improvements
 
@@ -108,10 +108,10 @@ Added:
 - Only use list transaction in executeTx.
 - Rename the executeTransaction to executeTx
 
-- The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is 
-recommended to use the method from `Deployer` rather than the function dirrectly. 
+- The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is
+  recommended to use the method from `Deployer` rather than the function dirrectly.
 
-- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` . 
+- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` .
 
 ### Bug fixes
 
@@ -121,7 +121,9 @@ recommended to use the method from `Deployer` rather than the function dirrectly
 - Allow token to be empty.
 - Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
 - Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
+- Wallet contructor come from a parameter walletURL(token, server, port)
 - Restirct duplicate transaction in group transaction. 
+
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
