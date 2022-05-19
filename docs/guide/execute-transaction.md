@@ -5,7 +5,7 @@ layout: splash
 # Execute Transaction
 
 `executeTx` is a high level method of Deployer  which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` as parameter.
-If the lenght of `ExecParams` array is greater than one, it will be considered as `atomic transaction`.
+If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
 Note: For each parameter `type` and `sign` fields are mandatory.
