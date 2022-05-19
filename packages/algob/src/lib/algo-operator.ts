@@ -595,7 +595,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
 	): Promise<wtypes.SourceBytes> {
-		// we don't need compile bytes source.
+		// in case of bytes source we do not need to compile it
 		if (source.metaType === wtypes.MetaType.BYTES) return source;
 
 		let approvalFile = `${appName} - approval.teal`;
