@@ -6849,6 +6849,7 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
+		
 		it("Should throw an error, no inner transaction", () => {
 			interpreter.innerTxnGroups = [];
 			const op = new ITxn(["Logs", "0"], 1, interpreter);
