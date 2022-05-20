@@ -195,20 +195,20 @@ export type SourceCode = {
 	clearProgramCode: string;
 };
 
-Compiled bytes of a TEAL program.
+// Compiled bytes of a TEAL program.
 export type SourceCompiled = {
 	metaType: MetaType.BYTES;
 	approvalProgramBytes: Uint8Array;
 	clearProgramBytes: Uint8Array;
 };
 
-export type SmartContract = SourceFile | SourceCode | SourceBytes;
+export type SmartContract = SourceFile | SourceCode | SourceCompiled;
 
 export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
 
 export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
 
-export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceBytes;
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceCompiled;
 
 export type AppDefinition =
 	| AppDefinitionFromFile
