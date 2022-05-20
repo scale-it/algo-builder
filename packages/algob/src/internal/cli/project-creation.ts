@@ -9,10 +9,11 @@ import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
-const SAMPLE_PROJECT_DEPENDENCIES = ["chai"];
+const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha"];
 
 const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	...SAMPLE_PROJECT_DEPENDENCIES,
+	"@types/mocha",
 	"@types/chai",
 	"@types/node",
 	"typescript",
