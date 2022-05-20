@@ -80,7 +80,7 @@ console.log("txn1 information: ", receipts[2]);
     clearProgramFilename: string;
   };
 
-  // from raw teal source code.
+  // from teal source code (string).
   type SourceCode = {
     metaType: MetaType.SOURCE_CODE;
     approvalProgramCode: string;
@@ -88,7 +88,7 @@ console.log("txn1 information: ", receipts[2]);
   };
 
   // from compiled source code. 
-  type SourceBytes = {
+  type SourceCompiled = {
     metaType: MetaType.BYTES;
     approvalProgramBytes: Uint8Array;
     clearProgramBytes: Uint8Array;
@@ -103,7 +103,7 @@ export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFil
 
 export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
 
-export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceBytes;
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceCompiled;
 
 export type AppDefinition =
 	| AppDefinitionFromFile
