@@ -17,6 +17,7 @@ import {
 	TxnFields,
 } from "../lib/constants";
 import type { TEALStack } from "../types";
+import { Interpreter } from "./interpreter";
 
 export abstract class Op {
 	//line number in TEAL file
@@ -354,5 +355,17 @@ export abstract class Op {
 		}
 
 		return array.slice(start, end);
+	}
+	/**
+	 * asserts if inner transaction exists
+	 * @param interpreter interpreter
+	 */
+	assertInnerTransactionExists(interpreter: Interpreter) {
+		if (interpreter.innerTxnGroups.length === 0) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
+				tealVersion: interpreter.tealVersion,
+				line: this.line,
+			});
+		}
 	}
 }

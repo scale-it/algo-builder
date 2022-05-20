@@ -110,6 +110,7 @@ import {
 	Intc,
 	Intcblock,
 	Itob,
+	ITxn,
 	ITxnas,
 	Keccak256,
 	Label,
@@ -6825,6 +6826,54 @@ describe("Teal Opcodes", function () {
 		it("Should fail: stack empty", () => {
 			const op = new ITxnas(["Accounts"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+		});
+	});
+
+	describe("Tealv5: itxn opcode", function () {
+		let stack: Stack<StackElem>;
+		let interpreter: Interpreter;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.tx = TXN_OBJ;
+			interpreter.tealVersion = 5;
+			interpreter.innerTxnGroups = [[TXN_OBJ, { ...TXN_OBJ, fee: 1000 }]];
+			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+				txn: interpreter.runtime.ctx.tx,
+				txID: TXN_OBJ.txID,
+				logs: [parsing.stringToBytes("Hello")],
+			});
+		});
+
+		it("Should put on top of the stack logs from innerTx", () => {
+			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
+		});
+
+		it("Should throw an error, no inner transaction", () => {
+			interpreter.innerTxnGroups = [];
+			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
+			);
+		});
+
+		it("Should throw an error, no inner transaction", () => {
+			interpreter.innerTxnGroups = [];
+			const op = new ITxn(["NumLogs"], 1, interpreter);
+			expectRuntimeError(
+				() => op.execute(stack),
+				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
+			);
+		});
+
+		it("Should put the number of logs on top of the stack", () => {
+			const op = new ITxn(["NumLogs"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(1n, stack.pop());
 		});
 	});
 

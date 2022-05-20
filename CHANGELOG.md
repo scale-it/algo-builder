@@ -52,6 +52,8 @@ Added:
 
   - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
+- Full support for inner transactions: `itxn`, `itxna` and `itxnas`
+
 - `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `.
 
 - Return list of receipts for each txn in group txn. Example:

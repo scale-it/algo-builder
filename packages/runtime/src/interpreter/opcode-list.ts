@@ -28,6 +28,7 @@ import {
 	AppParamDefined,
 	AssetParamMap,
 	GlobalFields,
+	ITxArrFields,
 	MathOp,
 	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
@@ -60,6 +61,7 @@ import {
 import { Stack } from "../lib/stack";
 import {
 	encTxToExecParams,
+	executeITxn,
 	isEncTxApplicationCall,
 	txAppArg,
 	txnSpecByField,
@@ -4315,7 +4317,7 @@ export class ITxnSubmit extends Op {
 // push to stack [...stack, transaction field]
 export class ITxn extends Op {
 	readonly field: string;
-	readonly idx: number | undefined;
+	readonly idx: number;
 	readonly interpreter: Interpreter;
 	readonly line: number;
 
@@ -4330,10 +4332,12 @@ export class ITxn extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
-		this.idx = undefined;
-
+		this.idx = -1;
 		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-		if (TxArrFields[interpreter.tealVersion].has(args[0])) {
+		if (
+			TxArrFields[interpreter.tealVersion].has(args[0]) ||
+			ITxArrFields[interpreter.tealVersion].has(args[0])
+		) {
 			// eg. itxn Accounts 1
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
@@ -4341,58 +4345,13 @@ export class ITxn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-
 		this.field = args[0]; // field
 		this.interpreter = interpreter;
 	}
 
 	execute(stack: TEALStack): number {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-
-		let result;
-		// what is "last "
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		const tx = groupTx[groupTx.length - 1];
-
-		switch (this.field) {
-			case "Logs": {
-				// TODO handle this after log opcode is implemented
-				// https://www.pivotaltracker.com/story/show/179855820
-				result = 0n;
-				break;
-			}
-			case "NumLogs": {
-				// TODO handle this after log opcode is implemented
-				result = 0n;
-				break;
-			}
-			case "CreatedAssetID": {
-				result = BigInt(this.interpreter.runtime.ctx.createdAssetID);
-				break;
-			}
-			case "CreatedApplicationID": {
-				result = 0n; // can we create an app in inner-tx?
-				break;
-			}
-			default: {
-				// similarly as Txn Op
-				if (this.idx !== undefined) {
-					// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
-					result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-				} else {
-					result = txnSpecByField(this.field, tx, [tx], this.interpreter.tealVersion);
-				}
-
-				break;
-			}
-		}
-		stack.push(result);
+		this.assertInnerTransactionExists(this.interpreter);
+		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
 }
@@ -4424,27 +4383,8 @@ export class ITxna extends Op {
 	}
 
 	execute(stack: TEALStack): number {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		let result: StackElem;
-
-		const tx = groupTx[groupTx.length - 1];
-		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
-			// handle Logs
-			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			const logs: Uint8Array[] = txReceipt?.logs ?? [];
-			this.checkIndexBound(this.idx, logs, this.line);
-			result = logs[this.idx];
-		} else {
-			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-		}
-		stack.push(result);
-
+		this.assertInnerTransactionExists(this.interpreter);
+		stack.push(executeITxn(this));
 		return this.computeCost();
 	}
 }
@@ -4614,7 +4554,7 @@ export class Log extends Op {
 		const logByte = this.assertBytes(stack.pop(), this.line);
 		const txID = this.interpreter.runtime.ctx.tx.txID;
 		const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
-		// for Log opcode we assume receipt is alway exist
+		// for Log opcode we assume receipt always exists
 		// TODO: recheck when log opcode failed
 		if (txReceipt) {
 			if (txReceipt.logs === undefined) {
