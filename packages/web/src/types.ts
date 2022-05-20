@@ -195,7 +195,8 @@ export type SourceCode = {
 	clearProgramCode: string;
 };
 
-export type SourceBytes = {
+Compiled bytes of a TEAL program.
+export type SourceCompiled = {
 	metaType: MetaType.BYTES;
 	approvalProgramBytes: Uint8Array;
 	clearProgramBytes: Uint8Array;
