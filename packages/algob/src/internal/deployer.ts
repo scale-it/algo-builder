@@ -830,7 +830,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID ID of the application being configured or empty if creating
-	 * @param newAppcode new source of application
+	 * @param newAppCode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
