@@ -39,10 +39,12 @@ async function run(runtimeEnv, deployer) {
 	};
 	// Create Application
 	const bondAppInfo = await deployer.deployApp(
-		"bond-dapp-stateful.py",
-		"bond-dapp-clear.py",
+		managerAcc,
 		{
-			sender: managerAcc,
+			appName: "BondApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "bond-dapp-stateful.py",
+			clearProgramFilename: "bond-dapp-clear.py",
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 8,
@@ -50,8 +52,7 @@ async function run(runtimeEnv, deployer) {
 			appArgs: appArgs,
 		},
 		{},
-		placeholderParam,
-		"BondApp"
+		placeholderParam
 	);
 	console.log(bondAppInfo);
 

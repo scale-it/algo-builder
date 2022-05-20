@@ -55,7 +55,7 @@ describe("DAO test", function () {
 	let alice;
 
 	let runtime;
-	let appCreationFlags; // deploy app params (sender, storage schema)
+	let appStorageConfig; // deploy app params (sender, storage schema)
 	let appID; // DAO app
 	let govTokenID;
 	let daoFundLsig;
@@ -76,8 +76,7 @@ describe("DAO test", function () {
 		]);
 		[alice] = runtime.defaultAccounts();
 
-		appCreationFlags = {
-			sender: creator.account,
+		appStorageConfig = {
 			localInts: 9,
 			localBytes: 7,
 			globalInts: 4,
@@ -122,14 +121,20 @@ describe("DAO test", function () {
 			`str:${daoName}`,
 		];
 
-		const approvalFileName = "dao-app-approval.py";
-		const clearFilename = "dao-app-clear.py";
+		const approvalProgramFilename = "dao-app-approval.py";
+		const clearProgramFilename = "dao-app-clear.py";
 		const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
 		// deploy application
 		appID = runtime.deployApp(
-			approvalFileName,
-			clearFilename,
-			{ ...appCreationFlags, appArgs: daoAppArgs },
+			creator.account,
+			{
+				...appStorageConfig,
+				appName: "daoApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appArgs: daoAppArgs,
+			},
 			{},
 			placeholderParam
 		).appID;

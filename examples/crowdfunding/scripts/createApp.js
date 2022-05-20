@@ -37,19 +37,19 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const appInfo = await deployer.deployApp(
-		"crowdFundApproval.teal", // approval program
-		"crowdFundClear.teal", // clear program
+		creatorAccount,
 		{
-			sender: creatorAccount,
+			appName: "CrowdfundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "crowdFundApproval.teal", // approval program
+			clearProgramFilename: "crowdFundClear.teal", // clear program
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
 			globalBytes: 3,
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"CrowdfundingApp"
+		{}
 	);
 
 	console.log(appInfo);
@@ -69,11 +69,15 @@ async function run(runtimeEnv, deployer) {
 	appArgs = [convert.addressToPk(escrowAccount.address())];
 
 	const updatedRes = await deployer.updateApp(
+		"CrowdfundingApp",
 		creatorAccount,
 		{}, // pay flags
 		applicationID,
-		"crowdFundApproval.teal",
-		"crowdFundClear.teal",
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "crowdFundApproval.teal",
+			clearProgramFilename: "crowdFundClear.teal",
+		},
 		{ appArgs: appArgs }
 	);
 	console.log("Application Updated: ", updatedRes);

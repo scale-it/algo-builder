@@ -34,6 +34,7 @@ export class CompileOp {
 	 */
 	async ensureCompiled(
 		filename: string,
+		tealSource = "",
 		force?: boolean,
 		scTmplParams?: SCParams
 	): Promise<ASCCache> {
@@ -53,21 +54,26 @@ export class CompileOp {
 			scTmplParams = {};
 		}
 
-		const filePath = getPathFromDirRecursive(ASSETS_DIR, filename);
-		if (filePath === undefined) {
-			throw new BuilderError(ERRORS.GENERAL.FILE_NOT_FOUND_IN_DIR, {
-				directory: ASSETS_DIR,
-				file: filename,
-			});
-		}
-
 		let teal: string;
 		let thash: number;
-		if (filename.endsWith(pyExt)) {
-			const content = this.pyCompile.ensurePyTEALCompiled(filename, scTmplParams);
-			[teal, thash] = [content, murmurhash.v3(content)];
+
+		if (tealSource === "") {
+			const filePath = getPathFromDirRecursive(ASSETS_DIR, filename);
+			if (filePath === undefined) {
+				throw new BuilderError(ERRORS.GENERAL.FILE_NOT_FOUND_IN_DIR, {
+					directory: ASSETS_DIR,
+					file: filename,
+				});
+			}
+
+			if (filename.endsWith(pyExt)) {
+				const content = this.pyCompile.ensurePyTEALCompiled(filename, scTmplParams);
+				[teal, thash] = [content, murmurhash.v3(content)];
+			} else {
+				[teal, thash] = this.readTealAndHash(filePath);
+			}
 		} else {
-			[teal, thash] = this.readTealAndHash(filePath);
+			[teal, thash] = [tealSource, murmurhash.v3(tealSource)];
 		}
 
 		let a = await this.readArtifact(filename);

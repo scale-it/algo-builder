@@ -10,18 +10,19 @@ async function run(runtimeEnv, deployer) {
 
 	// Create Application
 	const appInfo = await deployer.deployApp(
-		"coordinator.py",
-		"clear.teal",
+		creator,
 		{
-			sender: creator,
+			appName: "coordinator",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "coordinator.py",
+			clearProgramFilename: "clear.teal",
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 0,
 			globalBytes: 0,
 		},
 		{},
-		{},
-		"coordinator"
+		{}
 	);
 
 	console.log(appInfo);
@@ -36,7 +37,7 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: min_balance,
 		payFlags: {},
 	};
-	await executeTx(deployer, paymentTxnParam);
+	await deployer.executeTx(paymentTxnParam);
 }
 
 module.exports = { default: run };

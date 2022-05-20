@@ -47,8 +47,11 @@ describe("TEAL: Execution modes", function () {
 		});
 
 		it("should pass in application mode", function () {
-			const flags = {
-				sender: john.account,
+			const appDefinition: types.AppDefinition = {
+				appName: "app",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "sig-mode.teal",
+				clearProgramFilename: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,
@@ -56,14 +59,17 @@ describe("TEAL: Execution modes", function () {
 			};
 
 			// deployApp is also an application mode transaction
-			assert.doesNotThrow(() => runtime.deployApp("sig-mode.teal", "clear.teal", flags, {}));
+			assert.doesNotThrow(() => runtime.deployApp(john.account, appDefinition, {}));
 		});
 	});
 
 	describe("Signature ops used in application mode", function () {
 		it("should fail in application mode if Signature mode opcode is used", function () {
-			const flags = {
-				sender: john.account,
+			const appDefinition: types.AppDefinition = {
+				appName: "app",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "app-mode.teal",
+				clearProgramFilename: "clear.teal",
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,
@@ -71,7 +77,7 @@ describe("TEAL: Execution modes", function () {
 			};
 
 			expectRuntimeError(
-				() => runtime.deployApp("app-mode.teal", "clear.teal", flags, {}),
+				() => runtime.deployApp(john.account, appDefinition, {}),
 				RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
 			);
 		});

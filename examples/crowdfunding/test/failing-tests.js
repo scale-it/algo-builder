@@ -25,10 +25,10 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 	let lsig;
 	let escrowAddress;
 	const rejectMsg = "RUNTIME_ERR1007: Teal code rejected by logic";
-	const approvalProgramFileName = "crowdFundApproval.teal";
-	const clearProgramFileName = "crowdFundClear.teal";
-	const approvalProgram = getProgram(approvalProgramFileName);
-	const clearProgram = getProgram(clearProgramFileName);
+	const approvalProgramFilename = "crowdFundApproval.teal";
+	const clearProgramFilename = "crowdFundClear.teal";
+	const approvalProgram = getProgram(approvalProgramFilename);
+	const clearProgram = getProgram(clearProgramFilename);
 	// Create new runtime and application before each test.
 	this.beforeEach(() => {
 		runtime = new Runtime([master, creator, donor]);
@@ -55,8 +55,11 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 			convert.addressToPk(creator.address),
 			convert.uint64ToBigEndian(fundCloseDate.getTime()),
 		];
-		const creationFlags = {
-			sender: creator.account,
+		const appDefinition = {
+			appName: "crowdfundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -65,9 +68,8 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 
 		// deploy application
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDefinition, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -108,10 +110,14 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		runtime.updateApp(
+			"crowdfundingApp",
 			creator.address,
 			applicationId,
-			approvalProgram,
-			clearProgram,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+			},
 			{},
 			{ appArgs: appArgs }
 		);
@@ -380,10 +386,14 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(
 			() =>
 				runtime.updateApp(
+					"appName",
 					donor.address,
 					applicationId,
-					approvalProgram,
-					clearProgram,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: approvalProgram,
+						clearProgramCode: clearProgram,
+					},
 					{},
 					{ appArgs: appArgs }
 				),

@@ -19,18 +19,19 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
 	/** Deploy Permissions(rules) smart contract **/
 	console.log("\n** Deploying smart contract: permissions **");
 	const permissionAppInfo = await deployer.deployApp(
-		"permissions.py", // approval program
-		"clear_state_program.py", // clear program
+		owner,
 		{
-			sender: owner,
+			appName: "Permissions",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "permissions.py", // approval program
+			clearProgramFilename: "clear_state_program.py", // clear program
 			localInts: 1, // 1 to store whitelisted status in local state
 			localBytes: 0,
 			globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
 			globalBytes: 1, // to store permissions manager
 		},
 		{},
-		templateParam,
-		"Permissions"
+		templateParam
 	); // pass perm_manager as a template param (to set during deploy)
 	console.log(permissionAppInfo);
 

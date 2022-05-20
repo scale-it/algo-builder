@@ -15,20 +15,19 @@ describe("Test for transferring asset using custom logic", function () {
 	let escrow; // initialized later (using runtime.loadLogic)
 
 	let runtime;
-	let creationFlags;
+	let appStorageConfig;
 	let applicationId;
 	let assetId;
 	let assetDef;
-	const approvalProgramFileName = "poi-approval.teal";
-	const clearProgramFileName = "poi-clear.teal";
+	const approvalProgramFilename = "poi-approval.teal";
+	const clearProgramFilename = "poi-clear.teal";
 
 	this.beforeEach(async function () {
 		alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
 		bob = new AccountStore(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
 		runtime = new Runtime([master, alice, bob]);
 
-		creationFlags = {
-			sender: alice.account,
+		appStorageConfig = {
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 2,
@@ -62,9 +61,15 @@ describe("Test for transferring asset using custom logic", function () {
 		];
 
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			alice.account,
+			{
+				...appStorageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appName: "app",
+				appArgs: creationArgs,
+			},
 			{}
 		).appID;
 
@@ -275,9 +280,15 @@ describe("Test for transferring asset using custom logic", function () {
 		];
 
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			alice.account,
+			{
+				...appStorageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appName: "app",
+				appArgs: creationArgs,
+			},
 			{}
 		).appID;
 

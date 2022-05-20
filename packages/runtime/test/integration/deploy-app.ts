@@ -5,7 +5,6 @@ import { assert } from "chai";
 import { getProgram } from "../../src";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Contract Account", function () {
@@ -15,21 +14,21 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	let john = new AccountStore(minBalance + fee);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let approvalProgram: string;
 	let clearProgram: string;
-	let appCreationFlags: AppDeploymentFlags;
+	let storageConfig: types.StorageConfig;
 	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
-		approvalProgram = getProgram(approvalProgramFileName);
-		clearProgram = getProgram(clearProgramFileName);
+		approvalProgram = getProgram(approvalProgramFilename);
+		clearProgram = getProgram(clearProgramFilename);
 
-		appCreationFlags = {
-			sender: john.account,
+		storageConfig = {
+			appName: "app",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -44,16 +43,24 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	it("initialize new account for deployed app(s)", function () {
 		// deploy new app
 		const appIdX = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			appCreationFlags,
+			john.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				...storageConfig,
+			},
 			{}
 		).appID;
 
 		const appIdY = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			appCreationFlags,
+			john.account,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+				...storageConfig,
+			},
 			{}
 		).appID;
 
@@ -66,12 +73,15 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	it("initialize new account for app(s) deployed using executeTx", function () {
 		// create new app
 		const execParams: types.DeployAppParam = {
-			...appCreationFlags,
 			type: types.TransactionType.DeployApp,
 			sign: types.SignType.SecretKey,
 			fromAccount: john.account,
-			approvalProgram: approvalProgram,
-			clearProgram: clearProgram,
+			appDefinition: {
+				...storageConfig,
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+			},
 			payFlags: {},
 		};
 

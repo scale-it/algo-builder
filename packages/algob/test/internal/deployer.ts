@@ -174,14 +174,20 @@ describe("DeployerDeployMode", () => {
 			clearFile: "clear-file.py",
 		});
 
-		const sscFlags = {
-			sender: deployer.accounts[0],
-			localInts: 1,
-			globalInts: 1,
-			localBytes: 1,
-			globalBytes: 1,
-		};
-		const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {});
+		const sscInfo = await deployer.deployApp(
+			deployer.accounts[0],
+			{
+				appName: "app-clear",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "app.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				globalInts: 1,
+				localBytes: 1,
+				globalBytes: 1,
+			},
+			{}
+		);
 		assert.deepEqual(sscInfo, {
 			creator: "addr-1-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -218,11 +224,15 @@ describe("DeployerDeployMode", () => {
 		});
 
 		const updatedInfo = await deployer.updateApp(
+			"app-clear",
 			deployer.accounts[0],
 			{},
 			33,
-			"app",
-			"clear",
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "app",
+				clearProgramFilename: "clear",
+			},
 			{}
 		);
 		assert.deepEqual(updatedInfo, {
@@ -266,14 +276,18 @@ describe("DeployerDeployMode", () => {
 			clearFile: "clear-file.py",
 		});
 
-		const sscFlags = {
-			sender: deployer.accounts[0],
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			metaType: wtypes.MetaType.FILE,
+			approvalProgramFilename: "app",
+			clearProgramFilename: "clear",
 			localInts: 1,
 			globalInts: 1,
 			localBytes: 1,
 			globalBytes: 1,
+			appName: "my-app",
 		};
-		const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {}, {}, "my-app");
+
+		const sscInfo = await deployer.deployApp(deployer.accounts[0], appDefinition, {});
 		assert.deepEqual(sscInfo, {
 			creator: "addr-1-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,
@@ -310,14 +324,17 @@ describe("DeployerDeployMode", () => {
 		});
 
 		const updatedInfo = await deployer.updateApp(
+			"my-app",
 			deployer.accounts[0],
 			{},
 			33,
-			"app",
-			"clear",
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "app",
+				clearProgramFilename: "clear",
+			},
 			{},
-			{},
-			"my-app"
+			{}
 		);
 		assert.deepEqual(updatedInfo, {
 			creator: "addr-1-get-address-dry-run",

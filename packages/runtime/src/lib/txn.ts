@@ -295,13 +295,18 @@ export function encTxToExecParams(
 	switch (encTx.type) {
 		case TransactionTypeEnum.APPLICATION_CALL: {
 			if (isEncTxApplicationCreate(encTx)) {
+				const appDefinition: types.AppDefinition = {
+					appName: "Mock",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: encTx.approvalProgram as string,
+					clearProgramFilename: encTx.clearProgram as string,
+					localInts: encTx.apls?.nui as number,
+					localBytes: encTx.apls?.nbs as number,
+					globalInts: encTx.apgs?.nui as number,
+					globalBytes: encTx.apgs?.nbs as number,
+				};
 				execParams.type = types.TransactionType.DeployApp;
-				execParams.approvalProgram = encTx.approvalProgram;
-				execParams.clearProgram = encTx.clearProgram;
-				execParams.localInts = encTx.apls?.nui;
-				execParams.localBytes = encTx.apls?.nbs;
-				execParams.globalInts = encTx.apgs?.nui;
-				execParams.globalBytes = encTx.apgs?.nbs;
+				execParams.appDefinition = appDefinition;
 			} else if (isEncTxApplicationCall(encTx)) {
 				execParams.type = types.TransactionType.CallApp;
 				execParams.appID = encTx.apid;

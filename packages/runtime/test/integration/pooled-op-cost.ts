@@ -3,7 +3,6 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { AccountStoreI, AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
@@ -14,25 +13,28 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 	const john = new AccountStore(10e6);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
-	let flags: AppDeploymentFlags;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
+	let appDefinition: types.AppDefinitionFromFile;
 	let appID: number;
 	let appCallParam: types.AppCallsParam;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "pooled-opcode-budget.teal";
-		clearProgramFileName = "clear-pooled-opcode-budget.teal";
+		approvalProgramFilename = "pooled-opcode-budget.teal";
+		clearProgramFilename = "clear-pooled-opcode-budget.teal";
 
-		flags = {
-			sender: john.account,
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
 			localInts: 1,
 		};
 
-		appID = runtime.deployApp(approvalProgramFileName, clearProgramFileName, flags, {}).appID;
+		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		appCallParam = {
 			type: types.TransactionType.CallApp,
@@ -97,10 +99,12 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 
 		this.beforeEach(async function () {
 			appID = runtime.deployApp(
-				"budget-opcode.teal",
-				"clearv6.teal",
+				john.account,
 				{
-					sender: john.account,
+					appName: "app",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "budget-opcode.teal",
+					clearProgramFilename: "clearv6.teal",
 					globalBytes: 0,
 					globalInts: 0,
 					localBytes: 0,

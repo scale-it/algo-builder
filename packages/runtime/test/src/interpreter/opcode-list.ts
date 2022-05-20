@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import {
 	decodeAddress,
 	encodeAddress,
@@ -6480,10 +6480,12 @@ describe("Teal Opcodes", function () {
 			alan = new AccountStore(1e9);
 			runtime = new Runtime([alan]);
 			appID = runtime.deployApp(
-				"counter-approval.teal",
-				"clear.teal",
+				alan.account,
 				{
-					sender: alan.account,
+					appName: "app",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "counter-approval.teal",
+					clearProgramFilename: "clear.teal",
 					globalInts: 1,
 					globalBytes: 2,
 					localInts: 3,

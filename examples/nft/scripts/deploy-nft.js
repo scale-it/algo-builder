@@ -21,10 +21,12 @@ async function run(runtimeEnv, deployer) {
 	await executeTx(deployer, algoTxnParams); // fund john
 
 	await deployer.deployApp(
-		"nft_approval.py",
-		"nft_clear_state.py",
+		masterAccount,
 		{
-			sender: masterAccount,
+			appName: "nft",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "nft_approval.py",
+			clearProgramFilename: "nft_clear_state.py",
 			localInts: 16,
 			globalInts: 1,
 			globalBytes: 63,
@@ -32,7 +34,7 @@ async function run(runtimeEnv, deployer) {
 		{}
 	);
 
-	const appInfo = await deployer.getAppByFile("nft_approval.py", "nft_clear_state.py");
+	const appInfo = await deployer.getApp("nft");
 	const appID = appInfo.appID;
 	console.log(appInfo);
 

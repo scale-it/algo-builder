@@ -1,3 +1,4 @@
+const { types } = require("@algo-builder/algob/build/runtime");
 const accounts = require("./common/accounts");
 const { fundAccount } = require("./common/common");
 
@@ -12,10 +13,12 @@ async function setupNewPermissionsApp(runtimeEnv, deployer) {
 
 	// deploy new permissions smart contract
 	const newPermissionsAppInfo = await deployer.deployApp(
-		"permissions_new.teal", // new permissions contract
-		"clear_state_program.py",
+		owner,
 		{
-			sender: owner,
+			appName: "PermissionNewApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "permissions_new.teal", // new permissions contract
+			clearProgramFilename: "clear_state_program.py",
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 0,
