@@ -52,7 +52,7 @@ Added:
 
   - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
-- Added missing implementation for `itxn` and moved the common code from `itxn`, `itxna` and `itxnas` to a common function.
+- Full support for inner transactions: `itxn`, `itxna` and `itxnas`
 
 - `algob test` now runs tests in `test` directory and all its subdirectories. Before only the files inside `test directory where run `.
 
