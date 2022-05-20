@@ -139,10 +139,12 @@ log("still goes to stdout, but via console.info now");
 ```javascript
 // deployment
 const daoAppInfo = await deployer.deployApp(
-	"dao-app-approval.py",
-	"dao-app-clear.py",
+	creator,
 	{
-		sender: creator,
+	    appName: "DAO App" // app name passed here
+        metaType: MetaType.File
+	    approvalProgramFilename: "dao-app-approval.py",
+	    clearProgramFilename: "dao-app-clear.py",
 		localInts: 9,
 		localBytes: 7,
 		globalInts: 4,
@@ -151,7 +153,6 @@ const daoAppInfo = await deployer.deployApp(
 	},
 	{},
 	{},
-	"DAO App" // app name passed here
 );
 
 // now during querying, you only need this app name

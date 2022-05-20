@@ -100,10 +100,12 @@ Firstly we need to fund the contract. `master` account will fund it (as it has l
 // Create Application
 // Note: An Account can have maximum of 10 Applications.
 const sscInfo = await deployer.deployApp(
-	"approval_program.teal", // approval program
-	"clear_program.teal", // clear program
+	creatorAccount,
 	{
-		sender: creatorAccount,
+		appName: "CounterApp",
+		metaType: types.MetaType.File
+		approvalProgramFilename: "approval_program.teal", // approval program
+		clearProgramFilename: "clear_program.teal", // clear program
 		localInts: 1,
 		localBytes: 1,
 		globalInts: 1,
@@ -193,15 +195,19 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-const updatedRes = await deployer.updateApp(
-	creatorAccount,
-	{}, // pay flags
-	applicationID,
-	"new_approval.teal",
-	"new_clear.teal",
-	{}
-);
-console.log("Application Updated: ", updatedRes);
+	const updatedRes = await deployer.updateApp(
+		"CounterApp", // app name use for checkpoint
+		creatorAccount,
+		{}, // pay flags
+		applicationID,
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: 'new_approval.teal',
+			clearProgramFilename: 'new_clear.teal'	
+		},
+		{}
+	);
+	console.log("Application Updated: ", updatedRes);
 ```
 
 # 7. Delete Application

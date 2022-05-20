@@ -107,17 +107,63 @@ To deploy an ASA without using `asa.yaml`:
 
 ### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployAppParam)
 
+We support 3 format of DeloyApp params:
+
+- Deploy source from files(supported in `algob` cli and `runtime`).
 ```js
   {
     type: TransactionType.DeployApp,
     sign: SignType.SecretKey,
     fromAccount: john,
-    approvalProgram: approvalProgram,
-    clearProgram: clearProgram,
-    localInts: 1,
-    localBytes: 1,
-    globalInts: 1,
-    globalBytes: 1,
+    appDefinition: {
+      appName: "my-app",
+      metaTypes: MetaType.File
+      approvalProgramFilename: "approval.teal",
+      clearProgramFileName: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+    }
+    payFlags: {}
+  }
+```
+  - Deploy source from code(supported in `algob` cli and `runtime`).
+```js
+  {
+    type: TransactionType.DeployApp,
+    sign: SignType.SecretKey,
+    fromAccount: john,
+    appDefinition: {
+      appName: "my-app",
+      metaTypes: MetaType.SOURCE_CODE
+      approvalProgramCode: "<approval program>",
+      clearProgramCode: "<clear state program>",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+    }
+    payFlags: {}
+  }
+```
+- Deploy source from compiled code(supported in `algob` cli and `web`).
+
+```js
+  {
+    type: TransactionType.DeployApp,
+    sign: SignType.SecretKey,
+    fromAccount: john,
+    appDefinition: {
+      appName: "my-app",
+      metaTypes: MetaType.BYTES
+      approvalProgramBytes: "<compiled bytes from algod client>",
+      clearProgramBytes: "<compiled bytes from algod client>",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+    }
     payFlags: {}
   }
 ```
@@ -150,14 +196,19 @@ To deploy an ASA without using `asa.yaml`:
 
 ### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#UpdateAppParam)
 
+`newAppCode` type is `SmartContract`. Please check [types define](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).
 ```js
   {
-    type: TransactionType.updateApp,
+    type: TransactionType.UpdateApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appID: appId,
-    newApprovalProgram: newApprovalProgram,
-    newClearProgram: newClearProgram,
+    appName: "my-app",
+    newAppCode: {
+      metaTypes: MetaType.File
+      approvalProgramFilename: "approval.teal",
+      clearProgramFileName: "clear.teal", 
+    }, 
     payFlags: {}
   }
 ```
