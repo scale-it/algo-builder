@@ -696,7 +696,7 @@ export interface Deployer {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	) => Promise<wtypes.SourceBytes>;
+	) => Promise<wtypes.SourceCompiled>;
 
 	/**
 	 * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.

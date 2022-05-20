@@ -230,7 +230,7 @@ class DeployerBasicMode {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	): Promise<wtypes.SourceBytes> {
+	): Promise<wtypes.SourceCompiled> {
 		return this.algoOp.compileApplication(appName, source, scTmplParams);
 	}
 

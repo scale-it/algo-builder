@@ -888,7 +888,7 @@ export class Runtime {
 			tx = sdkTxns[0];
 			gtxs = sdkTxns;
 		} else {
-			const dummySource: types.SourceBytes = {
+			const dummySource: types.SourceCompiled = {
 				metaType: types.MetaType.BYTES,
 				approvalProgramBytes: new Uint8Array(32),
 				clearProgramBytes: new Uint8Array(32),

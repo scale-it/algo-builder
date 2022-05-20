@@ -142,7 +142,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	): Promise<wtypes.SourceBytes> {
+	): Promise<wtypes.SourceCompiled> {
 		return {
 			metaType: wtypes.MetaType.BYTES,
 			approvalProgramBytes: new Uint8Array(32).fill(0),

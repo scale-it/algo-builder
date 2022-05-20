@@ -144,7 +144,7 @@ export class FakeDeployer implements Deployer {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	): Promise<wtypes.SourceBytes> {
+	): Promise<wtypes.SourceCompiled> {
 		throw new Error("Not implemented");
 	}
 

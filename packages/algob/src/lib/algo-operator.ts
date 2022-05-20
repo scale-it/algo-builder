@@ -116,7 +116,7 @@ export interface AlgoOperator {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	) => Promise<wtypes.SourceBytes>;
+	) => Promise<wtypes.SourceCompiled>;
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
 	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 }
@@ -600,7 +600,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		appName: string,
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
-	): Promise<wtypes.SourceBytes> {
+	): Promise<wtypes.SourceCompiled> {
 		// in case of bytes source we do not need to compile it
 		if (source.metaType === wtypes.MetaType.BYTES) return source;
 
