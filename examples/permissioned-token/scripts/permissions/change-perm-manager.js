@@ -1,4 +1,4 @@
-const { fundAccount, executeTx, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp } = require("../common/common");
 const { whitelist } = require("./whitelist");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");

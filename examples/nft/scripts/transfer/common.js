@@ -1,6 +1,6 @@
 const { readAppGlobalState, readAppLocalState } = require("@algo-builder/algob");
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
 		await deployer.executeTx(deployer, txnParams);
 	} catch (e) {

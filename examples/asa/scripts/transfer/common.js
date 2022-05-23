@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
 		await deployer.executeTx(txnParams);
 	} catch (e) {

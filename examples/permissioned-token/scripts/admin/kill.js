@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { issue } = require("./issue");
-const { executeTx, fundAccount } = require("../common/common");
+const { tryExecuteTx, fundAccount } = require("../common/common");
 const accounts = require("../common/accounts");
 
 async function kill(deployer) {
@@ -28,11 +28,7 @@ async function kill(deployer) {
 	];
 
 	console.log("* Kill Token: tesla *");
-	try {
-		await deployer.executeTx(killParams);
-	} catch (e) {
-		console.error("Transaction Failed", e.response ? e.response.error : e);
-	}
+	await tryExecuteTx(deployer, killParams);
 }
 
 async function run(runtimeEnv, deployer) {

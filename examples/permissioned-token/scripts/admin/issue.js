@@ -1,6 +1,6 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { executeTx, fundAccount, totalSupply } = require("../common/common");
+const { fundAccount, totalSupply, tryExecuteTx } = require("../common/common");
 const accounts = require("../common/accounts");
 
 /**
@@ -47,11 +47,7 @@ async function issue(deployer, address, amount) {
 		},
 	];
 	console.log(`* Issuing ${amount} tokens to [${address}] *`);
-	try {
-		await deployer.executeTx(issuanceParams);
-	} catch (e) {
-		console.error("Transaction Failed", e.response ? e.response.error : e);
-	}
+	await tryExecuteTx(deployer, issuanceParams);
 	console.log(`* ${address} asset holding: *`);
 	console.log(await balanceOf(deployer, address, tesla.assetIndex));
 

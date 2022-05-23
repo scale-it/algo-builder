@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { bytesToBigInt } = require("algosdk");
 const { accounts, decodeValue } = require("../utils");

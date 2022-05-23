@@ -2,7 +2,7 @@
  * Description:
  * This file creates a new NFT and transfers 1 NFT from A to B
  */
-const { executeTx, printGlobalNFT, printLocalNFT } = require("./common");
+const { printGlobalNFT, printLocalNFT } = require("./common");
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 

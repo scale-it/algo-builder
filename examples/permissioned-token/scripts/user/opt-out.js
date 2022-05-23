@@ -1,7 +1,7 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { issue } = require("../admin/issue");
-const { executeTx, fundAccount } = require("../common/common");
+const { fundAccount } = require("../common/common");
 
 /**
  * To opt-out of the token, do an asset transfer transaction with
