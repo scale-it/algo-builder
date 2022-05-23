@@ -47,8 +47,11 @@ async function issue(deployer, address, amount) {
 		},
 	];
 	console.log(`* Issuing ${amount} tokens to [${address}] *`);
-	await deployer.executeTx(issuanceParams);
-
+	try {
+		await deployer.executeTx(issuanceParams);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+	}
 	console.log(`* ${address} asset holding: *`);
 	console.log(await balanceOf(deployer, address, tesla.assetIndex));
 

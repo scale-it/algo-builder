@@ -43,7 +43,11 @@ async function run(runtimeEnv, deployer) {
 	txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
 
 	// Fails because wrong secret is provided
-	await deployer.executeTx([txnParams]);
+	try {
+		await deployer.executeTx([txnParams]);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+	}
 
 	// Passes because right secret is provided
 	txnParams.args = [convert.stringToBytes(secret)];
