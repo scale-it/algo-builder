@@ -7,14 +7,16 @@ async function run(runtimeEnv, deployer) {
 	const managerAcc = deployer.accountsByName.get("alice");
 	const creatorAccount = deployer.accountsByName.get("john");
 
-	const algoTxnParams = {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: managerAcc.addr,
-		amountMicroAlgos: 10e6,
-		payFlags: {},
-	};
+	const algoTxnParams = [
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: managerAcc.addr,
+			amountMicroAlgos: 10e6,
+			payFlags: {},
+		},
+	];
 	await deployer.executeTx(algoTxnParams);
 	algoTxnParams.toAccountAddr = creatorAccount.addr;
 	await deployer.executeTx(algoTxnParams);
@@ -74,14 +76,16 @@ async function run(runtimeEnv, deployer) {
 	// update issuer address in bond-dapp
 	appArgs = ["str:update_issuer_address", convert.addressToPk(issuerLsig.address())];
 
-	const appCallParams = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: managerAcc,
-		appID: bondAppInfo.appID,
-		payFlags: {},
-		appArgs: appArgs,
-	};
+	const appCallParams = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: managerAcc,
+			appID: bondAppInfo.appID,
+			payFlags: {},
+			appArgs: appArgs,
+		},
+	];
 	await deployer.executeTx(appCallParams);
 
 	console.log("Issuer address updated!");

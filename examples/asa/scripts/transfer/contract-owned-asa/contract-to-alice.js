@@ -63,16 +63,18 @@ async function run(runtimeEnv, deployer) {
 
 	try {
 		// tx FAIL: trying to send asset directly without calling stateful smart contract
-		await deployer.executeTx({
-			type: types.TransactionType.TransferAsset,
-			sign: types.SignType.LogicSignature,
-			fromAccountAddr: lsig.address(),
-			toAccountAddr: alice.addr,
-			amount: 20n,
-			assetID: assetID,
-			lsig: lsig,
-			payFlags: { totalFee: 1000 },
-		});
+		await deployer.executeTx([
+			{
+				type: types.TransactionType.TransferAsset,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: lsig.address(),
+				toAccountAddr: alice.addr,
+				amount: 20n,
+				assetID: assetID,
+				lsig: lsig,
+				payFlags: { totalFee: 1000 },
+			},
+		]);
 	} catch (e) {
 		console.error(e);
 	}
