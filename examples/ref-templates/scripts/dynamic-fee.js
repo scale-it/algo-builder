@@ -38,7 +38,11 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
-	await deployer.executeTx(transactions);
+	try {
+		await deployer.executeTx(transactions);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+	}
 
 	transactions = [
 		mkTxnParams(masterAccount, escrow, 1000, signedContract, { totalFee: 1000 }),

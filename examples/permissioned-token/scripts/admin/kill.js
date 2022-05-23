@@ -28,7 +28,11 @@ async function kill(deployer) {
 	];
 
 	console.log("* Kill Token: tesla *");
-	await deployer.executeTx(killParams);
+	try {
+		await deployer.executeTx(killParams);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+	}
 }
 
 async function run(runtimeEnv, deployer) {
