@@ -1,6 +1,5 @@
 const { types } = require("@algo-builder/web");
 const { convert } = require("@algo-builder/algob");
-const { executeTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -8,22 +7,26 @@ async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
 	const bob = deployer.accountsByName.get("bob");
 
-	await deployer.executeTx({
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: alice.addr,
-		amountMicroAlgos: 200000000,
-		payFlags: {},
-	});
-	await deployer.executeTx({
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: bob.addr,
-		amountMicroAlgos: 200000000,
-		payFlags: {},
-	});
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: alice.addr,
+			amountMicroAlgos: 200000000,
+			payFlags: {},
+		},
+	]);
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 200000000,
+			payFlags: {},
+		},
+	]);
 
 	// Get last round.
 	const status = await deployer.algodClient.status().do();

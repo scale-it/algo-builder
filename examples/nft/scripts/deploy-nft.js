@@ -9,14 +9,16 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const john = deployer.accountsByName.get("john");
 
-	const algoTxnParams = {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: john.addr,
-		amountMicroAlgos: 401000000, // 401 algos
-		payFlags: { note: "funding account" },
-	};
+	const algoTxnParams = [
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: john.addr,
+			amountMicroAlgos: 401000000, // 401 algos
+			payFlags: { note: "funding account" },
+		},
+	];
 
 	await deployer.executeTx(algoTxnParams); // fund john
 

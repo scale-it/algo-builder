@@ -30,20 +30,22 @@ async function run(runtimeEnv, deployer) {
 		console.log("The Winner is CandidateA!!");
 	}
 
-	const txnParam = {
-		type: types.TransactionType.DeleteApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: votingAdminAccount,
-		appID: appInfo.appID,
-		payFlags: {},
-	};
+	const txnParam = [
+		{
+			type: types.TransactionType.DeleteApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: votingAdminAccount,
+			appID: appInfo.appID,
+			payFlags: {},
+		},
+	];
 
 	// Delete Application
 	console.log("Deleting Application");
 	await deployer.executeTx(txnParam);
 
-	txnParam.fromAccount = alice;
-	txnParam.type = types.TransactionType.ClearApp;
+	txnParam[0].fromAccount = alice;
+	txnParam[0].type = types.TransactionType.ClearApp;
 
 	// Clear voter's account
 	console.log("Clearing Alice's Account");

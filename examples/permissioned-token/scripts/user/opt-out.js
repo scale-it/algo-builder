@@ -17,15 +17,17 @@ async function optOut(deployer, account) {
 	 * is different than creator, then creator will need to send these assets
 	 * to reserve account (after user has opted out).
 	 */
-	const optOutParams = {
-		type: types.TransactionType.TransferAsset,
-		sign: types.SignType.SecretKey,
-		fromAccount: account,
-		toAccountAddr: account.addr,
-		assetID: tesla.assetIndex,
-		amount: 0,
-		payFlags: { totalFee: 1000, closeRemainderTo: tesla.creator },
-	};
+	const optOutParams = [
+		{
+			type: types.TransactionType.TransferAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: account,
+			toAccountAddr: account.addr,
+			assetID: tesla.assetIndex,
+			amount: 0,
+			payFlags: { totalFee: 1000, closeRemainderTo: tesla.creator },
+		},
+	];
 
 	console.log(`* Opting out [${account.name}:${account.addr}] from token 'tesla' *`);
 	await deployer.executeTx(optOutParams);

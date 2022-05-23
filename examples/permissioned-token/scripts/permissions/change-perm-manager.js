@@ -11,15 +11,17 @@ const accounts = require("../common/accounts");
 async function changePermissionsManager(deployer, permissionsManager, address) {
 	const permissionAppInfo = deployer.getApp("Permissions");
 
-	const changePerManagerParams = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: permissionsManager, // asset manager account (fails otherwise)
-		appID: permissionAppInfo.appID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:change_permissions_manager"],
-		accounts: [address],
-	};
+	const changePerManagerParams = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: permissionsManager, // asset manager account (fails otherwise)
+			appID: permissionAppInfo.appID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:change_permissions_manager"],
+			accounts: [address],
+		},
+	];
 
 	console.log(`\n* Updating permissions manager to: ${address} *`);
 	await deployer.executeTx(changePerManagerParams);

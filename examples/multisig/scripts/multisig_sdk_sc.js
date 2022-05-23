@@ -37,9 +37,9 @@ async function run(runtimeEnv, deployer) {
 		payFlags: { note: "Funding multisig account", totalFee: 1000 },
 	};
 	// Funding multisignature account
-	await deployer.executeTx(txnParams);
+	await executeTx(deployer, txnParams);
 	txnParams = bob.addr;
-	await deployer.executeTx(txnParams); // fund bob
+	await executeTx(deployer, txnParams); // fund bob
 
 	await deployer.addCheckpointKV("User Checkpoint", "Fund Multisignature Account");
 
@@ -48,11 +48,11 @@ async function run(runtimeEnv, deployer) {
 	txnParams.sign = types.SignType.LogicSignature;
 	txnParams.amountMicroAlgos = 58;
 	// Transaction PASS - according to sample-asc.teal logic, amount should be <= 100
-	await deployer.executeTx(txnParams);
+	await executeTx(deployer, txnParams);
 
 	txnParams.amountMicroAlgos = 580;
 	// Transaction FAIL - according to sample-asc.teal logic, amount should be <= 100
-	await deployer.executeTx(txnParams);
+	await executeTx(deployer, txnParams);
 }
 
 module.exports = { default: run };

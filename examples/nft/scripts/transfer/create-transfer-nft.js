@@ -21,14 +21,16 @@ async function run(runtimeEnv, deployer) {
 	// arguments: "create", nft_data_ref, data_hash
 	let appArgs = ["create", nftRef, "1234"].map(convert.stringToBytes);
 
-	let txnParam = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		appID: appID,
-		payFlags: {},
-		appArgs,
-	};
+	let txnParam = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			appID: appID,
+			payFlags: {},
+			appArgs,
+		},
+	];
 	await deployer.executeTx(txnParam); // creates new nft (with id = 1)
 
 	// print Global Count after creation
@@ -47,15 +49,17 @@ async function run(runtimeEnv, deployer) {
 
 	// transfer nft from master to john
 	// account_A = master, account_B = john
-	txnParam = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		appID: appID,
-		payFlags: {},
-		accounts: [masterAccount.addr, john.addr],
-		appArgs,
-	};
+	txnParam = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			appID: appID,
+			payFlags: {},
+			accounts: [masterAccount.addr, john.addr],
+			appArgs,
+		},
+	];
 	await deployer.executeTx(txnParam);
 
 	await printLocalNFT(deployer, masterAccount.addr, appID);
