@@ -65,6 +65,8 @@ console.log("txn1 information: ", receipts[2]);
 - Every opcode class has been updated and now their `execute` method returns its cost.
 - Upgraded PyTEAL version [`0.13.0`](https://github.com/algorand/pyteal/releases/tag/v0.13.0) in Pipfile.
 
+- Documentation and examples were updated to use `deployer.executeTx` instead of `executeTx(deployer)`.
+
 ### Template improvements
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
