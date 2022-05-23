@@ -18,7 +18,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 	await deployer.executeTx(algoTxnParams);
-	algoTxnParams.toAccountAddr = creatorAccount.addr;
+	algoTxnParams[0].toAccountAddr = creatorAccount.addr;
 	await deployer.executeTx(algoTxnParams);
 
 	// Create B_0 - Bond Token
@@ -67,7 +67,7 @@ async function run(runtimeEnv, deployer) {
 	await deployer.mkContractLsig("IssuerLsig", "issuer-lsig.py", scInitParam);
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 
-	algoTxnParams.toAccountAddr = issuerLsig.address();
+	algoTxnParams[0].toAccountAddr = issuerLsig.address();
 	await deployer.executeTx(algoTxnParams);
 
 	// Only app manager can opt-in issueer lsig to ASA
