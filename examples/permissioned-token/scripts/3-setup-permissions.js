@@ -49,15 +49,17 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
 	try {
 		const appArgs = ["str:set_permission", `int:${permissionAppInfo.appID}`];
 
-		await deployer.executeTx({
-			type: types.TransactionType.CallApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: owner, // asa manager account
-			appID: controllerappID,
-			payFlags: { totalFee: 1000 },
-			appArgs: appArgs,
-			foreignAssets: [tesla.assetIndex], // controller sc verifies if correct token is being used + asa.manager is correct one
-		});
+		await deployer.executeTx([
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: owner, // asa manager account
+				appID: controllerappID,
+				payFlags: { totalFee: 1000 },
+				appArgs: appArgs,
+				foreignAssets: [tesla.assetIndex], // controller sc verifies if correct token is being used + asa.manager is correct one
+			},
+		]);
 	} catch (e) {
 		console.log("Error occurred", e.response.error);
 	}

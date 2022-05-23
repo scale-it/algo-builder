@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { accounts } = require("./utils");
 

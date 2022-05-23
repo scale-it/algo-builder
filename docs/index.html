@@ -197,7 +197,7 @@ async function run (runtimeEnv, deployer) {
   const bob `=` deployer.accountsByName.get('bob');
 
   // transfer ALGO
-  await executeTx(deployer, {
+  await deployer.executeTx({
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,

@@ -19,15 +19,17 @@ async function run(runtimeEnv, deployer) {
 	const goldOwner = deployer.accountsByName.get("alice");
 
 	// execute asset transfer transaction
-	await deployer.executeTx({
-		type: types.TransactionType.TransferAsset,
-		sign: types.SignType.SecretKey,
-		fromAccount: goldOwner,
-		toAccountAddr: john.addr,
-		amount: 1,
-		assetID: gold.assetIndex,
-		payFlags: { totalFee: 1000 },
-	});
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: goldOwner,
+			toAccountAddr: john.addr,
+			amount: 1,
+			assetID: gold.assetIndex,
+			payFlags: { totalFee: 1000 },
+		},
+	]);
 
 	console.log("Balance: ", await balanceOf(deployer, john.addr, gold.assetIndex));
 }

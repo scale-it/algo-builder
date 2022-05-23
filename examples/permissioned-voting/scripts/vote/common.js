@@ -1,4 +1,4 @@
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
 		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
 		else await deployer.executeTx([txnParams]);

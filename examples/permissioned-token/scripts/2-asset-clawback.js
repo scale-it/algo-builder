@@ -34,14 +34,16 @@ async function setupClawback(runtimeEnv, deployer) {
 	await deployer.fundLsig("ClawbackLsig", { funder: owner, fundingMicroAlgo: 5e6 }, {});
 
 	console.log("\n** Updating asset clawback to lsig **");
-	const assetConfigParams = {
-		type: types.TransactionType.ModifyAsset,
-		sign: types.SignType.SecretKey,
-		fromAccount: owner,
-		assetID: tesla.assetIndex,
-		fields: { clawback: clawbackAddress },
-		payFlags: { totalFee: 1000 },
-	};
+	const assetConfigParams = [
+		{
+			type: types.TransactionType.ModifyAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner,
+			assetID: tesla.assetIndex,
+			fields: { clawback: clawbackAddress },
+			payFlags: { totalFee: 1000 },
+		},
+	];
 	await deployer.executeTx(assetConfigParams);
 }
 
