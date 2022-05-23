@@ -9,14 +9,16 @@ async function updateReserveByRekeying(deployer, address) {
 	const owner = deployer.accountsByName.get(accounts.owner);
 
 	// Rekey oldReserve to newReserve
-	const rekeyReserveParam = {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: owner,
-		toAccountAddr: owner.addr,
-		amountMicroAlgos: 0,
-		payFlags: { totalFee: 1000, rekeyTo: address },
-	};
+	const rekeyReserveParam = [
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner,
+			toAccountAddr: owner.addr,
+			amountMicroAlgos: 0,
+			payFlags: { totalFee: 1000, rekeyTo: address },
+		},
+	];
 
 	console.log(`* Rekeying reserve address from: ${owner.addr} to: ${address} *`);
 	await deployer.executeTx(rekeyReserveParam);

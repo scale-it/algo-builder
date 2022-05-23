@@ -66,14 +66,21 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction Fails because Alice can only vote once.
 	console.log("Alice tries to cast vote again");
-	await deployer.executeTx(transactions);
+	try {
+		await deployer.executeTx(transactions);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e.error);
+	}
 
 	// Transaction Fails because bob is not registered voter.
 	console.log("Bob tries to cast vote");
 	transactions[0].fromAccount = bob;
 	transactions[1].fromAccount = bob;
-
-	await deployer.executeTx(transactions);
+	try {
+		await deployer.executeTx(transactions);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e.error);
+	}
 }
 
 module.exports = { default: run };

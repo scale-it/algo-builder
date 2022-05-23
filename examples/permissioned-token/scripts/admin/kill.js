@@ -15,15 +15,17 @@ async function kill(deployer) {
 	 */
 	const tesla = deployer.asa.get("tesla");
 	const controllerAppInfo = deployer.getApp("Controller");
-	const killParams = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: owner,
-		appID: controllerAppInfo.appID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:kill"],
-		foreignAssets: [tesla.assetIndex],
-	};
+	const killParams = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner,
+			appID: controllerAppInfo.appID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:kill"],
+			foreignAssets: [tesla.assetIndex],
+		},
+	];
 
 	console.log("* Kill Token: tesla *");
 	await deployer.executeTx(killParams);
