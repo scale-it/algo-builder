@@ -1,8 +1,11 @@
-import algosdk, { SuggestedParams, Transaction } from "algosdk";
+import { Txn } from "@randlabs/myalgo-connect";
+import algosdk, { SignedTransaction, SuggestedParams, Transaction } from "algosdk";
+import { ALGORAND_ZERO_ADDRESS_STRING } from "algosdk/dist/types/src/encoding/address";
+import { types } from "..";
 
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { AccountAddress, ExecParams, SignType, TransactionType, TxParams } from "../types";
+import { AccountAddress, AssetModFields, ExecParams, SignType, TransactionType, TxParams } from "../types";
 import { parseAppArgs } from "./parsing";
 
 export function encodeNote(
@@ -16,6 +19,12 @@ export function encodeNote(
 	return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
 
+export function decodeUint8ArrayToString(toDecode: Uint8Array | undefined): string | undefined {
+	if (toDecode === undefined) return undefined;
+	return new TextDecoder().decode(toDecode);
+}
+
+
 /**
  * Returns from address from the transaction params depending on @SignType
  * @param execParams transaction execution params passed by user
@@ -26,6 +35,95 @@ export function getFromAddress(execParams: ExecParams): AccountAddress {
 	}
 	return execParams.fromAccountAddr;
 }
+
+/**
+ * Returns revocation targer address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionRevokeAddress(transaction: Transaction): AccountAddress {
+	if (transaction.assetRevocationTarget !== undefined) {
+		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey)
+	} else {
+		return ALGORAND_ZERO_ADDRESS_STRING;
+	}
+}
+
+/**
+ * Returns from address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionFromAddress(transaction: Transaction): AccountAddress {
+	return algosdk.encodeAddress(transaction.from.publicKey)
+}
+
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionToAddress(transaction: Transaction): AccountAddress {
+	return algosdk.encodeAddress(transaction.to.publicKey)
+}
+
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionCloseReminderToAddress(transaction: Transaction): AccountAddress {
+	if (transaction.closeRemainderTo !== undefined) {
+		return algosdk.encodeAddress(transaction.closeRemainderTo.publicKey)
+	} else {
+		return ALGORAND_ZERO_ADDRESS_STRING;
+	}
+}
+
+/**
+ * Returns  reKeyTo address of the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionReKeyToToAddress(transaction: Transaction): AccountAddress {
+	if (transaction.reKeyTo !== undefined) {
+		return algosdk.encodeAddress(transaction.reKeyTo.publicKey)
+	} else {
+		return ALGORAND_ZERO_ADDRESS_STRING;
+	}
+}
+
+/**
+ * Returns freeze target address of the Transaction object
+ * @param transaction Transaction Object
+ */
+ export function getTransactionFreezeAddress(transaction: Transaction): AccountAddress {
+	if (transaction.freezeAccount !== undefined) {
+		return algosdk.encodeAddress(transaction.freezeAccount.publicKey)
+	} else {
+		return ALGORAND_ZERO_ADDRESS_STRING;
+	}
+}
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTransactionFlags(transaction: Transaction): types.TxParams {
+	let transactionFlags: types.TxParams = {};
+	transactionFlags.closeRemainderTo = getTransactionCloseReminderToAddress(transaction);
+	transactionFlags.lease = transaction.lease;
+	transactionFlags.note = decodeUint8ArrayToString(transaction.note)
+	transactionFlags.rekeyTo = getTransactionReKeyToToAddress(transaction);
+	transactionFlags.firstValid = transaction.firstRound;
+	transactionFlags.validRounds = transaction.lastRound - transaction.firstRound;
+	if (transaction.flatFee === true) {
+		transactionFlags.totalFee = transaction.fee;
+		transactionFlags.flatFee = true;
+	} else {
+		transactionFlags.feePerByte = transaction.fee;
+	}
+	return transactionFlags;
+}
+
+
+
+
+
 
 /**
  * Using flatFee, if flatFee is true, set totalFee
@@ -322,4 +420,24 @@ export function mkTransaction(
 			});
 		}
 	}
+}
+
+/**
+ * Returns the fields necessary for an Asset Modification
+ * @param transaction Transaction Object
+ */
+export function getAssetReconfigureFields(transaction: Transaction): AssetModFields {
+	let modificationFields: AssetModFields = {};
+	const encodedTransaction = transaction.get_obj_for_encoding();
+	if (encodedTransaction.apar !== undefined &&
+		encodedTransaction.apar.m !== undefined &&
+		encodedTransaction.apar.c !== undefined &&
+		encodedTransaction.apar.f !== undefined &&
+		encodedTransaction.apar.r !== undefined) {
+		modificationFields.clawback = encodedTransaction.apar.c.toString();
+		modificationFields.freeze = encodedTransaction.apar.f.toString();
+		modificationFields.manager = encodedTransaction.apar.m.toString();
+		modificationFields.reserve = encodedTransaction.apar.r.toString();
+	}
+	return modificationFields;
 }

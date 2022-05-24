@@ -921,8 +921,10 @@ export class Runtime {
 
 		// Run TEAL program associated with each transaction and
 		// then execute the transaction without interacting with store.
-		const runtimeTxnParams: types.ExecParams[] = txnParams.map((txn) =>
-			types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
+
+		//TODO this has to be fixed. if execParams convert to SignedTransaction
+		const runtimeTxnParams: algosdk.SignedTransaction [] = txnParams.map((txn) =>
+			types.isExecParams(txn) ? webTx.mkTransaction(txn, mockSuggestedParams()) : txn
 		);
 
 		// calculate budget for single/group tx

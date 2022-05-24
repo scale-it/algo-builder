@@ -1,4 +1,5 @@
 import { parsing, types } from "@algo-builder/web";
+import { AssetModFields } from "@algo-builder/web/build/types";
 import {
 	encodeAddress,
 	EncodedAssetParams,
@@ -226,7 +227,7 @@ export function isEncTxAssetDeletion(txn: EncTx): boolean {
 }
 
 /**
- * Check if given encoded transaction obj is asset deletion
+ * Check if given encoded transaction obj is asset creation
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig(txn: EncTx): boolean {
@@ -238,6 +239,56 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
 	); // AND should not be asset deletion
 }
 
+/**
+ * Check if given encoded transaction obj is asset creation
+ * @param txn Encoded EncTx Object
+ */
+ export function isEncTxAssetCreate(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid === undefined && // assetIndex should be undefined
+		txn.apar !== undefined // assetParameters should not be undefined
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset reconfiguration
+ * @param txn Encoded EncTx Object
+ */
+ export function isEncTxAssetReconfigure(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid !== undefined && // assetIndex should be undefined
+		txn.apar !== undefined && // assetParameters should not be undefined
+		txn.apar.m !== undefined && // manager
+		txn.apar.f !== undefined && // freeze
+		txn.apar.c !== undefined && // clawback
+		txn.apar.r !== undefined    // reserve
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset revoke
+ * @param txn Encoded EncTx Object
+ */
+ export function isEncTxAssetRevoke(txn: EncTx): boolean {
+	return txn.asnd !== undefined;
+}
+/**
+ * Checks if given encoded transaction obj is asset freeze
+ * @param txn Encoded EncTx Object
+ */
+ export function isEncTxAssetFreeze(txn: EncTx): boolean {
+	return (txn.afrz !== undefined &&
+			txn.fadd !== undefined );
+}
+/**
+ * Checks if given encoded transaction obj is asset opt in
+ * @param txn Encoded EncTx Object
+ */
+ export function isEncTxAssetOptIn(txn: EncTx): boolean {
+	return (txn.arcv !== undefined &&
+			txn.asnd !== undefined &&
+			txn.arcv === txn.asnd );
+}
 /**
  * Check if given encoded transaction object is app creation
  * @param txn Encoded EncTx Object
