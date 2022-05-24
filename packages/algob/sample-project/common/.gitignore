@@ -1,0 +1,6 @@
+/node_data
+.dockerignore
+artifacts/
+/algob.config-local.js
+node_modules
+.DS_Store

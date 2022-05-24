@@ -1,4 +1,3 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
@@ -20,117 +19,122 @@ const fee = 1000;
 // test above.
 // NOTE: when updating this test, you must update /docs/guide/testing-teal.md
 describe("Logic Signature: Escrow Account", function () {
-  useFixture("escrow-account");
+	useFixture("escrow-account");
 
-  let john = new AccountStore(initialJohnHolding, johnAccount); // 0.005 ALGO
-  const admin = new AccountStore(1e12);
-  let runtime: Runtime;
+	let john = new AccountStore(initialJohnHolding, johnAccount); // 0.005 ALGO
+	const admin = new AccountStore(1e12);
+	let runtime: Runtime;
 
-  // we can't load teal code and create an escrow, because in this test we are loading a
-  // fixture environment, which happens in `beforeAll`. So, consequently we need to move
-  // initialization of lsig and escrow to beforeAll
-  let lsig: LogicSigAccount;
-  let escrow: AccountStore;
-  let paymentTxParams: types.AlgoTransferParam;
+	// we can't load teal code and create an escrow, because in this test we are loading a
+	// fixture environment, which happens in `beforeAll`. So, consequently we need to move
+	// initialization of lsig and escrow to beforeAll
+	let lsig: LogicSigAccount;
+	let escrow: AccountStore;
+	let paymentTxParams: types.AlgoTransferParam;
 
-  this.beforeAll(function () {
-    runtime = new Runtime([john, admin]); // setup runtime
-    lsig = runtime.loadLogic('escrow.teal');
-    escrow = runtime.getAccount(lsig.address());
-    paymentTxParams = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.LogicSignature,
-      lsig: lsig,
-      fromAccountAddr: escrow.address,
-      toAccountAddr: john.address,
-      amountMicroAlgos: 100n,
-      payFlags: { totalFee: fee }
-    };
-  });
+	this.beforeAll(function () {
+		runtime = new Runtime([john, admin]); // setup runtime
+		lsig = runtime.loadLogic("escrow.teal");
+		escrow = runtime.getAccount(lsig.address());
+		paymentTxParams = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.LogicSignature,
+			lsig: lsig,
+			fromAccountAddr: escrow.address,
+			toAccountAddr: john.address,
+			amountMicroAlgos: 100n,
+			payFlags: { totalFee: fee },
+		};
+	});
 
-  // helper function
-  function syncAccounts (): void {
-    john = runtime.getAccount(john.address);
-    escrow = runtime.getAccount(escrow.address);
-  }
+	// helper function
+	function syncAccounts(): void {
+		john = runtime.getAccount(john.address);
+		escrow = runtime.getAccount(escrow.address);
+	}
 
-  it("should fund escrow account", function () {
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo, // payment
-      sign: types.SignType.SecretKey,
-      fromAccount: admin.account,
-      toAccountAddr: escrow.address,
-      amountMicroAlgos: initialEscrowHolding,
-      payFlags: { totalFee: fee }
-    });
+	it("should fund escrow account", function () {
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAlgo, // payment
+				sign: types.SignType.SecretKey,
+				fromAccount: admin.account,
+				toAccountAddr: escrow.address,
+				amountMicroAlgos: initialEscrowHolding,
+				payFlags: { totalFee: fee },
+			},
+		]);
 
-    // check initial balance
-    syncAccounts();
-    assert.equal(escrow.balance(), initialEscrowHolding);
-    assert.equal(john.balance(), initialJohnHolding);
-  });
+		// check initial balance
+		syncAccounts();
+		assert.equal(escrow.balance(), initialEscrowHolding);
+		assert.equal(john.balance(), initialJohnHolding);
+	});
 
-  it("should withdraw funds from escrow if txn params are correct", function () {
-    runtime.executeTx(paymentTxParams);
+	it("should withdraw funds from escrow if txn params are correct", function () {
+		runtime.executeTx([paymentTxParams]);
 
-    // check final state (updated accounts)
-    syncAccounts();
-    assert.equal(escrow.balance(), initialEscrowHolding - 100n - BigInt(fee));
-    assert.equal(john.balance(), initialJohnHolding + 100n);
-  });
+		// check final state (updated accounts)
+		syncAccounts();
+		assert.equal(escrow.balance(), initialEscrowHolding - 100n - BigInt(fee));
+		assert.equal(john.balance(), initialJohnHolding + 100n);
+	});
 
-  it("should reject transaction if amount > 100", function () {
-    expectRuntimeError(
-      () => runtime.executeTx({ ...paymentTxParams, amountMicroAlgos: 500n }),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
-  });
+	it("should reject transaction if amount > 100", function () {
+		expectRuntimeError(
+			() => runtime.executeTx([{ ...paymentTxParams, amountMicroAlgos: 500n }]),
+			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+		);
+	});
 
-  it("should reject transaction if Fee > 10000", function () {
-    expectRuntimeError(
-      () => runtime.executeTx({ ...paymentTxParams, payFlags: { totalFee: 0.1e6 } }),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
-  });
+	it("should reject transaction if Fee > 10000", function () {
+		expectRuntimeError(
+			() => runtime.executeTx([{ ...paymentTxParams, payFlags: { totalFee: 0.1e6 } }]),
+			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+		);
+	});
 
-  it("should reject transaction if type is not `pay`", function () {
-    expectRuntimeError(
-      () => runtime.executeTx({
-        ...paymentTxParams,
-        type: types.TransactionType.TransferAsset,
-        assetID: 1111,
-        amount: 10n // asset amount
-      }),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
-  });
+	it("should reject transaction if type is not `pay`", function () {
+		expectRuntimeError(
+			() =>
+				runtime.executeTx([
+					{
+						...paymentTxParams,
+						type: types.TransactionType.TransferAsset,
+						assetID: 1111,
+						amount: 10n, // asset amount
+					},
+				]),
+			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+		);
+	});
 
-  it("should reject transaction if receiver is not john", function () {
-    const bob = new AccountStore(100);
-    expectRuntimeError(
-      () => runtime.executeTx({ ...paymentTxParams, toAccountAddr: bob.address }),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
-  });
+	it("should reject transaction if receiver is not john", function () {
+		const bob = new AccountStore(100);
+		expectRuntimeError(
+			() => runtime.executeTx([{ ...paymentTxParams, toAccountAddr: bob.address }]),
+			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+		);
+	});
 
-  it("should correctly close escrow account if closeRemainderTo is passed", function () {
-    syncAccounts();
-    const escrowBal = escrow.balance();
-    const johnBal = john.balance();
-    assert.isAbove(Number(escrowBal), 0); // escrow balance should be > 0
+	it("should correctly close escrow account if closeRemainderTo is passed", function () {
+		syncAccounts();
+		const escrowBal = escrow.balance();
+		const johnBal = john.balance();
+		assert.isAbove(Number(escrowBal), 0); // escrow balance should be > 0
 
-    const closeParams: types.ExecParams = {
-      ...paymentTxParams,
-      amountMicroAlgos: 0n,
-      payFlags: {
-        totalFee: 1000,
-        closeRemainderTo: john.address
-      }
-    };
-    runtime.executeTx(closeParams);
+		const closeParams: types.ExecParams = {
+			...paymentTxParams,
+			amountMicroAlgos: 0n,
+			payFlags: {
+				totalFee: 1000,
+				closeRemainderTo: john.address,
+			},
+		};
+		runtime.executeTx([closeParams]);
 
-    syncAccounts();
-    assert.equal(escrow.balance(), 0n);
-    assert.equal(john.balance(), (johnBal + escrowBal) - BigInt(fee));
-  });
+		syncAccounts();
+		assert.equal(escrow.balance(), 0n);
+		assert.equal(john.balance(), johnBal + escrowBal - BigInt(fee));
+	});
 });

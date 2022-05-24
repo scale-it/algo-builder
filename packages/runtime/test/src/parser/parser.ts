@@ -4,115 +4,131 @@ import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add,
-  Addr,
-  Addw,
-  And,
-  AppGlobalDel,
-  AppGlobalGet,
-  AppGlobalGetEx,
-  AppGlobalPut,
-  AppLocalDel,
-  AppLocalGet,
-  AppLocalGetEx,
-  AppLocalPut,
-  AppOptedIn,
-  AppParamsGet,
-  Arg,
-  Assert,
-  Balance,
-  BitLen,
-  BitwiseAnd,
-  BitwiseNot,
-  BitwiseOr,
-  BitwiseXor,
-  Branch,
-  BranchIfNotZero,
-  BranchIfZero,
-  Btoi,
-  Byte,
-  Bytec,
-  Callsub,
-  Concat,
-  Cover,
-  Dig,
-  Div,
-  DivModw,
-  Dup,
-  Dup2,
-  EcdsaPkDecompress,
-  EcdsaPkRecover,
-  EcdsaVerify,
-  Ed25519verify,
-  EqualTo,
-  Err,
-  Exp,
-  Expw,
-  Extract,
-  Extract3,
-  ExtractUint16,
-  ExtractUint32,
-  ExtractUint64,
-  Gaid,
-  Gaids,
-  GetAssetDef,
-  GetAssetHolding,
-  GetBit,
-  GetByte,
-  Gload,
-  Gloads,
-  Global,
-  GreaterThan,
-  GreaterThanEqualTo,
-  Gtxn,
-  Gtxna,
-  Gtxns,
-  Gtxnsa,
-  Int,
-  Intc,
-  Itob,
-  ITxnBegin,
-  ITxnField,
-  ITxnSubmit,
-  Keccak256,
-  Label,
-  Len,
-  LessThan,
-  LessThanEqualTo,
-  Load,
-  Loads,
-  MinBalance,
-  Mod,
-  Mul,
-  Mulw,
-  Not,
-  NotEqualTo,
-  Or,
-  Pop,
-  Pragma,
-  PushBytes,
-  PushInt,
-  Retsub,
-  Return,
-  Select,
-  SetBit,
-  SetByte,
-  Sha256,
-  Sha512_256,
-  Shl,
-  Shr,
-  Sqrt,
-  Store,
-  Stores,
-  Sub,
-  Substring,
-  Substring3,
-  Swap,
-  Txn,
-  Txna,
-  Uncover
+	AcctParamsGet,
+	Add,
+	Addr,
+	Addw,
+	And,
+	AppGlobalDel,
+	AppGlobalGet,
+	AppGlobalGetEx,
+	AppGlobalPut,
+	AppLocalDel,
+	AppLocalGet,
+	AppLocalGetEx,
+	AppLocalPut,
+	AppOptedIn,
+	AppParamsGet,
+	Arg,
+	Assert,
+	Balance,
+	Base64Decode,
+	BitLen,
+	BitwiseAnd,
+	BitwiseNot,
+	BitwiseOr,
+	BitwiseXor,
+	Branch,
+	BranchIfNotZero,
+	BranchIfZero,
+	Bsqrt,
+	Btoi,
+	Byte,
+	Bytec,
+	Callsub,
+	Concat,
+	Cover,
+	Dig,
+	Div,
+	DivModw,
+	Divw,
+	Dup,
+	Dup2,
+	EcdsaPkDecompress,
+	EcdsaPkRecover,
+	EcdsaVerify,
+	Ed25519verify,
+	EqualTo,
+	Err,
+	Exp,
+	Expw,
+	Extract,
+	Extract3,
+	ExtractUint16,
+	ExtractUint32,
+	ExtractUint64,
+	Gaid,
+	Gaids,
+	GetAssetDef,
+	GetAssetHolding,
+	GetBit,
+	GetByte,
+	Gitxn,
+	Gitxna,
+	Gitxnas,
+	Gload,
+	Gloads,
+	Gloadss,
+	Global,
+	GreaterThan,
+	GreaterThanEqualTo,
+	Gtxn,
+	Gtxna,
+	Gtxns,
+	Gtxnsa,
+	Int,
+	Intc,
+	Itob,
+	ITxnas,
+	ITxnBegin,
+	ITxnField,
+	ITxnNext,
+	ITxnSubmit,
+	Keccak256,
+	Label,
+	Len,
+	LessThan,
+	LessThanEqualTo,
+	Load,
+	Loads,
+	MinBalance,
+	Mod,
+	Mul,
+	Mulw,
+	Not,
+	NotEqualTo,
+	Or,
+	Pop,
+	Pragma,
+	PushBytes,
+	PushInt,
+	Retsub,
+	Return,
+	Select,
+	SetBit,
+	SetByte,
+	Sha256,
+	Sha512_256,
+	Shl,
+	Shr,
+	Sqrt,
+	Store,
+	Stores,
+	Sub,
+	Substring,
+	Substring3,
+	Swap,
+	Txn,
+	Txna,
+	Uncover,
 } from "../../../src/interpreter/opcode-list";
-import { AppParamDefined, MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
+import {
+	AcctParamQueryFields,
+	AppParamDefined,
+	MAX_UINT64,
+	MaxTEALVersion,
+	MIN_UINT64,
+} from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
@@ -121,1737 +137,2592 @@ import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
-  describe("Extract words from line", () => {
-    it("should return correct words for addr", function () {
-      let res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB");
-      const expected = ["addr", "KAGKGFFKGKGFGLFFBSLFBJKSFB"];
+	describe("Extract words from line", () => {
+		it("should return correct words for addr", function () {
+			let res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB");
+			const expected = ["addr", "KAGKGFFKGKGFGLFFBSLFBJKSFB"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB       //comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB       //comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("addr              KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("addr              KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("      addr     KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here       ");
-      assert.deepEqual(res, expected);
-    });
+			res = wordsFromLine("      addr     KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here       ");
+			assert.deepEqual(res, expected);
+		});
 
-    it("should return correct words for byte base64", () => {
-      let res = wordsFromLine("byte base64 BKBDKSKDK");
-      let expected = ["byte", "base64", "BKBDKSKDK"];
+		it("should return correct words for byte base64", () => {
+			let res = wordsFromLine("byte base64 BKBDKSKDK");
+			let expected = ["byte", "base64", "BKBDKSKDK"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("byte base64(BKBDKSKDK)");
-      expected = ["byte", "base64(BKBDKSKDK)"];
+			res = wordsFromLine("byte base64(BKBDKSKDK)");
+			expected = ["byte", "base64(BKBDKSKDK)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("byte base64(BKBDKSKD/K)");
-      expected = ["byte", "base64(BKBDKSKD/K)"];
+			res = wordsFromLine("byte base64(BKBDKSKD/K)");
+			expected = ["byte", "base64(BKBDKSKD/K)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB)");
-      expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
+			res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB)");
+			expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      // Ignore `//` present in () because it may be a valid base64, but ignore outer comments
-      res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB) // comment here");
-      expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
+			// Ignore `//` present in () because it may be a valid base64, but ignore outer comments
+			res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB) // comment here");
+			expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should return correct words for byte base32", () => {
-      let res = wordsFromLine("byte     base32       BKBDKSKDK//commenthere");
-      let expected = ["byte", "base32", "BKBDKSKDK"];
+		it("should return correct words for byte base32", () => {
+			let res = wordsFromLine("byte     base32       BKBDKSKDK//commenthere");
+			let expected = ["byte", "base32", "BKBDKSKDK"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("      byte  base32(BKBDKSKDK) //comment");
-      expected = ["byte", "base32(BKBDKSKDK)"];
+			res = wordsFromLine("      byte  base32(BKBDKSKDK) //comment");
+			expected = ["byte", "base32(BKBDKSKDK)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("byte b32(BKBDKSKDK)");
-      expected = ["byte", "b32(BKBDKSKDK)"];
+			res = wordsFromLine("byte b32(BKBDKSKDK)");
+			expected = ["byte", "b32(BKBDKSKDK)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("byte b32 BKBDKSKDK//comment");
-      expected = ["byte", "b32", "BKBDKSKDK"];
+			res = wordsFromLine("byte b32 BKBDKSKDK//comment");
+			expected = ["byte", "b32", "BKBDKSKDK"];
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should return correct words for byte string literal", () => {
-      let res = wordsFromLine('byte "STRING LITERAL"');
-      let expected = ["byte", '"STRING LITERAL"'];
+		it("should return correct words for byte string literal", () => {
+			let res = wordsFromLine('byte "STRING LITERAL"');
+			let expected = ["byte", '"STRING LITERAL"'];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine('byte "STRING \\"NESTED STRING\\" END"');
-      expected = ["byte", '"STRING \\"NESTED STRING\\" END"'];
+			res = wordsFromLine('byte "STRING \\"NESTED STRING\\" END"');
+			expected = ["byte", '"STRING \\"NESTED STRING\\" END"'];
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should return correct words for int", () => {
-      let res = wordsFromLine("int 123");
-      const expected = ["int", "123"];
+		it("should return correct words for int", () => {
+			let res = wordsFromLine("int 123");
+			const expected = ["int", "123"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("int 123//comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("int 123//comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("       int       123       //comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("       int       123       //comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("int 123 //comment here");
-      assert.deepEqual(res, expected);
-    });
+			res = wordsFromLine("int 123 //comment here");
+			assert.deepEqual(res, expected);
+		});
 
-    it("should return correct words for operators", () => {
-      let res = wordsFromLine("+");
-      let expected = ["+"];
+		it("should return correct words for operators", () => {
+			let res = wordsFromLine("+");
+			let expected = ["+"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("  +//comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("  +//comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("+ //comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("+ //comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("         - //comment            here");
-      expected = ["-"];
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("         - //comment            here");
+			expected = ["-"];
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("- //comment here");
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("- //comment here");
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("/ //comment here");
-      expected = ["/"];
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("/ //comment here");
+			expected = ["/"];
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("* //comment here");
-      expected = ["*"];
-      assert.deepEqual(res, expected);
+			res = wordsFromLine("* //comment here");
+			expected = ["*"];
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("      *       //    comment     here");
-      assert.deepEqual(res, expected);
-    });
+			res = wordsFromLine("      *       //    comment     here");
+			assert.deepEqual(res, expected);
+		});
 
-    // more edge cases
-    // space before parentheses,
-    // space after base64: base64 (xxx ), base64( xxx) ..
-    it("should extract correct words from line", () => {
-      let res = wordsFromLine("base64 (abcd)");
-      let expected = ["base64", "(abcd)"];
+		// more edge cases
+		// space before parentheses,
+		// space after base64: base64 (xxx ), base64( xxx) ..
+		it("should extract correct words from line", () => {
+			let res = wordsFromLine("base64 (abcd)");
+			let expected = ["base64", "(abcd)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("base64 (abcd )");
-      expected = ["base64", "(abcd", ")"];
+			res = wordsFromLine("base64 (abcd )");
+			expected = ["base64", "(abcd", ")"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("base64( abcd)");
-      expected = ["base64(", "abcd)"];
+			res = wordsFromLine("base64( abcd)");
+			expected = ["base64(", "abcd)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("base64(ab cd)");
-      expected = ["base64(ab", "cd)"];
+			res = wordsFromLine("base64(ab cd)");
+			expected = ["base64(ab", "cd)"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine('base64 "ab cd"');
-      expected = ["base64", '"ab cd"'];
+			res = wordsFromLine('base64 "ab cd"');
+			expected = ["base64", '"ab cd"'];
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should extract correct words from line", () => {
-      let res = wordsFromLine("arg 1//comment here");
-      let expected = ["arg", "1"];
+		it("should extract correct words from line", () => {
+			let res = wordsFromLine("arg 1//comment here");
+			let expected = ["arg", "1"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("arg_0// comment // comment // here");
-      expected = ["arg_0"];
+			res = wordsFromLine("arg_0// comment // comment // here");
+			expected = ["arg_0"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("//comment int 2");
-      expected = [];
+			res = wordsFromLine("//comment int 2");
+			expected = [];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("         txn             LastValid       // comment here");
-      expected = ["txn", "LastValid"];
+			res = wordsFromLine("         txn             LastValid       // comment here");
+			expected = ["txn", "LastValid"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("     ed25519verify     // here");
-      expected = ["ed25519verify"];
+			res = wordsFromLine("     ed25519verify     // here");
+			expected = ["ed25519verify"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("/");
-      expected = ["/"];
+			res = wordsFromLine("/");
+			expected = ["/"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("//");
-      expected = [];
+			res = wordsFromLine("//");
+			expected = [];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("!//");
-      expected = ["!"];
+			res = wordsFromLine("!//");
+			expected = ["!"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("!=//");
-      expected = ["!="];
+			res = wordsFromLine("!=//");
+			expected = ["!="];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("%//here");
-      expected = ["%"];
+			res = wordsFromLine("%//here");
+			expected = ["%"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("|//");
-      expected = ["|"];
+			res = wordsFromLine("|//");
+			expected = ["|"];
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should extract correct stateful words", () => {
-      let res = wordsFromLine("app_opted_in//comment here");
-      let expected = ["app_opted_in"];
+		it("should extract correct stateful words", () => {
+			let res = wordsFromLine("app_opted_in//comment here");
+			let expected = ["app_opted_in"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("          app_local_get     // comment here");
-      expected = ["app_local_get"];
+			res = wordsFromLine("          app_local_get     // comment here");
+			expected = ["app_local_get"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("          app_global_get_ex     // comment here");
-      expected = ["app_global_get_ex"];
+			res = wordsFromLine("          app_global_get_ex     // comment here");
+			expected = ["app_global_get_ex"];
 
-      assert.deepEqual(res, expected);
+			assert.deepEqual(res, expected);
 
-      res = wordsFromLine("  balance     // comment here");
-      expected = ["balance"];
+			res = wordsFromLine("  balance     // comment here");
+			expected = ["balance"];
 
-      assert.deepEqual(res, expected);
-    });
-  });
+			assert.deepEqual(res, expected);
+		});
+	});
 
-  describe("Opcode Objects from words", () => {
-    let interpreter: Interpreter;
-    beforeEach(function () {
-      interpreter = new Interpreter();
-      interpreter.tealVersion = MaxTEALVersion;
-    });
+	describe("Opcode Objects from words", () => {
+		let interpreter: Interpreter;
+		beforeEach(function () {
+			interpreter = new Interpreter();
+			interpreter.tealVersion = MaxTEALVersion;
+			interpreter.runtime = new Runtime([]);
+		});
 
-    it("should return correct opcode object for '+'", () => {
-      const res = opcodeFromSentence(["+"], 1, interpreter);
-      const expected = new Add([], 1);
+		it("should return correct opcode object for '+'", () => {
+			const res = opcodeFromSentence(["+"], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Add([], 1);
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should throw error for wrong field length for '+'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["+", "+"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
+		it("should throw error for wrong field length for '+'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["+", "+"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
 
-    it("should return correct opcode object for '-'", () => {
-      const res = opcodeFromSentence(["-"], 1, interpreter);
-      const expected = new Sub([], 1);
+		it("should return correct opcode object for '-'", () => {
+			const res = opcodeFromSentence(["-"], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Sub([], 1);
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should throw error for wrong field length for '-'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["-", "-"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
+		it("should throw error for wrong field length for '-'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["-", "-"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
 
-    it("should return correct opcode object for '/'", () => {
-      const res = opcodeFromSentence(["/"], 1, interpreter);
-      const expected = new Div([], 1);
+		it("should return correct opcode object for '/'", () => {
+			const res = opcodeFromSentence(["/"], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Div([], 1);
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should throw error for wrong field length for '/'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["/", "/"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
+		it("should throw error for wrong field length for '/'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["/", "/"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
 
-    it("should return correct opcode object for '*'", () => {
-      const res = opcodeFromSentence(["*"], 1, interpreter);
-      const expected = new Mul([], 1);
+		it("should return correct opcode object for '*'", () => {
+			const res = opcodeFromSentence(["*"], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Mul([], 1);
 
-      assert.deepEqual(res, expected);
-    });
+			assert.deepEqual(res, expected);
+		});
 
-    it("should throw error for wrong field length for '*'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["*", "*"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
-
-    it("should return correct opcode object for 'addr'", () => {
-      const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
-      const res = opcodeFromSentence(["addr", address], 1, interpreter);
-      const expected = new Addr([address], 1);
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should throw error for wrong field length for 'addr'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["addr"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
-
-    it("should throw error for invalid address for 'addr'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["addr", "AKGH12"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_ADDR
-      );
-    });
-
-    it("can use prefix 0x(hex) with 'int'", () => {
-      const valueInHex = "0x02";
-      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
-      const expected = new Int(["2"], 1);
-      assert.deepEqual(res, expected);
-    });
-
-    it("can use prefix 0(oct) with 'int'", () => {
-      const valueInHex = "010";
-      const res = opcodeFromSentence(["int", valueInHex], 1, interpreter);
-      const expected = new Int(["8"], 1);
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode object for 'int'", () => {
-      const value = "812546821";
-      const res = opcodeFromSentence(["int", value], 1, interpreter);
-      const expected = new Int([value], 1);
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should work when int arg is zero", () => {
-      const value = "0";
-      const res = opcodeFromSentence(["int", value], 1, interpreter);
-      const expected = new Int([value], 1);
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should throw error for wrong field length for 'int'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["int"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
-
-    it("should throw error for invalid number for 'int'", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["int", "123A12"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
-
-      // for dec format
-      expectRuntimeError(
-        () => opcodeFromSentence(["int", String(MAX_UINT64 + 5n)], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
-      );
-
-      // for hex format
-      expectRuntimeError(
-        () => opcodeFromSentence(["int", "0x" + (MAX_UINT64 + 5n).toString(16)], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
-      );
-
-      // for oct format
-      expectRuntimeError(
-        () => opcodeFromSentence(["int", "0" + (MAX_UINT64 + 5n).toString(8)], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["int", String(MIN_UINT64 - 5n)], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
-    });
-
-    it("should return correct label", () => {
-      const res = opcodeFromSentence(["label:"], 1, interpreter);
-      const expected = new Label(["label:"], 1);
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should throw error if wrong label is used", () => {
-      expectRuntimeError(
-        () => opcodeFromSentence(["substring:"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_LABEL
-      );
-    });
-
-    it("should return correct objects for `txn`", () => {
-      let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter);
-      let expected = new Txn(["Fee"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["txn", "Accounts", "1"], 1, interpreter);
-      expected = new Txn(["Accounts", "1"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["txn", "ApplicationArgs", "0"], 1, interpreter);
-      expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["txn", "fee"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
-      );
-    });
-
-    it("should return correct object for `gtxn`", () => {
-      let res = opcodeFromSentence(["gtxn", "0", "Fee"], 1, interpreter);
-      let expected = new Gtxn(["0", "Fee"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["gtxn", "0", "ApplicationArgs", "0"], 1, interpreter);
-      expected = new Gtxn(["0", "ApplicationArgs", "0"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["gtxn", "1"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
-    });
-
-    it("should return correct object for `txna`", () => {
-      let res = opcodeFromSentence(["txna", "Accounts", "0"], 1, interpreter);
-      let expected = new Txna(["Accounts", "0"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["txna", "ApplicationArgs", "2"], 1, interpreter);
-      expected = new Txna(["ApplicationArgs", "2"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["txna", "2"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
-    });
-
-    it("should return correct object for `gtxna`", () => {
-      let res = opcodeFromSentence(["gtxna", "1", "Accounts", "1"], 1, interpreter);
-      let expected = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["gtxna", "1", "ApplicationArgs", "4"], 1, interpreter);
-      expected = new Gtxna(["1", "ApplicationArgs", "4"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["gtxna", "1", "Fee", "4"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["gtxna", "1", "2", "3", "4"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["gtxna", "1AB", "Fee", "4"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.INVALID_TYPE
-      );
-    });
-
-    it("should return correct objects for `global`", () => {
-      let res = opcodeFromSentence(["global", "MinTxnFee"], 1, interpreter);
-      let expected = new Global(["MinTxnFee"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "MinBalance"], 1, interpreter);
-      expected = new Global(["MinBalance"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "MaxTxnLife"], 1, interpreter);
-      expected = new Global(["MaxTxnLife"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "ZeroAddress"], 1, interpreter);
-      expected = new Global(["ZeroAddress"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "GroupSize"], 1, interpreter);
-      expected = new Global(["GroupSize"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "LogicSigVersion"], 1, interpreter);
-      expected = new Global(["LogicSigVersion"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "Round"], 1, interpreter);
-      expected = new Global(["Round"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "LatestTimestamp"], 1, interpreter);
-      expected = new Global(["LatestTimestamp"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "CurrentApplicationID"], 1, interpreter);
-      expected = new Global(["CurrentApplicationID"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "CreatorAddress"], 1, interpreter);
-      expected = new Global(["CreatorAddress"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      res = opcodeFromSentence(["global", "GroupID"], 1, interpreter);
-      expected = new Global(["GroupID"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["global", "mintxnfee"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["global", "minbalance"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
-      );
-    });
-
-    it("should return correct opcodes for `Balance` and `Asset` opcodes", () => {
-      let res = opcodeFromSentence(["balance"], 1, interpreter);
-      let expected = new Balance([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["balance", "1"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["asset_holding_get", "AssetBalance"], 1, interpreter);
-      expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () =>
-          opcodeFromSentence(
-            ["asset_holding_get", "AssetBalance", "AssetFrozen"],
-            1,
-            interpreter
-          ),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["asset_params_get", "AssetTotal"], 1, interpreter);
-      expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["asset_params_get", "AssetTotal", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["asset_params_get", "AssetCreator", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
-
-    it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", () => {
-      interpreter.tealVersion = 4;
-      expectRuntimeError(
-        () => opcodeFromSentence(["asset_params_get", "AssetCreator"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD
-      );
-    });
-
-    it("should return correct opcodes for Stateful opcodes", () => {
-      let res = opcodeFromSentence(["app_opted_in"], 1, interpreter);
-      let expected = new AppOptedIn([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_opted_in", "12", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_local_get"], 1, interpreter);
-      expected = new AppLocalGet([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_local_get", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_local_get_ex"], 1, interpreter);
-      expected = new AppLocalGetEx([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_local_get_ex", "22", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_global_get"], 1, interpreter);
-      expected = new AppGlobalGet([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_global_get", "12", "3"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_global_get_ex"], 1, interpreter);
-      expected = new AppGlobalGetEx([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_global_get_ex", "4"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_local_put"], 1, interpreter);
-      expected = new AppLocalPut([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_local_put", "1223"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_global_put"], 1, interpreter);
-      expected = new AppGlobalPut([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_global_put", "123"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_local_del"], 1, interpreter);
-      expected = new AppLocalDel([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_local_del", "3"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      res = opcodeFromSentence(["app_global_del"], 1, interpreter);
-      expected = new AppGlobalDel([], 1, interpreter);
-      assert.deepEqual(res, expected);
-
-      expectRuntimeError(
-        () => opcodeFromSentence(["app_global_del", "45"], 1, interpreter),
-        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-      );
-    });
-
-    describe("should return correct opcodes for tealv3 ops", () => {
-      it("assert", () => {
-        const res = opcodeFromSentence(["assert"], 1, interpreter);
-        const expected = new Assert([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["assert", "1234"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("pushint", () => {
-        const res = opcodeFromSentence(["pushint", "345"], 1, interpreter);
-        const expected = new PushInt(["345"], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["pushint", "345", "456"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-
-        expectRuntimeError(
-          // Int Constants(eg. NoOp) works with int x
-          () => opcodeFromSentence(["pushint", "NoOp"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["pushint", (MAX_UINT64 + 10n).toString()], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
-        );
-      });
-
-      it("pushbytes", () => {
-        const res = opcodeFromSentence(["pushbytes", `"Algorand"`], 1, interpreter);
-        const expected = new PushBytes([`"Algorand"`], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["pushbytes", `"Algorand"`, `"Blockchain"`], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-
-        expectRuntimeError(
-          () =>
-            opcodeFromSentence(
-              ["pushbytes", `0x250001000192CD0000002F6D6E742F72`],
-              1,
-              interpreter
-            ),
-          RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE
-        );
-      });
-
-      it("swap", () => {
-        const res = opcodeFromSentence(["swap"], 1, interpreter);
-        const expected = new Swap([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["swap", "xyz"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("txn fields", () => {
-        let res = opcodeFromSentence(["txn", "Assets", "1"], 1, interpreter);
-        let expected = new Txn(["Assets", "1"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "Assets", "0", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "Assets", "random-string"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        res = opcodeFromSentence(["txn", "Applications", "0"], 1, interpreter);
-        expected = new Txn(["Applications", "0"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "Applications", "0", "11"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "Applications", "random-string"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        res = opcodeFromSentence(["txn", "NumAssets"], 1, interpreter);
-        expected = new Txn(["NumAssets"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        res = opcodeFromSentence(["txn", "GlobalNumUint"], 1, interpreter);
-        expected = new Txn(["GlobalNumUint"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "NumAssets", "0"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["txn", "GlobalNumUint", "0"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("getbit", () => {
-        const res = opcodeFromSentence(["getbit"], 1, interpreter);
-        const expected = new GetBit([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["getbit", "1234"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("setbit", () => {
-        const res = opcodeFromSentence(["setbit"], 1, interpreter);
-        const expected = new SetBit([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["setbit", "1234"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("getbyte", () => {
-        const res = opcodeFromSentence(["getbyte"], 1, interpreter);
-        const expected = new GetByte([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["getbyte", "1234"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("setbyte", () => {
-        const res = opcodeFromSentence(["setbyte"], 1, interpreter);
-        const expected = new SetByte([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["setbyte", "1234"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("dig", () => {
-        const res = opcodeFromSentence(["dig", "2"], 1, interpreter);
-        const expected = new Dig(["2"], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["dig", "xyz"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["dig", "2", "3"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("select", () => {
-        const res = opcodeFromSentence(["select"], 1, interpreter);
-        const expected = new Select([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["select", "xyz"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("gtxns", () => {
-        const res = opcodeFromSentence(["gtxns", "Amount"], 1, interpreter);
-        const expected = new Gtxns(["Amount"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gtxns", "amount"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
-        );
-
-        // invalid because index 0 is fetched from top of stack
-        expectRuntimeError(
-          () => opcodeFromSentence(["gtxns", "0", "Amount"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("gtxnsa", () => {
-        const res = opcodeFromSentence(["gtxnsa", "ApplicationArgs", "0"], 1, interpreter);
-        const expected = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gtxnsa", "applicationargs", "0"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
-        );
-
-        // invalid because index 0 is fetched from top of stack
-        expectRuntimeError(
-          () => opcodeFromSentence(["gtxnsa", "0", "ApplicationArgs", "0"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("min_balance", () => {
-        const res = opcodeFromSentence(["min_balance"], 1, interpreter);
-        const expected = new MinBalance([], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["min_balance", "xyz"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-    });
-
-    describe("should return correct opcodes for tealv4 ops", () => {
-      it("gload", () => {
-        const res = opcodeFromSentence(["gload", "0", "1"], 1, interpreter);
-        const expected = new Gload(["0", "1"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gload", "one", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gload", "0"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("gloads", () => {
-        const res = opcodeFromSentence(["gloads", "0"], 1, interpreter);
-        const expected = new Gloads(["0"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gloads", "one"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.INVALID_TYPE
-        );
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gloads", "0", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("callsub", () => {
-        const res = opcodeFromSentence(["callsub", "label"], 1, interpreter);
-        const expected = new Callsub(["label"], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["callsub", "label1", "label2"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("retsub", () => {
-        const res = opcodeFromSentence(["retsub"], 1, interpreter);
-        const expected = new Retsub([], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["retsub", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("gaid", () => {
-        const res = opcodeFromSentence(["gaid", "2"], 1, interpreter);
-        const expected = new Gaid(["2"], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gaid", "1", "2"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("gaids", () => {
-        const res = opcodeFromSentence(["gaids"], 1, interpreter);
-        const expected = new Gaids([], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["gaids", "1", "2"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("divmodw", () => {
-        const res = opcodeFromSentence(["divmodw"], 1, interpreter);
-        const expected = new DivModw([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["divmodw", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("exp", () => {
-        const res = opcodeFromSentence(["exp"], 1, interpreter);
-        const expected = new Exp([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["exp", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("expw", () => {
-        const res = opcodeFromSentence(["expw"], 1, interpreter);
-        const expected = new Expw([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["expw", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("shl", () => {
-        const res = opcodeFromSentence(["shl"], 1, interpreter);
-        const expected = new Shl([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["shl", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("shr", () => {
-        const res = opcodeFromSentence(["shr"], 1, interpreter);
-        const expected = new Shr([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["shr", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("sqrt", () => {
-        const res = opcodeFromSentence(["sqrt"], 1, interpreter);
-        const expected = new Sqrt([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["sqrt", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("bitlen", () => {
-        const res = opcodeFromSentence(["bitlen"], 1, interpreter);
-        const expected = new BitLen([], 1);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["bitlen", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-    });
-
-    describe("should return correct opcodes for tealv5 ops", () => {
-      it("extract", () => {
-        const res = opcodeFromSentence(["extract", "1", "2"], 1, interpreter);
-        const expected = new Extract(["1", "2"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["extract", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("extract3", () => {
-        const res = opcodeFromSentence(["extract3"], 1, interpreter);
-        const expected = new Extract3([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["extract3", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("extract_uint16", () => {
-        const res = opcodeFromSentence(["extract_uint16"], 1, interpreter);
-        const expected = new ExtractUint16([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["extract_uint16", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("extract_uint32", () => {
-        const res = opcodeFromSentence(["extract_uint32"], 1, interpreter);
-        const expected = new ExtractUint32([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["extract_uint32", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("extract_uint64", () => {
-        const res = opcodeFromSentence(["extract_uint64"], 1, interpreter);
-        const expected = new ExtractUint64([], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["extract_uint64", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-    });
-
-    describe("Tealv5: ECDSA opcodes", () => {
-      it("ecdsa_verify", () => {
-        const res = opcodeFromSentence(["ecdsa_verify", "0"], 1, interpreter);
-        const expected = new EcdsaVerify(["0"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["ecdsa_verify"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("ecdsa_pk_decompress", () => {
-        const res = opcodeFromSentence(["ecdsa_pk_decompress", "0"], 1, interpreter);
-        const expected = new EcdsaPkDecompress(["0"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["ecdsa_pk_decompress"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("ecdsa_pk_recover", () => {
-        const res = opcodeFromSentence(["ecdsa_pk_recover", "0"], 1, interpreter);
-        const expected = new EcdsaPkRecover(["0"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["ecdsa_pk_recover"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-    });
-
-    describe("should return correct opcodes for tealv5 ops", () => {
-      it("loads", () => {
-        const res = opcodeFromSentence(["loads"], 1, interpreter);
-        const expected = new Loads([], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["loads", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("stores", () => {
-        const res = opcodeFromSentence(["stores"], 1, interpreter);
-        const expected = new Stores([], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["stores", "1"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("cover", () => {
-        const res = opcodeFromSentence(["cover", "1"], 1, interpreter);
-        const expected = new Cover(["1"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["cover", "1", "2"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("uncover", () => {
-        const res = opcodeFromSentence(["uncover", "1"], 1, interpreter);
-        const expected = new Uncover(["1"], 1);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["uncover", "1", "2"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("itxn_begin", () => {
-        const res = opcodeFromSentence(["itxn_begin"], 1, interpreter);
-        const expected = new ITxnBegin([], 1, interpreter);
-
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["itxn_begin", "exxtra"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("itxn_field f", () => {
-        let res = opcodeFromSentence(["itxn_field", "Sender"], 1, interpreter);
-        let expected = new ITxnField(["Sender"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        res = opcodeFromSentence(["itxn_field", "FreezeAsset"], 1, interpreter);
-        expected = new ITxnField(["FreezeAsset"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        res = opcodeFromSentence(["itxn_field", "ConfigAssetTotal"], 1, interpreter);
-        expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["itxn_field", "Sender", "Fee"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("itxn_submit", () => {
-        const res = opcodeFromSentence(["itxn_submit"], 1, interpreter);
-        const expected = new ITxnSubmit([], 1, interpreter);
-        assert.deepEqual(res, expected);
-
-        expectRuntimeError(
-          () => opcodeFromSentence(["itxn_submit", "exxtra"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-
-      it("app_get_params i", () => {
-        const appParams = AppParamDefined[interpreter.tealVersion];
-        appParams.forEach((appParam: string) => {
-          const res = opcodeFromSentence(["app_params_get", appParam], 1, interpreter);
-          const expected = new AppParamsGet([appParam], 1, interpreter);
-          assert.deepEqual(res, expected);
-        });
-        expectRuntimeError(
-          () => opcodeFromSentence(["app_params_get", "unknow", "hello"], 1, interpreter),
-          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
-        );
-      });
-    });
-  });
-
-  const cryptoFile = "test-crypto.teal";
-  describe("Opcodes list from TEAL file", () => {
-    useFixture("teal-files");
-
-    let interpreter: Interpreter;
-    beforeEach(function () {
-      interpreter = new Interpreter();
-      interpreter.tealVersion = 2;
-    });
-
-    it("Supported pragma version 6", () => {
-      const fileWithPragmav6 = "test-pragma-v6.teal";
-      assert.doesNotThrow(() =>
-        parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
-      );
-    });
-
-    it("Should failed if declare pragma greater than 6", () => {
-      const fileWithPragmaInvalid = "test-pragma-invalid.teal";
-      expectRuntimeError(
-        () => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
-        RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
-      );
-    });
-
-    it("Should return correct opcode list for '+'", async () => {
-      const file1 = "test-file-1.teal";
-      let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
-
-      assert.deepEqual(res, expected);
-
-      const expect = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Int(["1"], 2),
-        new Int(["3"], 3),
-        new Add([], 4)
-      ];
-      res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
-
-      assert.deepEqual(res, expect);
-    });
-
-    it("Should throw error if #pragma is not on 1st line", async () => {
-      let file = "test-pragma-1.teal";
-      expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
-        RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
-      );
-
-      file = "test-pragma-2.teal";
-      expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
-        RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
-      );
-    });
-
-    it("Should return correct opcode list for '-'", async () => {
-      const file = "test-file-3.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Int(["5"], 2),
-        new Int(["3"], 3),
-        new Sub([], 4)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for '/'", async () => {
-      const file = "test-file-4.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Int(["6"], 2),
-        new Int(["3"], 3),
-        new Div([], 6)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for '*'", async () => {
-      const file = "test-file-5.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Int(["5"], 4),
-        new Int(["3"], 6),
-        new Mul([], 10)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'addr'", async () => {
-      const file = "test-addr.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'byte'", async () => {
-      const file = "test-byte.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
-      const byte32 = "MFRGGZDFMY======";
-
-      const expected = [
-        new Byte(["b64", byte64], 1),
-        new Byte(["b64", byte64], 2),
-        new Byte(["b64", byte64], 3),
-        new Byte(["b64", byte64], 4),
-        new Byte(["b32", byte32], 5),
-        new Byte(["b32", byte32], 6),
-        new Byte(["b32", byte32], 7),
-        new Byte(["b32", byte32], 8)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Len and Err'", async () => {
-      const file = "test-len-err.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Len([], 1), new Err([], 2)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Bitwise'", async () => {
-      const file = "test-bitwise.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new BitwiseOr([], 2),
-        new BitwiseAnd([], 4),
-        new BitwiseXor([], 6),
-        new BitwiseNot([], 7)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Mod'", async () => {
-      const file = "test-mod.teal";
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Arg'", async () => {
-      const file = "test-arg.teal";
-      interpreter.runtime = new Runtime([]);
-      interpreter.runtime.ctx.args = [new Uint8Array(0)];
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Arg(["0"], 1, interpreter)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Intc and Bytec'", async () => {
-      const file = "test-int-bytec.teal";
-      interpreter.intcblock = [1n];
-      interpreter.bytecblock = [new Uint8Array(0)];
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Store and Load'", async () => {
-      const file = "test-store-load.teal";
-      interpreter.scratch = [1n];
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'Crypto opcodes'", async () => {
-      const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Sha256([], 1),
-        new Keccak256([], 2),
-        new Sha512_256([], 3),
-        new Ed25519verify([], 4)
-      ];
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'comparsions'", async () => {
-      const file = "test-compare.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new LessThan([], 1),
-        new GreaterThan([], 2),
-        new LessThanEqualTo([], 3),
-        new GreaterThanEqualTo([], 4),
-        new And([], 5),
-        new Or([], 6),
-        new EqualTo([], 7),
-        new NotEqualTo([], 8),
-        new Not([], 9)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("Should return correct opcode list for 'all others'", async () => {
-      const file = "test-others.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Pragma(["version", "4"], 1, interpreter),
-        new Itob([], 2),
-        new Btoi([], 3),
-        new Mulw([], 4),
-        new Addw([], 5),
-        new Pop([], 6),
-        new Dup([], 7),
-        new Dup2([], 8),
-        new Concat([], 9),
-        new Substring(["0", "4"], 10),
-        new Substring3([], 11)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode list for 'b, bz, bnz'", async () => {
-      const file = "test-branch.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Branch(["label1"], 2, interpreter),
-        new BranchIfZero(["label2"], 3, interpreter),
-        new BranchIfNotZero(["label3"], 4, interpreter)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode list for 'return'", async () => {
-      const file = "test-return.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Return([], 2, interpreter)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode list for 'Label'", async () => {
-      const file = "test-label.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [new Label(["label:"], 2)];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode list for 'global'", async () => {
-      const file = "test-global.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
-      const expected = [
-        new Global(["MinTxnFee"], 3, interpreter),
-        new Global(["MinBalance"], 4, interpreter),
-        new Global(["MaxTxnLife"], 5, interpreter),
-        new Global(["ZeroAddress"], 6, interpreter),
-        new Global(["GroupSize"], 7, interpreter),
-        new Global(["LogicSigVersion"], 8, interpreter),
-        new Global(["Round"], 9, interpreter),
-        new Global(["LatestTimestamp"], 10, interpreter),
-        new Global(["CurrentApplicationID"], 11, interpreter)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-
-    it("should return correct opcode list for `Stateful`", async () => {
-      const file = "test-stateful.teal";
-
-      const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
-      const expected = [
-        new Pragma(["version", "5"], 1, interpreter),
-        new Balance([], 4, interpreter),
-        new GetAssetHolding(["AssetBalance"], 5, interpreter),
-        new GetAssetDef(["AssetTotal"], 6, interpreter),
-        new AppOptedIn([], 8, interpreter),
-        new AppLocalGet([], 9, interpreter),
-        new AppLocalGetEx([], 10, interpreter),
-        new AppGlobalGet([], 11, interpreter),
-        new AppGlobalGetEx([], 12, interpreter),
-        new AppLocalPut([], 13, interpreter),
-        new AppGlobalPut([], 14, interpreter),
-        new AppLocalDel([], 15, interpreter),
-        new AppGlobalDel([], 16, interpreter),
-        new Int(["10"], 17),
-        new AppParamsGet(["AppCreator"], 18, interpreter)
-      ];
-
-      assert.deepEqual(res, expected);
-    });
-  });
-
-  describe("Gas cost of Opcodes from TEAL file", () => {
-    useFixture("teal-files");
-
-    let interpreter: Interpreter;
-    beforeEach(function () {
-      interpreter = new Interpreter();
-    });
-
-    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
-      interpreter.tealVersion = 1; // by default the version is also 1
-
-      let op = opcodeFromSentence(["sha256"], 1, interpreter);
-      assert.equal(interpreter.gas, 7);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["keccak256"], 2, interpreter);
-      assert.equal(interpreter.gas, 26);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
-      assert.equal(interpreter.gas, 9);
-
-      interpreter.gas = 0;
-      // eslint-disable-next-line
-      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
-      assert.equal(interpreter.gas, 1900);
-
-      interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
-      assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
-    });
-
-    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
-      interpreter.tealVersion = 2;
-
-      let op = opcodeFromSentence(["sha256"], 1, interpreter);
-      assert.equal(interpreter.gas, 35);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["keccak256"], 2, interpreter);
-      assert.equal(interpreter.gas, 130);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
-      assert.equal(interpreter.gas, 45);
-
-      interpreter.gas = 0;
-      // eslint-disable-next-line
-      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
-      assert.equal(interpreter.gas, 1900);
-
-      interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
-      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
-    });
-
-    // note: cost for cryto ops for teal version 2, 3 are same
-    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async () => {
-      interpreter.tealVersion = 3;
-
-      let op = opcodeFromSentence(["sha256"], 1, interpreter);
-      assert.equal(interpreter.gas, 35);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["keccak256"], 2, interpreter);
-      assert.equal(interpreter.gas, 130);
-
-      interpreter.gas = 0;
-      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
-      assert.equal(interpreter.gas, 45);
-
-      interpreter.gas = 0;
-      // eslint-disable-next-line
-      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
-      assert.equal(interpreter.gas, 1900);
-
-      interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
-      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
-    });
-
-    it("Should return correct gas cost for mix opcodes from teal files", async () => {
-      let file = "test-file-1.teal";
-      const mode = ExecutionMode.SIGNATURE;
-      parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 3);
-
-      interpreter.gas = 0;
-      file = "test-file-3.teal";
-      parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 3);
-
-      interpreter.gas = 0;
-      file = "test-file-4.teal";
-      parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 3);
-
-      interpreter.gas = 0;
-      file = "test-label.teal";
-      parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 0); // label has cost 0
-
-      interpreter.gas = 0;
-      file = "test-others.teal";
-      parser(getProgram(file), mode, interpreter);
-      assert.equal(interpreter.gas, 10);
-
-      interpreter.gas = 0;
-      file = "test-stateful.teal";
-      parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
-      assert.equal(interpreter.gas, 14);
-    });
-
-    it("Should throw error if total cost exceeds 20000", async () => {
-      const file = "test-max-opcost.teal"; // has cost 22800
-      expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
-        RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
-      );
-    });
-  });
+		it("should throw error for wrong field length for '*'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["*", "*"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
+
+		it("should return correct opcode object for 'addr'", () => {
+			const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
+			const res = opcodeFromSentence(
+				["addr", address],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			const expected = new Addr([address], 1);
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should throw error for wrong field length for 'addr'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["addr"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
+
+		it("should throw error for invalid address for 'addr'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["addr", "AKGH12"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_ADDR
+			);
+		});
+
+		it("can use prefix 0x(hex) with 'int'", () => {
+			const valueInHex = "0x02";
+			const res = opcodeFromSentence(
+				["int", valueInHex],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			const expected = new Int(["2"], 1);
+			assert.deepEqual(res, expected);
+		});
+
+		it("can use prefix 0(oct) with 'int'", () => {
+			const valueInHex = "010";
+			const res = opcodeFromSentence(
+				["int", valueInHex],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			const expected = new Int(["8"], 1);
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode object for 'int'", () => {
+			const value = "812546821";
+			const res = opcodeFromSentence(["int", value], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Int([value], 1);
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should work when int arg is zero", () => {
+			const value = "0";
+			const res = opcodeFromSentence(["int", value], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Int([value], 1);
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should throw error for wrong field length for 'int'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["int"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
+
+		it("should throw error for invalid number for 'int'", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["int", "123A12"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			);
+
+			// for dec format
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["int", String(MAX_UINT64 + 5n)],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+
+			// for hex format
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["int", "0x" + (MAX_UINT64 + 5n).toString(16)],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+
+			// for oct format
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["int", "0" + (MAX_UINT64 + 5n).toString(8)],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["int", String(MIN_UINT64 - 5n)],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			);
+		});
+
+		it("should return correct label", () => {
+			const res = opcodeFromSentence(["label:"], 1, interpreter, ExecutionMode.SIGNATURE);
+			const expected = new Label(["label:"], 1);
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should throw error if wrong label is used", () => {
+			expectRuntimeError(
+				() => opcodeFromSentence(["substring:"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_LABEL
+			);
+		});
+
+		it("should return correct objects for `txn`", () => {
+			let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE);
+			let expected = new Txn(["Fee"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["txn", "Accounts", "1"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Txn(["Accounts", "1"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["txn", "ApplicationArgs", "0"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["txn", "fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+			);
+		});
+
+		it("should return correct object for `gtxn`", () => {
+			let res = opcodeFromSentence(
+				["gtxn", "0", "Fee"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			let expected = new Gtxn(["0", "Fee"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["gtxn", "0", "ApplicationArgs", "0"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Gtxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["gtxn", "1"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			);
+		});
+
+		it("should return correct object for `txna`", () => {
+			let res = opcodeFromSentence(
+				["txna", "Accounts", "0"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			let expected = new Txna(["Accounts", "0"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["txna", "ApplicationArgs", "2"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Txna(["ApplicationArgs", "2"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+			);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["txna", "2"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			);
+		});
+
+		it("should return correct object for `gtxna`", () => {
+			let res = opcodeFromSentence(
+				["gtxna", "1", "Accounts", "1"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			let expected = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["gtxna", "1", "ApplicationArgs", "4"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Gtxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["gtxna", "1", "Fee", "4"],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["gtxna", "1", "2", "3", "4"],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["gtxna", "1AB", "Fee", "4"],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			);
+		});
+
+		it("should return correct objects for `global`", () => {
+			let res = opcodeFromSentence(
+				["global", "MinTxnFee"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			let expected = new Global(["MinTxnFee"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "MinBalance"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["MinBalance"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "MaxTxnLife"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["MaxTxnLife"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "ZeroAddress"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["ZeroAddress"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "GroupSize"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["GroupSize"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "LogicSigVersion"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["LogicSigVersion"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(["global", "Round"], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global(["Round"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "LatestTimestamp"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["LatestTimestamp"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "CurrentApplicationID"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["CurrentApplicationID"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(
+				["global", "CreatorAddress"],
+				1,
+				interpreter,
+				ExecutionMode.SIGNATURE
+			);
+			expected = new Global(["CreatorAddress"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			res = opcodeFromSentence(["global", "GroupID"], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global(["GroupID"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["global", "MinTxnFee", "MinTxnFee"],
+						1,
+						interpreter,
+						ExecutionMode.SIGNATURE
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["global", "mintxnfee"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["global", "minbalance"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter, ExecutionMode.SIGNATURE),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+			);
+		});
+
+		it("should return correct opcodes for `Balance` and `Asset` opcodes", () => {
+			let res = opcodeFromSentence(["balance"], 1, interpreter, ExecutionMode.APPLICATION);
+			let expected = new Balance([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() => opcodeFromSentence(["balance", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(
+				["asset_holding_get", "AssetBalance"],
+				1,
+				interpreter,
+				ExecutionMode.APPLICATION
+			);
+			expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["asset_holding_get", "AssetBalance", "AssetFrozen"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(
+				["asset_params_get", "AssetTotal"],
+				1,
+				interpreter,
+				ExecutionMode.APPLICATION
+			);
+			expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["asset_params_get", "AssetTotal", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["asset_params_get", "AssetCreator", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
+
+		it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", () => {
+			interpreter.tealVersion = 4;
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["asset_params_get", "AssetCreator"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD
+			);
+		});
+
+		it("should return correct opcodes for Stateful opcodes", () => {
+			let res = opcodeFromSentence(["app_opted_in"], 1, interpreter, ExecutionMode.APPLICATION);
+			let expected = new AppOptedIn([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_opted_in", "12", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_local_get"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppLocalGet([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_local_get", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_local_get_ex"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppLocalGetEx([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_local_get_ex", "22", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_global_get"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppGlobalGet([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_global_get", "12", "3"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(
+				["app_global_get_ex"],
+				1,
+				interpreter,
+				ExecutionMode.APPLICATION
+			);
+			expected = new AppGlobalGetEx([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_global_get_ex", "4"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_local_put"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppLocalPut([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_local_put", "1223"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_global_put"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppGlobalPut([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_global_put", "123"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_local_del"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppLocalDel([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(["app_local_del", "3"], 1, interpreter, ExecutionMode.APPLICATION),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+
+			res = opcodeFromSentence(["app_global_del"], 1, interpreter, ExecutionMode.APPLICATION);
+			expected = new AppGlobalDel([], 1, interpreter);
+			assert.deepEqual(res, expected);
+
+			expectRuntimeError(
+				() =>
+					opcodeFromSentence(
+						["app_global_del", "45"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					),
+				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+			);
+		});
+
+		describe("should return correct opcodes for tealv3 ops", () => {
+			it("assert", () => {
+				const res = opcodeFromSentence(["assert"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Assert([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["assert", "1234"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("pushint", () => {
+				const res = opcodeFromSentence(
+					["pushint", "345"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new PushInt(["345"], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["pushint", "345", "456"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					// Int Constants(eg. NoOp) works with int x
+					() =>
+						opcodeFromSentence(["pushint", "NoOp"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["pushint", (MAX_UINT64 + 10n).toString()],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+				);
+			});
+
+			it("pushbytes", () => {
+				const res = opcodeFromSentence(
+					["pushbytes", `"Algorand"`],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new PushBytes([`"Algorand"`], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["pushbytes", `"Algorand"`, `"Blockchain"`],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["pushbytes", `0x250001000192CD0000002F6D6E742F72`],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE
+				);
+			});
+
+			it("swap", () => {
+				const res = opcodeFromSentence(["swap"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Swap([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["swap", "xyz"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("txn fields", () => {
+				let res = opcodeFromSentence(
+					["txn", "Assets", "1"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				let expected = new Txn(["Assets", "1"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "Assets", "0", "1"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "Assets", "random-string"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				res = opcodeFromSentence(
+					["txn", "Applications", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new Txn(["Applications", "0"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "Applications", "0", "11"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "Applications", "random-string"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				res = opcodeFromSentence(
+					["txn", "NumAssets"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new Txn(["NumAssets"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				res = opcodeFromSentence(
+					["txn", "GlobalNumUint"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new Txn(["GlobalNumUint"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "NumAssets", "0"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["txn", "GlobalNumUint", "0"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("getbit", () => {
+				const res = opcodeFromSentence(["getbit"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new GetBit([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["getbit", "1234"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("setbit", () => {
+				const res = opcodeFromSentence(["setbit"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new SetBit([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["setbit", "1234"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("getbyte", () => {
+				const res = opcodeFromSentence(["getbyte"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new GetByte([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["getbyte", "1234"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("setbyte", () => {
+				const res = opcodeFromSentence(["setbyte"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new SetByte([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["setbyte", "1234"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("dig", () => {
+				const res = opcodeFromSentence(["dig", "2"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Dig(["2"], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["dig", "xyz"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["dig", "2", "3"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("select", () => {
+				const res = opcodeFromSentence(["select"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Select([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["select", "xyz"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gtxns", () => {
+				const res = opcodeFromSentence(
+					["gtxns", "Amount"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Gtxns(["Amount"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["gtxns", "amount"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+				);
+
+				// invalid because index 0 is fetched from top of stack
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gtxns", "0", "Amount"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gtxnsa", () => {
+				const res = opcodeFromSentence(
+					["gtxnsa", "ApplicationArgs", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gtxnsa", "applicationargs", "0"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+				);
+
+				// invalid because index 0 is fetched from top of stack
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gtxnsa", "0", "ApplicationArgs", "0"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("min_balance", () => {
+				const res = opcodeFromSentence(
+					["min_balance"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new MinBalance([], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["min_balance", "xyz"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+		});
+
+		describe("should return correct opcodes for tealv4 ops", () => {
+			it("gload", () => {
+				const res = opcodeFromSentence(
+					["gload", "0", "1"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Gload(["0", "1"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["gload", "one", "1"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["gload", "0"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gloads", () => {
+				const res = opcodeFromSentence(
+					["gloads", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Gloads(["0"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["gloads", "one"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.INVALID_TYPE
+				);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["gloads", "0", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("callsub", () => {
+				const res = opcodeFromSentence(
+					["callsub", "label"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Callsub(["label"], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["callsub", "label1", "label2"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("retsub", () => {
+				const res = opcodeFromSentence(["retsub"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Retsub([], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["retsub", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gaid", () => {
+				const res = opcodeFromSentence(
+					["gaid", "2"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Gaid(["2"], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["gaid", "1", "2"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("gaids", () => {
+				const res = opcodeFromSentence(["gaids"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Gaids([], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["gaids", "1", "2"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("divmodw", () => {
+				const res = opcodeFromSentence(["divmodw"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new DivModw([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["divmodw", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("exp", () => {
+				const res = opcodeFromSentence(["exp"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Exp([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["exp", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("expw", () => {
+				const res = opcodeFromSentence(["expw"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Expw([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["expw", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("shl", () => {
+				const res = opcodeFromSentence(["shl"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Shl([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["shl", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("shr", () => {
+				const res = opcodeFromSentence(["shr"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Shr([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["shr", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("sqrt", () => {
+				const res = opcodeFromSentence(["sqrt"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Sqrt([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["sqrt", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("bitlen", () => {
+				const res = opcodeFromSentence(["bitlen"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new BitLen([], 1);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["bitlen", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("bsqrt", () => {
+				const res = opcodeFromSentence(["bsqrt"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Sqrt([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["bsqrt", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+		});
+
+		describe("should return correct opcodes for tealv5 ops", () => {
+			it("extract", () => {
+				const res = opcodeFromSentence(
+					["extract", "1", "2"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Extract(["1", "2"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["extract", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("extract3", () => {
+				const res = opcodeFromSentence(["extract3"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Extract3([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["extract3", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("extract_uint16", () => {
+				const res = opcodeFromSentence(
+					["extract_uint16"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ExtractUint16([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["extract_uint16", "1"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("extract_uint32", () => {
+				const res = opcodeFromSentence(
+					["extract_uint32"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ExtractUint32([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["extract_uint32", "1"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("extract_uint64", () => {
+				const res = opcodeFromSentence(
+					["extract_uint64"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ExtractUint64([], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["extract_uint64", "1"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+		});
+
+		describe("Tealv5: ECDSA opcodes", () => {
+			it("ecdsa_verify", () => {
+				const res = opcodeFromSentence(
+					["ecdsa_verify", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new EcdsaVerify(["0"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["ecdsa_verify"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("ecdsa_pk_decompress", () => {
+				const res = opcodeFromSentence(
+					["ecdsa_pk_decompress", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new EcdsaPkDecompress(["0"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["ecdsa_pk_decompress"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("ecdsa_pk_recover", () => {
+				const res = opcodeFromSentence(
+					["ecdsa_pk_recover", "0"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new EcdsaPkRecover(["0"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["ecdsa_pk_recover"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+		});
+
+		describe("should return correct opcodes for tealv5 ops", () => {
+			it("loads", () => {
+				const res = opcodeFromSentence(["loads"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Loads([], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["loads", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("stores", () => {
+				const res = opcodeFromSentence(["stores"], 1, interpreter, ExecutionMode.APPLICATION);
+				const expected = new Stores([], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() => opcodeFromSentence(["stores", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("cover", () => {
+				const res = opcodeFromSentence(
+					["cover", "1"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Cover(["1"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(["cover", "1", "2"], 1, interpreter, ExecutionMode.APPLICATION),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("uncover", () => {
+				const res = opcodeFromSentence(
+					["uncover", "1"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new Uncover(["1"], 1);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["uncover", "1", "2"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("itxn_begin", () => {
+				const res = opcodeFromSentence(
+					["itxn_begin"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ITxnBegin([], 1, interpreter);
+
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["itxn_begin", "exxtra"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("itxn_field f", () => {
+				let res = opcodeFromSentence(
+					["itxn_field", "Sender"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				let expected = new ITxnField(["Sender"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				res = opcodeFromSentence(
+					["itxn_field", "FreezeAsset"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new ITxnField(["FreezeAsset"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				res = opcodeFromSentence(
+					["itxn_field", "ConfigAssetTotal"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["itxn_field", "Sender", "Fee"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("itxn_submit", () => {
+				const res = opcodeFromSentence(
+					["itxn_submit"],
+					1,
+					interpreter,
+					ExecutionMode.APPLICATION
+				);
+				const expected = new ITxnSubmit([], 1, interpreter);
+				assert.deepEqual(res, expected);
+
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["itxn_submit", "exxtra"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+
+			it("app_get_params i", () => {
+				const appParams = AppParamDefined[interpreter.tealVersion];
+				appParams.forEach((appParam: string) => {
+					const res = opcodeFromSentence(
+						["app_params_get", appParam],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new AppParamsGet([appParam], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+				expectRuntimeError(
+					() =>
+						opcodeFromSentence(
+							["app_params_get", "unknow", "hello"],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						),
+					RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+				);
+			});
+		});
+
+		describe("opcodes for tealv6 ops", function () {
+			this.beforeEach(() => {
+				interpreter.tealVersion = 6;
+			});
+
+			describe("gloadss opcode", function () {
+				it("should succeed create gloadss", () => {
+					const res = opcodeFromSentence(
+						["gloadss"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new Gloadss([], 1, interpreter);
+
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: create opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(["gloadss", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() => opcodeFromSentence(["gloadss"], 1, interpreter, ExecutionMode.SIGNATURE),
+						RUNTIME_ERRORS.TEAL.EXECUTION_MODE_NOT_VALID
+					);
+				});
+			});
+
+			describe("acct_params_get Opcode", function () {
+				it("Should succeed: create new acct_params_get opcode", () => {
+					Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
+						const res = opcodeFromSentence(
+							["acct_params_get", appParam],
+							1,
+							interpreter,
+							ExecutionMode.APPLICATION
+						);
+						const expected = new AcctParamsGet([appParam], 1, interpreter);
+						assert.deepEqual(res, expected);
+					});
+				});
+				it("Should fail: create acct_params_get opcode with invalid parameter", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["acct_params_get", "unknow", "hello"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+				});
+			});
+
+			describe("itxn_next opcode", () => {
+				it("Should succeed: create new itxn_next opcode", () => {
+					// can parse opcode
+					const res = opcodeFromSentence(
+						["itxn_next"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new ITxnNext([], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: Create itxn_next with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["itxn_next", "unknowfield"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+				});
+			});
+
+			describe("gitxn Opcode", () => {
+				it("Should succeed: create new gitxn opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxn", "0", "Fee"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxn(["0", "Fee"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxn", "0", "ApplicationArgs", "0"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+				it("Should fail: create gitxn opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() => opcodeFromSentence(["gitxn", "1"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxn", "1AA", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
+			});
+
+			describe("gitxna Opcode", () => {
+				it("Should succeed: create new gitxna opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxna", "1", "Accounts", "1"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxna(["1", "Accounts", "1"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxna", "1", "ApplicationArgs", "4"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create gitxna with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1", "Fee", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1", "2", "3", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxna", "1AB", "Fee", "4"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
+			});
+
+			describe("gitxnas Opcode", () => {
+				it("Should succeed: create new gitxnas opcode", () => {
+					let res = opcodeFromSentence(
+						["gitxnas", "1", "Accounts"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					let expected = new Gitxnas(["1", "Accounts"], 1, interpreter);
+					assert.deepEqual(res, expected);
+
+					res = opcodeFromSentence(
+						["gitxnas", "1", "ApplicationArgs"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					expected = new Gitxnas(["1", "ApplicationArgs"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create gitxnas with invalid parameters", () => {
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1", "2", "3"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(
+								["gitxnas", "1AB", "Fee"],
+								1,
+								interpreter,
+								ExecutionMode.APPLICATION
+							),
+						RUNTIME_ERRORS.TEAL.INVALID_TYPE
+					);
+				});
+			});
+
+			describe("itxnas opcode", () => {
+				it("Should succeed: create new itxnas opcode", () => {
+					// can parse opcode
+					const res = opcodeFromSentence(
+						["itxnas", "Accounts"],
+						1,
+						interpreter,
+						ExecutionMode.APPLICATION
+					);
+					const expected = new ITxnas(["Accounts"], 1, interpreter);
+					assert.deepEqual(res, expected);
+				});
+
+				it("Should fail: create opcode with invalid parameters", () => {
+					expectRuntimeError(
+						() => opcodeFromSentence(["itxnas"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+					);
+
+					expectRuntimeError(
+						() =>
+							opcodeFromSentence(["itxnas", "Fee"], 1, interpreter, ExecutionMode.APPLICATION),
+						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+					);
+				});
+			});
+		});
+	});
+
+	const cryptoFile = "test-crypto.teal";
+	describe("Opcodes list from TEAL file", () => {
+		useFixture("teal-files");
+
+		let interpreter: Interpreter;
+		beforeEach(function () {
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.tealVersion = 2;
+		});
+
+		it("Supported pragma version 6", () => {
+			const fileWithPragmav6 = "test-pragma-v6.teal";
+			assert.doesNotThrow(() =>
+				parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
+			);
+		});
+
+		it("Supported pragma version 7", () => {
+			const fileWithPragmav7 = "test-pragma-v7.teal";
+			assert.doesNotThrow(() =>
+				parser(getProgram(fileWithPragmav7), ExecutionMode.SIGNATURE, interpreter)
+			);
+		});
+
+		it("Should fail if declare pragma greater than 7", () => {
+			const fileWithPragmaInvalid = "test-pragma-invalid.teal";
+			expectRuntimeError(
+				() => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+			);
+		});
+
+		it("Should return correct opcode list for '+'", async () => {
+			const file1 = "test-file-1.teal";
+			let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
+
+			assert.deepEqual(res, expected);
+
+			const expect = [
+				new Pragma(["version", "4"], 1, interpreter),
+				new Int(["1"], 2),
+				new Int(["3"], 3),
+				new Add([], 4),
+			];
+			res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
+
+			assert.deepEqual(res, expect);
+		});
+
+		it("Should throw error if #pragma is not on 1st line", async () => {
+			let file = "test-pragma-1.teal";
+			expectRuntimeError(
+				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
+			);
+
+			file = "test-pragma-2.teal";
+			expectRuntimeError(
+				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
+			);
+		});
+
+		it("Should return correct opcode list for '-'", async () => {
+			const file = "test-file-3.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Pragma(["version", "4"], 1, interpreter),
+				new Int(["5"], 2),
+				new Int(["3"], 3),
+				new Sub([], 4),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for '/'", async () => {
+			const file = "test-file-4.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Pragma(["version", "4"], 1, interpreter),
+				new Int(["6"], 2),
+				new Int(["3"], 3),
+				new Div([], 6),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for '*'", async () => {
+			const file = "test-file-5.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Pragma(["version", "4"], 1, interpreter),
+				new Int(["5"], 4),
+				new Int(["3"], 6),
+				new Mul([], 10),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'addr'", async () => {
+			const file = "test-addr.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Pragma(["version", "4"], 1, interpreter),
+				new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'byte'", async () => {
+			const file = "test-byte.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
+			const byte32 = "MFRGGZDFMY======";
+
+			const expected = [
+				new Byte(["b64", byte64], 1),
+				new Byte(["b64", byte64], 2),
+				new Byte(["b64", byte64], 3),
+				new Byte(["b64", byte64], 4),
+				new Byte(["b32", byte32], 5),
+				new Byte(["b32", byte32], 6),
+				new Byte(["b32", byte32], 7),
+				new Byte(["b32", byte32], 8),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Len and Err'", async () => {
+			const file = "test-len-err.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Len([], 1), new Err([], 2)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Bitwise'", async () => {
+			const file = "test-bitwise.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new BitwiseOr([], 2),
+				new BitwiseAnd([], 4),
+				new BitwiseXor([], 6),
+				new BitwiseNot([], 7),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Mod'", async () => {
+			const file = "test-mod.teal";
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Arg'", async () => {
+			const file = "test-arg.teal";
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(0)];
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Arg(["0"], 1, interpreter)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Intc and Bytec'", async () => {
+			const file = "test-int-bytec.teal";
+			interpreter.intcblock = [1n];
+			interpreter.bytecblock = [new Uint8Array(0)];
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Store and Load'", async () => {
+			const file = "test-store-load.teal";
+			interpreter.scratch = [1n];
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'Crypto opcodes'", async () => {
+			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Sha256([], 1, interpreter),
+				new Keccak256([], 2, interpreter),
+				new Sha512_256([], 3, interpreter),
+				new Ed25519verify([], 4),
+			];
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'comparsions'", async () => {
+			const file = "test-compare.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new LessThan([], 1),
+				new GreaterThan([], 2),
+				new LessThanEqualTo([], 3),
+				new GreaterThanEqualTo([], 4),
+				new And([], 5),
+				new Or([], 6),
+				new EqualTo([], 7),
+				new NotEqualTo([], 8),
+				new Not([], 9),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("Should return correct opcode list for 'all others'", async () => {
+			const file = "test-others.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Pragma(["version", "6"], 1, interpreter),
+				new Itob([], 2),
+				new Btoi([], 3),
+				new Mulw([], 4),
+				new Addw([], 5),
+				new Pop([], 6),
+				new Dup([], 7),
+				new Dup2([], 8),
+				new Concat([], 9),
+				new Substring(["0", "4"], 10),
+				new Substring3([], 11),
+				new Divw([], 12),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for 'b, bz, bnz'", async () => {
+			const file = "test-branch.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Branch(["label1"], 2, interpreter),
+				new BranchIfZero(["label2"], 3, interpreter),
+				new BranchIfNotZero(["label3"], 4, interpreter),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for 'return'", async () => {
+			const file = "test-return.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Return([], 2, interpreter)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for 'Label'", async () => {
+			const file = "test-label.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [new Label(["label:"], 2)];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for 'global'", async () => {
+			const file = "test-global.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const expected = [
+				new Global(["MinTxnFee"], 3, interpreter),
+				new Global(["MinBalance"], 4, interpreter),
+				new Global(["MaxTxnLife"], 5, interpreter),
+				new Global(["ZeroAddress"], 6, interpreter),
+				new Global(["GroupSize"], 7, interpreter),
+				new Global(["LogicSigVersion"], 8, interpreter),
+				new Global(["Round"], 9, interpreter),
+				new Global(["LatestTimestamp"], 10, interpreter),
+				new Global(["CurrentApplicationID"], 11, interpreter),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for `Stateful`", async () => {
+			const file = "test-stateful.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "5"], 1, interpreter),
+				new Balance([], 4, interpreter),
+				new GetAssetHolding(["AssetBalance"], 5, interpreter),
+				new GetAssetDef(["AssetTotal"], 6, interpreter),
+				new AppOptedIn([], 8, interpreter),
+				new AppLocalGet([], 9, interpreter),
+				new AppLocalGetEx([], 10, interpreter),
+				new AppGlobalGet([], 11, interpreter),
+				new AppGlobalGetEx([], 12, interpreter),
+				new AppLocalPut([], 13, interpreter),
+				new AppGlobalPut([], 14, interpreter),
+				new AppLocalDel([], 15, interpreter),
+				new AppGlobalDel([], 16, interpreter),
+				new Int(["10"], 17),
+				new AppParamsGet(["AppCreator"], 18, interpreter),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for `teal v6`", async () => {
+			const file = "teal-v6.teal";
+
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "6"], 1, interpreter),
+				new Divw([], 2),
+				new Bsqrt([], 3),
+				new Gloadss([], 4, interpreter),
+				new AcctParamsGet(["AcctBalance"], 5, interpreter),
+				new ITxnNext([], 6, interpreter),
+				new Gitxn(["0", "Fee"], 7, interpreter),
+				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
+				new Gitxnas(["0", "Accounts"], 9, interpreter),
+				new ITxnas(["Accounts"], 10, interpreter),
+			];
+
+			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for `teal v7`", async () => {
+			const file = "teal-v7.teal";
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "7"], 1, interpreter),
+				new Base64Decode(["URLEncoding"], 2),
+			];
+
+			assert.deepEqual(expected, res);
+		});
+	});
+
+	describe("Gas cost of Opcodes from TEAL file", () => {
+		useFixture("teal-files");
+
+		let interpreter: Interpreter;
+		beforeEach(function () {
+			interpreter = new Interpreter();
+		});
+
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
+			interpreter.tealVersion = 1; // by default the version is also 1
+
+			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 7);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["keccak256"], 2, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 26);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["sha512_256"], 3, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 9);
+
+			interpreter.gas = 0;
+			// eslint-disable-next-line
+			op = opcodeFromSentence(["ed25519verify"], 4, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 1900);
+
+			interpreter.gas = 0;
+			parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
+		});
+
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
+			interpreter.tealVersion = 2;
+
+			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 35);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["keccak256"], 2, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 130);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["sha512_256"], 3, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 45);
+
+			interpreter.gas = 0;
+			// eslint-disable-next-line
+			op = opcodeFromSentence(["ed25519verify"], 4, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 1900);
+
+			interpreter.gas = 0;
+			parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+		});
+
+		// note: cost for cryto ops for teal version 2, 3 are same
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async () => {
+			interpreter.tealVersion = 3;
+
+			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 35);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["keccak256"], 2, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 130);
+
+			interpreter.gas = 0;
+			op = opcodeFromSentence(["sha512_256"], 3, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 45);
+
+			interpreter.gas = 0;
+			// eslint-disable-next-line
+			op = opcodeFromSentence(["ed25519verify"], 4, interpreter, ExecutionMode.APPLICATION);
+			assert.equal(interpreter.gas, 1900);
+
+			interpreter.gas = 0;
+			parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+		});
+
+		it("Should return correct gas cost for mix opcodes from teal files", async () => {
+			let file = "test-file-1.teal";
+			const mode = ExecutionMode.SIGNATURE;
+			parser(getProgram(file), mode, interpreter);
+			assert.equal(interpreter.gas, 3);
+
+			interpreter.gas = 0;
+			file = "test-file-3.teal";
+			parser(getProgram(file), mode, interpreter);
+			assert.equal(interpreter.gas, 3);
+
+			interpreter.gas = 0;
+			file = "test-file-4.teal";
+			parser(getProgram(file), mode, interpreter);
+			assert.equal(interpreter.gas, 3);
+
+			interpreter.gas = 0;
+			file = "test-label.teal";
+			parser(getProgram(file), mode, interpreter);
+			assert.equal(interpreter.gas, 0); // label has cost 0
+
+			interpreter.gas = 0;
+			file = "test-others.teal";
+			parser(getProgram(file), mode, interpreter);
+			assert.equal(interpreter.gas, 11);
+
+			interpreter.gas = 0;
+			file = "test-stateful.teal";
+			parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			assert.equal(interpreter.gas, 14);
+		});
+
+		it("Should throw error if total cost exceeds 20000", async () => {
+			const file = "test-max-opcost.teal"; // has cost 22800
+			expectRuntimeError(
+				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
+			);
+		});
+	});
 });

@@ -1,0 +1,35 @@
+#pragma version 6
+
+txn ApplicationID
+bz on_creation
+
+txna ApplicationArgs 0 
+byte "budget"
+==
+bnz budget
+
+int 0 
+store 0
+
+loop: 
+
+load 0
+int 1
++
+dup
+store 0
+
+int 100
+< 
+bnz loop
+
+int 1
+return
+
+budget: 
+int 1 
+return
+
+on_creation:
+int 1 
+return 

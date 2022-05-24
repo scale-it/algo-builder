@@ -52,5 +52,6 @@ def app():
     )
     return program
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(app(), Mode.Application, version = 5))
+    print(compileTeal(app(), Mode.Application, version = 5, optimize=optimize_options))

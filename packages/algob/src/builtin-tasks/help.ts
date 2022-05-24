@@ -7,27 +7,24 @@ import { RuntimeEnv } from "../types";
 import { TASK_HELP } from "./task-names";
 
 export default function (): void {
-  task(TASK_HELP, "Prints this message")
-    .addOptionalPositionalParam(
-      "task",
-      "An optional task to print more info about"
-    )
-    .setAction(help);
+	task(TASK_HELP, "Prints this message")
+		.addOptionalPositionalParam("task", "An optional task to print more info about")
+		.setAction(help);
 }
 
-async function help ({ task: taskName }: { task?: string }, env: RuntimeEnv): Promise<void> {
-  const packageJson = await getPackageJson();
-  const helpPrinter = new HelpPrinter(
-    ALGOB_NAME,
-    packageJson.version,
-    ALGOB_PARAM_DEFINITIONS,
-    env.tasks
-  );
+async function help({ task: taskName }: { task?: string }, env: RuntimeEnv): Promise<void> {
+	const packageJson = await getPackageJson();
+	const helpPrinter = new HelpPrinter(
+		ALGOB_NAME,
+		packageJson.version,
+		ALGOB_PARAM_DEFINITIONS,
+		env.tasks
+	);
 
-  if (taskName !== undefined) {
-    helpPrinter.printTaskHelp(taskName);
-    return;
-  }
+	if (taskName !== undefined) {
+		helpPrinter.printTaskHelp(taskName);
+		return;
+	}
 
-  helpPrinter.printGlobalHelp();
+	helpPrinter.printGlobalHelp();
 }

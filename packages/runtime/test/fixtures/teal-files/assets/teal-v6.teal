@@ -1,0 +1,10 @@
+#pragma version 6
+bsqrt 
+divw
+gloadss
+acct_params_get AcctBalance
+itxn_next
+gitxn 0 Fee 
+gitxna 1 Accounts 1
+gitxnas 0 Accounts
+itxnas Accounts

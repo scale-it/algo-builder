@@ -1,293 +1,361 @@
-import { types } from "@algo-builder/web";
-import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
+import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
+import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
-import { TxnFields, TxnTypeMap, ZERO_ADDRESS_STR } from "../lib/constants";
-import { AccountAddress, EncTx, RuntimeAccountI, StackElem } from "../types";
+import {
+	ALGORAND_MIN_TX_FEE,
+	MaxTxnNoteBytes,
+	TransactionTypeEnum,
+	TxnFields,
+} from "../lib/constants";
+import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
-import { assetTxnFields, isEncTxAssetConfig, isEncTxAssetDeletion } from "./txn";
+import { assetTxnFields, calculateFeeCredit, CreditFeeType } from "./txn";
+
+// supported types for inner tx (typeEnum -> type mapping)
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/#txn-f
+const TxnTypeMap: { [key: string]: { version: number; field: string | number } } = {
+	1: { version: 5, field: "pay" },
+	2: { version: 6, field: "keyreg" },
+	3: { version: 5, field: "acfg" }, // DeployASA OR RevokeAsset OR ModifyAsset OR DeleteAsset
+	4: { version: 5, field: "axfer" }, // TransferAsset OR RevokeAsset,
+	5: { version: 5, field: "afrz" },
+	6: { version: 6, field: "appl" },
+};
 
 // requires their type as number
-const numberTxnFields = new Set([
-  'Fee', 'FreezeAssetFrozen', 'ConfigAssetDecimals',
-  'ConfigAssetDefaultFrozen'
-]);
+const numberTxnFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set(["Fee", "FreezeAssetFrozen", "ConfigAssetDecimals", "ConfigAssetDefaultFrozen"]),
+};
+numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
+["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
+	(field) => numberTxnFields[6].add(field)
+);
 
-const uintTxnFields = new Set([
-  'Amount', 'AssetAmount', 'TypeEnum', 'ConfigAssetTotal'
-]);
+const uintTxnFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set(["Amount", "AssetAmount", "TypeEnum", "ConfigAssetTotal"]),
+};
+uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
-const assetIDFields = new Set([
-  'XferAsset', 'FreezeAsset', 'ConfigAsset'
-]);
+const assetIDFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set(["XferAsset", "FreezeAsset", "ConfigAsset"]),
+};
 
-const byteTxnFields = new Set([
-  'Type', 'ConfigAssetName', 'ConfigAssetUnitName',
-  'ConfigAssetMetadataHash', 'ConfigAssetURL'
-]);
+assetIDFields[6] = cloneDeep(assetIDFields[5]);
 
-const acfgAddrTxnFields = new Set([
-  'ConfigAssetManager', 'ConfigAssetReserve', 'ConfigAssetFreeze', 'ConfigAssetClawback'
-]);
+const byteTxnFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set([
+		"Type",
+		"ConfigAssetName",
+		"ConfigAssetUnitName",
+		"ConfigAssetMetadataHash",
+		"ConfigAssetURL",
+	]),
+};
 
-const otherAddrTxnFields = new Set([
-  'Sender', 'Receiver', 'CloseRemainderTo', 'AssetSender', 'AssetCloseTo',
-  'AssetReceiver', 'FreezeAssetAccount'
-]);
+byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
+[
+	"VotePK",
+	"SelectionPK",
+	"Note",
+	"ApplicationArgs",
+	"ApprovalProgram",
+	"ClearStateProgram",
+].forEach((field) => byteTxnFields[6].add(field));
+
+const acfgAddrTxnFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set([
+		"ConfigAssetManager",
+		"ConfigAssetReserve",
+		"ConfigAssetFreeze",
+		"ConfigAssetClawback",
+	]),
+};
+acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
+
+const otherAddrTxnFields: { [key: number]: Set<string> } = {
+	5: new Set([
+		"Sender",
+		"Receiver",
+		"CloseRemainderTo",
+		"AssetSender",
+		"AssetCloseTo",
+		"AssetReceiver",
+		"FreezeAssetAccount",
+	]),
+};
+
+otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
+// add new inner transaction fields support in teal v6.
+["RekeyTo"].forEach((field) => otherAddrTxnFields[6].add(field));
+
+const txTypes: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set(["pay", "axfer", "acfg", "afrz"]),
+};
+
+// supported keyreg on teal v6
+txTypes[6] = cloneDeep(txTypes[5]);
+txTypes[6].add("keyreg");
+txTypes[6].add("appl");
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
  * https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#setting-transaction-properties
  */
 /* eslint-disable sonarjs/cognitive-complexity */
-export function setInnerTxField (
-  subTxn: EncTx, field: string, val: StackElem,
-  op: Op, interpreter: Interpreter, line: number): EncTx {
-  let txValue: bigint | number | string | Uint8Array | undefined;
-  if (uintTxnFields.has(field)) {
-    txValue = op.assertBigInt(val, line);
-  }
+export function setInnerTxField(
+	subTxn: EncTx,
+	field: string,
+	val: StackElem,
+	op: Op,
+	interpreter: Interpreter,
+	line: number
+): EncTx {
+	let txValue: bigint | number | string | Uint8Array | undefined;
+	const tealVersion = interpreter.tealVersion;
 
-  if (numberTxnFields.has(field)) {
-    txValue = Number(op.assertBigInt(val, line));
-  }
+	if (uintTxnFields[tealVersion].has(field)) {
+		txValue = op.assertBigInt(val, line);
+	}
 
-  if (assetIDFields.has(field)) {
-    const id = op.assertBigInt(val, line);
-    txValue = interpreter.getAssetIDByReference(Number(id), false, line, op);
-  }
+	if (numberTxnFields[tealVersion].has(field)) {
+		txValue = Number(op.assertBigInt(val, line));
+	}
 
-  if (byteTxnFields.has(field)) {
-    const assertedVal = op.assertBytes(val, line);
-    txValue = convertToString(assertedVal);
-  }
+	if (assetIDFields[tealVersion].has(field)) {
+		const id = op.assertBigInt(val, line);
+		txValue = interpreter.getAssetIDByReference(Number(id), false, line, op);
+	}
 
-  if (otherAddrTxnFields.has(field)) {
-    const assertedVal = op.assertBytes(val, line);
-    const accountState = interpreter.getAccount(assertedVal, line);
-    txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
-  }
+	if (byteTxnFields[tealVersion].has(field)) {
+		const assertedVal = op.assertBytes(val, line);
+		txValue = convertToString(assertedVal);
+	}
 
-  // if address use for acfg we only check address is valid
-  if (acfgAddrTxnFields.has(field)) {
-    txValue = op.assertAlgorandAddress(val, line);
-  }
+	if (otherAddrTxnFields[tealVersion].has(field)) {
+		const assertedVal = op.assertBytes(val, line);
+		const accountState = interpreter.getAccount(assertedVal, line);
+		txValue = Buffer.from(decodeAddress(accountState.address).publicKey);
+	}
 
-  const encodedField = TxnFields[interpreter.tealVersion][field]; // eg 'rcv'
+	// if address use for acfg we only check address is valid
+	if (acfgAddrTxnFields[tealVersion].has(field)) {
+		txValue = op.assertAlgorandAddress(val, line);
+	}
 
-  // txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
-  if (txValue === undefined) {
-    throw new RuntimeError(
-      RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR, {
-        msg: `Field ${field} is invalid`,
-        field: field,
-        line: line,
-        tealV: interpreter.tealVersion
-      });
-  }
+	const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
-  // handle individual cases
-  let errMsg = "";
-  switch (field) {
-    case 'Type': {
-      const txType = txValue as string;
-      // either invalid string, or not allowed for TEALv5
-      if (
-        txType !== 'pay' && txType !== 'axfer' && txType !== 'acfg' && txType !== 'afrz'
-      ) {
-        errMsg = `Type does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
-      }
-      break;
-    }
-    case 'TypeEnum': {
-      const txType = op.assertBigInt(val, line);
-      if (TxnTypeMap[Number(txType)] === undefined) {
-        errMsg = `TypeEnum does not represent 'pay', 'axfer', 'acfg' or 'afrz'`;
-      }
+	// txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
+	if (txValue === undefined) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR, {
+			msg: `Field ${field} is invalid`,
+			field: field,
+			line: line,
+			tealV: tealVersion,
+		});
+	}
 
-      subTxn.type = TxnTypeMap[Number(txType)];
-      break;
-    }
-    case 'ConfigAssetDecimals': {
-      const assetDecimals = txValue as bigint;
-      if (assetDecimals > 19n || assetDecimals < 0n) {
-        errMsg = "Decimals must be between 0 (non divisible) and 19";
-      }
-      break;
-    }
-    case 'ConfigAssetMetadataHash': {
-      const assetMetadataHash = txValue as string;
-      if (assetMetadataHash.length !== 32) {
-        errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
-      }
-      break;
-    }
-    case 'ConfigAssetUnitName': {
-      const assetUnitName = txValue as string;
-      if (assetUnitName.length > 8) {
-        errMsg = "Unit name must not be longer than 8 bytes";
-      }
-      break;
-    }
-    case 'ConfigAssetName': {
-      const assetName = txValue as string;
-      if (assetName.length > 32) {
-        errMsg = "AssetName must not be longer than 8 bytes";
-      }
-      break;
-    }
-    case 'ConfigAssetURL': {
-      const assetURL = txValue as string;
-      if (assetURL.length > 96) {
-        errMsg = "URL must not be longer than 96 bytes";
-      }
-      break;
-    }
-    default: { break; }
-  }
+	// handle individual cases
+	let errMsg = "";
+	switch (field) {
+		case "Type": {
+			const txType = txValue as string;
+			// check if txType is supported in current teal version
+			if (!txTypes[tealVersion].has(txType)) {
+				errMsg = `${txType} is not a valid Type for itxn_field`;
+			}
+			break;
+		}
+		case "TypeEnum": {
+			const txType = op.assertBigInt(val, line);
+			if (
+				TxnTypeMap[Number(txType)] === undefined ||
+				TxnTypeMap[Number(txType)].version > interpreter.tealVersion
+			) {
+				errMsg = `TypeEnum ${Number(txType)}does not support`;
+			} else {
+				subTxn.type = String(TxnTypeMap[Number(txType)].field);
+			}
+			break;
+		}
+		case "ConfigAssetDecimals": {
+			const assetDecimals = txValue as bigint;
+			if (assetDecimals > 19n || assetDecimals < 0n) {
+				errMsg = "Decimals must be between 0 (non divisible) and 19";
+			}
+			break;
+		}
+		case "ConfigAssetMetadataHash": {
+			const assetMetadataHash = txValue as string;
+			if (assetMetadataHash.length !== 32) {
+				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
+			}
+			break;
+		}
+		case "ConfigAssetUnitName": {
+			const assetUnitName = txValue as string;
+			if (assetUnitName.length > 8) {
+				errMsg = "Unit name must not be longer than 8 bytes";
+			}
+			break;
+		}
+		case "ConfigAssetName": {
+			const assetName = txValue as string;
+			if (assetName.length > 32) {
+				errMsg = "AssetName must not be longer than 8 bytes";
+			}
+			break;
+		}
+		case "ConfigAssetURL": {
+			const assetURL = txValue as string;
+			if (assetURL.length > 96) {
+				errMsg = "URL must not be longer than 96 bytes";
+			}
+			break;
+		}
 
-  if (errMsg) {
-    throw new RuntimeError(
-      RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR, {
-        msg: errMsg,
-        field: field,
-        line: line,
-        tealV: interpreter.tealVersion
-      });
-  }
+		case "VotePK": {
+			const votePk = txValue as string;
+			if (votePk.length !== 32) {
+				errMsg = "VoteKey must be 32 bytes";
+			}
+			break;
+		}
 
-  // if everything goes well, set the [key, value]
-  if (encodedField === null) {
-    return subTxn; // could be for "TypeEnum"
-  } else if (assetTxnFields.has(field)) {
-    (subTxn as any).apar = (subTxn as any).apar ?? {};
-    (subTxn as any).apar[encodedField] = txValue;
-  } else {
-    (subTxn as any)[encodedField] = txValue;
-  }
+		case "SelectionPK": {
+			const selectionPK = txValue as string;
+			if (selectionPK.length !== 32) {
+				errMsg = "SelectionPK must be 32 bytes";
+			}
+			break;
+		}
 
-  return subTxn;
+		case "Note": {
+			const note = txValue as Uint8Array;
+			if (note.length > MaxTxnNoteBytes) {
+				errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+			}
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+
+	if (errMsg) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_FIELD_ERR, {
+			msg: errMsg,
+			field: field,
+			line: line,
+			tealV: tealVersion,
+		});
+	}
+
+	// if everything goes well, set the [key, value]
+	if (encodedField === null) {
+		return subTxn; // could be for "TypeEnum"
+	} else if (assetTxnFields.has(field)) {
+		(subTxn as any).apar = (subTxn as any).apar ?? {};
+		(subTxn as any).apar[encodedField] = txValue;
+	} else {
+		if (field === "ApplicationArgs") {
+			if ((subTxn as any)[encodedField] === undefined) {
+				(subTxn as any)[encodedField] = [];
+			}
+			(subTxn as any)[encodedField].push(txValue);
+		} else {
+			(subTxn as any)[encodedField] = txValue;
+		}
+	}
+
+	return subTxn;
 }
 
-const _getRuntimeAccount = (publickey: Buffer | undefined,
-  interpreter: Interpreter, line: number): RuntimeAccountI | undefined => {
-  if (publickey === undefined) { return undefined; }
-  const address = encodeAddress(Uint8Array.from(publickey));
-  const runtimeAcc = interpreter.runtime.assertAccountDefined(
-    address,
-    interpreter.runtime.ctx.state.accounts.get(address),
-    line
-  );
-  return runtimeAcc.account;
-};
+/**
+ * Calculate remaining fee after executing an inner transaction;
+ * @param interpeter current interpeter contain context
+ * @param includeCurrentInnerTx include remaining fee of current inner tx group
+ */
+export function calculateInnerTxCredit(interpeter: Interpreter): CreditFeeType {
+	// calculate curret txn group fee
+	const feeInfo = calculateFeeCredit(interpeter.currentInnerTxnGroup);
 
-const _getRuntimeAccountAddr = (publickey: Buffer | undefined,
-  interpreter: Interpreter, line: number): AccountAddress | undefined => {
-  return _getRuntimeAccount(publickey, interpreter, line)?.addr;
-};
+	// plus fee from outner
+	feeInfo.collectedFee += interpeter.runtime.ctx.remainingFee;
+	feeInfo.remainingFee = feeInfo.collectedFee - feeInfo.requiredFee;
 
-const _getASAConfigAddr = (addr?: Uint8Array): string => {
-  if (addr) {
-    return encodeAddress(addr);
-  }
-  return "";
-};
+	return feeInfo;
+}
 
-// parse encoded txn obj to execParams (params passed by user in algob)
-/* eslint-disable sonarjs/cognitive-complexity */
-export function parseEncodedTxnToExecParams (tx: EncTx,
-  interpreter: Interpreter, line: number): types.ExecParams {
-  // signer is the contract
-  const appID = interpreter.runtime.ctx.tx.apid ?? 0;
-  const appAddress = getApplicationAddress(appID);
+// return 0 if transaction pay by pool fee
+// return `ALGORAND_MIN_TX_FEE` if transaction pay by contract (pooled not enough fee).
+export function getInnerTxDefaultFee(interpeter: Interpreter): number {
+	// sum of outnerCredit.remaining and executedInnerCredit remaining
+	const creditFee = calculateInnerTxCredit(interpeter).remainingFee;
+	// if remaining fee is enough to pay current tx set default fee to zero
+	// else set fee to ALGORAND_MIN_TX_FEE and contract will pay this transaction
+	return creditFee >= ALGORAND_MIN_TX_FEE ? 0 : ALGORAND_MIN_TX_FEE;
+}
 
-  // initial common fields
-  const execParams: any = {
-    sign: types.SignType.SecretKey,
-    fromAccount: { addr: appAddress, sk: Buffer.from([]) }, // signer is the contract
-    fromAccountAddr: encodeAddress(tx.snd),
-    payFlags: {
-      totalFee: tx.fee,
-      firstValid: tx.fv
-    }
-  };
+/**
+ * Add new inner tx to inner tx group
+ * @param interpreter interpeter execute current tx
+ * @param line line number
+ * @returns EncTx object
+ */
+export function addInnerTransaction(interpreter: Interpreter, line: number): EncTx {
+	// get app, assert it exists
+	const appID = interpreter.runtime.ctx.tx.apid ?? 0;
+	interpreter.runtime.assertAppDefined(appID, interpreter.getApp(appID, line), line);
 
-  switch (tx.type) {
-    case 'pay': {
-      execParams.type = types.TransactionType.TransferAlgo;
-      execParams.toAccountAddr =
-        _getRuntimeAccountAddr(tx.rcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-      execParams.amountMicroAlgos = tx.amt ?? 0n;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.close, interpreter, line);
-      break;
-    }
-    case 'afrz': {
-      execParams.type = types.TransactionType.FreezeAsset;
-      execParams.assetID = tx.faid;
-      execParams.freezeTarget = _getRuntimeAccountAddr(tx.fadd, interpreter, line);
-      execParams.freezeState = BigInt(tx.afrz ?? 0n) === 1n;
-      break;
-    }
-    case 'axfer': {
-      if (tx.asnd !== undefined) { // if 'AssetSender' is set, it is clawback transaction
-        execParams.type = types.TransactionType.RevokeAsset;
-        execParams.recipient =
-          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-        execParams.revocationTarget = _getRuntimeAccountAddr(tx.asnd, interpreter, line);
-      } else { // asset transfer
-        execParams.type = types.TransactionType.TransferAsset;
-        execParams.toAccountAddr =
-          _getRuntimeAccountAddr(tx.arcv, interpreter, line) ?? ZERO_ADDRESS_STR;
-      }
-      // set common fields (asset amount, index, closeRemTo)
-      execParams.amount = tx.aamt ?? 0n;
-      execParams.assetID = tx.xaid ?? 0;
-      execParams.payFlags.closeRemainderTo = _getRuntimeAccountAddr(tx.aclose, interpreter, line);
-      break;
-    }
-    case 'acfg': { // can be asset modification, destroy, or deployment(create)
-      if (isEncTxAssetDeletion(tx)) {
-        execParams.type = types.TransactionType.DestroyAsset;
-        execParams.assetID = tx.caid;
-      } else if (isEncTxAssetConfig(tx)) {
-        // from the docs: all fields must be reset, otherwise they will be cleared
-        // https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#asset-configuration
-        execParams.type = types.TransactionType.ModifyAsset;
-        execParams.assetID = tx.caid;
-        execParams.fields = {
-          manager: _getASAConfigAddr(tx.apar?.m),
-          reserve: _getASAConfigAddr(tx.apar?.r),
-          clawback: _getASAConfigAddr(tx.apar?.c),
-          freeze: _getASAConfigAddr(tx.apar?.f)
-        };
-      } else { // if not delete or modify, it's ASA deployment
-        execParams.type = types.TransactionType.DeployASA;
-        execParams.asaName = tx.apar?.an;
-        execParams.asaDef = {
-          name: tx.apar?.an,
-          total: tx.apar?.t,
-          decimals: tx.apar?.dc !== undefined ? Number(tx.apar.dc) : undefined,
-          defaultFrozen: BigInt(tx.apar?.df ?? 0n) === 1n,
-          unitName: tx.apar?.un,
-          url: tx.apar?.au,
-          metadataHash: tx.apar?.am,
-          manager: _getASAConfigAddr(tx.apar?.m),
-          reserve: _getASAConfigAddr(tx.apar?.r),
-          clawback: _getASAConfigAddr(tx.apar?.c),
-          freeze: _getASAConfigAddr(tx.apar?.f)
-        };
-      }
-      break;
-    }
-    default: {
-      throw new Error(`unsupported type for itxn_submit at line ${line}, for version ${interpreter.tealVersion}`);
-    }
-  }
+	// get application's account
+	const address = getApplicationAddress(appID);
+	const applicationAccount = interpreter.runtime.assertAccountDefined(
+		address,
+		interpreter.runtime.ctx.state.accounts.get(address),
+		line
+	);
 
-  return execParams;
+	return {
+		// set sender, fee, fv, lv
+		snd: Buffer.from(algosdk.decodeAddress(applicationAccount.address).publicKey),
+		// user can change this fee
+		fee: getInnerTxDefaultFee(interpreter),
+		fv: interpreter.runtime.ctx.tx.fv,
+		lv: interpreter.runtime.ctx.tx.lv,
+		// to avoid type hack
+		gen: interpreter.runtime.ctx.tx.gen,
+		gh: interpreter.runtime.ctx.tx.gh,
+		txID: "",
+		type: TransactionTypeEnum.UNKNOWN,
+	};
 }

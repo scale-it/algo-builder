@@ -1,91 +1,91 @@
 {
-  "name": "@algo-builder/runtime",
-  "version": "3.2.0",
-  "license": "Apache-2.0",
-  "repository": "https://github.com/scale-it/algo-builder.git",
-  "description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
-  "keywords": [
-    "smart-contracts",
-    "blockchain",
-    "algorand",
-    "dapps",
-    "javascript",
-    "tooling"
-  ],
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "engines": {
-    "node": ">=14.11.0"
-  },
-  "scripts": {
-    "lint": "eslint --ext .js,.ts src",
-    "lint:fix": "eslint --fix --ext .js,.ts src",
-    "lint:unix": "eslint --format unix --ext .js,.ts src",
-    "test": "echo testing web; mocha",
-    "test:watch:p": "mocha -w &",
-    "coverage": "nyc ../../node_modules/mocha/bin/mocha",
-    "build": "tsc --build .",
-    "build:watch": "tsc -w -p .",
-    "build:docs": "typedoc --out ../../docs/api/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
-    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
-    "prepublish": "yarn build"
-  },
-  "dependencies": {
-    "@algo-builder/web": "workspace:*",
-    "@nodelib/fs.walk": "^1.2.8",
-    "algosdk": "^1.13.1",
-    "elliptic": "^6.5.4",
-    "hi-base32": "^0.5.1",
-    "js-sha256": "^0.9.0",
-    "js-sha512": "^0.8.0",
-    "lodash.clonedeep": "^4.5.0",
-    "murmurhash": "^2.0.0",
-    "sha3": "^2.1.4",
-    "source-map-support": "^0.5.21",
-    "tweetnacl-ts": "^1.0.3",
-    "yaml": "^1.10.2",
-    "zod": "^3.11.6"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.2.22",
-    "@types/elliptic": "^6.4.13",
-    "@types/lodash.clonedeep": "^4.5.6",
-    "@types/mocha": "^9.0.0",
-    "@types/murmurhash": "0.0.1",
-    "@types/node": "~15.12.5",
-    "@types/sinon": "^9.0.4",
-    "chai": "^4.3.4",
-    "eslint": "^8.7.0",
-    "mocha": "^9.2.0",
-    "nyc": "^15.1.0",
-    "sinon": "^12.0.1",
-    "ts-node": "^10.4.0",
-    "typedoc": "^0.22.11",
-    "typescript": "^4.5.5"
-  },
-  "publishConfig": {
-    "access": "public",
-    "no-git-tag-version": true
-  },
-  "files": [
-    "build/",
-    "LICENSE",
-    "README.md"
-  ],
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "exclude": [
-      "build",
-      "test",
-      "coverage",
-      ".nyc_output"
-    ],
-    "reporter": [
-      "text",
-      "lcovonly"
-    ],
-    "all": true
-  }
+	"name": "@algo-builder/runtime",
+	"version": "3.2.0",
+	"license": "Apache-2.0",
+	"homepage": "https://algobuilder.dev",
+	"repository": "https://github.com/scale-it/algo-builder.git",
+	"description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
+	"keywords": [
+		"smart-contracts",
+		"blockchain",
+		"algorand",
+		"dapps",
+		"javascript",
+		"tooling"
+	],
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
+	"engines": {
+		"node": ">=14.11.0"
+	},
+	"scripts": {
+		"lint:check": "eslint --ext .js,.ts src",
+		"lint": "eslint --cache --fix --ext .js,.ts src",
+		"lint:unix": "eslint --cache --format unix --ext .js,.ts src",
+		"test": "echo testing runtime; mocha -R progress",
+		"test:watch:p": "mocha -w &",
+		"coverage": "nyc ../../node_modules/mocha/bin/mocha",
+		"build": "tsc --build .",
+		"build:watch": "tsc -w -p .",
+		"build:docs": "typedoc --out ../../docs/api/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
+		"clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
+		"prepublish": "yarn build"
+	},
+	"dependencies": {
+		"@algo-builder/web": "workspace:*",
+		"@nodelib/fs.walk": "^1.2.8",
+		"algosdk": "^1.16.0",
+		"elliptic": "^6.5.4",
+		"hi-base32": "^0.5.1",
+		"js-sha256": "^0.9.0",
+		"js-sha512": "^0.8.0",
+		"lodash.clonedeep": "^4.5.0",
+		"murmurhash": "^2.0.0",
+		"sha3": "^2.1.4",
+		"source-map-support": "^0.5.21",
+		"tweetnacl-ts": "^1.0.3",
+		"yaml": "^1.10.2",
+		"zod": "^3.13.4"
+	},
+	"devDependencies": {
+		"@types/chai": "^4.3.0",
+		"@types/elliptic": "^6.4.14",
+		"@types/lodash.clonedeep": "^4.5.6",
+		"@types/mocha": "^9.1.0",
+		"@types/node": "^17.0.21",
+		"@types/sinon": "^10.0.11",
+		"chai": "^4.3.6",
+		"eslint": "^8.10.0",
+		"mocha": "^9.2.1",
+		"nyc": "^15.1.0",
+		"sinon": "^13.0.1",
+		"ts-node": "^10.7.0",
+		"typedoc": "^0.22.13",
+		"typescript": "^4.6.2"
+	},
+	"publishConfig": {
+		"access": "public",
+		"no-git-tag-version": true
+	},
+	"files": [
+		"build/",
+		"LICENSE",
+		"README.md"
+	],
+	"nyc": {
+		"extension": [
+			".ts"
+		],
+		"exclude": [
+			"build",
+			"test",
+			"coverage",
+			".nyc_output"
+		],
+		"reporter": [
+			"text",
+			"lcovonly"
+		],
+		"all": true
+	}
 }

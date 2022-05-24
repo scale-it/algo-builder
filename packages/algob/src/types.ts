@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2, Transaction } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -10,82 +10,79 @@ import * as types from "./internal/core/params/argument-types";
 export type Timestamp = number;
 
 export interface Account {
-  name: string
-  mnemonic: string
+	name: string;
+	mnemonic: string;
 }
 
 export interface HDAccount {
-  mnemonic: string
-  initialIndex?: number
-  count?: number
-  path: string
+	mnemonic: string;
+	initialIndex?: number;
+	count?: number;
+	path: string;
 }
 
 export interface MnemonicAccount {
-  name: string
-  addr: string
-  mnemonic: string
+	name: string;
+	addr: string;
+	mnemonic: string;
 }
 
-export type AccountDef =
-  | MnemonicAccount
-  | HDAccount
-  | rtypes.Account;
+export type AccountDef = MnemonicAccount | HDAccount | rtypes.Account;
 
 interface CommonNetworkConfig {
-  accounts: rtypes.Account[]
-  // optional, when provided KMD accounts will be loaded by the config resolver
-  // and merged into the accounts variable (above)
-  kmdCfg?: KmdCfg
-  indexerCfg?: IndexerCfg
-  chainName?: string
-  // from?: string;
-  // TODO: timeout?: number;
+	accounts: rtypes.Account[];
+	// optional, when provided KMD accounts will be loaded by the config resolver
+	// and merged into the accounts variable (above)
+	kmdCfg?: KmdCfg;
+	indexerCfg?: IndexerCfg;
+	chainName?: string;
+	// from?: string;
+	// TODO: timeout?: number;
 }
 
 export interface ChainCfg extends CommonNetworkConfig {
-  throwOnTransactionFailures?: boolean
-  throwOnCallFailures?: boolean
-  loggingEnabled?: boolean
-  initialDate?: string
+	throwOnTransactionFailures?: boolean;
+	throwOnCallFailures?: boolean;
+	loggingEnabled?: boolean;
+	initialDate?: string;
 }
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
-  host: string // with optional http o https prefix
-  port: string | number
-  token: string | AlgodTokenHeader | CustomTokenHeader
-  httpHeaders?: { [name: string]: string }
+	host: string; // with optional http o https prefix
+	port: string | number;
+	token: string | AlgodTokenHeader | CustomTokenHeader;
+	httpHeaders?: { [name: string]: string };
 }
 
 export type NetworkConfig = ChainCfg | HttpNetworkConfig;
 
 export interface Networks {
-  [networkName: string]: NetworkConfig
+	[networkName: string]: NetworkConfig;
 }
 
 export interface KmdWallet {
-  name: string
-  password: string
-  accounts: Array<{name: string, address: string}> // both are obligatory
+	name: string;
+	password: string;
+	accounts: Array<{ name: string; address: string }>; // both are obligatory
 }
 
 export interface KmdCfg {
-  host: string
-  port: string | number
-  token: string | KMDTokenHeader | CustomTokenHeader
-  wallets: KmdWallet[]
+	host: string;
+	port: string | number;
+	token: string | KMDTokenHeader | CustomTokenHeader;
+	wallets: KmdWallet[];
 }
 
 export interface IndexerCfg {
-  host: string
-  port: string | number
-  token: string | IndexerTokenHeader | CustomTokenHeader
+	host: string;
+	port: string | number;
+	token: string | IndexerTokenHeader | CustomTokenHeader;
 }
 
 export interface NetworkCredentials {
-  host: string
-  port: string | number
-  token: string
+	host: string;
+	port: string | number;
+	token: string;
 }
 
 /**
@@ -93,19 +90,19 @@ export interface NetworkCredentials {
  * https://github.com/algorand/js-algorand-sdk/issues/437
  */
 export interface AlgodTokenHeader {
-  'X-Algo-API-Token': string
+	"X-Algo-API-Token": string;
 }
 
 export interface IndexerTokenHeader {
-  'X-Indexer-API-Token': string
+	"X-Indexer-API-Token": string;
 }
 
 export interface KMDTokenHeader {
-  'X-KMD-API-Token': string
+	"X-KMD-API-Token": string;
 }
 
 export interface CustomTokenHeader {
-  [headerName: string]: string
+	[headerName: string]: string;
 }
 
 /**
@@ -118,29 +115,29 @@ export interface CustomTokenHeader {
  * * tests: project's tests directory.
  */
 export interface ProjectPaths {
-  root: string
-  configFile: string
-  cache: string
-  artifacts: string
-  sources: string
-  tests: string
+	root: string;
+	configFile: string;
+	cache: string;
+	artifacts: string;
+	sources: string;
+	tests: string;
 }
 
 export type UserPaths = Omit<Partial<ProjectPaths>, "configFile">;
 
 export interface Config {
-  networks?: Networks
-  paths?: UserPaths
-  mocha?: Mocha.MochaOptions
+	networks?: Networks;
+	paths?: UserPaths;
+	mocha?: Mocha.MochaOptions;
 }
 
 export interface TaskTestConfig extends Config {
-  testFiles: string[]
+	testFiles: string[];
 }
 
 export interface ResolvedConfig extends Config {
-  paths?: ProjectPaths
-  networks: Networks
+	paths?: ProjectPaths;
+	networks: Networks;
 }
 
 // End config types
@@ -151,88 +148,85 @@ export interface ResolvedConfig extends Config {
  */
 export type EnvironmentExtender = (env: RuntimeEnv) => void;
 
-export type ConfigExtender = (
-  config: ResolvedConfig,
-  userConfig: Readonly<Config>
-) => void;
+export type ConfigExtender = (config: ResolvedConfig, userConfig: Readonly<Config>) => void;
 
 export interface TasksMap {
-  [name: string]: TaskDefinition
+	[name: string]: TaskDefinition;
 }
 
 export interface ConfigurableTaskDefinition {
-  setDescription: (description: string) => this
+	setDescription: (description: string) => this;
 
-  setAction: (action: ActionType<TaskArguments>) => this
+	setAction: (action: ActionType<TaskArguments>) => this;
 
-  addParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T,
-    type?: types.ArgumentType<T>,
-    isOptional?: boolean
-  ) => this
+	addParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T,
+		type?: types.ArgumentType<T>,
+		isOptional?: boolean
+	) => this;
 
-  addOptionalParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T,
-    type?: types.ArgumentType<T>
-  ) => this
+	addOptionalParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T,
+		type?: types.ArgumentType<T>
+	) => this;
 
-  addPositionalParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T,
-    type?: types.ArgumentType<T>,
-    isOptional?: boolean
-  ) => this
+	addPositionalParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T,
+		type?: types.ArgumentType<T>,
+		isOptional?: boolean
+	) => this;
 
-  addOptionalPositionalParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T,
-    type?: types.ArgumentType<T>
-  ) => this
+	addOptionalPositionalParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T,
+		type?: types.ArgumentType<T>
+	) => this;
 
-  addVariadicPositionalParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T[],
-    type?: types.ArgumentType<T>,
-    isOptional?: boolean
-  ) => this
+	addVariadicPositionalParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T[],
+		type?: types.ArgumentType<T>,
+		isOptional?: boolean
+	) => this;
 
-  addOptionalVariadicPositionalParam: <T>(
-    name: string,
-    description?: string,
-    defaultValue?: T[],
-    type?: types.ArgumentType<T>
-  ) => this
+	addOptionalVariadicPositionalParam: <T>(
+		name: string,
+		description?: string,
+		defaultValue?: T[],
+		type?: types.ArgumentType<T>
+	) => this;
 
-  addFlag: (name: string, description?: string) => this
+	addFlag: (name: string, description?: string) => this;
 }
 
 export interface ParamDefinition<T> {
-  name: string
-  shortName?: string
-  defaultValue?: T
-  type: types.ArgumentType<T>
-  description?: string
-  isOptional: boolean
-  isFlag: boolean
-  isVariadic: boolean
+	name: string;
+	shortName?: string;
+	defaultValue?: T;
+	type: types.ArgumentType<T>;
+	description?: string;
+	isOptional: boolean;
+	isFlag: boolean;
+	isVariadic: boolean;
 }
 
 export type ParamDefinitionAny = ParamDefinition<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface OptionalParamDefinition<T> extends ParamDefinition<T> {
-  defaultValue: T
-  isOptional: true
+	defaultValue: T;
+	isOptional: true;
 }
 
 export interface ParamDefinitionsMap {
-  [paramName: string]: ParamDefinitionAny
+	[paramName: string]: ParamDefinitionAny;
 }
 
 /**
@@ -244,35 +238,33 @@ export interface ParamDefinitionsMap {
  * + config: used to specify algob's config file.
  */
 export interface RuntimeArgs {
-  network: string
-  showStackTraces: boolean
-  version: boolean
-  help: boolean
-  config?: string
-  verbose: boolean
+	network: string;
+	showStackTraces: boolean;
+	version: boolean;
+	help: boolean;
+	config?: string;
+	verbose: boolean;
 }
 
 export type ParamDefinitions = {
-  [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
-  RuntimeArgs[param]
-  >;
+	[param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<RuntimeArgs[param]>;
 };
 
 export interface ShortParamSubstitutions {
-  [name: string]: string
-};
+	[name: string]: string;
+}
 
 export interface TaskDefinition extends ConfigurableTaskDefinition {
-  readonly name: string
-  readonly description?: string
-  readonly action: ActionType<TaskArguments>
-  readonly isInternal: boolean
+	readonly name: string;
+	readonly description?: string;
+	readonly action: ActionType<TaskArguments>;
+	readonly isInternal: boolean;
 
-  // TODO: Rename this to something better. It doesn't include the positional
-  // params, and that's not clear.
-  readonly paramDefinitions: ParamDefinitionsMap
+	// TODO: Rename this to something better. It doesn't include the positional
+	// params, and that's not clear.
+	readonly paramDefinitions: ParamDefinitionsMap;
 
-  readonly positionalParamDefinitions: ParamDefinitionAny[]
+	readonly positionalParamDefinitions: ParamDefinitionAny[];
 }
 
 /**
@@ -291,412 +283,465 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
  */
 export type TaskArguments = any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export type RunTaskFunction = (
-  name: string,
-  taskArguments?: TaskArguments
-) => PromiseAny;
+export type RunTaskFunction = (name: string, taskArguments?: TaskArguments) => PromiseAny;
 
 export interface RunSuperFunction<ArgT extends TaskArguments> {
-  (taskArguments?: ArgT): PromiseAny
-  isDefined: boolean
+	(taskArguments?: ArgT): PromiseAny;
+	isDefined: boolean;
 }
 
 export type ActionType<ArgsT extends TaskArguments> = (
-  taskArgs: ArgsT,
-  env: RuntimeEnv,
-  runSuper: RunSuperFunction<ArgsT>
+	taskArgs: ArgsT,
+	env: RuntimeEnv,
+	runSuper: RunSuperFunction<ArgsT>
 ) => PromiseAny;
 
 export interface Network {
-  name: string
-  config: NetworkConfig
-  // provider:
+	name: string;
+	config: NetworkConfig;
+	// provider:
 }
 
 export interface RuntimeEnv {
-  readonly config: ResolvedConfig
-  readonly runtimeArgs: RuntimeArgs
-  readonly tasks: TasksMap
-  readonly run: RunTaskFunction
-  readonly network: Network
+	readonly config: ResolvedConfig;
+	readonly runtimeArgs: RuntimeArgs;
+	readonly tasks: TasksMap;
+	readonly run: RunTaskFunction;
+	readonly network: Network;
 }
 
 export interface Artifact {
-  contractName: string
-  abi: any // eslint-disable-line @typescript-eslint/no-explicit-any
-  bytecode: string // "0x"-prefixed hex string
-  deployedBytecode: string // "0x"-prefixed hex string
-  linkReferences: LinkReferences
-  deployedLinkReferences: LinkReferences
+	contractName: string;
+	abi: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+	bytecode: string; // "0x"-prefixed hex string
+	deployedBytecode: string; // "0x"-prefixed hex string
+	linkReferences: LinkReferences;
+	deployedLinkReferences: LinkReferences;
 }
 
 export interface LinkReferences {
-  [libraryFileName: string]: {
-    [libraryName: string]: Array<{ length: number, start: number }>
-  }
+	[libraryFileName: string]: {
+		[libraryName: string]: Array<{ length: number; start: number }>;
+	};
 }
 
 export type AccountAddress = string;
 
-// stateless smart contract deployment information (log)
+// smart signature deployment information (log)
 export interface LsigInfo {
-  creator: AccountAddress
-  contractAddress: string
-  lsig: LogicSigAccount
+	creator: AccountAddress;
+	contractAddress: string;
+	lsig: LogicSigAccount;
+	file?: string;
 }
 
 /**
  * Checkpoint implementation
  */
 export interface CheckpointRepo {
-  /**
-   * Accumulates state as scripts are executed. This way it hides values generated by
-   * remaining checkpoints. It is what should be exposed to the running scripts. */
-  precedingCP: Checkpoints
-  /**
-   * Variables that current script introduced, short version of what was added.
-   * Used for state persistence. */
-  strippedCP: Checkpoints
-  /**
-   * All possible values that are loaded in advance.
-   * This allows to prevent asset name clashes between scripts. */
-  allCPs: Checkpoints
+	/**
+	 * Accumulates state as scripts are executed. This way it hides values generated by
+	 * remaining checkpoints. It is what should be exposed to the running scripts. */
+	precedingCP: Checkpoints;
+	/**
+	 * Variables that current script introduced, short version of what was added.
+	 * Used for state persistence. */
+	strippedCP: Checkpoints;
+	/**
+	 * All possible values that are loaded in advance.
+	 * This allows to prevent asset name clashes between scripts. */
+	allCPs: Checkpoints;
 
-  merge: (c: Checkpoints, scriptName: string) => CheckpointRepo
-  mergeToGlobal: (c: Checkpoints, scriptName: string) => CheckpointRepo
+	merge: (c: Checkpoints, scriptName: string) => CheckpointRepo;
+	mergeToGlobal: (c: Checkpoints, scriptName: string) => CheckpointRepo;
 
-  /**
-   * Sets metadata key-value for a specified network. */
-  putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
-  /**
-   * Gets metadata key-value for a specified network. */
-  getMetadata: (networkName: string, key: string) => string | undefined
+	/**
+	 * Sets metadata key-value for a specified network. */
+	putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo;
+	/**
+	 * Gets metadata key-value for a specified network. */
+	getMetadata: (networkName: string, key: string) => string | undefined;
 
-  registerASA: (networkName: string, name: string, info: rtypes.ASAInfo) => CheckpointRepo
-  registerSSC: (networkName: string, name: string, info: rtypes.SSCInfo) => CheckpointRepo
-  registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
+	registerASA: (networkName: string, name: string, info: rtypes.ASAInfo) => CheckpointRepo;
+	registerSSC: (networkName: string, name: string, info: rtypes.AppInfo) => CheckpointRepo;
+	registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo;
 
-  isDefined: (networkName: string, name: string) => boolean
-  networkExistsInCurrentCP: (networkName: string) => boolean
-};
+	isDefined: (networkName: string, name: string) => boolean;
+	networkExistsInCurrentCP: (networkName: string) => boolean;
+}
 
 export interface Checkpoints {
-  [network: string]: Checkpoint
+	[network: string]: Checkpoint;
 }
 
 export interface Checkpoint {
-  timestamp: number
-  metadata: Map<string, string>
-  asa: Map<string, rtypes.ASAInfo>
-  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>
-  dLsig: Map<string, LsigInfo>
-};
+	timestamp: number;
+	metadata: Map<string, string>;
+	asa: Map<string, rtypes.ASAInfo>;
+	app: Map<string, Map<Timestamp, rtypes.AppInfo>>;
+	dLsig: Map<string, LsigInfo>;
+}
 
 export interface FundASCFlags {
-  funder: rtypes.Account
-  fundingMicroAlgo: number
+	funder: rtypes.Account;
+	fundingMicroAlgo: number;
 }
 
 export interface AssetScriptMap {
-  [assetName: string]: string
+	[assetName: string]: string;
 }
 
 export interface CheckpointFunctions {
-  /**
-   * Queries a stateful smart contract info from checkpoint using key. */
-  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+	/**
+	 * Queries a stateful smart contract info from checkpoint using key. */
+	getAppfromCPKey: (key: string) => rtypes.AppInfo | undefined;
 
-  /**
-   * Returns SSC checkpoint key using application index,
-   * returns undefined if it doesn't exist
-   * @param index Application index
-   */
-  getAppCheckpointKeyFromIndex: (index: number) => string | undefined
+	/**
+	 * Returns SSC checkpoint key using application index,
+	 * returns undefined if it doesn't exist
+	 * @param index Application index
+	 */
+	getAppCheckpointKeyFromIndex: (index: number) => string | undefined;
 
-  /**
-   * Returns ASA checkpoint key using asset index,
-   * returns undefined if it doesn't exist
-   * @param index Asset Index
-   */
-  getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
+	/**
+	 * Returns ASA checkpoint key using asset index,
+	 * returns undefined if it doesn't exist
+	 * @param index Asset Index
+	 */
+	getAssetCheckpointKeyFromIndex: (index: number) => string | undefined;
 
-  getLatestTimestampValue: (map: Map<number, rtypes.SSCInfo>) => number
+	getLatestTimestampValue: (map: Map<number, rtypes.AppInfo>) => number;
 }
 
 export interface Deployer {
-  /**
-   * Allows user to know whether a script is running in a `deploy` or `run` mode. */
-  isDeployMode: boolean
-  accounts: rtypes.Account[]
-  accountsByName: rtypes.AccountMap
+	/**
+	 * Allows user to know whether a script is running in a `deploy` or `run` mode. */
+	isDeployMode: boolean;
+	accounts: rtypes.Account[];
+	accountsByName: rtypes.AccountMap;
 
-  /**
-   * Mapping of ASA name to deployment log */
-  asa: Map<string, rtypes.ASAInfo>
+	/**
+	 * Mapping of ASA name to deployment log */
+	asa: Map<string, rtypes.ASAInfo>;
 
-  checkpoint: CheckpointFunctions
+	checkpoint: CheckpointFunctions;
 
-  getASAInfo: (name: string) => rtypes.ASAInfo
+	getASAInfo: (name: string) => rtypes.ASAInfo;
 
-  /**
-   * Sets metadata key value for a current network in the chckpoint file based on the
-   * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)
-   * it will throw an exception. */
-  addCheckpointKV: (key: string, value: string) => void
+	/**
+	 * Sets metadata key value for a current network in the chckpoint file based on the
+	 * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)
+	 * it will throw an exception. */
+	addCheckpointKV: (key: string, value: string) => void;
 
-  /**
-   * Queries metadata key in all checkpoint files of current network. If the key is not defined
-   * in any checkpoint then `undefined` is returned. Can be run in both _run_ and _deploy_ mode.
-   */
-  getCheckpointKV: (key: string) => string | undefined
+	/**
+	 * Queries metadata key in all checkpoint files of current network. If the key is not defined
+	 * in any checkpoint then `undefined` is returned. Can be run in both _run_ and _deploy_ mode.
+	 */
+	getCheckpointKV: (key: string) => string | undefined;
 
-  /**
-   * Creates and deploys ASA defined in asa.yaml.
-   * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
-   * @flags  deployment flags */
-  deployASA: (
-    name: string,
-    flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<wtypes.ASADef>
-  ) => Promise<rtypes.ASAInfo>
+	/**
+	 * Creates and deploys ASA defined in asa.yaml.
+	 * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
+	 * @flags  deployment flags */
+	deployASA: (
+		name: string,
+		flags: rtypes.ASADeploymentFlags,
+		asaParams?: Partial<wtypes.ASADef>
+	) => Promise<rtypes.ASAInfo>;
 
-  /**
-   * Creates and deploys ASA without using asa.yaml.
-   * @name ASA name
-   * @asaDef ASA definitions
-   * @flags deployment flags
-   */
-  deployASADef: (
-    name: string,
-    asaDef: wtypes.ASADef,
-    flags: rtypes.ASADeploymentFlags,
-  ) => Promise<rtypes.ASAInfo>
+	/**
+	 * Creates and deploys ASA without using asa.yaml.
+	 * @name ASA name
+	 * @asaDef ASA definitions
+	 * @flags deployment flags
+	 */
+	deployASADef: (
+		name: string,
+		asaDef: wtypes.ASADef,
+		flags: rtypes.ASADeploymentFlags
+	) => Promise<rtypes.ASAInfo>;
 
-  /**
-   * Loads deployed asset definition from checkpoint.
-   * NOTE: This function returns "deployed" ASADef, as immutable properties
-   * of asaDef could be updated during tx execution (eg. update asset clawback)
-   * @name  ASA name - name of ASA in the /assets/asa.yaml file */
-  loadASADef: (asaName: string) => wtypes.ASADef | undefined
+	/**
+	 * Loads deployed asset definition from checkpoint.
+	 * NOTE: This function returns "deployed" ASADef, as immutable properties
+	 * of asaDef could be updated during tx execution (eg. update asset clawback)
+	 * @name  ASA name - name of ASA in the /assets/asa.yaml file */
+	loadASADef: (asaName: string) => wtypes.ASADef | undefined;
 
-  assertNoAsset: (name: string) => void
+	assertNoAsset: (name: string) => void;
+	assertNoLsig: (lsigName: string) => void;
+	assertNoApp: (appName: string) => void;
 
-  getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
+	getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef;
 
-  persistCP: () => void
+	persistCP: () => void;
 
-  registerASAInfo: (name: string, asaInfo: rtypes.ASAInfo) => void
+	registerASAInfo: (name: string, asaInfo: rtypes.ASAInfo) => void;
 
-  registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
+	registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void;
 
-  logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
+	logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void;
 
-  /**
-   * Send signed transaction to network and wait for confirmation
-   * @param rawTxns Signed Transaction(s)
-   */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>
+	/**
+	 * Send signed transaction to network and wait for confirmation
+	 * @param rawTxns Signed Transaction(s)
+	 */
+	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
 
-  /**
-   * Funds logic signature account (Contract Account).
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
-   * @payFlags  Transaction Parameters
-   * @scTmplParams  Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   */
-  fundLsig: (
-    name: string,
-    flags: FundASCFlags,
-    payFlags: wtypes.TxParams,
-    scTmplParams?: SCParams
-  ) => void
+	/**
+	 * Return receipts for each transaction in group txn
+	 * @param txns list transaction in group
+	 * @returns confirmed tx info of group
+	 */
+	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 
-  /**
-   * Makes delegated logic signature signed by the `signer`.
-   * @name  Stateless Smart Contract filename (must be present in assets folder)
-   * @signer  Signer Account which will sign the smart contract
-   * @scTmplParams  Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   */
-  mkDelegatedLsig: (
-    name: string,
-    signer: rtypes.Account,
-    scTmplParams?: SCParams
-  ) => Promise<LsigInfo>
+	/**
+	 * Funds logic signature account (Contract Account).
+	 * @fileName:  filename with a Smart Signature code (must be present in the assets folder)
+	 * @payFlags  Transaction Parameters
+	 * @scTmplParams  Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 */
+	fundLsigByFile: (
+		fileName: string,
+		flags: FundASCFlags,
+		payFlags: wtypes.TxParams,
+		scTmplParams?: SCParams
+	) => void;
 
-  /**
-   * Deploys stateful smart contract.
-   * @approvalProgram  approval program filename (must be present in assets folder)
-   * @clearProgram  clear program filename (must be present in assets folder)
-   * @flags  AppDeploymentFlags
-   * @payFlags  Transaction Parameters
-   * @scTmplParams  Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   * @appName name of the app to deploy. This name (if passed) will be used as
-   * the checkpoint "key", and app information will be stored agaisnt this name
-   */
-  deployApp: (
-    approvalProgram: string,
-    clearProgram: string,
-    flags: rtypes.AppDeploymentFlags,
-    payFlags: wtypes.TxParams,
-    scTmplParams?: SCParams,
-    appName?: string) => Promise<rtypes.SSCInfo>
+	/**
+	 * This function will send Algos to ASC account in "Contract Mode".
+	 * @param lsigName - name of the smart signature (passed by user during
+	 * mkContractLsig/mkDelegatedLsig)
+	 * @param flags    - Deployments flags (as per SPEC)
+	 * @param payFlags - as per SPEC
+	 */
+	fundLsig: (lsigName: string, flags: FundASCFlags, payFlags: wtypes.TxParams) => void;
 
-  /**
-   * Update programs(approval, clear) for a stateful smart contract.
-   * @param sender Account from which call needs to be made
-   * @param payFlags Transaction Flags
-   * @param appID ID of the application being configured or empty if creating
-   * @param newApprovalProgram New Approval Program filename
-   * @param newClearProgram New Clear Program filename
-   * @param flags Optional parameters to SSC (accounts, args..)
-   * @param scTmplParams: scTmplParams: Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   * @param appName name of the app to deploy. This name (if passed) will be used as
-   * the checkpoint "key", and app information will be stored agaisnt this name
-   */
-  updateApp: (
-    sender: algosdk.Account,
-    payFlags: wtypes.TxParams,
-    appID: number,
-    newApprovalProgram: string,
-    newClearProgram: string,
-    flags: rtypes.AppOptionalFlags,
-    scTmplParams?: SCParams,
-    appName?: string
-  ) => Promise<rtypes.SSCInfo>
+	/**
+	 * Makes delegated logic signature signed by the `signer`.
+	 * @lsigName name of smart signature (checkpoint info will be stored against this name)
+	 * @fileName  Smart Signature filename (must be present in assets folder)
+	 * @signer  Signer Account which will sign the smart contract
+	 * @scTmplParams  Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 */
+	mkDelegatedLsig: (
+		lsigName: string,
+		fileName: string,
+		signer: rtypes.Account,
+		scTmplParams?: SCParams
+	) => Promise<LsigInfo>;
 
-  /**
-   * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
-   * Checks even for checkpoints which are out of scope from the execution
-   * session and are not obtainable using get methods.
-   */
-  isDefined: (name: string) => boolean
+	/**
+	 * Stores logic signature info in checkpoint for contract mode
+	 * @lsigName name of lsig (checkpoint info will be stored against this name)
+	 * @fileName ASC file name
+	 * @scTmplParams : Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+	 */
+	mkContractLsig: (
+		lsigName: string,
+		fileName: string,
+		scTmplParams?: SCParams
+	) => Promise<LsigInfo>;
 
-  algodClient: algosdk.Algodv2
+	/**
+	 * Deploys stateful smart contract.
+	 * @approvalProgram  approval program filename (must be present in assets folder)
+	 * @clearProgram  clear program filename (must be present in assets folder)
+	 * @flags  AppDeploymentFlags
+	 * @payFlags  Transaction Parameters
+	 * @scTmplParams  Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 * @appName name of the app to deploy. This name (if passed) will be used as
+	 * the checkpoint "key", and app information will be stored agaisnt this name
+	 */
+	deployApp: (
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
+		payFlags: wtypes.TxParams,
+		scTmplParams?: SCParams,
+		appName?: string
+	) => Promise<rtypes.AppInfo>;
 
-  /**
-   * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
+	/**
+	 * Update programs(approval, clear) for a stateful smart contract.
+	 * @param sender Account from which call needs to be made
+	 * @param payFlags Transaction Flags
+	 * @param appID ID of the application being configured or empty if creating
+	 * @param newApprovalProgram New Approval Program filename
+	 * @param newClearProgram New Clear Program filename
+	 * @param flags Optional parameters to SSC (accounts, args..)
+	 * @param scTmplParams: scTmplParams: Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 * @param appName name of the app to deploy. This name (if passed) will be used as
+	 * the checkpoint "key", and app information will be stored agaisnt this name
+	 */
+	updateApp: (
+		appName: string,
+		sender: algosdk.Account,
+		payFlags: wtypes.TxParams,
+		appID: number,
+		newAppCode: wtypes.SmartContract,
+		flags: rtypes.AppOptionalFlags,
+		scTmplParams?: SCParams
+	) => Promise<rtypes.AppInfo>;
 
-  /**
-   * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
+	/**
+	 * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
+	 * Checks even for checkpoints which are out of scope from the execution
+	 * session and are not obtainable using get methods.
+	 */
+	isDefined: (name: string) => boolean;
 
-  /**
-   * Creates an opt-in transaction for given ASA name, which must be defined in
-   * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
-  optInAccountToASA: (asa: string, accountName: string,
-    flags: wtypes.TxParams) => Promise<void>
+	algodClient: algosdk.Algodv2;
 
-  /**
-   * Creates an opt-in transaction for given ASA name, which must be defined in
-   * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams) => Promise<void>
+	/**
+	 * Queries blockchain for a given transaction and waits until it will be processed. */
+	waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>;
 
-  /**
-   * Opt-In to stateful smart contract (SSC) for a single account
-   * signed by account secret key
-   * @param sender sender account
-   * @param appID application index
-   * @param payFlags Transaction flags
-   * @param flags Optional parameters to SSC (accounts, args..)
-   */
-  optInAccountToApp: (
-    sender: rtypes.Account,
-    appID: number,
-    payFlags: wtypes.TxParams,
-    flags: rtypes.AppOptionalFlags) => Promise<void>
+	/**
+	 * Queries blockchain using algodv2 for asset information by index  */
+	getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>;
 
-  /**
-   * Opt-In to stateful smart contract (SSC) for a contract account
-   * The opt-in transaction is signed by the logic signature
-   * @param sender sender account
-   * @param appID application index
-   * @param payFlags Transaction flags
-   * @param flags Optional parameters to SSC (accounts, args..)
-   */
-  optInLsigToApp: (
-    appID: number,
-    lsig: LogicSigAccount,
-    payFlags: wtypes.TxParams,
-    flags: rtypes.AppOptionalFlags) => Promise<void>
+	/**
+	 * Creates an opt-in transaction for given ASA name, which must be defined in
+	 * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
+	optInAccountToASA: (
+		asa: string,
+		accountName: string,
+		flags: wtypes.TxParams
+	) => Promise<void>;
 
-  /**
-   * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
-  log: (msg: string, obj: any) => void
+	/**
+	 * Creates an opt-in transaction for given ASA name, which must be defined in
+	 * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
+	optInLsigToASA: (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams) => Promise<void>;
 
-  /**
-   * Extracts multi signed logic signature file from `assets/`. */
-  loadMultiSig: (name: string) => Promise<LogicSig>
+	/**
+	 * Opt-In to stateful smart contract (SSC) for a single account
+	 * signed by account secret key
+	 * @param sender sender account
+	 * @param appID application index
+	 * @param payFlags Transaction flags
+	 * @param flags Optional parameters to SSC (accounts, args..)
+	 */
+	optInAccountToApp: (
+		sender: rtypes.Account,
+		appID: number,
+		payFlags: wtypes.TxParams,
+		flags: rtypes.AppOptionalFlags
+	) => Promise<void>;
 
-  /**
-   * Queries a stateful smart contract info from checkpoint. */
-  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+	/**
+	 * Opt-In to stateful smart contract (SSC) for a contract account
+	 * The opt-in transaction is signed by the logic signature
+	 * @param sender sender account
+	 * @param appID application index
+	 * @param payFlags Transaction flags
+	 * @param flags Optional parameters to SSC (accounts, args..)
+	 */
+	optInLsigToApp: (
+		appID: number,
+		lsig: LogicSigAccount,
+		payFlags: wtypes.TxParams,
+		flags: rtypes.AppOptionalFlags
+	) => Promise<void>;
 
-  /**
-   * Queries a stateful smart contract info from checkpoint name
-   * passed by user during deployment */
-  getAppByName: (appName: string) => rtypes.SSCInfo | undefined
+	/**
+	 * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
+	log: (msg: string, obj: any) => void;
 
-  /**
-   * Queries a delegated logic signature from checkpoint. */
-  getDelegatedLsig: (lsigName: string) => Object | undefined
+	/**
+	 * Extracts multi signed logic signature file from `assets/`. */
+	loadMultiSig: (name: string) => Promise<LogicSig>;
 
-  /**
-   * Loads contract mode logic signature (TEAL or PyTEAL)
-   * @name   Smart Contract filename (must be present in assets folder)
-   * @scTmplParams  Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>
+	/**
+	 * Queries a stateful smart contract info from checkpoint name
+	 * passed by user during deployment */
+	getApp: (appName: string) => rtypes.AppInfo;
 
-  /**
-   * Alias to `this.compileASC`
-   * Deprecated: this function will be removed in the next release.
-   */
-  ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
+	/**
+	 * Loads logic signature info(contract or delegated) from checkpoint (by lsig name)
+	 * @param lsigName name of the smart signture
+	 * (defined by user during mkContractLsig/mkDelegatedLsig)
+	 */
+	getLsig: (lsigName: string) => LogicSigAccount;
 
-  /**
-   * Returns ASCCache (with compiled code)
-   * @param name: Smart Contract filename (must be present in assets folder)
-   * @param scTmplParams: scTmplParams: Smart contract template parameters
-   *     (used only when compiling PyTEAL to TEAL)
-   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
-   */
-  compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>
+	/**
+	 * Loads contract mode logic signature (TEAL or PyTEAL)
+	 * @name   Smart Contract filename (must be present in assets folder)
+	 * @scTmplParams  Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 */
+	loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>;
 
-  /**
-   * Returns cached program (from artifacts/cache) `ASCCache` object by filename.
-   * TODO: beta support - this will change
-   * @param name ASC name used during deployment
-   */
-  getDeployedASC: (name: string) => Promise<ASCCache | undefined>
+	/**
+	 * Alias to `this.compileASC`
+	 * @deprecated this function will be removed in the next release.
+	 */
+	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
 
-  /**
-   * Checks if checkpoint is deleted for a particular transaction
-   * if checkpoint exists and is marked as deleted,
-   * throw error(except for opt-out transactions), else pass
-   * @param execParams Transaction execution parameters
-   */
-  assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void
+	/**
+	 * Returns ASCCache (with compiled code)
+	 * @param name: Smart Contract filename (must be present in assets folder)
+	 * @param scTmplParams: scTmplParams: Smart contract template parameters
+	 *     (used only when compiling PyTEAL to TEAL)
+	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
+	 */
+	compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>;
+
+	compileApplication: (
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	) => Promise<wtypes.SourceCompiled>;
+
+	/**
+	 * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
+	 * @param name App/Lsig name used during deployment
+	 */
+	getDeployedASC: (name: string) => Promise<ASCCache | AppCache | undefined>;
+
+	/**
+	 * Checks if checkpoint is deleted for a particular transaction
+	 * if checkpoint exists and is marked as deleted,
+	 * throw error(except for opt-out transactions), else pass
+	 * @param execParams Transaction execution parameters
+	 */
+	assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void;
+
+	/** Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	executeTx: (
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	) => Promise<ConfirmedTxInfo[]>;
 }
 
 // ************************
 //     Asset types
 
 export interface ASCCache {
-  filename: string
-  timestamp: number // compilation time (Unix time)
-  compiled: string // the compiled code
-  compiledHash: string // hash returned by the compiler
-  srcHash: number // source code hash
-  base64ToBytes: Uint8Array // compiled base64 in bytes
+	filename: string;
+	timestamp: number; // compilation time (Unix time)
+	compiled: string; // the compiled code
+	compiledHash: string; // hash returned by the compiler
+	srcHash: number; // source code hash
+	base64ToBytes: Uint8Array; // compiled base64 in bytes
+	tealCode: string;
+	scParams: SCParams;
 }
 
-export interface PyASCCache extends ASCCache {
-  tealCode: string
+export interface AppCache {
+	approval: ASCCache | undefined;
+	clear: ASCCache | undefined;
 }
 
 // ************************
@@ -707,34 +752,34 @@ export type StateValue = string | number | bigint;
 export type Key = string;
 
 export interface StrMap {
-  [key: string]: string
+	[key: string]: string;
 }
 
 export interface SCParams {
-  [key: string]: string | bigint
+	[key: string]: string | bigint;
 }
 
 export interface AnyMap {
-  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
+	[key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
-export type LogicSig = LogicSigAccount['lsig'];
+export type LogicSig = LogicSigAccount["lsig"];
 
 export interface DebuggerContext {
-  tealFile?: string
-  scInitParam?: SCParams // if tealfile is ".py"
-  groupIndex?: number
-  mode?: rtypes.ExecutionMode
+	tealFile?: string;
+	scInitParam?: SCParams; // if tealfile is ".py"
+	groupIndex?: number;
+	mode?: rtypes.ExecutionMode;
 }
 
 // TODO: Remove when this is resolved https://discord.com/channels/491256308461207573/631209194967531559/869677444242739220
 export interface ConfirmedTxInfo {
-  'confirmed-round': number
-  "asset-index": number
-  'application-index': number
-  'global-state-delta': string
-  'local-state-delta': string
+	"confirmed-round": number;
+	"asset-index": number;
+	"application-index": number;
+	"global-state-delta": string;
+	"local-state-delta": string;
 }

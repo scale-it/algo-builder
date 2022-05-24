@@ -1,14 +1,11 @@
 {
-  "name": "sample-project-ts",
-  "version": "0.0.1",
-  "main": "index.js",
-  "license": "MIT",
-  "devDependencies": {
-    "mocha": "^9.1.3"
-  },
-  "scripts": {
-    "algob": "algob",
-    "build": "tsc --build .",
-    "build:watch": "tsc -w -p ."
-  }
+	"name": "sample-project-ts",
+	"version": "0.0.1",
+	"main": "index.js",
+	"license": "MIT",
+	"scripts": {
+		"algob": "algob",
+		"build": "tsc --build .",
+		"build:watch": "tsc -w -p ."
+	}
 }

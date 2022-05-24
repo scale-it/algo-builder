@@ -9,15 +9,15 @@ import { AccountAddress, Deployer, Key, StateValue } from "../types";
  * @param accountAddress account to return assetholding info
  * @param assetID asset index
  */
-export async function balanceOf (
-  deployer: Deployer,
-  accountAddress: AccountAddress,
-  assetID: number
-): Promise<number|bigint> {
-  const a = await status.getAssetHolding(deployer.algodClient, accountAddress, assetID);
-  if (a === undefined) return 0n;
-  return a.amount;
-};
+export async function balanceOf(
+	deployer: Deployer,
+	accountAddress: AccountAddress,
+	assetID: number
+): Promise<number | bigint> {
+	const a = await status.getAssetHolding(deployer.algodClient, accountAddress, assetID);
+	if (a === undefined) return 0n;
+	return a.amount;
+}
 
 /**
  * fetches and returns the global state of application.
@@ -25,26 +25,27 @@ export async function balanceOf (
  * @param creator Account from which call needs to be made
  * @param appID ID of the application being configured or empty if creating
  */
-export async function readAppGlobalState (
-  deployer: Deployer,
-  creator: AccountAddress,
-  appID: number): Promise<Map<Key, StateValue> | undefined> {
-  const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
-  for (const app of accountInfoResponse['created-apps']) {
-    if (app.id === appID) {
-      const globalStateMap = new Map<Key, StateValue>();
-      for (const g of app.params['global-state']) {
-        const key = Buffer.from(g.key, 'base64').toString();
-        if (g.value.type === 1) {
-          globalStateMap.set(key, g.value.bytes);
-        } else {
-          globalStateMap.set(key, g.value.uint);
-        }
-      }
-      return globalStateMap;
-    }
-  }
-  return undefined;
+export async function readAppGlobalState(
+	deployer: Deployer,
+	creator: AccountAddress,
+	appID: number
+): Promise<Map<Key, StateValue> | undefined> {
+	const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
+	for (const app of accountInfoResponse["created-apps"]) {
+		if (app.id === appID) {
+			const globalStateMap = new Map<Key, StateValue>();
+			for (const g of app.params["global-state"]) {
+				const key = Buffer.from(g.key, "base64").toString();
+				if (g.value.type === 1) {
+					globalStateMap.set(key, g.value.bytes);
+				} else {
+					globalStateMap.set(key, g.value.uint);
+				}
+			}
+			return globalStateMap;
+		}
+	}
+	return undefined;
 }
 
 /**
@@ -53,26 +54,27 @@ export async function readAppGlobalState (
  * @param account account from the which the local state has to be read
  * @param appID ID of the application being configured or empty if creating
  */
-export async function readAppLocalState (
-  deployer: Deployer,
-  account: AccountAddress,
-  appID: number): Promise<Map<Key, StateValue> | undefined> {
-  const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
-  for (const app of accountInfoResponse['apps-local-state']) {
-    if (app.id === appID) {
-      const localStateMap = new Map<Key, StateValue>();
-      for (const g of app[`key-value`]) {
-        const key = Buffer.from(g.key, 'base64').toString();
-        if (g.value.type === 1) {
-          localStateMap.set(key, g.value.bytes);
-        } else {
-          localStateMap.set(key, g.value.uint);
-        }
-      }
-      return localStateMap;
-    }
-  }
-  return undefined;
+export async function readAppLocalState(
+	deployer: Deployer,
+	account: AccountAddress,
+	appID: number
+): Promise<Map<Key, StateValue> | undefined> {
+	const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
+	for (const app of accountInfoResponse["apps-local-state"]) {
+		if (app.id === appID && app["key-value"]) {
+			const localStateMap = new Map<Key, StateValue>();
+			for (const g of app[`key-value`]) {
+				const key = Buffer.from(g.key, "base64").toString();
+				if (g.value.type === 1) {
+					localStateMap.set(key, g.value.bytes);
+				} else {
+					localStateMap.set(key, g.value.uint);
+				}
+			}
+			return localStateMap;
+		}
+	}
+	return undefined;
 }
 
 /**
@@ -80,10 +82,10 @@ export async function readAppLocalState (
  * @param deployer algob deployer object
  * @param account account whose asset holding to print
  */
-export async function printAssets (deployer: Deployer, account: string): Promise<void> {
-  const accountInfo = await deployer.algodClient.accountInformation(account).do();
-  console.log("Asset Holding Info:", accountInfo.assets);
-  console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
+export async function printAssets(deployer: Deployer, account: string): Promise<void> {
+	const accountInfo = await deployer.algodClient.accountInformation(account).do();
+	console.log("Asset Holding Info:", accountInfo.assets);
+	console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
 }
 
 /**
@@ -92,14 +94,17 @@ export async function printAssets (deployer: Deployer, account: string): Promise
  * @param accountAddr account address to print local state
  * @param appID application index of smart contract
  */
-export async function printLocalStateSSC (
-  deployer: Deployer,
-  accountAddr: AccountAddress,
-  appID: number): Promise<void> {
-  const localState = await readAppLocalState(deployer, accountAddr, appID);
-  if (localState === undefined) { return; }
-  console.log("User's local state:");
-  console.log(localState);
+export async function printLocalStateApp(
+	deployer: Deployer,
+	accountAddr: AccountAddress,
+	appID: number
+): Promise<void> {
+	const localState = await readAppLocalState(deployer, accountAddr, appID);
+	if (localState === undefined) {
+		return;
+	}
+	console.log("User's local state:");
+	console.log(localState);
 }
 
 /**
@@ -108,12 +113,15 @@ export async function printLocalStateSSC (
  * @param creatorAddr creator address of stateful smart contract
  * @param appID application index of smart contract
  */
-export async function printGlobalStateSSC (
-  deployer: Deployer,
-  creatorAddr: AccountAddress,
-  appID: number): Promise<void> {
-  const globalState = await readAppGlobalState(deployer, creatorAddr, appID);
-  if (globalState === undefined) { return; }
-  console.log("Application's global state:");
-  console.log(globalState);
+export async function printGlobalStateApp(
+	deployer: Deployer,
+	creatorAddr: AccountAddress,
+	appID: number
+): Promise<void> {
+	const globalState = await readAppGlobalState(deployer, creatorAddr, appID);
+	if (globalState === undefined) {
+		return;
+	}
+	console.log("Application's global state:");
+	console.log(globalState);
 }

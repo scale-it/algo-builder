@@ -1,114 +1,113 @@
 {
-  "name": "@algo-builder/algob",
-  "version": "3.2.0",
-  "author": "Robert Zaremba (https://zaremba.ch)",
-  "license": "Apache-2.0",
-  "repository": "https://github.com/scale-it/algo-builder.git",
-  "description": "A framework for building and testing Algorand smart contracts and dapps.",
-  "keywords": [
-    "smart-contracts",
-    "blockchain",
-    "builder",
-    "algorand",
-    "dapps",
-    "javascript",
-    "tooling",
-    "task-runner"
-  ],
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "bin": "build/internal/cli/cli.js",
-  "engines": {
-    "node": ">=14.11.0"
-  },
-  "scripts": {
-    "lint": "eslint --ext .js,.ts src test",
-    "lint:fix": "eslint --fix --ext .js,.ts src test",
-    "lint:unix": "eslint --format unix --ext .js,.ts src test",
-    "test": "echo testing algob; mocha",
-    "test:watch:p": "mocha -w &",
-    "coverage": "nyc ../../node_modules/mocha/bin/mocha",
-    "build:docs": "typedoc --out ../../docs/api/algob --excludePrivate --exclude 'src/internal/**' src/index.ts",
-    "build": "tsc --build .",
-    "build:watch": "tsc -w -p .",
-    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
-    "prepublish": "yarn build",
-    "algob:dev": "sh ./setup_dev_project.sh"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "build/",
-    "LICENSE",
-    "README.md",
-    "setup_dev_project.sh",
-    "sample-project/"
-  ],
-  "devDependencies": {
-    "@types/chai": "^4.2.12",
-    "@types/debug": "^4.1.5",
-    "@types/deep-equal": "^1.0.1",
-    "@types/download-git-repo": "workspace:^",
-    "@types/findup-sync": "^2.0.2",
-    "@types/fs-extra": "^9.0.1",
-    "@types/glob": "^7.1.2",
-    "@types/mocha": "^9.0.0",
-    "@types/murmurhash": "0.0.1",
-    "@types/node": "15.12.5",
-    "@types/semver": "^7.2.0",
-    "@types/sinon": "^9.0.4",
-    "@types/tmp": "^0.2.0",
-    "chai": "^4.3.4",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.7.0",
-    "glob": "^7.2.0",
-    "human-signals": "^3.0.1",
-    "lodash": "^4.17.21",
-    "mocha": "^9.2.0",
-    "nyc": "^15.1.0",
-    "sinon": "^12.0.1",
-    "ts-mocha": "^9.0.2",
-    "ts-node": "^10.4.0",
-    "typedoc": "^0.22.11",
-    "typescript": "^4.5.5"
-  },
-  "dependencies": {
-    "@algo-builder/runtime": "workspace:*",
-    "@algo-builder/web": "workspace:*",
-    "algosdk": "^1.13.1",
-    "chalk": "^4.0.0",
-    "debug": "^4.3.3",
-    "deep-equal": "^2.0.5",
-    "deepmerge": "^4.2.2",
-    "download-git-repo": "^3.0.2",
-    "enquirer": "^2.3.6",
-    "findup-sync": "^5.0.0",
-    "fs-extra": "^10.0.0",
-    "glob": "^7.2.0",
-    "is-installed-globally": "^0.4.0",
-    "mocha": "^9.2.0",
-    "murmurhash": "^2.0.0",
-    "semver": "^7.3.5",
-    "source-map-support": "^0.5.21",
-    "tmp": "^0.2.1",
-    "yaml": "^1.10.2",
-    "zod": "^3.11.6"
-  },
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "exclude": [
-      "build",
-      "test",
-      "coverage",
-      ".nyc_output"
-    ],
-    "reporter": [
-      "text",
-      "lcovonly"
-    ],
-    "all": true
-  }
+	"name": "@algo-builder/algob",
+	"version": "3.2.0",
+	"author": "Robert Zaremba (https://zaremba.ch)",
+	"license": "Apache-2.0",
+	"homepage": "https://algobuilder.dev",
+	"repository": "https://github.com/scale-it/algo-builder.git",
+	"description": "A framework for building and testing Algorand smart contracts and dapps.",
+	"keywords": [
+		"smart-contracts",
+		"blockchain",
+		"builder",
+		"algorand",
+		"dapps",
+		"javascript",
+		"tooling",
+		"task-runner"
+	],
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
+	"bin": "build/internal/cli/cli.js",
+	"engines": {
+		"node": ">=14.11.0"
+	},
+	"scripts": {
+		"lint:check": "eslint --ext .js,.ts src test",
+		"lint": "eslint --cache  --fix --ext .js,.ts src test",
+		"lint:unix": "eslint --cache  --format unix --ext .js,.ts src test",
+		"test": "echo testing algob; mocha -R progress",
+		"test:watch:p": "mocha -w &",
+		"coverage": "nyc ../../node_modules/mocha/bin/mocha",
+		"build:docs": "typedoc --out ../../docs/api/algob --excludePrivate --exclude 'src/internal/**' src/index.ts",
+		"build": "tsc --build .",
+		"build:watch": "tsc -w -p .",
+		"clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
+		"prepublish": "yarn build; for f in Makefile README.md private-net-template.json sandbox-docker-compose.yml; cp ../../infrastructure/$f sample-project/infrastructure",
+		"algob:dev": "sh ./setup_dev_project.sh"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"build/",
+		"LICENSE",
+		"README.md",
+		"setup_dev_project.sh",
+		"sample-project/"
+	],
+	"devDependencies": {
+		"@types/chai": "^4.3.0",
+		"@types/debug": "^4.1.7",
+		"@types/deep-equal": "^1.0.1",
+		"@types/download-git-repo": "workspace:^",
+		"@types/findup-sync": "^4.0.2",
+		"@types/fs-extra": "^9.0.13",
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.0",
+		"@types/node": "^17.0.21",
+		"@types/semver": "^7.3.9",
+		"@types/sinon": "^10.0.11",
+		"@types/tmp": "^0.2.3",
+		"chai": "^4.3.6",
+		"cross-env": "^7.0.3",
+		"eslint": "^8.10.0",
+		"glob": "^7.2.0",
+		"human-signals": "^3.0.1",
+		"mocha": "^9.2.1",
+		"nyc": "^15.1.0",
+		"sinon": "^13.0.1",
+		"ts-mocha": "^9.0.2",
+		"ts-node": "^10.7.0",
+		"typedoc": "^0.22.13",
+		"typescript": "^4.6.2"
+	},
+	"dependencies": {
+		"@algo-builder/runtime": "workspace:*",
+		"@algo-builder/web": "workspace:*",
+		"algosdk": "^1.16.0",
+		"chalk": "^4.1.2",
+		"debug": "^4.3.3",
+		"deep-equal": "^2.0.5",
+		"deepmerge": "^4.2.2",
+		"download-git-repo": "^3.0.2",
+		"enquirer": "^2.3.6",
+		"findup-sync": "^5.0.0",
+		"fs-extra": "^10.0.1",
+		"glob": "^7.2.0",
+		"is-installed-globally": "^0.4.0",
+		"mocha": "^9.2.1",
+		"murmurhash": "^2.0.0",
+		"semver": "^7.3.5",
+		"source-map-support": "^0.5.21",
+		"tmp": "^0.2.1",
+		"yaml": "^1.10.2",
+		"zod": "^3.13.4"
+	},
+	"nyc": {
+		"extension": [
+			".ts"
+		],
+		"exclude": [
+			"build",
+			"test",
+			"coverage",
+			".nyc_output"
+		],
+		"reporter": [
+			"text",
+			"lcovonly"
+		],
+		"all": true
+	}
 }

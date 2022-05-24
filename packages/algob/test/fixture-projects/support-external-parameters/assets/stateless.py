@@ -39,4 +39,5 @@ if __name__ == "__main__":
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
 
-  print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Signature))
+  optimize_options = OptimizeOptions(scratch_slots=True)
+  print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Signature, optimize=optimize_options))

@@ -1,0 +1,6 @@
+#pragma version 5
+// fails if: signature mode opcode{args} is used in application mode
+int 0
+args
+int 1
+return

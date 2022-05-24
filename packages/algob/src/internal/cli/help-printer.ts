@@ -2,228 +2,212 @@ import { BuilderError, ERRORS } from "@algo-builder/web";
 
 import { cmpStr } from "../../lib/comparators";
 import {
-  ParamDefinition,
-  ParamDefinitionAny,
-  ParamDefinitions,
-  ParamDefinitionsMap,
-  TasksMap
+	ParamDefinition,
+	ParamDefinitionAny,
+	ParamDefinitions,
+	ParamDefinitionsMap,
+	TasksMap,
 } from "../../types";
 import { ArgumentsParser } from "./arguments-parser";
 
 const getMax = (a: number, b: number): number => Math.max(a, b);
 
 export class HelpPrinter {
-  constructor (
-    private readonly _programName: string,
-    private readonly _version: string,
-    private readonly _algobParamDefs: ParamDefinitions,
-    private readonly _tasks: TasksMap
-  ) {}
+	constructor(
+		private readonly _programName: string,
+		private readonly _version: string,
+		private readonly _algobParamDefs: ParamDefinitions,
+		private readonly _tasks: TasksMap
+	) {}
 
-  public printGlobalHelp (includeInternalTasks = false): void {
-    console.log(`${this._programName} version ${this._version}\n`);
+	public printGlobalHelp(includeInternalTasks = false): void {
+		console.log(`${this._programName} version ${this._version}\n`);
 
-    console.log(
-      `Usage: ${this._programName} [GLOBAL OPTIONS] <TASK> [TASK OPTIONS]\n`
-    );
+		console.log(`Usage: ${this._programName} [GLOBAL OPTIONS] <TASK> [TASK OPTIONS]\n`);
 
-    console.log("GLOBAL OPTIONS:\n");
+		console.log("GLOBAL OPTIONS:\n");
 
-    this._printParamDetails(this._algobParamDefs);
+		this._printParamDetails(this._algobParamDefs);
 
-    console.log("\n\nAVAILABLE TASKS:\n");
+		console.log("\n\nAVAILABLE TASKS:\n");
 
-    const tasksToShow: TasksMap = {};
-    for (const [taskName, taskDefinition] of Object.entries(this._tasks)) {
-      if (includeInternalTasks || !taskDefinition.isInternal) {
-        tasksToShow[taskName] = taskDefinition;
-      }
-    }
+		const tasksToShow: TasksMap = {};
+		for (const [taskName, taskDefinition] of Object.entries(this._tasks)) {
+			if (includeInternalTasks || !taskDefinition.isInternal) {
+				tasksToShow[taskName] = taskDefinition;
+			}
+		}
 
-    const nameLength = Object.keys(tasksToShow)
-      .map((n) => n.length)
-      .reduce((a, b) => Math.max(a, b), 0);
+		const nameLength = Object.keys(tasksToShow)
+			.map((n) => n.length)
+			.reduce((a, b) => Math.max(a, b), 0);
 
-    for (const name of Object.keys(tasksToShow).sort(cmpStr)) {
-      const { description = "" } = this._tasks[name];
+		for (const name of Object.keys(tasksToShow).sort(cmpStr)) {
+			const { description = "" } = this._tasks[name];
 
-      console.log(`  ${name.padEnd(nameLength)}\t${description}`);
-    }
+			console.log(`  ${name.padEnd(nameLength)}\t${description}`);
+		}
 
-    console.log("");
+		console.log("");
 
-    console.log(
-      `To get help for a specific task run: npx ${this._programName} help [task]\n`
-    );
-  }
+		console.log(`To get help for a specific task run: npx ${this._programName} help [task]\n`);
+	}
 
-  public printTaskHelp (taskName: string): void {
-    const taskDefinition = this._tasks[taskName];
+	public printTaskHelp(taskName: string): void {
+		const taskDefinition = this._tasks[taskName];
 
-    if (taskDefinition === undefined) {
-      throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-        task: taskName
-      });
-    }
+		if (taskDefinition === undefined) {
+			throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
+				task: taskName,
+			});
+		}
 
-    const {
-      description = "",
-      name,
-      paramDefinitions,
-      positionalParamDefinitions
-    } = taskDefinition;
+		const {
+			description = "",
+			name,
+			paramDefinitions,
+			positionalParamDefinitions,
+		} = taskDefinition;
 
-    console.log(`${this._programName} version ${this._version}\n`);
+		console.log(`${this._programName} version ${this._version}\n`);
 
-    const paramsList = this._getParamsList(paramDefinitions);
-    const positionalParamsList = this._getPositionalParamsList(
-      positionalParamDefinitions
-    );
+		const paramsList = this._getParamsList(paramDefinitions);
+		const positionalParamsList = this._getPositionalParamsList(positionalParamDefinitions);
 
-    console.log(
-      `Usage: ${this._programName} [GLOBAL OPTIONS] ${name}${paramsList}${positionalParamsList}\n`
-    );
+		console.log(
+			`Usage: ${this._programName} [GLOBAL OPTIONS] ${name}${paramsList}${positionalParamsList}\n`
+		);
 
-    if (Object.keys(paramDefinitions).length > 0) {
-      console.log("OPTIONS:\n");
+		if (Object.keys(paramDefinitions).length > 0) {
+			console.log("OPTIONS:\n");
 
-      this._printParamDetails(paramDefinitions);
+			this._printParamDetails(paramDefinitions);
 
-      console.log("");
-    }
+			console.log("");
+		}
 
-    if (positionalParamDefinitions.length > 0) {
-      console.log("POSITIONAL ARGUMENTS:\n");
+		if (positionalParamDefinitions.length > 0) {
+			console.log("POSITIONAL ARGUMENTS:\n");
 
-      this._printPositionalParamDetails(positionalParamDefinitions);
+			this._printPositionalParamDetails(positionalParamDefinitions);
 
-      console.log("");
-    }
+			console.log("");
+		}
 
-    console.log(`${name}: ${description}\n`);
+		console.log(`${name}: ${description}\n`);
 
-    console.log(`For global options help run: ${this._programName} help\n`);
-  }
+		console.log(`For global options help run: ${this._programName} help\n`);
+	}
 
-  private _getParamValueDescription<T>(paramDefinition: ParamDefinition<T>): string {
-    return `<${paramDefinition.type.name.toUpperCase()}>`;
-  }
+	private _getParamValueDescription<T>(paramDefinition: ParamDefinition<T>): string {
+		return `<${paramDefinition.type.name.toUpperCase()}>`;
+	}
 
-  private _getParamsList (paramDefinitions: ParamDefinitionsMap): string {
-    let paramsList = "";
+	private _getParamsList(paramDefinitions: ParamDefinitionsMap): string {
+		let paramsList = "";
 
-    for (const name of Object.keys(paramDefinitions).sort(cmpStr)) {
-      const definition = paramDefinitions[name];
-      const { defaultValue, isFlag } = definition;
+		for (const name of Object.keys(paramDefinitions).sort(cmpStr)) {
+			const definition = paramDefinitions[name];
+			const { defaultValue, isFlag } = definition;
 
-      paramsList += " ";
+			paramsList += " ";
 
-      if (defaultValue !== undefined) {
-        paramsList += "[";
-      }
+			if (defaultValue !== undefined) {
+				paramsList += "[";
+			}
 
-      paramsList += `${ArgumentsParser.paramNameToCLA(name)}`;
+			paramsList += `${ArgumentsParser.paramNameToCLA(name)}`;
 
-      if (!isFlag) {
-        paramsList += ` ${this._getParamValueDescription(definition)}`;
-      }
+			if (!isFlag) {
+				paramsList += ` ${this._getParamValueDescription(definition)}`;
+			}
 
-      if (defaultValue !== undefined) {
-        paramsList += "]";
-      }
-    }
+			if (defaultValue !== undefined) {
+				paramsList += "]";
+			}
+		}
 
-    return paramsList;
-  }
+		return paramsList;
+	}
 
-  private _getPositionalParamsList (
-    positionalParamDefinitions: ParamDefinitionAny[]
-  ): string {
-    let paramsList = "";
+	private _getPositionalParamsList(positionalParamDefinitions: ParamDefinitionAny[]): string {
+		let paramsList = "";
 
-    for (const definition of positionalParamDefinitions) {
-      const { defaultValue, isVariadic, name } = definition;
+		for (const definition of positionalParamDefinitions) {
+			const { defaultValue, isVariadic, name } = definition;
 
-      paramsList += " ";
+			paramsList += " ";
 
-      if (defaultValue !== undefined) {
-        paramsList += "[";
-      }
+			if (defaultValue !== undefined) {
+				paramsList += "[";
+			}
 
-      if (isVariadic) {
-        paramsList += "...";
-      }
+			if (isVariadic) {
+				paramsList += "...";
+			}
 
-      paramsList += name;
+			paramsList += name;
 
-      if (defaultValue !== undefined) {
-        paramsList += "]";
-      }
-    }
+			if (defaultValue !== undefined) {
+				paramsList += "]";
+			}
+		}
 
-    return paramsList;
-  }
+		return paramsList;
+	}
 
-  private _printParamDetails (paramDefinitions: ParamDefinitionsMap): void {
-    const paramKeys = Object.keys(paramDefinitions);
-    const shortParamsNameLength = paramKeys
-      .map((n) => ArgumentsParser.shortParamNameToCLA(paramDefinitions[n].shortName).length)
-      .reduce(getMax, 0);
-    const paramsNameLength = paramKeys
-      .map((n) => ArgumentsParser.paramNameToCLA(n).length)
-      .reduce(getMax, 0);
+	private _printParamDetails(paramDefinitions: ParamDefinitionsMap): void {
+		const paramKeys = Object.keys(paramDefinitions);
+		const shortParamsNameLength = paramKeys
+			.map((n) => ArgumentsParser.shortParamNameToCLA(paramDefinitions[n].shortName).length)
+			.reduce(getMax, 0);
+		const paramsNameLength = paramKeys
+			.map((n) => ArgumentsParser.paramNameToCLA(n).length)
+			.reduce(getMax, 0);
 
-    for (const name of paramKeys.sort(cmpStr)) {
-      const {
-        description,
-        defaultValue,
-        isOptional,
-        isFlag,
-        shortName
-      } = paramDefinitions[name];
+		for (const name of paramKeys.sort(cmpStr)) {
+			const { description, defaultValue, isOptional, isFlag, shortName } =
+				paramDefinitions[name];
 
-      const paddedShortName = ArgumentsParser.shortParamNameToCLA(shortName)
-        .padEnd(shortParamsNameLength) + (shortName ? "," : " ");
+			const paddedShortName =
+				ArgumentsParser.shortParamNameToCLA(shortName).padEnd(shortParamsNameLength) +
+				(shortName ? "," : " ");
 
-      let msg = `  ${paddedShortName} `;
+			let msg = `  ${paddedShortName} `;
 
-      msg += `${ArgumentsParser.paramNameToCLA(name).padEnd(
-        paramsNameLength
-      )}\t`;
+			msg += `${ArgumentsParser.paramNameToCLA(name).padEnd(paramsNameLength)}\t`;
 
-      if (description !== undefined) {
-        msg += `${description} `;
-      }
+			if (description !== undefined) {
+				msg += `${description} `;
+			}
 
-      if (isOptional && defaultValue !== undefined && !isFlag) {
-        msg += `(default: ${JSON.stringify(defaultValue)})`;
-      }
+			if (isOptional && defaultValue !== undefined && !isFlag) {
+				msg += `(default: ${JSON.stringify(defaultValue)})`;
+			}
 
-      console.log(msg);
-    }
-  }
+			console.log(msg);
+		}
+	}
 
-  private _printPositionalParamDetails (
-    positionalParamDefinitions: ParamDefinitionAny[]
-  ): void {
-    const paramsNameLength = positionalParamDefinitions
-      .map((d) => d.name.length)
-      .reduce((a, b) => Math.max(a, b), 0);
+	private _printPositionalParamDetails(positionalParamDefinitions: ParamDefinitionAny[]): void {
+		const paramsNameLength = positionalParamDefinitions
+			.map((d) => d.name.length)
+			.reduce((a, b) => Math.max(a, b), 0);
 
-    for (const definition of positionalParamDefinitions) {
-      const { name, description, isOptional, defaultValue } = definition;
+		for (const definition of positionalParamDefinitions) {
+			const { name, description, isOptional, defaultValue } = definition;
 
-      let msg = `  ${name.padEnd(paramsNameLength)}\t`;
+			let msg = `  ${name.padEnd(paramsNameLength)}\t`;
 
-      if (description !== undefined) {
-        msg += `${description} `;
-      }
+			if (description !== undefined) {
+				msg += `${description} `;
+			}
 
-      if (isOptional && defaultValue !== undefined) {
-        msg += `(default: ${JSON.stringify(defaultValue)})`;
-      }
+			if (isOptional && defaultValue !== undefined) {
+				msg += `(default: ${JSON.stringify(defaultValue)})`;
+			}
 
-      console.log(msg);
-    }
-  }
+			console.log(msg);
+		}
+	}
 }

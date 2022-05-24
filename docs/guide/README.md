@@ -17,6 +17,7 @@ layout: splash
 - [Algob Console](./algob-console.md)
 - [PyTeal](./py-teal.md)
 - [Test TEAL](./testing-teal.md)
+- [Advanced Runtime Features](./runtime-advanced.md)
 - [Templates](./templates.md)
 - [Execute Transaction](./execute-transaction.md)
 - [Sign Multisig](./sign-multisig.md)
@@ -24,7 +25,7 @@ layout: splash
 - [Using algob with WebApp](./algob-web.md)
 - [PureStake API](./purestake-api.md)
 - [Best Practices](./best-practices.md)
-- [Contributing](https://github.com/scale-it/algo-builder#requirements#contributing)
+- [Contributing](https://github.com/scale-it/algo-builder#contributing)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -33,7 +34,7 @@ For more in-depth description you can look at the [project specification](https:
 - Node 14+
 - Connection to an Algorand node. Follow our [infrastructure guide](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
   NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
-- Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it. We recommend to use `pipenv` with our `Pipfile` to stay always up to date.
+- Python >= 3.10 (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it. We recommend to use `pipenv` with our `Pipfile` to stay always up to date.
 - Yarn `v3.1+` or NPM `v8.0+` or PNPM `v6.21+` (note: all our examples use yarn v3 workspaces).
 
 ### Algorand Node requirements
@@ -69,12 +70,11 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 
     pip3 install pyteal
 
-
 # Usage
 
 ## Quick start
 
-Check the _requirements_ section above first._
+Check the _requirements_ section above first.\_
 
 ### Create a blockchain
 
@@ -83,7 +83,7 @@ Check the _requirements_ section above first._
   - Remember to set `"EnableDeveloperAPI": true` in the node config.json
 - Or use any of the existing network providers.
 
-### Create an algob project 
+### Create an algob project
 
 #### Recommended way
 
@@ -112,19 +112,18 @@ Check the _requirements_ section above first._
     - update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
     - Note: If you follow `infrastructure` instructions, you don't need to do this step as well because command will fund the master account.
 
-1. You don't need to install and run Algorand Node yourself. You can connect to any network provider (eg Pure Stake).
-1. Add assets and smart-contracts in the `assets` directory.
-1. Add deployment scripts in `scripts` directory.
-1. Run `yarn run algob deploy` to compile and deploy everything (all scripts nested directly in /scripts).
-1. Run `yarn run algob run scriptPath/scriptName` to run a script.
-1. To run `algob` on different network (by default the `default` network is used) use
+1.  You don't need to install and run Algorand Node yourself. You can connect to any network provider (eg Pure Stake).
+1.  Add assets and smart-contracts in the `assets` directory.
+1.  Add deployment scripts in `scripts` directory.
+1.  Run `yarn run algob deploy` to compile and deploy everything (all scripts nested directly in /scripts).
+1.  Run `yarn run algob run scriptPath/scriptName` to run a script.
+1.  To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>
 
-
 #### Creating a new project using `npx`
 
-``` shell
+```shell
 npx @algo-builder/algob init my-algob-project
 ```
 
@@ -186,17 +185,15 @@ or
 algob -h deploy
 ```
 
-
 ### Using algob with a TypeScript project
 
 You can write your scripts and tests in TS. To initialize a new typescript project add `--typescript` to the init flag. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
 
-``` shell
-yarn run algob init --typescript 
+```shell
+yarn run algob init --typescript
 ```
 
 You can also copy our [htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) example project.
-
 
 Typescript projects require a transpilation to JavaScript. Then algob can execute `js` files.
 To develop in `typescript`, please remember these points:
@@ -207,7 +204,6 @@ To develop in `typescript`, please remember these points:
 
         "outDir": "./build/scripts"
 
-
 ## Project Overview
 
 After initializing a project you will have the following items:
@@ -217,9 +213,15 @@ After initializing a project you will have the following items:
 - `tests/`: Directory for test files for testing your assets and contracts
 - `algob.config.js`: Algob configuration file
 
+You can initialize project with `infrastructure/` folder by adding `--infrastructure` flag. It will contain scripts to setup a private network - a copy the `/infrastructure` directory from our repository.
+
+```bash
+algob init my-project --infrastructure
+```
+
 A `sample-project` is provided for your reference.
 
-Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
+Further information about the `sample-project` can be found in sample project [README](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/js/README.md) file.
 
 **NOTE**:
 a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.

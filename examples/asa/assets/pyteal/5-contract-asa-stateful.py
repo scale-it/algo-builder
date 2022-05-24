@@ -77,5 +77,6 @@ def contract_owned_asa():
 
     return program
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(contract_owned_asa(), Mode.Application, version = 4))
+    print(compileTeal(contract_owned_asa(), Mode.Application, version = 5, optimize=optimize_options))

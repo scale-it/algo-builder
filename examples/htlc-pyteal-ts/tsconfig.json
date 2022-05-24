@@ -1,10 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./build/scripts"
-  },
-  "include": [
-    "scripts",
-    "../../@types"
-  ]
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./build/scripts"
+	},
+	"include": ["scripts", "../../@types"]
 }

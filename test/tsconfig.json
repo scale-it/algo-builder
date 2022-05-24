@@ -1,6 +1,3 @@
 {
-  "include": [
-    "../packages",
-    "../@types"
-  ]
+	"include": ["../packages", "../@types"]
 }

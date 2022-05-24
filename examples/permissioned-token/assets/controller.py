@@ -168,7 +168,7 @@ def approval_program(TOKEN_ID):
                     If(Global.group_size() > Int(3), Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve(), Int(0))
                 ),
                 Int(1),
-                # else verify that permissions ssc is called
+                # else verify that permissions app is called
                 verify_perm_is_called
             )
         )
@@ -216,5 +216,5 @@ if __name__ == "__main__":
     # Overwrite params if sys.argv[1] is passed
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
-
-    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application, version = 4))
+    optimize_options = OptimizeOptions(scratch_slots=True)
+    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application, version = 5, optimize=optimize_options))

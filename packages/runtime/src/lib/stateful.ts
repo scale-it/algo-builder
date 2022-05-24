@@ -13,14 +13,16 @@ import { MAX_KEY_BYTES, MAX_KEY_VAL_BYTES } from "./constants";
  * @param value value at key (uint / bytes)
  * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
  */
-function assertKeyValLengthValid (key: Uint8Array, value: StackElem): void {
-  let isSchemaInValid = false;
-  isSchemaInValid = (key.length > MAX_KEY_BYTES);
-  if (value instanceof Uint8Array && ((key.length + value.length) > MAX_KEY_VAL_BYTES)) {
-    isSchemaInValid = true;
-  }
+function assertKeyValLengthValid(key: Uint8Array, value: StackElem): void {
+	let isSchemaInValid = false;
+	isSchemaInValid = key.length > MAX_KEY_BYTES;
+	if (value instanceof Uint8Array && key.length + value.length > MAX_KEY_VAL_BYTES) {
+		isSchemaInValid = true;
+	}
 
-  if (isSchemaInValid) { throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_SCHEMA); }
+	if (isSchemaInValid) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+	}
 }
 
 /**
@@ -28,16 +30,18 @@ function assertKeyValLengthValid (key: Uint8Array, value: StackElem): void {
  * @param keyValue: list of key-value pairs (state data)
  * @param schema: permissible local/global state schema
  */
-export function assertValidSchema (
-  keyValue: Map<string, StackElem>, schema: modelsv2.ApplicationStateSchema
+export function assertValidSchema(
+	keyValue: Map<string, StackElem>,
+	schema: modelsv2.ApplicationStateSchema
 ): void {
-  let numUint = 0; let byteSlices = 0;
-  keyValue.forEach((value, key) => {
-    const keyasByte = new Uint8Array(key.split(',').map(Number));
-    assertKeyValLengthValid(keyasByte, value);
-    value instanceof Uint8Array ? byteSlices++ : numUint++;
-  });
-  if (numUint > schema.numUint || byteSlices > schema.numByteSlice) {
-    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
-  }
+	let numUint = 0;
+	let byteSlices = 0;
+	keyValue.forEach((value, key) => {
+		const keyasByte = new Uint8Array(key.split(",").map(Number));
+		assertKeyValLengthValid(keyasByte, value);
+		value instanceof Uint8Array ? byteSlices++ : numUint++;
+	});
+	if (numUint > schema.numUint || byteSlices > schema.numByteSlice) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+	}
 }

@@ -1,4 +1,4 @@
-#pragma version 4
+#pragma version 6
 itob
                 btoi
            mulw
@@ -9,4 +9,5 @@ itob
        concat
     substring 0 4
  substring3
+ divw
  // comments

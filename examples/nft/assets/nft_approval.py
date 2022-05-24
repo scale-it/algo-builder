@@ -107,5 +107,6 @@ def approval_program():
 
     return program
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application, version = 4))
+    print(compileTeal(approval_program(), Mode.Application, version = 4, optimize=optimize_options))

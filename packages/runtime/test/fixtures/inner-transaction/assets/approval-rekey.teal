@@ -1,0 +1,24 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz on_creation
+
+itxn_begin
+int pay
+itxn_field TypeEnum
+txna Accounts 0
+itxn_field Receiver
+int 0
+itxn_field Amount
+txna Accounts 1
+itxn_field RekeyTo
+int 1000
+itxn_field Fee
+itxn_submit
+int 1
+return
+
+on_creation:
+int 1
+return

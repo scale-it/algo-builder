@@ -1,18 +1,19 @@
 ## Stateful Counter Example
 
 We will create a simple stateful smart contract which will:
+
 - Have a global variable `counter`
 - Will increment `counter` each time we call the application.
 
 ## Steps
 
-+ [Create a file with Approval Program](https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/approval_program.teal)
-+ [Create a file with Clear program](https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/clear_program.teal)
-+ [Deploy New Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
-+ [Opt-In to Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
-+ [Call Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts//interaction_scripts/call_application.js)
-+ [Update Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/update_application.js)
-+ [Delete Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/delete_application.js)
+- [Create a file with Approval Program](https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/approval_program.teal)
+- [Create a file with Clear program](https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/clear_program.teal)
+- [Deploy New Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
+- [Opt-In to Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
+- [Call Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts//interaction_scripts/call_application.js)
+- [Update Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/update_application.js)
+- [Delete Application](https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/delete_application.js)
 
 # 1. Create a file with Approval Program
 
@@ -56,7 +57,6 @@ return
 
 This program has a single global key/value pair to store the number of times the program was called. The key is the string "counter" and the value will be defined as an integer when the application is created.
 
-
 # 2. Create a file with Clear Program
 
 Now, we will create clear program. This program does not evaluate any conditions and simply approves the call. Put the code below in `/assets/clear_program.teal`:
@@ -75,19 +75,19 @@ To deploy the contract use the following code in a new file named `deploy.js` in
 ### Create user accounts
 
 ```javascript
-const masterAccount = deployer.accountsByName.get('master-account');
-const creatorAccount = deployer.accountsByName.get('alice');
+const masterAccount = deployer.accountsByName.get("master-account");
+const creatorAccount = deployer.accountsByName.get("alice");
 
 const algoTxnParams = {
-  type: types.TransactionType.TransferAlgo,
-  sign: types.SignType.SecretKey,
-  fromAccount: masterAccount,
-  toAccountAddr: creatorAccount.addr,
-  amountMicroAlgos: 200e6,
-  payFlags: {}
+	type: types.TransactionType.TransferAlgo,
+	sign: types.SignType.SecretKey,
+	fromAccount: masterAccount,
+	toAccountAddr: creatorAccount.addr,
+	amountMicroAlgos: 200e6,
+	payFlags: {},
 };
 // transfer some algos to creator account
-await executeTransaction(deployer, algoTxnParams);
+await deployer.executeTx(algoTxnParams);
 ```
 
 In the code above we declared user accounts and funded `creatorAccount` account. `masterAccount` is the default account used in algob private net.
@@ -100,24 +100,29 @@ Firstly we need to fund the contract. `master` account will fund it (as it has l
 // Create Application
 // Note: An Account can have maximum of 10 Applications.
 const sscInfo = await deployer.deployApp(
-  'approval_program.teal', // approval program
-  'clear_program.teal', // clear program
-  {
-    sender: creatorAccount,
-    localInts: 1,
-    localBytes: 1,
-    globalInts: 1,
-    globalBytes: 1
-  }, {});
+	creatorAccount,
+	{
+		appName: "CounterApp",
+		metaType: types.MetaType.File
+		approvalProgramFilename: "approval_program.teal", // approval program
+		clearProgramFilename: "clear_program.teal", // clear program
+		localInts: 1,
+		localBytes: 1,
+		globalInts: 1,
+		globalBytes: 1,
+	},
+	{}
+);
 
 console.log(sscInfo);
 ```
 
 Parameters passed are:
-  - Approval Program
-  - Clear Program
-  - SSC(stateful smart contract) arguments which includes sender and details for storage usage.
-  - Common transaction parameters (eg. totalFee)
+
+- Approval Program
+- Clear Program
+- SSC(stateful smart contract) arguments which includes sender and details for storage usage.
+- Common transaction parameters (eg. totalFee)
 
 - In above code we have deployed a new application.
 
@@ -127,7 +132,7 @@ Parameters passed are:
 Created new app-id: 189
 {
   creator: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
-  txId: 'BCP3ZKT26K2BEB475OMKQHOMBEFVWEHESRS3XMAWQEVASFP6JFUA',
+  txID: 'BCP3ZKT26K2BEB475OMKQHOMBEFVWEHESRS3XMAWQEVASFP6JFUA',
   confirmedRound: 13899,
   appID: 189
 }
@@ -149,22 +154,23 @@ To call an application use the following code in one of your scripts (in `./scri
 
 ```javascript
 const tx = {
-  type: types.TransactionType.CallApp,
-  sign: types.SignType.SecretKey,
-  fromAccount: creatorAccount,
-  appID: applicationID,
-  payFlags: {}
-}
+	type: types.TransactionType.CallApp,
+	sign: types.SignType.SecretKey,
+	fromAccount: creatorAccount,
+	appID: applicationID,
+	payFlags: {},
+};
 
-await executeTransaction(deployer, tx);
+await deployer.executeTx(tx);
 ```
 
 In `tx` there are following parameters:
-  - we set the type which is `CallApp` - Call to stateful smart contract
-  - set the sign to SecretKey (tx is signed by creatorAccount's sk)
-  - provide fromAccount details
-  - provide application index of SSC (retreived from checkpoint)
-  - provide payment flags, if any (eg. fee, firstValid, lastvalid etc)
+
+- we set the type which is `CallApp` - Call to stateful smart contract
+- set the sign to SecretKey (tx is signed by creatorAccount's sk)
+- provide fromAccount details
+- provide application index of SSC (retreived from checkpoint)
+- provide payment flags, if any (eg. fee, firstValid, lastvalid etc)
 
 Calling application each time will increase the stateful counter by 1.
 To view the global state of the application you can use the following code:
@@ -189,15 +195,19 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-const updatedRes = await deployer.updateApp(
-  creatorAccount,
-  {}, // pay flags
-  applicationID,
-  'new_approval.teal',
-  'new_clear.teal',
-  {}
-);
-console.log('Application Updated: ', updatedRes);
+	const updatedRes = await deployer.updateApp(
+		"CounterApp", // app name use for checkpoint
+		creatorAccount,
+		{}, // pay flags
+		applicationID,
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: 'new_approval.teal',
+			clearProgramFilename: 'new_clear.teal'	
+		},
+		{}
+	);
+	console.log("Application Updated: ", updatedRes);
 ```
 
 # 7. Delete Application
@@ -206,15 +216,15 @@ To delete an existing application you can use:
 
 ```javascript
 const tx = {
-  type: types.TransactionType.DeleteApp,
-  sign: types.SignType.SecretKey,
-  fromAccount: creatorAccount,
-  appID: applicationID,
-  payFlags: {},
-  appArgs: []
-}
+	type: types.TransactionType.DeleteApp,
+	sign: types.SignType.SecretKey,
+	fromAccount: creatorAccount,
+	appID: applicationID,
+	payFlags: {},
+	appArgs: [],
+};
 
-await executeTransaction(deployer, tx);
+await deployer.executeTx(tx);
 ```
 
 Note: Deleting non existing app will throw error.

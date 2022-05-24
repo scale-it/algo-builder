@@ -10,100 +10,165 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 
 const approvalStr = "approval-program";
 describe("Algorand Smart Contracts - Update Application", function () {
-  useFixture("stateful-update");
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 20 + 1000; // 1000 to cover fee
-  let creator = new AccountStore(minBalance + 1000);
-  const alice = new AccountStore(minBalance + 1000);
+	useFixture("stateful-update");
+	const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 20 + 1000; // 1000 to cover fee
+	let creator = new AccountStore(minBalance + 1000);
+	const alice = new AccountStore(minBalance + 1000);
 
-  let runtime: Runtime;
-  let oldApprovalProgramFileName: string;
-  let newApprovalProgramFileName: string;
-  let clearProgramFileName: string;
+	let runtime: Runtime;
+	let oldApprovalProgramFileName: string;
+	let newApprovalProgramFileName: string;
+	let clearProgramFilename: string;
 
-  let oldApprovalProgram: string;
-  let newApprovalProgram: string;
-  let clearProgram: string;
-  let appID: number;
-  const flags = {
-    sender: creator.account,
-    globalBytes: 4,
-    globalInts: 4,
-    localBytes: 2,
-    localInts: 2
-  };
-  this.beforeAll(async function () {
-    runtime = new Runtime([creator, alice]);
+	let oldApprovalProgram: string;
+	let newApprovalProgram: string;
+	let clearProgram: string;
+	let appID: number;
+	const storageConfig = {
+		appName: "app",
+		globalBytes: 4,
+		globalInts: 4,
+		localBytes: 2,
+		localInts: 2,
+	};
+	this.beforeAll(async function () {
+		runtime = new Runtime([creator, alice]);
 
-    oldApprovalProgramFileName = 'oldapproval.teal';
-    newApprovalProgramFileName = 'newapproval.teal';
-    clearProgramFileName = 'clear.teal';
+		oldApprovalProgramFileName = "oldapproval.teal";
+		newApprovalProgramFileName = "newapproval.teal";
+		clearProgramFilename = "clear.teal";
 
-    oldApprovalProgram = getProgram(oldApprovalProgramFileName);
-    newApprovalProgram = getProgram(newApprovalProgramFileName);
-    clearProgram = getProgram(clearProgramFileName);
-  });
+		oldApprovalProgram = getProgram(oldApprovalProgramFileName);
+		newApprovalProgram = getProgram(newApprovalProgramFileName);
+		clearProgram = getProgram(clearProgramFilename);
+	});
 
-  it("should fail during update application if app id is not defined", function () {
-    expectRuntimeError(
-      () => runtime.updateApp(creator.address, 1111, oldApprovalProgram, clearProgram, {}, {}),
-      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
-    );
-  });
+	it("should fail during update application if app id is not defined", function () {
+		expectRuntimeError(
+			() =>
+				runtime.updateApp(
+					"app",
+					creator.address,
+					1111,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename: oldApprovalProgramFileName,
+						clearProgramFilename: clearProgramFilename,
+					},
+					{},
+					{}
+				),
+			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
+		);
+	});
 
-  it("should update application", function () {
-    appID = runtime.deployApp(oldApprovalProgramFileName, clearProgramFileName, flags, {}).appID;
-    runtime.optInToApp(creator.address, appID, {}, {});
+	it("should update application", function () {
+		appID = runtime.deployApp(
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
+				...storageConfig,
+			},
+			{}
+		).appID;
+		runtime.optInToApp(creator.address, appID, {}, {});
 
-    // check deploy app params
-    let app = runtime.getApp(appID);
-    assert.isDefined(app);
-    assert.deepEqual(app[approvalStr], oldApprovalProgram);
-    assert.deepEqual(app["clear-state-program"], clearProgram);
+		// check deploy app params
+		let app = runtime.getApp(appID);
+		assert.isDefined(app);
+		assert.deepEqual(app[approvalStr], oldApprovalProgram);
+		assert.deepEqual(app["clear-state-program"], clearProgram);
 
-    runtime.updateApp(creator.address, appID, newApprovalProgram, clearProgram, {}, {});
-    app = runtime.getApp(appID);
+		runtime.updateApp(
+			storageConfig.appName,
+			creator.address,
+			appID,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: newApprovalProgram,
+				clearProgramCode: clearProgram,
+			},
+			{},
+			{}
+		);
+		app = runtime.getApp(appID);
 
-    // check if program & state is updated after tx execution
-    assert.deepEqual(app[approvalStr], newApprovalProgram);
-    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), parsing.stringToBytes("global-val"));
-    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), parsing.stringToBytes("local-val"));
+		// check if program & state is updated after tx execution
+		assert.deepEqual(app[approvalStr], newApprovalProgram);
+		assert.deepEqual(
+			runtime.getGlobalState(appID, "global-key"),
+			parsing.stringToBytes("global-val")
+		);
+		assert.deepEqual(
+			runtime.getLocalState(appID, creator.address, "local-key"),
+			parsing.stringToBytes("local-val")
+		);
 
-    // now call the smart contract after updating approval program which checks for
-    // global-key and local-key in state (which was set during the update from oldApprovalProgram)
-    const noOpParams: types.AppCallsParam = {
-      type: types.TransactionType.CallApp,
-      sign: types.SignType.SecretKey,
-      fromAccount: creator.account,
-      appID: appID,
-      payFlags: { totalFee: 1000 }
-    };
-    runtime.executeTx(noOpParams);
-    creator = runtime.getAccount(creator.address);
+		// now call the smart contract after updating approval program which checks for
+		// global-key and local-key in state (which was set during the update from oldApprovalProgram)
+		const noOpParams: types.AppCallsParam = {
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: creator.account,
+			appID: appID,
+			payFlags: { totalFee: 1000 },
+		};
+		runtime.executeTx([noOpParams]);
+		creator = runtime.getAccount(creator.address);
 
-    // check state set by the 'new' approval program
-    assert.deepEqual(runtime.getGlobalState(appID, "new-global-key"), parsing.stringToBytes("new-global-val"));
-    assert.deepEqual(runtime.getLocalState(appID, creator.address, "new-local-key"), parsing.stringToBytes("new-local-val"));
-  });
+		// check state set by the 'new' approval program
+		assert.deepEqual(
+			runtime.getGlobalState(appID, "new-global-key"),
+			parsing.stringToBytes("new-global-val")
+		);
+		assert.deepEqual(
+			runtime.getLocalState(appID, creator.address, "new-local-key"),
+			parsing.stringToBytes("new-local-val")
+		);
+	});
 
-  it("should not update application if logic is rejected", function () {
-    // create app
-    appID = runtime.deployApp(oldApprovalProgramFileName, clearProgramFileName, flags, {}).appID;
-    runtime.optInToApp(creator.address, appID, {}, {});
+	it("should not update application if logic is rejected", function () {
+		// create app
+		appID = runtime.deployApp(
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
+				...storageConfig,
+			},
+			{}
+		).appID;
+		runtime.optInToApp(creator.address, appID, {}, {});
 
-    let app = runtime.getApp(appID);
-    assert.isDefined(app);
-    assert.deepEqual(app[approvalStr], oldApprovalProgram);
+		let app = runtime.getApp(appID);
+		assert.isDefined(app);
+		assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
-    // update should be rejected because sender is not creator
-    expectRuntimeError(
-      () => runtime.updateApp(alice.address, appID, newApprovalProgram, clearProgram, {}, {}),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
+		// update should be rejected because sender is not creator
+		expectRuntimeError(
+			() =>
+				runtime.updateApp(
+					storageConfig.appName,
+					alice.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: newApprovalProgram,
+						clearProgramCode: clearProgram,
+					},
+					{},
+					{}
+				),
+			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+		);
 
-    // verify approval program & state is not updated as tx is rejected
-    app = runtime.getApp(appID);
-    assert.deepEqual(app[approvalStr], oldApprovalProgram);
-    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), undefined);
-    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), undefined);
-  });
+		// verify approval program & state is not updated as tx is rejected
+		app = runtime.getApp(appID);
+		assert.deepEqual(app[approvalStr], oldApprovalProgram);
+		assert.deepEqual(runtime.getGlobalState(appID, "global-key"), undefined);
+		assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), undefined);
+	});
 });

@@ -1,20 +1,26 @@
-async function run (runtimeEnv, deployer) {
-  const creatorAccount = deployer.accountsByName.get('alice');
+const { types } = require("@algo-builder/web");
 
-  // Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getApp('approval_program.teal', 'clear_program.teal');
-  const applicationID = appInfo.appID;
-  console.log('Application Id ', applicationID);
+async function run(runtimeEnv, deployer) {
+	const creatorAccount = deployer.accountsByName.get("alice");
 
-  const updatedRes = await deployer.updateApp(
-    creatorAccount,
-    {}, // pay flags
-    applicationID,
-    'new_approval.teal',
-    'new_clear.teal',
-    {}
-  );
-  console.log('Application Updated: ', updatedRes);
+	// Retreive AppInfo from checkpoints.
+	const appInfo = deployer.getApp("CounterApp");
+	const applicationID = appInfo.appID;
+	console.log("Application Id ", applicationID);
+
+	const updatedRes = await deployer.updateApp(
+		"CounterApp",
+		creatorAccount,
+		{}, // pay flags
+		applicationID,
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "new_approval.teal",
+			clearProgramFilename: "new_clear.teal",
+		},
+		{}
+	);
+	console.log("Application Updated: ", updatedRes);
 }
 
 module.exports = { default: run };

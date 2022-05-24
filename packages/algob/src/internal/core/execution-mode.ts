@@ -11,43 +11,43 @@ const log = debug("algob:core:execution-mode");
  * widely adopted.
  */
 export enum ExecutionMode {
-  EXECUTION_MODE_TS_NODE_TESTS,
-  EXECUTION_MODE_LINKED,
-  EXECUTION_MODE_GLOBAL_INSTALLATION,
-  EXECUTION_MODE_LOCAL_INSTALLATION,
+	EXECUTION_MODE_TS_NODE_TESTS,
+	EXECUTION_MODE_LINKED,
+	EXECUTION_MODE_GLOBAL_INSTALLATION,
+	EXECUTION_MODE_LOCAL_INSTALLATION,
 }
 
 const workingDirectoryOnLoad = process.cwd();
 
-export function getExecutionMode (): ExecutionMode {
-  const isInstalled = __filename.includes("node_modules");
+export function getExecutionMode(): ExecutionMode {
+	const isInstalled = __filename.includes("node_modules");
 
-  if (!isInstalled) {
-    // When running the tests with ts-node we set the CWD to the root of
-    // algob. We could check if the __filename ends with .ts
-    if (__dirname.startsWith(workingDirectoryOnLoad)) {
-      return ExecutionMode.EXECUTION_MODE_TS_NODE_TESTS;
-    }
+	if (!isInstalled) {
+		// When running the tests with ts-node we set the CWD to the root of
+		// algob. We could check if the __filename ends with .ts
+		if (__dirname.startsWith(workingDirectoryOnLoad)) {
+			return ExecutionMode.EXECUTION_MODE_TS_NODE_TESTS;
+		}
 
-    return ExecutionMode.EXECUTION_MODE_LINKED;
-  }
+		return ExecutionMode.EXECUTION_MODE_LINKED;
+	}
 
-  try {
-    if (require("is-installed-globally") == null) {
-      return ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-    }
-  } catch (error) {
-    log(
-      "Failed to load is-installed-globally. Using alternative local installation detection\n",
-      error
-    );
+	try {
+		if (require("is-installed-globally") == null) {
+			return ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
+		}
+	} catch (error) {
+		log(
+			"Failed to load is-installed-globally. Using alternative local installation detection\n",
+			error
+		);
 
-    if (!alternativeIsLocalInstallation()) {
-      return ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-    }
-  }
+		if (!alternativeIsLocalInstallation()) {
+			return ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
+		}
+	}
 
-  return ExecutionMode.EXECUTION_MODE_LOCAL_INSTALLATION;
+	return ExecutionMode.EXECUTION_MODE_LOCAL_INSTALLATION;
 }
 
 /**
@@ -58,20 +58,23 @@ export function getExecutionMode (): ExecutionMode {
  * directory that contains the `node_module` with the installation, this will
  * fail and return `false`.
  */
-function alternativeIsLocalInstallation (): boolean {
-  let cwd = workingDirectoryOnLoad;
+function alternativeIsLocalInstallation(): boolean {
+	let cwd = workingDirectoryOnLoad;
 
-  while (true) {
-    const nodeModules = findupSync("node_modules", { cwd });
+	let maxIter = 30;
+	while (--maxIter >= 0) {
+		const nodeModules = findupSync("node_modules", { cwd });
 
-    if (nodeModules === null || nodeModules === undefined) {
-      return false;
-    }
+		if (nodeModules === null || nodeModules === undefined) {
+			return false;
+		}
 
-    if (__dirname.startsWith(nodeModules)) {
-      return true;
-    }
+		if (__dirname.startsWith(nodeModules)) {
+			return true;
+		}
 
-    cwd = path.join(nodeModules, "..", "..");
-  }
+		cwd = path.join(nodeModules, "..", "..");
+		if (cwd === "") return false;
+	}
+	return false;
 }
