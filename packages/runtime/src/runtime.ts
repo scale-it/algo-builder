@@ -889,15 +889,11 @@ export class Runtime {
 		txnParams: types.ExecParams[] | algosdk.SignedTransaction[],
 		debugStack?: number
 	): TxReceipt[] {
+		// TODO: union above and create new type in task below:
+		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
 		let tx, gtxs;
-		if (types.isSDKTransactionAndSign(txnParams[0])) {
-			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
-				const txn = txnParamerter as types.TransactionAndSign;
-				return txn.transaction.get_obj_for_encoding() as EncTx;
-			});
-			tx = sdkTxns[0];
-			gtxs = sdkTxns;
-		} else {
+
+		if (types.isExecParams(txnParams[0])) {
 			const dummySource: types.SourceCompiled = {
 				metaType: types.MetaType.BYTES,
 				approvalProgramBytes: new Uint8Array(32),
@@ -928,6 +924,14 @@ export class Runtime {
 
 			// get current txn and txn group (as encoded obj)
 			[tx, gtxs] = this.createTxnContext(txns as types.ExecParams[]);
+		} else {
+			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
+				const txn = txnParamerter as algosdk.SignedTransaction;
+				return txn.txn.get_obj_for_encoding() as EncTx;
+			});
+			tx = sdkTxns[0];
+			gtxs = sdkTxns;
+			
 		}
 
 		// validate first and last rounds
@@ -941,22 +945,11 @@ export class Runtime {
 
 		// Run TEAL program associated with each transaction and
 		// then execute the transaction without interacting with store.
-
-		if(types.isExecParams(txnParams[0])){ //Convert to Transaction object and sign it
-			const transactionsToSign algosdk.SignedTransaction [] = txnParams.map((txn) =>
-			types.isExecParams(txn) ? webTx.mkTransaction(txn, mockSuggestedParams()) : txn
+		const signedTransactions: algosdk.SignedTransaction [] = txnParams.map((txn) =>
+			types.isExecParams(txn) ? { sig: Buffer.alloc(5),
+				 txn: webTx.mkTransaction(txn, mockSuggestedParams(txn.payFlags, 1)) } : txn
 		);
-		}
 
-		txnParams.map((txn) => { if(types.isExecParams(txn)){}})
-
-
-
-
-		//TODO this has to be fixed. if execParams convert to SignedTransaction
-		const runtimeTxnParams: algosdk.SignedTransaction [] = txnParams.map((txn) =>
-			types.isExecParams(txn) ? webTx.mkTransaction(txn, mockSuggestedParams()) : txn
-		);
 
 		// calculate budget for single/group tx
 		const applCallTxNumber = gtxs.filter(
@@ -965,7 +958,7 @@ export class Runtime {
 
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
 
-		const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
+		const txReceipts = this.ctx.processTransactions(signedTransactions);
 
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { tx as webTx, types } from "@algo-builder/web";
-import { TxParams } from "@algo-builder/web/build/types";
+import { AppDefinition, MetaType, SmartContract, TxParams } from "@algo-builder/web/build/types";
 import algosdk, {
 	getApplicationAddress,
 	makeAssetTransferTxnWithSuggestedParams,
@@ -28,6 +28,7 @@ import { getProgramVersion } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
+	AppDeploymentFlags,
 	AppInfo,
 	ASADeploymentFlags,
 	ASAInfo,
@@ -800,8 +801,10 @@ export class Ctx implements Context {
 						signedTransaction.txn.to.publicKey)) === undefined) {
 						this.state.accounts.set(
 							algosdk.encodeAddress(signedTransaction.txn.to.publicKey),
-							new AccountStore(0, { addr: algosdk.encodeAddress(
-								signedTransaction.txn.to.publicKey), sk: new Uint8Array(0) })
+							new AccountStore(0, {
+								addr: algosdk.encodeAddress(
+									signedTransaction.txn.to.publicKey), sk: new Uint8Array(0)
+							})
 						);
 					}
 
@@ -823,22 +826,22 @@ export class Ctx implements Context {
 							if (isEncTxApplicationCreate(
 								signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 								const senderAcc = this.getAccount(fromAccountAddr);
-								const flags: AppDeploymentFlags = {
-									sender: senderAcc.account,
+								const appDefinition: AppDefinition = {
 									localInts: signedTransaction.txn.appLocalInts,
 									localBytes: signedTransaction.txn.appLocalByteSlices,
 									globalInts: signedTransaction.txn.appGlobalInts,
 									globalBytes: signedTransaction.txn.appGlobalByteSlices,
+									appName: signedTransaction.txn.appIndex.toString(),
+									metaType: MetaType.SOURCE_CODE,
+									approvalProgramCode: webTx.decodeUint8ArrayToString(
+										signedTransaction.txn.appApprovalProgram) as string,
+									clearProgramCode: webTx.decodeUint8ArrayToString(
+										signedTransaction.txn.appClearProgram) as string,
 								};
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
-
 								r = this.deployApp(
 									fromAccountAddr,
-									flags,
-									webTx.decodeUint8ArrayToString(
-										signedTransaction.txn.appApprovalProgram) as string,
-									webTx.decodeUint8ArrayToString(
-										signedTransaction.txn.appClearProgram) as string,
+									appDefinition,
 									idx
 								);
 								this.knowableID.set(idx, r.appID);
@@ -910,12 +913,17 @@ export class Ctx implements Context {
 						case algosdk.OnApplicationComplete.UpdateApplicationOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
 
+							const appSourceCode: SmartContract = {
+								metaType: MetaType.SOURCE_CODE,
+								approvalProgramCode: webTx.decodeUint8ArrayToString(
+									signedTransaction.txn.appApprovalProgram) as string,
+								clearProgramCode: webTx.decodeUint8ArrayToString(
+									signedTransaction.txn.appClearProgram) as string,
+							}
+
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
-								webTx.decodeUint8ArrayToString(
-									signedTransaction.txn.appApprovalProgram) as string,
-								webTx.decodeUint8ArrayToString(
-									signedTransaction.txn.appClearProgram) as string,
+								appSourceCode,
 								idx,
 							);
 							break;
@@ -945,7 +953,7 @@ export class Ctx implements Context {
 						}
 						// modify asset in ctx.
 						r = this.modifyAsset(signedTransaction.txn.assetIndex,
-							 webTx.getAssetReconfigureFields(signedTransaction.txn));
+							webTx.getAssetReconfigureFields(signedTransaction.txn));
 					} else if (isEncTxAssetDeletion(
 						signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
