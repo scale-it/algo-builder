@@ -1,0 +1,12 @@
+#pragma version 4
+int 5
+int 3
++
+int 8
+==
+bnz success
+int 1 //not calculate into cost
+int 4 //not calculate into cost
+success:
+int 1
+return
