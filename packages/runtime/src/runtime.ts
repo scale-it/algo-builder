@@ -884,15 +884,7 @@ export class Runtime {
 		debugStack?: number
 	): TxReceipt[] {
 		let tx, gtxs;
-
-		// if (types.isSDKTransactionAndSign(txnParams[0])) {
-		// 	const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
-		// 		const txn = txnParamerter as types.TransactionAndSign;
-		// 		return txn.transaction.get_obj_for_encoding() as EncTx;
-		// 	});
-		// 	tx = sdkTxns[0];
-		// 	gtxs = sdkTxns;
-		// } else {
+		if(types.isExecParams(txnParams[0])){
 			for (const txnParamerter of txnParams) {
 				const txn = txnParamerter as types.ExecParams;
 				switch (txn.type) {
@@ -909,7 +901,14 @@ export class Runtime {
 			}
 			// get current txn and txn group (as encoded obj)
 			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
-		
+		} else {
+			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
+				const txn = txnParamerter as algosdk.SignedTransaction;
+				return txn.txn.get_obj_for_encoding() as EncTx;
+			});
+			tx = sdkTxns[0];
+			gtxs = sdkTxns;
+		} 
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
@@ -921,6 +920,17 @@ export class Runtime {
 
 		// Run TEAL program associated with each transaction and
 		// then execute the transaction without interacting with store.
+
+		if(types.isExecParams(txnParams[0])){ //Convert to Transaction object and sign it
+			const transactionsToSign algosdk.SignedTransaction [] = txnParams.map((txn) =>
+			types.isExecParams(txn) ? webTx.mkTransaction(txn, mockSuggestedParams()) : txn
+		);
+		}
+
+		txnParams.map((txn) => { if(types.isExecParams(txn)){}})
+
+
+
 
 		//TODO this has to be fixed. if execParams convert to SignedTransaction
 		const runtimeTxnParams: algosdk.SignedTransaction [] = txnParams.map((txn) =>
@@ -980,52 +990,9 @@ export class Runtime {
 	sendSignedTransaction(signedTransaction: SignedTransaction) {
 		this.verifySignature(signedTransaction);
 		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
-		let signerAccount;
-		let fromAccountAddr;
-		if (signedTransaction.txn.reKeyTo === undefined) {
-			signerAccount = this.getAccount(
-				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
-			).account;
-		} else {
-			signerAccount = this.getAccount(
-				algosdk.encodeAddress(signedTransaction.txn.reKeyTo.publicKey)
-			).account;
-			fromAccountAddr = this.getAccount(
-				algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
-			).account.addr;
-		}
 		encodedTxnObj.txID = signedTransaction.txn.txID();
-		let execParams;
-		if (typeof signedTransaction.sig !== "undefined") {
-			//Transaction signature
-			execParams = encTxToExecParams(
-				encodedTxnObj,
-				{ sign: SignType.SecretKey, fromAccount: signerAccount },
-				this.ctx
-			);
-		} else if (typeof signedTransaction.sgnr !== "undefined") {
-			//The signer, if signing with a different key than the Transaction type from property indicates
-			execParams = encTxToExecParams(
-				encodedTxnObj,
-				{
-					sign: SignType.SecretKey,
-					fromAccount: signerAccount,
-					fromAccountAddr: fromAccountAddr,
-				},
-				this.ctx
-			);
-		} else if (typeof signedTransaction.lsig !== "undefined") {
-			//Logic signature
-			throw new Error("Lsig not supported");
-		} else if (typeof signedTransaction.msig !== "undefined") {
-			// Multisig structure
-			throw new Error("Lsig not supported");
-		}
-		if (execParams === undefined) {
-			throw new Error("Signature type not supported");
-		}
 		this.ctx = new Ctx(cloneDeep(this.store), encodedTxnObj, [encodedTxnObj], [], this);
-		this.ctx.processTransactions([execParams]);
+		this.ctx.processTransactions([signedTransaction]);
 		this.store = this.ctx.state;
 	}
 

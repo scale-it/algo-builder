@@ -329,7 +329,7 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }
 // This function checks if given object implements `Transaction` class
-export function isExecParams(object: unknown): object is Transaction {
+export function isExecParams(object: unknown): object is ExecParams {
 	if (object === undefined || object === null) {
 		return false;
 	}
