@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { accounts, decodeValue } = require("../utils");
 
@@ -20,7 +19,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const txReceipt = await executeTx(deployer, [masterTxnParam]);
+	const txReceipt = await deployer.executeTx([masterTxnParam]);
 
 	// only one transaction
 	const logs = txReceipt[0].logs;

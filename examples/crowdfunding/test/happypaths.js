@@ -25,19 +25,22 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 	let escrow, escrowLsig; // initialized later
 
 	let runtime;
-	let creationFlags;
+	let appDef;
 	let applicationId;
-	const approvalProgramFileName = "crowdFundApproval.teal";
-	const clearProgramFileName = "crowdFundClear.teal";
+	const approvalProgramFilename = "crowdFundApproval.teal";
+	const clearProgramFilename = "crowdFundClear.teal";
 
-	const approvalProgram = getProgram(approvalProgramFileName);
-	const clearProgram = getProgram(clearProgramFileName);
+	const approvalProgram = getProgram(approvalProgramFilename);
+	const clearProgram = getProgram(clearProgramFilename);
 
 	this.beforeAll(async function () {
 		runtime = new Runtime([master, creator, donor]);
 
-		creationFlags = {
-			sender: creator.account,
+		appDef = {
+			appName: "crowdfundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 5,
@@ -67,7 +70,13 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		runtime = new Runtime([master, creator, donor, fundReceiver]);
 
 		applicationId = 1;
-		creator.addApp(applicationId, creationFlags, approvalProgram, clearProgram);
+		// addApp only works with AppDefinition from Source
+		creator.addApp(applicationId, {
+			...appDef,
+			metaType: types.MetaType.SOURCE_CODE,
+			approvalProgramCode: approvalProgram,
+			clearProgramCode: clearProgram,
+		});
 		runtime.store.globalApps.set(applicationId, creator.address);
 
 		// set creation args in global state
@@ -108,9 +117,8 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 
 		// deploy application
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			creator.account,
+			{ ...appDef, appArgs: creationArgs },
 			{}
 		).appID;
 
@@ -131,10 +139,14 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 
 		const escrowPk = convert.addressToPk(escrow.address);
 		runtime.updateApp(
+			appDef.appName,
 			creator.address,
 			applicationId,
-			approvalProgram,
-			clearProgram,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+			},
 			{},
 			{
 				appArgs: [escrowPk],

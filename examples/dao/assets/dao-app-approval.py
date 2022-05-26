@@ -158,6 +158,7 @@ def approval_program(ARG_GOV_TOKEN):
         App.globalPut(max_duration, Btoi(Txn.application_args[3])),
         App.globalPut(url, Txn.application_args[4]),
         App.globalPut(dao_name, Txn.application_args[5]),
+        Log(Bytes("SigmaDAO created")),
         Return(Int(1))
     ])
 
@@ -550,4 +551,5 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 5))
+    optimize_options = OptimizeOptions(scratch_slots=True)
+    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 5, optimize=optimize_options))

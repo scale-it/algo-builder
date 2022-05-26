@@ -28,14 +28,16 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 	console.log("Issuer address: ", issuerLsig.address());
 	const newBondToken = "bond-token-" + String(i);
-	const deployTx = {
-		type: types.TransactionType.DeployASA,
-		sign: types.SignType.SecretKey,
-		fromAccount: creatorAccount,
-		asaName: newBondToken,
-		asaDef: asaDef,
-		payFlags: {},
-	};
+	const deployTx = [
+		{
+			type: types.TransactionType.DeployASA,
+			sign: types.SignType.SecretKey,
+			fromAccount: creatorAccount,
+			asaName: newBondToken,
+			asaDef: asaDef,
+			payFlags: {},
+		},
+	];
 	// Create B_[i+1]
 	const newAsaInfo = (await deployer.executeTx(deployTx))[0];
 	console.log(newAsaInfo);

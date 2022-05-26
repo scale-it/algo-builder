@@ -20,14 +20,16 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
 	const buybackLsig = await deployer.loadLogicByFile("buyback-lsig.py", scInitParam);
 	await fundAccount(deployer, buybackLsig.address());
 
-	const buybackTx = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: managerAcc,
-		appID: appInfo.appID,
-		payFlags: {},
-		appArgs: ["str:set_buyback", convert.addressToPk(buybackLsig.address())],
-	};
+	const buybackTx = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: managerAcc,
+			appID: appInfo.appID,
+			payFlags: {},
+			appArgs: ["str:set_buyback", convert.addressToPk(buybackLsig.address())],
+		},
+	];
 
 	// Only store manager can allow opt-in to ASA for lsig
 	await optInTx(deployer, managerAcc, buybackLsig, bondToken);

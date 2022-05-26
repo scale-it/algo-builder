@@ -28,7 +28,6 @@ import { getProgramVersion } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	ASADeploymentFlags,
 	ASAInfo,
@@ -323,33 +322,43 @@ export class Ctx implements Context {
 
 	/**
 	 * deploy a new application and returns application id
-	 * @param fromAccountAddr creator account address
-	 * @param flags SSCDeployment flags
-	 * @param approvalProgram application approval program (TEAL code or program filename)
-	 * @param clearProgram application clear program (TEAL code or program filename)
+	 * @param creatorAddr creator account address
+	 * @param appDefinition source of approval and clear program
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 * NOTE When creating or opting into an app, the minimum balance grows before the app code runs
 	 */
 	deployApp(
-		fromAccountAddr: AccountAddress,
-		flags: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string,
+		creatorAddr: AccountAddress,
+		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	): AppInfo {
-		const senderAcc = this.getAccount(fromAccountAddr);
+		const senderAcc = this.getAccount(creatorAddr);
+
+		if (appDefinition.metaType === types.MetaType.BYTES) {
+			throw new Error("not support this format");
+		}
+
+		const approvalFile =
+			appDefinition.metaType === types.MetaType.FILE
+				? appDefinition.approvalProgramFilename
+				: appDefinition.approvalProgramCode;
+
+		const clearFile =
+			appDefinition.metaType === types.MetaType.FILE
+				? appDefinition.clearProgramFilename
+				: appDefinition.clearProgramCode;
 
 		const approvalProgTEAL =
-			approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt)
-				? getProgram(approvalProgram, scTmplParams)
-				: approvalProgram;
+			appDefinition.metaType === types.MetaType.FILE
+				? getProgram(appDefinition.approvalProgramFilename, scTmplParams)
+				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
-			clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt)
-				? getProgram(clearProgram, scTmplParams)
-				: clearProgram;
+			appDefinition.metaType === types.MetaType.FILE
+				? getProgram(appDefinition.clearProgramFilename, scTmplParams)
+				: appDefinition.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
@@ -361,8 +370,8 @@ export class Ctx implements Context {
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 
 		//verify that MaxGlobalSchemaEntries <= 64 and MaxLocalSchemaEntries <= 16
-		const globalSchemaEntries = flags.globalInts + flags.globalBytes;
-		const localSchemaEntries = flags.localInts + flags.localBytes;
+		const globalSchemaEntries = appDefinition.globalInts + appDefinition.globalBytes;
+		const localSchemaEntries = appDefinition.localInts + appDefinition.localBytes;
 
 		if (
 			localSchemaEntries > MAX_LOCAL_SCHEMA_ENTRIES ||
@@ -377,7 +386,13 @@ export class Ctx implements Context {
 		}
 
 		// create app with id = 0 in globalApps for teal execution
-		const app = senderAcc.addApp(0, flags, approvalProgTEAL, clearProgTEAL);
+		const app = senderAcc.addApp(0, {
+			...appDefinition,
+			metaType: types.MetaType.SOURCE_CODE,
+			approvalProgramCode: approvalProgTEAL,
+			clearProgramCode: clearProgTEAL,
+		});
+
 		this.assertAccBalAboveMin(senderAcc.address);
 		this.state.accounts.set(senderAcc.address, senderAcc);
 		this.state.globalApps.set(app.id, senderAcc.address);
@@ -400,10 +415,10 @@ export class Ctx implements Context {
 			timestamp: Math.round(+new Date() / 1000),
 			deleted: false,
 			// we don't have access to bytecode in runtime
-			approvalFile: approvalProgram,
-			clearFile: clearProgram,
+			approvalFile,
+			clearFile,
 		};
-		this.state.appNameInfo.set(approvalProgram + "-" + clearProgram, appInfo);
+		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
 
 		const acc = new AccountStore(
 			0,
@@ -685,20 +700,23 @@ export class Ctx implements Context {
 	 */
 	updateApp(
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		appSourceCode: types.SmartContract,
 		idx: number,
 		scTmplParams?: SCParams
 	): TxReceipt {
+		if (appSourceCode.metaType === types.MetaType.BYTES) {
+			throw new Error("not support this format");
+		}
+
 		const approvalProgTEAL =
-			approvalProgram.endsWith(tealExt) || approvalProgram.endsWith(pyExt)
-				? getProgram(approvalProgram, scTmplParams)
-				: approvalProgram;
+			appSourceCode.metaType === types.MetaType.FILE
+				? getProgram(appSourceCode.approvalProgramFilename, scTmplParams)
+				: appSourceCode.approvalProgramCode;
 
 		const clearProgTEAL =
-			clearProgram.endsWith(tealExt) || clearProgram.endsWith(pyExt)
-				? getProgram(clearProgram, scTmplParams)
-				: clearProgram;
+			appSourceCode.metaType === types.MetaType.FILE
+				? getProgram(appSourceCode.clearProgramFilename, scTmplParams)
+				: appSourceCode.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);

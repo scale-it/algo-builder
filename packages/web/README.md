@@ -29,30 +29,45 @@ You can connect to `web` package in your react app by using different wallets. C
 1.  ### AlgoSigner:
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
-
-        const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
-
+```js
+    const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+```
 2.  ### MyAlgo Wallet:
 
-    Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
+    Create an instance of the `MyAlgoWalletSession` class by passing the walletURL(token, server, port) and connect it using `connectToMyAlgo`.
 
-         ```js
-         const wcSession = new MyAlgoWalletSession(CHAIN_NAME)
-         await wcSession.connectToMyAlgo();
-         ```
+
+    ```js
+    const walletURL = {
+         token: token,
+         host: host,
+         port: port,
+    }
+    const wcSession = new MyAlgoWalletSession(walletURL)  
+    await wcSession.connectToMyAlgo();
+    ```
+
 
 3.  ### Wallet Connect:
 
-    Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
+    Create an instance of the `WallectConnectSession` class by passing the walletURL(token, server, port) and create a new session using `create` and connect to it using `onConnect`.
+
 
     ```js
-    const wcSession = new WallectConnectSession(CHAIN_NAME);
+    const walletURL = {
+         token: token,
+         host: host,
+         port: port,
+    }
+    const wcSession = new WallectConnectSession(walletURL);
+
     await wcSession.create(true);
     wcSession.onConnect((error, response) => console.log(error, response));
-    ```
+```
 
 Now you can use it to execute a transaction:
 
+```javascript
     const txParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -62,8 +77,9 @@ Now you can use it to execute a transaction:
       payFlags: {},
     };
     let response = await wcSession.executeTx(txParams);
+```
 
-This code will make the transaction, let the user sign it using wallet selected and send it to the network.
+This code will create the transaction, let the user sign it using selected wallet and send it to the network.
 
 You can also use `wcSession.sendTransaction()` or `wcSession.signTransaction()` in a react app.
 The example using these wallets can be found [here] (https://github.com/scale-it/algo-builder-templates/tree/master/shop)
@@ -90,7 +106,7 @@ console.log(2, debug.enabled("test"));
 
 print:
 
-```
+```bash
 1 true
 2 false
 ```
@@ -112,20 +128,23 @@ error("still goes to stderr!");
 debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
+```
 
 ## deployApp
 
 `deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
 
-## Example
+### Example
 
-```js
+```javascript
 // deployment
 const daoAppInfo = await deployer.deployApp(
-	"dao-app-approval.py",
-	"dao-app-clear.py",
+	creator,
 	{
-		sender: creator,
+	    appName: "DAO App" // app name passed here
+        metaType: MetaType.File
+	    approvalProgramFilename: "dao-app-approval.py",
+	    clearProgramFilename: "dao-app-clear.py",
 		localInts: 9,
 		localBytes: 7,
 		globalInts: 4,
@@ -134,7 +153,6 @@ const daoAppInfo = await deployer.deployApp(
 	},
 	{},
 	{},
-	"DAO App" // app name passed here
 );
 
 // now during querying, you only need this app name

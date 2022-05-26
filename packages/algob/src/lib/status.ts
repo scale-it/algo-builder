@@ -61,7 +61,7 @@ export async function readAppLocalState(
 ): Promise<Map<Key, StateValue> | undefined> {
 	const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
 	for (const app of accountInfoResponse["apps-local-state"]) {
-		if (app.id === appID) {
+		if (app.id === appID && app["key-value"]) {
 			const localStateMap = new Map<Key, StateValue>();
 			for (const g of app[`key-value`]) {
 				const key = Buffer.from(g.key, "base64").toString();

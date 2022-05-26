@@ -33,10 +33,12 @@ async function run(runtimeEnv, deployer) {
 	const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
 	// Create Application
 	const daoAppInfo = await deployer.deployApp(
-		"dao-app-approval.py",
-		"dao-app-clear.py",
+		creator,
 		{
-			sender: creator,
+			appName: "DAOApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "dao-app-approval.py",
+			clearProgramFilename: "dao-app-clear.py",
 			localInts: 9,
 			localBytes: 7,
 			globalInts: 4,
@@ -44,8 +46,7 @@ async function run(runtimeEnv, deployer) {
 			appArgs: appArgs,
 		},
 		{},
-		templateParam,
-		"DAOApp"
+		templateParam
 	);
 	console.log(daoAppInfo);
 

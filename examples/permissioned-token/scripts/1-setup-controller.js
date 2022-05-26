@@ -1,3 +1,4 @@
+const { types } = require("@algo-builder/algob/build/runtime");
 const accounts = require("./common/accounts");
 
 /**
@@ -20,10 +21,12 @@ async function setupControllerSSC(runtimeEnv, deployer) {
 
 	console.log("\n** Deploying smart contract: controller **");
 	const controllerAppInfo = await deployer.deployApp(
-		"controller.py", // approval program
-		"clear_state_program.py", // clear program
+		owner,
 		{
-			sender: owner,
+			appName: "Controller",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "controller.py", // approval program
+			clearProgramFilename: "clear_state_program.py", // clear program
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 2, // 1 to store kill_status, 1 for storing permissions_app_id
@@ -31,8 +34,7 @@ async function setupControllerSSC(runtimeEnv, deployer) {
 			foreignAssets: [tesla.assetIndex], // pass token_id in foreign assets array
 		},
 		{},
-		templateParam,
-		"Controller"
+		templateParam
 	); // pass token_id as a template paramenter
 	console.log(controllerAppInfo);
 

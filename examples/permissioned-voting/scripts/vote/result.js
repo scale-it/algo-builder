@@ -1,6 +1,7 @@
 const { readAppGlobalState } = require("@algo-builder/algob");
+const { default: deploy } = require("@algo-builder/algob/build/builtin-tasks/deploy");
 const { types } = require("@algo-builder/web");
-const { executeTx } = require("./common");
+const { tryExecuteTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
@@ -30,24 +31,26 @@ async function run(runtimeEnv, deployer) {
 		console.log("The Winner is CandidateA!!");
 	}
 
-	const txnParam = {
-		type: types.TransactionType.DeleteApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: votingAdminAccount,
-		appID: appInfo.appID,
-		payFlags: {},
-	};
+	const txnParam = [
+		{
+			type: types.TransactionType.DeleteApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: votingAdminAccount,
+			appID: appInfo.appID,
+			payFlags: {},
+		},
+	];
 
 	// Delete Application
 	console.log("Deleting Application");
-	await executeTx(deployer, txnParam);
+	await tryExecuteTx(deployer, txnParam);
 
-	txnParam.fromAccount = alice;
-	txnParam.type = types.TransactionType.ClearApp;
+	txnParam[0].fromAccount = alice;
+	txnParam[0].type = types.TransactionType.ClearApp;
 
 	// Clear voter's account
 	console.log("Clearing Alice's Account");
-	await executeTx(deployer, txnParam);
+	await tryExecuteTx(deployer, txnParam);
 }
 
 module.exports = { default: run };

@@ -169,30 +169,63 @@ export type DeployASAParam = BasicParams & {
 	overrideAsaDef?: Partial<ASADef>;
 };
 
-export type DeployAppParam = BasicParams &
-	AppOptionalFlags & {
-		type: TransactionType.DeployApp;
-		approvalProgram: string;
-		clearProgram: string;
-		localInts: number;
-		localBytes: number;
-		globalInts: number;
-		globalBytes: number;
-		extraPages?: number;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
-	};
+export enum MetaType {
+	FILE,
+	SOURCE_CODE,
+	BYTES,
+}
+export type StorageConfig = {
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+	appName: string; // name of app to store info against in checkpoint, now it's required
+};
+
+export type SourceFile = {
+	metaType: MetaType.FILE;
+	approvalProgramFilename: string;
+	clearProgramFilename: string;
+};
+
+export type SourceCode = {
+	metaType: MetaType.SOURCE_CODE;
+	approvalProgramCode: string;
+	clearProgramCode: string;
+};
+
+// Compiled bytes of a TEAL program.
+export type SourceCompiled = {
+	metaType: MetaType.BYTES;
+	approvalProgramBytes: Uint8Array;
+	clearProgramBytes: Uint8Array;
+};
+
+export type SmartContract = SourceFile | SourceCode | SourceCompiled;
+
+export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
+
+export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
+
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceCompiled;
+
+export type AppDefinition =
+	| AppDefinitionFromFile
+	| AppDefinitionFromSource
+	| AppDefinitionFromSourceCompiled;
+
+export type DeployAppParam = BasicParams & {
+	type: TransactionType.DeployApp;
+	appDefinition: AppDefinition;
+};
 
 export type UpdateAppParam = BasicParams &
 	AppOptionalFlags & {
 		type: TransactionType.UpdateApp;
 		appID: number;
-		newApprovalProgram: string;
-		newClearProgram: string;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
+		newAppCode: SmartContract;
+		appName: string; // name of app to store info against in checkpoint
 	};
 
 export type AppCallsParam = BasicParams &
@@ -347,6 +380,7 @@ export function isExecParams(object: unknown): object is ExecParams {
 export enum ChainType {
 	MainNet = "MainNet",
 	TestNet = "TestNet",
+	BetaNet = "BetaNet",
 }
 
 export interface SessionConnectResponse {
@@ -381,4 +415,19 @@ export interface TransactionInGroup {
 	signers?: string | string[];
 	msig?: WalletMultisigMetadata;
 	message?: string;
+}
+
+export interface AlgodTokenHeader {
+	"X-Algo-API-Token": string;
+}
+
+export interface CustomTokenHeader {
+	[headerName: string]: string;
+}
+
+export interface HttpNetworkConfig {
+	server: string; // with optional http o https prefix
+	port: string | number;
+	token: string | AlgodTokenHeader | CustomTokenHeader;
+	httpHeaders?: { [name: string]: string };
 }

@@ -3,9 +3,6 @@
 	"version": "0.0.1",
 	"main": "index.js",
 	"license": "MIT",
-	"devDependencies": {
-		"mocha": "^9.2.0"
-	},
 	"scripts": {
 		"algob": "algob"
 	}

@@ -34,7 +34,7 @@ For more in-depth description you can look at the [project specification](https:
 - Node 14+
 - Connection to an Algorand node. Follow our [infrastructure guide](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
   NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
-- Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it. We recommend to use `pipenv` with our `Pipfile` to stay always up to date.
+- Python >= 3.10 (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it. We recommend to use `pipenv` with our `Pipfile` to stay always up to date.
 - Yarn `v3.1+` or NPM `v8.0+` or PNPM `v6.21+` (note: all our examples use yarn v3 workspaces).
 
 ### Algorand Node requirements

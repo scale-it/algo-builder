@@ -5,7 +5,7 @@ import {
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import type { Account, EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -148,15 +148,6 @@ class DeployerBasicMode {
 
 	/**
 	 * Loads stateful smart contract info from checkpoint
-	 * @param approvalFileName Approval program file name
-	 * @param clearFileName clear program file name
-	 */
-	getAppByFile(approvalFileName: string, clearFileName: string): rtypes.AppInfo {
-		return this.assertAppExistsInCP(approvalFileName + "-" + clearFileName);
-	}
-
-	/**
-	 * Loads stateful smart contract info from checkpoint
 	 * @param appName name of the app (defined by user during deployment)
 	 */
 	getApp(appName: string): rtypes.AppInfo {
@@ -198,7 +189,7 @@ class DeployerBasicMode {
 
 	/**
 	 * Loads logic signature from cache for contract mode. This helps user to avoid
-	 * passing template parameters always during loading logic signature.
+	 * passing templaste parameters always during loading logic signature.
 	 * @param name ASC name
 	 * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
 	 * @deprecated this function will be removed in the next release. Use mkContractLsig to
@@ -225,7 +216,22 @@ class DeployerBasicMode {
 	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
 	 */
 	compileASC(name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
-		return this.algoOp.ensureCompiled(name, force, scTmplParams);
+		return this.algoOp.ensureCompiled(name, "", force, scTmplParams);
+	}
+
+	/**
+	 * Return application in bytes source format
+	 * @param appName app name
+	 * @param source
+	 * @param scTmplParams
+	 * @returns application in bytes format
+	 */
+	compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceCompiled> {
+		return this.algoOp.compileApplication(appName, source, scTmplParams);
 	}
 
 	/**
@@ -785,32 +791,25 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
 	/**
 	 * Deploys Algorand Stateful Smart Contract
-	 * @param approvalProgram filename which has approval program
-	 * @param clearProgram filename which has clear program
-	 * @param flags AppDeploymentFlags
 	 * @param payFlags Transaction Params
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
-	 * @param appName name of the app to deploy. This name (if passed) will be used as
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
-		const name = appName ?? approvalProgram + "-" + clearProgram;
+		const name = appDefinition.appName;
 
 		this.assertNoApp(name);
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.deployApp(
-				approvalProgram,
-				clearProgram,
-				flags,
+				creator,
+				appDefinition,
 				payFlags,
 				this.txWriter,
 				scTmplParams
@@ -831,8 +830,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID ID of the application being configured or empty if creating
-	 * @param newApprovalProgram New Approval Program filename
-	 * @param newClearProgram New Clear Program filename
+	 * @param newAppCode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
@@ -840,34 +838,33 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		this.assertCPNotDeleted({
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
+			appName,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
-		const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
+		const cpKey = appName;
 
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.updateApp(
+				appName,
 				sender,
 				payFlags,
 				appID,
-				newApprovalProgram,
-				newClearProgram,
+				newAppCode,
 				flags,
 				this.txWriter,
 				scTmplParams
@@ -1019,9 +1016,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scInitParam?: unknown,
 		appName?: string
@@ -1037,18 +1033,16 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Sender account
 	 * @param payFlags transaction parameters
 	 * @param appID application index
-	 * @param newApprovalProgram new approval program name
-	 * @param newClearProgram new clear program name
 	 * @param flags SSC optional flags
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
@@ -1056,17 +1050,17 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			appName,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
 		return await this.algoOp.updateApp(
+			appName,
 			sender,
 			payFlags,
 			appID,
-			newApprovalProgram,
-			newClearProgram,
+			newAppCode,
 			flags,
 			this.txWriter,
 			scTmplParams

@@ -18,18 +18,18 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const sscInfo = await deployer.deployApp(
-		"approval_program.teal", // approval program
-		"clear_program.teal", // clear program
+		creatorAccount,
 		{
-			sender: creatorAccount,
+			appName: "CounterApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "approval_program.teal", // approval program
+			clearProgramFilename: "clear_program.teal", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,
 			globalBytes: 1,
 		},
-		{},
-		{},
-		"CounterApp"
+		{}
 	);
 
 	console.log(sscInfo);

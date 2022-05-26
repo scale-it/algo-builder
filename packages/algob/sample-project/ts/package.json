@@ -3,11 +3,6 @@
 	"version": "0.0.1",
 	"main": "index.js",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/mocha": "^9.1.0",
-		"mocha": "^9.1.3",
-		"ts-mocha": "^9.0.2"
-	},
 	"scripts": {
 		"algob": "algob",
 		"build": "tsc --build .",

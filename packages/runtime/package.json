@@ -1,18 +1,11 @@
 {
 	"name": "@algo-builder/runtime",
-	"version": "3.2.0",
+	"version": "4.0.0",
 	"license": "Apache-2.0",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
 	"description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
-	"keywords": [
-		"smart-contracts",
-		"blockchain",
-		"algorand",
-		"dapps",
-		"javascript",
-		"tooling"
-	],
+	"keywords": ["smart-contracts", "blockchain", "algorand", "dapps", "javascript", "tooling"],
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"engines": {
@@ -34,7 +27,7 @@
 	"dependencies": {
 		"@algo-builder/web": "workspace:*",
 		"@nodelib/fs.walk": "^1.2.8",
-		"algosdk": "^1.14.0",
+		"algosdk": "^1.16.0",
 		"elliptic": "^6.5.4",
 		"hi-base32": "^0.5.1",
 		"js-sha256": "^0.9.0",
@@ -67,25 +60,11 @@
 		"access": "public",
 		"no-git-tag-version": true
 	},
-	"files": [
-		"build/",
-		"LICENSE",
-		"README.md"
-	],
+	"files": ["build/", "LICENSE", "README.md"],
 	"nyc": {
-		"extension": [
-			".ts"
-		],
-		"exclude": [
-			"build",
-			"test",
-			"coverage",
-			".nyc_output"
-		],
-		"reporter": [
-			"text",
-			"lcovonly"
-		],
+		"extension": [".ts"],
+		"exclude": ["build", "test", "coverage", ".nyc_output"],
+		"reporter": ["text", "lcovonly"],
 		"all": true
 	}
 }

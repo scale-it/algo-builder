@@ -27,5 +27,6 @@ def gold_asc(asset_amt=asset_amt, arg_sender=arg_sender):
 
 	return combine
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(gold_asc(), Mode.Signature))
+    print(compileTeal(gold_asc(), Mode.Signature, optimize=optimize_options))

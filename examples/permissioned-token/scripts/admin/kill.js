@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { issue } = require("./issue");
-const { executeTx, fundAccount } = require("../common/common");
+const { tryExecuteTx, fundAccount } = require("../common/common");
 const accounts = require("../common/accounts");
 
 async function kill(deployer) {
@@ -15,18 +15,20 @@ async function kill(deployer) {
 	 */
 	const tesla = deployer.asa.get("tesla");
 	const controllerAppInfo = deployer.getApp("Controller");
-	const killParams = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: owner,
-		appID: controllerAppInfo.appID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:kill"],
-		foreignAssets: [tesla.assetIndex],
-	};
+	const killParams = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner,
+			appID: controllerAppInfo.appID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:kill"],
+			foreignAssets: [tesla.assetIndex],
+		},
+	];
 
 	console.log("* Kill Token: tesla *");
-	await executeTx(deployer, killParams);
+	await tryExecuteTx(deployer, killParams);
 }
 
 async function run(runtimeEnv, deployer) {

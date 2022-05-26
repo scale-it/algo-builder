@@ -58,8 +58,11 @@ class Context {
 		// const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
 		const daoPlaceholderParam = { ARG_GOV_TOKEN: this.govTokenID };
-		const appCreationFlags = {
-			sender: sender.account,
+		const appDef = {
+			appName: "daoApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: daoApprovalProgramFileName,
+			clearProgramFilename: daoClearStateProgramFileName,
 			localInts: 9,
 			localBytes: 7,
 			globalInts: 4,
@@ -81,9 +84,8 @@ class Context {
 		];
 
 		this.daoAppID = this.runtime.deployApp(
-			daoApprovalProgramFileName,
-			daoClearStateProgramFileName,
-			{ ...appCreationFlags, appArgs: daoAppArgs },
+			sender.account,
+			{ ...appDef, appArgs: daoAppArgs },
 			{},
 			daoPlaceholderParam
 		).appID;

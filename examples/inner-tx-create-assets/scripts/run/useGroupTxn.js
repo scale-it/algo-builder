@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { bytesToBigInt } = require("algosdk");
 const { accounts, decodeValue } = require("../utils");
@@ -49,7 +48,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptsTx = await executeTx(deployer, [
+	const receiptsTx = await deployer.executeTx([
 		createAppTxnParam,
 		createASATxnParam,
 		masterTxnParam,

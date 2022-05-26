@@ -1,6 +1,5 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { executeTx } = require("../common/common");
 const accounts = require("../common/accounts");
 
 // here instead of updating the asset reserve by modifyAsset tx,
@@ -9,17 +8,19 @@ async function updateReserveByRekeying(deployer, address) {
 	const owner = deployer.accountsByName.get(accounts.owner);
 
 	// Rekey oldReserve to newReserve
-	const rekeyReserveParam = {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: owner,
-		toAccountAddr: owner.addr,
-		amountMicroAlgos: 0,
-		payFlags: { totalFee: 1000, rekeyTo: address },
-	};
+	const rekeyReserveParam = [
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner,
+			toAccountAddr: owner.addr,
+			amountMicroAlgos: 0,
+			payFlags: { totalFee: 1000, rekeyTo: address },
+		},
+	];
 
 	console.log(`* Rekeying reserve address from: ${owner.addr} to: ${address} *`);
-	await executeTx(deployer, rekeyReserveParam);
+	await deployer.executeTx(rekeyReserveParam);
 	console.log("* Rekeying Successful *");
 }
 
@@ -99,7 +100,7 @@ async function updateReserveByAssetConfig(deployer, address) {
 	];
 
 	console.log(`* Updating reserve address to: ${address} *`);
-	await executeTx(deployer, updateReserveParams);
+	await deployer.executeTx(updateReserveParams);
 	console.log("* Update Successful *");
 
 	console.log(

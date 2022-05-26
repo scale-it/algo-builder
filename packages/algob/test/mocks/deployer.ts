@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { Account, LogicSigAccount, modelsv2 } from "algosdk";
 
 import type {
 	ASCCache,
@@ -140,6 +140,14 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
+	async compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceCompiled> {
+		throw new Error("Not implemented");
+	}
+
 	async getDeployedASC(name: string): Promise<ASCCache | undefined> {
 		throw new Error("Not implemented");
 	}
@@ -191,9 +199,8 @@ export class FakeDeployer implements Deployer {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scInitParam?: unknown,
 		appName?: string
@@ -202,14 +209,13 @@ export class FakeDeployer implements Deployer {
 	}
 
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		throw new Error("Not implemented");
 	}

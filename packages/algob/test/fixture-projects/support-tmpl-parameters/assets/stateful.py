@@ -35,5 +35,5 @@ if __name__ == "__main__":
   # Overwrite scParam if sys.argv[1] is passed
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
-
-  print(compileTeal(approval_program(Addr(scParam["ARG_SENDER"])), Mode.Application))
+  optimize_options = OptimizeOptions(scratch_slots=True)
+  print(compileTeal(approval_program(Addr(scParam["ARG_SENDER"])), Mode.Application, optimize=optimize_options))

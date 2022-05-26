@@ -1,3 +1,5 @@
+const { types } = require("@algo-builder/web");
+
 async function run(runtimeEnv, deployer) {
 	const creatorAccount = deployer.accountsByName.get("alice");
 
@@ -7,11 +9,15 @@ async function run(runtimeEnv, deployer) {
 	console.log("Application Id ", applicationID);
 
 	const updatedRes = await deployer.updateApp(
+		"CounterApp",
 		creatorAccount,
 		{}, // pay flags
 		applicationID,
-		"new_approval.teal",
-		"new_clear.teal",
+		{
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "new_approval.teal",
+			clearProgramFilename: "new_clear.teal",
+		},
 		{}
 	);
 	console.log("Application Updated: ", updatedRes);

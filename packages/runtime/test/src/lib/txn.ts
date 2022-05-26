@@ -1,5 +1,6 @@
 import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
+import cloneDeep from "lodash.clonedeep";
 import { encodeBase64 } from "tweetnacl-ts";
 
 import { AccountStore } from "../../../src";
@@ -27,15 +28,32 @@ describe("Convert encoded Txn to ExecParams", function () {
 		runtime: Runtime,
 		execParams: types.ExecParams
 	): void {
-		const [encTx] = runtime.createTxnContext(execParams);
 		const sign = {
 			sign: types.SignType.SecretKey,
 			fromAccount: execParams.fromAccount,
 		};
+
+		const cloneExecParams = cloneDeep(execParams);
+
+		if (cloneExecParams.type === types.TransactionType.DeployApp) {
+			cloneExecParams.appDefinition = {
+				...cloneExecParams.appDefinition,
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+				appName: "Mock",
+			};
+		}
 		// add approvalProgram and clearProgram to encTx
+		// TODO: recheck it
+		const [encTx] = runtime.createTxnContext(cloneExecParams);
+
 		if (execParams.type === types.TransactionType.DeployApp) {
-			encTx.approvalProgram = execParams.approvalProgram;
-			encTx.clearProgram = execParams.clearProgram;
+			encTx.metaType = execParams.appDefinition.metaType;
+			if (execParams.appDefinition.metaType === types.MetaType.FILE) {
+				encTx.approvalProgram = execParams.appDefinition.approvalProgramFilename;
+				encTx.clearProgram = execParams.appDefinition.clearProgramFilename;
+			}
 		}
 
 		// convert appArgs to buffer for an easier comparison
@@ -172,12 +190,16 @@ describe("Convert encoded Txn to ExecParams", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
-				approvalProgram: "counter-approval.teal",
-				clearProgram: "clear.teal",
-				globalBytes: 1,
-				globalInts: 1,
-				localBytes: 1,
-				localInts: 1,
+				appDefinition: {
+					appName: "Mock",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "counter-approval.teal",
+					clearProgramFilename: "clear.teal",
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+				},
 				payFlags: {
 					totalFee: 1000,
 				},

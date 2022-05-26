@@ -30,7 +30,6 @@ import {
 	BaseTxReceipt,
 	EncTx,
 	ExecutionMode,
-	Operator,
 	SSCAttributesM,
 	StackElem,
 	TEALStack,
@@ -58,7 +57,7 @@ export class Interpreter {
 	intcblock: BigInt[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
-	instructions: Operator[];
+	instructions: Op[];
 	instructionIndex: number;
 	runtime: Runtime;
 	// The call stack is separate from the data stack. Only callsub and retsub manipulate it.
@@ -411,7 +410,7 @@ export class Interpreter {
 	 * @param instruction interpreter opcode instance
 	 * @param debugStack max no. of elements to print from top of stack
 	 */
-	printStack(instruction: Operator, debugStack?: number): void {
+	printStack(instruction: Op, debugStack?: number): void {
 		if (!debugStack) {
 			return;
 		}
@@ -536,9 +535,6 @@ export class Interpreter {
 
 		while (this.instructionIndex < this.instructions.length) {
 			const instruction = this.instructions[this.instructionIndex];
-			//TODO this should return cost
-			const costFromExecute = instruction.execute(this.stack);
-
 			if (
 				this.runtime.ctx.isInnerTx &&
 				this.runtime.ctx.tx.type === TransactionTypeEnum.APPLICATION_CALL &&
@@ -548,14 +544,11 @@ export class Interpreter {
 					tealVersion: this.tealVersion,
 				});
 			}
+			const costFromExecute = instruction.execute(this.stack);
+			this.cost += costFromExecute;
 
 			// for teal version >= 4, cost is calculated dynamically at the time of execution
 			// for teal version < 4, cost is handled statically during parsing
-			if (costFromExecute === undefined) {
-				this.cost += this.lineToCost[instruction.line];
-			} else {
-				this.cost = costFromExecute;
-			}
 			if (this.tealVersion < 4) {
 				txReceipt.gas = this.gas;
 			}
@@ -564,7 +557,7 @@ export class Interpreter {
 					assertMaxCost(this.cost, this.mode);
 					txReceipt.gas = this.cost;
 				} else {
-					this.runtime.ctx.pooledApplCost += this.lineToCost[instruction.line];
+					this.runtime.ctx.pooledApplCost += costFromExecute;
 					assertMaxCost(
 						this.runtime.ctx.pooledApplCost,
 						ExecutionMode.APPLICATION,

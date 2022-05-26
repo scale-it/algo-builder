@@ -1,6 +1,7 @@
 const { readAppGlobalState, readAppLocalState } = require("@algo-builder/algob");
+const { default: algosdk } = require("algosdk");
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
 		await deployer.executeTx(deployer, txnParams);
 	} catch (e) {
@@ -25,12 +26,12 @@ exports.printLocalNFT = async function (deployer, account, appID) {
 		if (localState === undefined) {
 			holdings = "none";
 		} else {
-			for (const [key, _] of localState.entries()) {
-				holdings.push(key);
+			for (const key of localState.keys()) {
+				holdings.push(algosdk.bytesToBigInt(key));
 			}
 			holdings = holdings.join(" ");
 		}
-		console.log("%s account holds app(%s) NFTs: ", account, appID, holdings);
+		console.log("%s account holds app(%s) NFTs: %s", account, appID, holdings);
 	} catch (e) {
 		console.error("Error Occurred", e);
 	}

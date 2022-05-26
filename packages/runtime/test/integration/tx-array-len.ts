@@ -5,7 +5,6 @@ import { assert } from "chai";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../build/lib/constants";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { johnAccount } from "../mocks/account";
@@ -25,19 +24,21 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
 	};
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	this.beforeAll(function () {
 		runtime = new Runtime([john]); // setup test
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
 		// deploy a new app
 		txnParams.appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
+			john.account,
 			{
-				sender: john.account,
+				appName: "app",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 2,
 				globalInts: 2,
 				localBytes: 3,
@@ -152,7 +153,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 	let approvalProgramFailFileName: string;
 	let clearProgramPassFileName: string;
 	let clearProgramFailFileName: string;
-	let flags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 		approvalProgramPassFileName = "approval-pass.teal";
@@ -160,8 +161,11 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 		clearProgramPassFileName = "clear-pass.teal";
 		clearProgramFailFileName = "clear-fail.teal";
 
-		flags = {
-			sender: john.account,
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: approvalProgramFailFileName,
+			clearProgramFilename: clearProgramFailFileName,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -171,7 +175,7 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 
 	it("should fail during create application if pragma version <= 3", function () {
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFailFileName, clearProgramFailFileName, flags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 		);
 	});
@@ -179,8 +183,8 @@ describe("TEALv4: Dynamic Opcode Cost calculation", function () {
 	it("should pass during create application if pragma version >= 4", function () {
 		// same program with teal version == 4. Since cost is calculation during execution,
 		// this code will pass.
-		assert.doesNotThrow(() =>
-			runtime.deployApp(approvalProgramPassFileName, clearProgramPassFileName, flags, {})
-		);
+		appDefinition.approvalProgramFilename = approvalProgramPassFileName;
+		appDefinition.clearProgramFilename = clearProgramPassFileName;
+		assert.doesNotThrow(() => runtime.deployApp(john.account, appDefinition, {}));
 	});
 });
