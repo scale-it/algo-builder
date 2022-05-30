@@ -215,4 +215,9 @@ jobs:
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/run/transfer-nft.js
-
+      - name: Example inner-tx-create-assets
+        working-directory: ./examples/inner-tx-create-assets
+        run: |
+          pipenv run yarn algob deploy
+          pipenv run yarn algob run scripts/run/useInnerTxn.js
+          pipenv run yarn algob run scripts/run/useGroupTxn.js
