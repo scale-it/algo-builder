@@ -14,8 +14,8 @@ async function run(runtimeEnv, deployer) {
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
 		appDefinition: {
-			appName: "appName",
 			metaType: types.MetaType.FILE,
+			appName: "anotherApp",
 			approvalProgramFilename: "coordinator.py",
 			clearProgramFilename: "clear.teal",
 			localInts: 0,
@@ -59,8 +59,8 @@ async function run(runtimeEnv, deployer) {
 
 	// log created asset id and application id
 	const lastReceipt = receiptsTx[receiptsTx.length - 1];
-	console.log("new application id:", decodeValue(lastReceipt.logs[0]));
-	console.log("new asset id:", decodeValue(lastReceipt.logs[1]));
+	console.log("New application id:", decodeValue(lastReceipt.logs[0]));
+	console.log("New asset id:", decodeValue(lastReceipt.logs[1]));
 }
 
 module.exports = { default: run };

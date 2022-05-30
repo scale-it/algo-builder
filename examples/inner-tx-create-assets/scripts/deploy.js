@@ -20,7 +20,6 @@ async function run(runtimeEnv, deployer) {
 			globalInts: 0,
 			globalBytes: 0,
 		},
-		{},
 		{}
 	);
 
