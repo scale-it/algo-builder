@@ -49,7 +49,7 @@ async function run(runtimeEnv, deployer) {
 		},
 		{}
 	);
-	console.log("after deployment", daoAppInfo);
+	console.log(daoAppInfo);
 
 	// Fund application account with some ALGO(5)
 	const fundAppParameters = {
