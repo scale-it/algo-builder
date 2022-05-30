@@ -545,9 +545,6 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    # params = {
-    #     "ARG_GOV_TOKEN": 99
-    # }
 
 
     optimize_options = OptimizeOptions(scratch_slots=True)
