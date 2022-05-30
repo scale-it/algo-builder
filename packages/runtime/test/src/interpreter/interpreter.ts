@@ -28,7 +28,7 @@ describe("Interpreter", function () {
 	let applicationAccount: AccountStoreI;
 	const elonPk = decodeAddress(elonAddr).publicKey;
 
-	const reset = (): void => {
+	const resetInterpreterState = (): void => {
 		while (interpreter.stack.length() !== 0) {
 			interpreter.stack.pop();
 		}
@@ -45,6 +45,7 @@ describe("Interpreter", function () {
 			txn: TXN_OBJ,
 			txID: TXN_OBJ.txID,
 		});
+		interpreter.tealVersion = 1;
 	};
 
 	const setUpInterpreter = (
@@ -71,7 +72,7 @@ describe("Interpreter", function () {
 		interpreter = new Interpreter();
 		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, applicationAccount]);
 		interpreter.tealVersion = tealVersion;
-		reset();
+		resetInterpreterState();
 	};
 	this.beforeAll(() => {
 		setUpInterpreter(6); //setup interpreter for execute
@@ -80,35 +81,47 @@ describe("Interpreter", function () {
 	describe("Teal cost", () => {
 		useFixture("teal-files");
 		beforeEach(() => {
-			reset(); //reset the state of interpreter
+			resetInterpreterState(); //resetInterpreterState the state of interpreter
 		});
 		it("Should return correct cost for a .teal program", () => {
 			let file = "test-file-1.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
 
-			reset(); //after each execute need to reset interpreter
+			resetInterpreterState(); //after each execute need to resetInterpreterState interpreter
 			interpreter.cost = 0;
 			file = "test-file-3.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
 
-			reset();
+			resetInterpreterState();
 			interpreter.cost = 0;
 			file = "test-interpreter.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 5);
 
-			reset();
+			resetInterpreterState();
 			interpreter.cost = 0;
 			file = "test-if-else.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 9);
+
+			resetInterpreterState();
+			interpreter.cost = 0;
+			file = "test-sha256-v1.teal";
+			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
+			assert.equal(interpreter.cost, 14);
+
+			resetInterpreterState();
+			interpreter.cost = 0;
+			file = "test-sha256-v2.teal";
+			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
+			assert.equal(interpreter.cost, 42);
 		});
 
 		it("Should fail when executing wrong logic teal", () => {
 			// logic of teal file failed
-			reset();
+			resetInterpreterState();
 			interpreter.cost = 0;
 			const file = "test-label.teal";
 			expectRuntimeError(
@@ -118,9 +131,4 @@ describe("Interpreter", function () {
 			);
 		});
 	});
-
-	// it("Should return correct cost for a .teal program", () => {
-	//     interpreter.execute(getProgram("example_program.teal", runtime, executionMode, stack));
-	//     assert.deepEqual(interpreter.cost, 45);
-	// });
 });
