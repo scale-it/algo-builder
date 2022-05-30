@@ -57,7 +57,6 @@ class Context {
 		// const daoApprovalProgram = getProgram(approvalProgram, , false);
 		// const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
-		const daoPlaceholderParam = { ARG_GOV_TOKEN: this.govTokenID };
 		const appDef = {
 			appName: "daoApp",
 			metaType: types.MetaType.FILE,
@@ -65,7 +64,7 @@ class Context {
 			clearProgramFilename: daoClearStateProgramFileName,
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 		};
 
@@ -81,13 +80,13 @@ class Context {
 			`int:${maxDuration}`,
 			`str:${url}`,
 			`str:${daoName}`,
+			`int:${this.govTokenID}`,
 		];
 
 		this.daoAppID = this.runtime.deployApp(
 			sender.account,
 			{ ...appDef, appArgs: daoAppArgs },
-			{},
-			daoPlaceholderParam
+			{}
 		).appID;
 
 		// initialize app account as DAO's deposit acc

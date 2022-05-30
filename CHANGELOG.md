@@ -75,6 +75,7 @@ Dependencies:
 
 - We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
 - Enabled PyTEAL Optimizer option in all our examples.
+- DAO template has been improved by moving the `gov_token_id` from template parameter to the global state.
 
 ### API breaking
 

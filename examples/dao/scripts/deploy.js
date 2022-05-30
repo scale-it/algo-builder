@@ -21,6 +21,7 @@ async function run(runtimeEnv, deployer) {
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
 	const daoName = "DAO";
+	const govTokenId = 99;
 
 	const appArgs = [
 		`int:${deposit}`,
@@ -29,8 +30,9 @@ async function run(runtimeEnv, deployer) {
 		`int:${maxDuration}`,
 		`str:${url}`,
 		`str:${daoName}`,
+		`int:${govTokenId}`,
 	];
-	const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
+	// const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
 	// Create Application
 	const daoAppInfo = await deployer.deployApp(
 		creator,
@@ -41,14 +43,13 @@ async function run(runtimeEnv, deployer) {
 			clearProgramFilename: "dao-app-clear.py",
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 			appArgs: appArgs,
 		},
-		{},
-		templateParam
+		{}
 	);
-	console.log(daoAppInfo);
+	console.log("after deployment", daoAppInfo);
 
 	// Fund application account with some ALGO(5)
 	const fundAppParameters = {

@@ -1,10 +1,9 @@
 import sys
 sys.path.insert(0,'..')
 
-from algobpy.parse import parse_params
 from pyteal import *
 
-def approval_program(ARG_GOV_TOKEN):
+def approval_program():
     """
     A stateful app with governance rules. Stores
     deposit, min_support, min_duration, max_duration, url, dao_name.
@@ -33,7 +32,7 @@ def approval_program(ARG_GOV_TOKEN):
         return Assert(And(
             Global.group_size() >= tx_index,
             Gtxn[tx_index].type_enum() == TxnType.AssetTransfer,
-            Gtxn[tx_index].xfer_asset() == Int(ARG_GOV_TOKEN),
+            Gtxn[tx_index].xfer_asset() == App.globalGet(gov_token_id),
             Gtxn[tx_index].asset_receiver() == receiver,
             Gtxn[tx_index].asset_amount() >= Int(0)
         ))
@@ -138,11 +137,13 @@ def approval_program(ARG_GOV_TOKEN):
     url = Bytes("url")
      # dao name
     dao_name = Bytes("dao_name")
+    # governance token id
+    gov_token_id = Bytes("gov_token_id")
 
 
     # initialization
     # Expected arguments:
-    #   [deposit, min_support, min_duration, max_duration, url, dao_name]
+    #   [deposit, min_support, min_duration, max_duration, url, dao_name, gov_token_id]
     on_initialize = Seq([
         Assert(
             And(
@@ -158,6 +159,7 @@ def approval_program(ARG_GOV_TOKEN):
         App.globalPut(max_duration, Btoi(Txn.application_args[3])),
         App.globalPut(url, Txn.application_args[4]),
         App.globalPut(dao_name, Txn.application_args[5]),
+        App.globalPut(gov_token_id, Btoi(Txn.application_args[6])),
         Log(Bytes("SigmaDAO created")),
         Return(Int(1))
     ])
@@ -172,7 +174,7 @@ def approval_program(ARG_GOV_TOKEN):
             And(
                 Global.group_size() == Int(1),
                 Txn.rekey_to() == Global.zero_address(),
-                Txn.assets[0] == Int(ARG_GOV_TOKEN),
+                Txn.assets[0] == App.globalGet(gov_token_id),
             )
         ),
         # submit opt-in transaction by App
@@ -180,7 +182,7 @@ def approval_program(ARG_GOV_TOKEN):
         InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.xfer_asset: Int(ARG_GOV_TOKEN),
+                TxnField.xfer_asset: App.globalGet(gov_token_id),
                 TxnField.asset_receiver: Global.current_application_address(),
                 TxnField.asset_amount: Int(0),
                 # fees should be paid/pooled by main transaction
@@ -303,7 +305,7 @@ def approval_program(ARG_GOV_TOKEN):
         InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.xfer_asset: Int(ARG_GOV_TOKEN),
+                TxnField.xfer_asset: App.globalGet(gov_token_id),
                 TxnField.asset_receiver: Txn.sender(),
                 TxnField.asset_amount: Btoi(Txn.application_args[1]),
                 # fees must be paid by sender (voter)
@@ -469,7 +471,7 @@ def approval_program(ARG_GOV_TOKEN):
         InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.xfer_asset: Int(ARG_GOV_TOKEN),
+                TxnField.xfer_asset: App.globalGet(gov_token_id),
                 TxnField.asset_receiver: Txn.sender(),  # proposal lsig
                 TxnField.asset_amount: App.globalGet(Bytes("deposit")),
                 # fees must be paid by proposal
@@ -543,13 +545,13 @@ def approval_program(ARG_GOV_TOKEN):
     return program
 
 if __name__ == "__main__":
-    params = {
-        "ARG_GOV_TOKEN": 99
-    }
+    # params = {
+    #     "ARG_GOV_TOKEN": 99
+    # }
 
-    # Overwrite params if sys.argv[1] is passed
-    if(len(sys.argv) > 1):
-        params = parse_params(sys.argv[1], params)
+    # # Overwrite params if sys.argv[1] is passed
+    # if(len(sys.argv) > 1):
+    #     params = parse_params(sys.argv[1], params)
 
     optimize_options = OptimizeOptions(scratch_slots=True)
-    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 5, optimize=optimize_options))
+    print(compileTeal(approval_program(), Mode.Application, version = 5, optimize=optimize_options))
