@@ -1,5 +1,6 @@
 import { parsing, types } from "@algo-builder/web";
 import {
+	bigIntToBytes,
 	encodeAddress,
 	EncodedAssetParams,
 	EncodedGlobalStateSchema,
@@ -157,6 +158,14 @@ export function txnSpecByField(
 			if (tx.type === "axfer") {
 				result = tx.asnd ?? tx.snd;
 			}
+			break;
+		}
+		case "CreatedAssetID": {
+			result = 1;
+			break;
+		}
+		case "CreatedApplicationID": {
+			result = 1;
 			break;
 		}
 		default: {

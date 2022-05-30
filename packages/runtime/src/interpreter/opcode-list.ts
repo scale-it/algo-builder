@@ -1459,8 +1459,8 @@ export class Gtxn extends Op {
 		this.assertUint8(BigInt(this.txIdx), this.line);
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		let result;
-
 		const tx = this.groupTxn[this.txIdx]; // current tx
+		console.log(this.field, this.txFieldIdx);
 		if (this.txFieldIdx !== undefined) {
 			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
