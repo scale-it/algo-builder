@@ -43,8 +43,8 @@ describe("Re-keying transactions", function () {
 		alice = runtime.getAccount(alice.address);
 		bob = runtime.getAccount(bob.address);
 		john = runtime.getAccount(john.address);
-		lsigAccount = runtime.getAccount(lsig.address());
-		cloneLsigAccount = runtime.getAccount(cloneLsig.address());
+		// lsigAccount = runtime.getAccount(lsig.address());
+		// cloneLsigAccount = runtime.getAccount(cloneLsig.address());
 	}
 
 	// create transfe algo transaction from lsig
@@ -242,12 +242,12 @@ describe("Re-keying transactions", function () {
 		runtime = new Runtime([alice, bob, john, master]);
 
 		// lsig
-		lsig = runtime.loadLogic("basic.teal");
-		cloneLsig = runtime.loadLogic("another-basic.teal");
+		// lsig = runtime.loadLogic("basic.teal");
+		// cloneLsig = runtime.loadLogic("another-basic.teal");
 
-		// fund to logic sign address
-		runtime.fundLsig(master.account, lsig.address(), 10e8);
-		runtime.fundLsig(master.account, cloneLsig.address(), 10e8);
+		// // fund to logic sign address
+		// runtime.fundLsig(master.account, lsig.address(), 10e8);
+		// runtime.fundLsig(master.account, cloneLsig.address(), 10e8);
 
 		syncAccounts();
 	});

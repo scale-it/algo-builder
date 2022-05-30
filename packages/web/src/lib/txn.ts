@@ -52,7 +52,7 @@ export function getTransactionRevokeAddress(transaction: Transaction): AccountAd
 	if (transaction.assetRevocationTarget !== undefined) {
 		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey)
 	} else {
-		return ALGORAND_ZERO_ADDRESS_STRING;
+		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 	}
 }
 
@@ -76,11 +76,11 @@ export function getTransactionToAddress(transaction: Transaction): AccountAddres
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionCloseReminderToAddress(transaction: Transaction): AccountAddress {
+export function getTransactionCloseReminderToAddress(transaction: Transaction): AccountAddress | undefined {
 	if (transaction.closeRemainderTo !== undefined) {
 		return algosdk.encodeAddress(transaction.closeRemainderTo.publicKey)
 	} else {
-		return ALGORAND_ZERO_ADDRESS_STRING;
+		return undefined;
 	}
 }
 
@@ -88,11 +88,11 @@ export function getTransactionCloseReminderToAddress(transaction: Transaction): 
  * Returns  reKeyTo address of the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionReKeyToToAddress(transaction: Transaction): AccountAddress {
+export function getTransactionReKeyToToAddress(transaction: Transaction): AccountAddress | undefined {
 	if (transaction.reKeyTo !== undefined) {
 		return algosdk.encodeAddress(transaction.reKeyTo.publicKey)
 	} else {
-		return ALGORAND_ZERO_ADDRESS_STRING;
+		return undefined;
 	}
 }
 
@@ -104,7 +104,7 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
 	if (transaction.freezeAccount !== undefined) {
 		return algosdk.encodeAddress(transaction.freezeAccount.publicKey)
 	} else {
-		return ALGORAND_ZERO_ADDRESS_STRING;
+		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 	}
 }
 /**

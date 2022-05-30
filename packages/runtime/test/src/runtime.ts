@@ -354,7 +354,7 @@ describe("Send duplicate transaction", function () {
 	});
 });
 
-describe("Algorand Standard Assets", function () {
+describe.only("Algorand Standard Assets", function () {
 	useFixture("asa-check");
 	let john = new AccountStore(minBalance);
 	const bob = new AccountStore(minBalance);
@@ -396,7 +396,7 @@ describe("Algorand Standard Assets", function () {
 		alice = runtime.getAccount(alice.address);
 	};
 
-	it("should create asset using asa.yaml file and raise account minimum balance", () => {
+	it.only("should create asset using asa.yaml file and raise account minimum balance", () => {
 		const initialMinBalance = john.minBalance;
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
@@ -420,7 +420,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
 	});
 
-	it("should create asset without using asa.yaml file", () => {
+	it.only("should create asset without using asa.yaml file", () => {
 		const expected = {
 			name: "gold-1221",
 			asaDef: {
@@ -451,7 +451,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res.url, "url");
 	});
 
-	it("should create asset without using asa.yaml (execute transaction)", () => {
+	it.only("should create asset without using asa.yaml (execute transaction)", () => {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.DeployASA,
 			sign: types.SignType.SecretKey,
@@ -1236,7 +1236,7 @@ describe("Algo Trasnfer using sendSignedTransaction", function () {
 	});
 
 	it("Should send signedTransacion from one account to another", () => {
-		// Create transaction
+		//Create transaction
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
@@ -1252,13 +1252,15 @@ describe("Algo Trasnfer using sendSignedTransaction", function () {
 		runtime.sendSignedTransaction(signedTransaction);
 		[alice, bob] = runtime.defaultAccounts();
 		assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
-		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+		assert.equal(initialBobBalance + BigInt(amount), bob.balance());//(got, expected)
 	});
 
 	it("Should close alice account and send all the balance to bob the account", () => {
 		// Create transaction
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
+		console.log(initialAliceBalance);
+		console.log(initialBobBalance);
 		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
 		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
 			from: alice.account.addr,
@@ -1272,8 +1274,10 @@ describe("Algo Trasnfer using sendSignedTransaction", function () {
 		// Send the transaction
 		runtime.sendSignedTransaction(signedTransaction);
 		[alice, bob] = runtime.defaultAccounts();
-		assert.equal(0n, alice.balance());
+		assert.equal(0n, alice.balance());//(got, expected)
 		assert.equal(initialBobBalance + initialAliceBalance - BigInt(fee), bob.balance());
+		//-199999000n
+		//+101000000n
 	});
 });
 

@@ -22,7 +22,7 @@ import {
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
-import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke } from "./lib/txn";
+import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke, isEncTxAssetTransfer } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -224,15 +224,14 @@ export class Ctx implements Context {
 	transferAlgo(transaction: algosdk.Transaction): TxReceipt {
 		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(transaction));
 		const toAccount = this.getAccount(webTx.getTransactionToAddress(transaction));
-
 		fromAccount.amount -= BigInt(transaction.amount); // remove 'x' algo from sender
 		toAccount.amount += BigInt(transaction.amount); // add 'x' algo to receiver
 		this.assertAccBalAboveMin(fromAccount.address);
 
-		if (transaction.closeRemainderTo !== undefined) {
+		const closeRemainderToAddress = webTx.getTransactionCloseReminderToAddress(transaction);
+		if (closeRemainderToAddress !== undefined) {
 			this.verifyCloseRemainderTo(transaction);
-			const closeReminderToAccount = this.getAccount(webTx.getTransactionFromAddress(transaction));
-
+			const closeReminderToAccount = this.getAccount(closeRemainderToAddress);
 			closeReminderToAccount.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
 			fromAccount.amount = 0n; // close sender's account
 		}
@@ -742,7 +741,7 @@ export class Ctx implements Context {
 	}
 
 	// apply rekey config on from account
-	rekeyTo(txParam: types.ExecParams): void {
+	rekeyTo1(txParam: types.ExecParams): void {
 		if (!txParam.payFlags.rekeyTo) return;
 		const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
 		// apply rekey
@@ -750,11 +749,17 @@ export class Ctx implements Context {
 	}
 
 	// apply rekey config on from account
-	rekeyToFromTransaction(txn: Transaction): void {
-		if (!txn.reKeyTo) return;
+	// rekeyToFromTransaction(txn: Transaction): void {
+	// 	if (!txn.reKeyTo) return;
+	// 	const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
+	// 	// apply rekey
+	// 	fromAccount.rekeyTo(webTx.getTransactionReKeyToToAddress(txn));
+	// }
+
+	rekeyTo(txn: Transaction, reKeyTo: string | undefined): void {
+		if (reKeyTo === undefined) return;
 		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
-		// apply rekey
-		fromAccount.rekeyTo(webTx.getTransactionReKeyToToAddress(txn));
+		fromAccount.rekeyTo(reKeyTo);
 	}
 
 	/**
@@ -771,14 +776,12 @@ export class Ctx implements Context {
 	processTransactions(signedTransactions: algosdk.SignedTransaction[]): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
-
 		this.verifyMinimumFees();
 		this.verifyAndUpdateInnerAppCallStack();
 		signedTransactions.forEach((signedTransaction, idx) => {
 			const fromAccountAddr = webTx.getTransactionFromAddress(signedTransaction.txn);
 			let payFlags: TxParams = {};
-			payFlags.totalFee = signedTransaction.txn.fee;
-			payFlags.flatFee = signedTransaction.txn.flatFee;
+			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
 			// if (txParam.sign === types.SignType.LogicSignature) {
@@ -807,12 +810,7 @@ export class Ctx implements Context {
 							})
 						);
 					}
-
 					r = this.transferAlgo(signedTransaction.txn);
-					break;
-				}
-				case TransactionType.axfer: { //AssetTransfer
-					r = this.transferAsset(signedTransaction.txn);
 					break;
 				}
 				case TransactionType.keyreg: {
@@ -929,6 +927,7 @@ export class Ctx implements Context {
 							break;
 						}
 					};
+					break;
 				}
 				case TransactionType.acfg: {
 					if (isEncTxAssetCreate(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
@@ -938,12 +937,14 @@ export class Ctx implements Context {
 							...payFlags,
 							creator: { ...senderAcc.account, name: senderAcc.address },
 						};
-						//TODO: We need somehow deal with the assets being deploying using .yaml file
-						// if (asaDefinition) {
-						// 	r = this.deployASADef(signedTransaction.txn.assetName, asaDefinition, fromAccountAddr, flags);
-						// } else {
+						//TODO: We need somehow deal with the assets being deploying without .yaml file
+						//TODO: Add a method do deploy ASA from signedTransaction (ask Robert)
+						if (isASADefinition(signedTransaction.txn)) {
+							r = this.deployASADef(signedTransaction.txn.assetName, webTx.getTransactionASADefinition(signedTransaction.txn), fromAccountAddr, flags);
+						} else {
 						r = this.deployASA(signedTransaction.txn.assetName, fromAccountAddr, flags);
 						this.knowableID.set(idx, r.assetIndex);
+						}
 					} else if (isEncTxAssetReconfigure(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.manager !== fromAccountAddr) {
@@ -967,7 +968,9 @@ export class Ctx implements Context {
 					break;
 				}
 				case TransactionType.axfer: {
-					if (isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)){ //AssetTransfer
+						r = this.transferAsset(signedTransaction.txn);
+					} else if (isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.clawback !== fromAccountAddr) {
 							throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, {
@@ -997,17 +1000,18 @@ export class Ctx implements Context {
 						r = this.optIntoASA(
 							signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
 					}
-
+					break;
 				}
 			}
 			// if closeRemainderTo field occur in txParam
 			// we will change rekeyTo field to webTx.getFromAddress(txParam)
 			if (payFlags.closeRemainderTo) {
 				payFlags.rekeyTo = webTx.getTransactionFromAddress(signedTransaction.txn);
+			} else {
+				payFlags.rekeyTo = webTx.getTransactionReKeyToToAddress(signedTransaction.txn);
 			}
 			// apply rekey after pass all logic
-			this.rekeyToFromTransaction(signedTransaction.txn);
-
+			this.rekeyTo(signedTransaction.txn, payFlags.rekeyTo);
 			if (this.isInnerTx) {
 				// pop current application in the inner app call stack
 				this.innerTxAppIDCallStack.pop();
