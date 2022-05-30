@@ -1,5 +1,4 @@
 const { types } = require("@algo-builder/web");
-const { bytesToBigInt } = require("algosdk");
 const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
@@ -14,12 +13,16 @@ async function run(runtimeEnv, deployer) {
 		type: types.TransactionType.DeployApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		approvalProgram: "coordinator.py",
-		clearProgram: "clear.teal",
-		localInts: 0,
-		localBytes: 0,
-		globalInts: 0,
-		globalBytes: 0,
+		appDefinition: {
+			appName: "appName",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "coordinator.py",
+			clearProgramFilename: "clear.teal",
+			localInts: 0,
+			localBytes: 0,
+			globalInts: 0,
+			globalBytes: 0,
+		},
 		payFlags: {
 			totalFee: 1000,
 		},
