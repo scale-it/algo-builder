@@ -59,7 +59,7 @@ describe("Interpreter", function () {
 		// setup 2nd account
 		johnAcc = new AccountStore(0, johnAccount);
 
-		// setup 2nd account
+		// setup 3rd account
 		bobAccount = new AccountStore(1000000, bobAcc);
 
 		// setup application account
