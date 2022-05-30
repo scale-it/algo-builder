@@ -32,7 +32,6 @@ async function run(runtimeEnv, deployer) {
 		`str:${daoName}`,
 		`int:${govTokenId}`,
 	];
-	// const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
 	// Create Application
 	const daoAppInfo = await deployer.deployApp(
 		creator,
