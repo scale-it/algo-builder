@@ -56,8 +56,8 @@ describe("Group txn", function () {
 		const assetId = new TextDecoder().decode(logs[0]);
 		const applicationId = new TextDecoder().decode(logs[1]);
 
-		// create application by inner txn not support yet
-		// so applicationId wille equal zero.
+		// creating an application by inner txn is not supported yet
+		// so applicationId will equal zero.
 		assert.isTrue(Number(applicationId) == 0);
 		assert.isTrue(Number(assetId) > 0);
 	});

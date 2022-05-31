@@ -275,7 +275,7 @@ export class Ctx implements Context {
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
 
-		//TODO: logic at here is wrong
+		//TODO: this logic is wrong
 		if (this.isInnerTx) {
 			this.createdAssetID = this.state.assetCounter;
 		}

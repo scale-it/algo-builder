@@ -28,7 +28,7 @@ describe("Group txn", function () {
 
 	it("Should create new app and asset from group id", () => {
 		// first tx in group: deploy new app
-		// btw we're using same code with coordinator contract.
+		// the same code is used for coordinator contract
 		const createAppTxnParam = {
 			type: types.TransactionType.DeployApp,
 			sign: types.SignType.SecretKey,
@@ -79,8 +79,9 @@ describe("Group txn", function () {
 
 		// verify new applicationId and assetId
 		const lastReceipt = receiptsTx[receiptsTx.length - 1];
-		const applicationId = new TextDecoder().decode(lastReceipt.logs[0]);
-		const assetId = new TextDecoder().decode(lastReceipt.logs[1]);
+    const decoder = new TextDecoder();
+		const applicationId = decoder.decode(lastReceipt.logs[0]);
+		const assetId = decoder.decode(lastReceipt.logs[1]);
 
 		assert.isTrue(Number(applicationId) > 0);
 		assert.isTrue(Number(assetId) > 0);
