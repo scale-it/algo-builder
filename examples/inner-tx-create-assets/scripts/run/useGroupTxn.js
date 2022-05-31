@@ -40,6 +40,8 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// third tx: call master app
+	// verify logic in first and second transaction.
+	// You can check `assets/coordinator.py` for more details.
 	const masterTxnParam = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,

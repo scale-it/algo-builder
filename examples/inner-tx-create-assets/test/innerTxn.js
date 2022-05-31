@@ -51,10 +51,11 @@ describe("Group txn", function () {
 
 		const txReceipt = runtime.executeTx([masterTxnParam]);
 
-		// only one transaction
+		// get logs from transaction
 		const logs = txReceipt[0].logs;
-		const assetId = new TextDecoder().decode(logs[0]);
-		const applicationId = new TextDecoder().decode(logs[1]);
+		const decoder = new TextDecoder();
+		const assetId = decoder.decode(logs[0]);
+		const applicationId = decoder.decode(logs[1]);
 
 		// creating an application by inner txn is not supported yet
 		// so applicationId will equal zero.

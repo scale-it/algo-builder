@@ -294,7 +294,7 @@ describe("C2C call", function () {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
 				(console["log"] as any).calledWith(
-					chalk.yellow("Only supports application call in this version")
+					chalk.yellowBright("Current Runtime version only supports application call!!!")
 				)
 			);
 		});

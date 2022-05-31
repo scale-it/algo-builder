@@ -59,7 +59,9 @@ describe("Group txn", function () {
 			},
 		};
 
-		// third tx: call master app
+		// third tx: call master app,
+		// verify logic in first and second transaction.
+		// You can check `assets/coordinator.py` for more details.
 		const masterTxnParam = {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
@@ -79,7 +81,7 @@ describe("Group txn", function () {
 
 		// verify new applicationId and assetId
 		const lastReceipt = receiptsTx[receiptsTx.length - 1];
-    const decoder = new TextDecoder();
+		const decoder = new TextDecoder();
 		const applicationId = decoder.decode(lastReceipt.logs[0]);
 		const assetId = decoder.decode(lastReceipt.logs[1]);
 
