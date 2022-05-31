@@ -1,7 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { parsing, types } from "@algo-builder/web";
-import algosdk, {
-	ALGORAND_MIN_TX_FEE,
+import {
 	decodeAddress,
 	decodeUint64,
 	encodeAddress,
@@ -11,7 +10,7 @@ import algosdk, {
 	modelsv2,
 	verifyBytes,
 } from "algosdk";
-import { setSendTransactionHeaders } from "algosdk/dist/types/src/client/v2/algod/sendRawTransaction";
+import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -4255,7 +4254,7 @@ export class ITxnSubmit extends Op {
 		// Supports only calling app(NoOpt) for app transaction type.
 		for (const tx of this.interpreter.currentInnerTxnGroup) {
 			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
-				console.warn(`\x1b[33m%s\x1b[0m`, "Only supports application call in this version");
+				console.log(chalk.yellow("Only supports application call in this version"));
 				return this.computeCost();
 			}
 		}

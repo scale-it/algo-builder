@@ -70,6 +70,7 @@ __metadata:
     "@types/sinon": ^10.0.11
     algosdk: ^1.16.0
     chai: ^4.3.6
+    chalk: ^4.1.2
     elliptic: ^6.5.4
     eslint: ^8.10.0
     hi-base32: ^0.5.1

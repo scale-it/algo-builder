@@ -1,5 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
+import chalk from "chalk";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
@@ -292,9 +293,8 @@ describe("C2C call", function () {
 		it("Should not support other inner tx appl(not include appcall)", () => {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
-				(console["warn"] as any).calledWith(
-					`\x1b[33m%s\x1b[0m`,
-					"Only supports application call in this version"
+				(console["log"] as any).calledWith(
+					chalk.yellow("Only supports application call in this version")
 				)
 			);
 		});
