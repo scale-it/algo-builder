@@ -79,7 +79,7 @@ describe("DAO test", function () {
 		appStorageConfig = {
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 		};
 	});
@@ -119,11 +119,11 @@ describe("DAO test", function () {
 			`int:${maxDuration}`,
 			`str:${url}`,
 			`str:${daoName}`,
+			`int:${govTokenID}`,
 		];
 
 		const approvalProgramFilename = "dao-app-approval.py";
 		const clearProgramFilename = "dao-app-clear.py";
-		const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
 		// deploy application
 		appID = runtime.deployApp(
 			creator.account,
@@ -135,8 +135,7 @@ describe("DAO test", function () {
 				clearProgramFilename,
 				appArgs: daoAppArgs,
 			},
-			{},
-			placeholderParam
+			{}
 		).appID;
 
 		// Fund DAO app account with some ALGO
@@ -187,6 +186,7 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("max_duration"), BigInt(maxDuration));
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
 		assert.deepEqual(getGlobal("dao_name"), parsing.stringToBytes(daoName));
+		assert.deepEqual(getGlobal("gov_token_id"), BigInt(govTokenID));
 
 		// opt in deposit account (dao app account) to gov_token asa
 		const optInToGovASAParam = [

@@ -56,4 +56,4 @@ if __name__ == "__main__":
         params = parse_params(sys.argv[1], params)
 
     optimize_options = OptimizeOptions(scratch_slots=True)
-    print(compileTeal(dao_fund_lsig(params["ARG_DAO_APP_ID"]), Mode.Signature, version = 5, optimize=optimize_options))
+    print(compileTeal(dao_fund_lsig(params["ARG_DAO_APP_ID"]), Mode.Signature, version = 6, optimize=optimize_options))

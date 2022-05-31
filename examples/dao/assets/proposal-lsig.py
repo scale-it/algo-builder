@@ -95,7 +95,7 @@ if __name__ == "__main__":
         compileTeal(
             proposal_lsig(params["ARG_OWNER"], params["ARG_DAO_APP_ID"]),
             Mode.Signature,
-            version=5,
+            version=6,
             optimize=optimize_options,
         )
     )
