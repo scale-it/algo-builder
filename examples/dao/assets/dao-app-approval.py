@@ -6,7 +6,7 @@ from pyteal import *
 def approval_program():
     """
     A stateful app with governance rules. Stores
-    deposit, min_support, min_duration, max_duration, url, dao_name.
+    deposit, min_support, min_duration, max_duration, url, dao_name, gov_token_id.
 
     Commands:
         add_proposal            Save proposal record in lsig
