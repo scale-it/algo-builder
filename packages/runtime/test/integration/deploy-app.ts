@@ -88,7 +88,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		runtime.executeTx([execParams]);
 		syncAccount();
 
-		const res = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+		const res = runtime.getAppByName(storageConfig.appName);
 		assert.isDefined(res);
 		assert.isDefined(res?.applicationAccount);
 	});

@@ -415,7 +415,9 @@ export class Ctx implements Context {
 			approvalFile,
 			clearFile,
 		};
+
 		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
+		this.state.appNameInfo.set(appDefinition.appName, appInfo);
 
 		const acc = new AccountStore(
 			0,

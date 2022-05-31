@@ -532,7 +532,7 @@ const runtimeGeneralErrors = {
 		description: `Account and address mismatch in the current state`,
 	},
 	MAX_SCHEMA_ENTRIES_EXCEEDED: {
-		number: 1508,
+		number: 1318,
 		message: "Local/Global state keys has too many entries",
 		title: "Max schema entries exceeded",
 		description:

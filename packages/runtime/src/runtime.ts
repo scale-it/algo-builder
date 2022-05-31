@@ -367,6 +367,16 @@ export class Runtime {
 	}
 
 	/**
+	 * Queries app id by app name from global state.
+	 * Returns undefined if app is not found.
+	 * @param approval
+	 * @param clear
+	 */
+	getAppByName(appName: string): AppInfo | undefined {
+		return this.store.appNameInfo.get(appName);
+	}
+
+	/**
 	 * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
 	 * @param accounts: array of account info's
 	 */
