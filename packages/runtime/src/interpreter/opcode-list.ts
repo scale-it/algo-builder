@@ -1408,7 +1408,7 @@ export class Txn extends Op {
 				this.field,
 				this.interpreter.runtime.ctx.tx,
 				this.interpreter.runtime.ctx.gtxs,
-				this.interpreter.tealVersion
+				this.interpreter
 			);
 		}
 		stack.push(result);
@@ -1460,11 +1460,10 @@ export class Gtxn extends Op {
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		let result;
 		const tx = this.groupTxn[this.txIdx]; // current tx
-		console.log(this.field, this.txFieldIdx);
 		if (this.txFieldIdx !== undefined) {
 			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
-			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
+			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter);
 		}
 		stack.push(result);
 		return this.computeCost();
