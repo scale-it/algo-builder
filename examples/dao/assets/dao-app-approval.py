@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(0,'..')
-
 from pyteal import *
 
 def approval_program():
@@ -548,4 +545,4 @@ if __name__ == "__main__":
 
 
     optimize_options = OptimizeOptions(scratch_slots=True)
-    print(compileTeal(approval_program(), Mode.Application, version = 5, optimize=optimize_options))
+    print(compileTeal(approval_program(), Mode.Application, version = 6, optimize=optimize_options))

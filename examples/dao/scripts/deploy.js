@@ -29,7 +29,7 @@ async function run(runtimeEnv, deployer) {
 		`int:${maxDuration}`,
 		`str:${url}`,
 		`str:${daoName}`,
-		`int:${govToken.assetID}`,
+		`int:${govToken.assetIndex}`,
 	];
 	// Create Application
 	const daoAppInfo = await deployer.deployApp(
