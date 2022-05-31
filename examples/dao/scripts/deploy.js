@@ -21,7 +21,6 @@ async function run(runtimeEnv, deployer) {
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
 	const daoName = "DAO";
-	const govTokenId = 99;
 
 	const appArgs = [
 		`int:${deposit}`,
