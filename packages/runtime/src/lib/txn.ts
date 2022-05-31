@@ -530,20 +530,6 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 			result = BigInt(logs.length);
 			break;
 		}
-		case "CreatedAssetID": {
-			const asaInfo = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
-			if (asaInfo.assetIndex !== undefined) result = BigInt(asaInfo.assetIndex);
-			else result = 0n;
-			break;
-		}
-		case "CreatedApplicationID": {
-			const appInfo = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
-			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
-			else if (isEncTxApplicationCreate(tx))
-				result = BigInt(op.interpreter.runtime.ctx.state.appCounter + 1);
-			else result = 0n;
-			break;
-		}
 		default: {
 			result = txnSpecByField(op.field, tx, [tx], op.interpreter);
 			if (result === undefined || Object(result).length === 0) {
