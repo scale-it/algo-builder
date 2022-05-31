@@ -275,7 +275,8 @@ export class Ctx implements Context {
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
 
-		//TODO: this logic is wrong
+		// TODO: this logic is wrong
+		// Details: https://www.pivotaltracker.com/n/projects/2452320/stories/182332033
 		if (this.isInnerTx) {
 			this.createdAssetID = this.state.assetCounter;
 		}
