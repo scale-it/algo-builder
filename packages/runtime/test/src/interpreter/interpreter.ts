@@ -82,47 +82,41 @@ describe("Interpreter", function () {
 		useFixture("teal-files");
 		beforeEach(() => {
 			resetInterpreterState(); //resetInterpreterState the state of interpreter
+			interpreter.cost = 0;
 		});
-		it("Should return correct cost for a .teal program", () => {
-			let file = "test-file-1.teal";
+
+		it("Should return correct cost for a simple .teal program ", () => {
+			const file = "test-file-1.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
+		});
 
-			resetInterpreterState(); //after each execute need to resetInterpreterState interpreter
-			interpreter.cost = 0;
-			file = "test-file-3.teal";
+		it("Should return correct cost for a simple .teal program ", () => {
+			const file = "test-file-3.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
+		});
 
-			resetInterpreterState();
-			interpreter.cost = 0;
-			file = "test-interpreter.teal";
-			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
-			assert.equal(interpreter.cost, 5);
-
-			resetInterpreterState();
-			interpreter.cost = 0;
-			file = "test-if-else.teal";
+		it("Should return correct cost for a .teal program(if-else)", () => {
+			const file = "test-if-else.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 9);
+		});
 
-			resetInterpreterState();
-			interpreter.cost = 0;
-			file = "test-sha256-v1.teal";
+		it("Should return correct cost for a .teal program with different version(v1)", () => {
+			const file = "test-sha256-v1.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 14);
+		});
 
-			resetInterpreterState();
-			interpreter.cost = 0;
-			file = "test-sha256-v2.teal";
+		it("Should return correct cost for a .teal program for different version(v2)", () => {
+			const file = "test-sha256-v2.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 42);
 		});
 
 		it("Should fail when executing wrong logic teal", () => {
 			// logic of teal file failed
-			resetInterpreterState();
-			interpreter.cost = 0;
 			const file = "test-label.teal";
 			expectRuntimeError(
 				() =>
