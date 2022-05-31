@@ -4255,7 +4255,7 @@ export class ITxnSubmit extends Op {
 		// Supports only calling app(NoOpt) for app transaction type.
 		for (const tx of this.interpreter.currentInnerTxnGroup) {
 			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
-				console.warn("Only supports application call in this version");
+				console.warn(`\x1b[33m%s\x1b[0m`, "Only supports application call in this version");
 				return this.computeCost();
 			}
 		}

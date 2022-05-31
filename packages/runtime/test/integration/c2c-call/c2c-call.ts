@@ -292,7 +292,10 @@ describe("C2C call", function () {
 		it("Should not support other inner tx appl(not include appcall)", () => {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
-				(console["warn"] as any).calledWith("Only supports application call in this version")
+				(console["warn"] as any).calledWith(
+					`\x1b[33m%s\x1b[0m`,
+					"Only supports application call in this version"
+				)
 			);
 		});
 	});

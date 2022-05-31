@@ -19,6 +19,7 @@ import {
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
 import {
+	AppInfo,
 	ASAInfo,
 	Context,
 	EncTx,
@@ -166,7 +167,11 @@ export function txnSpecByField(
 			break;
 		}
 		case "CreatedApplicationID": {
-			result = 1;
+			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
+			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
+			else if (isEncTxApplicationCreate(tx))
+				result = BigInt(interpreter.runtime.ctx.state.appCounter + 1);
+			else result = 0n;
 			break;
 		}
 		default: {
@@ -527,12 +532,16 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 		}
 		case "CreatedAssetID": {
 			const asaInfo = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
-			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
+			if (asaInfo.assetIndex !== undefined) result = BigInt(asaInfo.assetIndex);
 			else result = 0n;
 			break;
 		}
 		case "CreatedApplicationID": {
-			result = 0n;
+			const appInfo = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
+			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
+			else if (isEncTxApplicationCreate(tx))
+				result = BigInt(op.interpreter.runtime.ctx.state.appCounter + 1);
+			else result = 0n;
 			break;
 		}
 		default: {

@@ -1,5 +1,6 @@
 const { Runtime } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
+import { assert } from "chai";
 
 describe("Group txn", function () {
 	let runtime;
@@ -76,9 +77,12 @@ describe("Group txn", function () {
 			masterTxnParam,
 		]);
 
-		// log created asset id and application id
+		// verify new applicationId and assetId
 		const lastReceipt = receiptsTx[receiptsTx.length - 1];
-		console.log("new application id:", new TextDecoder().decode(lastReceipt.logs[0]));
-		console.log("new asset id:", new TextDecoder().decode(lastReceipt.logs[1]));
+		const applicationId = new TextDecoder().decode(lastReceipt.logs[0]);
+		const assetId = new TextDecoder().decode(lastReceipt.logs[1]);
+
+		assert.isTrue(Number(applicationId) > 0);
+		assert.isTrue(Number(assetId) > 0);
 	});
 });

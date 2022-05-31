@@ -79,7 +79,7 @@ def created_by_inner_txns():
             TxnField.config_asset_freeze: Global.current_application_address(),
             TxnField.config_asset_clawback: Global.current_application_address()
         }),
-        InnerTxnBuilder.Submit(),
+        InnerTxnBuilder.Submit(), 
         Log(itoa(InnerTxn.created_asset_id())),  # Log new asset id
         # create new application
         InnerTxnBuilder.Begin(),

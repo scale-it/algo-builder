@@ -57,7 +57,6 @@ export class Ctx implements Context {
 	remainingFee: number;
 	budget: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
-	createdApplicationID: number; //
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -82,7 +81,6 @@ export class Ctx implements Context {
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.createdAssetID = 0;
-		this.createdApplicationID = 0;
 		this.remainingFee = 0;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
