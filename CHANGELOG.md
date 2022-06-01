@@ -16,6 +16,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Features
 
+- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+
 ### Bug Fixes
 
 ### Breaking Changes
