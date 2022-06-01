@@ -21,7 +21,7 @@ async function run(runtimeEnv, deployer) {
 
 	const txReceipt = await deployer.executeTx([masterTxnParam]);
 
-	// only one transaction
+	// get logs from transaction
 	const logs = txReceipt[0].logs;
 	console.log("New asset Id =", decodeValue(logs[0]));
 	console.log("New application Id =", decodeValue(logs[1]));

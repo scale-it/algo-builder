@@ -17,7 +17,6 @@ import {
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
-import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
@@ -58,7 +57,6 @@ export class Ctx implements Context {
 	remainingFee: number;
 	budget: number;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
-
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -277,6 +275,8 @@ export class Ctx implements Context {
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
 
+		// TODO: this logic is wrong
+		// Details: https://www.pivotaltracker.com/n/projects/2452320/stories/182332033
 		if (this.isInnerTx) {
 			this.createdAssetID = this.state.assetCounter;
 		}
