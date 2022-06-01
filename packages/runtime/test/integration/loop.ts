@@ -80,6 +80,7 @@ describe("TEALv4: Loops", function () {
 				john.account,
 				{
 					...appDefinition,
+					appName: "skipApp",
 					approvalProgramFilename: approvalProgramPassFileName,
 				},
 				{}

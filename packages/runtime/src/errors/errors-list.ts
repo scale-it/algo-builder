@@ -538,6 +538,12 @@ const runtimeGeneralErrors = {
 		description:
 			"Local key entires: used: %localState%, max: %localMax%. Global  key entires: used: %globalState, max: %globalMax%.",
 	},
+	APP_NAME_ALREADLY_USED: {
+		number: 1319,
+		message: "%appName% already used. Please choose another name.",
+		title: "%appName% already used",
+		description: "%appName% already used. Please choose another name.",
+	},
 };
 
 const transactionErrors = {

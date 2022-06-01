@@ -3,24 +3,26 @@ import { getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
 import { getProgram } from "../../src";
+import RUNTIME_ERRORS from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
+import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 
 describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	useFixture("stateful");
-	const fee = 1000;
-	const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + fee;
-	let john = new AccountStore(minBalance + fee);
 
+	let john: AccountStoreI;
 	let runtime: Runtime;
 	let approvalProgramFilename: string;
 	let clearProgramFilename: string;
 	let approvalProgram: string;
 	let clearProgram: string;
 	let storageConfig: types.StorageConfig;
+
 	this.beforeAll(function () {
-		runtime = new Runtime([john]); // setup test
+		runtime = new Runtime([]); // setup test
+		[john] = runtime.defaultAccounts();
 		approvalProgramFilename = "counter-approval.teal";
 		clearProgramFilename = "clear.teal";
 
@@ -49,6 +51,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				approvalProgramFilename,
 				clearProgramFilename,
 				...storageConfig,
+				appName: "firstApp",
 			},
 			{}
 		).appID;
@@ -60,6 +63,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
 				...storageConfig,
+				appName: "secondApp",
 			},
 			{}
 		).appID;
@@ -78,6 +82,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			fromAccount: john.account,
 			appDefinition: {
 				...storageConfig,
+				appName: "newApp",
 				metaType: types.MetaType.SOURCE_CODE,
 				approvalProgramCode: approvalProgram,
 				clearProgramCode: clearProgram,
@@ -88,8 +93,26 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		runtime.executeTx([execParams]);
 		syncAccount();
 
-		const res = runtime.getAppByName(storageConfig.appName);
+		const res = runtime.getAppByName("newApp");
 		assert.isDefined(res);
 		assert.isDefined(res?.applicationAccount);
+	});
+
+	it("Should failed if deploy duplicate app name", () => {
+		expectRuntimeError(
+			() =>
+				runtime.deployApp(
+					john.account,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: approvalProgram,
+						clearProgramCode: clearProgram,
+						...storageConfig,
+						appName: "firstApp",
+					},
+					{}
+				),
+			RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED
+		);
 	});
 });

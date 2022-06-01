@@ -36,7 +36,7 @@ describe("C2C call", function () {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
 		appDefinition = {
-			appName: "app",
+			appName: "firstApp",
 			metaType: types.MetaType.FILE,
 			approvalProgramFilename: "c2c-call.py",
 			clearProgramFilename: "clear.teal",
@@ -50,7 +50,7 @@ describe("C2C call", function () {
 		// deploy second app
 		secondApp = runtime.deployApp(
 			alice.account,
-			{ ...appDefinition, approvalProgramFilename: "c2c-echo.py" },
+			{ ...appDefinition, approvalProgramFilename: "c2c-echo.py", appName: "secondApp" },
 			{}
 		);
 
@@ -160,6 +160,7 @@ describe("C2C call", function () {
 					...appDefinition,
 					approvalProgramFilename: "dummy-approval-v5.teal",
 					clearProgramFilename: "dummy-clear-v5.teal",
+					appName: "dummy-v5",
 				},
 				{}
 			);
@@ -215,14 +216,22 @@ describe("C2C call", function () {
 				bob = runtime.defaultAccounts()[1];
 				baseApp = runtime.deployApp(
 					bob.account,
-					{ ...appDefinition, approvalProgramFilename: "seq-call.py" },
+					{
+						...appDefinition,
+						approvalProgramFilename: "seq-call.py",
+						appName: "base",
+					},
 					{}
 				);
 				fundToApp(bob, baseApp);
 				for (let id = 0; id < totalApp; ++id) {
 					const curApp = runtime.deployApp(
 						bob.account,
-						{ ...appDefinition, approvalProgramFilename: "seq-call.py" },
+						{
+							...appDefinition,
+							approvalProgramFilename: "seq-call.py",
+							appName: "app" + id,
+						},
 						{}
 					);
 					fundToApp(bob, curApp);
@@ -274,7 +283,11 @@ describe("C2C call", function () {
 		this.beforeEach(() => {
 			const appInfo = runtime.deployApp(
 				alice.account,
-				{ ...appDefinition, approvalProgramFilename: "inner-tx-deploy.py" },
+				{
+					...appDefinition,
+					approvalProgramFilename: "inner-tx-deploy.py",
+					appName: "inner-tx",
+				},
 				{}
 			);
 
