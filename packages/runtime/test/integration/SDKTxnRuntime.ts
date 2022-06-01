@@ -1,5 +1,6 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { assert } from "chai";
+import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "../../src/account";
 import { mockSuggestedParams } from "../../src/mock/tx";
@@ -25,7 +26,21 @@ describe("Should execute SDK transaction object using runtime", function () {
 		execParams: types.ExecParams
 	): types.TransactionAndSign {
 		const suggestedParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
-		const transaction = webTx.mkTransaction(execParams, suggestedParams) as any;
+		let transaction;
+
+		if (execParams.type == types.TransactionType.DeployApp) {
+			const cloneExecParams = cloneDeep(execParams);
+			cloneExecParams.appDefinition = {
+				...cloneExecParams.appDefinition,
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+			};
+			transaction = webTx.mkTransaction(cloneExecParams, suggestedParams) as any;
+		} else {
+			transaction = webTx.mkTransaction(execParams, suggestedParams) as any;
+		}
+
 		let sign: types.Sign;
 
 		// extract `sign` from execParams
@@ -45,8 +60,9 @@ describe("Should execute SDK transaction object using runtime", function () {
 		// inject approval and clear program in string format to transaction object.
 		// TODO: Should we create disassemble method to convert Uint8Array program format to string???
 		if (execParams.type === types.TransactionType.DeployApp) {
-			transaction.approvalProgram = execParams.approvalProgram;
-			transaction.clearProgram = execParams.clearProgram;
+			const appDef = execParams.appDefinition as types.AppDefinitionFromFile;
+			transaction.approvalProgram = appDef.approvalProgramFilename;
+			transaction.clearProgram = appDef.clearProgramFilename;
 		}
 		return {
 			transaction,
@@ -105,12 +121,16 @@ describe("Should execute SDK transaction object using runtime", function () {
 				type: types.TransactionType.DeployApp,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				approvalProgram: "counter-approval.teal",
-				clearProgram: "clear.teal",
-				localBytes: 1,
-				localInts: 1,
-				globalBytes: 1,
-				globalInts: 1,
+				appDefinition: {
+					appName: "app",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "counter-approval.teal",
+					clearProgramFilename: "clear.teal",
+					localBytes: 1,
+					localInts: 1,
+					globalBytes: 1,
+					globalInts: 1,
+				},
 				payFlags: {
 					totalFee: fee,
 				},

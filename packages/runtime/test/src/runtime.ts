@@ -3,6 +3,7 @@ import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
+import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
@@ -307,6 +308,47 @@ describe("Rounds Test", function () {
 		syncAccounts();
 		assert.equal(john.balance(), minBalance - 1100n);
 		assert.equal(bob.balance(), minBalance + 100n);
+	});
+});
+
+describe("Send duplicate transaction", function () {
+	const amount = minBalance;
+	const fee = 1000;
+
+	let alice: AccountStoreI;
+	let bob: AccountStoreI;
+
+	let runtime: Runtime;
+	let paymentTxn: types.AlgoTransferParam;
+
+	this.beforeEach(() => {
+		runtime = new Runtime([]);
+		[alice, bob] = runtime.defaultAccounts();
+		paymentTxn = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.address,
+			amountMicroAlgos: amount,
+			payFlags: {
+				totalFee: fee,
+			},
+		};
+	});
+
+	it("Should throw an error when sending duplicate tx in a group", () => {
+		const groupTx = [paymentTxn, { ...paymentTxn }];
+
+		expectRuntimeError(
+			() => runtime.executeTx(groupTx),
+			RUNTIME_ERRORS.TRANSACTION.TRANSACTION_ALREADY_IN_LEDGER
+		);
+	});
+
+	it("Should not throw an error when add different note filed", () => {
+		const groupTx = [paymentTxn, { ...paymentTxn, payFlags: { note: "salt" } }];
+
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 	});
 });
 
@@ -925,94 +967,112 @@ describe("Stateful Smart Contracts", function () {
 	useFixture("stateful");
 	const john = new AccountStore(minBalance);
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
+	let appDefinition: types.AppDefinitionFromFile;
 	this.beforeEach(() => {
 		runtime = new Runtime([john]);
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
+
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
+			globalBytes: 32,
+			globalInts: 32,
+			localBytes: 8,
+			localInts: 8,
+		};
 	});
-	const creationFlags = {
-		sender: john.account,
-		globalBytes: 32,
-		globalInts: 32,
-		localBytes: 8,
-		localInts: 8,
-	};
 
 	it("Should not create application if approval program is empty", () => {
-		approvalProgramFileName = "empty-app.teal";
+		appDefinition.approvalProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
 		);
 	});
 
 	it("Should not create application if clear program is empty", () => {
-		clearProgramFileName = "empty-app.teal";
+		appDefinition.clearProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
 		);
 	});
 
 	it("Should create application", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		const app = runtime.getApp(appID);
 		assert.isDefined(app);
 	});
 
 	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", () => {
-		clearProgramFileName = "clearv6.teal";
+		appDefinition.clearProgramFilename = "clearv6.teal";
 		expectRuntimeError(
-			() => runtime.deployApp(approvalProgramFileName, clearProgramFileName, creationFlags, {}),
+			() => runtime.deployApp(john.account, appDefinition, {}),
 			RUNTIME_ERRORS.TEAL.PROGRAM_VERSION_MISMATCH
 		);
 	});
 
 	it("Should not update application if approval or clear program is empty", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, "", clearProgramFileName, {}, {}),
+			() =>
+				runtime.updateApp(
+					appDefinition.appName,
+					john.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: "",
+						clearProgramCode: getProgram(clearProgramFilename),
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
 		);
 
 		expectRuntimeError(
-			() => runtime.updateApp(john.address, appID, approvalProgramFileName, "", {}, {}),
+			() =>
+				runtime.updateApp(
+					appDefinition.appName,
+					john.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: getProgram(approvalProgramFilename),
+						clearProgramCode: "",
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
 		);
 	});
 
 	it("Should not update application if approval and clear program not match", () => {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
-		clearProgramFileName = "clearv6.teal";
+		clearProgramFilename = "clearv6.teal";
 		expectRuntimeError(
 			() =>
 				runtime.updateApp(
+					appDefinition.appName,
 					john.address,
 					appID,
-					approvalProgramFileName,
-					clearProgramFileName,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename,
+						clearProgramFilename,
+					},
 					{},
 					{}
 				),
@@ -1020,9 +1080,8 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should throw and error when local schema entries exceeds the limit (AppDeploymentFlags)", () => {
+	it("Should throw and error when local schema entries exceeds the limit (AppDefinition)", () => {
 		const incorrectCreationFlags = {
-			sender: john.account,
 			globalBytes: 10,
 			globalInts: 10,
 			localBytes: 10,
@@ -1031,18 +1090,22 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(
-					approvalProgramFileName,
-					clearProgramFileName,
-					incorrectCreationFlags,
+					john.account,
+					{
+						appName: "app",
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename,
+						clearProgramFilename,
+						...incorrectCreationFlags,
+					},
 					{}
 				),
 			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED
 		);
 	});
 
-	it("Should throw and error when global schema entries exceeds the limit (AppDeploymentFlags)", () => {
+	it("Should throw and error when global schema entries exceeds the limit (AppDefinition)", () => {
 		const incorrectCreationFlags = {
-			sender: john.account,
 			globalBytes: 36,
 			globalInts: 32,
 			localBytes: 1,
@@ -1051,9 +1114,14 @@ describe("Stateful Smart Contracts", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(
-					approvalProgramFileName,
-					clearProgramFileName,
-					incorrectCreationFlags,
+					john.account,
+					{
+						appName: "app",
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename,
+						clearProgramFilename,
+						...incorrectCreationFlags,
+					},
 					{}
 				),
 			RUNTIME_ERRORS.GENERAL.MAX_SCHEMA_ENTRIES_EXCEEDED

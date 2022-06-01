@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { convert } = require("@algo-builder/algob");
-const { executeTx } = require("./common");
+const { tryExecuteTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -8,22 +8,26 @@ async function run(runtimeEnv, deployer) {
 	const votingAdminAccount = deployer.accountsByName.get("john");
 	const bob = deployer.accountsByName.get("bob");
 
-	await executeTx(deployer, {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: alice.addr,
-		amountMicroAlgos: 200000000,
-		payFlags: {},
-	});
-	await executeTx(deployer, {
-		type: types.TransactionType.TransferAlgo,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		toAccountAddr: bob.addr,
-		amountMicroAlgos: 200000000,
-		payFlags: {},
-	});
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: alice.addr,
+			amountMicroAlgos: 200000000,
+			payFlags: {},
+		},
+	]);
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 200000000,
+			payFlags: {},
+		},
+	]);
 
 	// Get last round.
 	const status = await deployer.algodClient.status().do();
@@ -59,18 +63,17 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction Passes because Alice is registered voter and hasn't voted yet.
 	console.log("Vote being casted by Alice");
-	await executeTx(deployer, transactions);
+	await tryExecuteTx(deployer, transactions);
 
 	// Transaction Fails because Alice can only vote once.
 	console.log("Alice tries to cast vote again");
-	await executeTx(deployer, transactions);
+	await tryExecuteTx(deployer, transactions);
 
 	// Transaction Fails because bob is not registered voter.
 	console.log("Bob tries to cast vote");
 	transactions[0].fromAccount = bob;
 	transactions[1].fromAccount = bob;
-
-	await executeTx(deployer, transactions);
+	await tryExecuteTx(deployer, transactions);
 }
 
 module.exports = { default: run };

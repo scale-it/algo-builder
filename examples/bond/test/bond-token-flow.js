@@ -32,14 +32,13 @@ describe("Bond token Tests", function () {
 	const runtime = new Runtime([master, issuerAddress]);
 	[appManager, bondTokenCreator, elon, bob, dex1, dex2] = runtime.defaultAccounts();
 
-	let flags;
+	let appStorageConfig;
 	let applicationId;
 	let issuerLsigAddress;
 	let lsig;
 
 	this.beforeAll(() => {
-		flags = {
-			sender: appManager.account,
+		appStorageConfig = {
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 8,
@@ -81,7 +80,7 @@ describe("Bond token Tests", function () {
 			creator: { ...bondTokenCreator.account, name: "bond-token-creator" },
 		}).assetIndex;
 
-		const creationFlags = Object.assign({}, flags);
+		const creationFlags = Object.assign({}, appStorageConfig);
 		const creationArgs = [
 			appManagerPk,
 			bondCreator,
@@ -93,9 +92,15 @@ describe("Bond token Tests", function () {
 
 		// create application
 		applicationId = runtime.deployApp(
-			approvalProgram,
-			clearProgram,
-			{ ...creationFlags, appArgs: creationArgs },
+			appManager.account,
+			{
+				...creationFlags,
+				appName: "bond",
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+				appArgs: creationArgs,
+			},
 			{},
 			placeholderParam
 		).appID;

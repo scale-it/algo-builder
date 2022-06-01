@@ -86,13 +86,14 @@ def approval():
 def clear():
     return Return(Int(1))
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 
 def get_approval():
-    return compileTeal(approval(), mode=Mode.Application, version=6)
+    return compileTeal(approval(), mode=Mode.Application, version=6, optimize=optimize_options)
 
 
 def get_clear():
-    return compileTeal(clear(), mode=Mode.Application, version=6)
+    return compileTeal(clear(), mode=Mode.Application, version=6, optimize=optimize_options)
 
 
 if __name__ == "__main__":

@@ -7,12 +7,18 @@ This directory (`/infrastructure`) provides an example setup for a private-net i
 
 Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
-NOTE: For Windows user, check this StackOverflow [thread](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows) on how to install `make`. As a workaround, you can always open Makefile in a text editor and copy paste the commands from required make job, directly to your terminal.
+### Windows Users
+
+For Windows user, check this [StackOverflow thread](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows) on how to install `make`. As a workaround, you can always open Makefile in a text editor and copy paste the commands from required make job, directly to your terminal.
 
 We advise Windows users to install WSL on their system for better accessibility and easier development in the future
 [Installing WSL](https://docs.microsoft.com/en-us/windows/wsl/install)
 [Setting up Node js on WSL](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl)
 [Setting up Pip,venv on WSL](https://docs.microsoft.com/en-us/windows/python/web-frameworks#install-python-pip-and-venv)
+
+Another solution is to run Linux on Windows using Virtual Box, [tutorial](https://www.instructables.com/How-to-install-Linux-on-your-Windows/).
+
+Finally follow the instructions below to download Algorand binaries and run them in Linux.
 
 ## Setting up a local node
 
@@ -145,14 +151,7 @@ By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on l
 
 ### Installation with docker
 
-**Prerequisite:** Make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages).
-
-Following make jobs are provided:
-
-1. `indexer-docker-up`: Clones the indexer repo to `~/.algorand-indexer` and runs `docker-compose up` on the [docker-compose.yml](https://github.com/algorand/indexer/blob/develop/docker-compose.yml) file. Starts two services: [`indexer`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L4)(on port `8980`) & [`indexer-db`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L17)(on port `5432`).
-2. `indexer-docker-down`: Stops and removes indexer related container and images.
-
-**NOTE:** Docker based setup runs indexer in a "[read-only](https://github.com/algorand/indexer/blob/develop/docker/run.sh#L10)" mode, without connecting to the private-net `algod` node. Read more about this mode [here](https://github.com/algorand/indexer#read-only).
+The Indexer starts automatically when you run Algorand Sandbox.
 
 ### Installation on local
 
@@ -190,3 +189,13 @@ curl "localhost:8980/v2/accounts" | json_pp
 It should list all accounts in your local-network. More examples can be found [here](https://developer.algorand.org/docs/features/indexer/?query=indexer%2520#date-time).
 
 To **remove** local indexer directory from system, use `make remove-indexer` (removes ~/.algorand-indexer-download).
+
+## Tealdbg
+
+Algob includes helpful tools to setup debugging sessions with `tealdbg`. To use these, `tealdbg` must be locally installed. It's included by default along with the Algorand Node when installed via the updater script. If the Algorand Node was installed via a linux package manger it must be installed seperately [via the devtools package](https://developer.algorand.org/docs/run-a-node/setup/install/#installing-the-devtools). You can check your installation simply by running:
+
+```
+tealdbg
+```
+
+More details on using tealdbg with algob can be found [here](https://algobuilder.dev/guide/debugging-teal.html).

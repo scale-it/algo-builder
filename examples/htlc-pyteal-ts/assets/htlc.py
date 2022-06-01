@@ -45,8 +45,9 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
+    optimize_options = OptimizeOptions(scratch_slots=True)
     print(compileTeal(htlc(
         Addr(params["bob"]),
         Addr(params["alice"]),
         params["hash_image"],
-        params["timeout"]), Mode.Signature, version = 4))
+        params["timeout"]), Mode.Signature, version = 5, optimize=optimize_options))

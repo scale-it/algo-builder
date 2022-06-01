@@ -23,7 +23,7 @@ __metadata:
     "@types/semver": ^7.3.9
     "@types/sinon": ^10.0.11
     "@types/tmp": ^0.2.3
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     chai: ^4.3.6
     chalk: ^4.1.2
     cross-env: ^7.0.3
@@ -68,7 +68,7 @@ __metadata:
     "@types/mocha": ^9.1.0
     "@types/node": ^17.0.21
     "@types/sinon": ^10.0.11
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     chai: ^4.3.6
     elliptic: ^6.5.4
     eslint: ^8.10.0
@@ -104,7 +104,7 @@ __metadata:
     "@walletconnect/client": ^1.6.6
     "@walletconnect/types": ^1.7.1
     algorand-walletconnect-qrcode-modal: ^1.7.4
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     chai: ^4.3.6
     eslint: ^8.10.0
     mocha: ^9.2.1
@@ -1269,7 +1269,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -1289,9 +1289,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"algosdk@npm:^1.14.0":
-  version: 1.14.0
-  resolution: "algosdk@npm:1.14.0"
+"algosdk@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "algosdk@npm:1.16.0"
   dependencies:
     algo-msgpack-with-bigint: ^2.1.1
     buffer: ^6.0.2
@@ -1303,7 +1303,7 @@ __metadata:
     superagent: ^6.1.0
     tweetnacl: ^1.0.3
     url-parse: ^1.5.1
-  checksum: 9c19191d2a2d7e4e3a20756603f5b321590cfe5d09bdf522614a6a6ce9872c4e533b03b6c92e35b886ae3ce15d049d046f004154dd45d1b120bde191c0da427d
+  checksum: 5a1f17fce00b448fd037dfbd8bf3b9bc7974f78c92dccd0ac962478f16b954b691c22af35291e04a72ef79a01663fa38c7a2142873bdbefd1c8bf7fac7caf97c
   languageName: node
   linkType: hard
 
@@ -2097,7 +2097,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     dotenv: ^16.0.0
     eslint: ^8.10.0
     mocha: ^9.2.1
@@ -2141,7 +2141,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2154,7 +2154,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2851,7 +2851,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2864,7 +2864,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -3617,7 +3617,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     js-sha256: ^0.9.0
     mocha: ^9.2.1
@@ -4879,7 +4879,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5315,7 +5315,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5328,7 +5328,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5341,7 +5341,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5590,7 +5590,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     dotenv: ^16.0.0
     eslint: ^8.10.0
     mocha: ^9.2.1
@@ -5874,7 +5874,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -6066,7 +6066,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -6675,7 +6675,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown

@@ -20,20 +20,6 @@ import {
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
 
-export type Operator =
-	| Len
-	| Add
-	| Sub
-	| Mul
-	| Div
-	| Arg
-	| Bytecblock
-	| Bytec
-	| Addr
-	| Int
-	| Byte
-	| Pragma;
-
 export type AppArgs = Array<string | number>;
 
 export type StackElem = bigint | Uint8Array;
@@ -43,6 +29,7 @@ export interface EncTx extends EncodedTransaction {
 	txID: string;
 	// user should push raw string TEAL code - not compiled code
 	// for approvalProgram and clearProgram
+	metaType?: types.MetaType;
 	approvalProgram?: string;
 	clearProgram?: string;
 }
@@ -137,6 +124,15 @@ export interface AppInfo extends DeployedAssetInfo {
 	gas?: number; // used in runtime
 }
 
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+}
+
 // describes interpreter's local context (state + txns)
 export interface Context {
 	state: State;
@@ -190,17 +186,14 @@ export interface Context {
 	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
-		flags: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string,
+		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	) => AppInfo;
 	optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt;
 	updateApp: (
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		appSourceCode: types.SmartContract,
 		idx: number,
 		scTmplParams?: SCParams
 	) => TxReceipt;
@@ -263,12 +256,7 @@ export interface AccountStoreI {
 	getSpendAddress: () => AccountAddress;
 	getApp: (appID: number) => SSCAttributesM | undefined;
 	getAppFromLocal: (appID: number) => AppLocalStateM | undefined;
-	addApp: (
-		appID: number,
-		params: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string
-	) => CreatedAppM;
+	addApp: (appID: number, appDefinition: types.AppDefinitionFromSource) => CreatedAppM;
 	getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined;
 	getAssetHolding: (assetId: number) => AssetHoldingM | undefined;
 	addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams;
@@ -316,7 +304,7 @@ export enum ExecutionMode {
 
 /**
  * Stateful Smart contract flags for specifying sender and schema */
-export interface AppDeploymentFlags extends AppOptionalFlags {
+export interface types extends AppOptionalFlags {
 	sender: AccountSDK;
 	localInts: number;
 	localBytes: number;
@@ -355,6 +343,17 @@ export interface AppOptionalFlags {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// you can learn more about these parameters from here.(https://developer.algorand.org/docs/reference/transactions/#application-call-transaction)
+}
+
+/**
+ * Stateful Smart contract flags for specifying sender and schema */
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
 }
 
 export interface AnyMap {

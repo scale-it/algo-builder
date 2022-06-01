@@ -6,7 +6,9 @@ import {
 	tx as webTx,
 	types as wtypes,
 } from "@algo-builder/web";
+import { SmartContract } from "@algo-builder/web/build/types";
 import algosdk, {
+	Account,
 	getApplicationAddress,
 	LogicSigAccount,
 	modelsv2,
@@ -55,19 +57,18 @@ export interface AlgoOperator {
 		scTmplParams?: SCParams
 	) => Promise<LsigInfo>;
 	deployApp: (
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
 	) => Promise<rtypes.AppInfo>;
 	updateApp: (
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
@@ -105,7 +106,17 @@ export interface AlgoOperator {
 		payFlags: wtypes.TxParams,
 		flags: rtypes.AppOptionalFlags
 	) => Promise<void>;
-	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
+	ensureCompiled: (
+		name: string,
+		source: string,
+		force?: boolean,
+		scTmplParams?: SCParams
+	) => Promise<ASCCache>;
+	compileApplication: (
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	) => Promise<wtypes.SourceCompiled>;
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
 	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
 }
@@ -367,53 +378,41 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
 	/**
 	 * Function to deploy Stateful Smart Contract
-	 * @param approvalProgram name of file in which approval program is stored
-	 * @param clearProgram name of file in which clear program is stored
-	 * @param flags         AppDeploymentFlags
+	 * @param creator Creator of application aka deployer
+	 * @param appDefinition   Application Definition
 	 * @param payFlags      TxParams
 	 * @param txWriter
 	 * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
 	 */
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		const params = await mkTxParams(this.algodClient, payFlags);
 
-		const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
-		const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-		const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
-		const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+		const appProgramBytes = await this.compileApplication(
+			appDefinition.appName,
+			appDefinition,
+			scTmplParams
+		);
 
-		const execParam: wtypes.ExecParams = {
+		const execParam: wtypes.DeployAppParam = {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
-			fromAccount: flags.sender,
-			approvalProgram: approvalProgram,
-			clearProgram: clearProgram,
-			approvalProg: approvalProg,
-			clearProg: clearProg,
+			fromAccount: creator,
+			appDefinition: {
+				...appDefinition,
+				...appProgramBytes,
+			},
 			payFlags: payFlags,
-			localInts: flags.localInts,
-			localBytes: flags.localBytes,
-			globalInts: flags.globalInts,
-			globalBytes: flags.globalBytes,
-			extraPages: flags.extraPages,
-			accounts: flags.accounts,
-			foreignApps: flags.foreignApps,
-			foreignAssets: flags.foreignAssets,
-			appArgs: flags.appArgs,
-			note: flags.note,
-			lease: flags.lease,
 		};
 
 		const txn = webTx.mkTransaction(execParam, params);
 		const txId = txn.txID().toString();
-		const signedTxn = txn.signTxn(flags.sender.sk);
+		const signedTxn = txn.signTxn(creator.sk);
 
 		const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 		const confirmedTxInfo = await this.waitForConfirmation(txId);
@@ -425,15 +424,21 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		txWriter.push(message, confirmedTxInfo);
 
 		return {
-			creator: flags.sender.addr,
+			creator: creator.addr,
 			txID: txInfo.txId,
 			confirmedRound: Number(confirmedTxInfo[confirmedRound]),
 			appID: Number(appId),
 			applicationAccount: getApplicationAddress(Number(appId)),
 			timestamp: Math.round(+new Date() / 1000),
 			deleted: false,
-			approvalFile: approvalProgram,
-			clearFile: clearProgram,
+			approvalFile:
+				appDefinition.metaType === wtypes.MetaType.FILE
+					? appDefinition.approvalProgramFilename
+					: `${appDefinition.appName} - approval.teal`,
+			clearFile:
+				appDefinition.metaType === wtypes.MetaType.FILE
+					? appDefinition.clearProgramFilename
+					: `${appDefinition.appName} - clear.teal`,
 		};
 	}
 
@@ -442,39 +447,33 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID index of the application being configured
-	 * @param newApprovalProgram New Approval Program filename
-	 * @param newClearProgram New Clear Program filename
+	 * @param newAppCode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param txWriter - transaction log writer
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		txWriter: txWriter,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		const params = await mkTxParams(this.algodClient, payFlags);
 
-		const app = await this.ensureCompiled(newApprovalProgram, false, scTmplParams);
-		const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-		const clear = await this.ensureCompiled(newClearProgram, false, scTmplParams);
-		const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+		const appProgramBytes = await this.compileApplication(appName, newAppCode, scTmplParams);
 
 		const execParam: wtypes.ExecParams = {
+			appName,
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: sender,
 			appID: appID,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
-			approvalProg: approvalProg,
-			clearProg: clearProg,
+			newAppCode: appProgramBytes,
 			payFlags: payFlags,
 			accounts: flags.accounts,
 			foreignApps: flags.foreignApps,
@@ -504,8 +503,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
 			applicationAccount: getApplicationAddress(appID),
 			timestamp: Math.round(+new Date() / 1000),
 			deleted: false,
-			approvalFile: newApprovalProgram,
-			clearFile: newClearProgram,
+			approvalFile:
+				newAppCode.metaType === wtypes.MetaType.FILE
+					? newAppCode.approvalProgramFilename
+					: `${appName} - approval.teal`,
+			clearFile:
+				newAppCode.metaType === wtypes.MetaType.FILE
+					? newAppCode.clearProgramFilename
+					: `${appName} - clear.teal`,
 		};
 	}
 
@@ -577,9 +582,54 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
 	async ensureCompiled(
 		name: string,
+		source: string,
 		force?: boolean,
 		scTmplParams?: SCParams
 	): Promise<ASCCache> {
-		return await this.compileOp.ensureCompiled(name, force, scTmplParams);
+		return await this.compileOp.ensureCompiled(name, source, force, scTmplParams);
+	}
+
+	/**
+	 * Return application in bytes source format
+	 * @param appName app name
+	 * @param source
+	 * @param scTmplParams
+	 * @returns application in bytes format
+	 */
+	async compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceCompiled> {
+		// in case of bytes source we do not need to compile it
+		if (source.metaType === wtypes.MetaType.BYTES) return source;
+
+		let approvalFile = `${appName} - approval.teal`;
+		let clearFile = `${appName} - clear.teal`;
+		let approvalSource = "";
+		let clearSource = "";
+
+		if (source.metaType === wtypes.MetaType.FILE) {
+			approvalFile = source.approvalProgramFilename;
+			clearFile = source.clearProgramFilename;
+		}
+
+		if (source.metaType === wtypes.MetaType.SOURCE_CODE) {
+			approvalSource = source.approvalProgramCode;
+			clearSource = source.clearProgramCode;
+		}
+
+		const app = await this.ensureCompiled(approvalFile, approvalSource, false, scTmplParams);
+		const clear = await this.ensureCompiled(clearFile, clearSource, false, scTmplParams);
+
+		// convert to base64 format
+		const approvalProgramBytes = new Uint8Array(Buffer.from(app.compiled, "base64"));
+		const clearProgramBytes = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+
+		return {
+			metaType: wtypes.MetaType.BYTES,
+			approvalProgramBytes,
+			clearProgramBytes,
+		};
 	}
 }

@@ -37,7 +37,7 @@ describe("Bond token failing tests", function () {
 	let randomUser = new AccountStore(initialBalance);
 
 	let runtime;
-	let flags;
+	let appStorageConfig;
 	let applicationId;
 	let issuerLsigAddress;
 	let lsig;
@@ -56,8 +56,7 @@ describe("Bond token failing tests", function () {
 			randomUser,
 		]);
 
-		flags = {
-			sender: appManager.account,
+		appStorageConfig = {
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 8,
@@ -89,7 +88,7 @@ describe("Bond token failing tests", function () {
 			creator: { ...bondTokenCreator.account, name: "bond-token-creator" },
 		}).assetIndex;
 
-		const creationFlags = Object.assign({}, flags);
+		const appDefinition = Object.assign({}, appStorageConfig);
 		const creationArgs = [
 			appManagerPk,
 			bondCreator,
@@ -101,9 +100,15 @@ describe("Bond token failing tests", function () {
 
 		// deploy application
 		applicationId = runtime.deployApp(
-			approvalProgram,
-			clearProgram,
-			{ ...creationFlags, appArgs: creationArgs },
+			appManager.account,
+			{
+				...appDefinition,
+				appName: "bond",
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: approvalProgram,
+				clearProgramCode: clearProgram,
+				appArgs: creationArgs,
+			},
 			{},
 			placeholderParam
 		).appID;

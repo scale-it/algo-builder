@@ -46,11 +46,11 @@ const placeholderParam = {
 	TMPL_MATURITY_DATE: Math.round(new Date().getTime() / 1000) + 240,
 };
 
-const approvalProgramFileName = "bond-dapp-stateful.py";
-const clearProgramFileName = "bond-dapp-clear.py";
+const approvalProgramFilename = "bond-dapp-stateful.py";
+const clearProgramFilename = "bond-dapp-clear.py";
 
-const approvalProgram = getProgram(approvalProgramFileName, placeholderParam);
-const clearProgram = getProgram(clearProgramFileName);
+const approvalProgram = getProgram(approvalProgramFilename, placeholderParam);
+const clearProgram = getProgram(clearProgramFilename);
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;

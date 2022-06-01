@@ -1,5 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { decodeAddress, modelsv2 } from "algosdk";
+import algosdk, { Account as AccountSDK, decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
@@ -21,7 +21,6 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	AppOptionalFlags,
 	ASADeploymentFlags,
@@ -222,6 +221,19 @@ export class Runtime {
 					last: txn.lv,
 					round: this.round,
 				});
+			}
+		}
+	}
+
+	/**
+	 * Ensure no duplicate transaction in group txn
+	 * @param gtxns group transaction
+	 */
+	assertNoDuplicateTransaction(gtxns: EncTx[]): void {
+		for (const txn of gtxns) {
+			const isDuplicate = gtxns.filter((anotherTxn) => anotherTxn.txID === txn.txID).length > 1;
+			if (isDuplicate) {
+				throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.TRANSACTION_ALREADY_IN_LEDGER);
 			}
 		}
 	}
@@ -448,7 +460,7 @@ export class Runtime {
 	/**
 	 * Create Asset in Runtime using asa.yaml
 	 * @deprecated `deployASA` should be used instead
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	addAsset(asa: string, flags: ASADeploymentFlags): ASAInfo {
@@ -457,7 +469,7 @@ export class Runtime {
 
 	/**
 	 * Deploy Asset in Runtime using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASA(asa: string, flags: ASADeploymentFlags): ASAInfo {
@@ -480,7 +492,7 @@ export class Runtime {
 
 	/**
 	 * Deploy Asset in Runtime without using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
@@ -493,8 +505,8 @@ export class Runtime {
 
 	/**
 	 * Opt-In to all accounts given in asa.yaml to a specific asset.
-	 * @param name Asset name
 	 * @param assetID Asset Index
+	 * @param accounts list account opt to asa
 	 */
 	optInToASAMultiple(assetID: number, accounts?: string[]): void {
 		if (accounts === undefined) {
@@ -539,23 +551,27 @@ export class Runtime {
 	}
 
 	// creates new application transaction object and update context
-	addCtxAppCreateTxn(flags: AppDeploymentFlags, payFlags: types.TxParams): void {
+	addCtxAppCreateTxn(
+		creator: AccountSDK,
+		appDef: types.AppDefinition,
+		payFlags: types.TxParams
+	): void {
 		const txn = algosdk.makeApplicationCreateTxn(
-			flags.sender.addr,
+			creator.addr,
 			mockSuggestedParams(payFlags, this.round),
 			algosdk.OnApplicationComplete.NoOpOC,
 			new Uint8Array(32), // mock approval program
 			new Uint8Array(32), // mock clear progam
-			flags.localInts,
-			flags.localBytes,
-			flags.globalInts,
-			flags.globalBytes,
-			parsing.parseAppArgs(flags.appArgs),
-			flags.accounts,
-			flags.foreignApps,
-			flags.foreignAssets,
-			flags.note,
-			flags.lease,
+			appDef.localInts,
+			appDef.localBytes,
+			appDef.globalInts,
+			appDef.globalBytes,
+			parsing.parseAppArgs(appDef.appArgs),
+			appDef.accounts,
+			appDef.foreignApps,
+			appDef.foreignAssets,
+			appDef.note,
+			appDef.lease,
 			payFlags.rekeyTo
 		);
 
@@ -578,43 +594,32 @@ export class Runtime {
 	addApp(
 		approvalProgram: string,
 		clearProgram: string,
-		flags: AppDeploymentFlags,
+		flags: types.AppDeploymentFlags,
 		payFlags: types.TxParams,
 		debugStack?: number
 	): AppInfo {
-		return this.deployApp(approvalProgram, clearProgram, flags, payFlags, {}, debugStack);
+		throw new Error("We remove this function now");
 	}
 
 	/**
 	 * deploy a new application and returns application id
-	 * @param approvalProgram application approval program (TEAL code or program filename)
-	 * @param clearProgram application clear program (TEAL code or program filename)
-	 * @param flags SSCDeployment flags
 	 * @param payFlags Transaction parameters
+	 * @param appDefinition app definition
 	 * @param scTmplParams Smart Contract template parameters
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: AppDeploymentFlags,
+		sender: AccountSDK,
+		appDefinition: types.AppDefinition,
 		payFlags: types.TxParams,
 		scTmplParams?: SCParams,
 		debugStack?: number
 	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
+		this.addCtxAppCreateTxn(sender, appDefinition, payFlags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
-
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0,
-			scTmplParams
-		);
+		const txReceipt = this.ctx.deployApp(sender.addr, appDefinition, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;
 	}
@@ -698,20 +703,20 @@ export class Runtime {
 
 	/**
 	 * Update application
+	 * @param appName application Name. Note in runtime application name just placeholder params
 	 * @param senderAddr sender address
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param newAppCode new application source code
 	 * @param payFlags Transaction parameters
 	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	updateApp(
+		appName: string,
 		senderAddr: string,
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		newAppCode: types.SmartContract,
 		payFlags: types.TxParams,
 		flags: AppOptionalFlags,
 		scTmplParams?: SCParams,
@@ -720,7 +725,7 @@ export class Runtime {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
-		const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
+		const txReceipt = this.ctx.updateApp(appID, newAppCode, 0, scTmplParams);
 
 		// If successful, Update programs and state
 		this.store = this.ctx.state;
@@ -883,27 +888,42 @@ export class Runtime {
 			tx = sdkTxns[0];
 			gtxs = sdkTxns;
 		} else {
-			for (const txnParamerter of txnParams) {
-				const txn = txnParamerter as types.ExecParams;
+			const dummySource: types.SourceCompiled = {
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+			};
+
+			const txns = txnParams.map((txnParamerter) => {
+				const txn = cloneDeep(txnParamerter as types.ExecParams);
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
 						if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
 						break;
 					}
 					case types.TransactionType.DeployApp: {
-						txn.approvalProg = new Uint8Array(32); // mock approval program
-						txn.clearProg = new Uint8Array(32); // mock clear program
+						txn.appDefinition = {
+							...txn.appDefinition,
+							...dummySource,
+						};
+						break;
+					}
+					case types.TransactionType.UpdateApp: {
+						txn.newAppCode = dummySource;
 						break;
 					}
 				}
-			}
+				return txn;
+			});
+
 			// get current txn and txn group (as encoded obj)
-			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
+			[tx, gtxs] = this.createTxnContext(txns as types.ExecParams[]);
 		}
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
-
+		// checks if the transactions are not duplicated
+		this.assertNoDuplicateTransaction(gtxs);
 		// initialize context before each execution
 		// Prepare shared space at each execution of transaction/s.
 		// state is a deep copy of store

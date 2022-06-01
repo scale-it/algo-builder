@@ -558,9 +558,8 @@ export interface Deployer {
 	 * the checkpoint "key", and app information will be stored agaisnt this name
 	 */
 	deployApp: (
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scTmplParams?: SCParams,
 		appName?: string
@@ -580,14 +579,13 @@ export interface Deployer {
 	 * the checkpoint "key", and app information will be stored agaisnt this name
 	 */
 	updateApp: (
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	) => Promise<rtypes.AppInfo>;
 
 	/**
@@ -660,10 +658,6 @@ export interface Deployer {
 	loadMultiSig: (name: string) => Promise<LogicSig>;
 
 	/**
-	 * Queries a stateful smart contract info from checkpoint. */
-	getAppByFile: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined;
-
-	/**
 	 * Queries a stateful smart contract info from checkpoint name
 	 * passed by user during deployment */
 	getApp: (appName: string) => rtypes.AppInfo;
@@ -697,6 +691,12 @@ export interface Deployer {
 	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
 	 */
 	compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>;
+
+	compileApplication: (
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	) => Promise<wtypes.SourceCompiled>;
 
 	/**
 	 * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.

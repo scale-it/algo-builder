@@ -4,7 +4,7 @@ import { assert } from "chai";
 
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags } from "../../../src/types";
+import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -23,7 +23,7 @@ describe("Rekey transaction and inner transaction ", function () {
 	let appAccount: AccountStoreI; // application account
 
 	let runtime: Runtime;
-	let appDeployFlag: AppDeploymentFlags;
+	let storageConfig: types.StorageConfig;
 	let appID: number;
 	let appCallParams: types.ExecParams;
 
@@ -41,8 +41,8 @@ describe("Rekey transaction and inner transaction ", function () {
 		bob = new AccountStore(minBalance);
 		runtime = new Runtime([master, alice, bob]);
 
-		appDeployFlag = {
-			sender: master.account,
+		storageConfig = {
+			appName: "app",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -53,12 +53,16 @@ describe("Rekey transaction and inner transaction ", function () {
 	describe("Apply Inner transaction when rekey application to account", function () {
 		this.beforeEach(() => {
 			// deploy application
-			const approvalProgramFileName = "approval-rekey.teal";
-			const clearProgramFileName = "clear-rekey.teal";
+			const approvalProgramFilename = "approval-rekey.teal";
+			const clearProgramFilename = "clear-rekey.teal";
 			appID = runtime.deployApp(
-				approvalProgramFileName,
-				clearProgramFileName,
-				appDeployFlag,
+				master.account,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename,
+					clearProgramFilename,
+					...storageConfig,
+				},
 				{}
 			).appID;
 
@@ -157,12 +161,16 @@ describe("Rekey transaction and inner transaction ", function () {
 
 		this.beforeEach(() => {
 			// deploy app
-			const approvalProgramFileName = "rekey-approval-payment.py";
-			const clearProgramFileName = "clear.teal";
+			const approvalProgramFilename = "rekey-approval-payment.py";
+			const clearProgramFilename = "clear.teal";
 			appID = runtime.deployApp(
-				approvalProgramFileName,
-				clearProgramFileName,
-				appDeployFlag,
+				master.account,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename,
+					clearProgramFilename,
+					...storageConfig,
+				},
 				{}
 			).appID;
 			// query application account

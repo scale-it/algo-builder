@@ -14,25 +14,25 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 
-	await deployer.executeTx([
-		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" }),
-	]);
+	await deployer.executeTx(
+		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" })
+	);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const appInfo = await deployer.deployApp(
-		"5-contract-asa-stateful.py", // approval program
-		"5-clear.py", // clear program
+		alice,
 		{
-			sender: alice,
+			appName: "StatefulASA_App",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "5-contract-asa-stateful.py", // approval program
+			clearProgramFilename: "5-clear.py", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,
 			globalBytes: 1,
 		},
-		{},
-		{},
-		"StatefulASA_App"
+		{}
 	);
 
 	console.log(appInfo);
@@ -44,9 +44,9 @@ async function run(runtimeEnv, deployer) {
 	const statelessAccount = deployer.getLsig("StateLessASALsig");
 	console.log("stateless Account Address:", statelessAccount.address());
 
-	await deployer.executeTx([
-		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" }),
-	]);
+	await deployer.executeTx(
+		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" })
+	);
 
 	const txGroup = [
 		// Stateful call

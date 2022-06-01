@@ -2,7 +2,7 @@
  * Description:
  * This file creates a new NFT and transfers 1 NFT from A to B
  */
-const { executeTx, printGlobalNFT, printLocalNFT } = require("./common");
+const { printGlobalNFT, printLocalNFT } = require("./common");
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
@@ -10,7 +10,7 @@ async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const john = deployer.accountsByName.get("john");
 
-	const appInfo = await deployer.getAppByFile("nft_approval.py", "nft_clear_state.py");
+	const appInfo = await deployer.getApp("nft");
 	const appID = appInfo.appID;
 	console.log(appInfo);
 
@@ -21,15 +21,17 @@ async function run(runtimeEnv, deployer) {
 	// arguments: "create", nft_data_ref, data_hash
 	let appArgs = ["create", nftRef, "1234"].map(convert.stringToBytes);
 
-	let txnParam = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		appID: appID,
-		payFlags: {},
-		appArgs,
-	};
-	await executeTx(deployer, txnParam); // creates new nft (with id = 1)
+	let txnParam = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			appID: appID,
+			payFlags: {},
+			appArgs,
+		},
+	];
+	await deployer.executeTx(txnParam); // creates new nft (with id = 1)
 
 	// print Global Count after creation
 	await printGlobalNFT(deployer, masterAccount.addr, appID);
@@ -47,16 +49,18 @@ async function run(runtimeEnv, deployer) {
 
 	// transfer nft from master to john
 	// account_A = master, account_B = john
-	txnParam = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: masterAccount,
-		appID: appID,
-		payFlags: {},
-		accounts: [masterAccount.addr, john.addr],
-		appArgs,
-	};
-	await executeTx(deployer, txnParam);
+	txnParam = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: masterAccount,
+			appID: appID,
+			payFlags: {},
+			accounts: [masterAccount.addr, john.addr],
+			appArgs,
+		},
+	];
+	await deployer.executeTx(txnParam);
 
 	await printLocalNFT(deployer, masterAccount.addr, appID);
 	await printLocalNFT(deployer, john.addr, appID);

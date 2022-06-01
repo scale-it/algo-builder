@@ -6,6 +6,7 @@ import algosdk, { Transaction } from "algosdk";
 import { WalletTransaction } from "../algo-signer-types";
 import {
 	ExecParams,
+	HttpNetworkConfig,
 	isSDKTransactionAndSign,
 	SessionConnectResponse,
 	SessionDisconnectResponse,
@@ -24,8 +25,8 @@ export class WallectConnectSession {
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
 
-	constructor(chain: string, connector?: WalletConnect) {
-		this.algodClient = algoexplorerAlgod(chain);
+	constructor(walletURL: HttpNetworkConfig, connector?: WalletConnect) {
+		this.algodClient = algoexplorerAlgod(walletURL);
 		if (connector) {
 			this.connector = connector;
 		} else {

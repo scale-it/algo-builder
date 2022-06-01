@@ -55,8 +55,11 @@ class Context {
 	}
 
 	deployController(sender, controllerProgram, clearProgram) {
-		const sscFlags = {
-			sender: sender.account,
+		const appDef = {
+			appName: "controler",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: controllerProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 2,
@@ -64,9 +67,8 @@ class Context {
 			foreignAssets: [this.assetIndex],
 		};
 		this.controllerappID = this.runtime.deployApp(
-			controllerProgram,
-			clearProgram,
-			sscFlags,
+			sender.account,
+			appDef,
 			{},
 			{ TOKEN_ID: this.assetIndex }
 		).appID;
@@ -101,8 +103,11 @@ class Context {
 	}
 
 	deployPermissions(permManager, permissionsProgram, clearProgram) {
-		const sscFlags = {
-			sender: permManager.account,
+		const appDef = {
+			appName: "Permissions",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: permissionsProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 2,
@@ -110,9 +115,8 @@ class Context {
 			appArgs: [`int:${this.controllerappID}`],
 		};
 		this.permissionsappID = this.runtime.deployApp(
-			permissionsProgram,
-			clearProgram,
-			sscFlags,
+			permManager.account,
+			appDef,
 			{},
 			{ PERM_MANAGER: permManager.address }
 		).appID;

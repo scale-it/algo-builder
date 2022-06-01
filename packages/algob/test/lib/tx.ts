@@ -247,14 +247,17 @@ describe("Delete ASA and SSC", () => {
 	});
 
 	it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
-		const flags: types.AppDeploymentFlags = {
-			sender: bobAcc,
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			appName: "app",
+			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
+			approvalProgramFilename: "approval.teal",
+			clearProgramFilename: "clear.teal",
 		};
-		const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
+		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		const execParams: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
@@ -265,7 +268,7 @@ describe("Delete ASA and SSC", () => {
 
 		await deployer.executeTx([execParams]);
 
-		const res = deployer.getAppByFile("approval.teal", "clear.teal");
+		const res = deployer.getApp("app");
 		assert.isDefined(res);
 		if (res) assert.equal(res.deleted, true);
 	});
@@ -310,14 +313,17 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParams]);
 
 		// deploy and delete app
-		const flags: types.AppDeploymentFlags = {
-			sender: bobAcc,
+		const appDefinition: wtypes.AppDefinitionFromFile = {
+			appName: "app",
+			metaType: wtypes.MetaType.FILE,
 			localBytes: 1,
 			localInts: 1,
 			globalBytes: 1,
 			globalInts: 1,
+			approvalProgramFilename: "approval.teal",
+			clearProgramFilename: "clear.teal",
 		};
-		const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
+		const info = await deployer.deployApp(bobAcc, appDefinition, {});
 		appID = info.appID;
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
@@ -373,13 +379,35 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 	it("should throw error with update app function, if app exist and deleted", async () => {
 		await expectBuilderErrorAsync(
 			async () =>
-				await deployer.updateApp(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
+				await deployer.updateApp(
+					"app",
+					bobAcc,
+					{},
+					appID,
+					{
+						metaType: wtypes.MetaType.FILE,
+						approvalProgramFilename: "approval.teal",
+						clearProgramFilename: "clear.teal",
+					},
+					{}
+				),
 			ERRORS.GENERAL.APP_DELETED
 		);
 	});
 
 	it("should pass with update app functions, if app doesn't exist in checkpoint", async () => {
-		await deployer.updateApp(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
+		await deployer.updateApp(
+			"app",
+			bobAcc,
+			{},
+			123,
+			{
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
+			{}
+		);
 	});
 
 	it("should fail if user tries to opt-in through execute tx", async () => {
@@ -507,9 +535,13 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			payFlags: {},
+			appName: "my-app",
 			appID: appID,
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
 		};
 		await expectBuilderErrorAsync(
 			async () => await deployer.executeTx([execParam]),
@@ -644,21 +676,22 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				appName: "app",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		await deployer.executeTx([execParams]);
 
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
 	it("should deploy application in deploy mode and save info by name", async () => {
@@ -667,25 +700,22 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+				appName: "dao-app",
+			},
 			payFlags: {},
-			appName: "dao-app",
 		};
 		await deployer.executeTx([execParams]);
 
 		// able to retrieve info by "appName"
 		assert.isDefined(deployer.getApp("dao-app"));
-
-		// do note that traditional way doesn't work if appName is passed
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
 	});
 
 	it("should delete application in run mode", async () => {
@@ -694,12 +724,16 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				appName: "app",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
@@ -715,7 +749,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
 		await deployer.executeTx([execParams]);
 
-		const res = deployer.getAppByFile("approval.teal", "clear.teal");
+		const res = deployer.getApp("app");
 		assert.isDefined(res);
 		assert.equal(res?.deleted, false);
 	});
@@ -744,38 +778,40 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				appName: "app",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
 
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 
 		execParams = {
+			appName: "app",
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appID: appInfo["application-index"],
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
 			payFlags: {},
 		};
 
 		await deployer.executeTx([execParams]);
 		// should not be stored in checkpoint if in run mode
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
 	it("deploy in deploy mode, update in run mode", async () => {
@@ -784,32 +820,40 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				appName: "app",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		await deployer.executeTx([execParams]);
-		const appInfo = deployer.getAppByFile("approval.teal", "clear.teal");
+		const appInfo = deployer.getApp("app");
 		assert.isDefined(appInfo);
 
 		deployer = new DeployerRunMode(deployerCfg);
 		if (appInfo) {
 			execParams = {
+				appName: "app",
 				type: wtypes.TransactionType.UpdateApp,
 				sign: wtypes.SignType.SecretKey,
 				fromAccount: bobAcc,
 				appID: appInfo.appID,
-				newApprovalProgram: "approval.teal",
-				newClearProgram: "clear.teal",
+				newAppCode: {
+					metaType: wtypes.MetaType.FILE,
+					approvalProgramFilename: "approval.teal",
+					clearProgramFilename: "clear.teal",
+				},
 				payFlags: {},
 			};
 
 			await deployer.executeTx([execParams]);
-			assert.deepEqual(appInfo, deployer.getAppByFile("approval.teal", "clear.teal"));
+			assert.deepEqual(appInfo, deployer.getApp("app"));
 		}
 	});
 
@@ -818,19 +862,20 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			approvalProgram: "approval.teal",
-			clearProgram: "clear.teal",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
+			appDefinition: {
+				appName: "app",
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
 			payFlags: {},
 		};
 		const [appInfo] = await deployer.executeTx([execParams]);
-		expectBuilderError(
-			() => deployer.getAppByFile("approval.teal", "clear.teal"),
-			ERRORS.GENERAL.APP_NOT_FOUND_IN_CP
-		);
+		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 
 		deployer = new DeployerDeployMode(deployerCfg);
 		execParams = {
@@ -838,14 +883,18 @@ describe("Update transaction test in run mode", () => {
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
 			appID: appInfo["application-index"],
-			newApprovalProgram: "approval.teal",
-			newClearProgram: "clear.teal",
+			newAppCode: {
+				metaType: wtypes.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+			},
+			appName: "app",
 			payFlags: {},
 		};
 
 		await deployer.executeTx([execParams]);
 		// checkpoint is stored for the update
-		assert.isDefined(deployer.getAppByFile("approval.teal", "clear.teal"));
+		assert.isDefined(deployer.getApp("app"));
 	});
 });
 

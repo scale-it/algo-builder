@@ -4,7 +4,6 @@ import { assert } from "chai";
 
 import { AccountStore, getProgram, Runtime } from "../../src/index";
 import { LogicSigAccount } from "../../src/logicsig";
-import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
 describe("TEALv6: Global Opcode Budget", function () {
@@ -12,7 +11,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 	const john = new AccountStore(10e6);
 
 	let runtime: Runtime;
-	let flags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinition;
 	let appID: number;
 	let dummyAppID: number;
 	let txnParam: types.ExecParams;
@@ -20,17 +19,24 @@ describe("TEALv6: Global Opcode Budget", function () {
 	this.beforeAll(async function () {
 		runtime = new Runtime([john]); // setup test
 
-		flags = {
-			sender: john.account,
+		appDefinition = {
+			metaType: types.MetaType.FILE,
+			appName: "app",
+			approvalProgramFilename: "app.teal",
+			clearProgramFilename: "clear.teal",
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
 			localInts: 1,
 		};
 
-		appID = runtime.deployApp("app.teal", "clear.teal", flags, {}).appID;
+		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
-		dummyAppID = runtime.deployApp("dummy-app.teal", "clear.teal", flags, {}).appID;
+		dummyAppID = runtime.deployApp(
+			john.account,
+			{ ...appDefinition, approvalProgramFilename: "dummy-app.teal" },
+			{}
+		).appID;
 
 		lsig = runtime.createLsigAccount(getProgram("lsig.teal"), []);
 
@@ -96,6 +102,10 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 			const buffTx = {
 				...txnParam,
+				payFlags: {
+					totalFee: 1000,
+					note: "salt",
+				},
 			};
 			const receipts = runtime.executeTx([txnParam, buffTx]);
 			const logs = receipts[0].logs ?? [];

@@ -2,7 +2,14 @@ import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { AccountAddress, ExecParams, SignType, TransactionType, TxParams } from "../types";
+import {
+	AccountAddress,
+	ExecParams,
+	MetaType,
+	SignType,
+	TransactionType,
+	TxParams,
+} from "../types";
 import { parseAppArgs } from "./parsing";
 
 export function encodeNote(
@@ -234,43 +241,52 @@ export function mkTransaction(
 		}
 		case TransactionType.DeployApp: {
 			const onComplete = algosdk.OnApplicationComplete.NoOpOC;
-			const tx = algosdk.makeApplicationCreateTxn(
-				fromAccountAddr,
-				suggestedParams,
-				onComplete,
-				execParams.approvalProg ? execParams.approvalProg : new Uint8Array(8).fill(0),
-				execParams.clearProg ? execParams.clearProg : new Uint8Array(8).fill(0),
-				execParams.localInts,
-				execParams.localBytes,
-				execParams.globalInts,
-				execParams.globalBytes,
-				parseAppArgs(execParams.appArgs),
-				execParams.accounts,
-				execParams.foreignApps,
-				execParams.foreignAssets,
-				note,
-				execParams.lease,
-				execParams.payFlags.rekeyTo,
-				execParams.extraPages
-			);
-			return updateTxFee(execParams.payFlags, tx);
+			const appDef = execParams.appDefinition;
+			if (appDef.metaType === MetaType.BYTES) {
+				const tx = algosdk.makeApplicationCreateTxn(
+					fromAccountAddr,
+					suggestedParams,
+					onComplete,
+					appDef.approvalProgramBytes,
+					appDef.clearProgramBytes,
+					appDef.localInts,
+					appDef.localBytes,
+					appDef.globalInts,
+					appDef.globalBytes,
+					parseAppArgs(appDef.appArgs),
+					appDef.accounts,
+					appDef.foreignApps,
+					appDef.foreignAssets,
+					note,
+					appDef.lease,
+					execParams.payFlags.rekeyTo,
+					appDef.extraPages
+				);
+				return updateTxFee(execParams.payFlags, tx);
+			} else {
+				throw new Error("Not suppport"); // TODO: better message error
+			}
 		}
 		case TransactionType.UpdateApp: {
-			const tx = algosdk.makeApplicationUpdateTxn(
-				fromAccountAddr,
-				suggestedParams,
-				execParams.appID,
-				execParams.approvalProg ? execParams.approvalProg : new Uint8Array(8).fill(0),
-				execParams.clearProg ? execParams.clearProg : new Uint8Array(8).fill(0),
-				parseAppArgs(execParams.appArgs),
-				execParams.accounts,
-				execParams.foreignApps,
-				execParams.foreignAssets,
-				note,
-				execParams.lease,
-				execParams.payFlags.rekeyTo
-			);
-			return updateTxFee(execParams.payFlags, tx);
+			if (execParams.newAppCode.metaType === MetaType.BYTES) {
+				const tx = algosdk.makeApplicationUpdateTxn(
+					fromAccountAddr,
+					suggestedParams,
+					execParams.appID,
+					execParams.newAppCode.approvalProgramBytes,
+					execParams.newAppCode.clearProgramBytes,
+					parseAppArgs(execParams.appArgs),
+					execParams.accounts,
+					execParams.foreignApps,
+					execParams.foreignAssets,
+					note,
+					execParams.lease,
+					execParams.payFlags.rekeyTo
+				);
+				return updateTxFee(execParams.payFlags, tx);
+			} else {
+				throw new Error("Not support");
+			}
 		}
 		case TransactionType.OptInToApp: {
 			const tx = algosdk.makeApplicationOptInTxn(

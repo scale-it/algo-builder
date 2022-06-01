@@ -1,10 +1,9 @@
 import { types } from "@algo-builder/web";
-import algosdk from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
-import { AccountStoreI, AppDeploymentFlags, AppInfo } from "../../../src/types";
+import { AccountStoreI, AppInfo } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -17,7 +16,7 @@ describe("C2C call", function () {
 
 	let appCallArgs: string[];
 
-	let flags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinitionFromFile;
 
 	function fundToApp(funder: AccountStoreI, appInfo: AppInfo) {
 		const fundTx: types.AlgoTransferParam = {
@@ -36,18 +35,24 @@ describe("C2C call", function () {
 	this.beforeEach(() => {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
-		flags = {
-			sender: alice.account,
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "c2c-call.py",
+			clearProgramFilename: "clear.teal",
 			localBytes: 1,
 			globalBytes: 1,
 			localInts: 1,
 			globalInts: 1,
 		};
 		// deploy first app
-		// eslint-disable-next-line sonarjs/no-duplicate-string
-		firstApp = runtime.deployApp("c2c-call.py", "clear.teal", flags, {});
+		firstApp = runtime.deployApp(alice.account, appDefinition, {});
 		// deploy second app
-		secondApp = runtime.deployApp("c2c-echo.py", "clear.teal", flags, {});
+		secondApp = runtime.deployApp(
+			alice.account,
+			{ ...appDefinition, approvalProgramFilename: "c2c-echo.py" },
+			{}
+		);
 
 		// fund to application
 		fundToApp(alice, firstApp);
@@ -149,7 +154,15 @@ describe("C2C call", function () {
 	describe("c2c call unhappy case", function () {
 		let thirdApp: AppInfo;
 		this.beforeEach(() => {
-			thirdApp = runtime.deployApp("dummy-approval-v5.teal", "dummy-clear-v5.teal", flags, {});
+			thirdApp = runtime.deployApp(
+				alice.account,
+				{
+					...appDefinition,
+					approvalProgramFilename: "dummy-approval-v5.teal",
+					clearProgramFilename: "dummy-clear-v5.teal",
+				},
+				{}
+			);
 			fundToApp(alice, thirdApp);
 		});
 
@@ -200,11 +213,18 @@ describe("C2C call", function () {
 			this.beforeEach(() => {
 				apps = [];
 				bob = runtime.defaultAccounts()[1];
-				flags.sender = bob.account;
-				baseApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+				baseApp = runtime.deployApp(
+					bob.account,
+					{ ...appDefinition, approvalProgramFilename: "seq-call.py" },
+					{}
+				);
 				fundToApp(bob, baseApp);
 				for (let id = 0; id < totalApp; ++id) {
-					const curApp = runtime.deployApp("seq-call.py", "clear.teal", flags, {});
+					const curApp = runtime.deployApp(
+						bob.account,
+						{ ...appDefinition, approvalProgramFilename: "seq-call.py" },
+						{}
+					);
 					fundToApp(bob, curApp);
 					apps.push(curApp);
 				}
@@ -252,7 +272,11 @@ describe("C2C call", function () {
 	describe("Only support application call for now", function () {
 		let execParams: types.ExecParams;
 		this.beforeEach(() => {
-			const appInfo = runtime.deployApp("inner-tx-deploy.py", "clear.teal", flags, {});
+			const appInfo = runtime.deployApp(
+				alice.account,
+				{ ...appDefinition, approvalProgramFilename: "inner-tx-deploy.py" },
+				{}
+			);
 
 			execParams = {
 				type: types.TransactionType.CallApp,
