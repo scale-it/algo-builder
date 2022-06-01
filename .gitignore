@@ -118,3 +118,6 @@ packages/builder/project/
 
 # DS_Store
 .DS_Store
+
+# Emacs tool
+.dir-locals.el
