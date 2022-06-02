@@ -13,6 +13,7 @@ import { ec as EC } from "elliptic";
 import { describe } from "mocha";
 
 import { AccountStore } from "../../../src/account";
+import { Ctx } from "../../../src/ctx";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
@@ -2469,6 +2470,20 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.nonpart), stack.pop());
+			});
+		});
+
+		describe("Txn: teal v6", function () {
+			it("should return empty log if no log emit before", () => {
+				const op = new Txn(["LastLog"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array(0));
+			});
+			it("should return last log", () => {
+				interpreter.runtime.ctx.lastLog = new Uint8Array([42, 32]);
+				const op = new Txn(["LastLog"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
 			});
 		});
 

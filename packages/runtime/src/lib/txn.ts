@@ -57,6 +57,13 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
+	// case Uint8Array but empty, some magic here
+	// I also don't how it work :|
+	if (ArrayBuffer.isView(a)) {
+		return new Uint8Array(a.buffer);
+	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
@@ -175,6 +182,7 @@ export function txnSpecByField(
 			break;
 		}
 		case "LastLog": {
+			result = interpreter.runtime.ctx.lastLog;
 			break;
 		}
 
