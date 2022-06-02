@@ -56,7 +56,6 @@ export class Ctx implements Context {
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
 	budget: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -80,7 +79,6 @@ export class Ctx implements Context {
 		this.isInnerTx = false;
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
-		this.createdAssetID = 0;
 		this.remainingFee = 0;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
@@ -274,12 +272,6 @@ export class Ctx implements Context {
 			deleted: false,
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
-
-		// TODO: this logic is wrong
-		// Details: https://www.pivotaltracker.com/n/projects/2452320/stories/182332033
-		if (this.isInnerTx) {
-			this.createdAssetID = this.state.assetCounter;
-		}
 
 		// set & return transaction receipt
 		this.state.txReceipts.set(this.tx.txID, asaInfo);
