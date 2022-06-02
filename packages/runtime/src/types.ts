@@ -142,6 +142,7 @@ export interface Context {
 	gtxs: EncTx[]; // all transactions
 	args?: Uint8Array[];
 	debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+	lastLog: Uint8Array;
 	budget: number;
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props

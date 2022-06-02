@@ -4554,6 +4554,9 @@ export class Log extends Op {
 		const logByte = this.assertBytes(stack.pop(), this.line);
 		const txID = this.interpreter.runtime.ctx.tx.txID;
 		const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
+
+		// update last log
+		this.interpreter.runtime.ctx.lastLog = logByte;
 		// for Log opcode we assume receipt always exists
 		// TODO: recheck when log opcode failed
 		if (txReceipt) {

@@ -174,6 +174,10 @@ export function txnSpecByField(
 			else result = 0n;
 			break;
 		}
+		case "LastLog": {
+			break;
+		}
+
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']

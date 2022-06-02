@@ -56,6 +56,7 @@ export class Ctx implements Context {
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
 	budget: number;
+	lastLog: Uint8Array;
 	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	constructor(
 		state: State,
@@ -71,6 +72,7 @@ export class Ctx implements Context {
 		this.args = args;
 		this.runtime = runtime;
 		this.debugStack = debugStack;
+		this.lastLog = new Uint8Array(0);
 		// Mapping from the tx index number to the scratch space.
 		// Scratch space is a list of elements.
 		this.sharedScratchSpace = new Map<number, StackElem[]>();
