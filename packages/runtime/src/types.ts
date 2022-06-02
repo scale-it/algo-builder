@@ -150,7 +150,6 @@ export interface Context {
 	innerTxAppIDCallStack: number[];
 	// remaining fee from pool
 	remainingFee: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;
 	getApp: (appID: number, line?: number) => SSCAttributesM;
