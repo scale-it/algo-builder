@@ -19,7 +19,8 @@ RETURNS TRIGGER
 AS $$
 DECLARE
     asset_id bigint;
-	log_sigma text := 'U2lnbWFEQU8gY3JlYXRlZA==';
+	log_sigma text := 'U2lnbWFEQU8gY3JlYXRlZA=='; -- Byte code of 'SigmaDAO created'
+	gov_asset text : ='Z292X3Rva2VuX2lk'; -- Byte code of 'gov_token_id'
 	i record;
 BEGIN
 	/* 	Check to avoid duplicate entries in table. id attribute increments despite pass/fail insertion  */
@@ -32,9 +33,8 @@ BEGIN
 		/*	sigma dao contrac check. Here 'dt' and 'lg' is a json object present
 			in each record of txn column */
 		IF i.txn::jsonb -> 'dt'->'lg' ?& ARRAY[log_sigma] THEN
-			-- TODO: Fetch asset id from global state not from latest entry in asset table
-			-- store token id from db to above decalred variable asset_id
-			SELECT index INTO asset_id FROM public.asset ORDER BY index DESC LIMIT 1;
+			-- Iterate json object and get gov asset from it
+			SELECT i.txn::jsonb -> 'dt'->'gd'->gov_asset->'ui' INTO asset_id;
 			-- insert values in sigma_daos table
 			INSERT INTO public.sigma_daos (
 			app_id, app_params, asset_id)
