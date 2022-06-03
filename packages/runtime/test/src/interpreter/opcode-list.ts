@@ -13,7 +13,6 @@ import { ec as EC } from "elliptic";
 import { describe } from "mocha";
 
 import { AccountStore } from "../../../src/account";
-import { Ctx } from "../../../src/ctx";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
