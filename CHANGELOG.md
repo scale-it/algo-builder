@@ -17,6 +17,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Features
 
 - Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+- Add new example Trampoline[https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline]
 
 ### Bug Fixes
 

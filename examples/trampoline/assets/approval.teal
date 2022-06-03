@@ -1,0 +1,111 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l12
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l11
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l10
+txn OnCompletion
+int CloseOut
+==
+bnz main_l9
+txn OnCompletion
+int OptIn
+==
+bnz main_l8
+txna ApplicationArgs 0
+byte "fund"
+==
+bnz main_l7
+err
+main_l7:
+callsub fund_0
+int 1
+return
+main_l8:
+int 1
+return
+main_l9:
+int 1
+return
+main_l10:
+txn Sender
+global CreatorAddress
+==
+return
+main_l11:
+txn Sender
+global CreatorAddress
+==
+return
+main_l12:
+int 1
+return
+
+// fund
+fund_0:
+gtxn 0 CreatedApplicationID
+app_params_get AppAddress
+store 1
+store 0
+global GroupSize
+int 3
+==
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 0 OnCompletion
+int NoOp
+==
+&&
+gtxn 0 ApplicationID
+int 0
+==
+&&
+gtxn 1 TypeEnum
+int pay
+==
+&&
+gtxn 1 Amount
+int 100000
+>=
+&&
+gtxn 1 Receiver
+global CurrentApplicationAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 TypeEnum
+int appl
+==
+&&
+gtxn 2 OnCompletion
+int NoOp
+==
+&&
+gtxn 2 ApplicationID
+global CurrentApplicationID
+==
+&&
+assert
+itxn_begin
+int pay
+itxn_field TypeEnum
+gtxn 1 Amount
+itxn_field Amount
+load 0
+itxn_field Receiver
+int 0
+itxn_field Fee
+itxn_submit
+retsub
