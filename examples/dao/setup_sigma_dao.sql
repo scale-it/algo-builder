@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
   app_params jsonb, -- application params with approval etc.
   asset_id bigint -- token id
 );
+
+-- Create unique index on app_id
 CREATE UNIQUE INDEX sigma_daos_app_id_idx ON sigma_daos (app_id);
 
 -- create a procedure to handle the trigger (sigmadao_trigger_fn) action
