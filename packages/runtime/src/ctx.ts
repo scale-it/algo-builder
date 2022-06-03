@@ -57,7 +57,6 @@ export class Ctx implements Context {
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -82,7 +81,6 @@ export class Ctx implements Context {
 		this.isInnerTx = false;
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
-		this.createdAssetID = 0;
 		this.remainingFee = 0;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
@@ -277,12 +275,6 @@ export class Ctx implements Context {
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
 
-		// TODO: this logic is wrong
-		// Details: https://www.pivotaltracker.com/n/projects/2452320/stories/182332033
-		if (this.isInnerTx) {
-			this.createdAssetID = this.state.assetCounter;
-		}
-
 		// set & return transaction receipt
 		this.state.txReceipts.set(this.tx.txID, asaInfo);
 		return asaInfo;
@@ -417,7 +409,15 @@ export class Ctx implements Context {
 			approvalFile,
 			clearFile,
 		};
-		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
+
+		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
+		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
+				appName: appDefinition.appName,
+			});
+		}
+
+		this.state.appNameMap.set(appDefinition.appName, appInfo);
 
 		const acc = new AccountStore(
 			0,

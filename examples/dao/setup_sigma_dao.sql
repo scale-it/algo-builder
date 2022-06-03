@@ -4,10 +4,14 @@
 
 -- create a sigma_daos table if does not exit already.
 CREATE TABLE IF NOT EXISTS sigma_daos (
-  app_id bigint PRIMARY KEY, -- application id
+  id SERIAL PRIMARY KEY, -- auto increment id
+  app_id bigint, -- application id
   app_params jsonb, -- application params with approval etc.
   asset_id bigint -- token id
 );
+
+-- Create unique index on app_id
+CREATE UNIQUE INDEX sigma_daos_app_id_idx ON sigma_daos (app_id);
 
 -- create a procedure to handle the trigger (sigmadao_trigger_fn) action
 CREATE OR REPLACE FUNCTION sigmadao_trigger_fn()
@@ -18,6 +22,10 @@ DECLARE
 	log_sigma text := 'U2lnbWFEQU8gY3JlYXRlZA==';
 	i record;
 BEGIN
+	/* 	Check to avoid duplicate entries in table. id attribute increments despite pass/fail insertion  */
+	IF EXISTS (SELECT FROM sigma_daos p WHERE p.app_id = NEW.asset) THEN
+		RETURN NEW;
+	END IF;
 	/* 	txn colmun of txn relation stores both asset and app id. typeenum column
 		identifies the asset and app */
 	FOR i IN SELECT txn FROM txn WHERE asset = NEW.asset AND typeenum=6 LOOP

@@ -93,7 +93,7 @@ export interface State {
 	globalApps: Map<number, string>;
 	assetDefs: Map<number, AccountAddress>;
 	assetNameInfo: Map<string, ASAInfo>;
-	appNameInfo: Map<string, AppInfo>;
+	appNameMap: Map<string, AppInfo>;
 	appCounter: number;
 	assetCounter: number;
 	txReceipts: Map<string, TxReceipt>; // map of {txID: txReceipt}
@@ -151,7 +151,6 @@ export interface Context {
 	innerTxAppIDCallStack: number[];
 	// remaining fee from pool
 	remainingFee: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;
 	getApp: (appID: number, line?: number) => SSCAttributesM;

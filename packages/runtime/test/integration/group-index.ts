@@ -42,6 +42,7 @@ describe("Current Transaction Tests", function () {
 				metaType: types.MetaType.FILE,
 				approvalProgramFilename,
 				clearProgramFilename,
+				appName: "firstApp" + Date.now(),
 			},
 			{}
 		).appID;
@@ -54,6 +55,7 @@ describe("Current Transaction Tests", function () {
 				approvalProgramFilename: "test2.teal",
 				clearProgramFilename,
 				...storageConfig,
+				appName: "secondApp" + Date.now(),
 			},
 			{}
 		).appID;

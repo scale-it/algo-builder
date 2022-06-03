@@ -25,7 +25,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	let appDefinition: types.AppDefinitionFromFile;
 
 	this.beforeAll(async function () {
-		runtime = new Runtime([john, alice]); // setup test
 		approvalProgramFilename = "close-clear-ssc.teal";
 		clearProgramFilename = "clear.teal";
 
@@ -49,6 +48,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		};
 	});
 
+	this.beforeEach(() => {
+		runtime = new Runtime([john, alice]); // setup test
+	});
 	const syncAccount = (): void => {
 		john = runtime.getAccount(john.address);
 		alice = runtime.getAccount(alice.address);
