@@ -62,7 +62,7 @@ export class Runtime {
 			globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
 			assetDefs: new Map<number, AccountAddress>(), // number represents assetId
 			assetNameInfo: new Map<string, ASAInfo>(),
-			appNameInfo: new Map<string, AppInfo>(),
+			appNameMap: new Map<string, AppInfo>(),
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
@@ -363,7 +363,17 @@ export class Runtime {
 	 * @param clear
 	 */
 	getAppInfoFromName(approval: string, clear: string): AppInfo | undefined {
-		return this.store.appNameInfo.get(approval + "-" + clear);
+		return this.store.appNameMap.get(approval + "-" + clear);
+	}
+
+	/**
+	 * Queries app id by app name from global state.
+	 * Returns undefined if app is not found.
+	 * @param approval
+	 * @param clear
+	 */
+	getAppByName(appName: string): AppInfo | undefined {
+		return this.store.appNameMap.get(appName);
 	}
 
 	/**

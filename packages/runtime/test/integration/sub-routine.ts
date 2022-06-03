@@ -61,7 +61,14 @@ describe("TEALv4: Sub routine", function () {
 
 	it("should calculate correct fibonacci number", () => {
 		appDefinition.approvalProgramFilename = "fibonacci.teal";
-		let appID = runtime.deployApp(john.account, appDefinition, {}).appID;
+		appDefinition.appName = "Fibo5";
+		let appID = runtime.deployApp(
+			john.account,
+			{
+				...appDefinition,
+			},
+			{}
+		).appID;
 
 		// 5th fibonacci
 		let result = runtime.getGlobalState(appID, "result");
@@ -69,6 +76,7 @@ describe("TEALv4: Sub routine", function () {
 
 		// 6th fibonacci
 		appDefinition.appArgs = ["int:6"];
+		appDefinition.appName = "Fibo6";
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		result = runtime.getGlobalState(appID, "result");
 
@@ -76,6 +84,7 @@ describe("TEALv4: Sub routine", function () {
 
 		// 8th fibonacci
 		appDefinition.appArgs = ["int:8"];
+		appDefinition.appName = "Fibo8";
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		result = runtime.getGlobalState(appID, "result");
 
@@ -83,6 +92,7 @@ describe("TEALv4: Sub routine", function () {
 
 		// 1st fibonacci
 		appDefinition.appArgs = ["int:1"];
+		appDefinition.appName = "Fibo1";
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		result = runtime.getGlobalState(appID, "result");
 

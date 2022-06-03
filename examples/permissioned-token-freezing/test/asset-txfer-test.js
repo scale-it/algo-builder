@@ -286,7 +286,7 @@ describe("Test for transferring asset using custom logic", function () {
 				metaType: types.MetaType.FILE,
 				approvalProgramFilename,
 				clearProgramFilename,
-				appName: "app",
+				appName: "rejectApp",
 				appArgs: creationArgs,
 			},
 			{}

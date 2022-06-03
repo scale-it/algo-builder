@@ -407,7 +407,15 @@ export class Ctx implements Context {
 			approvalFile,
 			clearFile,
 		};
-		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
+
+		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
+		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
+				appName: appDefinition.appName,
+			});
+		}
+
+		this.state.appNameMap.set(appDefinition.appName, appInfo);
 
 		const acc = new AccountStore(
 			0,
