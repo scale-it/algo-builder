@@ -303,7 +303,6 @@ export function setInnerTxField(
 /**
  * Calculate remaining fee after executing an inner transaction;
  * @param interpeter current interpeter contain context
- * @param includeCurrentInnerTx include remaining fee of current inner tx group
  */
 export function calculateInnerTxCredit(interpeter: Interpreter): CreditFeeType {
 	// calculate curret txn group fee

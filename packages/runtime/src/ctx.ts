@@ -136,7 +136,7 @@ export class Ctx implements Context {
 
 	/**
 	 * Returns asset creator account from runtime.ctx or throws error is it doesn't exist
-	 * @param Asset Index
+	 * @param assetId Asset Index
 	 */
 	getAssetAccount(assetId: number): AccountStoreI {
 		const addr = this.state.assetDefs.get(assetId);
@@ -608,7 +608,7 @@ export class Ctx implements Context {
 	 * Revoking an asset for an account removes a specific number of the asset
 	 * from the revoke target account.
 	 * @param recipient asset receiver address
-	 * @param assetId asset index
+	 * @param assetID asset index
 	 * @param revocationTarget revoke target account
 	 * @param amount amount of assets
 	 */
@@ -688,8 +688,7 @@ export class Ctx implements Context {
 	/**
 	 * Update application
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param appSourceCode new application source
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 */
