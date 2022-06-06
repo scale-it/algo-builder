@@ -9,10 +9,10 @@ This is especially useful in the case that an application creator wants to creat
 ## Setup
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
-This example is using TEAL, so make sure to follow the Python3 setup described above.
+This example is using PyTEAL, so make sure to follow the Python3 setup described above.
+If you run the file fundApplication.py, it will generate two file TEAL approval.teal and clear.teal
 
 ## Run
-
 ```
 yarn run algob deploy
 yarn run algob run scripts/run/create-fund-app.js

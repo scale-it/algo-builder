@@ -1,6 +1,9 @@
 /**
  * Descrpition:
- * This function deploy the app for the first time
+ * In this scripts, you will execute a group of transaction whichh consist:
+ *   + Create new application transaction
+ *   + Give money to the old address account application transaction
+ *   + Call the old application transaction with argument fund
  */
 const { types } = require("@algo-builder/web");
 const { convert } = require("@algo-builder/algob");
