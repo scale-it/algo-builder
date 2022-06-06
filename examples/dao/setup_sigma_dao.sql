@@ -38,6 +38,8 @@ BEGIN
 	/* 	txn colmun of txn relation stores both asset and app id. typeenum column
 		identifies the asset and app */
 	FOR i IN SELECT txn FROM txn WHERE asset = NEW.asset AND typeenum=6 LOOP
+		-- check json path exists or not
+		IF (SELECT i.txn::jsonb -> 'dt'->'gd'->gov_asset->'ui') IS NOT NULL THEN
 			-- Iterate json object and get gov asset from it
 			SELECT i.txn::jsonb -> 'dt'->'gd'->gov_asset->'ui' INTO asset_id;
 			-- insert values in sigma_daos table
@@ -45,6 +47,7 @@ BEGIN
 			app_id, app_params, asset_id)
 			VALUES (NEW.asset, NEW.txn, asset_id);
 			EXIT;
+		END IF;
     END LOOP;
 	RETURN NEW;
 END;
