@@ -17,6 +17,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Features
 
 - Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+- For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 
 ### Bug Fixes
 
