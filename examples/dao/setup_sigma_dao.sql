@@ -45,7 +45,7 @@ BEGIN
 			-- insert values in sigma_daos table
 			INSERT INTO public.sigma_daos (
 			app_id, app_params, asset_id)
-			VALUES (NEW.asset, NEW.txn, asset_id);
+			VALUES (NEW.asset, i.txn::jsonb, asset_id);
 			EXIT;
 		END IF;
     END LOOP;
