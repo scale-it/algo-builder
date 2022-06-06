@@ -123,7 +123,7 @@ export class LogicSig {
 
 	/**
 	 * Performs signature verification
-	 * @param accPk Sender's account pk
+	 * @param accPk Sender's account public key
 	 */
 	verify(accPk: Uint8Array): boolean {
 		const accAddr = encodeAddress(accPk);
