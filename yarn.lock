@@ -6398,6 +6398,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"trampoline@workspace:examples/trampoline":
+  version: 0.0.0-use.local
+  resolution: "trampoline@workspace:examples/trampoline"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
+    algosdk: ^1.16.0
+    eslint: ^8.10.0
+    mocha: ^9.2.1
+  languageName: unknown
+  linkType: soft
+
 "trim-repeated@npm:^1.0.0":
   version: 1.0.0
   resolution: "trim-repeated@npm:1.0.0"
