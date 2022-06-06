@@ -18,6 +18,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
+- Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
 
 ### Bug Fixes
 
