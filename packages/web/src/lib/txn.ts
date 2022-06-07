@@ -107,6 +107,24 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
 		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 	}
 }
+
+/**
+ * Returns ASA definiton
+ * @param transaction Transaction Object
+ */
+ export function getTransactionASADefinition(transaction: Transaction): types.ASADef {
+	const asaDef: types.ASADef = {
+		total: transaction.assetTotal,
+		decimals: transaction.assetDecimals,
+		defaultFrozen: transaction.assetDefaultFrozen,
+		unitName: transaction.assetUnitName,
+		url: transaction.assetURL,
+		metadataHash: new TextDecoder().decode(transaction.assetMetadataHash),
+		note: undefined,
+	};
+	return asaDef;
+}
+
 /**
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
@@ -172,6 +190,7 @@ export function mkTransaction(
 	const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
 	const transactionType = execParams.type;
 	const fromAccountAddr = getFromAddress(execParams);
+	console.log("witam")
 	switch (execParams.type) {
 		case TransactionType.TransferAsset: {
 			const tx = algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -281,6 +300,8 @@ export function mkTransaction(
 			return updateTxFee(execParams.payFlags, tx);
 		}
 		case TransactionType.CallApp: {
+			console.log("witam1")
+			console.log("app args in mkTransactoin:", execParams.appArgs)
 			const tx = algosdk.makeApplicationNoOpTxn(
 				fromAccountAddr,
 				suggestedParams,
@@ -293,6 +314,7 @@ export function mkTransaction(
 				execParams.lease,
 				execParams.payFlags.rekeyTo
 			);
+			console.log("witam2")
 			return updateTxFee(execParams.payFlags, tx);
 		}
 		case TransactionType.CloseApp: {
@@ -451,10 +473,10 @@ export function getAssetReconfigureFields(transaction: Transaction): AssetModFie
 		encodedTransaction.apar.c !== undefined &&
 		encodedTransaction.apar.f !== undefined &&
 		encodedTransaction.apar.r !== undefined) {
-		modificationFields.clawback = encodedTransaction.apar.c.toString();
-		modificationFields.freeze = encodedTransaction.apar.f.toString();
-		modificationFields.manager = encodedTransaction.apar.m.toString();
-		modificationFields.reserve = encodedTransaction.apar.r.toString();
+		modificationFields.clawback = algosdk.encodeAddress(transaction.assetClawback.publicKey)
+		modificationFields.freeze = algosdk.encodeAddress(transaction.assetFreeze.publicKey)
+		modificationFields.manager = algosdk.encodeAddress(transaction.assetManager.publicKey)
+		modificationFields.reserve = algosdk.encodeAddress(transaction.assetReserve.publicKey)
 	}
 	return modificationFields;
 }

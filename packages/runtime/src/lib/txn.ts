@@ -294,9 +294,12 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
  export function isEncTxAssetOptIn(txn: EncTx): boolean {
-	return (txn.arcv !== undefined &&
-			txn.snd !== undefined &&
-			txn.arcv === txn.snd );
+	if  (txn.arcv !== undefined && txn.arcv !== undefined){
+		return !txn.arcv.compare(txn.snd) as boolean;
+	} else {
+		return false;
+	}
+	
 }
 /**
  * Checks if given encoded transaction obj is asset opt in
@@ -304,7 +307,7 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  */
  export function isEncTxAssetTransfer(txn: EncTx): boolean {
 	return (txn.arcv !== undefined &&
-			txn.asnd !== undefined);
+			txn.snd !== undefined && txn.asnd === undefined);
 }
 /**
  * Check if given encoded transaction object is app creation

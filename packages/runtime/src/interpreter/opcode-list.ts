@@ -10,6 +10,7 @@ import algosdk, {
 	isValidAddress,
 	modelsv2,
 	SignedTransaction,
+	Transaction,
 	verifyBytes,
 } from "algosdk";
 import { setSendTransactionHeaders } from "algosdk/dist/types/src/client/v2/algod/sendRawTransaction";
@@ -4271,6 +4272,8 @@ export class ITxnSubmit extends Op {
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
+		(console.log as any).restore();
+		console.log(this.interpreter.currentInnerTxnGroup);
 		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
 			encTxToExecParams(
 				encTx,
@@ -4282,7 +4285,8 @@ export class ITxnSubmit extends Op {
 				this.line
 			)
 		);
-		try {
+		console.log(execParams[0]);
+
 			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
@@ -4293,15 +4297,18 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
 			// execute innner transaction
-			const signedTransactions: algosdk.SignedTransaction [] = execParams.map((txn) =>
-			types.isExecParams(txn) ? { sig: Buffer.alloc(5),
-				 txn: webTx.mkTransaction(txn, mockSuggestedParams(txn.payFlags, 1)) } : txn
-		);
+			console.log("length", execParams.length);
+			
+			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
+				types.isExecParams(txnParam) ? {
+					sig: Buffer.alloc(5),
+					txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1))
+				} : txnParam
+			);
+			try{
 
-
-
-
-			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
+			// console.log("halo", signedTransactions[0])
+			 this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution
 			this.interpreter.runtime.ctx.tx = baseCurrTx;

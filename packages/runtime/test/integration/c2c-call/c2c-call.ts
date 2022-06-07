@@ -7,7 +7,7 @@ import { AccountStoreI, AppInfo } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
-describe("C2C call", function () {
+describe.only("C2C call", function () {
 	useFixture("c2c-call");
 	let runtime: Runtime;
 	let alice: AccountStoreI;
@@ -61,7 +61,7 @@ describe("C2C call", function () {
 		appCallArgs = ["str:call_method", "int:1"];
 	});
 
-	it("should succeed: call another application", () => {
+	it.only("should succeed: call another application", () => {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,

@@ -22,7 +22,7 @@ import {
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { pyExt, tealExt } from "./lib/pycompile-op";
-import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke, isEncTxAssetTransfer } from "./lib/txn";
+import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke, isEncTxAssetTransfer, txnSpecByField } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -773,7 +773,9 @@ export class Ctx implements Context {
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
 	/* eslint-disable complexity */
-	processTransactions(signedTransactions: algosdk.SignedTransaction[]): TxReceipt[] {
+	processTransactions(signedTransactions: algosdk.SignedTransaction[],
+		appDefinition?: types.AppDefinition | types.SmartContract,
+		lsig? : types.Lsig): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
 		this.verifyMinimumFees();
@@ -784,10 +786,11 @@ export class Ctx implements Context {
 			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
-			// if (txParam.sign === types.SignType.LogicSignature) {
-			// 	this.tx = this.gtxs[idx]; // update current tx to index of stateless
-			// 	r = this.runtime.validateLsigAndRun(txParam, this.debugStack);
-			// 	this.tx = this.gtxs[0]; // 
+			if (lsig !== undefined) {
+				this.tx = this.gtxs[idx]; // update current tx to index of stateless
+			    r = this.runtime.validateLsigAndRun(lsig, this.debugStack);
+				this.tx = this.gtxs[0];
+			} // 
 			//after executing stateless tx updating current tx to default (index 0)
 			// } else if (txParam.sign === types.SignType.SecretKey) {
 			// 	this.runtime.validateAccountSignature(txParam);
@@ -820,26 +823,17 @@ export class Ctx implements Context {
 				}
 				case TransactionType.appl: {
 					switch (signedTransaction.txn.appOnComplete) {
-						case algosdk.OnApplicationComplete.NoOpOC: {
+						case algosdk.OnApplicationComplete.NoOpOC: {//deployApp
 							if (isEncTxApplicationCreate(
 								signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 								const senderAcc = this.getAccount(fromAccountAddr);
-								const appDefinition: AppDefinition = {
-									localInts: signedTransaction.txn.appLocalInts,
-									localBytes: signedTransaction.txn.appLocalByteSlices,
-									globalInts: signedTransaction.txn.appGlobalInts,
-									globalBytes: signedTransaction.txn.appGlobalByteSlices,
-									appName: signedTransaction.txn.appIndex.toString(),
-									metaType: MetaType.SOURCE_CODE,
-									approvalProgramCode: webTx.decodeUint8ArrayToString(
-										signedTransaction.txn.appApprovalProgram) as string,
-									clearProgramCode: webTx.decodeUint8ArrayToString(
-										signedTransaction.txn.appClearProgram) as string,
-								};
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
+								if(appDefinition === undefined){
+									throw new Error("Not supported");
+								}
 								r = this.deployApp(
 									fromAccountAddr,
-									appDefinition,
+									appDefinition as AppDefinition,
 									idx
 								);
 								this.knowableID.set(idx, r.appID);
@@ -847,6 +841,7 @@ export class Ctx implements Context {
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
 								const appParams = this.getApp(
 									signedTransaction.txn.appIndex);
+								console.log("app params in ctx:", appParams[APPROVAL_PROGRAM]);
 								r = this.runtime.run(
 									appParams[APPROVAL_PROGRAM],
 									ExecutionMode.APPLICATION,
@@ -911,17 +906,19 @@ export class Ctx implements Context {
 						case algosdk.OnApplicationComplete.UpdateApplicationOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-							const appSourceCode: SmartContract = {
-								metaType: MetaType.SOURCE_CODE,
-								approvalProgramCode: webTx.decodeUint8ArrayToString(
-									signedTransaction.txn.appApprovalProgram) as string,
-								clearProgramCode: webTx.decodeUint8ArrayToString(
-									signedTransaction.txn.appClearProgram) as string,
+							// const appSourceCode: SmartContract = {
+							// 	metaType: MetaType.SOURCE_CODE,
+							// 	approvalProgramCode: webTx.decodeUint8ArrayToString(
+							// 		signedTransaction.txn.appApprovalProgram) as string,
+							// 	clearProgramCode: webTx.decodeUint8ArrayToString(
+							// 		signedTransaction.txn.appClearProgram) as string,
+							// }
+							if(appDefinition === undefined){
+								throw new Error("Not supported");
 							}
-
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
-								appSourceCode,
+								appDefinition as SmartContract,
 								idx,
 							);
 							break;
@@ -939,12 +936,12 @@ export class Ctx implements Context {
 						};
 						//TODO: We need somehow deal with the assets being deploying without .yaml file
 						//TODO: Add a method do deploy ASA from signedTransaction (ask Robert)
-						if (isASADefinition(signedTransaction.txn)) {
-							r = this.deployASADef(signedTransaction.txn.assetName, webTx.getTransactionASADefinition(signedTransaction.txn), fromAccountAddr, flags);
-						} else {
-						r = this.deployASA(signedTransaction.txn.assetName, fromAccountAddr, flags);
+						// if (isASADefinition(signedTransaction.txn)) {
+						r = this.deployASADef(signedTransaction.txn.assetName, webTx.getTransactionASADefinition(signedTransaction.txn), fromAccountAddr, flags);
+						// } else {
+						// r = this.deployASA(signedTransaction.txn.assetName, fromAccountAddr, flags);
 						this.knowableID.set(idx, r.assetIndex);
-						}
+						// }
 					} else if (isEncTxAssetReconfigure(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.manager !== fromAccountAddr) {
@@ -968,7 +965,7 @@ export class Ctx implements Context {
 					break;
 				}
 				case TransactionType.axfer: {
-					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)){ //AssetTransfer
+					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)) { //AssetTransfer
 						r = this.transferAsset(signedTransaction.txn);
 					} else if (isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
@@ -986,20 +983,23 @@ export class Ctx implements Context {
 							webTx.getTransactionRevokeAddress(signedTransaction.txn),
 							BigInt(signedTransaction.txn.amount),
 						);
-					} else if (isEncTxAssetFreeze(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
-						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
-						if (asset.freeze !== fromAccountAddr) {
-							throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
-						}
-						r = this.freezeAsset(
-							signedTransaction.txn.assetIndex,
-							webTx.getTransactionFreezeAddress(signedTransaction.txn),
-							signedTransaction.txn.freezeState
-						);
 					} else if (isEncTxAssetOptIn(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						r = this.optIntoASA(
 							signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
 					}
+					break;
+				}
+				case TransactionType.afrz: {
+					// } else if (isEncTxAssetFreeze(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+					const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
+					if (asset.freeze !== fromAccountAddr) {
+						throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
+					}
+					r = this.freezeAsset(
+						signedTransaction.txn.assetIndex,
+						webTx.getTransactionFreezeAddress(signedTransaction.txn),
+						signedTransaction.txn.freezeState
+					);
 					break;
 				}
 			}
@@ -1027,3 +1027,7 @@ export class Ctx implements Context {
 		return txReceipts;
 	}
 }
+// function isASADefinition(txn: algosdk.Transaction) Boolean {
+// 	return (txn.assetName !==undefined )
+// }
+

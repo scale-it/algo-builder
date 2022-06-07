@@ -43,6 +43,8 @@ const throwFmtError = (appArg: string): void => {
  * @param appArgs : arguments to stateful smart contract
  */
 export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
+	console.log("parser:1");
+	console.log(appArgs);
 	if (appArgs === undefined) {
 		return undefined;
 	}
@@ -67,6 +69,7 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 
 		// parse string to bytes according to type
 		let arg;
+		console.log("parser:2");
 		switch (type) {
 			case "int": {
 				if (!reDigit.test(value)) {
@@ -88,10 +91,13 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 				break;
 			}
 			default: {
+				console.log("parser:3");
 				throwFmtError(appArg);
 			}
 		}
+		console.log("parser:4")
 		args.push(arg);
 	}
+	console.log("parser: end")
 	return args as Uint8Array[];
 }

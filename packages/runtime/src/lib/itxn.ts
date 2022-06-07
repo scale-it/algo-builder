@@ -158,7 +158,7 @@ export function setInnerTxField(
 
 	if (byteTxnFields[tealVersion].has(field)) {
 		const assertedVal = op.assertBytes(val, line);
-		txValue = convertToString(assertedVal);
+		txValue = assertedVal;
 	}
 
 	if (otherAddrTxnFields[tealVersion].has(field)) {

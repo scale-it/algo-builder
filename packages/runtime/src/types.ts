@@ -171,7 +171,11 @@ export interface Context {
 	destroyAsset: (assetId: number) => void;
 	deleteApp: (appID: number) => void;
 	closeApp: (sender: AccountAddress, appID: number) => void;
-	processTransactions: (signedTransactions: algosdk.SignedTransaction[]) => TxReceipt[];
+	processTransactions: (
+		signedTransactions: algosdk.SignedTransaction[],
+		appDefinition?: types.AppDefinition | types.SmartContract,
+		lsig?: types.Lsig,
+	) => TxReceipt[];
 	deployASA: (
 		name: string,
 		fromAccountAddr: AccountAddress,

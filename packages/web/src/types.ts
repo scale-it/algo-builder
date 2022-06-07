@@ -156,6 +156,8 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
+export type Lsig = SignWithLsig;
+
 export type Sign = SignWithSk | SignWithLsig;
 
 export type BasicParams = Sign & {

@@ -354,7 +354,7 @@ describe("Send duplicate transaction", function () {
 	});
 });
 
-describe.only("Algorand Standard Assets", function () {
+describe("Algorand Standard Assets", function () {
 	useFixture("asa-check");
 	let john = new AccountStore(minBalance);
 	const bob = new AccountStore(minBalance);
@@ -396,7 +396,7 @@ describe.only("Algorand Standard Assets", function () {
 		alice = runtime.getAccount(alice.address);
 	};
 
-	it.only("should create asset using asa.yaml file and raise account minimum balance", () => {
+	it("should create asset using asa.yaml file and raise account minimum balance", () => {
 		const initialMinBalance = john.minBalance;
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
@@ -420,7 +420,7 @@ describe.only("Algorand Standard Assets", function () {
 		assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
 	});
 
-	it.only("should create asset without using asa.yaml file", () => {
+	it("should create asset without using asa.yaml file", () => {
 		const expected = {
 			name: "gold-1221",
 			asaDef: {
@@ -451,7 +451,7 @@ describe.only("Algorand Standard Assets", function () {
 		assert.equal(res.url, "url");
 	});
 
-	it.only("should create asset without using asa.yaml (execute transaction)", () => {
+	it("should create asset without using asa.yaml (execute transaction)", () => {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.DeployASA,
 			sign: types.SignType.SecretKey,
