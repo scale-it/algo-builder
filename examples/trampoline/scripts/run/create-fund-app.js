@@ -6,7 +6,8 @@
  *   + Call the old application transaction with argument fund
  */
 const { types } = require("@algo-builder/web");
-const { convert } = require("@algo-builder/algob");
+const { convert, balanceOf } = require("@algo-builder/algob");
+const algosdk = require("algosdk");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -59,11 +60,21 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	await deployer.executeTx(createAppTxnParam);
 	const receiptsTx = await deployer.executeTx([createAppTxnParam, fundAppTxtParam, callAppTxn]);
 
 	// log all transaction have been confirmed including application-index created
 	console.log(receiptsTx);
+
+	// Log all the information of the new application created
+	const appID = receiptsTx[0]["application-index"];
+	const trampolineAddr = algosdk.getApplicationAddress(appID);
+
+	console.log("Application index: ", appID);
+	console.log("Application address: ", trampolineAddr);
+	console.log(
+		"Balance of new trampoline application: ",
+		await balanceOf(deployer, trampolineAddr)
+	);
 }
 
 module.exports = { default: run };

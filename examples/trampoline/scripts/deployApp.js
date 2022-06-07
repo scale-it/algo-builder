@@ -3,6 +3,7 @@
  * This function deploy the app for the first time
  */
 const { types } = require("@algo-builder/web");
+const { balanceOf } = require("@algo-builder/algob");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -53,6 +54,10 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 	await deployer.executeTx(algoTxnFundProxy);
+	console.log(
+		"Balance of application: ",
+		await balanceOf(deployer, appInfo.applicationAccount)
+	);
 }
 
 module.exports = { default: run };
