@@ -190,7 +190,6 @@ export function mkTransaction(
 	const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
 	const transactionType = execParams.type;
 	const fromAccountAddr = getFromAddress(execParams);
-	console.log("witam")
 	switch (execParams.type) {
 		case TransactionType.TransferAsset: {
 			const tx = algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -300,8 +299,6 @@ export function mkTransaction(
 			return updateTxFee(execParams.payFlags, tx);
 		}
 		case TransactionType.CallApp: {
-			console.log("witam1")
-			console.log("app args in mkTransactoin:", execParams.appArgs)
 			const tx = algosdk.makeApplicationNoOpTxn(
 				fromAccountAddr,
 				suggestedParams,
@@ -314,7 +311,6 @@ export function mkTransaction(
 				execParams.lease,
 				execParams.payFlags.rekeyTo
 			);
-			console.log("witam2")
 			return updateTxFee(execParams.payFlags, tx);
 		}
 		case TransactionType.CloseApp: {

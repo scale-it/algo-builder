@@ -780,7 +780,6 @@ export class Ctx implements Context {
 		let r: TxReceipt;
 		this.verifyMinimumFees();
 		this.verifyAndUpdateInnerAppCallStack();
-		console.log("signedTransaction inside of process Transacrion", signedTransactions[0].txn.appArgs);
 		signedTransactions.forEach((signedTransaction, idx) => {
 			const fromAccountAddr = webTx.getTransactionFromAddress(signedTransaction.txn);
 			let payFlags: TxParams = {};
@@ -842,7 +841,6 @@ export class Ctx implements Context {
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
 								const appParams = this.getApp(
 									signedTransaction.txn.appIndex);
-								console.log("app params in ctx:", appParams[APPROVAL_PROGRAM]);
 								r = this.runtime.run(
 									appParams[APPROVAL_PROGRAM],
 									ExecutionMode.APPLICATION,

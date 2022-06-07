@@ -372,7 +372,9 @@ export function encTxToExecParams(
 	};
 
 	execParams.payFlags.totalFee = encTx.fee;
-
+	if(ArrayBuffer.isView(encTx.type)){
+		encTx.type = Buffer.from(encTx.type).toString("utf-8");
+	}
 	switch (encTx.type) {
 		case TransactionTypeEnum.APPLICATION_CALL: {
 			if (isEncTxApplicationCreate(encTx)) {

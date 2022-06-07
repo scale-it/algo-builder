@@ -188,7 +188,7 @@ export function setInnerTxField(
 	let errMsg = "";
 	switch (field) {
 		case "Type": {
-			const txType = txValue as string;
+			const txType = convertToString(txValue as Uint8Array);
 			// check if txType is supported in current teal version
 			if (!txTypes[tealVersion].has(txType)) {
 				errMsg = `${txType} is not a valid Type for itxn_field`;
