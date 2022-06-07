@@ -6,7 +6,7 @@
  *   + Call the old application transaction with argument fund
  */
 const { types } = require("@algo-builder/web");
-const { convert } = require("@algo-builder/algob");
+const { convert, balanceOf } = require("@algo-builder/algob");
 const { balanceOf } = require("@algo-builder/algob");
 const algosdk = require("algosdk");
 
