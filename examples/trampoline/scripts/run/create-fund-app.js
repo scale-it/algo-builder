@@ -7,7 +7,6 @@
  */
 const { types } = require("@algo-builder/web");
 const { convert, balanceOf } = require("@algo-builder/algob");
-const { balanceOf } = require("@algo-builder/algob");
 const algosdk = require("algosdk");
 
 async function run(runtimeEnv, deployer) {
