@@ -53,6 +53,7 @@ const globalAndLocalNumTxnFields = new Set([
 
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
+// a = Uint8Array
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
@@ -63,7 +64,12 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
+	
+	if (ArrayBuffer.isView(a)) {
+		return new Uint8Array(a.buffer)
+	}
 
+	// console.log("i like water");
 	return TxFieldDefaults[field];
 }
 
@@ -187,11 +193,15 @@ export function txAppArg(
 	interpreter: Interpreter,
 	line: number
 ): StackElem {
+	console.log(txField);
+
 	const tealVersion: number = interpreter.tealVersion;
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
+	console.log(s);
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
-
+	console.log(tx);
+	console.log("result", result);
 	if (!result) {
 		// handle defaults
 		return TxFieldDefaults[txField];
