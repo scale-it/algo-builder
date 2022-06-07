@@ -896,6 +896,7 @@ export class Runtime {
 		let signedTransacions: algosdk.SignedTransaction[];
 		let appDef: types.AppDefinition | SmartContract | undefined;
 		let lsig: types.Lsig | undefined;
+		console.log('appCallArgs in execute', txnParams[0]);
 
 		if (types.isExecParams(txnParams[0])) {
 			const dummySource: types.SourceCompiled = {

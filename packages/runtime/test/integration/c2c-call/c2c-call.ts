@@ -38,7 +38,7 @@ describe.only("C2C call", function () {
 		appDefinition = {
 			appName: "app",
 			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "c2c-call.py",
+			approvalProgramFilename: "c2c-call.teal",
 			clearProgramFilename: "clear.teal",
 			localBytes: 1,
 			globalBytes: 1,
@@ -50,7 +50,7 @@ describe.only("C2C call", function () {
 		// deploy second app
 		secondApp = runtime.deployApp(
 			alice.account,
-			{ ...appDefinition, approvalProgramFilename: "c2c-echo.py" },
+			{ ...appDefinition, approvalProgramFilename: "c2c-echo.teal" },
 			{}
 		);
 
@@ -73,6 +73,7 @@ describe.only("C2C call", function () {
 				totalFee: 2000,
 			},
 		};
+		(console.log as any).restore();
 		const txReceipt = runtime.executeTx([execParams]);
 		const logs = txReceipt[0].logs ?? [];
 		assert.deepEqual(new TextDecoder().decode(logs[0]).substring(6), "Call from applicatiton");

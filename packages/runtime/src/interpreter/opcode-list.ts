@@ -951,6 +951,8 @@ export class EqualTo extends Op {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = stack.pop();
 		const prev = stack.pop();
+		console.log('prev in equal to', prev);
+		console.log('last in equal to', last);
 		if (typeof last !== typeof prev) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
 				expected: typeof prev,
@@ -1517,6 +1519,7 @@ export class Txna extends Op {
 			this.interpreter,
 			this.line
 		);
+		console.log('result in itxna', result);
 		stack.push(result);
 		return this.computeCost();
 	}
@@ -2432,6 +2435,8 @@ export class Byte extends Op {
 
 	execute(stack: TEALStack): number {
 		const buffer = convertToBuffer(this.str, this.encoding);
+		console.log('buffer inside of byte', buffer);
+		console.log('unit8array in Byte', new Uint8Array(buffer));
 		stack.push(new Uint8Array(buffer));
 		return this.computeCost();
 	}
@@ -4272,7 +4277,6 @@ export class ITxnSubmit extends Op {
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
-		(console.log as any).restore();
 		console.log(this.interpreter.currentInnerTxnGroup);
 		const execParams = this.interpreter.currentInnerTxnGroup.map((encTx) =>
 			encTxToExecParams(
