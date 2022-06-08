@@ -21,12 +21,19 @@ import {
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
-<<<<<<< HEAD
-import { pyExt, tealExt } from "./lib/pycompile-op";
-import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke, isEncTxAssetTransfer, txnSpecByField } from "./lib/txn";
-=======
-import { calculateFeeCredit } from "./lib/txn";
->>>>>>> develop
+import {
+	calculateFeeCredit,
+	isEncTxApplicationCreate,
+	isEncTxAssetConfig,
+	isEncTxAssetCreate,
+	isEncTxAssetDeletion,
+	isEncTxAssetFreeze,
+	isEncTxAssetOptIn,
+	isEncTxAssetReconfigure,
+	isEncTxAssetRevoke,
+	isEncTxAssetTransfer,
+	txnSpecByField
+} from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -781,7 +788,7 @@ export class Ctx implements Context {
 	/* eslint-disable complexity */
 	processTransactions(signedTransactions: algosdk.SignedTransaction[],
 		appDefinition?: types.AppDefinition | types.SmartContract,
-		lsig? : types.Lsig): TxReceipt[] {
+		lsig?: types.Lsig): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
 		this.verifyMinimumFees();
@@ -794,7 +801,7 @@ export class Ctx implements Context {
 
 			if (lsig !== undefined) {
 				this.tx = this.gtxs[idx]; // update current tx to index of stateless
-			    r = this.runtime.validateLsigAndRun(lsig, this.debugStack);
+				r = this.runtime.validateLsigAndRun(lsig, this.debugStack);
 				this.tx = this.gtxs[0];
 			} // 
 			//after executing stateless tx updating current tx to default (index 0)
@@ -834,7 +841,7 @@ export class Ctx implements Context {
 								signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 								const senderAcc = this.getAccount(fromAccountAddr);
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
-								if(appDefinition === undefined){
+								if (appDefinition === undefined) {
 									throw new Error("Not supported");
 								}
 								r = this.deployApp(
@@ -918,7 +925,7 @@ export class Ctx implements Context {
 							// 	clearProgramCode: webTx.decodeUint8ArrayToString(
 							// 		signedTransaction.txn.appClearProgram) as string,
 							// }
-							if(appDefinition === undefined){
+							if (appDefinition === undefined) {
 								throw new Error("Not supported");
 							}
 							r = this.updateApp(

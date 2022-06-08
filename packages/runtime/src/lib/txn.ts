@@ -57,11 +57,7 @@ const globalAndLocalNumTxnFields = new Set([
 // a = Uint8Array
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (a instanceof Uint8Array) {
-<<<<<<< HEAD
-		return new Uint8Array(a);
-=======
 		return a;
->>>>>>> develop
 	}
 
 	if (Buffer.isBuffer(a)) {
