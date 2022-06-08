@@ -1139,7 +1139,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Log", () => {
-		it(`should log bytes to current transaction receipt`, function () {
+		it.only(`should log bytes to current transaction receipt`, function () {
 			const txnInfo = interpreter.runtime.getTxReceipt(TXN_OBJ.txID);
 			assert.isUndefined(txnInfo?.logs); // no logs before
 

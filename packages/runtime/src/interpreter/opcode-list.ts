@@ -4283,7 +4283,7 @@ export class ITxnSubmit extends Op {
 				this.line
 			)
 		);
-
+		try {
 		const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 		const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
@@ -4301,7 +4301,6 @@ export class ITxnSubmit extends Op {
 				txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1))
 			} : txnParam
 		);
-		try {
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution
