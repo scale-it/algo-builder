@@ -54,12 +54,18 @@ const globalAndLocalNumTxnFields = new Set([
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
+	if (a instanceof Uint8Array) {
+		return new Uint8Array(a);
+	}
+
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
+
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
