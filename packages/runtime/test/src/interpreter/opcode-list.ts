@@ -2472,6 +2472,20 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
+		describe("Txn: teal v6", function () {
+			it("should return empty log if no log emit before", () => {
+				const op = new Txn(["LastLog"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array(0));
+			});
+			it("should return last log", () => {
+				interpreter.runtime.ctx.lastLog = new Uint8Array([42, 32]);
+				const op = new Txn(["LastLog"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
+			});
+		});
+
 		describe("Gtxn", function () {
 			before(function () {
 				const tx = interpreter.runtime.ctx.tx;

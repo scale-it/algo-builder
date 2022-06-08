@@ -54,9 +54,14 @@ const globalAndLocalNumTxnFields = new Set([
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
+	if (a instanceof Uint8Array) {
+		return a;
+	}
+
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
@@ -174,6 +179,11 @@ export function txnSpecByField(
 			else result = 0n;
 			break;
 		}
+		case "LastLog": {
+			result = interpreter.runtime.ctx.lastLog;
+			break;
+		}
+
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
