@@ -145,11 +145,14 @@ TxnFields[4] = {
 
 TxnFields[5] = {
 	...TxnFields[4],
+	CreatedAssetID: null,
+	CreatedApplicationID: null,
 	Nonparticipation: "nonpart",
 };
 
 TxnFields[6] = {
 	...TxnFields[5],
+	LastLog: null,
 };
 
 TxnFields[7] = {

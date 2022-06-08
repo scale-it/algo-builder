@@ -34,7 +34,11 @@ describe("TEALv6: Global Opcode Budget", function () {
 
 		dummyAppID = runtime.deployApp(
 			john.account,
-			{ ...appDefinition, approvalProgramFilename: "dummy-app.teal" },
+			{
+				...appDefinition,
+				appName: "dummyapp",
+				approvalProgramFilename: "dummy-app.teal",
+			},
 			{}
 		).appID;
 

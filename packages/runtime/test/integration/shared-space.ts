@@ -76,6 +76,7 @@ describe("TEALv4: shared space between contracts", function () {
 	});
 
 	it("should fail during create application if second program compares wrong values", function () {
+		groupTx[0].appDefinition.appName = "app";
 		groupTx[1].appDefinition = {
 			...firstAppDefinition,
 			approvalProgramCode: approvalProgramFail2,
@@ -87,10 +88,12 @@ describe("TEALv4: shared space between contracts", function () {
 		groupTx[0].appDefinition = {
 			...firstAppDefinition,
 			approvalProgramCode: approvalProgramFail1,
+			appName: "app1",
 		};
 		groupTx[1].appDefinition = {
 			...secondAppDefinition,
 			approvalProgramCode: approvalProgram2,
+			appName: "app2",
 		};
 
 		expectRuntimeError(() => runtime.executeTx(groupTx), RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);

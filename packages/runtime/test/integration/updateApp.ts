@@ -138,6 +138,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 				approvalProgramFilename: oldApprovalProgramFileName,
 				clearProgramFilename,
 				...storageConfig,
+				appName: "RejectUpdate",
 			},
 			{}
 		).appID;

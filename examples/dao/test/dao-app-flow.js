@@ -1,4 +1,3 @@
-const { convert } = require("@algo-builder/algob");
 const { Runtime, AccountStore } = require("@algo-builder/runtime");
 const { types, parsing } = require("@algo-builder/web");
 const { assert } = require("chai");
@@ -20,7 +19,6 @@ const {
 	executeBefore,
 } = require("../scripts/run/common/tx-params");
 const { getApplicationAddress } = require("algosdk");
-const { aliceAcc } = require("@algo-builder/algob/test/mocks/account");
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;
@@ -42,16 +40,16 @@ const initialBalance = 200e6;
  * https://paper.dropbox.com/doc/Algo-DAO--BTR~tKj8P788NMZqnVfKwS7BAg-ncLdytuFa7EJrRerIASSl
  */
 describe("DAO test", function () {
-	const master = new AccountStore(1000e6);
-	let creator = new AccountStore(initialBalance);
-	let proposerA = new AccountStore(initialBalance);
-	let proposerB = new AccountStore(initialBalance);
-	let voterA = new AccountStore(initialBalance);
-	let voterB = new AccountStore(initialBalance);
+	let master;
+	let creator;
+	let proposerA;
+	let proposerB;
+	let voterA;
+	let voterB;
 	let depositAcc; // runtime.account of deposit
-	let daoFundLsigAcc = new AccountStore(initialBalance);
-	let proposalALsigAcc = new AccountStore(initialBalance);
-	let proposalBLsigAcc = new AccountStore(initialBalance);
+	let daoFundLsigAcc;
+	let proposalALsigAcc;
+	let proposalBLsigAcc;
 	let alice;
 
 	let runtime;
@@ -62,8 +60,10 @@ describe("DAO test", function () {
 	let proposalALsig;
 	let proposalBLsig;
 
-	this.beforeAll(async function () {
-		runtime = new Runtime([
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+		[
+			alice,
 			master,
 			creator,
 			proposerA,
@@ -73,15 +73,16 @@ describe("DAO test", function () {
 			daoFundLsigAcc,
 			proposalALsigAcc,
 			proposalBLsigAcc,
-		]);
-		[alice] = runtime.defaultAccounts();
+		] = runtime.defaultAccounts();
 
 		appStorageConfig = {
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 		};
+
+		setUpDAO();
 	});
 
 	const getGlobal = (key) => runtime.getGlobalState(appID, key);
@@ -119,11 +120,11 @@ describe("DAO test", function () {
 			`int:${maxDuration}`,
 			`str:${url}`,
 			`str:${daoName}`,
+			`int:${govTokenID}`,
 		];
 
 		const approvalProgramFilename = "dao-app-approval.py";
 		const clearProgramFilename = "dao-app-clear.py";
-		const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
 		// deploy application
 		appID = runtime.deployApp(
 			creator.account,
@@ -135,8 +136,7 @@ describe("DAO test", function () {
 				clearProgramFilename,
 				appArgs: daoAppArgs,
 			},
-			{},
-			placeholderParam
+			{}
 		).appID;
 
 		// Fund DAO app account with some ALGO
@@ -187,6 +187,7 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("max_duration"), BigInt(maxDuration));
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
 		assert.deepEqual(getGlobal("dao_name"), parsing.stringToBytes(daoName));
+		assert.deepEqual(getGlobal("gov_token_id"), BigInt(govTokenID));
 
 		// opt in deposit account (dao app account) to gov_token asa
 		const optInToGovASAParam = [
@@ -266,8 +267,6 @@ describe("DAO test", function () {
 		 *   a) optIn to Gov Token by proposalALsig
 		 *   b) Call to DAO app by proposalALsig + asset transfer transaction from depositAcc -> proposalALsig
 		 */
-
-		setUpDAO();
 
 		/* --------------------  Add proposal  -------------------- */
 
@@ -564,8 +563,6 @@ describe("DAO test", function () {
 		 * + VoterA tries to voter again with newly locked tokens (fail)
 		 */
 
-		setUpDAO();
-
 		/* --------------------  Add proposal  -------------------- */
 
 		// optIn to DAO by proposalALsig
@@ -712,8 +709,6 @@ describe("DAO test", function () {
 		 * + VoterA tries to vote for proposalB (passes)
 		 */
 
-		setUpDAO();
-
 		/* --------------------  Add proposal(s)  -------------------- */
 
 		// optIn to DAO by proposalALsig & proposalBLsig
@@ -841,7 +836,6 @@ describe("DAO test", function () {
 		 * + Add proposalA
 		 * + Close proposalA (passes if past execution)
 		 */
-		setUpDAO();
 
 		/* --------------------  Add proposal  -------------------- */
 

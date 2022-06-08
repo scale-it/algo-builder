@@ -40,4 +40,10 @@ describe("Status package", () => {
 			0n
 		);
 	});
+
+	it("balaceOf should return account balance(in ALGO) when assetID undefined", async () => {
+		expect(await balanceOf(deployer, mockAccountInformation.address)).to.equal(
+			mockAccountInformation.amount
+		);
+	});
 });

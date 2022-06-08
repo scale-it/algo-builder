@@ -26,7 +26,6 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 	let appID: number;
 	let appCallParams: types.ExecParams;
 	this.beforeAll(function () {
-		runtime = new Runtime([master, john, elon, bob]); // setup test
 		approvalProgramFilename = "approval-payment.py";
 		clearProgramFilename = "clear.teal";
 
@@ -43,6 +42,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 	});
 
 	this.beforeEach(() => {
+		runtime = new Runtime([master, john, elon, bob]); // setup test
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 

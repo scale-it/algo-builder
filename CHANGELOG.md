@@ -7,12 +7,31 @@ Guidelines:
 + if relevant, you can also provide a link to a pull request.
 
 Organize change log in the following section (in that order):
-Features, Bug Fixes, Breaking Changes, Deprecated
+Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 -->
 
 # CHANGELOG
 
 ## Unreleased
+
+### Features
+
+- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+- For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
+- Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
+
+### Bug Fixes
+
+### Breaking Changes
+
+### Deprecated
+
+### Template Updates
+
+DAO template:
+
+- [breaking] moving template parameters (`gov_token_id`) to the global state. Because of
+  that change the bytecode remains the same after each deploy hence the hash of the appliction also will remain the same.
 
 ## v4.0.0 2022-05-24
 
@@ -71,12 +90,7 @@ Dependencies:
 - Upgraded PyTEAL version [`0.13.0`](https://github.com/algorand/pyteal/releases/tag/v0.13.0) in Pipfile.
 - Upgraded JS SDK to v1.16.0
 
-### Template improvements
-
-- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
-- Enabled PyTEAL Optimizer option in all our examples.
-
-### API breaking
+### API Breaking
 
 - Improved the smart contract deployment process. We changed the `DeployASAParam` and `DeployASCParam` to make it more explicit. The `deployer.deploy*` also got improvemetns with a cost of API breaking. We created the following types to describe the smart-contract to be deplyed:
 
@@ -264,16 +278,21 @@ See [packages/web/src/types.ts](https://github.com/scale-it/algo-builder/blob/ma
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
-- Approval program and clear propram should throw error if they are mismatch version. Fixed in [#620](https://github.com/scale-it/algo-builder/pull/620)
+- Approval program and clear program should throw error if they are mismatch version. Fixed in [#620](https://github.com/scale-it/algo-builder/pull/620)
 - Allow token to be empty.
 - Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
 - Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
-- Wallet contructor come from a parameter walletURL(token, server, port)
-- Restirct duplicate transaction in group transaction.
+- Wallet constructor come from a parameter walletURL(token, server, port)
+- Restrict duplicate transaction in group transaction.
 
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
+
+### Template Updates
+
+- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
+- Enabled PyTEAL Optimizer option in all our examples.
 
 ## v3.2.0 2022-02-03
 

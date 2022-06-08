@@ -21,8 +21,12 @@ import {
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
+<<<<<<< HEAD
 import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit, isEncTxApplicationCreate, isEncTxAssetConfig, isEncTxAssetCreate, isEncTxAssetDeletion, isEncTxAssetFreeze, isEncTxAssetOptIn, isEncTxAssetReconfigure, isEncTxAssetRevoke, isEncTxAssetTransfer, txnSpecByField } from "./lib/txn";
+=======
+import { calculateFeeCredit } from "./lib/txn";
+>>>>>>> develop
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -62,8 +66,7 @@ export class Ctx implements Context {
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
 	budget: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
-
+	lastLog: Uint8Array;
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -78,6 +81,7 @@ export class Ctx implements Context {
 		this.args = args;
 		this.runtime = runtime;
 		this.debugStack = debugStack;
+		this.lastLog = new Uint8Array([]);
 		// Mapping from the tx index number to the scratch space.
 		// Scratch space is a list of elements.
 		this.sharedScratchSpace = new Map<number, StackElem[]>();
@@ -87,7 +91,6 @@ export class Ctx implements Context {
 		this.isInnerTx = false;
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
-		this.createdAssetID = 0;
 		this.remainingFee = 0;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
@@ -145,7 +148,7 @@ export class Ctx implements Context {
 
 	/**
 	 * Returns asset creator account from runtime.ctx or throws error is it doesn't exist
-	 * @param Asset Index
+	 * @param assetId Asset Index
 	 */
 	getAssetAccount(assetId: number): AccountStoreI {
 		const addr = this.state.assetDefs.get(assetId);
@@ -279,10 +282,6 @@ export class Ctx implements Context {
 			deleted: false,
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
-
-		if (this.isInnerTx) {
-			this.createdAssetID = this.state.assetCounter;
-		}
 
 		// set & return transaction receipt
 		this.state.txReceipts.set(this.tx.txID, asaInfo);
@@ -418,7 +417,15 @@ export class Ctx implements Context {
 			approvalFile,
 			clearFile,
 		};
-		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
+
+		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
+		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
+				appName: appDefinition.appName,
+			});
+		}
+
+		this.state.appNameMap.set(appDefinition.appName, appInfo);
 
 		const acc = new AccountStore(
 			0,
@@ -613,7 +620,7 @@ export class Ctx implements Context {
 	 * Revoking an asset for an account removes a specific number of the asset
 	 * from the revoke target account.
 	 * @param recipient asset receiver address
-	 * @param assetId asset index
+	 * @param assetID asset index
 	 * @param revocationTarget revoke target account
 	 * @param amount amount of assets
 	 */
@@ -693,8 +700,7 @@ export class Ctx implements Context {
 	/**
 	 * Update application
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param appSourceCode new application source
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 */

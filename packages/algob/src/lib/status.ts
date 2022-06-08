@@ -7,13 +7,19 @@ import { AccountAddress, Deployer, Key, StateValue } from "../types";
  * opt-in to the given asset id.
  * @param deployer algob deployer
  * @param accountAddress account to return assetholding info
- * @param assetID asset index
+ * @param assetID asset index. If assetID is undefined the account algo balance will return
  */
 export async function balanceOf(
 	deployer: Deployer,
 	accountAddress: AccountAddress,
-	assetID: number
+	assetID?: number
 ): Promise<number | bigint> {
+	if (assetID === undefined) {
+		const accountInfo = await deployer.algodClient.accountInformation(accountAddress).do();
+		// amount of account
+		return accountInfo.amount;
+	}
+
 	const a = await status.getAssetHolding(deployer.algodClient, accountAddress, assetID);
 	if (a === undefined) return 0n;
 	return a.amount;

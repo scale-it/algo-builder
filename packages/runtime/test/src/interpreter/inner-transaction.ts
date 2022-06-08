@@ -1070,7 +1070,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
-			const lastAssetID = interpreter.runtime.ctx.createdAssetID;
+			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
 
 			const create = `
         itxn_begin
@@ -1093,8 +1093,8 @@ describe("Inner Transactions", function () {
       `;
 
 			assert.doesNotThrow(() => executeTEAL(create));
-			const createdAssetID = interpreter.runtime.ctx.createdAssetID;
-			assert.equal(createdAssetID, lastAssetID + 1);
+			const createdAssetID = lastAssetID + 1;
+			assert.equal(createdAssetID, interpreter.runtime.ctx.state.assetCounter);
 
 			const freeze = `
         itxn_begin

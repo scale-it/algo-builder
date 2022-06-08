@@ -58,7 +58,11 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 		approvalProgramFilename = "reject-optin.teal";
 		appID = runtime.deployApp(
 			john.account,
-			{ ...appDefinition, approvalProgramFilename },
+			{
+				...appDefinition,
+				approvalProgramFilename,
+				appName: "rejectedOptin",
+			},
 			{}
 		).appID;
 

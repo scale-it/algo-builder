@@ -15,8 +15,8 @@ export const ASSETS_DIR = "assets";
  * Validates asset definitions and checks if opt-in acc names are present in network
  * @param accounts AccountMap is the SDK account type, used in builder. RuntimeAccountMap is
  * for AccountStore used in runtime (where we use maps instead of arrays in sdk structures).
- * @param filename asa filename
  * @param asaDef asset definition
+ * @param source
  */
 export function validateOptInAccNames(
 	accounts: AccountMap | RuntimeAccountMap,

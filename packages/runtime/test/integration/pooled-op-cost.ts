@@ -97,11 +97,11 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 		let callAppTx: types.ExecParams;
 		let increaseBudgetTx: types.ExecParams;
 
-		this.beforeEach(async function () {
+		this.beforeAll(function () {
 			appID = runtime.deployApp(
 				john.account,
 				{
-					appName: "app",
+					appName: "combineapp",
 					metaType: types.MetaType.FILE,
 					approvalProgramFilename: "budget-opcode.teal",
 					clearProgramFilename: "clearv6.teal",

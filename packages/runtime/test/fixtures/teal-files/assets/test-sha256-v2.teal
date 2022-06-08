@@ -1,0 +1,9 @@
+#pragma version 2
+int 1
+itob
+sha256
+int 1
+itob 
+==
+int 0
+==

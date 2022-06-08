@@ -1,5 +1,4 @@
 const { types } = require("@algo-builder/web");
-const { bytesToBigInt } = require("algosdk");
 const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
@@ -14,12 +13,16 @@ async function run(runtimeEnv, deployer) {
 		type: types.TransactionType.DeployApp,
 		sign: types.SignType.SecretKey,
 		fromAccount: creator,
-		approvalProgram: "coordinator.py",
-		clearProgram: "clear.teal",
-		localInts: 0,
-		localBytes: 0,
-		globalInts: 0,
-		globalBytes: 0,
+		appDefinition: {
+			metaType: types.MetaType.FILE,
+			appName: "anotherApp",
+			approvalProgramFilename: "coordinator.py",
+			clearProgramFilename: "clear.teal",
+			localInts: 0,
+			localBytes: 0,
+			globalInts: 0,
+			globalBytes: 0,
+		},
 		payFlags: {
 			totalFee: 1000,
 		},
@@ -37,6 +40,8 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// third tx: call master app
+	// verify logic in first and second transaction.
+	// You can check `assets/coordinator.py` for more details.
 	const masterTxnParam = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,
@@ -56,8 +61,8 @@ async function run(runtimeEnv, deployer) {
 
 	// log created asset id and application id
 	const lastReceipt = receiptsTx[receiptsTx.length - 1];
-	console.log("new application id:", decodeValue(lastReceipt.logs[0]));
-	console.log("new asset id:", decodeValue(lastReceipt.logs[1]));
+	console.log("New application id:", decodeValue(lastReceipt.logs[0]));
+	console.log("New asset id:", decodeValue(lastReceipt.logs[1]));
 }
 
 module.exports = { default: run };
