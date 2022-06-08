@@ -54,14 +54,12 @@ const globalAndLocalNumTxnFields = new Set([
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
-	if (Buffer.isBuffer(a)) {
-		return new Uint8Array(a);
+	if (a instanceof Uint8Array) {
+		return a;
 	}
 
-	// case Uint8Array but empty, some magic here
-	// I also don't how it work :|
-	if (ArrayBuffer.isView(a)) {
-		return new Uint8Array(a.buffer);
+	if (Buffer.isBuffer(a)) {
+		return new Uint8Array(a);
 	}
 
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
