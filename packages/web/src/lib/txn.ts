@@ -64,6 +64,16 @@ export function getTransactionFromAddress(transaction: Transaction): AccountAddr
 	return algosdk.encodeAddress(transaction.from.publicKey)
 }
 
+export function getAddress(account: algosdk.Address | undefined): AccountAddress | undefined {
+	if (account !== undefined) {
+		return algosdk.encodeAddress(account.publicKey)
+	} else {
+		return undefined;
+	}
+}
+
+
+
 /**
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
@@ -114,12 +124,17 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
  */
  export function getTransactionASADefinition(transaction: Transaction): types.ASADef {
 	const asaDef: types.ASADef = {
+		clawback: getAddress(transaction.assetClawback),
+		manager: getAddress(transaction.assetManager),
+		reserve: getAddress(transaction.assetReserve),
+		freeze: getAddress(transaction.assetFreeze),
+		name: transaction.assetName,
 		total: transaction.assetTotal,
 		decimals: transaction.assetDecimals,
 		defaultFrozen: transaction.assetDefaultFrozen,
 		unitName: transaction.assetUnitName,
 		url: transaction.assetURL,
-		metadataHash: new TextDecoder().decode(transaction.assetMetadataHash),
+		metadataHash: transaction.assetMetadataHash ? new TextDecoder().decode(transaction.assetMetadataHash): undefined,
 		note: undefined,
 	};
 	return asaDef;

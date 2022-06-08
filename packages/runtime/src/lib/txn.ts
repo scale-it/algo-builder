@@ -55,22 +55,22 @@ const globalAndLocalNumTxnFields = new Set([
 // otherwise return parsed data to interpreter
 // a = Uint8Array
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
+	if (a instanceof Uint8Array) {
+		return new Uint8Array(a);
+	}
+
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
+
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
-	
-	if (ArrayBuffer.isView(a)) {
-		return new Uint8Array(a.buffer)
-	}
-
-	// console.log("i like water");
-	return TxFieldDefaults[field];
+   return TxFieldDefaults[field];
 }
 
 /**
