@@ -310,7 +310,7 @@ export async function executeTx(
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
 		} else {
-			console.warn("deploy app/asset will not store in checkpoint on run mode");
+			console.warn("deploy app/asset will not be stored in checkpoint in run mode");
 		}
 		return confirmedTx;
 	} catch (error) {
