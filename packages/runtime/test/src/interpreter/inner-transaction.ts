@@ -19,7 +19,7 @@ export function setDummyAccInfo(acc: AccountStoreI): void {
 	acc.createdApps = accInfo[0].createdApps;
 }
 
-describe("Inner Transactions", function () {
+describe.only("Inner Transactions", function () {
 	const elonPk = decodeAddress(elonAddr).publicKey;
 	let tealCode: string;
 	let interpreter: Interpreter;
@@ -85,7 +85,7 @@ describe("Inner Transactions", function () {
 
 	this.beforeAll(() => setUpInterpreter(5));
 
-	describe("TestActionTypes", function () {
+	describe.only("TestActionTypes", function () {
 		it("should fail: itxn_submit without itxn_begin", function () {
 			tealCode = `
         itxn_submit
@@ -1139,7 +1139,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Log", () => {
-		it.only(`should log bytes to current transaction receipt`, function () {
+		it(`should log bytes to current transaction receipt`, function () {
 			const txnInfo = interpreter.runtime.getTxReceipt(TXN_OBJ.txID);
 			assert.isUndefined(txnInfo?.logs); // no logs before
 

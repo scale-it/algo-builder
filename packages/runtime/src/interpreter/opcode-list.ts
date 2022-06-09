@@ -4293,7 +4293,8 @@ export class ITxnSubmit extends Op {
 		this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 		this.interpreter.runtime.ctx.isInnerTx = true;
 
-		// execute innner transaction
+		// TODO check minimum fee 
+		//this.interpreter.runtime.ctx.deductFee()
 
 		const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 			types.isExecParams(txnParam) ? {
