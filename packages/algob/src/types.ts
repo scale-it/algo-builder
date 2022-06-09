@@ -780,8 +780,8 @@ export interface ConfirmedTxInfo {
 	"confirmed-round": number;
 	"asset-index": number;
 	"application-index": number;
-	"global-state-delta": algosdk.EncodedGlobalStateSchema;
-	"local-state-delta": algosdk.EncodedLocalStateSchema;
-	"inner-txns": ConfirmedTxInfo;
+	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
+	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
+	"inner-txns"?: ConfirmedTxInfo;
 	txn: algosdk.EncodedSignedTransaction;
 }
