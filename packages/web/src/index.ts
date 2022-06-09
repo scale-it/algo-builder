@@ -10,4 +10,4 @@ export { WebMode } from "./lib/web-mode";
 export { WallectConnectSession } from "./lib/wallectconnect-mode";
 export { MyAlgoWalletSession } from "./lib/myalgowallet-mode";
 export { getSuggestedParams, mkTxParams } from "./lib/api";
-export { mainnetURL, testnetURL } from "./lib/constants";
+export { mainnetURL, testnetURL, betanetURL } from "./lib/constants";
