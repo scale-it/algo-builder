@@ -211,7 +211,6 @@ export function txAppArg(
 	interpreter: Interpreter,
 	line: number
 ): StackElem {
-
 	const tealVersion: number = interpreter.tealVersion;
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
