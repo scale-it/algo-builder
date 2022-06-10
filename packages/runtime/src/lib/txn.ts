@@ -268,7 +268,6 @@ export function isEncTxAssetDeletion(txn: EncTx): boolean {
 /**
 =======
  * Check if given encoded transaction obj is asset config
->>>>>>> develop
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig(txn: EncTx): boolean {
