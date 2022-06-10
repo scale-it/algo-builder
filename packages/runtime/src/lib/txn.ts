@@ -214,7 +214,6 @@ export function txAppArg(
 	const tealVersion: number = interpreter.tealVersion;
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-	console.log(s);
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
 	console.log(tx);
 	console.log("result", result);
