@@ -42,7 +42,8 @@ export const mockSuggestedParam: SuggestedParams = {
 const account = algosdk.generateAccount();
 const addr = algosdk.decodeAddress(account.addr);
 
-export const TXN_OBJ = {
+//MOCK Algorand Encoded Transaction
+export const TXN_OBJ: algosdk.EncodedTransaction = {
 	snd: Buffer.from(addr.publicKey),
 	rcv: Buffer.from(addr.publicKey),
 	arcv: Buffer.from(addr.publicKey),
@@ -97,12 +98,12 @@ export const TXN_OBJ = {
 		nui: 3,
 		nbs: 4,
 	},
-	txID: "transaction-id",
 	rekey: Buffer.from(addr.publicKey),
 	grp: Buffer.from("group"),
 	apep: 1,
 	nonpart: true,
 };
+
 export const mockConfirmedTx: ConfirmedTxInfo = {
 	"confirmed-round": 1,
 	"asset-index": 1,
