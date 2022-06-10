@@ -211,7 +211,6 @@ export function txAppArg(
 	interpreter: Interpreter,
 	line: number
 ): StackElem {
-	console.log(txField);
 
 	const tealVersion: number = interpreter.tealVersion;
 
