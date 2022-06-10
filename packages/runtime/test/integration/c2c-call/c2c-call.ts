@@ -39,7 +39,7 @@ describe("C2C call", function () {
 		appDefinition = {
 			appName: "firstApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "c2c-call.teal",
+			approvalProgramFilename: "c2c-call.py",
 			clearProgramFilename: "clear.teal",
 			localBytes: 1,
 			globalBytes: 1,

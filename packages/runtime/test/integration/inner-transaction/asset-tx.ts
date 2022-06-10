@@ -28,7 +28,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 	let appCallParams: types.ExecParams;
 	this.beforeAll(function () {
 		runtime = new Runtime([master, john, elon, bob]); // setup test
-		approvalProgramFilename = "approval-asset-tx.teal";
+		approvalProgramFilename = "approval-asset-tx.py";
 		clearProgramFilename = "clear.teal";
 
 		appDefinition = {

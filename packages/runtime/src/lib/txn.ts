@@ -215,8 +215,6 @@ export function txAppArg(
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
-	console.log(tx);
-	console.log("result", result);
 	if (!result) {
 		// handle defaults
 		return TxFieldDefaults[txField];
