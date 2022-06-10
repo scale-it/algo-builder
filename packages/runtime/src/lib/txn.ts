@@ -266,7 +266,6 @@ export function isEncTxAssetDeletion(txn: EncTx): boolean {
 }
 
 /**
-<<<<<<< HEAD
  * Check if given encoded transaction obj is asset creation
 =======
  * Check if given encoded transaction obj is asset config
