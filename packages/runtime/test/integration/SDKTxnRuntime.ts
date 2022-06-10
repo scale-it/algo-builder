@@ -1,17 +1,17 @@
-import { tx as webTx, types } from "@algo-builder/web";
-import { assert } from "chai";
-import cloneDeep from "lodash.clonedeep";
+// import { tx as webTx, types } from "@algo-builder/web";
+// import { assert } from "chai";
+// import cloneDeep from "lodash.clonedeep";
 
-import { AccountStore } from "../../src/account";
-import { mockSuggestedParams } from "../../src/mock/tx";
-import { Runtime } from "../../src/runtime";
-import { AccountStoreI } from "../../src/types";
-import { useFixture } from "../helpers/integration";
+// import { AccountStore } from "../../src/account";
+// import { mockSuggestedParams } from "../../src/mock/tx";
+// import { Runtime } from "../../src/runtime";
+// import { AccountStoreI } from "../../src/types";
+// import { useFixture } from "../helpers/integration";
 
-const minBalance = BigInt(10 * 1e6);
+// const minBalance = BigInt(10 * 1e6);
 
-// TODO: add more test for all transaction types.
-// https://www.pivotaltracker.com/n/projects/2452320/stories/181383052
+// // TODO: add more test for all transaction types.
+// // https://www.pivotaltracker.com/n/projects/2452320/stories/181383052
 // describe("Should execute SDK transaction object using runtime", function () {
 // 	const fee = 1000;
 
