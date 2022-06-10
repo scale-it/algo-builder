@@ -1,5 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import { ExecParams, SmartContract } from "@algo-builder/web/build/types";
+import { SmartContract } from "@algo-builder/web/build/types";
 import algosdk, {
 	Account as AccountSDK,
 	Address,
@@ -1057,7 +1057,11 @@ export class Runtime {
 	verifySignature(signedTransaction: SignedTransaction) {
 		let isValid = false;
 		if (typeof signedTransaction.sig !== "undefined") {
-			isValid = nacl.verify(Uint8Array.from(signedTransaction.txn.bytesToSign()), signedTransaction.sig, signedTransaction.txn.from.publicKey);
+			isValid = nacl.verify(
+				Uint8Array.from(signedTransaction.txn.bytesToSign()),
+				 signedTransaction.sig,
+				  signedTransaction.txn.from.publicKey
+				  );
 			//Transaction signature
 			// isValid = algosdk.verifyBytes(
 			// 	signedTransaction.txn.bytesToSign(),

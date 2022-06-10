@@ -1,5 +1,4 @@
 import { parsing, types } from "@algo-builder/web";
-import { AssetModFields } from "@algo-builder/web/build/types";
 import {
 	encodeAddress,
 	EncodedAssetParams,
