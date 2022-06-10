@@ -66,7 +66,6 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
-
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
