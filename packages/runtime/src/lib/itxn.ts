@@ -1,4 +1,5 @@
 import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
+import { has } from "lodash";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
@@ -65,13 +66,7 @@ const byteTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set([
-		"Type",
-		"ConfigAssetName",
-		"ConfigAssetUnitName",
-		"ConfigAssetMetadataHash",
-		"ConfigAssetURL",
-	]),
+	5: new Set(["ConfigAssetMetadataHash"]),
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
@@ -83,6 +78,16 @@ byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 	"ApprovalProgram",
 	"ClearStateProgram",
 ].forEach((field) => byteTxnFields[6].add(field));
+
+const strTxnFields: { [key: number]: Set<string> } = {
+	1: new Set(),
+	2: new Set(),
+	3: new Set(),
+	4: new Set(),
+	5: new Set(["Type", "ConfigAssetName", "ConfigAssetUnitName", "ConfigAssetURL"]),
+};
+
+strTxnFields[6] = cloneDeep(strTxnFields[5]);
 
 const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -96,6 +101,7 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 		"ConfigAssetClawback",
 	]),
 };
+
 acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
 
 const otherAddrTxnFields: { [key: number]: Set<string> } = {
@@ -156,9 +162,13 @@ export function setInnerTxField(
 		txValue = interpreter.getAssetIDByReference(Number(id), false, line, op);
 	}
 
-	if (byteTxnFields[tealVersion].has(field)) {
+	if (strTxnFields[tealVersion].has(field)) {
 		const assertedVal = op.assertBytes(val, line);
 		txValue = convertToString(assertedVal);
+	}
+
+	if (byteTxnFields[tealVersion].has(field)) {
+		txValue = op.assertBytes(val, line);
 	}
 
 	if (otherAddrTxnFields[tealVersion].has(field)) {
@@ -215,7 +225,7 @@ export function setInnerTxField(
 			break;
 		}
 		case "ConfigAssetMetadataHash": {
-			const assetMetadataHash = txValue as string;
+			const assetMetadataHash = txValue as Uint8Array;
 			if (assetMetadataHash.length !== 32) {
 				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
 			}
@@ -244,7 +254,7 @@ export function setInnerTxField(
 		}
 
 		case "VotePK": {
-			const votePk = txValue as string;
+			const votePk = txValue as Uint8Array;
 			if (votePk.length !== 32) {
 				errMsg = "VoteKey must be 32 bytes";
 			}
@@ -252,7 +262,7 @@ export function setInnerTxField(
 		}
 
 		case "SelectionPK": {
-			const selectionPK = txValue as string;
+			const selectionPK = txValue as Uint8Array;
 			if (selectionPK.length !== 32) {
 				errMsg = "SelectionPK must be 32 bytes";
 			}
