@@ -3,6 +3,7 @@ export SIGMA_DAO_PASSWORD = SigmaDao@1234
 # Below are objects needed for sigma dao app. Extend it if more sigma dao objects needed
 export SIGMA_DAO_OBJECTS = sigma_daos, asset, account_asset, account_app
 export SIGMA_DAO_SETUP_FILE = setup_sigma_dao.sql
+# https://github.com/scale-it/algo-builder/blob/326d6d34a7279dc0efc32cbcab0fc9ad4161c293/infrastructure/Makefile#L17
 export POSTGRES_UNAME = algorand
 export POSTGRES_DBNAME = pgdb
 
