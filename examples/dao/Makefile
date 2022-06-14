@@ -14,7 +14,7 @@ create-sigma-dao-user:
 	@echo "Setting up user: User=$(SIGMA_DAO_UNAME)"
 	@sudo -u postgres createuser $(SIGMA_DAO_UNAME)
 	@sudo -u postgres psql -c "ALTER USER $(SIGMA_DAO_UNAME) WITH ENCRYPTED PASSWORD '$(SIGMA_DAO_PASSWORD)';"
-# grant only read only access. DML queries has to be disabled to secure the database.
+# grant read only access.
 	@psql -U postgres -d pgdb -c "GRANT SELECT ON TABLE $(SIGMA_DAO_OBJECTS) TO $(SIGMA_DAO_UNAME);"
 
 # drop sigma_dao_user
