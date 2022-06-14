@@ -4284,24 +4284,24 @@ export class ITxnSubmit extends Op {
 			)
 		);
 		try {
-		const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
-		const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
+			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
+			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
 
-		this.interpreter.runtime.ctx.remainingFee = credit.remainingFee;
-		// set up context for inner transaction
-		this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
-		this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
-		this.interpreter.runtime.ctx.isInnerTx = true;
+			this.interpreter.runtime.ctx.remainingFee = credit.remainingFee;
+			// set up context for inner transaction
+			this.interpreter.runtime.ctx.tx = this.interpreter.currentInnerTxnGroup[0];
+			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
+			this.interpreter.runtime.ctx.isInnerTx = true;
 
-		// TODO check minimum fee 
-		//this.interpreter.runtime.ctx.deductFee()
+			// TODO check minimum fee 
+			//this.interpreter.runtime.ctx.deductFee()
 
-		const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
-			types.isExecParams(txnParam) ? {
-				sig: Buffer.alloc(5),
-				txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1))
-			} : txnParam
-		);
+			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
+				types.isExecParams(txnParam) ? {
+					sig: Buffer.alloc(5),
+					txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1))
+				} : txnParam
+			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution

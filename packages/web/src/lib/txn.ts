@@ -7,7 +7,7 @@ import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import {
 	AccountAddress,
-  AssetModFields,
+	AssetModFields,
 	ExecParams,
 	MetaType,
 	SignType,
@@ -110,7 +110,7 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
  * Returns freeze target address of the Transaction object
  * @param transaction Transaction Object
  */
- export function getTransactionFreezeAddress(transaction: Transaction): AccountAddress {
+export function getTransactionFreezeAddress(transaction: Transaction): AccountAddress {
 	if (transaction.freezeAccount !== undefined) {
 		return algosdk.encodeAddress(transaction.freezeAccount.publicKey)
 	} else {
@@ -122,7 +122,7 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
  * Returns ASA definiton
  * @param transaction Transaction Object
  */
- export function getTransactionASADefinition(transaction: Transaction): types.ASADef {
+export function getTransactionASADefinition(transaction: Transaction): types.ASADef {
 	const asaDef: types.ASADef = {
 		clawback: getAddress(transaction.assetClawback),
 		manager: getAddress(transaction.assetManager),
@@ -134,7 +134,7 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
 		defaultFrozen: transaction.assetDefaultFrozen,
 		unitName: transaction.assetUnitName,
 		url: transaction.assetURL,
-		metadataHash: transaction.assetMetadataHash ? new TextDecoder().decode(transaction.assetMetadataHash): undefined,
+		metadataHash: transaction.assetMetadataHash ? new TextDecoder().decode(transaction.assetMetadataHash) : undefined,
 		note: undefined,
 	};
 	return asaDef;
@@ -352,10 +352,10 @@ export function mkTransaction(
 					BigInt(execParams.asaDef.total || 0), // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 					execParams.asaDef.decimals as number,
 					execParams.asaDef.defaultFrozen ? execParams.asaDef.defaultFrozen : false,
-					execParams.asaDef.manager,
-					execParams.asaDef.reserve,
-					execParams.asaDef.freeze,
-					execParams.asaDef.clawback,
+					execParams.asaDef.manager !== "" ? execParams.asaDef.manager : undefined,
+					execParams.asaDef.reserve !== "" ? execParams.asaDef.reserve : undefined,
+					execParams.asaDef.freeze !== "" ? execParams.asaDef.freeze : undefined,
+					execParams.asaDef.clawback !== "" ? execParams.asaDef.clawback : undefined,
 					execParams.asaDef.unitName,
 					execParams.asaName,
 					execParams.asaDef.url,

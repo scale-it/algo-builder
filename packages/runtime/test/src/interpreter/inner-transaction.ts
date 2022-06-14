@@ -85,7 +85,7 @@ describe.only("Inner Transactions", function () {
 
 	this.beforeAll(() => setUpInterpreter(5));
 
-	describe.only("TestActionTypes", function () {
+	describe("TestActionTypes", function () {
 		it("should fail: itxn_submit without itxn_begin", function () {
 			tealCode = `
         itxn_submit
