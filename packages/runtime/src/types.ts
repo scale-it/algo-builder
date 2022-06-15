@@ -183,7 +183,7 @@ export interface Context {
 		fromAccountAddr: AccountAddress,
 		flags: ASADeploymentFlags
 	) => ASAInfo;
-	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
+	optInToASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
 		appDefinition: types.AppDefinition,

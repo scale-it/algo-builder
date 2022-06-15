@@ -150,7 +150,7 @@ class Context {
 
 	// Opt-In account to ASA
 	optInToASA(address) {
-		this.runtime.optIntoASA(this.assetIndex, address, {});
+		this.runtime.optInToASA(this.assetIndex, address, {});
 	}
 
 	// Opt-In address to Permissions SSC

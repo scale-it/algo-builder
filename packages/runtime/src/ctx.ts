@@ -286,7 +286,7 @@ export class Ctx implements Context {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
 		const assetDef = this.getAssetDef(assetIndex);
 		makeAssetTransferTxnWithSuggestedParams(
 			address,
@@ -536,7 +536,7 @@ export class Ctx implements Context {
 		const fromAccountAddr = webTx.getFromAddress(txParam);
 		txParam.amount = BigInt(txParam.amount);
 		if (txParam.amount === 0n && fromAccountAddr === txParam.toAccountAddr) {
-			this.optIntoASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
+			this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
 		} else if (txParam.amount !== 0n) {
 			this.assertAssetNotFrozen(txParam.assetID as number, fromAccountAddr);
 			this.assertAssetNotFrozen(txParam.assetID as number, txParam.toAccountAddr);
@@ -927,7 +927,7 @@ export class Ctx implements Context {
 					break;
 				}
 				case types.TransactionType.OptInASA: {
-					r = this.optIntoASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
+					r = this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
 					break;
 				}
 				case types.TransactionType.DeployApp: {
