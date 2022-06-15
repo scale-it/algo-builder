@@ -127,11 +127,7 @@ export function loadASAFile(accounts: AccountMap | RuntimeAccountMap): types.ASA
 		// to handle tests
 		filePath = path.join(ASSETS_DIR, "asa.yaml");
 	} else {
-		filePath = getPathFromDirRecursive(
-			ASSETS_DIR,
-			"asa.yaml",
-			"ASA file not defined"
-		) as string;
+		filePath = getPathFromDirRecursive(ASSETS_DIR, "asa.yaml", "") as string;
 	}
 
 	return validateASADefs(loadFromYamlFileSilent(filePath), accounts, filePath);
