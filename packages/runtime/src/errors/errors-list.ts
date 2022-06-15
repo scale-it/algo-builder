@@ -703,7 +703,7 @@ const runtimeAsaErrors = {
 		message: "ASA file is undefined.",
 		title: "ASA file is undefined.",
 		description:
-			"Attempt to read an undefined ASA file (asa.yml)",
+			"Attempt to read an undefined ASA file (asa.yaml)",
 	},
 	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
 		number: 1511,
