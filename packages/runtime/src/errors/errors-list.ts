@@ -707,9 +707,9 @@ const runtimeAsaErrors = {
 	},
 	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
 		number: 1511,
-		message: "ASA defition not found in asa file(asa.yml)",
-		title: "ASA definition not found in asa file(asa.yml)",
-		description: "ASA definition not found in asa file. Please check asa.yml",
+		message: "ASA defition not found in asa file(asa.yaml)",
+		title: "ASA definition not found in asa file(asa.yaml)",
+		description: "ASA definition not found in asa file. Please check asa.yaml",
 	},
 };
 
