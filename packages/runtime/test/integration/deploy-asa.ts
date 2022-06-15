@@ -1,7 +1,9 @@
 import { assert } from "chai";
 
+import RUNTIME_ERRORS from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 
 const minBalance = 1e6;
 
@@ -12,7 +14,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 	let runtime: Runtime;
 	let alice: AccountStore;
 
-	this.beforeAll(async function () {
+	this.beforeEach(async function () {
 		john = new AccountStore(minBalance, "john");
 		bob = new AccountStore(minBalance, "bob");
 		alice = new AccountStore(minBalance, "alice");
@@ -34,5 +36,28 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 		syncAccounts();
 		assert.isDefined(bob.getAssetHolding(asset));
 		assert.isDefined(alice.getAssetHolding(asset));
+	});
+
+	it("Should throw error when ASA definition not found in asa.yaml", () => {
+		expectRuntimeError(
+			() =>
+				runtime.deployASA("asa-invalid", {
+					creator: { ...john.account, name: "john" },
+				}),
+			RUNTIME_ERRORS.ASA.ASA_DEFINITION_NO_FOUND_IN_ASA_FILE
+		);
+	});
+
+	describe("ASA file is undefinded", function () {
+		useFixture("loop"); // project don't have asa-file
+		it("Should fail b/c we tried to get asa from asa file for deploy", () => {
+			expectRuntimeError(
+				() =>
+					runtime.deployASA("asa", {
+						creator: { ...john.account, name: "john" },
+					}),
+				RUNTIME_ERRORS.ASA.ASA_FILE_IS_UNDEFINED
+			);
+		});
 	});
 });
