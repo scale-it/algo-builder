@@ -164,7 +164,7 @@ describe("Bond token Tests", function () {
 		assert.equal(issuerAddress.getAssetHolding(currentBondIndex)?.amount, 1000000n);
 
 		// at epoch_0 elon buys 10 bonds
-		runtime.optIntoASA(currentBondIndex, elon.address, {});
+		runtime.optInToASA(currentBondIndex, elon.address, {});
 		runtime.optInToApp(elon.address, applicationId, {}, {});
 		let amount = 10;
 		let algoAmount = amount * issue;
@@ -182,7 +182,7 @@ describe("Bond token Tests", function () {
 		syncAccounts();
 		assert.equal(elon.getAssetHolding(currentBondIndex)?.amount, 10n);
 
-		runtime.optIntoASA(currentBondIndex, bob.address, {});
+		runtime.optInToASA(currentBondIndex, bob.address, {});
 		// elon sells 2 bonds to bob for 2020 Algo
 		const sellTx = [
 			{

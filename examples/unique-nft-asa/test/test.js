@@ -144,7 +144,7 @@ describe("Unique NFT ASA tests", function () {
 
 			// optInToASA  by creator (before transfer)
 			const assetIndex = runtime.getAssetInfoFromName("nft-asa").assetIndex;
-			runtime.optIntoASA(assetIndex, creator.address, {});
+			runtime.optInToASA(assetIndex, creator.address, {});
 			syncAccounts();
 
 			// verify optIn
@@ -218,7 +218,7 @@ describe("Unique NFT ASA tests", function () {
 				runtime.executeTx(createNftTxGroup);
 				const assetIndex = runtime.getAssetInfoFromName("nft-asa").assetIndex;
 				transferNftTxGroup[1].assetID = assetIndex;
-				runtime.optIntoASA(assetIndex, creator.address, {});
+				runtime.optInToASA(assetIndex, creator.address, {});
 				syncAccounts();
 			};
 

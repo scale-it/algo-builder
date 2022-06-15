@@ -150,7 +150,7 @@ describe("Bond token failing tests", function () {
 	}
 
 	function buy() {
-		runtime.optIntoASA(initialBond, elon.address, {});
+		runtime.optInToASA(initialBond, elon.address, {});
 		try {
 			runtime.optInToApp(elon.address, applicationId, {}, {});
 			// eslint-disable-next-line no-empty
@@ -266,7 +266,7 @@ describe("Bond token failing tests", function () {
 		};
 		runtime.executeTx([appCallParams]);
 		optInLsigToBond(runtime, lsig, initialBond, appManager);
-		runtime.optIntoASA(initialBond, elon.address, {});
+		runtime.optInToASA(initialBond, elon.address, {});
 
 		const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
 		groupTx[0].toAccountAddr = elon.address;
@@ -278,7 +278,7 @@ describe("Bond token failing tests", function () {
 		issue();
 
 		// Buy tokens from issuer
-		runtime.optIntoASA(initialBond, elon.address, {});
+		runtime.optInToASA(initialBond, elon.address, {});
 		runtime.optInToApp(elon.address, applicationId, {}, {});
 		const algoAmount = 10 * 1000;
 
@@ -312,7 +312,7 @@ describe("Bond token failing tests", function () {
 	it("Buyer tries to buy bonds without paying fees", () => {
 		issue();
 		// Buy tokens from issuer
-		runtime.optIntoASA(initialBond, elon.address, {});
+		runtime.optInToASA(initialBond, elon.address, {});
 		const algoAmount = 10 * 1000;
 
 		const groupTx = buyTxRuntime(

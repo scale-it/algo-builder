@@ -206,7 +206,7 @@ describe("DAO test", function () {
 
 		// optIn to ASA(Gov Token) by accounts
 		for (const acc of [proposerA, proposerB, voterA, voterB, daoFundLsigAcc]) {
-			runtime.optIntoASA(govTokenID, acc.address, {});
+			runtime.optInToASA(govTokenID, acc.address, {});
 		}
 		syncAccounts();
 
@@ -988,7 +988,7 @@ describe("DAO test", function () {
 		);
 
 		//verify that the funds from proposalLsig cannot be withdrawed to an non-owner account
-		runtime.optIntoASA(govTokenID, alice.address, {});
+		runtime.optInToASA(govTokenID, alice.address, {});
 		[alice] = runtime.defaultAccounts();
 		const withdrawTxFail = withdrawTx.map((item) => ({
 			...item,

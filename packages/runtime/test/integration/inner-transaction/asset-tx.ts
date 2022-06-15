@@ -106,7 +106,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		runtime.executeTx([asaTransferParam]);
 		syncAccounts();
 
-		runtime.optIntoASA(assetID, elon.address, {});
+		runtime.optInToASA(assetID, elon.address, {});
 		syncAccounts();
 	}
 
