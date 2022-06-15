@@ -38,7 +38,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 		assert.isDefined(alice.getAssetHolding(asset));
 	});
 
-	it("Should throw error when ASA definition not found in asa.yaml", () => {
+	it("Should throw  an error when ASA definition not found in asa.yaml", () => {
 		expectRuntimeError(
 			() =>
 				runtime.deployASA("asa-invalid", {
@@ -49,7 +49,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 	});
 
 	describe("ASA file is undefinded", function () {
-		useFixture("loop"); // project don't have asa-file
+		useFixture("loop"); // project does not have an asa-file
 		it("Should fail b/c we tried to get asa from asa file for deploy", () => {
 			expectRuntimeError(
 				() =>
