@@ -2,10 +2,10 @@ Closes #x
 
 ## PR Type
 
--[ ] Feature
--[ ] Bugfix
--[ ] Documentation
--[ ] Refactoring
+- [ ] Feature
+- [ ] Bugfix
+- [ ] Documentation
+- [ ] Refactoring
 
 ## Proposed Changes
 
@@ -15,11 +15,11 @@ Closes #x
 
 ## TODO
 
--[ ] update change log
+- [ ] update change log
 
 ## Breaking changes 
 
--[ ] Yes 
--[ ] No
+- [ ] Yes 
+- [ ] No
 
 ## Potential followups
