@@ -80,7 +80,7 @@ Setup sigma dao:
 
     make setup_sigma_dao
 
-Run below script if you want to delete the sigma dao user, sigma dao user should already been created:
+Run below script to delete the sigma dao user, sigma dao user should be present:
 
     make drop-sigma-dao-user
 
