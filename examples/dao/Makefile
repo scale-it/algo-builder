@@ -12,11 +12,11 @@ drop-create-sigma-dao-user: drop-sigma-dao-user create-sigma-dao-user
 
 # create sigma_dao_user
 create-sigma-dao-user:
-	@echo "Setting up user: User=$(SIGMA_DAO_UNAME)"
+	@echo "Setting up User=$(SIGMA_DAO_UNAME)"
 	@sudo -u postgres createuser $(SIGMA_DAO_UNAME)
 	@sudo -u postgres psql -c "ALTER USER $(SIGMA_DAO_UNAME) WITH ENCRYPTED PASSWORD '$(SIGMA_DAO_PASSWORD)';"
 # grant read only access.
-	@psql -U postgres -d pgdb -c "GRANT SELECT ON TABLE $(SIGMA_DAO_OBJECTS) TO $(SIGMA_DAO_UNAME);"
+	@psql -U postgres -d $(POSTGRES_DBNAME) -c "GRANT SELECT ON TABLE $(SIGMA_DAO_OBJECTS) TO $(SIGMA_DAO_UNAME);"
 
 # drop sigma_dao_user
 drop-sigma-dao-user:
