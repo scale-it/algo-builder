@@ -20,7 +20,6 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 	let appDefinition: types.AppDefinitionFromFile;
 
 	this.beforeAll(async function () {
-		runtime = new Runtime([john, alice]); // setup test
 		approvalProgramFilename = "deleteApp.teal";
 		clearProgramFilename = "clear.teal";
 
@@ -43,6 +42,10 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 			payFlags: { totalFee: 1000 },
 			appArgs: [],
 		};
+	});
+
+	this.beforeEach(() => {
+		runtime = new Runtime([john, alice]); // setup test
 	});
 
 	it("should fail during delete application if app id is not defined", function () {

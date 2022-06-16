@@ -29,54 +29,53 @@ You can connect to `web` package in your react app by using different wallets. C
 1.  ### AlgoSigner:
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
-```js
-    const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
-```
+
+      ```js
+      const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+      ```
+
 2.  ### MyAlgo Wallet:
 
     Create an instance of the `MyAlgoWalletSession` class by passing the walletURL(token, server, port) and connect it using `connectToMyAlgo`.
 
-
     ```js
     const walletURL = {
-         token: token,
-         host: host,
-         port: port,
-    }
-    const wcSession = new MyAlgoWalletSession(walletURL)  
+    	token: token,
+    	server: server,
+    	port: port,
+    };
+    const wcSession = new MyAlgoWalletSession(walletURL);
     await wcSession.connectToMyAlgo();
     ```
-
 
 3.  ### Wallet Connect:
 
     Create an instance of the `WallectConnectSession` class by passing the walletURL(token, server, port) and create a new session using `create` and connect to it using `onConnect`.
 
-
     ```js
     const walletURL = {
-         token: token,
-         host: host,
-         port: port,
-    }
+    	token: token,
+    	server: server,
+    	port: port,
+    };
     const wcSession = new WallectConnectSession(walletURL);
 
     await wcSession.create(true);
     wcSession.onConnect((error, response) => console.log(error, response));
-```
+    ```
 
 Now you can use it to execute a transaction:
 
 ```javascript
-    const txParams = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccountAddr: fromAddress,
-      toAccountAddr: toAddress,
-      amountMicroAlgos: amount,
-      payFlags: {},
-    };
-    let response = await wcSession.executeTx(txParams);
+const txParams = {
+	type: types.TransactionType.TransferAlgo,
+	sign: types.SignType.SecretKey,
+	fromAccountAddr: fromAddress,
+	toAccountAddr: toAddress,
+	amountMicroAlgos: amount,
+	payFlags: {},
+};
+let response = await wcSession.executeTx(txParams);
 ```
 
 This code will create the transaction, let the user sign it using selected wallet and send it to the network.
@@ -142,14 +141,14 @@ const daoAppInfo = await deployer.deployApp(
 	creator,
 	{
 	    appName: "DAO App" // app name passed here
-        metaType: MetaType.File
+            metaType: MetaType.File,
 	    approvalProgramFilename: "dao-app-approval.py",
 	    clearProgramFilename: "dao-app-clear.py",
-		localInts: 9,
-		localBytes: 7,
-		globalInts: 4,
-		globalBytes: 2,
-		appArgs: appArgs,
+	    localInts: 9,
+	    localBytes: 7,
+	    globalInts: 4,
+	    globalBytes: 2,
+	    appArgs: appArgs,
 	},
 	{},
 	{},

@@ -23,6 +23,7 @@ import {
 	mockLsig,
 	mockPendingTransactionInformation,
 	mockSuggestedParam,
+	TXN_OBJ,
 } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -93,8 +94,9 @@ describe("Opt-In to ASA", () => {
 				"confirmed-round": 1,
 				"asset-index": 1,
 				"application-index": 1,
-				"global-state-delta": "string",
-				"local-state-delta": "string",
+				txn: {
+					txn: TXN_OBJ,
+				},
 			},
 		];
 	});

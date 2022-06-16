@@ -19,9 +19,10 @@ import {
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
 import {
+	AppInfo,
+	ASAInfo,
 	Context,
 	EncTx,
-	ExecutionMode,
 	RuntimeAccountI,
 	StackElem,
 	TxField,
@@ -53,12 +54,18 @@ const globalAndLocalNumTxnFields = new Set([
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
+	if (a instanceof Uint8Array) {
+		return a;
+	}
+
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
+
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
@@ -85,17 +92,17 @@ export function checkIfAssetDeletionTx(txn: Transaction): boolean {
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
  * @param tx Current transaction
- * @param txns Transaction group
- * @param tealVersion version of TEAL
+ * @param gtxns Transaction group
+ * @param interpreter interpreter object
  */
 export function txnSpecByField(
 	txField: string,
 	tx: EncTx,
 	gtxns: EncTx[],
-	tealVersion: number
+	interpreter: Interpreter
 ): StackElem {
 	let result; // store raw result, parse and return
-
+	const tealVersion = interpreter.tealVersion;
 	// handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
 	if (assetTxnFields.has(txField)) {
 		const s = TxnFields[tealVersion][txField];
@@ -159,6 +166,25 @@ export function txnSpecByField(
 			}
 			break;
 		}
+		case "CreatedAssetID": {
+			const asaInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
+			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
+			else result = 0n;
+			break;
+		}
+		case "CreatedApplicationID": {
+			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
+			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
+			else if (isEncTxApplicationCreate(tx))
+				result = BigInt(interpreter.runtime.ctx.state.appCounter + 1);
+			else result = 0n;
+			break;
+		}
+		case "LastLog": {
+			result = interpreter.runtime.ctx.lastLog;
+			break;
+		}
+
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
@@ -175,7 +201,7 @@ export function txnSpecByField(
  * @param txField transaction field
  * @param idx index in EncodedTransaction[txField]
  * @param op Op object
- * @param tealVersion version of TEAL
+ * @param interpreter interpreter object
  * @param line line number in TEAL file
  */
 export function txAppArg(
@@ -235,7 +261,7 @@ export function isEncTxAssetDeletion(txn: EncTx): boolean {
 }
 
 /**
- * Check if given encoded transaction obj is asset deletion
+ * Check if given encoded transaction obj is asset config
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig(txn: EncTx): boolean {
@@ -243,8 +269,8 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
 		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
 		txn.caid !== undefined &&
 		txn.caid !== 0 && // assetIndex should not be 0
-		!isEncTxAssetDeletion(txn)
-	); // AND should not be asset deletion
+		!isEncTxAssetDeletion(txn) // AND should not be asset deletion
+	);
 }
 
 /**
@@ -515,16 +541,8 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 			result = BigInt(logs.length);
 			break;
 		}
-		case "CreatedAssetID": {
-			result = BigInt(op.interpreter.runtime.ctx.createdAssetID);
-			break;
-		}
-		case "CreatedApplicationID": {
-			result = 0n; // can we create an app in inner-tx?
-			break;
-		}
 		default: {
-			result = txnSpecByField(op.field, tx, [tx], op.interpreter.tealVersion);
+			result = txnSpecByField(op.field, tx, [tx], op.interpreter);
 			if (result === undefined || Object(result).length === 0) {
 				result = txAppArg(op.field, tx, op.idx, op, op.interpreter, op.line);
 				break;

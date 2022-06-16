@@ -93,7 +93,7 @@ export interface State {
 	globalApps: Map<number, string>;
 	assetDefs: Map<number, AccountAddress>;
 	assetNameInfo: Map<string, ASAInfo>;
-	appNameInfo: Map<string, AppInfo>;
+	appNameMap: Map<string, AppInfo>;
 	appCounter: number;
 	assetCounter: number;
 	txReceipts: Map<string, TxReceipt>; // map of {txID: txReceipt}
@@ -142,6 +142,7 @@ export interface Context {
 	gtxs: EncTx[]; // all transactions
 	args?: Uint8Array[];
 	debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+	lastLog: Uint8Array;
 	budget: number;
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
@@ -150,7 +151,6 @@ export interface Context {
 	innerTxAppIDCallStack: number[];
 	// remaining fee from pool
 	remainingFee: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;
 	getApp: (appID: number, line?: number) => SSCAttributesM;
@@ -183,7 +183,7 @@ export interface Context {
 		fromAccountAddr: AccountAddress,
 		flags: ASADeploymentFlags
 	) => ASAInfo;
-	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
+	optInToASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
 		appDefinition: types.AppDefinition,

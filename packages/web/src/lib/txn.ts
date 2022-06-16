@@ -48,8 +48,8 @@ export function updateTxFee(params: TxParams, tx: Transaction): Transaction {
 }
 
 /**
- * Returns unsigned transaction as per ExecParams
- * ExecParams can be of following types:
+ * Converts ExecParams to Algo SDK Transaction.
+ * ExecParams is a type safe and more friendly way to create Algorand transactions.
  *  + AlgoTransferParam used for transferring algo
  *  + AssetTransferParam used for transferring asset
  *  + ModifyAssetParam used to modify asset mutable properties
@@ -264,7 +264,8 @@ export function mkTransaction(
 				);
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
-				throw new Error("Not suppport"); // TODO: better message error
+				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
+				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + appDef.metaType);
 			}
 		}
 		case TransactionType.UpdateApp: {
@@ -285,7 +286,8 @@ export function mkTransaction(
 				);
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
-				throw new Error("Not support");
+				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
+				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + execParams.newAppCode.metaType);
 			}
 		}
 		case TransactionType.OptInToApp: {

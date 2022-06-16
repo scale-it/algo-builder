@@ -532,11 +532,17 @@ const runtimeGeneralErrors = {
 		description: `Account and address mismatch in the current state`,
 	},
 	MAX_SCHEMA_ENTRIES_EXCEEDED: {
-		number: 1508,
+		number: 1318,
 		message: "Local/Global state keys has too many entries",
 		title: "Max schema entries exceeded",
 		description:
 			"Local key entires: used: %localState%, max: %localMax%. Global  key entires: used: %globalState, max: %globalMax%.",
+	},
+	APP_NAME_ALREADLY_USED: {
+		number: 1319,
+		message: "%appName% already used. Please choose another name.",
+		title: "%appName% already used",
+		description: "%appName% already used. Please choose another name.",
 	},
 };
 
@@ -691,6 +697,19 @@ const runtimeAsaErrors = {
 		message: `Assetholding of creator account cannot be closed to another account`,
 		title: "Cannot close asset ID in allocating account",
 		description: "Asset holding of Asset creator cannot be closed to other account",
+	},
+	ASA_FILE_IS_UNDEFINED: {
+		number: 1511,
+		message: "ASA file is undefined.",
+		title: "ASA file is undefined.",
+		description:
+			"Attempt to read an undefined ASA file (asa.yaml)",
+	},
+	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
+		number: 1511,
+		message: "ASA defition not found in asa file(asa.yaml)",
+		title: "ASA definition not found in asa file(asa.yaml)",
+		description: "ASA definition not found in asa file. Please check asa.yaml",
 	},
 };
 

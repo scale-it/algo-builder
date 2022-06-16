@@ -62,7 +62,7 @@ export class Runtime {
 			globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
 			assetDefs: new Map<number, AccountAddress>(), // number represents assetId
 			assetNameInfo: new Map<string, ASAInfo>(),
-			appNameInfo: new Map<string, AppInfo>(),
+			appNameMap: new Map<string, AppInfo>(),
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
@@ -326,7 +326,7 @@ export class Runtime {
 
 	/**
 	 * Returns asset creator account or throws error is it doesn't exist
-	 * @param Asset Index
+	 * @param assetId Index
 	 */
 	getAssetAccount(assetId: number): AccountStoreI {
 		const addr = this.store.assetDefs.get(assetId);
@@ -363,7 +363,16 @@ export class Runtime {
 	 * @param clear
 	 */
 	getAppInfoFromName(approval: string, clear: string): AppInfo | undefined {
-		return this.store.appNameInfo.get(approval + "-" + clear);
+		return this.store.appNameMap.get(approval + "-" + clear);
+	}
+
+	/**
+	 * Queries app id by app name from global state.
+	 * Returns undefined if app is not found.
+	 * @param appName
+	 */
+	getAppByName(appName: string): AppInfo | undefined {
+		return this.store.appNameMap.get(appName);
 	}
 
 	/**
@@ -483,7 +492,7 @@ export class Runtime {
 	/**
 	 * Create Asset in Runtime without using asa.yaml
 	 * @deprecated `deployASADef` should be used instead
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	addASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
@@ -515,7 +524,7 @@ export class Runtime {
 		for (const accName of accounts) {
 			const address = this.store.accountNameAddress.get(accName);
 			if (address) {
-				this.optIntoASA(assetID, address, {});
+				this.optInToASA(assetID, address, {});
 			}
 		}
 	}
@@ -526,8 +535,8 @@ export class Runtime {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
-		const txReceipt = this.ctx.optIntoASA(assetIndex, address, flags);
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+		const txReceipt = this.ctx.optInToASA(assetIndex, address, flags);
 
 		this.store = this.ctx.state;
 		return txReceipt;
@@ -955,6 +964,7 @@ export class Runtime {
 	 * This function executes TEAL code line by line
 	 * @param program : teal code as string
 	 * @param executionMode : execution Mode (Stateless or Stateful)
+	 * @param indexInGroup: txn index in transaction group.
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 * NOTE: Application mode is only supported in TEALv > 1

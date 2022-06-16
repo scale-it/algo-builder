@@ -157,7 +157,6 @@ def approval_program():
         App.globalPut(url, Txn.application_args[4]),
         App.globalPut(dao_name, Txn.application_args[5]),
         App.globalPut(gov_token_id, Btoi(Txn.application_args[6])),
-        Log(Bytes("SigmaDAO created")),
         Return(Int(1))
     ])
 

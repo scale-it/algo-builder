@@ -1,5 +1,4 @@
 const { types } = require("@algo-builder/web");
-const { bytesToBigInt } = require("algosdk");
 const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
@@ -41,6 +40,8 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	// third tx: call master app
+	// verify logic in first and second transaction.
+	// You can check `assets/coordinator.py` for more details.
 	const masterTxnParam = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,

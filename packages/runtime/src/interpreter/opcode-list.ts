@@ -1,7 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { parsing, types } from "@algo-builder/web";
-import algosdk, {
-	ALGORAND_MIN_TX_FEE,
+import {
 	decodeAddress,
 	decodeUint64,
 	encodeAddress,
@@ -11,7 +10,7 @@ import algosdk, {
 	modelsv2,
 	verifyBytes,
 } from "algosdk";
-import { setSendTransactionHeaders } from "algosdk/dist/types/src/client/v2/algod/sendRawTransaction";
+import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -1408,7 +1407,7 @@ export class Txn extends Op {
 				this.field,
 				this.interpreter.runtime.ctx.tx,
 				this.interpreter.runtime.ctx.gtxs,
-				this.interpreter.tealVersion
+				this.interpreter
 			);
 		}
 		stack.push(result);
@@ -1459,12 +1458,11 @@ export class Gtxn extends Op {
 		this.assertUint8(BigInt(this.txIdx), this.line);
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		let result;
-
 		const tx = this.groupTxn[this.txIdx]; // current tx
 		if (this.txFieldIdx !== undefined) {
 			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
-			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
+			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter);
 		}
 		stack.push(result);
 		return this.computeCost();
@@ -4256,7 +4254,9 @@ export class ITxnSubmit extends Op {
 		// Supports only calling app(NoOpt) for app transaction type.
 		for (const tx of this.interpreter.currentInnerTxnGroup) {
 			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
-				console.warn("Only supports application call in this version");
+				console.log(
+					chalk.yellowBright("Current Runtime version only supports application call!!!")
+				);
 				return this.computeCost();
 			}
 		}
@@ -4554,6 +4554,9 @@ export class Log extends Op {
 		const logByte = this.assertBytes(stack.pop(), this.line);
 		const txID = this.interpreter.runtime.ctx.tx.txID;
 		const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
+
+		// update last log
+		this.interpreter.runtime.ctx.lastLog = logByte;
 		// for Log opcode we assume receipt always exists
 		// TODO: recheck when log opcode failed
 		if (txReceipt) {

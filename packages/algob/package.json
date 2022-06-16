@@ -39,7 +39,13 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"files": ["build/", "LICENSE", "README.md", "setup_dev_project.sh", "sample-project/"],
+	"files": [
+		"build/",
+		"LICENSE",
+		"README.md",
+		"setup_dev_project.sh",
+		"sample-project/"
+	],
 	"devDependencies": {
 		"@types/chai": "^4.3.0",
 		"@types/debug": "^4.1.7",
@@ -89,9 +95,19 @@
 		"zod": "^3.13.4"
 	},
 	"nyc": {
-		"extension": [".ts"],
-		"exclude": ["build", "test", "coverage", ".nyc_output"],
-		"reporter": ["text", "lcovonly"],
+		"extension": [
+			".ts"
+		],
+		"exclude": [
+			"build",
+			"test",
+			"coverage",
+			".nyc_output"
+		],
+		"reporter": [
+			"text",
+			"lcovonly"
+		],
 		"all": true
 	}
 }

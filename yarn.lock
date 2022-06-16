@@ -70,6 +70,7 @@ __metadata:
     "@types/sinon": ^10.0.11
     algosdk: ^1.16.0
     chai: ^4.3.6
+    chalk: ^4.1.2
     elliptic: ^6.5.4
     eslint: ^8.10.0
     hi-base32: ^0.5.1
@@ -6409,6 +6410,19 @@ __metadata:
   checksum: a90dc80ed1e7b18db8f4e16e86a5574f87632dc729cfc07d9ea3ced50021ad42bb4e08f22c0913e0b98e3837b0b717e0a51613c65f30418e21eb99da6556a74c
   languageName: node
   linkType: hard
+
+"trampoline@workspace:examples/trampoline":
+  version: 0.0.0-use.local
+  resolution: "trampoline@workspace:examples/trampoline"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
+    algosdk: ^1.16.0
+    eslint: ^8.10.0
+    mocha: ^9.2.1
+  languageName: unknown
+  linkType: soft
 
 "trim-repeated@npm:^1.0.0":
   version: 1.0.0

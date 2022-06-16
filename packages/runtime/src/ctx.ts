@@ -17,7 +17,6 @@ import {
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
-import { pyExt, tealExt } from "./lib/pycompile-op";
 import { calculateFeeCredit } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
@@ -57,8 +56,7 @@ export class Ctx implements Context {
 	innerTxAppIDCallStack: number[];
 	remainingFee: number;
 	budget: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
-
+	lastLog: Uint8Array;
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -73,6 +71,7 @@ export class Ctx implements Context {
 		this.args = args;
 		this.runtime = runtime;
 		this.debugStack = debugStack;
+		this.lastLog = new Uint8Array([]);
 		// Mapping from the tx index number to the scratch space.
 		// Scratch space is a list of elements.
 		this.sharedScratchSpace = new Map<number, StackElem[]>();
@@ -82,7 +81,6 @@ export class Ctx implements Context {
 		this.isInnerTx = false;
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
-		this.createdAssetID = 0;
 		this.remainingFee = 0;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
@@ -140,7 +138,7 @@ export class Ctx implements Context {
 
 	/**
 	 * Returns asset creator account from runtime.ctx or throws error is it doesn't exist
-	 * @param Asset Index
+	 * @param assetId Asset Index
 	 */
 	getAssetAccount(assetId: number): AccountStoreI {
 		const addr = this.state.assetDefs.get(assetId);
@@ -242,6 +240,12 @@ export class Ctx implements Context {
 	 * @param flags asa deployment flags
 	 */
 	deployASA(name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): ASAInfo {
+		if (this.runtime.loadedAssetsDefs === {}) {
+			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_FILE_IS_UNDEFINED);
+		}
+		if (this.runtime.loadedAssetsDefs[name] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_DEFINITION_NO_FOUND_IN_ASA_FILE);
+		}
 		return this.deployASADef(name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags);
 	}
 
@@ -277,10 +281,6 @@ export class Ctx implements Context {
 		};
 		this.state.assetNameInfo.set(name, asaInfo);
 
-		if (this.isInnerTx) {
-			this.createdAssetID = this.state.assetCounter;
-		}
-
 		// set & return transaction receipt
 		this.state.txReceipts.set(this.tx.txID, asaInfo);
 		return asaInfo;
@@ -292,7 +292,7 @@ export class Ctx implements Context {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
 		const assetDef = this.getAssetDef(assetIndex);
 		makeAssetTransferTxnWithSuggestedParams(
 			address,
@@ -415,7 +415,15 @@ export class Ctx implements Context {
 			approvalFile,
 			clearFile,
 		};
-		this.state.appNameInfo.set(approvalFile + "-" + clearFile, appInfo);
+
+		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
+		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
+				appName: appDefinition.appName,
+			});
+		}
+
+		this.state.appNameMap.set(appDefinition.appName, appInfo);
 
 		const acc = new AccountStore(
 			0,
@@ -534,7 +542,7 @@ export class Ctx implements Context {
 		const fromAccountAddr = webTx.getFromAddress(txParam);
 		txParam.amount = BigInt(txParam.amount);
 		if (txParam.amount === 0n && fromAccountAddr === txParam.toAccountAddr) {
-			this.optIntoASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
+			this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
 		} else if (txParam.amount !== 0n) {
 			this.assertAssetNotFrozen(txParam.assetID as number, fromAccountAddr);
 			this.assertAssetNotFrozen(txParam.assetID as number, txParam.toAccountAddr);
@@ -608,7 +616,7 @@ export class Ctx implements Context {
 	 * Revoking an asset for an account removes a specific number of the asset
 	 * from the revoke target account.
 	 * @param recipient asset receiver address
-	 * @param assetId asset index
+	 * @param assetID asset index
 	 * @param revocationTarget revoke target account
 	 * @param amount amount of assets
 	 */
@@ -688,8 +696,7 @@ export class Ctx implements Context {
 	/**
 	 * Update application
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param appSourceCode new application source
 	 * @param idx index of transaction in group
 	 * @param scTmplParams Smart Contract template parameters
 	 */
@@ -926,7 +933,7 @@ export class Ctx implements Context {
 					break;
 				}
 				case types.TransactionType.OptInASA: {
-					r = this.optIntoASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
+					r = this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
 					break;
 				}
 				case types.TransactionType.DeployApp: {

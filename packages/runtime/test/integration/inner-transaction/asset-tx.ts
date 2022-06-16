@@ -46,6 +46,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 	this.beforeEach(() => {
 		// reset app (delete + create)
 		john.createdApps.delete(appID);
+		appDefinition.appName = "app" + Date.now();
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account
 
@@ -105,7 +106,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		runtime.executeTx([asaTransferParam]);
 		syncAccounts();
 
-		runtime.optIntoASA(assetID, elon.address, {});
+		runtime.optInToASA(assetID, elon.address, {});
 		syncAccounts();
 	}
 

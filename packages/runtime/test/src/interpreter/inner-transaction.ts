@@ -867,7 +867,7 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should create new holding in appAccount`, function () {
-			interpreter.runtime.ctx.optIntoASA(assetID1, appAccAddr, {});
+			interpreter.runtime.ctx.optInToASA(assetID1, appAccAddr, {});
 			// increase asa balance to 5
 			const holding = interpreter.runtime.ctx.state.accounts
 				.get(appAccAddr)
@@ -901,7 +901,7 @@ describe("Inner Transactions", function () {
 
 		it(`should fail: insufficient balance`, function () {
 			// optin by txn Account1
-			interpreter.runtime.ctx.optIntoASA(assetID1, johnAddr, {});
+			interpreter.runtime.ctx.optInToASA(assetID1, johnAddr, {});
 
 			const teal =
 				`
@@ -1070,7 +1070,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
-			const lastAssetID = interpreter.runtime.ctx.createdAssetID;
+			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
 
 			const create = `
         itxn_begin
@@ -1093,8 +1093,8 @@ describe("Inner Transactions", function () {
       `;
 
 			assert.doesNotThrow(() => executeTEAL(create));
-			const createdAssetID = interpreter.runtime.ctx.createdAssetID;
-			assert.equal(createdAssetID, lastAssetID + 1);
+			const createdAssetID = lastAssetID + 1;
+			assert.equal(createdAssetID, interpreter.runtime.ctx.state.assetCounter);
 
 			const freeze = `
         itxn_begin
@@ -1120,7 +1120,7 @@ describe("Inner Transactions", function () {
 			expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 
 			// should freeze now
-			interpreter.runtime.optIntoASA(createdAssetID, johnAddr, {});
+			interpreter.runtime.optInToASA(createdAssetID, johnAddr, {});
 			assert.doesNotThrow(() => executeTEAL(freeze));
 
 			// verify freeze

@@ -123,7 +123,7 @@ export class LogicSig {
 
 	/**
 	 * Performs signature verification
-	 * @param accAddr Sender's account address
+	 * @param accPk Sender's account public key
 	 */
 	verify(accPk: Uint8Array): boolean {
 		const accAddr = encodeAddress(accPk);
@@ -257,7 +257,7 @@ export class LogicSigAccount {
 	 * LogicSigAccount to make it a delegated account.
 	 *
 	 * @param program - program in TEAL file
-	 * @param args - An optional array of arguments for the program.
+	 * @param programArgs - An optional array of arguments for the program.
 	 */
 	constructor(program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
 		this.lsig = new LogicSig(program, programArgs);

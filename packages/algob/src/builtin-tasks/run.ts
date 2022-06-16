@@ -1,4 +1,5 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
+import chalk from "chalk";
 import debug from "debug";
 import fsExtra from "fs-extra";
 
@@ -101,8 +102,7 @@ async function runSortedScripts(
 			log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
 			// '\x1b[33m%s\x1b[0m' this is used for setting the message color to yellow.
 			console.warn(
-				"\x1b[33m%s\x1b[0m",
-				`Skipping: Checkpoint exists for script ${relativeScriptPath}`
+				chalk.yellowBright(`Skipping: Checkpoint exists for script ${relativeScriptPath}`)
 			);
 			continue;
 		}
