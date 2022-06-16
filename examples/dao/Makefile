@@ -26,5 +26,5 @@ drop-sigma-dao-user:
 	@psql -d $(POSTGRES_DBNAME) -c "DROP USER $(SIGMA_DAO_UNAME);"
 
 # execute sigma dao setup file
-setup_sigma_dao:
+setup-sigma-dao:
 	@psql -U $(POSTGRES_UNAME) -d $(POSTGRES_DBNAME) -a -f $(SIGMA_DAO_SETUP_FILE)

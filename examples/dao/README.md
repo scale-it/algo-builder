@@ -78,7 +78,7 @@ Create a sigma dao user, if not already created:
 
 Setup sigma dao:
 
-    make setup_sigma_dao
+    make setup-sigma-dao
 
 Run below script to delete the sigma dao user, sigma dao user should be present:
 
