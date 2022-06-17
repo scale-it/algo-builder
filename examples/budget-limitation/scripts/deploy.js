@@ -6,19 +6,18 @@ async function run(runtimeEnv, deployer) {
 
 	// Create Application
 	const appInfo = await deployer.deployApp(
-		"handle.py",
-		"clear.py",
+		creator,
 		{
-			sender: creator,
-			localInts: 0,
-			localBytes: 0,
-			globalInts: 0,
-			globalBytes: 0,
-			appArgs: ["str:initialize"],
+			appName: "App",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "handle.py", // approval program
+			clearProgramFilename: "clear.py", // clear program
+			localInts: 1,
+			localBytes: 1,
+			globalInts: 1,
+			globalBytes: 1,
 		},
-		{},
-		{},
-		"app"
+		{}
 	);
 
 	console.log(appInfo);
