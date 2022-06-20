@@ -54,6 +54,7 @@ export class Ctx implements Context {
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
+	remainingTxn: number;
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;
@@ -82,6 +83,7 @@ export class Ctx implements Context {
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.remainingFee = 0;
+		this.remainingTxn = 256;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
@@ -776,6 +778,13 @@ export class Ctx implements Context {
 				this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
 			} else if (txParam.sign === types.SignType.SecretKey) {
 				this.runtime.validateAccountSignature(txParam);
+			}
+
+			//verify and reduce number remain Txn
+			if (this.remainingTxn > 0) {
+				this.remainingTxn--;
+			} else {
+				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.TOO_MANY_INNER_TXN);
 			}
 
 			// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract

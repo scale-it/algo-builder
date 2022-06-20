@@ -1290,24 +1290,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"algosdk@npm:^1.14.0":
-  version: 1.17.0
-  resolution: "algosdk@npm:1.17.0"
-  dependencies:
-    algo-msgpack-with-bigint: ^2.1.1
-    buffer: ^6.0.2
-    hi-base32: ^0.5.1
-    js-sha256: ^0.9.0
-    js-sha3: ^0.8.0
-    js-sha512: ^0.8.0
-    json-bigint: ^1.0.0
-    superagent: ^6.1.0
-    tweetnacl: ^1.0.3
-    url-parse: ^1.5.1
-  checksum: 4be250f9bf08b7a26f21d1865bca5db0d27a226357f3b9bca469238b5569d8d3f6723b4da107c6f5c2b60c17cb638190518cfd1f80d41eaad1986a73134e9c03
-  languageName: node
-  linkType: hard
-
 "algosdk@npm:^1.16.0":
   version: 1.16.0
   resolution: "algosdk@npm:1.16.0"
@@ -1621,7 +1603,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.16.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown

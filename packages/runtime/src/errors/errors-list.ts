@@ -544,6 +544,12 @@ const runtimeGeneralErrors = {
 		title: "%appName% already used",
 		description: "%appName% already used. Please choose another name.",
 	},
+	TOO_MANY_INNER_TXN: {
+		number: 1320,
+		message: "Too many inner transaction",
+		title: "Too many inner transaction.",
+		description: "Too many inner transaction in one call, maximum is 256.",
+	},
 };
 
 const transactionErrors = {
@@ -702,8 +708,7 @@ const runtimeAsaErrors = {
 		number: 1511,
 		message: "ASA file is undefined.",
 		title: "ASA file is undefined.",
-		description:
-			"Attempt to read an undefined ASA file (asa.yaml)",
+		description: "Attempt to read an undefined ASA file (asa.yaml)",
 	},
 	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
 		number: 1511,

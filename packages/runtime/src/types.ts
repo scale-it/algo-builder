@@ -149,6 +149,7 @@ export interface Context {
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	// save appID use inner tx call stack
 	innerTxAppIDCallStack: number[];
+	remainingTxn: number; // number txn can execute on current call, include inner txn and normal txn.
 	// remaining fee from pool
 	remainingFee: number;
 	getAccount: (address: string) => AccountStoreI;
