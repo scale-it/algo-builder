@@ -83,7 +83,7 @@ export class Ctx implements Context {
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.remainingFee = 0;
-		this.remainingTxn = 256;
+		this.remainingTxns = 256;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
@@ -781,8 +781,8 @@ export class Ctx implements Context {
 			}
 
 			//verify and reduce number remain Txn
-			if (this.remainingTxn > 0) {
-				this.remainingTxn--;
+			if (this.remainingTxns > 0) {
+				this.remainingTxns--;
 			} else {
 				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.TOO_MANY_INNER_TXN);
 			}
