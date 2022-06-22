@@ -546,7 +546,7 @@ const runtimeGeneralErrors = {
 	},
 	TOO_MANY_INNER_TXN: {
 		number: 1320,
-		message: "Too many inner transaction",
+		message: "Too many inner transaction.",
 		title: "Too many inner transaction.",
 		description: "Too many inner transaction in one call, maximum is 256.",
 	},

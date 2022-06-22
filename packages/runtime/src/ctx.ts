@@ -54,7 +54,7 @@ export class Ctx implements Context {
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
-	remainingTxn: number;
+	remainingTxns: number;
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;

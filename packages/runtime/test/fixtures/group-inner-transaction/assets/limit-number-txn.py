@@ -1,6 +1,5 @@
 from pyteal import *
 
-
 @Subroutine(TealType.none)
 def group_inner_txns():
     return Seq(
@@ -102,7 +101,6 @@ def group_inner_txns():
         }),
         InnerTxnBuilder.Submit(),
     )
-
 
 def approval_program():
 
