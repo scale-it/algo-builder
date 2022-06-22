@@ -172,7 +172,7 @@ class Context {
 
 	// Opt-In account to ASA (Gov Token)
 	optInToGovToken(address) {
-		this.runtime.optIntoASA(this.govTokenID, address, {});
+		this.runtime.optInToASA(this.govTokenID, address, {});
 	}
 
 	// Opt-In to DAO App by address

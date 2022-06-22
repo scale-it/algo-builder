@@ -186,7 +186,7 @@ export class WebMode {
 		for (const [txnId, txn] of txns.entries()) {
 			const singer: Sign = execParams[txnId];
 			if (singer.sign === SignType.LogicSignature) {
-				singer.lsig.lsig.args = singer.args ?? [];
+				singer.lsig.lsig.args = singer.args ? singer.args : [];
 				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
 				signedTxn[txnId] = {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),

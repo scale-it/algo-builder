@@ -22,8 +22,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Bug Fixes
 
+
 ### Breaking Changes
 
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project. 
 ### Deprecated
 
 ### Template Updates

@@ -152,7 +152,7 @@ function redeem(runtime, buyerAccount, dex, amount, dexLsig) {
 	const newBond = runtime.getAssetInfoFromName(bondToken + String(dex)).assetIndex;
 	const initBond = buyerAccount.getAssetHolding(oldBond)?.amount;
 
-	runtime.optIntoASA(newBond, buyerAccount.address, {});
+	runtime.optInToASA(newBond, buyerAccount.address, {});
 
 	const balanceBeforeRedeem = buyerAccount.balance();
 	const groupTx = redeemCouponTx(

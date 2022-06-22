@@ -536,7 +536,7 @@ export class Runtime {
 		for (const accName of accounts) {
 			const address = this.store.accountNameAddress.get(accName);
 			if (address) {
-				this.optIntoASA(assetID, address, {});
+				this.optInToASA(assetID, address, {});
 			}
 		}
 	}
@@ -547,8 +547,8 @@ export class Runtime {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
-		const txReceipt = this.ctx.optIntoASA(assetIndex, address, flags);
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+		const txReceipt = this.ctx.optInToASA(assetIndex, address, flags);
 
 		this.store = this.ctx.state;
 		return txReceipt;

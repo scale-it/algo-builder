@@ -493,7 +493,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(johnAssetHolding?.amount, 5912599999515n);
 
 		// opt-in for alice
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 		const aliceAssetHolding = alice.getAssetHolding(assetId);
 		assert.isDefined(aliceAssetHolding);
 		assert.equal(aliceAssetHolding?.amount, 0n);
@@ -525,7 +525,7 @@ describe("Algorand Standard Assets", function () {
 
 	it("should throw error on opt-in if asset does not exist", () => {
 		expectRuntimeError(
-			() => runtime.optIntoASA(1234, john.address, {}),
+			() => runtime.optInToASA(1234, john.address, {}),
 			RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
 		);
 	});
@@ -539,14 +539,14 @@ describe("Algorand Standard Assets", function () {
 		assert.isDefined(res);
 
 		// executing same opt-in tx again
-		runtime.optIntoASA(assetId, john.address, {});
+		runtime.optInToASA(assetId, john.address, {});
 		assert(stub.calledWith(`${john.address} is already opted in to asset ${assetId}`));
 	});
 
 	it("should transfer asset between two accounts", () => {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 
 		const initialJohnAssets = john.getAssetHolding(assetId)?.amount;
 		const initialAliceAssets = alice.getAssetHolding(assetId)?.amount;
@@ -576,7 +576,7 @@ describe("Algorand Standard Assets", function () {
 
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 		// freezing asset holding for john
 		runtime.executeTx([freezeParam]);
 
@@ -596,7 +596,7 @@ describe("Algorand Standard Assets", function () {
 		const initialAliceMinBalance = alice.minBalance;
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 
 		// transfer few assets to alice
 		runtime.executeTx([
@@ -638,7 +638,7 @@ describe("Algorand Standard Assets", function () {
 	it("should throw error if closeRemainderTo is fromAccountAddr", () => {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 
 		// transfer few assets to alice
 		runtime.executeTx([
@@ -668,7 +668,7 @@ describe("Algorand Standard Assets", function () {
 	it("should throw error if trying to close asset holding of asset creator account", () => {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 
 		expectRuntimeError(
 			() =>
@@ -814,7 +814,7 @@ describe("Algorand Standard Assets", function () {
 			amount: 15n,
 			payFlags: {},
 		};
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 
 		assetTransferParam.toAccountAddr = bob.address;
 		assetTransferParam.amount = 20n;
@@ -865,7 +865,7 @@ describe("Algorand Standard Assets", function () {
 		};
 
 		// opt-in to asset by alice
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 		expectRuntimeError(
 			() => runtime.executeTx([closebyClawbackParam]),
 			RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK
@@ -892,7 +892,7 @@ describe("Algorand Standard Assets", function () {
 			amount: 15n,
 			payFlags: {},
 		};
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 
 		assetTransferParam.toAccountAddr = bob.address;
 		assetTransferParam.amount = 20n;
@@ -951,7 +951,7 @@ describe("Algorand Standard Assets", function () {
 			assetID: assetId,
 			payFlags: {},
 		};
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 
 		assetTransferParam.toAccountAddr = bob.address;
 		assetTransferParam.amount = 20n;

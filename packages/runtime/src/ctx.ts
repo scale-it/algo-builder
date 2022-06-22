@@ -255,6 +255,12 @@ export class Ctx implements Context {
 	 * @param flags asa deployment flags
 	 */
 	deployASA(name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): ASAInfo {
+		if (this.runtime.loadedAssetsDefs === {}) {
+			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_FILE_IS_UNDEFINED);
+		}
+		if (this.runtime.loadedAssetsDefs[name] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_DEFINITION_NO_FOUND_IN_ASA_FILE);
+		}
 		return this.deployASADef(name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags);
 	}
 
@@ -301,7 +307,7 @@ export class Ctx implements Context {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
 		const assetDef = this.getAssetDef(assetIndex);
 		makeAssetTransferTxnWithSuggestedParams(
 			address,
@@ -553,7 +559,7 @@ export class Ctx implements Context {
 		const toAccountAddr = webTx.getTransactionToAddress(transaction);
 		const transactionFlags = webTx.getTransactionFlags(transaction);
 		if (BigInt(transaction.amount) === 0n && fromAccountAddr === toAccountAddr) {
-			this.optIntoASA(transaction.assetIndex, fromAccountAddr, transactionFlags);
+			this.optInToASA(transaction.assetIndex, fromAccountAddr, transactionFlags);
 		} else if (transaction.amount !== 0n) {
 			this.assertAssetNotFrozen(transaction.assetIndex as number, fromAccountAddr);
 			this.assertAssetNotFrozen(transaction.assetIndex as number, toAccountAddr);
@@ -996,7 +1002,7 @@ export class Ctx implements Context {
 							BigInt(signedTransaction.txn.amount),
 						);
 					} else if (isEncTxAssetOptIn(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
-						r = this.optIntoASA(
+						r = this.optInToASA(
 							signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
 					}
 					break;

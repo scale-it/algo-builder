@@ -698,6 +698,19 @@ const runtimeAsaErrors = {
 		title: "Cannot close asset ID in allocating account",
 		description: "Asset holding of Asset creator cannot be closed to other account",
 	},
+	ASA_FILE_IS_UNDEFINED: {
+		number: 1511,
+		message: "ASA file is undefined.",
+		title: "ASA file is undefined.",
+		description:
+			"Attempt to read an undefined ASA file (asa.yaml)",
+	},
+	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
+		number: 1511,
+		message: "ASA defition not found in asa file(asa.yaml)",
+		title: "ASA definition not found in asa file(asa.yaml)",
+		description: "ASA definition not found in asa file. Please check asa.yaml",
+	},
 };
 
 export const RUNTIME_ERRORS: {

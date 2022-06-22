@@ -72,7 +72,17 @@ We use functional notation to describe use cases we will implement.
 
 Setup the sigma_daos table. Indexer should be running before executing below script.
 
-    psql -U algorand -d pgdb -a -f setup_sigma_dao.sql
+Create a sigma dao user, if not already created:
+
+    make create-sigma-dao-user
+
+Setup sigma dao:
+
+    make setup-sigma-dao
+
+Run below script to delete the sigma dao user, sigma dao user should be present:
+
+    make drop-sigma-dao-user
 
 ## Spec document
 

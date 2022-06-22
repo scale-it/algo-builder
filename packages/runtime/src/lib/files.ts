@@ -84,8 +84,8 @@ export function getPathFromDirRecursive(
 	}
 
 	if (!filePath) {
-		if (warnMsg) {
-			console.warn(warnMsg);
+		if (warnMsg !== undefined) {
+			if (warnMsg !== "") console.warn(warnMsg);
 			return;
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.FILE_NOT_FOUND_IN_DIR, {

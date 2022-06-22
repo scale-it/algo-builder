@@ -47,7 +47,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		// opt-in to app
 		runtime.optInToApp(john.address, appID, {}, {});
 		// opt-in for alice
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 		syncAccounts();
 	});
 

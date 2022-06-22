@@ -48,7 +48,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(assetDef.manager, alice.address);
 		assert.equal(assetDef.clawback, alice.address);
 
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 		const aliceAssetHolding = runtime.getAssetHolding(assetId, aliceAddr);
 		const bobAssetHolding = runtime.getAssetHolding(assetId, bobAddr);
 		assert.isDefined(aliceAssetHolding);
@@ -271,7 +271,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...alice.account, name: "alice" },
 		}).assetIndex;
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 
 		/* Create application + optIn to app */
 		const creationArgs = [
