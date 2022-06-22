@@ -11,25 +11,28 @@ describe("Group inner transaction", function () {
 	useFixture("group-inner-transaction");
 
 	let runtime: Runtime;
-	let appInfo: AppInfo;
 	let alice: AccountStoreI;
 	let contractAcc: AccountStoreI;
 
-	function syncAccounts(): void {
+	let firstAppInfo: AppInfo;
+	let secondAppInfo: AppInfo;
+
+	function syncAccounts(appInfo: AppInfo): void {
 		contractAcc = runtime.getAccount(appInfo.applicationAccount);
 		[alice] = runtime.defaultAccounts();
 	}
-	this.beforeEach(() => {
-		runtime = new Runtime([]);
-		[alice] = runtime.defaultAccounts();
 
-		appInfo = runtime.deployApp(
+	function deployAppAndFund(
+		approvalProgramFilename: string,
+		clearProgramFilename: string
+	): AppInfo {
+		const appInfo = runtime.deployApp(
 			alice.account,
 			{
-				appName: "app",
+				appName: `${approvalProgramFilename}-${clearProgramFilename}`,
 				metaType: types.MetaType.FILE,
-				approvalProgramFilename: "group.py",
-				clearProgramFilename: "clear.teal",
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 1,
 				globalInts: 1,
 				localBytes: 1,
@@ -50,7 +53,16 @@ describe("Group inner transaction", function () {
 		};
 
 		runtime.executeTx([txnParams]);
-		syncAccounts();
+		syncAccounts(appInfo);
+
+		return appInfo;
+	}
+
+	this.beforeEach(() => {
+		runtime = new Runtime([]);
+		[alice] = runtime.defaultAccounts();
+
+		firstAppInfo = deployAppAndFund("group.py", "clear.teal");
 	});
 
 	it("Can use itxn_next for create group inner tx transaction", () => {
@@ -61,7 +73,7 @@ describe("Group inner transaction", function () {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
 			fromAccount: alice.account,
-			appID: appInfo.appID,
+			appID: firstAppInfo.appID,
 			appArgs: ["str:call"],
 			payFlags: {
 				totalFee: 1000,
@@ -69,7 +81,7 @@ describe("Group inner transaction", function () {
 		};
 		assert.doesNotThrow(() => runtime.executeTx([txnParams]));
 
-		syncAccounts();
+		syncAccounts(firstAppInfo);
 
 		// receive 2000 micro Algo from contract and spend 1000 micro Algo to send transaction to network
 		assert.equal(aliceBalance + 1000n, alice.balance());
@@ -78,36 +90,8 @@ describe("Group inner transaction", function () {
 	});
 
 	describe("Number inner transaction limitation", function () {
-		let secondAppInfo: AppInfo;
 		this.beforeEach(() => {
-			secondAppInfo = runtime.deployApp(
-				alice.account,
-				{
-					appName: "secondApp",
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "limit-number-txn.py",
-					clearProgramFilename: "clear.teal",
-					globalBytes: 1,
-					globalInts: 1,
-					localBytes: 1,
-					localInts: 1,
-				},
-				{}
-			);
-
-			const txnParams: types.AlgoTransferParam = {
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				toAccountAddr: secondAppInfo.applicationAccount,
-				amountMicroAlgos: 1e6,
-				payFlags: {
-					totalFee: 1000,
-				},
-			};
-
-			runtime.executeTx([txnParams]);
-			syncAccounts();
+			secondAppInfo = deployAppAndFund("limit-number-txn.py", "clear.teal");
 		});
 
 		it("Should fail when issue more than 256 inner txn", () => {
@@ -117,40 +101,24 @@ describe("Group inner transaction", function () {
 				fromAccount: alice.account,
 				appID: secondAppInfo.appID,
 				appArgs: ["str:exec"],
-				payFlags: {
-					totalFee: 1000,
-				},
+				payFlags: {},
 			};
+
 			const secondTxn: types.ExecParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				appID: secondAppInfo.appID,
-				appArgs: ["str:exec"],
+				...firstTxn,
 				payFlags: {
-					totalFee: 1000,
 					note: "second",
 				},
 			};
 			const thirdTxn: types.ExecParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				appID: secondAppInfo.appID,
-				appArgs: ["str:exec"],
+				...firstTxn,
 				payFlags: {
-					totalFee: 1000,
 					note: "third",
 				},
 			};
 			const fourthTxn: types.ExecParams = {
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				appID: secondAppInfo.appID,
-				appArgs: ["str:exec"],
+				...firstTxn,
 				payFlags: {
-					totalFee: 1000,
 					note: "fourth",
 				},
 			};

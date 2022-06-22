@@ -419,7 +419,10 @@ export class Ctx implements Context {
 		};
 
 		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
-		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+		if (
+			approvalFile + "-" + clearFile !== appDefinition.appName &&
+			this.state.appNameMap.get(appDefinition.appName) !== undefined
+		) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
 				appName: appDefinition.appName,
 			});
