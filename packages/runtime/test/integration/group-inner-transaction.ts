@@ -89,7 +89,7 @@ describe("Group inner transaction", function () {
 		assert.equal(contractBalance, contractAcc.balance() + 5000n);
 	});
 
-	describe("Number inner transaction limitation", function () {
+	describe("inner transaction limit tealv6", function () {
 		this.beforeEach(() => {
 			secondAppInfo = deployAppAndFund("limit-number-txn.py", "clear.teal");
 		});
