@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // -*- mode: typescript -*- // https://github.com/syl20bnr/spacemacs/issues/13715
 import "source-map-support/register";
 
