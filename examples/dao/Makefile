@@ -1,4 +1,4 @@
-export SIGMA_DAO_UNAME = test_user
+export SIGMA_DAO_UNAME = sigma_dao_user
 export SIGMA_DAO_PASSWORD = SigmaDao@1234
 # Below are objects needed for sigma dao app. Extend it if more sigma dao objects needed
 export SIGMA_DAO_OBJECTS = sigma_daos, asset, account_asset, account_app
@@ -15,8 +15,6 @@ create-sigma-dao-user:
 	@echo "Setting up User=$(SIGMA_DAO_UNAME)"
 	@psql -U postgres -c "CREATE USER $(SIGMA_DAO_UNAME);"
 	@psql -U postgres -c "ALTER USER $(SIGMA_DAO_UNAME) WITH ENCRYPTED PASSWORD '$(SIGMA_DAO_PASSWORD)';"
-# grant read only access.
-	@psql -U postgres -d $(POSTGRES_DBNAME) -c "GRANT SELECT ON TABLE $(SIGMA_DAO_OBJECTS) TO $(SIGMA_DAO_UNAME);"
 
 # drop sigma_dao_user
 drop-sigma-dao-user:
@@ -25,6 +23,8 @@ drop-sigma-dao-user:
 	@psql -d $(POSTGRES_DBNAME) -c "DROP OWNED BY $(SIGMA_DAO_UNAME);"
 	@psql -d $(POSTGRES_DBNAME) -c "DROP USER $(SIGMA_DAO_UNAME);"
 
-# execute sigma dao setup file
+# execute sigma dao setup file. Indexer should be running before executing this script
 setup-sigma-dao:
 	@psql -U $(POSTGRES_UNAME) -d $(POSTGRES_DBNAME) -a -f $(SIGMA_DAO_SETUP_FILE)
+# grant read only access.
+	@psql -U postgres -d $(POSTGRES_DBNAME) -c "GRANT SELECT ON TABLE $(SIGMA_DAO_OBJECTS) TO $(SIGMA_DAO_UNAME);"
