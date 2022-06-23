@@ -85,7 +85,7 @@ class Context {
 
 		this.daoAppID = this.runtime.deployApp(
 			sender.account,
-			{ ...appDef, appArgs: daoAppArgs },
+			{ ...appDef, appArgs: daoAppArgs, foreignAssets: [this.govTokenID] },
 			{}
 		).appID;
 
