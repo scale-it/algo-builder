@@ -81,6 +81,14 @@ describe("DAO - Failing Paths", function () {
 				RUNTIME_ERR1406
 			);
 		});
+
+		it("Should fail when deploy dao app because gov token doesn't exist", () => {
+			ctx.govTokenID = 100000; // token id doesn't exist
+			assert.throws(
+				() => ctx.deployDAOApp(ctx.creator, "dao-app-approval.py", "dao-app-clear.py"),
+				RUNTIME_ERR1009
+			);
+		});
 	});
 
 	describe("Add proposal", function () {

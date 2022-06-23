@@ -1,5 +1,6 @@
 from pyteal import *
 
+
 def approval_program():
     """
     A stateful app with governance rules. Stores
@@ -78,9 +79,11 @@ def approval_program():
         return Seq([
             Cond(
                 # 4 if proposal expired (now > proposal.execute_before())
-                [Global.latest_timestamp() > App.localGet(idx, Bytes("execute_before")), scratchvar_result.store(Int(4))],
+                [Global.latest_timestamp() > App.localGet(idx, Bytes(
+                    "execute_before")), scratchvar_result.store(Int(4))],
                 # 3 if voting is still in progress (now <= voting_end)
-                [Global.latest_timestamp() <= App.localGet(idx, Bytes("voting_end")), scratchvar_result.store(Int(3))],
+                [Global.latest_timestamp() <= App.localGet(
+                    idx, Bytes("voting_end")), scratchvar_result.store(Int(3))],
                 # 1 if voting is over and proposal.yes >= min_support and proposal.yes > proposal.no
                 [
                     is_proposal_passed(idx) == Int(1),
@@ -109,7 +112,7 @@ def approval_program():
                     # still in voting (now <= voting_end)
                     Global.latest_timestamp() <= App.localGet(idx, Bytes("voting_end")),
                     # OR succeeded but not executed (now <= execute_before && result() == 1 && executed == 0)
-                    And (
+                    And(
                         Global.latest_timestamp() <= App.localGet(idx, Bytes("execute_before")),
                         scratchvar_result.load() == Int(1),
                         App.localGet(idx, Bytes("executed")) == Int(0)
@@ -132,12 +135,12 @@ def approval_program():
     max_duration = Bytes("max_duration")
     # a url with more information about the DAO
     url = Bytes("url")
-     # dao name
+    # dao name
     dao_name = Bytes("dao_name")
     # governance token id
     gov_token_id = Bytes("gov_token_id")
 
-
+    asset_total = AssetParam.total(Btoi(Txn.application_args[6]))
     # initialization
     # Expected arguments:
     #   [deposit, min_support, min_duration, max_duration, url, dao_name, gov_token_id]
@@ -148,6 +151,10 @@ def approval_program():
                 Btoi(Txn.application_args[2]) > Int(0),
                 # min_duration < max_duration
                 Btoi(Txn.application_args[2]) < Btoi(Txn.application_args[3]),
+                Seq([  # check if ASA exists: total supply must be defined
+                    asset_total,
+                    asset_total.hasValue(),
+                ])
             )
         ),
         App.globalPut(deposit, Btoi(Txn.application_args[0])),
@@ -212,7 +219,8 @@ def approval_program():
         App.localPut(Int(0), Bytes("url_hash"), Txn.application_args[3]),
         If(
             Txn.application_args[4] == Bytes(""),
-            App.localPut(Int(0), Bytes("hash_algo"), Bytes("sha256")), # default hash_algo
+            App.localPut(Int(0), Bytes("hash_algo"),
+                         Bytes("sha256")),  # default hash_algo
             App.localPut(Int(0), Bytes("hash_algo"), Txn.application_args[4])
         ),
         # save some config in scratch first (to reuse later)
@@ -223,18 +231,24 @@ def approval_program():
 
         # voting_start must be after now
         Assert(scratchvar_voting_start.load() > Global.latest_timestamp()),
-        App.localPut(Int(0), Bytes("voting_start"), scratchvar_voting_start.load()),
+        App.localPut(Int(0), Bytes("voting_start"),
+                     scratchvar_voting_start.load()),
         Assert(And(
             # voting_end must be > voting_start
             scratchvar_voting_end.load() > scratchvar_voting_start.load(),
             # min_duration <= voting_end - voting_start <= max_duration
-            App.globalGet(min_duration) <= scratchvar_voting_end.load() - scratchvar_voting_start.load(),
-            App.globalGet(max_duration) >= scratchvar_voting_end.load() - scratchvar_voting_start.load()
+            App.globalGet(min_duration) <= scratchvar_voting_end.load(
+            ) - scratchvar_voting_start.load(),
+            App.globalGet(max_duration) >= scratchvar_voting_end.load(
+            ) - scratchvar_voting_start.load()
         )),
-        App.localPut(Int(0), Bytes("voting_end"), scratchvar_voting_end.load()),
+        App.localPut(Int(0), Bytes("voting_end"),
+                     scratchvar_voting_end.load()),
         # execute_before must be after voting_end
-        Assert(scratchvar_execute_before.load() > scratchvar_voting_end.load()),
-        App.localPut(Int(0), Bytes("execute_before"), scratchvar_execute_before.load()),
+        Assert(scratchvar_execute_before.load()
+               > scratchvar_voting_end.load()),
+        App.localPut(Int(0), Bytes("execute_before"),
+                     scratchvar_execute_before.load()),
         # type must be 1, 2 OR 3
         Assert(
             Or(
@@ -253,14 +267,19 @@ def approval_program():
         Cond(
             [App.localGet(Int(0), Bytes("type")) == Int(1), Seq([
                 App.localPut(Int(0), Bytes("from"), Txn.application_args[9]),
-                App.localPut(Int(0), Bytes("recipient"), Txn.application_args[10]),
-                App.localPut(Int(0), Bytes("amount"), Btoi(Txn.application_args[11])),
+                App.localPut(Int(0), Bytes("recipient"),
+                             Txn.application_args[10]),
+                App.localPut(Int(0), Bytes("amount"),
+                             Btoi(Txn.application_args[11])),
             ])],
             [App.localGet(Int(0), Bytes("type")) == Int(2), Seq([
                 App.localPut(Int(0), Bytes("from"), Txn.application_args[9]),
-                App.localPut(Int(0), Bytes("asa_id"), Btoi(Txn.application_args[10])),
-                App.localPut(Int(0), Bytes("recipient"), Txn.application_args[11]),
-                App.localPut(Int(0), Bytes("amount"), Btoi(Txn.application_args[12])),
+                App.localPut(Int(0), Bytes("asa_id"),
+                             Btoi(Txn.application_args[10])),
+                App.localPut(Int(0), Bytes("recipient"),
+                             Txn.application_args[11]),
+                App.localPut(Int(0), Bytes("amount"),
+                             Btoi(Txn.application_args[12])),
             ])],
             [App.localGet(Int(0), Bytes("type")) == Int(3), Seq([
                 App.localPut(Int(0), Bytes("msg"), Txn.application_args[9])
@@ -279,7 +298,8 @@ def approval_program():
     deposit_vote_token = Seq([
         verify_deposit(Int(1), Global.current_application_address()),
         # Sender.deposit += amount
-        App.localPut(Int(0), Bytes("deposit"), sender_deposit + Gtxn[1].asset_amount()),
+        App.localPut(Int(0), Bytes("deposit"),
+                     sender_deposit + Gtxn[1].asset_amount()),
         Return(Int(1))
     ])
 
@@ -309,13 +329,15 @@ def approval_program():
             }
         ),
         InnerTxnBuilder.Submit(),
-        App.localPut(Txn.sender(), Bytes("deposit"), sender_deposit - Btoi(Txn.application_args[1])),
+        App.localPut(Txn.sender(), Bytes("deposit"),
+                     sender_deposit - Btoi(Txn.application_args[1])),
         Return(Int(1))
     ])
 
     # p_<proposal> is a concatenation of p_ with the proposal address to avoid some weird attacks.
     byte_p_proposal = Concat(Bytes("p_"), Txn.accounts[1])
-    p_proposal = App.localGetEx(Int(0), Int(0), byte_p_proposal)  # value = proposal.id when a user voted or 0
+    # value = proposal.id when a user voted or 0
+    p_proposal = App.localGetEx(Int(0), Int(0), byte_p_proposal)
     yes = Bytes("yes")
     no = Bytes("no")
     abstain = Bytes("abstain")
@@ -346,9 +368,12 @@ def approval_program():
         ),
         # record vote in proposal_lsig local state (proposal.<counter> += Sender.deposit)
         Cond(
-            [Gtxn[0].application_args[1] == yes, App.localPut(Int(1), yes, App.localGet(Int(1), yes) + sender_deposit)],
-            [Gtxn[0].application_args[1] == no, App.localPut(Int(1), no, App.localGet(Int(1), no) + sender_deposit)],
-            [Gtxn[0].application_args[1] == abstain, App.localPut(Int(1), abstain, App.localGet(Int(1), abstain) + sender_deposit)]
+            [Gtxn[0].application_args[1] == yes, App.localPut(
+                Int(1), yes, App.localGet(Int(1), yes) + sender_deposit)],
+            [Gtxn[0].application_args[1] == no, App.localPut(
+                Int(1), no, App.localGet(Int(1), no) + sender_deposit)],
+            [Gtxn[0].application_args[1] == abstain, App.localPut(
+                Int(1), abstain, App.localGet(Int(1), abstain) + sender_deposit)]
         ),
         # Update Sender.deposit_lock := max(Sender.deposit_lock, proposal.voting_end)
         If(
@@ -387,7 +412,7 @@ def approval_program():
     # Executes a proposal (note: anyone can execute a proposal). Args:
     # * proposal : lsig account address with the proposal record (provided as the first external account)
     execute = Seq([
-        compute_result(Int(1)), # save result in scratch
+        compute_result(Int(1)),  # save result in scratch
         # Assert that the proposal.result() == 1 and proposal.executed == 0
         Assert(
             And(scratchvar_result.load() == Int(1), executed == Int(0))
@@ -438,7 +463,7 @@ def approval_program():
     # NOTE: proposalLsig is Txn.sender. Expected Arguments:
     # * foreignAssets: [gov_token_id]
     close_proposal = Seq([
-        compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
+        compute_result(Int(0)),  # int(0) as proposal_lsig is txn.sender()
         proposal_id,
         Assert(
             And(
@@ -451,12 +476,14 @@ def approval_program():
                     # it’s past execution: proposal.executed == 1  || proposal.execute_before < now
                     Or(
                         App.localGet(Int(0), Bytes("executed")) == Int(1),
-                        App.localGet(Int(0), Bytes("execute_before")) < Global.latest_timestamp()
+                        App.localGet(Int(0), Bytes("execute_before")
+                                     ) < Global.latest_timestamp()
                     ) == Int(1),
                     # OR voting failed result() != 1 && proposal.voting_end < now.
                     And(
                         scratchvar_result.load() != Int(1),
-                        App.localGet(Int(0), Bytes("voting_end")) < Global.latest_timestamp()
+                        App.localGet(Int(0), Bytes("voting_end")
+                                     ) < Global.latest_timestamp()
                     ) == Int(1)
                 )
 
@@ -525,23 +552,27 @@ def approval_program():
         # Verifies add proposal call, jumps to add_proposal branch.
         [Txn.application_args[0] == Bytes("add_proposal"), add_proposal],
         # Verifies deposit_vote_token call, jumps to deposit_vote_token branch.
-        [Txn.application_args[0] == Bytes("deposit_vote_token"), deposit_vote_token],
+        [Txn.application_args[0] == Bytes(
+            "deposit_vote_token"), deposit_vote_token],
         # Verifies register_vote call, jumps to register_vote branch.
         [Txn.application_args[0] == Bytes("register_vote"), register_vote],
         # Verifies execute call, jumps to execute branch.
         [Txn.application_args[0] == Bytes("execute"), execute],
         # Verifies withdraw_vote_deposit call, jumps to withdraw_vote_deposit branch.
-        [Txn.application_args[0] == Bytes("withdraw_vote_deposit"), withdraw_vote_deposit],
+        [Txn.application_args[0] == Bytes(
+            "withdraw_vote_deposit"), withdraw_vote_deposit],
         # Verifies clear_vote_record call, jumps to clear_vote_record branch.
-        [Txn.application_args[0] == Bytes("clear_vote_record"), clear_vote_record],
+        [Txn.application_args[0] == Bytes(
+            "clear_vote_record"), clear_vote_record],
         # Verifies close_proposal call, jumps to close_proposal branch.
         [Txn.application_args[0] == Bytes("close_proposal"), close_proposal]
     )
 
     return program
 
+
 if __name__ == "__main__":
 
-
     optimize_options = OptimizeOptions(scratch_slots=True)
-    print(compileTeal(approval_program(), Mode.Application, version = 6, optimize=optimize_options))
+    print(compileTeal(approval_program(), Mode.Application,
+          version=6, optimize=optimize_options))
