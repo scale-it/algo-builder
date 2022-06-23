@@ -151,7 +151,7 @@ def approval_program():
                 Btoi(Txn.application_args[2]) > Int(0),
                 # min_duration < max_duration
                 Btoi(Txn.application_args[2]) < Btoi(Txn.application_args[3]),
-                Seq([
+                Seq([  # check if ASA exists: total supply must be defined
                     asset_total,
                     asset_total.hasValue(),
                 ])
