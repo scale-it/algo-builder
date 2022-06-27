@@ -33,7 +33,6 @@ def approval_program():
         generate_inner_tx(16),
         generate_inner_tx(16),
         generate_inner_tx(16),
-        generate_inner_tx(16),
         Log(Itob(Global.opcode_budget())),
         Return(Int(1))
     )
