@@ -22,6 +22,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Bug Fixes
 
+- Fix number transaction in one call should be 256(include inner and atomic transaction).
 
 ### Breaking Changes
 
