@@ -12,7 +12,7 @@ import {
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
-import { mkTransaction } from "./txn";
+import { getFromAddress, mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
@@ -177,7 +177,7 @@ export class WebMode {
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
 				? { txn: txn, signers: [] }
-				: { txn: txn };
+				: { txn: txn, signers: [getFromAddress(execParams[txnId])] };
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
