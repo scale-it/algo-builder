@@ -176,8 +176,8 @@ export class WebMode {
 		// with logic signature we don't need signers.
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
-				? { txn: txn, signers: [] }
-				: { txn: txn, signers: [getFromAddress(execParams[txnId])] };
+				? { txn: txn, signers: [] } // logic signature
+				: { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
