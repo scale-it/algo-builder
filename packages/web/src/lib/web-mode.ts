@@ -12,7 +12,7 @@ import {
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
-import { getFromAddress, mkTransaction } from "./txn";
+import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
