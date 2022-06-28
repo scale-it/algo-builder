@@ -8,6 +8,7 @@ import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { Account, EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import * as algosdk from "algosdk";
 
+import { types } from "..";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
@@ -571,6 +572,37 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 */
 	persistCP(): void {
 		persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+	}
+
+	registerASAInfoFromInnerTxn(asaName: string, txConfirmation: ConfirmedTxInfo): void {
+		const txn = txConfirmation.txn.txn;
+
+		this.cpData.registerASA(this.networkName, asaName, {
+			assetIndex: txConfirmation["asset-index"],
+			creator: algosdk.encodeAddress(txn.apar?.m as Uint8Array),
+			confirmedRound: txConfirmation["confirmed-round"],
+			deleted: false,
+			assetDef: {
+				total: txn.apar?.t as number,
+				decimals: txn.apar?.dc as number,
+			},
+			txID: algosdk.Transaction.from_obj_for_encoding(txn).txID(),
+		});
+	}
+
+	registerAppInfoFromInnerTxn(appName: string, txConfirmation: ConfirmedTxInfo): void {
+		const txn = txConfirmation.txn.txn;
+		this.cpData.registerSSC(this.networkName, appName, {
+			appID: txConfirmation["application-index"],
+			applicationAccount: algosdk.getApplicationAddress(txConfirmation["application-index"]),
+			confirmedRound: txConfirmation["confirmed-round"],
+			approvalFile: txn.apap?.toString("base64") as string,
+			clearFile: txn.apsu?.toString("base64") as string,
+			creator: algosdk.encodeAddress(txn.snd),
+			timestamp: Math.round(+new Date() / 1000),
+			deleted: false,
+			txID: algosdk.Transaction.from_obj_for_encoding(txn).txID(),
+		});
 	}
 
 	/**
