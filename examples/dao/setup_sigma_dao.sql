@@ -28,11 +28,6 @@ DECLARE
 	dao_name CHAR(255); -- dao_name
 	i RECORD;
 BEGIN
-	/* 	txn relation has same data with different round number. This is a check to avoid duplicate 
-		entries in table. id attribute increments despite pass/fail insertion  */
-	IF EXISTS (SELECT FROM sigma_daos p WHERE p.app_id = NEW.asset) THEN
-		RETURN NEW;
-	END IF;
 	-- extract app hash from txn attribute
 	SELECT json_extract_path_text(NEW.txn::json, 'txn', 'apap') INTO app_bytecode;
 	-- Discard if app hash is not equal
