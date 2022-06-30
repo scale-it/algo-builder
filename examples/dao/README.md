@@ -76,7 +76,7 @@ Create a sigma dao user, if not already created:
 
     make create-sigma-dao-user
 
-Setup sigma dao:
+Setup sigma dao, indexer should be running before executing this script:
 
     make setup-sigma-dao
 
