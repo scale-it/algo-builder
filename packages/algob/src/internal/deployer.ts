@@ -574,6 +574,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 	}
 
+	/**
+	 * Save new ASA information(get from txConfirmation) to checkpoint
+	 * @param asaName name of asa
+	 * @param txConfirmation txn confirmation
+	 */
 	registerASAInfoFromInnerTxn(asaName: string, txConfirmation: ConfirmedTxInfo): void {
 		const txn = txConfirmation.txn.txn;
 
@@ -590,8 +595,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 		});
 	}
 
+	/**
+	 * Save new application information(get from txConfirmation) to checkpoint
+	 * @param appName app name
+	 * @param txConfirmation txn confirmation
+	 */
 	registerAppInfoFromInnerTxn(appName: string, txConfirmation: ConfirmedTxInfo): void {
-		const txn = txConfirmation.txn.txn;
+		const { txn } = txConfirmation.txn;
 		this.cpData.registerSSC(this.networkName, appName, {
 			appID: txConfirmation["application-index"],
 			applicationAccount: algosdk.getApplicationAddress(txConfirmation["application-index"]),
