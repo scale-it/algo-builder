@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
-import { generateAccount, LogicSigAccount } from "algosdk";
+import algosdk, { generateAccount, LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -13,7 +13,7 @@ import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
-import { MOCK_APPLICATION_ADDRESS } from "../mocks/tx";
+import { MOCK_APPLICATION_ADDRESS, mockConfirmedTx } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 function mkASA(): wtypes.ASADef {
@@ -675,5 +675,58 @@ describe("DeployerDeployMode", () => {
 		const res = deployer.getASAInfo("silver-122");
 		assert.isDefined(res);
 		assert.deepEqual(res.assetDef, asaDef);
+	});
+
+	describe("registerAppInfoFromConfirmTx and registerAppInfoFromConfirmTx", function () {
+		it("registerAppInfoFromConfirmTX", () => {
+			const deployer = new DeployerDeployMode(deployerCfg);
+
+			const appInfo = {
+				creator: algosdk.encodeAddress(mockConfirmedTx.txn.txn.snd),
+				applicationAccount: algosdk.getApplicationAddress(mockConfirmedTx["application-index"]),
+				txID: algosdk.Transaction.from_obj_for_encoding(mockConfirmedTx.txn.txn).txID(),
+				confirmedRound: 1,
+				appID: mockConfirmedTx["application-index"],
+				timestamp: 1,
+				deleted: false,
+				approvalFile: "YXBwcm92YWw=",
+				clearFile: "Y2xlYXI=",
+			};
+
+			deployer.registerAppInfoFromConfirmTx("app", mockConfirmedTx);
+
+			// get checkpoint data
+			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].app
+				.get("app")
+				?.values()
+				.next().value;
+			checkpointData.timestamp = 1; // sync timestamp
+
+			assert.deepEqual(checkpointData, appInfo);
+
+			assert.deepEqual(appInfo, deployer.getApp("app"));
+		});
+
+		it("registerASAInfoFromConfirmTx", () => {
+			const deployer = new DeployerDeployMode(deployerCfg);
+
+			const asaInfo: rtypes.ASAInfo = {
+				assetDef: { decimals: 0, total: 10 },
+				assetIndex: 1,
+				creator: algosdk.encodeAddress(mockConfirmedTx.txn.txn.snd),
+				deleted: false,
+				confirmedRound: 1,
+				txID: algosdk.Transaction.from_obj_for_encoding(mockConfirmedTx.txn.txn).txID(),
+			};
+
+			deployer.registerASAInfoFromConfirmTx("asaName", mockConfirmedTx);
+
+			// get checkpoint data
+			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].asa.get("asaName");
+
+			assert.deepEqual(checkpointData, asaInfo);
+
+			assert.deepEqual(asaInfo, deployer.getASAInfo("asaName"));
+		});
 	});
 });
