@@ -74,3 +74,13 @@ CREATE OR REPLACE FUNCTION search_sigma_daos(daoToBeSearched TEXT)
 RETURNS SETOF sigma_daos AS $$
 	SELECT * FROM sigma_daos WHERE dao_name ilike ('%' || daoToBeSearched || '%');
 $$ LANGUAGE SQL STABLE;
+
+-- Function to search proposal in account_app relation by app id
+CREATE OR REPLACE FUNCTION search_sigma_daos_proposals(appId BIGINT)
+RETURNS SETOF account_app AS $$
+DECLARE
+	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
+BEGIN
+	RETURN QUERY SELECT * FROM account_app WHERE app=appId AND localstate -> 'tkv' -> voting_end IS NOT NULL;
+END;
+$$ LANGUAGE plpgsql STABLE;
