@@ -13,8 +13,7 @@ drop-create-sigma-dao-user: drop-sigma-dao-user create-sigma-dao-user
 # create sigma_dao_user
 create-sigma-dao-user:
 	@echo "Setting up User=$(SIGMA_DAO_UNAME)"
-	@psql -U postgres -c "CREATE USER $(SIGMA_DAO_UNAME);"
-	@psql -U postgres -c "ALTER USER $(SIGMA_DAO_UNAME) WITH ENCRYPTED PASSWORD '$(SIGMA_DAO_PASSWORD)';"
+	@psql -U postgres -c "CREATE USER $(SIGMA_DAO_UNAME); ALTER USER $(SIGMA_DAO_UNAME) WITH ENCRYPTED PASSWORD '$(SIGMA_DAO_PASSWORD)'"
 
 # drop sigma_dao_user
 drop-sigma-dao-user:
