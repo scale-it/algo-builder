@@ -677,8 +677,8 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(res.assetDef, asaDef);
 	});
 
-	describe("registerAppInfoFromConfirmTx and registerAppInfoFromConfirmTx", function () {
-		it("registerAppInfoFromConfirmTX", () => {
+	describe("checkpointApp and checkpointASA", function () {
+		it("checkpointApp", () => {
 			const deployer = new DeployerDeployMode(deployerCfg);
 
 			const appInfo = {
@@ -693,7 +693,7 @@ describe("DeployerDeployMode", () => {
 				clearFile: "Y2xlYXI=",
 			};
 
-			deployer.registerAppInfoFromConfirmTx("app", mockConfirmedTx);
+			deployer.checkpointApp("app", mockConfirmedTx);
 
 			// get checkpoint data
 			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].app
@@ -707,7 +707,7 @@ describe("DeployerDeployMode", () => {
 			assert.deepEqual(appInfo, deployer.getApp("app"));
 		});
 
-		it("registerASAInfoFromConfirmTx", () => {
+		it("checkpointASA", () => {
 			const deployer = new DeployerDeployMode(deployerCfg);
 
 			const asaInfo: rtypes.ASAInfo = {
@@ -719,7 +719,7 @@ describe("DeployerDeployMode", () => {
 				txID: algosdk.Transaction.from_obj_for_encoding(mockConfirmedTx.txn.txn).txID(),
 			};
 
-			deployer.registerASAInfoFromConfirmTx("asaName", mockConfirmedTx);
+			deployer.checkpointASA("asaName", mockConfirmedTx);
 
 			// get checkpoint data
 			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].asa.get("asaName");

@@ -579,7 +579,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param asaName name of asa
 	 * @param txConfirmation txn confirmation
 	 */
-	registerASAInfoFromConfirmTx(asaName: string, txConfirmation: ConfirmedTxInfo): void {
+	checkpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
 		const txn = txConfirmation.txn.txn;
 
 		this.cpData.registerASA(this.networkName, asaName, {
@@ -600,7 +600,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param appName app name
 	 * @param txConfirmation txn confirmation
 	 */
-	registerAppInfoFromConfirmTx(appName: string, txConfirmation: ConfirmedTxInfo): void {
+	checkpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
 		const { txn } = txConfirmation.txn;
 		this.cpData.registerSSC(this.networkName, appName, {
 			appID: txConfirmation["application-index"],
