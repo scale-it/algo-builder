@@ -26,7 +26,9 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Breaking Changes
 
-- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project. 
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
+- Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
+
 ### Deprecated
 
 ### Template Updates
