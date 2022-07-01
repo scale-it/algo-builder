@@ -63,14 +63,18 @@ export class WebMode {
 	}
 
 	/**
-	 * Send transaction to network
-	 * @param signedTxn signed transaction
+	 * Send signed transaction to network and wait for confirmation
+	 * @param signedTxn Signed Transaction blob encoded in base64
 	 */
-	async sendTransaction(signedTxn: any): Promise<JsonPayload> {
-		return await this.algoSigner.send({
+	async sendAndWait(signedTxn: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
-			tx: signedTxn.blob,
+			tx: signedTxn,
 		});
+		if (txInfo && typeof txInfo.txId === "string") {
+			return await this.waitForConfirmation(txInfo.txId);
+		}
+		throw new Error("Transaction Error");
 	}
 
 	/**
