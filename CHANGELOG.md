@@ -20,7 +20,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
 - Runtime: add `Txn LastLog` opcode.
-- Runtime: better warning/error when deploy ASA. Throw error when get ASA definition file or ASA not found in asa.yaml but Runtime need query data from it.
+- Runtime: better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
 - Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
 
 ### Bug Fixes
