@@ -19,7 +19,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
-
+- Add `checkpointASA(asaName, txConfirmed)` and `checkpointApp(appName, txConfirmed)`. The methods will extract information about application and asa from `txConfirmed` and save it to checkpoint with name custom by developers.
+ 
 ### Bug Fixes
 
 - Fix number transaction in one call should be 256(include inner and atomic transaction).
