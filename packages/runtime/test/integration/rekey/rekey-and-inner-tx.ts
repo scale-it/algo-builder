@@ -135,7 +135,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
 		});
 
-		it("should failed: if auth/spend account invalid", () => {
+		it("should throw an error if auth/spend account invalid", () => {
 			const tranferAlgoTx: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -197,7 +197,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			assert.equal(alice.getSpendAddress(), getApplicationAddress(appID));
 		});
 
-		it("transfer algob by inner transaction", () => {
+		it("Should transfer algo by inner transaction", () => {
 			const masterBalanceBefore = master.amount;
 			const aliceBalanceBefore = alice.amount;
 			const bobBalanceBefore = bob.amount;

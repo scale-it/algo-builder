@@ -173,7 +173,7 @@ export interface Context {
 	closeApp: (sender: AccountAddress, appID: number) => void;
 	processTransactions: (
 		signedTransactions: algosdk.SignedTransaction[],
-		appDefinition?: types.AppDefinition | types.SmartContract,
+		appDefinitions?: (types.AppDefinition | types.SmartContract | undefined) [],
 		lsig?: types.Lsig,
 	) => TxReceipt[];
 	deployASA: (

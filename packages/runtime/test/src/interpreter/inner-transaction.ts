@@ -19,7 +19,7 @@ export function setDummyAccInfo(acc: AccountStoreI): void {
 	acc.createdApps = accInfo[0].createdApps;
 }
 
-describe.only("Inner Transactions", function () {
+describe("Inner Transactions", function () {
 	const elonPk = decodeAddress(elonAddr).publicKey;
 	let tealCode: string;
 	let interpreter: Interpreter;

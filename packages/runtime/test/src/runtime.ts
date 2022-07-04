@@ -159,12 +159,12 @@ describe("Transfer Algo Transaction", function () {
 			assert.equal(externalRuntimeAccount.amount, amount);
 		});
 
-		it("Can create transaction from external account", () => {
+		it	("Should transfer algo to an external account", () => {
 			const transferAlgoTx: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
-				fromAccount: externalRuntimeAccount.account,
-				toAccountAddr: alice.address,
+				fromAccount: alice.account,
+				toAccountAddr: externalRuntimeAccount.account.addr,
 				amountMicroAlgos: 1000n,
 				payFlags: {
 					totalFee: 1000,
@@ -1223,7 +1223,7 @@ describe("Deafult Accounts", function () {
 	});
 });
 
-describe("Algo Trasnfer using sendSignedTransaction", function () {
+describe.only("Algo Trasnfer using sendSignedTransaction", function () {
 	let alice: AccountStore;
 	let bob: AccountStore;
 	let runtime: Runtime;
@@ -1281,7 +1281,7 @@ describe("Algo Trasnfer using sendSignedTransaction", function () {
 	});
 });
 
-describe("Logic Signature Transaction in Runtime using sendSignedTransaction", function () {
+describe.only("Logic Signature Transaction in Runtime using sendSignedTransaction", function () {
 	useFixture("basic-teal");
 	let alice: AccountStore;
 	let bob: AccountStore;

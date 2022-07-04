@@ -793,7 +793,7 @@ export class Ctx implements Context {
 	/* eslint-disable sonarjs/cognitive-complexity */
 	/* eslint-disable complexity */
 	processTransactions(signedTransactions: algosdk.SignedTransaction[],
-		appDefinition?: types.AppDefinition | types.SmartContract,
+		appDefinition?: (types.AppDefinition | types.SmartContract | undefined)[],
 		lsig?: types.Lsig): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
@@ -811,9 +811,9 @@ export class Ctx implements Context {
 				this.tx = this.gtxs[0];
 			} // 
 			//after executing stateless tx updating current tx to default (index 0)
-			// } else if (txParam.sign === types.SignType.SecretKey) {
-			// 	this.runtime.validateAccountSignature(txParam);
-			// }
+			else if (signedTransaction.sgnr || signedTransaction.sig) {
+				this.runtime.validateSecretKeySignature(signedTransaction);
+			}
 
 			//TODO: verify signature
 
@@ -852,7 +852,7 @@ export class Ctx implements Context {
 								}
 								r = this.deployApp(
 									fromAccountAddr,
-									appDefinition as AppDefinition,
+									appDefinition[idx] as AppDefinition,
 									idx
 								);
 								this.knowableID.set(idx, r.appID);
@@ -936,7 +936,7 @@ export class Ctx implements Context {
 							}
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
-								appDefinition as SmartContract,
+								appDefinition[idx] as SmartContract,
 								idx,
 							);
 							break;

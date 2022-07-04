@@ -69,7 +69,7 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
-   return TxFieldDefaults[field];
+	return TxFieldDefaults[field];
 }
 
 /**
@@ -275,7 +275,7 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  * Check if given encoded transaction obj is asset creation
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetCreate(txn: EncTx): boolean {
+export function isEncTxAssetCreate(txn: EncTx): boolean {
 	return (
 		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
 		txn.caid === undefined && // assetIndex should be undefined
@@ -286,7 +286,7 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  * Checks if given encoded transaction obj is asset reconfiguration
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetReconfigure(txn: EncTx): boolean {
+export function isEncTxAssetReconfigure(txn: EncTx): boolean {
 	return (
 		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
 		txn.caid !== undefined && // assetIndex should be undefined
@@ -301,36 +301,36 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
  * Checks if given encoded transaction obj is asset revoke
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetRevoke(txn: EncTx): boolean {
+export function isEncTxAssetRevoke(txn: EncTx): boolean {
 	return txn.asnd !== undefined;
 }
 /**
  * Checks if given encoded transaction obj is asset freeze
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetFreeze(txn: EncTx): boolean {
+export function isEncTxAssetFreeze(txn: EncTx): boolean {
 	return (txn.afrz !== undefined &&
-			txn.fadd !== undefined );
+		txn.fadd !== undefined);
 }
 /**
  * Checks if given encoded transaction obj is asset opt in
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetOptIn(txn: EncTx): boolean {
-	if  (txn.arcv !== undefined && txn.arcv !== undefined){
+export function isEncTxAssetOptIn(txn: EncTx): boolean {
+	if (txn.arcv !== undefined && txn.arcv !== undefined) {
 		return !txn.arcv.compare(txn.snd) as boolean;
 	} else {
 		return false;
 	}
-	
+
 }
 /**
  * Checks if given encoded transaction obj is asset opt in
  * @param txn Encoded EncTx Object
  */
- export function isEncTxAssetTransfer(txn: EncTx): boolean {
+export function isEncTxAssetTransfer(txn: EncTx): boolean {
 	return (txn.arcv !== undefined &&
-			txn.snd !== undefined && txn.asnd === undefined);
+		txn.snd !== undefined && txn.asnd === undefined);
 }
 /**
  * Check if given encoded transaction object is app creation
@@ -385,7 +385,7 @@ export function encTxToExecParams(
 	};
 
 	execParams.payFlags.totalFee = encTx.fee;
-	if(ArrayBuffer.isView(encTx.type)){
+	if (ArrayBuffer.isView(encTx.type)) {
 		encTx.type = Buffer.from(encTx.type).toString("utf-8");
 	}
 	switch (encTx.type) {
@@ -416,7 +416,7 @@ export function encTxToExecParams(
 			execParams.fromAccountAddr = _getAddress(encTx.snd);
 			execParams.toAccountAddr =
 				getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
-			execParams.amountMicroAlgos = encTx.amt ?? 0n;
+			execParams.amountMicroAlgos = encTx.amt? BigInt(encTx.amt) : 0n;
 			if (encTx.close) {
 				execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.close, ctx, line);
 			}
@@ -447,7 +447,7 @@ export function encTxToExecParams(
 				execParams.toAccountAddr = getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
 			}
 			// set common fields (asset amount, index, closeRemainderTo)
-			execParams.amount = encTx.aamt ?? 0n;
+			execParams.amount = encTx.aamt? BigInt(encTx.aamt) : 0n;
 			execParams.assetID = encTx.xaid ?? 0;
 			// option fields
 			if (encTx.aclose) {
@@ -497,8 +497,14 @@ export function encTxToExecParams(
 
 		case TransactionTypeEnum.KEY_REGISTRATION: {
 			execParams.type = types.TransactionType.KeyRegistration;
-			execParams.voteKey = encTx.votekey?.toString("base64");
-			execParams.selectionKey = encTx.selkey?.toString("base64");
+			// execParams.voteKey = encTx.votekey?.toString("base64");
+			if (encTx.votekey !== undefined) {
+				execParams.voteKey = Buffer.from(encTx.votekey).toString('base64');
+			}
+			// execParams.selectionKey = encTx.selkey?.toString("base64");
+			if (encTx.selkey !== undefined) {
+				execParams.selectionKey = Buffer.from(encTx.selkey).toString('base64');
+			}
 			execParams.voteFirst = encTx.votefst;
 			execParams.voteLast = encTx.votelst;
 			execParams.voteKeyDilution = encTx.votekd;
