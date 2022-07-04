@@ -153,6 +153,7 @@ TxnFields[5] = {
 TxnFields[6] = {
 	...TxnFields[5],
 	LastLog: null,
+	StateProofPK: null,
 };
 
 TxnFields[7] = {

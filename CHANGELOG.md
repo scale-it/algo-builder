@@ -16,13 +16,21 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Features
 
-- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+#### Algob
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
-- Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
-- Runtime: add `Txn LastLog` opcode.
-- Runtime: better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
-- Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
 
+#### Runtime 
+
+- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+- Better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
+- Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
+- Teal v6 support: 
+  - Add `Txn LastLog` opcode.
+  - Add `Txn StateProofPK` opcode.
+
+#### Examples
+
+- Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
 ### Bug Fixes
 
 - Fix number transaction in one call should be 256(include inner and atomic transaction).
