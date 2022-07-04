@@ -20,14 +20,21 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
 - Add `checkpointASA(asaName, txConfirmed)` and `checkpointApp(appName, txConfirmed)`. The methods will extract information about application and asa from `txConfirmed` and save it to checkpoint with name custom by developers.
- 
+- Runtime: add `Txn LastLog` opcode.
+- Runtime: better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
+- Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
+
 ### Bug Fixes
 
 - Fix number transaction in one call should be 256(include inner and atomic transaction).
+- Fix Web mode(algo-builder/web) cannot sign by `fromAccount` when `fromAccountAddr` appear in `execParams`. 
+- Receipt confirmed txn have `inner-txns` and `txn` field.
 
 ### Breaking Changes
 
-- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project. 
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
+- Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
+
 ### Deprecated
 
 ### Template Updates
@@ -36,6 +43,7 @@ DAO template:
 
 - [breaking] moving template parameters (`gov_token_id`) to the global state. Because of
   that change the bytecode remains the same after each deploy hence the hash of the appliction also will remain the same.
+- [breaking] require `gov_token_id` is existen when deploy new DAO approval program.
 
 ## v4.0.0 2022-05-24
 

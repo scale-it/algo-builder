@@ -691,6 +691,7 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should test ASA optin, asa transfer`, function () {
+			TXN_OBJ.apas = [1, 9]; // set foreign asset
 			const optin = `
         itxn_begin
         int axfer
@@ -704,13 +705,17 @@ describe("Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-
+			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
+			if (acc) {
+				acc.amount = 1000000n;
+			}
 			// does not exist
 			expectRuntimeError(() => executeTEAL(optin), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
 
 			let assetID = 0;
 			const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 			if (elonAcc) {
+				elonAcc.amount = 1000000n;
 				assetID = interpreter.runtime.ctx.deployASADef(
 					"test-asa",
 					{ total: 10, decimals: 0, unitName: "TASA" },
@@ -1226,7 +1231,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Teal v6 update", function () {
-		this.beforeAll(() => {
+		this.beforeEach(() => {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
@@ -1279,7 +1284,7 @@ describe("Inner Transactions", function () {
 
 		describe("RekeyTo", () => {
 			let rekeyProgram: string;
-			this.beforeAll(() => {
+			this.beforeEach(() => {
 				setUpInterpreter(6);
 				rekeyProgram = `
           itxn_begin

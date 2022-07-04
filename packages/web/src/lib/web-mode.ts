@@ -63,14 +63,18 @@ export class WebMode {
 	}
 
 	/**
-	 * Send transaction to network
-	 * @param signedTxn signed transaction
+	 * Send signed transaction to network and wait for confirmation
+	 * @param signedTxn Signed Transaction blob encoded in base64
 	 */
-	async sendTransaction(signedTxn: any): Promise<JsonPayload> {
-		return await this.algoSigner.send({
+	async sendAndWait(signedTxn: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
-			tx: signedTxn.blob,
+			tx: signedTxn,
 		});
+		if (txInfo && typeof txInfo.txId === "string") {
+			return await this.waitForConfirmation(txInfo.txId);
+		}
+		throw new Error("Transaction Error");
 	}
 
 	/**
@@ -176,8 +180,8 @@ export class WebMode {
 		// with logic signature we don't need signers.
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			return execParams[txnId].sign === SignType.LogicSignature
-				? { txn: txn, signers: [] }
-				: { txn: txn };
+				? { txn: txn, signers: [] } // logic signature
+				: { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
