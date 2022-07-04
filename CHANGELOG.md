@@ -19,9 +19,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
-- Runtime: add `Txn LastLog` opcode.
+- Runtime: add `Txn LastLog` opcode(tealv6).
 - Runtime: better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
 - Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
+- Runtime: add `Txn StateProofPK` opcode(tealv6).
 
 ### Bug Fixes
 
