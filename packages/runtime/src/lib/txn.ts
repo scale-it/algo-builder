@@ -186,8 +186,8 @@ export function txnSpecByField(
 		}
 
 		case "StateProofPK": {
-			// When I run teal debug, "StateProofPK" always return 64 zero bytes.
-			// so I set up 64 zero bytes is default value of StateProofPK
+			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// so we set up 64 zero bytes as default value of StateProofPK
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
