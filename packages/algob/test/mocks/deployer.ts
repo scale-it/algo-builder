@@ -78,6 +78,14 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
+	addCheckpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
+		throw new Error("Not implemented");
+	}
+
+	addCheckpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
+		throw new Error("Not implemented");
+	}
+
 	setScriptName(name: string): void {
 		this.scriptName = name;
 	}

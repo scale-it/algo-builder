@@ -579,7 +579,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param asaName name of asa
 	 * @param txConfirmation txn confirmation
 	 */
-	checkpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
+	addCheckpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
 		const txn = txConfirmation.txn.txn;
 
 		this.cpData.registerASA(this.networkName, asaName, {
@@ -600,7 +600,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param appName app name
 	 * @param txConfirmation txn confirmation
 	 */
-	checkpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
+	addCheckpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
 		const { txn } = txConfirmation.txn;
 		this.cpData.registerSSC(this.networkName, appName, {
 			appID: txConfirmation["application-index"],
@@ -984,6 +984,28 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	registerSSCInfo(name: string, sscInfo: rtypes.AppInfo): void {
 		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
 			methodName: "registerSSCInfo",
+		});
+	}
+
+	/**
+	 * Checkpoint feature disable on run mode
+	 * @param asaName name of asa
+	 * @param txConfirmation txn confirmation
+	 */
+	addCheckpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+			methodName: "addCheckpointASA",
+		});
+	}
+
+	/**
+	 * Checkpoint feature disable on run mode
+	 * @param appName app name
+	 * @param txConfirmation txn confirmation
+	 */
+	addCheckpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+			methodName: "addCheckpointApp",
 		});
 	}
 

@@ -4,7 +4,7 @@ import algosdk, { generateAccount, LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
-import { DeployerDeployMode } from "../../src/internal/deployer";
+import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
@@ -13,6 +13,7 @@ import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
+import { FakeDeployer } from "../mocks/deployer";
 import { MOCK_APPLICATION_ADDRESS, mockConfirmedTx } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -677,10 +678,14 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(res.assetDef, asaDef);
 	});
 
-	describe("checkpointApp and checkpointASA", function () {
-		it("checkpointApp", () => {
-			const deployer = new DeployerDeployMode(deployerCfg);
+	describe("addCheckpointApp and addCheckpointASA", function () {
+		let deployer: DeployerDeployMode;
 
+		this.beforeEach(() => {
+			deployer = new DeployerDeployMode(deployerCfg);
+		});
+
+		it("addCheckpointApp", () => {
 			const appInfo = {
 				creator: algosdk.encodeAddress(mockConfirmedTx.txn.txn.snd),
 				applicationAccount: algosdk.getApplicationAddress(mockConfirmedTx["application-index"]),
@@ -693,13 +698,14 @@ describe("DeployerDeployMode", () => {
 				clearFile: "Y2xlYXI=",
 			};
 
-			deployer.checkpointApp("app", mockConfirmedTx);
+			deployer.addCheckpointApp("app", mockConfirmedTx);
 
 			// get checkpoint data
 			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].app
 				.get("app")
 				?.values()
 				.next().value;
+
 			checkpointData.timestamp = 1; // sync timestamp
 
 			assert.deepEqual(checkpointData, appInfo);
@@ -707,9 +713,7 @@ describe("DeployerDeployMode", () => {
 			assert.deepEqual(appInfo, deployer.getApp("app"));
 		});
 
-		it("checkpointASA", () => {
-			const deployer = new DeployerDeployMode(deployerCfg);
-
+		it("addCheckpointASA", () => {
 			const asaInfo: rtypes.ASAInfo = {
 				assetDef: { decimals: 0, total: 10 },
 				assetIndex: 1,
@@ -719,7 +723,7 @@ describe("DeployerDeployMode", () => {
 				txID: algosdk.Transaction.from_obj_for_encoding(mockConfirmedTx.txn.txn).txID(),
 			};
 
-			deployer.checkpointASA("asaName", mockConfirmedTx);
+			deployer.addCheckpointASA("asaName", mockConfirmedTx);
 
 			// get checkpoint data
 			const checkpointData = deployerCfg.cpData.precedingCP["network 123"].asa.get("asaName");
@@ -727,6 +731,20 @@ describe("DeployerDeployMode", () => {
 			assert.deepEqual(checkpointData, asaInfo);
 
 			assert.deepEqual(asaInfo, deployer.getASAInfo("asaName"));
+		});
+
+		it("should fails when use addCheckpointApp and addCheckpointASA in run mode", () => {
+			const deployerRunMode = new DeployerRunMode(deployerCfg);
+
+			assert.throw(() => {
+				deployerRunMode.addCheckpointApp("app", mockConfirmedTx),
+					"ABLDR606: Script tried to edit Deployer data using 'addCheckpointApp' outside 'deploy' action";
+			});
+
+			assert.throw(() => {
+				deployerRunMode.addCheckpointASA("asaName", mockConfirmedTx),
+					"ABLDR606: Script tried to edit Deployer data using 'addCheckpointASA' outside 'deploy' action";
+			});
 		});
 	});
 });
