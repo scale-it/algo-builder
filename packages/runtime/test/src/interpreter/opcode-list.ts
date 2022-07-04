@@ -2484,6 +2484,12 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
 			});
+
+			it("should return StateProofPK", () => {
+				const op = new Txn(["StateProofPK"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
+			});
 		});
 
 		describe("Gtxn", function () {
