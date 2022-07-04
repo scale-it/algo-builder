@@ -112,7 +112,7 @@ export class MyAlgoWalletSession {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 */
-	private async sendAndWait(
+	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();

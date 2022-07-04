@@ -71,6 +71,7 @@ export class Ctx implements Context {
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	innerTxAppIDCallStack: number[];
+	remainingTxns: number;
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;
@@ -99,6 +100,7 @@ export class Ctx implements Context {
 		// initial app call stack
 		this.innerTxAppIDCallStack = [tx.apid ?? 0];
 		this.remainingFee = 0;
+		this.remainingTxns = 256;
 		this.budget = MAX_APP_PROGRAM_COST;
 	}
 
@@ -432,7 +434,10 @@ export class Ctx implements Context {
 		};
 
 		this.state.appNameMap.set(approvalFile + "-" + clearFile, appInfo);
-		if (this.state.appNameMap.get(appDefinition.appName) !== undefined) {
+		if (
+			approvalFile + "-" + clearFile !== appDefinition.appName &&
+			this.state.appNameMap.get(appDefinition.appName) !== undefined
+		) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED, {
 				appName: appDefinition.appName,
 			});
@@ -814,9 +819,12 @@ export class Ctx implements Context {
 			else if (signedTransaction.sgnr || signedTransaction.sig) {
 				this.runtime.validateSecretKeySignature(signedTransaction);
 			}
-
-			//TODO: verify signature
-
+			//verify and reduce number remain Txn
+			if (this.remainingTxns > 0) {
+				this.remainingTxns--;
+			} else {
+				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.TOO_MANY_INNER_TXN);
+			}
 			// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
 			switch (signedTransaction.txn.type) {
 				case TransactionType.pay: {

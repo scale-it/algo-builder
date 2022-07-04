@@ -184,6 +184,13 @@ export function txnSpecByField(
 			break;
 		}
 
+		case "StateProofPK": {
+			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// so we set up 64 zero bytes as default value of StateProofPK
+			result = new Uint8Array(64).fill(0); // 64 zero bytes
+			break;
+		}
+
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']

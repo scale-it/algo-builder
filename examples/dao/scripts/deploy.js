@@ -44,6 +44,7 @@ async function run(runtimeEnv, deployer) {
 			globalInts: 5,
 			globalBytes: 2,
 			appArgs: appArgs,
+			foreignAssets: [govToken.assetIndex],
 		},
 		{}
 	);

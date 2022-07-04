@@ -135,6 +135,7 @@ describe("DAO test", function () {
 				approvalProgramFilename,
 				clearProgramFilename,
 				appArgs: daoAppArgs,
+				foreignAssets: [govTokenID],
 			},
 			{}
 		).appID;
