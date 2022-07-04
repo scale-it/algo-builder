@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
 -- create a sigma_dao_proposal table if does not exit already.
 CREATE TABLE IF NOT EXISTS sigma_dao_proposals (
   id SERIAL PRIMARY KEY, -- auto increment id
-  addr bytea,
-  app bigint,
-  localstate jsonb,
+  addr BYTEA,
+  app BIGINT,
+  localstate JSONB,
   voting_start BIGINT,
   voting_end BIGINT
 );
@@ -77,8 +77,8 @@ AS $$
 DECLARE
 	voting_start_key CHAR(255) := 'dm90aW5nX3N0YXJ0'; -- Byte code of 'voting_end'
 	voting_end_key CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
-	voting_start_value bigint;
-	voting_end_value bigint;
+	voting_start_value BIGINT;
+	voting_end_value BIGINT;
 BEGIN
 	IF (SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key) IS NOT NULL THEN
 			-- Iterate json object and get gov asset from it
@@ -87,7 +87,7 @@ BEGIN
 		-- insert values in sigma_daos table
 		INSERT INTO public.sigma_dao_proposals (
 		addr, app, localstate, voting_start, voting_end)
-		VALUES (new.addr, new.app, new.localstate::jsonb, voting_start_value, voting_end_value);
+		VALUES (NEW.addr, NEW.app, NEW.localstate::jsonb, voting_start_value, voting_end_value);
 	END IF;
 	RETURN NEW;
 END;
@@ -100,12 +100,12 @@ AFTER INSERT ON public.txn FOR EACH ROW
 EXECUTE FUNCTION sigmadao_trigger_fn();
 
 -- create a trigger (sigmadao_proposals_trigger)
--- Event: INSERT on publoc.account_app relation
+-- Event: UPDATE on publoc.account_app relation
 CREATE TRIGGER sigmadao_proposals_trigger
-AFTER INSERT ON public.account_app FOR EACH ROW
+AFTER UPDATE ON public.account_app FOR EACH ROW
 EXECUTE FUNCTION sigmadao_proposals_trigger_fn();
 
--- grant privileges to relation sigma_daos
+-- grant privileges
 GRANT ALL PRIVILEGES ON TABLE sigma_daos, sigma_dao_proposals TO algorand;
 
 -- Below are objects needed for sigma dao app. Extend it if more sigma dao objects needed
@@ -119,24 +119,24 @@ RETURNS SETOF sigma_daos AS $$
 $$ LANGUAGE SQL STABLE;
 
 -- Function to search proposal in account_app relation by app id
-CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType int)
+CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType INT)
 RETURNS SETOF sigma_dao_proposals AS $$
 DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
-	filter_all int := 1;
-	filter_active int := 2;
-	filter_future int := 3;
-	filter_past int := 4;
-	current_time bigint := extract(epoch from now()); -- epoch in second
+	filter_all INT := 1;
+	filter_active INT := 2;
+	filter_future INT := 3;
+	filter_past INT := 4;
+	current_time bigint := extract(epoch FROM NOW()); -- epoch in second
 BEGIN
-	if (filterType = filter_active) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and current_time between sigma_dao_proposals.voting_start and sigma_dao_proposals.voting_end order by voting_start;
+	IF (filterType = filter_active) THEN
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_future) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and current_time < voting_start order by voting_start;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time < voting_start ORDER BY voting_start;
 	ELSIF (filterType = filter_past) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and sigma_dao_proposals.voting_end < current_time order by voting_end desc;
-	else
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND sigma_dao_proposals.voting_end < current_time ORDER BY voting_end DESC;
+	ELSE
 		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId;
-	end if;
+	END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;
