@@ -16,7 +16,7 @@ CREATE UNIQUE INDEX sigma_daos_app_id_idx ON sigma_daos (app_id);
 -- create an index to do efficient text search using `%<text>%`, it requires
 -- pg_trgm extension.
 CREATE EXTENSION pg_trgm;
-CREATE INDEX sigma_daos_dao_name_idx ON users USING gin (dao_name gin_trgm_ops);
+CREATE INDEX sigma_daos_dao_name_idx ON sigma_daos USING gin (dao_name gin_trgm_ops);
 
 -- create a procedure to handle the trigger (sigmadao_trigger_fn) action
 CREATE OR REPLACE FUNCTION sigmadao_trigger_fn()
