@@ -11,6 +11,16 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
   asset_id BIGINT -- token id
 );
 
+-- create a sigma_dao_proposal table if does not exit already.
+CREATE TABLE IF NOT EXISTS sigma_dao_proposals (
+  id SERIAL PRIMARY KEY, -- auto increment id
+  addr bytea,
+  app bigint,
+  localstate jsonb,
+  voting_start BIGINT,
+  voting_end BIGINT
+);
+
 -- Create indexes
 CREATE UNIQUE INDEX sigma_daos_app_id_idx ON sigma_daos (app_id);
 -- create an index to do efficient text search using `%<text>%`, it requires
@@ -60,18 +70,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- create a procedure to handle the trigger (sigmadao_proposals_trigger_fn) action
+CREATE OR REPLACE FUNCTION sigmadao_proposals_trigger_fn()
+RETURNS TRIGGER
+AS $$
+DECLARE
+	voting_start_key CHAR(255) := 'dm90aW5nX3N0YXJ0'; -- Byte code of 'voting_end'
+	voting_end_key CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
+	voting_start_value bigint;
+	voting_end_value bigint;
+BEGIN
+	IF (SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key) IS NOT NULL THEN
+			-- Iterate json object and get gov asset from it
+		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key -> 'ui' INTO voting_start_value;
+		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_end_key -> 'ui' INTO voting_end_value;
+		-- insert values in sigma_daos table
+		INSERT INTO public.sigma_dao_proposals (
+		addr, app, localstate, voting_start, voting_end)
+		VALUES (new.addr, new.app, new.localstate::jsonb, voting_start_value, voting_end_value);
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- create a trigger (sigmadao_trigger)
 -- Event: INSERT on publoc.txn relation
 CREATE TRIGGER sigmadao_trigger
 AFTER INSERT ON public.txn FOR EACH ROW
 EXECUTE FUNCTION sigmadao_trigger_fn();
 
+-- create a trigger (sigmadao_proposals_trigger)
+-- Event: INSERT on publoc.account_app relation
+CREATE TRIGGER sigmadao_proposals_trigger
+AFTER INSERT ON public.account_app FOR EACH ROW
+EXECUTE FUNCTION sigmadao_proposals_trigger_fn();
+
 -- grant privileges to relation sigma_daos
-GRANT ALL PRIVILEGES ON TABLE sigma_daos TO algorand;
+GRANT ALL PRIVILEGES ON TABLE sigma_daos, sigma_dao_proposals TO algorand;
 
 -- Below are objects needed for sigma dao app. Extend it if more sigma dao objects needed
 -- Here, sigma_dao_user should be same as https://github.com/scale-it/algo-builder/blob/cbc2123622a10fbf96f9b99b254abc86a79ac1fb/examples/dao/Makefile#L1
-GRANT SELECT ON TABLE sigma_daos, asset, account_asset, account_app TO sigma_dao_user;
+GRANT SELECT ON TABLE sigma_daos, sigma_dao_proposals, asset, account_asset, account_app TO sigma_dao_user;
 
 -- Function to search dao name in sigma_daos relation
 CREATE OR REPLACE FUNCTION search_sigma_daos(daoToBeSearched TEXT)
@@ -80,11 +119,24 @@ RETURNS SETOF sigma_daos AS $$
 $$ LANGUAGE SQL STABLE;
 
 -- Function to search proposal in account_app relation by app id
-CREATE OR REPLACE FUNCTION search_sigma_daos_proposals(appId BIGINT)
-RETURNS SETOF account_app AS $$
+CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType int)
+RETURNS SETOF sigma_dao_proposals AS $$
 DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
+	filter_all int := 1;
+	filter_active int := 2;
+	filter_future int := 3;
+	filter_past int := 4;
+	current_time bigint := extract(epoch from now()); -- epoch in second
 BEGIN
-	RETURN QUERY SELECT * FROM account_app WHERE app=appId AND localstate -> 'tkv' -> voting_end IS NOT NULL;
+	if (filterType = filter_active) THEN
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and current_time between sigma_dao_proposals.voting_start and sigma_dao_proposals.voting_end order by voting_start;
+	ELSIF (filterType = filter_future) THEN
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and current_time < voting_start order by voting_start;
+	ELSIF (filterType = filter_past) THEN
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId and sigma_dao_proposals.voting_end < current_time order by voting_end desc;
+	else
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId;
+	end if;
 END;
 $$ LANGUAGE plpgsql STABLE;
