@@ -575,7 +575,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	}
 
 	/**
-	 * Save new ASA information(get from txConfirmation) to checkpoint
+	 * Save new ASA information(loaded from txConfirmation) to checkpoint
 	 * @param asaName name of asa
 	 * @param txConfirmation txn confirmation
 	 */

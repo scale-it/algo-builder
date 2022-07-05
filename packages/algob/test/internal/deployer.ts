@@ -733,7 +733,7 @@ describe("DeployerDeployMode", () => {
 			assert.deepEqual(asaInfo, deployer.getASAInfo("asaName"));
 		});
 
-		it("should fails when use addCheckpointApp and addCheckpointASA in run mode", () => {
+		it("should fail when we use addCheckpointApp and addCheckpointASA in run mode", () => {
 			const deployerRunMode = new DeployerRunMode(deployerCfg);
 
 			assert.throw(() => {
