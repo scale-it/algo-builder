@@ -577,15 +577,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	/**
 	 * Save new ASA information(loaded from txConfirmation) to checkpoint
 	 * @param asaName name of asa
-	 * @param txConfirmation txn confirmation
+	 * @param confirmedTxObj txn confirmation
 	 */
-	addCheckpointASA(asaName: string, txConfirmation: ConfirmedTxInfo): void {
-		const txn = txConfirmation.txn.txn;
+	addCheckpointASA(asaName: string, confirmedTxObj: ConfirmedTxInfo): void {
+		const txn = confirmedTxObj.txn.txn;
 
 		this.cpData.registerASA(this.networkName, asaName, {
-			assetIndex: txConfirmation["asset-index"],
+			assetIndex: confirmedTxObj["asset-index"],
 			creator: algosdk.encodeAddress(txn.apar?.m as Uint8Array),
-			confirmedRound: txConfirmation["confirmed-round"],
+			confirmedRound: confirmedTxObj["confirmed-round"],
 			deleted: false,
 			assetDef: {
 				total: txn.apar?.t as number,
@@ -598,14 +598,14 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	/**
 	 * Save new application information(get from txConfirmation) to checkpoint
 	 * @param appName app name
-	 * @param txConfirmation txn confirmation
+	 * @param confirmedTxObj txn confirmation
 	 */
-	addCheckpointApp(appName: string, txConfirmation: ConfirmedTxInfo): void {
-		const { txn } = txConfirmation.txn;
+	addCheckpointApp(appName: string, confirmedTxObj: ConfirmedTxInfo): void {
+		const { txn } = confirmedTxObj.txn;
 		this.cpData.registerSSC(this.networkName, appName, {
-			appID: txConfirmation["application-index"],
-			applicationAccount: algosdk.getApplicationAddress(txConfirmation["application-index"]),
-			confirmedRound: txConfirmation["confirmed-round"],
+			appID: confirmedTxObj["application-index"],
+			applicationAccount: algosdk.getApplicationAddress(confirmedTxObj["application-index"]),
+			confirmedRound: confirmedTxObj["confirmed-round"],
 			approvalFile: txn.apap?.toString("base64") as string,
 			clearFile: txn.apsu?.toString("base64") as string,
 			creator: algosdk.encodeAddress(txn.snd),

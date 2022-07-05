@@ -481,9 +481,9 @@ export interface Deployer {
 
 	registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void;
 
-	addCheckpointASA: (asaName: string, txConfirmation: ConfirmedTxInfo) => void;
+	addCheckpointASA: (asaName: string, confirmedTxObj: ConfirmedTxInfo) => void;
 
-	addCheckpointApp: (appName: string, txConfirmation: ConfirmedTxInfo) => void;
+	addCheckpointApp: (appName: string, confirmedTxObj: ConfirmedTxInfo) => void;
 
 	logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void;
 
