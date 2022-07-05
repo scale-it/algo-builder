@@ -81,10 +81,11 @@ DECLARE
 	voting_end_value BIGINT;
 BEGIN
 	IF (SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key) IS NOT NULL THEN
-			-- Iterate json object and get gov asset from it
+		-- Iterate json object and get voting start value
 		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key -> 'ui' INTO voting_start_value;
+		-- Iterate json object and get voting end value
 		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_end_key -> 'ui' INTO voting_end_value;
-		-- insert values in sigma_daos table
+		-- insert values in sigma_dao_proposals table
 		INSERT INTO public.sigma_dao_proposals (
 		addr, app, localstate, voting_start, voting_end)
 		VALUES (NEW.addr, NEW.app, NEW.localstate::jsonb, voting_start_value, voting_end_value);
@@ -118,16 +119,16 @@ RETURNS SETOF sigma_daos AS $$
 	SELECT * FROM sigma_daos WHERE dao_name ilike ('%' || daoToBeSearched || '%');
 $$ LANGUAGE SQL STABLE;
 
--- Function to search proposal in account_app relation by app id
+-- Function to search proposal in sigma_dao_proposals relation by app id
 CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType INT)
 RETURNS SETOF sigma_dao_proposals AS $$
 DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
-	filter_all INT := 1;
-	filter_active INT := 2;
-	filter_future INT := 3;
-	filter_past INT := 4;
 	current_time bigint := extract(epoch FROM NOW()); -- epoch in second
+	filter_all INT := 1; -- filter type -> all
+	filter_active INT := 2; -- filter type -> active
+	filter_future INT := 3; -- filter type -> future
+	filter_past INT := 4; -- filter type -> past
 BEGIN
 	IF (filterType = filter_active) THEN
 		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
