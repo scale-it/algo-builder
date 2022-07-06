@@ -494,7 +494,7 @@ export interface Deployer {
 	 * @param txns list transaction in group
 	 * @returns confirmed tx info of group
 	 */
-	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 
 	/**
 	 * Funds logic signature account (Contract Account).
@@ -722,7 +722,7 @@ export interface Deployer {
 	 */
 	executeTx: (
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	) => Promise<ConfirmedTxInfo[]>;
+	) => Promise<TxnReceipt[]>;
 }
 
 // ************************
@@ -784,5 +784,9 @@ export interface ConfirmedTxInfo {
 	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
 	"inner-txns"?: ConfirmedTxInfo;
 	txn: algosdk.EncodedSignedTransaction;
-	txnID: string; // not include in algorand response. However this field is very useful.
+}
+
+export interface TxnReceipt {
+	confirmedTxInfo: ConfirmedTxInfo;
+	txnID: string;
 }

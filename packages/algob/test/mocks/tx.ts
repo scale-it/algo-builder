@@ -111,7 +111,6 @@ export const mockConfirmedTx: ConfirmedTxInfo = {
 	txn: {
 		txn: TXN_OBJ,
 	},
-	txnID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 };
 
 export const mockAssetInfo: modelsv2.Asset = {
@@ -216,7 +215,6 @@ export const mockPendingTransactionInformation = {
 	txn: {
 		txn: TXN_OBJ,
 	},
-	txnID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 };
 
 export const mockLsig: LogicSigAccount = new LogicSigAccount(mockProgram, []);

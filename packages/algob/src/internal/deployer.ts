@@ -31,6 +31,7 @@ import type {
 	LsigInfo,
 	RuntimeEnv,
 	SCParams,
+	TxnReceipt,
 } from "../types";
 import { DeployerConfig } from "./deployer_cfg";
 
@@ -502,7 +503,7 @@ class DeployerBasicMode {
 	 * @param txns list transaction in group
 	 * @returns confirmed tx info of group
 	 */
-	async getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+	async getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
 		return await this.algoOp.getReceiptTxns(txns);
 	}
 }
@@ -890,7 +891,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 */
 	async executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo[]> {
+	): Promise<TxnReceipt[]> {
 		return await executeTx(this, transactions);
 	}
 }
@@ -1077,7 +1078,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	 */
 	async executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo[]> {
+	): Promise<TxnReceipt[]> {
 		return await executeTx(this, transactions);
 	}
 }

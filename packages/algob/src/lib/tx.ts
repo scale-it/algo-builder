@@ -9,7 +9,7 @@ import {
 } from "@algo-builder/web";
 import algosdk, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
-import { ConfirmedTxInfo, Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../types";
 import { loadEncodedTxFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
@@ -280,7 +280,7 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
 export async function executeTx(
 	deployer: Deployer,
 	transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-): Promise<ConfirmedTxInfo[]> {
+): Promise<TxnReceipt[]> {
 	let isSDK = false;
 	let signedTxn;
 	if (transactions.length === 0) {

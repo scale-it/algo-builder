@@ -12,7 +12,7 @@ import { TextEncoder } from "util";
 
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { ConfirmedTxInfo, Deployer } from "../../src/types";
+import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
@@ -72,7 +72,7 @@ describe("Opt-In to ASA", () => {
 	let deployer: Deployer;
 	let execParams: wtypes.OptInASAParam;
 	let algod: AlgoOperatorDryRunImpl;
-	let expected: ConfirmedTxInfo[];
+	let expected: TxnReceipt[];
 	beforeEach(async () => {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
@@ -91,11 +91,13 @@ describe("Opt-In to ASA", () => {
 
 		expected = [
 			{
-				"confirmed-round": 1,
-				"asset-index": 1,
-				"application-index": 1,
-				txn: {
-					txn: TXN_OBJ,
+				confirmedTxInfo: {
+					"confirmed-round": 1,
+					"asset-index": 1,
+					"application-index": 1,
+					txn: {
+						txn: TXN_OBJ,
+					},
 				},
 				txnID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 			},
@@ -746,7 +748,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo["application-index"],
+			appID: appInfo.confirmedTxInfo["application-index"],
 			payFlags: {},
 		};
 
@@ -803,7 +805,7 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo["application-index"],
+			appID: appInfo.confirmedTxInfo["application-index"],
 			newAppCode: {
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFilename: "approval.teal",
@@ -885,7 +887,7 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo["application-index"],
+			appID: appInfo.confirmedTxInfo["application-index"],
 			newAppCode: {
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFilename: "approval.teal",
@@ -987,7 +989,7 @@ describe("SDK Transaction object", () => {
 
 		const res = await deployer.executeTx([transaction]);
 		assert.isDefined(res);
-		assert.equal(res[0]["confirmed-round"], 1);
-		assert.equal(res[0]["asset-index"], 1);
+		assert.equal(res[0].confirmedTxInfo["confirmed-round"], 1);
+		assert.equal(res[0].confirmedTxInfo["asset-index"], 1);
 	});
 });
