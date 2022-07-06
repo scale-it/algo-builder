@@ -333,6 +333,9 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		syncAccounts();
 
 		// let's close escrow account first
+		//This walkaround was needed since the previous version
+		//was not able sign the transaction and escrowLsig
+		//always expects a group transaction
 		runtime.getAccount(escrow.address).amount = 0;
 		syncAccounts();
 

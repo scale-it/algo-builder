@@ -28,9 +28,15 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
 
+- Added `sendSignedTransaction(signedTransaction)`
+- Added support for `SignedTransaction` object in `executeTx` method.
+- `ProcessTransaction` now works on `SignedTransaction` object array.
+- Added verification for secret key signatures.
+
 #### Examples
 
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
+- Added secret key to all accounts that are signing transactins in examples. 
 ### Bug Fixes
 
 - Fix number transaction in one call should be 256(include inner and atomic transaction).
