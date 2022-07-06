@@ -299,9 +299,9 @@ export function isEncTxAssetReconfigure(txn: EncTx): boolean {
 		txn.caid !== undefined && // assetIndex should be undefined
 		txn.apar !== undefined && // assetParameters should not be undefined
 		(txn.apar.m !== undefined || // manager
-		txn.apar.f !== undefined || // freeze
-		txn.apar.c !== undefined || // clawback
-		txn.apar.r !== undefined )   // reserve
+			txn.apar.f !== undefined || // freeze
+			txn.apar.c !== undefined || // clawback
+			txn.apar.r !== undefined) // reserve
 	);
 }
 /**
@@ -316,28 +316,25 @@ export function isEncTxAssetRevoke(txn: EncTx): boolean {
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetFreeze(txn: EncTx): boolean {
-	return (txn.afrz !== undefined &&
-		txn.fadd !== undefined);
+	return txn.afrz !== undefined && txn.fadd !== undefined;
 }
 /**
  * Checks if given encoded transaction obj is asset opt in
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetOptIn(txn: EncTx): boolean {
-	if (txn.arcv !== undefined && txn.arcv !== undefined) {
+	if (txn.arcv !== undefined) {
 		return !txn.arcv.compare(txn.snd) as boolean;
 	} else {
 		return false;
 	}
-
 }
 /**
  * Checks if given encoded transaction obj is asset opt in
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetTransfer(txn: EncTx): boolean {
-	return (txn.arcv !== undefined &&
-		txn.snd !== undefined && txn.asnd === undefined);
+	return txn.arcv !== undefined && txn.snd !== undefined && txn.asnd === undefined;
 }
 /**
  * Check if given encoded transaction object is app creation
@@ -423,7 +420,7 @@ export function encTxToExecParams(
 			execParams.fromAccountAddr = _getAddress(encTx.snd);
 			execParams.toAccountAddr =
 				getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
-			execParams.amountMicroAlgos = encTx.amt? BigInt(encTx.amt) : 0n;
+			execParams.amountMicroAlgos = encTx.amt ? BigInt(encTx.amt) : 0n;
 			if (encTx.close) {
 				execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.close, ctx, line);
 			}
@@ -454,7 +451,7 @@ export function encTxToExecParams(
 				execParams.toAccountAddr = getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
 			}
 			// set common fields (asset amount, index, closeRemainderTo)
-			execParams.amount = encTx.aamt? BigInt(encTx.aamt) : 0n;
+			execParams.amount = encTx.aamt ? BigInt(encTx.aamt) : 0n;
 			execParams.assetID = encTx.xaid ?? 0;
 			// option fields
 			if (encTx.aclose) {
@@ -506,11 +503,11 @@ export function encTxToExecParams(
 			execParams.type = types.TransactionType.KeyRegistration;
 			// execParams.voteKey = encTx.votekey?.toString("base64");
 			if (encTx.votekey !== undefined) {
-				execParams.voteKey = Buffer.from(encTx.votekey).toString('base64');
+				execParams.voteKey = Buffer.from(encTx.votekey).toString("base64");
 			}
 			// execParams.selectionKey = encTx.selkey?.toString("base64");
 			if (encTx.selkey !== undefined) {
-				execParams.selectionKey = Buffer.from(encTx.selkey).toString('base64');
+				execParams.selectionKey = Buffer.from(encTx.selkey).toString("base64");
 			}
 			execParams.voteFirst = encTx.votefst;
 			execParams.voteLast = encTx.votelst;

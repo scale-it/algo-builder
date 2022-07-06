@@ -1,8 +1,8 @@
 import { Txn } from "@randlabs/myalgo-connect";
 import algosdk, { SignedTransaction, SuggestedParams, Transaction } from "algosdk";
 import { ALGORAND_ZERO_ADDRESS_STRING } from "algosdk/dist/types/src/encoding/address";
-import { types } from "..";
 
+import { types } from "..";
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import {
@@ -32,7 +32,6 @@ export function decodeUint8ArrayToString(toDecode: Uint8Array | undefined): stri
 	return new TextDecoder().decode(toDecode);
 }
 
-
 /**
  * Returns from address from the transaction params depending on @SignType
  * @param execParams transaction execution params passed by user
@@ -50,7 +49,7 @@ export function getFromAddress(execParams: ExecParams): AccountAddress {
  */
 export function getTransactionRevokeAddress(transaction: Transaction): AccountAddress {
 	if (transaction.assetRevocationTarget !== undefined) {
-		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey)
+		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey);
 	} else {
 		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 	}
@@ -61,34 +60,34 @@ export function getTransactionRevokeAddress(transaction: Transaction): AccountAd
  * @param transaction Transaction Object
  */
 export function getTransactionFromAddress(transaction: Transaction): AccountAddress {
-	return algosdk.encodeAddress(transaction.from.publicKey)
+	return algosdk.encodeAddress(transaction.from.publicKey);
 }
 
 export function getAddress(account: algosdk.Address | undefined): AccountAddress | undefined {
 	if (account !== undefined) {
-		return algosdk.encodeAddress(account.publicKey)
+		return algosdk.encodeAddress(account.publicKey);
 	} else {
 		return undefined;
 	}
 }
-
-
 
 /**
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
 export function getTransactionToAddress(transaction: Transaction): AccountAddress {
-	return algosdk.encodeAddress(transaction.to.publicKey)
+	return algosdk.encodeAddress(transaction.to.publicKey);
 }
 
 /**
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionCloseReminderToAddress(transaction: Transaction): AccountAddress | undefined {
+export function getTransactionCloseReminderToAddress(
+	transaction: Transaction
+): AccountAddress | undefined {
 	if (transaction.closeRemainderTo !== undefined) {
-		return algosdk.encodeAddress(transaction.closeRemainderTo.publicKey)
+		return algosdk.encodeAddress(transaction.closeRemainderTo.publicKey);
 	} else {
 		return undefined;
 	}
@@ -98,9 +97,11 @@ export function getTransactionCloseReminderToAddress(transaction: Transaction): 
  * Returns  reKeyTo address of the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionReKeyToToAddress(transaction: Transaction): AccountAddress | undefined {
+export function getTransactionReKeyToToAddress(
+	transaction: Transaction
+): AccountAddress | undefined {
 	if (transaction.reKeyTo !== undefined) {
-		return algosdk.encodeAddress(transaction.reKeyTo.publicKey)
+		return algosdk.encodeAddress(transaction.reKeyTo.publicKey);
 	} else {
 		return undefined;
 	}
@@ -112,7 +113,7 @@ export function getTransactionReKeyToToAddress(transaction: Transaction): Accoun
  */
 export function getTransactionFreezeAddress(transaction: Transaction): AccountAddress {
 	if (transaction.freezeAccount !== undefined) {
-		return algosdk.encodeAddress(transaction.freezeAccount.publicKey)
+		return algosdk.encodeAddress(transaction.freezeAccount.publicKey);
 	} else {
 		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 	}
@@ -134,7 +135,9 @@ export function getTransactionASADefinition(transaction: Transaction): types.ASA
 		defaultFrozen: transaction.assetDefaultFrozen,
 		unitName: transaction.assetUnitName,
 		url: transaction.assetURL,
-		metadataHash: transaction.assetMetadataHash ? new TextDecoder().decode(transaction.assetMetadataHash) : undefined,
+		metadataHash: transaction.assetMetadataHash
+			? new TextDecoder().decode(transaction.assetMetadataHash)
+			: undefined,
 		note: undefined,
 	};
 	return asaDef;
@@ -145,10 +148,10 @@ export function getTransactionASADefinition(transaction: Transaction): types.ASA
  * @param transaction Transaction Object
  */
 export function getTransactionFlags(transaction: Transaction): types.TxParams {
-	let transactionFlags: types.TxParams = {};
+	const transactionFlags: types.TxParams = {};
 	transactionFlags.closeRemainderTo = getTransactionCloseReminderToAddress(transaction);
 	transactionFlags.lease = transaction.lease;
-	transactionFlags.note = decodeUint8ArrayToString(transaction.note)
+	transactionFlags.note = decodeUint8ArrayToString(transaction.note);
 	transactionFlags.rekeyTo = getTransactionReKeyToToAddress(transaction);
 	transactionFlags.firstValid = transaction.firstRound;
 	transactionFlags.validRounds = transaction.lastRound - transaction.firstRound;
@@ -160,11 +163,6 @@ export function getTransactionFlags(transaction: Transaction): types.TxParams {
 	}
 	return transactionFlags;
 }
-
-
-
-
-
 
 /**
  * Using flatFee, if flatFee is true, set totalFee
@@ -397,7 +395,10 @@ export function mkTransaction(
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
 				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
-				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + appDef.metaType);
+				throw new Error(
+					"Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " +
+						appDef.metaType
+				);
 			}
 		}
 		case TransactionType.UpdateApp: {
@@ -419,7 +420,10 @@ export function mkTransaction(
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
 				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
-				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + execParams.newAppCode.metaType);
+				throw new Error(
+					"Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " +
+						execParams.newAppCode.metaType
+				);
 			}
 		}
 		case TransactionType.OptInToApp: {
@@ -479,17 +483,25 @@ export function mkTransaction(
  * @param transaction Transaction Object
  */
 export function getAssetReconfigureFields(transaction: Transaction): AssetModFields {
-	let modificationFields: AssetModFields = {};
+	const modificationFields: AssetModFields = {};
 	const encodedTransaction = transaction.get_obj_for_encoding();
 	if (encodedTransaction.apar !== undefined) {
-		modificationFields.clawback = encodedTransaction.apar.c !== undefined ?
-			algosdk.encodeAddress(transaction.assetClawback.publicKey) : "";
-		modificationFields.freeze = encodedTransaction.apar.f !== undefined ?
-			algosdk.encodeAddress(transaction.assetFreeze.publicKey) : "";
-		modificationFields.manager = encodedTransaction.apar.m !== undefined ?
-			algosdk.encodeAddress(transaction.assetManager.publicKey) : "";
-		modificationFields.reserve = encodedTransaction.apar.r !== undefined ?
-			algosdk.encodeAddress(transaction.assetReserve.publicKey) : "";
+		modificationFields.clawback =
+			encodedTransaction.apar.c !== undefined
+				? algosdk.encodeAddress(transaction.assetClawback.publicKey)
+				: "";
+		modificationFields.freeze =
+			encodedTransaction.apar.f !== undefined
+				? algosdk.encodeAddress(transaction.assetFreeze.publicKey)
+				: "";
+		modificationFields.manager =
+			encodedTransaction.apar.m !== undefined
+				? algosdk.encodeAddress(transaction.assetManager.publicKey)
+				: "";
+		modificationFields.reserve =
+			encodedTransaction.apar.r !== undefined
+				? algosdk.encodeAddress(transaction.assetReserve.publicKey)
+				: "";
 	}
 	return modificationFields;
 }

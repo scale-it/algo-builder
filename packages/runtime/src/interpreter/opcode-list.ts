@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { parsing, types, tx as webTx } from "@algo-builder/web";
+import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, {
 	decodeAddress,
 	decodeUint64,
@@ -4293,15 +4293,17 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
-			// TODO check minimum fee 
+			// TODO check minimum fee
 			//this.interpreter.runtime.ctx.deductFee()
 
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
-				types.isExecParams(txnParam) ? {
-					sig: Buffer.alloc(5),
-					sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-					txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1))
-				} : txnParam
+				types.isExecParams(txnParam)
+					? {
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
+					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
