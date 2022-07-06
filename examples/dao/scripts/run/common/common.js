@@ -1,9 +1,14 @@
 const { types } = require("@algo-builder/web");
+const { default: algosdk } = require("algosdk");
 
 async function tryExecuteTx(deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
-		else await deployer.executeTx([txnParams]);
+		if (Array.isArray(txnParams)) {
+			let receipts = await deployer.executeTx(txnParams);
+			console.log(algosdk.Transaction.from_obj_for_encoding(receipts[0].txn.txn).txID());
+		} else {
+			let receipts = await deployer.executeTx([txnParams]);
+		}
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.body : e);
 	}
