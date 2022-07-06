@@ -2,14 +2,10 @@ import { parsing, tx as webTx, types } from "@algo-builder/web";
 import { SmartContract } from "@algo-builder/web/build/types";
 import algosdk, {
 	Account as AccountSDK,
-	Address,
 	decodeAddress,
 	decodeSignedTransaction,
 	modelsv2,
-	OnApplicationComplete,
 	SignedTransaction,
-	Transaction,
-	TransactionParams,
 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
@@ -20,15 +16,13 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
-	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
-import { encTxToExecParams, transactionAndSignToExecParams } from "./lib/txn";
-import { LogicSig, LogicSigAccount } from "./logicsig";
+import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
 	AccountAddress,
@@ -416,11 +410,14 @@ export class Runtime {
 	}
 
 	/**
-	 * Creates new transaction object (tx, gtxs) from given txnParams
+	 * Creates new transaction object (tx, gtxs) from given txnParams and signes it
 	 * @param txnParams : Transaction parameters for current txn or txn Group
-	 * @returns: [current transaction, transaction group]
+	 * @returns: [current SignedTransaction, SignedTransaction group]
 	 */
-	createTxnContext(txnParams: types.ExecParams | types.ExecParams[]): [SignedTransaction, SignedTransaction[]] {
+	/* eslint-disable sonarjs/cognitive-complexity */
+	createTxnContext(
+		txnParams: types.ExecParams | types.ExecParams[]
+	): [SignedTransaction, SignedTransaction[]] {
 		// if txnParams is array, then user is requesting for a group txn
 		let signedTx: SignedTransaction;
 		if (Array.isArray(txnParams)) {
@@ -432,15 +429,16 @@ export class Runtime {
 				const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
 				const tx = webTx.mkTransaction(txnParam, mockParams);
 				if (txnParam.sign === types.SignType.SecretKey) {
-					if(txnParam.fromAccount.sk.length !== 64){
+					if (txnParam.fromAccount.sk.length !== 64) {
 						throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
-						secretkey: txnParam.fromAccount.sk, });
+							secretkey: txnParam.fromAccount.sk,
+						});
 					}
-					signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk))
-					signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn:tx};
-
-				} else { //in case of lsig we do not sign it we just mock the signature
-					signedTx = { sig: Buffer.alloc(5), txn: tx }
+					signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk));
+					signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn: tx };
+				} else {
+					//in case of lsig we do not sign it we just mock the signature
+					signedTx = { sig: Buffer.alloc(5), txn: tx };
 				}
 				txns.push(signedTx);
 			}
@@ -450,19 +448,26 @@ export class Runtime {
 			const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
 			const tx = webTx.mkTransaction(txnParams, mockParams);
 			if (txnParams.sign === types.SignType.SecretKey) {
-				if(txnParams.fromAccount.sk.length !== 64){
+				if (txnParams.fromAccount.sk.length !== 64) {
 					throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
-						secretkey: txnParams.fromAccount.sk, });
+						secretkey: txnParams.fromAccount.sk,
+					});
 				}
-				signedTx = decodeSignedTransaction(tx.signTxn(txnParams.fromAccount.sk))
+				signedTx = decodeSignedTransaction(tx.signTxn(txnParams.fromAccount.sk));
 			} else {
-				signedTx = { sig: Buffer.alloc(5), txn: tx }
+				signedTx = { sig: Buffer.alloc(5), txn: tx };
 			}
 			return [signedTx, [signedTx]];
 		}
 	}
+	/* eslint-enable sonarjs/cognitive-complexity */
 
-	// creates new asset creation transaction object.
+	/**
+	 * Creates new asset creation transaction object.
+	 * @param name : asset name
+	 * @param flags: asa deployment flags
+	 * @param asaDef: asa definition
+	 */
 	mkAssetCreateTx(name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
 		// this funtion is called only for validation of parameters passed
 		const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
@@ -918,8 +923,8 @@ export class Runtime {
 		let gtxs: EncTx[];
 		let signedTransactions: algosdk.SignedTransaction[];
 		let appDef: types.AppDefinition | SmartContract | undefined;
-		let appDefinitions: (types.AppDefinition | SmartContract | undefined)[] = [];
-		let lsigs: (types.Lsig | undefined)[] = [];
+		const appDefinitions: (types.AppDefinition | SmartContract | undefined)[] = [];
+		const lsigs: (types.Lsig | undefined)[] = [];
 
 		if (types.isExecParams(txnParams[0])) {
 			const dummySource: types.SourceCompiled = {
@@ -966,28 +971,18 @@ export class Runtime {
 			// get current txn and txn group (as encoded obj)
 			let _;
 			[_, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
-			// signedTransactions = txns;
 			gtxs = signedTransactions.map((signedTransaction) => {
-				let txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+				const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
 				txn.txID = signedTransaction.txn.txID();
-				return txn
+				return txn;
 			});
 			tx = gtxs[0];
-
-
 		} else {
 			signedTransactions = txnParams.map((txnParameter) => {
-				const txn = txnParameter as algosdk.SignedTransaction;
-				return txn;
-			})
-			// const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
-			// 	const txn = txnParamerter as algosdk.SignedTransaction;
-			// 	return txn.txn.get_obj_for_encoding() as EncTx;
-			// });
-			// tx = sdkTxns[0];
-			// gtxs = sdkTxns;
+				return txnParameter as algosdk.SignedTransaction;
+			});
 			gtxs = signedTransactions.map((signedTransaction) => {
-				let txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+				const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
 				txn.txID = signedTransaction.txn.txID();
 				return txn;
 			});
@@ -1003,23 +998,13 @@ export class Runtime {
 		// state is a deep copy of store
 		this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
-		// Run TEAL program associated with each transaction and
-		// then execute the transaction without interacting with store.
-		// const signedTransactions: algosdk.SignedTransaction[] = gtxs.map((txn) =>
-		// 	types.isExecParams(txn) ? {
-		// 		sig: Buffer.alloc(5),
-		// 		txn: txn
-		// 	} : txn
-		// );
-
-
 		// calculate budget for single/group tx
 		const applCallTxNumber = gtxs.filter(
 			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
 		).length;
 
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
-		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefinitions , lsigs);
+		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefinitions, lsigs);
 
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;
@@ -1072,41 +1057,6 @@ export class Runtime {
 		this.store = this.ctx.state;
 	}
 
-	// verifySignature(signedTransaction: SignedTransaction) {
-	// 	let isValid = false;
-	// 	if (typeof signedTransaction.sig !== "undefined") {
-	// 		isValid = nacl.verify(
-	// 			Uint8Array.from(signedTransaction.txn.bytesToSign()),
-	// 			signedTransaction.sig,
-	// 			signedTransaction.txn.from.publicKey
-	// 		);
-	// 		//Transaction signature
-	// 		// isValid = algosdk.verifyBytes(
-	// 		// 	signedTransaction.txn.bytesToSign(),
-	// 		// 	signedTransaction.sig,
-	// 		// 	algosdk.encodeAddress(signedTransaction.txn.from.publicKey)
-	// 		// );
-	// 	} else if (
-	// 		typeof signedTransaction.sgnr !== "undefined" &&
-	// 		typeof signedTransaction.txn.reKeyTo !== "undefined"
-	// 	) {
-	// 		isValid = algosdk.verifyBytes(
-	// 			signedTransaction.txn.bytesToSign(),
-	// 			signedTransaction.sgnr,
-	// 			signedTransaction.txn.reKeyTo.toString()
-	// 		);
-	// 	} else if (typeof signedTransaction.lsig !== "undefined") {
-	// 		//Logic signature
-	// 		isValid = false;
-	// 	} else if (typeof signedTransaction.msig !== "undefined") {
-	// 		// Multisig structure
-	// 		isValid = false;
-	// 	}
-	// 	if (!isValid) {
-	// 		throw new Error("Signature is not valid");
-	// 	}
-	// }
-
 	/**
 	 * Validate signature for Algorand account on transaction params.
 	 * Include check spending account when creating a transaction from Algorand account
@@ -1120,15 +1070,16 @@ export class Runtime {
 			const accountSpendAddr = fromAccount.getSpendAddress();
 			let signerAddr;
 			if (signedTransaction.sgnr !== undefined) {
-				signerAddr = algosdk.encodeAddress(signedTransaction.sgnr)
-			} else {//if .sgnr is undefined it means the singer is 'from'
+				signerAddr = algosdk.encodeAddress(signedTransaction.sgnr);
+			} else {
+				//if .sgnr is undefined it means the singer is 'from'
 				signerAddr = fromAccountAddr;
 			}
 			if (accountSpendAddr !== signerAddr) {
-					throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT, {
-						spend: accountSpendAddr,
-						signer: signerAddr,
-					});
+				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT, {
+					spend: accountSpendAddr,
+					signer: signerAddr,
+				});
 			}
 		} else {
 			// throw error if your don't provide account `signature`.

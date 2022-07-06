@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { tx as webTx, types } from "@algo-builder/web";
-import { AppDefinition, MetaType, SmartContract, TxParams } from "@algo-builder/web/build/types";
+import { AppDefinition, SmartContract, TxParams } from "@algo-builder/web/build/types";
 import algosdk, {
 	getApplicationAddress,
 	makeAssetTransferTxnWithSuggestedParams,
@@ -24,22 +24,18 @@ import {
 import {
 	calculateFeeCredit,
 	isEncTxApplicationCreate,
-	isEncTxAssetConfig,
 	isEncTxAssetCreate,
 	isEncTxAssetDeletion,
-	isEncTxAssetFreeze,
 	isEncTxAssetOptIn,
 	isEncTxAssetReconfigure,
 	isEncTxAssetRevoke,
 	isEncTxAssetTransfer,
-	txnSpecByField
 } from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	ASADeploymentFlags,
 	ASAInfo,
@@ -244,7 +240,8 @@ export class Ctx implements Context {
 		if (closeRemainderToAddress !== undefined) {
 			this.verifyCloseRemainderTo(transaction);
 			const closeReminderToAccount = this.getAccount(closeRemainderToAddress);
-			closeReminderToAccount.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
+			// transfer funds of sender to closeRemTo account
+			closeReminderToAccount.amount += fromAccount.amount;
 			fromAccount.amount = 0n; // close sender's account
 		}
 		return this.setAndGetTxReceipt();
@@ -410,8 +407,8 @@ export class Ctx implements Context {
 		this.assertAccBalAboveMin(senderAcc.address);
 		this.state.accounts.set(senderAcc.address, senderAcc);
 		this.state.globalApps.set(app.id, senderAcc.address);
-
-		this.runtime.run(approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack); // execute TEAL code with appID = 0
+		// execute TEAL code with appID = 0
+		this.runtime.run(approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack);
 
 		// create new application in globalApps map
 		this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -517,8 +514,10 @@ export class Ctx implements Context {
 	 */
 	verifyCloseRemainderTo(transaction: Transaction): void {
 		if (transaction.closeRemainderTo == undefined) return;
-		if (webTx.getTransactionCloseReminderToAddress(transaction)
-			=== webTx.getTransactionFromAddress(transaction)) {
+		if (
+			webTx.getTransactionCloseReminderToAddress(transaction) ===
+			webTx.getTransactionFromAddress(transaction)
+		) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO);
 		}
 	}
@@ -565,12 +564,15 @@ export class Ctx implements Context {
 		const transactionFlags = webTx.getTransactionFlags(transaction);
 		if (BigInt(transaction.amount) === 0n && fromAccountAddr === toAccountAddr) {
 			this.optInToASA(transaction.assetIndex, fromAccountAddr, transactionFlags);
-		} else if (transaction.amount !== 0n) {
+		} else if (BigInt(transaction.amount) !== 0n) {
 			this.assertAssetNotFrozen(transaction.assetIndex as number, fromAccountAddr);
 			this.assertAssetNotFrozen(transaction.assetIndex as number, toAccountAddr);
 		}
 
-		const fromAssetHolding = this.getAssetHolding(transaction.assetIndex as number, fromAccountAddr);
+		const fromAssetHolding = this.getAssetHolding(
+			transaction.assetIndex as number,
+			fromAccountAddr
+		);
 		const toAssetHolding = this.getAssetHolding(
 			transaction.assetIndex as number,
 			toAccountAddr
@@ -597,8 +599,8 @@ export class Ctx implements Context {
 				transaction.assetIndex as number,
 				closeToAddr
 			);
-
-			closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
+			// transfer assets of sender to closeRemTo account
+			closeRemToAssetHolding.amount += fromAssetHolding.amount;
 			const fromAccount = this.getAccount(fromAccountAddr);
 			fromAccount.closeAsset(transaction.assetIndex as number);
 		}
@@ -764,22 +766,13 @@ export class Ctx implements Context {
 		return txReceipt;
 	}
 
-	// apply rekey config on from account
-	rekeyTo1(txParam: types.ExecParams): void {
-		if (!txParam.payFlags.rekeyTo) return;
-		const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
-		// apply rekey
-		fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
-	}
-
-	// apply rekey config on from account
-	// rekeyToFromTransaction(txn: Transaction): void {
-	// 	if (!txn.reKeyTo) return;
-	// 	const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
+	// // apply rekey config on from account
+	// rekeyTo1(txParam: types.ExecParams): void {
+	// 	if (!txParam.payFlags.rekeyTo) return;
+	// 	const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
 	// 	// apply rekey
-	// 	fromAccount.rekeyTo(webTx.getTransactionReKeyToToAddress(txn));
+	// 	fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
 	// }
-
 	rekeyTo(txn: Transaction, reKeyTo: string | undefined): void {
 		if (reKeyTo === undefined) return;
 		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
@@ -797,9 +790,11 @@ export class Ctx implements Context {
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
 	/* eslint-disable complexity */
-	processTransactions(signedTransactions: algosdk.SignedTransaction[],
+	processTransactions(
+		signedTransactions: algosdk.SignedTransaction[],
 		appDefinition?: (types.AppDefinition | types.SmartContract | undefined)[],
-		lsigs?: (types.Lsig | undefined)[]): TxReceipt[] {
+		lsigs?: (types.Lsig | undefined)[]
+	): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
 		this.verifyMinimumFees();
@@ -811,12 +806,12 @@ export class Ctx implements Context {
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
 			if (lsigs !== undefined) {
-				if(lsigs[idx] !== undefined){
+				if (lsigs[idx] !== undefined) {
 					this.tx = this.gtxs[idx]; // update current tx to index of stateless
 					r = this.runtime.validateLsigAndRun(lsigs[idx] as types.Lsig, this.debugStack);
 					this.tx = this.gtxs[0];
 				}
-			} // 
+			} //
 			//after executing stateless tx updating current tx to default (index 0)
 			else if (signedTransaction.sgnr || signedTransaction.sig) {
 				this.runtime.validateSecretKeySignature(signedTransaction);
@@ -832,13 +827,16 @@ export class Ctx implements Context {
 				case TransactionType.pay: {
 					// if toAccountAddre doesn't exist in runtime env
 					// then we will add it to runtime env.
-					if (this.state.accounts.get(algosdk.encodeAddress(
-						signedTransaction.txn.to.publicKey)) === undefined) {
+					if (
+						this.state.accounts.get(
+							algosdk.encodeAddress(signedTransaction.txn.to.publicKey)
+						) === undefined
+					) {
 						this.state.accounts.set(
 							algosdk.encodeAddress(signedTransaction.txn.to.publicKey),
 							new AccountStore(0, {
-								addr: algosdk.encodeAddress(
-									signedTransaction.txn.to.publicKey), sk: new Uint8Array(0)
+								addr: algosdk.encodeAddress(signedTransaction.txn.to.publicKey),
+								sk: new Uint8Array(0),
 							})
 						);
 					}
@@ -852,24 +850,21 @@ export class Ctx implements Context {
 				}
 				case TransactionType.appl: {
 					switch (signedTransaction.txn.appOnComplete) {
-						case algosdk.OnApplicationComplete.NoOpOC: {//deployApp
-							if (isEncTxApplicationCreate(
-								signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+						case algosdk.OnApplicationComplete.NoOpOC: {
+							//deployApp
+							if (
+								isEncTxApplicationCreate(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+							) {
 								const senderAcc = this.getAccount(fromAccountAddr);
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
 								if (appDefinition === undefined) {
 									throw new Error("Not supported");
 								}
-								r = this.deployApp(
-									fromAccountAddr,
-									appDefinition[idx] as AppDefinition,
-									idx
-								);
+								r = this.deployApp(fromAccountAddr, appDefinition[idx] as AppDefinition, idx);
 								this.knowableID.set(idx, r.appID);
 							} else {
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
-								const appParams = this.getApp(
-									signedTransaction.txn.appIndex);
+								const appParams = this.getApp(signedTransaction.txn.appIndex);
 								r = this.runtime.run(
 									appParams[APPROVAL_PROGRAM],
 									ExecutionMode.APPLICATION,
@@ -878,7 +873,7 @@ export class Ctx implements Context {
 								);
 							}
 							break;
-						};
+						}
 						case algosdk.OnApplicationComplete.ClearStateOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
 							const appParams = this.runtime.assertAppDefined(
@@ -897,10 +892,10 @@ export class Ctx implements Context {
 								// remove the app without throwing an error (rejecting tx)
 								// tested by running on algorand network
 							}
-
-							this.closeApp(fromAccountAddr, signedTransaction.txn.appIndex); // remove app from local state
+							// remove app from local state
+							this.closeApp(fromAccountAddr, signedTransaction.txn.appIndex);
 							break;
-						};
+						}
 						case algosdk.OnApplicationComplete.CloseOutOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
 							const appParams = this.getApp(signedTransaction.txn.appIndex);
@@ -912,7 +907,7 @@ export class Ctx implements Context {
 							);
 							this.closeApp(fromAccountAddr, signedTransaction.txn.appIndex);
 							break;
-						};
+						}
 						case algosdk.OnApplicationComplete.DeleteApplicationOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
 							const appParams = this.getApp(signedTransaction.txn.appIndex);
@@ -924,34 +919,25 @@ export class Ctx implements Context {
 							);
 							this.deleteApp(signedTransaction.txn.appIndex);
 							break;
-						};
+						}
 						case algosdk.OnApplicationComplete.OptInOC: {
 							this.tx = this.gtxs[idx]; // update current tx to tx being exectuted in group
-
 							r = this.optInToApp(fromAccountAddr, signedTransaction.txn.appIndex, idx);
 							break;
-						};
+						}
 						case algosdk.OnApplicationComplete.UpdateApplicationOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
-
-							// const appSourceCode: SmartContract = {
-							// 	metaType: MetaType.SOURCE_CODE,
-							// 	approvalProgramCode: webTx.decodeUint8ArrayToString(
-							// 		signedTransaction.txn.appApprovalProgram) as string,
-							// 	clearProgramCode: webTx.decodeUint8ArrayToString(
-							// 		signedTransaction.txn.appClearProgram) as string,
-							// }
 							if (appDefinition === undefined) {
 								throw new Error("Not supported");
 							}
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
 								appDefinition[idx] as SmartContract,
-								idx,
+								idx
 							);
 							break;
 						}
-					};
+					}
 					break;
 				}
 				case TransactionType.acfg: {
@@ -962,15 +948,16 @@ export class Ctx implements Context {
 							...payFlags,
 							creator: { ...senderAcc.account, name: senderAcc.address },
 						};
-						//TODO: We need somehow deal with the assets being deploying without .yaml file
-						//TODO: Add a method do deploy ASA from signedTransaction (ask Robert)
-						// if (isASADefinition(signedTransaction.txn)) {
-						r = this.deployASADef(signedTransaction.txn.assetName, webTx.getTransactionASADefinition(signedTransaction.txn), fromAccountAddr, flags);
-						// } else {
-						// r = this.deployASA(signedTransaction.txn.assetName, fromAccountAddr, flags);
+						r = this.deployASADef(
+							signedTransaction.txn.assetName,
+							webTx.getTransactionASADefinition(signedTransaction.txn),
+							fromAccountAddr,
+							flags
+						);
 						this.knowableID.set(idx, r.assetIndex);
-						// }
-					} else if (isEncTxAssetReconfigure(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+					} else if (
+						isEncTxAssetReconfigure(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.manager !== fromAccountAddr) {
 							throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
@@ -978,10 +965,13 @@ export class Ctx implements Context {
 							});
 						}
 						// modify asset in ctx.
-						r = this.modifyAsset(signedTransaction.txn.assetIndex,
-							webTx.getAssetReconfigureFields(signedTransaction.txn));
-					} else if (isEncTxAssetDeletion(
-						signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+						r = this.modifyAsset(
+							signedTransaction.txn.assetIndex,
+							webTx.getAssetReconfigureFields(signedTransaction.txn)
+						);
+					} else if (
+						isEncTxAssetDeletion(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.manager !== fromAccountAddr) {
 							throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
@@ -993,9 +983,11 @@ export class Ctx implements Context {
 					break;
 				}
 				case TransactionType.axfer: {
-					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)) { //AssetTransfer
+					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 						r = this.transferAsset(signedTransaction.txn);
-					} else if (isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+					} else if (
+						isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
 						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 						if (asset.clawback !== fromAccountAddr) {
 							throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, {
@@ -1009,16 +1001,14 @@ export class Ctx implements Context {
 							webTx.getTransactionToAddress(signedTransaction.txn),
 							signedTransaction.txn.assetIndex,
 							webTx.getTransactionRevokeAddress(signedTransaction.txn),
-							BigInt(signedTransaction.txn.amount),
+							BigInt(signedTransaction.txn.amount)
 						);
 					} else if (isEncTxAssetOptIn(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
-						r = this.optInToASA(
-							signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
+						r = this.optInToASA(signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
 					}
 					break;
 				}
 				case TransactionType.afrz: {
-					// } else if (isEncTxAssetFreeze(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
 					const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 					if (asset.freeze !== fromAccountAddr) {
 						throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
@@ -1055,7 +1045,3 @@ export class Ctx implements Context {
 		return txReceipts;
 	}
 }
-// function isASADefinition(txn: algosdk.Transaction) Boolean {
-// 	return (txn.assetName !==undefined )
-// }
-
