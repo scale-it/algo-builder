@@ -971,21 +971,13 @@ export class Runtime {
 			// get current txn and txn group (as encoded obj)
 			let _;
 			[_, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
-			gtxs = signedTransactions.map((signedTransaction) => {
-				const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
-				txn.txID = signedTransaction.txn.txID();
-				return txn;
-			});
+			gtxs = this.getGroupTransaction(signedTransactions);
 			tx = gtxs[0];
 		} else {
 			signedTransactions = txnParams.map((txnParameter) => {
 				return txnParameter as algosdk.SignedTransaction;
 			});
-			gtxs = signedTransactions.map((signedTransaction) => {
-				const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
-				txn.txID = signedTransaction.txn.txID();
-				return txn;
-			});
+			gtxs = this.getGroupTransaction(signedTransactions);
 			tx = gtxs[0];
 		}
 
@@ -1048,7 +1040,27 @@ export class Runtime {
 		return txReceipt;
 	}
 
+	/**
+	 * Creates a group transaction array
+	 * @param signedTransactions : teal code as string
+	 * @returns groupTransactions array of EncTx type
+	 */
+	getGroupTransaction(signedTransactions: SignedTransaction[]): EncTx[] {
+		let gtxs: EncTx[] = [];
+		gtxs = signedTransactions.map((signedTransaction) => {
+			const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+			txn.txID = signedTransaction.txn.txID();
+			return txn;
+		});
+		return gtxs;
+	}
+
+	/**
+	 * Sends a SignedTransaction object
+	 * @param signedTransaction
+	 */
 	sendSignedTransaction(signedTransaction: SignedTransaction) {
+		//TODO: implement verify signature function
 		// this.verifySignature(signedTransaction);
 		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
 		encodedTxnObj.txID = signedTransaction.txn.txID();
