@@ -3,6 +3,7 @@ const { accounts } = require("./common/accounts.js");
 const { mkProposalTx } = require("./common/tx-params.js");
 
 async function addProposal(runtimeEnv, deployer) {
+	console.log("Account only can create Proposal!");
 	const { _, proposer } = accounts(deployer);
 
 	// fund account
@@ -32,7 +33,8 @@ async function addProposal(runtimeEnv, deployer) {
 
 	// Transaction PASS
 	addProposalTx[1].amount = 15; // deposit is set as 15 in DAO App
-	await tryExecuteTx(deployer, addProposalTx);
+	let receipts = await tryExecuteTx(deployer, addProposalTx);
+	console.log("New proposal ID = ", receipts[0].txnID);
 }
 
 module.exports = { default: addProposal };
