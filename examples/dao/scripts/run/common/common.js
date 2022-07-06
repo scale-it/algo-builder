@@ -2,8 +2,12 @@ const { types } = require("@algo-builder/web");
 
 async function tryExecuteTx(deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
-		else await deployer.executeTx([txnParams]);
+		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+
+		let receipts = await deployer.executeTx(txnParameters);
+		console.log(receipts);
+		// if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
+		// else await deployer.executeTx([txnParams]);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.body : e);
 	}

@@ -159,8 +159,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
 				return this.algodClient.pendingTransactionInformation(txn.txID()).do();
 			})
 		);
-
-		return receipts as ConfirmedTxInfo[];
+		// add txnID for each receipt
+		return receipts.map((receipt) => {
+			receipt["txnID"] = algosdk.Transaction.from_obj_for_encoding(receipt.txn.txn).txID();
+			return receipt as ConfirmedTxInfo;
+		});
 	}
 
 	/**

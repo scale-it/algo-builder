@@ -97,6 +97,7 @@ describe("Opt-In to ASA", () => {
 				txn: {
 					txn: TXN_OBJ,
 				},
+				txnID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 			},
 		];
 	});

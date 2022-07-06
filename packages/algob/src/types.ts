@@ -784,4 +784,5 @@ export interface ConfirmedTxInfo {
 	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
 	"inner-txns"?: ConfirmedTxInfo;
 	txn: algosdk.EncodedSignedTransaction;
+	txnID: string; // not include in algorand response. However this field is very useful.
 }
