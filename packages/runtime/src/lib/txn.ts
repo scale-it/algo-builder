@@ -298,10 +298,10 @@ export function isEncTxAssetReconfigure(txn: EncTx): boolean {
 		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
 		txn.caid !== undefined && // assetIndex should be undefined
 		txn.apar !== undefined && // assetParameters should not be undefined
-		txn.apar.m !== undefined && // manager
-		txn.apar.f !== undefined && // freeze
-		txn.apar.c !== undefined && // clawback
-		txn.apar.r !== undefined    // reserve
+		(txn.apar.m !== undefined || // manager
+		txn.apar.f !== undefined || // freeze
+		txn.apar.c !== undefined || // clawback
+		txn.apar.r !== undefined )   // reserve
 	);
 }
 /**

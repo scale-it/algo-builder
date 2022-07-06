@@ -6,6 +6,10 @@ const { Context } = require("./common");
 
 const minBalance = 20e6; // 20 ALGOs
 const ALICE_ADDRESS = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
+const ALICE_SK = new Uint8Array([216, 208, 24, 102, 119, 86, 131, 225, 119, 183,
+	127, 17, 94, 11, 60, 39, 234, 161, 247, 147, 158, 200, 187, 99, 233, 40, 118, 215,
+	 63, 134, 206, 221, 32, 238, 110, 24, 193, 33, 202, 182, 223, 192, 249, 77, 61, 151,
+	  217, 220, 224, 100, 83, 214, 173, 82, 215, 92, 216, 93, 91, 53, 216, 110, 17, 18]);
 const FORCE_TRANSFER_APPARG = "str:force_transfer";
 
 describe("Permissioned Token Tests - Happy Paths", function () {
@@ -15,12 +19,14 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 
 	function setUpCtx() {
 		master = new AccountStore(10000e6);
-		alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
+		alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: ALICE_SK });
 		bob = new AccountStore(minBalance);
 		elon = new AccountStore(minBalance);
 
 		ctx = new Context(master, alice, bob, elon);
 		asaDef = ctx.getAssetDef();
+		// (console.log).restore();
+		// console.log("asaDef",asaDef);
 		asaReserve = ctx.getAccount(asaDef.reserve);
 		asaManager = ctx.getAccount(asaDef.manager);
 		asaCreator = ctx.getAccount(asaDef.creator);
@@ -76,6 +82,8 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 
 		// Opt-In
 		ctx.optInToASA(elon.address);
+		(console.log).restore();
+		console.log("asaReserve", asaReserve);
 		ctx.issue(asaReserve.account, elon, 20);
 		ctx.syncAccounts();
 
@@ -84,6 +92,9 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 
 		// opt-out issued tokens to creator
 		const initialCreatorHolding = ctx.getAssetHolding(asaCreator.address);
+		
+		// console.log("asaCreator", asaCreator);
+		// console.log("elon", elon);
 		ctx.optOut(asaCreator.address, elon.account);
 		ctx.syncAccounts();
 

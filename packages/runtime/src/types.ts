@@ -175,7 +175,7 @@ export interface Context {
 	processTransactions: (
 		signedTransactions: algosdk.SignedTransaction[],
 		appDefinitions?: (types.AppDefinition | types.SmartContract | undefined) [],
-		lsig?: types.Lsig,
+		lsig?: (types.Lsig | undefined) [],
 	) => TxReceipt[];
 	deployASA: (
 		name: string,

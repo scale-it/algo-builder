@@ -481,15 +481,15 @@ export function mkTransaction(
 export function getAssetReconfigureFields(transaction: Transaction): AssetModFields {
 	let modificationFields: AssetModFields = {};
 	const encodedTransaction = transaction.get_obj_for_encoding();
-	if (encodedTransaction.apar !== undefined &&
-		encodedTransaction.apar.m !== undefined &&
-		encodedTransaction.apar.c !== undefined &&
-		encodedTransaction.apar.f !== undefined &&
-		encodedTransaction.apar.r !== undefined) {
-		modificationFields.clawback = algosdk.encodeAddress(transaction.assetClawback.publicKey)
-		modificationFields.freeze = algosdk.encodeAddress(transaction.assetFreeze.publicKey)
-		modificationFields.manager = algosdk.encodeAddress(transaction.assetManager.publicKey)
-		modificationFields.reserve = algosdk.encodeAddress(transaction.assetReserve.publicKey)
+	if (encodedTransaction.apar !== undefined) {
+		modificationFields.clawback = encodedTransaction.apar.c !== undefined ?
+			algosdk.encodeAddress(transaction.assetClawback.publicKey) : "";
+		modificationFields.freeze = encodedTransaction.apar.f !== undefined ?
+			algosdk.encodeAddress(transaction.assetFreeze.publicKey) : "";
+		modificationFields.manager = encodedTransaction.apar.m !== undefined ?
+			algosdk.encodeAddress(transaction.assetManager.publicKey) : "";
+		modificationFields.reserve = encodedTransaction.apar.r !== undefined ?
+			algosdk.encodeAddress(transaction.assetReserve.publicKey) : "";
 	}
 	return modificationFields;
 }

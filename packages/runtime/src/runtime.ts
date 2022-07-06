@@ -432,6 +432,10 @@ export class Runtime {
 				const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
 				const tx = webTx.mkTransaction(txnParam, mockParams);
 				if (txnParam.sign === types.SignType.SecretKey) {
+					if(txnParam.fromAccount.sk.length !== 64){
+						throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
+						secretkey: txnParam.fromAccount.sk, });
+					}
 					signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk))
 					signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn:tx};
 
@@ -446,6 +450,10 @@ export class Runtime {
 			const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
 			const tx = webTx.mkTransaction(txnParams, mockParams);
 			if (txnParams.sign === types.SignType.SecretKey) {
+				if(txnParams.fromAccount.sk.length !== 64){
+					throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
+						secretkey: txnParams.fromAccount.sk, });
+				}
 				signedTx = decodeSignedTransaction(tx.signTxn(txnParams.fromAccount.sk))
 			} else {
 				signedTx = { sig: Buffer.alloc(5), txn: tx }
@@ -911,7 +919,7 @@ export class Runtime {
 		let signedTransactions: algosdk.SignedTransaction[];
 		let appDef: types.AppDefinition | SmartContract | undefined;
 		let appDefinitions: (types.AppDefinition | SmartContract | undefined)[] = [];
-		let lsig: types.Lsig | undefined;
+		let lsigs: (types.Lsig | undefined)[] = [];
 
 		if (types.isExecParams(txnParams[0])) {
 			const dummySource: types.SourceCompiled = {
@@ -923,7 +931,9 @@ export class Runtime {
 			const txns = txnParams.map((txnParamerter) => {
 				const txn = cloneDeep(txnParamerter as types.ExecParams);
 				if (txn.sign === types.SignType.LogicSignature) {
-					lsig = txn;
+					lsigs.push(txn);
+				} else {
+					lsigs.push(undefined);
 				}
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
@@ -1009,7 +1019,7 @@ export class Runtime {
 		).length;
 
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
-		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefinitions , lsig);
+		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefinitions , lsigs);
 
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;

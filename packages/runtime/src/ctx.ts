@@ -799,7 +799,7 @@ export class Ctx implements Context {
 	/* eslint-disable complexity */
 	processTransactions(signedTransactions: algosdk.SignedTransaction[],
 		appDefinition?: (types.AppDefinition | types.SmartContract | undefined)[],
-		lsig?: types.Lsig): TxReceipt[] {
+		lsigs?: (types.Lsig | undefined)[]): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
 		this.verifyMinimumFees();
@@ -810,10 +810,12 @@ export class Ctx implements Context {
 			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
-			if (lsig !== undefined) {
-				this.tx = this.gtxs[idx]; // update current tx to index of stateless
-				r = this.runtime.validateLsigAndRun(lsig, this.debugStack);
-				this.tx = this.gtxs[0];
+			if (lsigs !== undefined) {
+				if(lsigs[idx] !== undefined){
+					this.tx = this.gtxs[idx]; // update current tx to index of stateless
+					r = this.runtime.validateLsigAndRun(lsigs[idx] as types.Lsig, this.debugStack);
+					this.tx = this.gtxs[0];
+				}
 			} // 
 			//after executing stateless tx updating current tx to default (index 0)
 			else if (signedTransaction.sgnr || signedTransaction.sig) {

@@ -4,7 +4,11 @@ import { assert } from "chai";
 const { types } = require("@algo-builder/web");
 
 const minBalance = 10e6; // 10 ALGO's
-const aliceAddr = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
+const ALICE_ADDR = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
+const ALICE_SK = new Uint8Array([216, 208, 24, 102, 119, 86, 131, 225, 119, 183,
+	127, 17, 94, 11, 60, 39, 234, 161, 247, 147, 158, 200, 187, 99, 233, 40, 118, 215,
+	 63, 134, 206, 221, 32, 238, 110, 24, 193, 33, 202, 182, 223, 192, 249, 77, 61, 151,
+	  217, 220, 224, 100, 83, 214, 173, 82, 215, 92, 216, 93, 91, 53, 216, 110, 17, 18]);
 const bobAddr = "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ";
 const ACCRED_LEVEL = "Accred-Level";
 const CLAWBACK_ESCROW_PY = "clawback-escrow.py";
@@ -23,7 +27,7 @@ describe("Test for transferring asset using custom logic", function () {
 	const clearProgramFilename = "poi-clear.teal";
 
 	this.beforeEach(async function () {
-		alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
+		alice = new AccountStore(minBalance, { addr: ALICE_ADDR, sk: ALICE_SK });
 		bob = new AccountStore(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
 		runtime = new Runtime([master, alice, bob]);
 
@@ -49,7 +53,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(assetDef.clawback, alice.address);
 
 		runtime.optInToASA(assetId, bob.address, {});
-		const aliceAssetHolding = runtime.getAssetHolding(assetId, aliceAddr);
+		const aliceAssetHolding = runtime.getAssetHolding(assetId, ALICE_ADDR);
 		const bobAssetHolding = runtime.getAssetHolding(assetId, bobAddr);
 		assert.isDefined(aliceAssetHolding);
 		assert.isDefined(bobAssetHolding);
@@ -148,7 +152,6 @@ describe("Test for transferring asset using custom logic", function () {
 			payFlags: { totalFee: 1000 },
 		};
 		runtime.executeTx([assetConfigParams]);
-
 		// verify clawback is updated & manager, freeze address is set to ""
 		assetDef = runtime.getAssetDef(assetId);
 		assert.equal(assetDef.clawback, escrowAddress);
@@ -192,7 +195,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(bob.getLocalState(applicationId, ACCRED_LEVEL), 2n);
 
 		/* Transfer 1000 assets from Alice to Bob (assets are revoken via clawback escrow) */
-		const prevAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
+		const prevAliceAssets = runtime.getAssetHolding(assetId, ALICE_ADDR).amount;
 		const prevBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
 		const txGroup = [
 			{
@@ -228,7 +231,7 @@ describe("Test for transferring asset using custom logic", function () {
 		runtime.executeTx(txGroup);
 		syncAccounts();
 
-		const afterAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
+		const afterAliceAssets = runtime.getAssetHolding(assetId, ALICE_ADDR).amount;
 		const afterBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
 		assert.equal(afterAliceAssets, prevAliceAssets - 1000n);
 		assert.equal(afterBobAssets, prevBobAssets + 1000n); // Bob received 1000 GLD
