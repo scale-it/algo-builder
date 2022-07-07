@@ -120,14 +120,14 @@ RETURNS SETOF sigma_daos AS $$
 	SELECT * FROM sigma_daos WHERE dao_name ilike ('%' || daoToBeSearched || '%');
 $$ LANGUAGE SQL STABLE;
 
--- Function to search proposal in sigma_dao_proposals relation by app id
+-- Function to search proposal in sigma_dao_proposals relation by app id and filter type
 CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType INT)
 RETURNS SETOF sigma_dao_proposals AS $$
 DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
-	current_time bigint := extract(epoch FROM NOW()); -- epoch in second
+	current_time bigint := extract(epoch FROM NOW()); -- epoch in seconds
 	filter_all INT := 1; -- filter type -> all
-	filter_ongoing INT := 2;
+	filter_ongoing INT := 2; -- ongoing
 	filter_active INT := 3;  -- ongoing + future
 	filter_past INT := 4; -- filter type -> past
 BEGIN
