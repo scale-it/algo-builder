@@ -3,7 +3,7 @@ const { accounts } = require("./common/accounts.js");
 const { mkProposalTx } = require("./common/tx-params.js");
 
 async function addProposal(runtimeEnv, deployer) {
-	console.log("Account only can create Proposal!");
+	// NOTE: One account only can create one proposal!
 	const { _, proposer } = accounts(deployer);
 
 	// fund account
