@@ -125,18 +125,18 @@ CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType I
 RETURNS SETOF sigma_dao_proposals AS $$
 DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
-	current_time bigint := extract(epoch FROM NOW()); -- epoch in seconds
+	timestamp BIGINT := extract(EPOCH FROM NOW()); -- epoch in seconds
 	filter_all INT := 1; -- filter type -> all
 	filter_ongoing INT := 2; -- ongoing
 	filter_active INT := 3;  -- ongoing + future
 	filter_past INT := 4; -- filter type -> past
 BEGIN
 	IF (filterType = filter_ongoing) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND current_time BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND timestamp BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_active) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND current_time < voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND timestamp < sigma_dao_proposals.voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_past) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND sigma_dao_proposals.voting_end < current_time ORDER BY voting_end DESC;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND sigma_dao_proposals.voting_end < timestamp ORDER BY voting_end DESC;
 	ELSE
 		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId;
 	END IF;
