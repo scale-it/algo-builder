@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
 CREATE TABLE IF NOT EXISTS sigma_dao_proposals (
   id SERIAL PRIMARY KEY, -- auto increment id
   addr BYTEA,  -- account address
-  app BIGINT,
-  localstate JSONB,
-  voting_start BIGINT,
-  voting_end BIGINT
+  app BIGINT, -- app id
+  localstate JSONB, -- localstate of addr
+  voting_start BIGINT, -- voting start
+  voting_end BIGINT -- voting end
 );
 
 -- Create indexes
@@ -80,6 +80,7 @@ DECLARE
 	voting_start_value BIGINT;
 	voting_end_value BIGINT;
 BEGIN
+	-- Iterate json object to tkv object and fetch the voting start key
 	IF (SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key) IS NOT NULL THEN
 		-- Iterate json object and get voting start value
 		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_start_key -> 'ui' INTO voting_start_value;
