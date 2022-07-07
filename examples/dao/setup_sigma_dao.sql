@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
 -- create a sigma_dao_proposal table if does not exit already.
 CREATE TABLE IF NOT EXISTS sigma_dao_proposals (
   id SERIAL PRIMARY KEY, -- auto increment id
-  addr BYTEA,
+  addr BYTEA,  -- account address
   app BIGINT,
   localstate JSONB,
   voting_start BIGINT,
