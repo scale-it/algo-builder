@@ -133,8 +133,8 @@ DECLARE
 BEGIN
 	IF (filterType = filter_ongoing) THEN
 		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
-	ELSIF (filterType = filter_future) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time < voting_start ORDER BY voting_start;
+	ELSIF (filterType = filter_active) THEN
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND current_time < voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_past) THEN
 		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app=appId AND sigma_dao_proposals.voting_end < current_time ORDER BY voting_end DESC;
 	ELSE
