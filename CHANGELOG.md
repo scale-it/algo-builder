@@ -20,9 +20,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
 - `deployer.executeTx` return `TxnReceipt` types. 
 ```ts
-export interface TxnReceipt {
-	confirmedTxInfo: ConfirmedTxInfo;
-	txnID: string;
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
 }
 ```
 

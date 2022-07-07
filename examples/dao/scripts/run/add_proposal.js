@@ -34,7 +34,7 @@ async function addProposal(runtimeEnv, deployer) {
 	// Transaction PASS
 	addProposalTx[1].amount = 15; // deposit is set as 15 in DAO App
 	let receipts = await tryExecuteTx(deployer, addProposalTx);
-	console.log("New proposal ID = ", receipts[0].txnID);
+	console.log("New proposal ID = ", receipts[0].txID);
 }
 
 module.exports = { default: addProposal };

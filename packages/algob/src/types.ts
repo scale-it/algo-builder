@@ -786,7 +786,6 @@ export interface ConfirmedTxInfo {
 	txn: algosdk.EncodedSignedTransaction;
 }
 
-export interface TxnReceipt {
-	confirmedTxInfo: ConfirmedTxInfo;
-	txnID: string;
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
 }

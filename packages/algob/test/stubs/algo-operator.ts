@@ -45,8 +45,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		return new Promise((resolve, rejects) => {
 			resolve([
 				{
-					confirmedTxInfo: mockPendingTransactionInformation,
-					txnID: algosdk.Transaction.from_obj_for_encoding(
+					...mockPendingTransactionInformation,
+					txID: algosdk.Transaction.from_obj_for_encoding(
 						mockPendingTransactionInformation.txn.txn
 					).txID(),
 				},

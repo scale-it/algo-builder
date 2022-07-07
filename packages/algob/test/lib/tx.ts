@@ -91,15 +91,13 @@ describe("Opt-In to ASA", () => {
 
 		expected = [
 			{
-				confirmedTxInfo: {
-					"confirmed-round": 1,
-					"asset-index": 1,
-					"application-index": 1,
-					txn: {
-						txn: TXN_OBJ,
-					},
+				"confirmed-round": 1,
+				"asset-index": 1,
+				"application-index": 1,
+				txn: {
+					txn: TXN_OBJ,
 				},
-				txnID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
+				txID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 			},
 		];
 	});
@@ -748,7 +746,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo.confirmedTxInfo["application-index"],
+			appID: appInfo["application-index"],
 			payFlags: {},
 		};
 
@@ -805,7 +803,7 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo.confirmedTxInfo["application-index"],
+			appID: appInfo["application-index"],
 			newAppCode: {
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFilename: "approval.teal",
@@ -887,7 +885,7 @@ describe("Update transaction test in run mode", () => {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: bobAcc,
-			appID: appInfo.confirmedTxInfo["application-index"],
+			appID: appInfo["application-index"],
 			newAppCode: {
 				metaType: wtypes.MetaType.FILE,
 				approvalProgramFilename: "approval.teal",
@@ -989,7 +987,7 @@ describe("SDK Transaction object", () => {
 
 		const res = await deployer.executeTx([transaction]);
 		assert.isDefined(res);
-		assert.equal(res[0].confirmedTxInfo["confirmed-round"], 1);
-		assert.equal(res[0].confirmedTxInfo["asset-index"], 1);
+		assert.equal(res[0]["confirmed-round"], 1);
+		assert.equal(res[0]["asset-index"], 1);
 	});
 });

@@ -162,8 +162,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		);
 
 		return confirmedTxInfos.map((confirmedTxInfo, index) => ({
-			confirmedTxInfo: confirmedTxInfo as ConfirmedTxInfo,
-			txnID: txns[index].txID(),
+			...(confirmedTxInfo as ConfirmedTxInfo),
+			txID: txns[index].txID(),
 		}));
 	}
 
