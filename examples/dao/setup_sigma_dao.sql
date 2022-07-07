@@ -127,7 +127,7 @@ DECLARE
 	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
 	current_time bigint := extract(epoch FROM NOW()); -- epoch in second
 	filter_all INT := 1; -- filter type -> all
-	filter_active INT := 2; -- filter type -> active
+	filter_ongoing INT := 2;
 	filter_active INT := 3;  -- ongoing + future
 	filter_past INT := 4; -- filter type -> past
 BEGIN
