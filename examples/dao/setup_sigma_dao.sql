@@ -128,7 +128,7 @@ DECLARE
 	current_time bigint := extract(epoch FROM NOW()); -- epoch in second
 	filter_all INT := 1; -- filter type -> all
 	filter_active INT := 2; -- filter type -> active
-	filter_future INT := 3; -- filter type -> future
+	filter_active INT := 3;  -- ongoing + future
 	filter_past INT := 4; -- filter type -> past
 BEGIN
 	IF (filterType = filter_active) THEN
