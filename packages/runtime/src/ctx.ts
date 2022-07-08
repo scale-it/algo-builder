@@ -766,13 +766,11 @@ export class Ctx implements Context {
 		return txReceipt;
 	}
 
-	// // apply rekey config on from account
-	// rekeyTo1(txParam: types.ExecParams): void {
-	// 	if (!txParam.payFlags.rekeyTo) return;
-	// 	const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
-	// 	// apply rekey
-	// 	fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
-	// }
+	/**
+	 * Rekeys the account
+	 * @param txn transaction
+	 * @param rekeyTo address
+	 */
 	rekeyTo(txn: Transaction, reKeyTo: string | undefined): void {
 		if (reKeyTo === undefined) return;
 		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
@@ -789,7 +787,6 @@ export class Ctx implements Context {
 	 * @param txParams Transaction Parameters
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
-	/* eslint-disable complexity */
 	processTransactions(
 		signedTransactions: algosdk.SignedTransaction[],
 		appDefinition?: (types.AppDefinition | types.SmartContract | undefined)[],
@@ -805,7 +802,7 @@ export class Ctx implements Context {
 			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
-			if (lsigs !== undefined) {
+			if (lsigs !== undefined && lsigs[idx] !== undefined) {
 				if (lsigs[idx] !== undefined) {
 					this.tx = this.gtxs[idx]; // update current tx to index of stateless
 					r = this.runtime.validateLsigAndRun(lsigs[idx] as types.Lsig, this.debugStack);

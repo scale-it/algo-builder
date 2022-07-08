@@ -1223,7 +1223,7 @@ describe("Deafult Accounts", function () {
 	});
 });
 
-describe.only("Algo Trasnfer using sendSignedTransaction", function () {
+describe("Algo Trasnfer using sendSignedTransaction", function () {
 	let alice: AccountStore;
 	let bob: AccountStore;
 	let runtime: Runtime;

@@ -5,10 +5,12 @@ const { types } = require("@algo-builder/web");
 
 const minBalance = 10e6; // 10 ALGO's
 const ALICE_ADDR = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
-const ALICE_SK = new Uint8Array([216, 208, 24, 102, 119, 86, 131, 225, 119, 183,
-	127, 17, 94, 11, 60, 39, 234, 161, 247, 147, 158, 200, 187, 99, 233, 40, 118, 215,
-	 63, 134, 206, 221, 32, 238, 110, 24, 193, 33, 202, 182, 223, 192, 249, 77, 61, 151,
-	  217, 220, 224, 100, 83, 214, 173, 82, 215, 92, 216, 93, 91, 53, 216, 110, 17, 18]);
+const ALICE_SK = new Uint8Array([
+	216, 208, 24, 102, 119, 86, 131, 225, 119, 183, 127, 17, 94, 11, 60, 39, 234, 161, 247, 147,
+	158, 200, 187, 99, 233, 40, 118, 215, 63, 134, 206, 221, 32, 238, 110, 24, 193, 33, 202, 182,
+	223, 192, 249, 77, 61, 151, 217, 220, 224, 100, 83, 214, 173, 82, 215, 92, 216, 93, 91, 53,
+	216, 110, 17, 18,
+]);
 const bobAddr = "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ";
 const ACCRED_LEVEL = "Accred-Level";
 const CLAWBACK_ESCROW_PY = "clawback-escrow.py";
@@ -26,7 +28,7 @@ describe("Test for transferring asset using custom logic", function () {
 	const approvalProgramFilename = "poi-approval.teal";
 	const clearProgramFilename = "poi-clear.teal";
 
-	this.beforeEach(async function () {
+	this.beforeEach(function () {
 		alice = new AccountStore(minBalance, { addr: ALICE_ADDR, sk: ALICE_SK });
 		bob = new AccountStore(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
 		runtime = new Runtime([master, alice, bob]);
