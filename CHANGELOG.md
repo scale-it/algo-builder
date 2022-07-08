@@ -14,38 +14,44 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+## v5.0.0 2022-07-8
+
 ### Features
 
 #### Algob
-- For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
-- `deployer.executeTx` return `TxnReceipt` types. 
-```ts
-export interface TxnReceipt extends ConfirmedTxInfo {
-	txID: string;
-}
-```
 
-#### Runtime 
+- `algob.balanceOf(deployer, accountAddr, assetID)`: if assetID is undefined then the function will return ALGO account balance.
+- `deployer.executeTx` returns list of `TxnReceipt`, which extends `ConfirmedTxInfo`. This is to add a useful `txID` attribute, needed in various scripts.
 
-- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
+  ```ts
+  export interface TxnReceipt extends ConfirmedTxInfo {
+  	txID: string;
+  }
+  ```
+
+#### Runtime
+
+- Add `Runtime.getAppByName(appName)`: gets app info based on the name declared in appDefinition.
 - Better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
 - Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
-- Teal v6 support: 
+- Teal v6 support:
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
 
 #### Examples
 
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
+
 ### Bug Fixes
 
-- Fix number transaction in one call should be 256(include inner and atomic transaction).
-- Fix Web mode(algo-builder/web) cannot sign by `fromAccount` when `fromAccountAddr` appear in `execParams`. 
+- Fix: missing schebang to run `algob` as an app directly. BTW, we recommend running algob through `yarn algob` in your project.
+- Fix: max number of transactions in one call should be 256 (include inner and atomic transaction).
+- Fix: Web mode (algo-builder/web) cannot sign by `fromAccount` when `fromAccountAddr` appear in `execParams`.
 - Receipt confirmed txn have `inner-txns` and `txn` field.
 
 ### Breaking Changes
 
-- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
+- Renamed `optIntoAsa` to `optInToAsa` bringing naming convention consistency across the project.
 - Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
 
 ### Deprecated
@@ -54,9 +60,8 @@ export interface TxnReceipt extends ConfirmedTxInfo {
 
 DAO template:
 
-- [breaking] moving template parameters (`gov_token_id`) to the global state. Because of
-  that change the bytecode remains the same after each deploy hence the hash of the appliction also will remain the same.
-- [breaking] require `gov_token_id` is existen when deploy new DAO approval program.
+- [breaking] moved template parameter (`gov_token_id`) to the global state. This is to assure constant bytecode fir each deployment. We need it to build an efficient indexer and UI.
+  - Subsequently, `gov_token_id` is required when deploying new DAO approval program.
 
 ## v4.0.0 2022-05-24
 
