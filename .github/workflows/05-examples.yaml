@@ -11,7 +11,7 @@ on:
       - develop
 
 jobs:
-  run-examples-patch-1:
+  run-examples-batch-1:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -111,7 +111,7 @@ jobs:
           pipenv run yarn algob run scripts/admin/kill.js
           pipenv run yarn algob run scripts/user/opt-out.js
 
-  run-examples-patch-2:
+  run-examples-batch-2:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -177,7 +177,7 @@ jobs:
           pipenv run yarn algob run scripts/run/add_proposal.js
           pipenv run yarn algob run scripts/run/deposit_vote_token.js
 
-  run-examples-patch-3:
+  run-examples-batch-3:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
