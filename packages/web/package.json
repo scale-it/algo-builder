@@ -5,7 +5,14 @@
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
 	"description": "package for the web",
-	"keywords": ["smart-contracts", "blockchain", "algorand", "dapps", "javascript", "tooling"],
+	"keywords": [
+		"smart-contracts",
+		"blockchain",
+		"algorand",
+		"dapps",
+		"javascript",
+		"tooling"
+	],
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"engines": {
@@ -31,10 +38,12 @@
 		"@walletconnect/types": "^1.7.1",
 		"algorand-walletconnect-qrcode-modal": "^1.7.4",
 		"algosdk": "^1.18.1",
+		"debug": "^4.3.4",
 		"zod": "^3.13.4"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.3.0",
+		"@types/debug": "^4.1.7",
 		"@types/mocha": "^9.1.0",
 		"@types/node": "^17.0.21",
 		"@types/sinon": "^10.0.11",
@@ -51,11 +60,25 @@
 		"access": "public",
 		"no-git-tag-version": true
 	},
-	"files": ["build/", "LICENSE", "README.md"],
+	"files": [
+		"build/",
+		"LICENSE",
+		"README.md"
+	],
 	"nyc": {
-		"extension": [".ts"],
-		"exclude": ["build", "test", "coverage", ".nyc_output"],
-		"reporter": ["text", "lcovonly"],
+		"extension": [
+			".ts"
+		],
+		"exclude": [
+			"build",
+			"test",
+			"coverage",
+			".nyc_output"
+		],
+		"reporter": [
+			"text",
+			"lcovonly"
+		],
 		"all": true
 	}
 }

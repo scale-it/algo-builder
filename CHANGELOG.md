@@ -14,6 +14,12 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+## v5.0.1 2022-07-11
+
+### Bug Fixes
+
+- added missing dependency (`debug`) to packages.
+
 ## v5.0.0 2022-07-8
 
 ### Features

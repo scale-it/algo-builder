@@ -27,7 +27,7 @@ __metadata:
     chai: ^4.3.6
     chalk: ^4.1.2
     cross-env: ^7.0.3
-    debug: ^4.3.3
+    debug: ^4.3.4
     deep-equal: ^2.0.5
     deepmerge: ^4.2.2
     download-git-repo: ^3.0.2
@@ -63,6 +63,7 @@ __metadata:
     "@algo-builder/web": "workspace:*"
     "@nodelib/fs.walk": ^1.2.8
     "@types/chai": ^4.3.0
+    "@types/debug": ^4.1.7
     "@types/elliptic": ^6.4.14
     "@types/lodash.clonedeep": ^4.5.6
     "@types/mocha": ^9.1.0
@@ -71,6 +72,7 @@ __metadata:
     algosdk: ^1.18.1
     chai: ^4.3.6
     chalk: ^4.1.2
+    debug: ^4.3.4
     elliptic: ^6.5.4
     eslint: ^8.10.0
     hi-base32: ^0.5.1
@@ -99,6 +101,7 @@ __metadata:
     "@json-rpc-tools/utils": ^1.7.6
     "@randlabs/myalgo-connect": ^1.1.2
     "@types/chai": ^4.3.0
+    "@types/debug": ^4.1.7
     "@types/mocha": ^9.1.0
     "@types/node": ^17.0.21
     "@types/sinon": ^10.0.11
@@ -107,6 +110,7 @@ __metadata:
     algorand-walletconnect-qrcode-modal: ^1.7.4
     algosdk: ^1.18.1
     chai: ^4.3.6
+    debug: ^4.3.4
     eslint: ^8.10.0
     mocha: ^9.2.1
     nyc: ^15.1.0
@@ -2180,6 +2184,18 @@ __metadata:
     supports-color:
       optional: true
   checksum: 820ea160e267e23c953c9ed87e7ad93494d8cda2f7349af5e7e3bb236d23707ee3022f477d5a7d2ee86ef2bf7d60aa9ab22d1f58080d7deb9dccd073585e1e43
+  languageName: node
+  linkType: hard
+
+"debug@npm:^4.3.4":
+  version: 4.3.4
+  resolution: "debug@npm:4.3.4"
+  dependencies:
+    ms: 2.1.2
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 3dbad3f94ea64f34431a9cbf0bafb61853eda57bff2880036153438f50fb5a84f27683ba0d8e5426bf41a8c6ff03879488120cf5b3a761e77953169c0600a708
   languageName: node
   linkType: hard
 
