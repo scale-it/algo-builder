@@ -23,17 +23,6 @@ export class BuilderPluginError extends Error {
 	 */
 	public constructor(pluginName: string, message: string, parent?: Error);
 
-	/**
-	 * A DEPRECATED constructor that automatically obtains the caller package and
-	 * use it as plugin name.
-	 *
-	 * @deprecated Use the above constructor.
-	 *
-	 * @param message An error message that will be shown to the user.
-	 * @param parent The error that causes this error to be thrown.
-	 */
-	public constructor(message: string, parent?: Error);
-
 	public constructor(
 		pluginNameOrMessage: string,
 		messageOrParent?: string | Error,

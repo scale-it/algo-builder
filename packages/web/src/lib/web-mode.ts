@@ -206,10 +206,4 @@ export class WebMode {
 		}
 		throw new Error("Transaction Error");
 	}
-
-	/** @deprecated */
-	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams) as unknown as JsonPayload;
-		else return this.executeTx([execParams]) as unknown as JsonPayload;
-	}
 }

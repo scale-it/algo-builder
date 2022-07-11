@@ -62,6 +62,22 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Deprecated
 
+In `deployer` API:
+
+- `ensureCompiled` is removed and `compileASC` should be used.
+- `loadLogicFromCache` is removed and `getLsigFromCache` should be used.
+- `executeTransaction` is removed and `executeTx` should be used.
+
+In `runtime` API:
+
+- `addAsset` is removed and `deployASA` should be used.
+- `addApp` is removed and `deployAdd` should be used.
+- `addASADef` is removed and `deployASADef` should be used.
+
+In web API:
+
+- `executeTransaction` is removed and `executeTx` should be used.
+
 ### Template Updates
 
 DAO template:

@@ -323,63 +323,6 @@ export async function executeTx(
 }
 
 /**
- * @deprecated  Remove in next release
- */
-export async function executeTransaction(
-	deployer: Deployer,
-	transactions:
-		| (wtypes.ExecParams | wtypes.TransactionAndSign)
-		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
-): Promise<ConfirmedTxInfo> {
-	let isSDK = false;
-	let signedTxn;
-	if (Array.isArray(transactions)) {
-		if (transactions.length === 0) {
-			throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
-		}
-		if (wtypes.isSDKTransactionAndSign(transactions[0])) {
-			signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
-			isSDK = true;
-		}
-	} else {
-		if (wtypes.isSDKTransactionAndSign(transactions)) {
-			signedTxn = signTransaction(transactions.transaction, transactions.sign);
-			isSDK = true;
-		}
-	}
-
-	if (isSDK && signedTxn) {
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		return confirmedTx;
-	}
-
-	// Update type here because we are sure this is not transaction object type
-	transactions = Array.isArray(transactions)
-		? (transactions as wtypes.ExecParams[])
-		: (transactions as wtypes.ExecParams);
-
-	const execParams = Array.isArray(transactions) ? transactions : [transactions];
-	deployer.assertCPNotDeleted(transactions);
-	try {
-		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-		const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		if (deployer.isDeployMode) {
-			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
-		}
-		return confirmedTx;
-	} catch (error) {
-		if (deployer.isDeployMode) {
-			deployer.persistCP();
-		}
-
-		throw error;
-	}
-}
-
-/**
  * Decode signed txn from file and send to network.
  * probably won't work, because transaction contains fields like
  * firstValid and lastValid which might not be equal to the

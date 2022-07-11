@@ -467,16 +467,6 @@ export class Runtime {
 	}
 
 	/**
-	 * Create Asset in Runtime using asa.yaml
-	 * @deprecated `deployASA` should be used instead
-	 * @param asa ASA name
-	 * @param flags ASA Deployment Flags
-	 */
-	addAsset(asa: string, flags: ASADeploymentFlags): ASAInfo {
-		return this.deployASA(asa, flags);
-	}
-
-	/**
 	 * Deploy Asset in Runtime using asa.yaml
 	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
@@ -487,16 +477,6 @@ export class Runtime {
 
 		this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
 		return txReceipt;
-	}
-
-	/**
-	 * Create Asset in Runtime without using asa.yaml
-	 * @deprecated `deployASADef` should be used instead
-	 * @param asa ASA name
-	 * @param flags ASA Deployment Flags
-	 */
-	addASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
-		return this.deployASADef(asa, asaDef, flags);
 	}
 
 	/**
@@ -587,27 +567,6 @@ export class Runtime {
 		const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
 		this.ctx.tx = encTx;
 		this.ctx.gtxs = [encTx];
-	}
-
-	/**
-	 * create new application and returns application id
-	 * @deprecated `deployApp` should be used instead.
-	 * @param approvalProgram application approval program
-	 * @param clearProgram application clear program
-	 * @param flags SSCDeployment flags
-	 * @param payFlags Transaction parameters
-	 * @param debugStack: if passed then TEAL Stack is logged to console after
-	 * each opcode execution (upto depth = debugStack)
-	 * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
-	 */
-	addApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: types.AppDeploymentFlags,
-		payFlags: types.TxParams,
-		debugStack?: number
-	): AppInfo {
-		throw new Error("We remove this function now");
 	}
 
 	/**
