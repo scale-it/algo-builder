@@ -57,26 +57,25 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Breaking Changes
 
+#### @algo-builder/algob
+
+- `ensureCompiled` is deprecated and removed and `compileASC` should be used.
+- `loadLogicFromCache` is deprecated and removed and `getLsigFromCache` should be used.
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
+
+#### @algo-builder/runtime
+
+- `addAsset` is deprecated and removed and `deployASA` should be used.
+- `addApp` is deprecated and removed and `deployAdd` should be used.
+- `addASADef` is deprecated and removed and `deployASADef` should be used.
 - Renamed `optIntoAsa` to `optInToAsa` bringing naming convention consistency across the project.
+
+#### @algo-builder/web
+
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
 - Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
 
 ### Deprecated
-
-In `deployer` API:
-
-- `ensureCompiled` is removed and `compileASC` should be used.
-- `loadLogicFromCache` is removed and `getLsigFromCache` should be used.
-- `executeTransaction` is removed and `executeTx` should be used.
-
-In `runtime` API:
-
-- `addAsset` is removed and `deployASA` should be used.
-- `addApp` is removed and `deployAdd` should be used.
-- `addASADef` is removed and `deployASADef` should be used.
-
-In web API:
-
-- `executeTransaction` is removed and `executeTx` should be used.
 
 ### Template Updates
 
