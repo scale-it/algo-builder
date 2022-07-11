@@ -8,17 +8,19 @@ CREATE TABLE IF NOT EXISTS sigma_daos (
   app_id BIGINT, -- application id
   dao_name CHAR(255), -- dao name
   app_params JSONB, -- application params with approval etc.
-  asset_id BIGINT -- token id
+  asset_id BIGINT, -- token id
+  UNIQUE(app_id)
 );
 
 -- create a sigma_dao_proposal table if does not exit already.
 CREATE TABLE IF NOT EXISTS sigma_dao_proposals (
   id SERIAL PRIMARY KEY, -- auto increment id
   addr BYTEA,  -- account address
-  app BIGINT, -- SigmaDAO app id
+  app_id BIGINT, -- SigmaDAO app id
   localstate JSONB, -- localstate of addr
   voting_start BIGINT, -- voting start
-  voting_end BIGINT -- voting end
+  voting_end BIGINT, -- voting end
+  FOREIGN KEY(app_id) REFERENCES sigma_daos(app_id)
 );
 
 -- Create indexes
@@ -88,7 +90,7 @@ BEGIN
 		SELECT NEW.localstate::jsonb -> 'tkv' -> voting_end_key -> 'ui' INTO voting_end_value;
 		-- insert values in sigma_dao_proposals table
 		INSERT INTO public.sigma_dao_proposals (
-		addr, app, localstate, voting_start, voting_end)
+		addr, app_id, localstate, voting_start, voting_end)
 		VALUES (NEW.addr, NEW.app, NEW.localstate::jsonb, voting_start_value, voting_end_value);
 	END IF;
 	RETURN NEW;
@@ -132,13 +134,13 @@ DECLARE
 	filter_past INT := 4; -- filter type -> past
 BEGIN
 	IF (filterType = filter_ongoing) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND timestamp BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app_id = appId AND timestamp BETWEEN sigma_dao_proposals.voting_start AND sigma_dao_proposals.voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_active) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND timestamp < sigma_dao_proposals.voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app_id = appId AND timestamp < sigma_dao_proposals.voting_end ORDER BY voting_start;
 	ELSIF (filterType = filter_past) THEN
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId AND sigma_dao_proposals.voting_end < timestamp ORDER BY voting_end DESC;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app_id = appId AND sigma_dao_proposals.voting_end < timestamp ORDER BY voting_end DESC;
 	ELSE
-		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app = appId;
+		RETURN QUERY SELECT * FROM sigma_dao_proposals WHERE app_id = appId;
 	END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;
