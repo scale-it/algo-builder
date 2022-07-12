@@ -10,6 +10,8 @@ A DAO is usually implemented using blockchain smart contracts:
 
 In this template, We are going to implement a DAO, where the members are defined by ASA holding (1 ASA = 1 voting power): each token holder is a DAO member and can participate equally in the governance.
 
+## DAO parameters:
+
 Every DAO has the following parameters:
 
 - `deposit` — a deposit amount in `gov_tokens` required to make a proposal.
@@ -68,6 +70,12 @@ We use functional notation to describe use cases we will implement.
 - `withdraw_from_proposal()` - Withdraw the assets from the proposalLsig back to the owner. Receiver must be the owner of the proposalLsig. Transaction composition:
  - _tx0_: Withdraw _gov_tokens_ from _proposalLsig_ back to _proposer_ (owner) (ASA transfer).
 
+## DAO flow
+
+Below diagram describes the flow of DAO application.
+
+<img src="./DAO-Flow.png" height="600" width="500" title="DAO flow" />
+
 ## Setup Sigma Dao
 
 Setup the sigma_daos table. Indexer should be running before executing below script.
@@ -86,25 +94,25 @@ Run below script to delete the sigma dao user, sigma dao user should be present:
 
 ## Spec document
 
-Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl).
-
-## Deploy script
-
-We created a deploy script in `scripts/deploy`, This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
+Please read the Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl) for more details about each use case.
 
 ## Scripts
 
-Please read the spec document (linked above) for more details about each use case. The scripts provide only a sample code to show how to use the template. For you private needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
+ The scripts provide only a sample code to show how to use the template. For your own needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
-To add proposal (`{voting_start, voting_end}` is set as `{now + 1min, now + 3min}`):
+To deploy the DAO. We created a deploy script in `scripts/deploy`, this script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
+
+    yarn run algob deploy
+
+To add proposal (`{voting_start, voting_end}` is set as `{now + 1min, now + 3min}`). This records proposal in lsig (local state).:
 
     yarn run algob run scripts/run/add_proposal.js
 
-To deposit votes:
+To deposit votes. User can only vote with the deposited tokens (to avoid double voting by sending tokens to someone else).:
 
     yarn run algob run scripts/run/deposit_vote_token.js
 
-To vote for a proposal (using deposited tokens):
+To vote for a proposal (using deposited tokens). Records vote by voterAcc in proposal (vote can be one of `yes`, `no`, `abstain`):
 
     yarn run algob run scripts/run/vote.js
 
@@ -112,15 +120,15 @@ To execute a proposal (`execute_before` is set as 7min from the time of proposal
 
     yarn run algob run scripts/run/vote.js
 
-To withdraw deposited votes (withdrawn from depositLsig to voter account):
+To withdraw deposited votes. This is used to unlock the deposit and withdraw tokens back to the user. To protect against double vote, user can only withdraw the deposit after the latest voting he participated in ended.:
 
     yarn run algob run scripts/run/withdraw_vote_deposit.js
 
-To clear vote record (from voter's account), fails if the proposal is still in progress:
+To clear vote record (from voter's account), fails if the proposal is still in progress. This clears sender's local state by removing a record of vote cast from a non-active proposal.:
 
     yarn run algob run scripts/run/clear_vote_record.js
 
-To close proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
+To close proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress. This closes proposal record and returns back the deposit. Sender must be an account with a recorded proposal.:
 
     yarn run algob run scripts/run/close_proposal.js
 
