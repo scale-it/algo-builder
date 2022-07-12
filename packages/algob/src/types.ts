@@ -678,12 +678,6 @@ export interface Deployer {
 	loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>;
 
 	/**
-	 * Alias to `this.compileASC`
-	 * @deprecated this function will be removed in the next release.
-	 */
-	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
-
-	/**
 	 * Returns ASCCache (with compiled code)
 	 * @param name: Smart Contract filename (must be present in assets folder)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
