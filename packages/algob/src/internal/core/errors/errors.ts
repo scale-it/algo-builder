@@ -35,7 +35,7 @@ export class BuilderPluginError extends Error {
 		} else {
 			super(pluginNameOrMessage);
 			this.pluginName = getClosestCallerPackage();
-			this.parent = messageOrParent;
+			this.parent = messageOrParent as Error;
 		}
 
 		this._isBuilderPluginError = true;
