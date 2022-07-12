@@ -17,11 +17,10 @@ export class BuilderPluginError extends Error {
 	/**
 	 * Creates a BuilderPluginError.
 	 *
-	 * @param pluginName The name of the plugin.
-	 * @param message An error message that will be shown to the user.
+	 * @param pluginNameOrMessage The name of the plugin.
+	 * @param messageOrParent An error message that will be shown to the user.
 	 * @param parent The error that causes this error to be thrown.
 	 */
-	public constructor(pluginName: string, message: string, parent?: Error);
 
 	public constructor(
 		pluginNameOrMessage: string,
@@ -35,7 +34,7 @@ export class BuilderPluginError extends Error {
 		} else {
 			super(pluginNameOrMessage);
 			this.pluginName = getClosestCallerPackage();
-			this.parent = messageOrParent as Error;
+			this.parent = messageOrParent;
 		}
 
 		this._isBuilderPluginError = true;
