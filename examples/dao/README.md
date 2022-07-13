@@ -74,7 +74,7 @@ We use functional notation to describe use cases we will implement.
 
 Below diagram describes the flow of DAO application.
 
-<img src="./DAO-Flow.png" height="600" width="500" title="DAO flow" />
+<img src="./docs/DAO-Flow.svg" height="600" width="500" title="DAO flow" />
 
 ## Setup Sigma Dao
 
