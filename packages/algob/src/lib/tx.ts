@@ -275,7 +275,9 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
  * @param deployer Deployer
  * @param transactions transaction parameters or atomic transaction parameters
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
- * or TransactionAndSign object(SDK transaction object and signer parameters)
+ * or TransactionAndSign object(SDK transaction object and signer parameters).
+ * If `ExecParams` are used, the deployer will connect to appropriate deployer accounts / wallets
+ * to sign constructed transactions.
  */
 export async function executeTx(
 	deployer: Deployer,
