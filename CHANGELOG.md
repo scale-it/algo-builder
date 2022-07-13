@@ -14,6 +14,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+### Bug Fixes 
+
+- Fix `txn AssetSender` should return zero address by default. 
+
 ## v5.0.1 2022-07-11
 
 ### Bug Fixes
