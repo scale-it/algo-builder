@@ -4,7 +4,7 @@ The purpose of the tutorial is a demonstration of Algorand Wallet Widget integra
 
 - [Vue CLI](https://cli.vuejs.org/guide/installation.html)<br/>
 - [NodeJS](https://nodejs.org/en/download/) > v14.11.0<br/>
-- JavaScript package manager - either [YARN](https://classic.yarnpkg.com/en/docs/install) version > 3.1.0 or NPM which comes with NodeJS.<br/>
+- JavaScript package manager - either [YARN](https://classic.yarnpkg.com/en/docs/install) > v3.1.0 or NPM which comes with NodeJS.<br/>
 - IDE, e.g. [VSCode](https://code.visualstudio.com/download)<br/>
 - Other dependencies are listed in [package.json](https://github.com/scale-it/algo-builder-templates/blob/master/wallet/package.json). Install them with yarn install or npm install.<br/>
 
@@ -14,7 +14,7 @@ Algorand ecosystem lacks a maintained Vue JS component connected to main Algoran
 
 [Algo Builder](https://algobuilder.dev/) is one of the main major frameworks for smart contract development and integrations. We took a responsibility to provide the community a Vue JS wallet widget, well integrated with the Algo Builder framework and Algo SDK.
 
-In this tutorial we create a basic Vue jS web application which connects web wallets and perform simple transaction (for eg: send Algo or call application). With the wallet widget a user can:
+In this tutorial we create a basic Vue JS web application which connects web wallets and perform simple transaction (for eg: send Algo or call application). With the wallet widget a user can:
 
 - select a network (such as MainNet, TestNet, BetaNet),
 - switch an account,
@@ -69,44 +69,42 @@ And finally you can disconnect your chosen wallet.
 
 You can also style your wallet widget with own custom styles or using an external library by editing the `App.vue` file to integrate your styled classes or components.
 
-    ```ts
+  ```ts
     <div>
-       <select @change="handleNetworkChange">
-    		<option :value="0" :key="0">Select a network</option>
-    		<option
-    			v-for="option in networkAvailable"
-    			:value="option.value"
-    			:key="option.id"
-    		>
-    			{{ option.value }}
-    		</option>
+      <select @change="handleNetworkChange">
+    	<option :value="0" :key="0">Select a network</option>
+    	<option
+    	 v-for="option in networkAvailable"
+    	 :value="option.value"
+    	 :key="option.id"
+    	>
+    	{{ option.value }}
+    	</option>
+      </select>
+      <div class="header" v-if="walletStore.network">
+         <select @change="connectWallet">
+    	  <option :value="0" :key="0">Select a wallet</option>
+    	  <option
+    	   v-for="option in walletsAvailable"
+    	   :value="option.value"
+    	   :key="option.id"
+    	  >
+    	  {{ option.value }}
+    	  </option>
     	</select>
-    	<div class="header" v-if="walletStore.network">
-    		<select @change="connectWallet">
-    			<option :value="0" :key="0">Select a wallet</option>
-    			<option
-    				v-for="option in walletsAvailable"
-    				:value="option.value"
-    				:key="option.id"
-    			>
-    				{{ option.value }}
-    			</option>
-    		</select>
-
-    		<div class="header" v-if="currentAddress">
-    			<select @change="setCurrentAddress">
-    				<option :value="0" :key="0">Select a account</option>
-    				<option v-for="addr in walletAddresses" :value="addr" :key="addr">
-    					{{ addr }}
-    				</option>
-    			</select>
-            </div>
-    	</div>
+      </div>
+      <div class="header" v-if="currentAddress">
+        <select @change="setCurrentAddress">
+         <option :value="0" :key="0">Select a account</option>
+         <option v-for="addr in walletAddresses" :value="addr" :key="addr">
+        	{{ addr }}
+         </option>
+        </select>
+       </div>
     </div>
+```
 
-    ```
-
-For eg: [Sigma Wallet](https://github.com/scale-it/algobuilder-msig) has a styled wallet widget using [Antd](https://www.antdv.com/) library.
+For eg: [Sigma Wallet](https://github.com/scale-it/algobuilder-msig) has a wallet widget styled using [Antd](https://www.antdv.com/) library.<br/>
 <img src="./t-wallet/assets/styled_wallet.png" height="200" title="Send Transaction" />
 
 The wallet component and the whole web page can easily be customized to fulfil your UX design requirements along with providing required functionality.
