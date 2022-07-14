@@ -46,7 +46,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 		}
 		// add approvalProgram and clearProgram to encTx
 		// TODO: recheck it
-		const [transaction] = runtime.createTxnContext(cloneExecParams);
+		const [transaction] = runtime.createTxnContext([cloneExecParams]);
 		const encTx = transaction.txn.get_obj_for_encoding() as EncTx;
 		encTx.txID = transaction.txn.txID();
 

@@ -1,4 +1,4 @@
-import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { BuilderError, parsing, tx as webTx, types } from "@algo-builder/web";
 import { SmartContract } from "@algo-builder/web/build/types";
 import algosdk, {
 	Account as AccountSDK,
@@ -415,50 +415,35 @@ export class Runtime {
 	 * @returns: [current SignedTransaction, SignedTransaction group]
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
-	createTxnContext(
-		txnParams: types.ExecParams | types.ExecParams[]
-	): [SignedTransaction, SignedTransaction[]] {
+	createTxnContext(txnParams: types.ExecParams[]): [SignedTransaction, SignedTransaction[]] {
 		// if txnParams is array, then user is requesting for a group txn
 		let signedTx: SignedTransaction;
-		if (Array.isArray(txnParams)) {
-			if (txnParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-			const txns = [];
-			for (const txnParam of txnParams) {
-				const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
-				const tx = webTx.mkTransaction(txnParam, mockParams);
-				if (txnParam.sign === types.SignType.SecretKey) {
-					if (txnParam.fromAccount.sk.length !== 64) {
-						throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
-							secretkey: txnParam.fromAccount.sk,
-						});
-					}
-					signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk));
-					signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn: tx };
-				} else {
-					//in case of lsig we do not sign it we just mock the signature
-					signedTx = { sig: Buffer.alloc(5), txn: tx };
-				}
-				txns.push(signedTx);
-			}
-			return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
-		} else {
-			// if not array, then create a single transaction
-			const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
-			const tx = webTx.mkTransaction(txnParams, mockParams);
-			if (txnParams.sign === types.SignType.SecretKey) {
-				if (txnParams.fromAccount.sk.length !== 64) {
+		if (txnParams.length === 0) {
+			throw new Error("ExecParams length is zero");
+		}
+		if (txnParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
+		}
+
+		const txns = [];
+		for (const txnParam of txnParams) {
+			const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
+			const tx = webTx.mkTransaction(txnParam, mockParams);
+			if (txnParam.sign === types.SignType.SecretKey) {
+				if (txnParam.fromAccount.sk.length !== 64) {
 					throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
-						secretkey: txnParams.fromAccount.sk,
+						secretkey: txnParam.fromAccount.sk,
 					});
 				}
-				signedTx = decodeSignedTransaction(tx.signTxn(txnParams.fromAccount.sk));
+				signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk));
+				signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn: tx };
 			} else {
+				//in case of lsig we do not sign it we just mock the signature
 				signedTx = { sig: Buffer.alloc(5), txn: tx };
 			}
-			return [signedTx, [signedTx]];
+			txns.push(signedTx);
 		}
+		return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
 	}
 	/* eslint-enable sonarjs/cognitive-complexity */
 
