@@ -108,7 +108,7 @@ To add proposal (`{voting_start, voting_end}` is set as `{now + 1min, now + 3min
 
     yarn run algob run scripts/run/add_proposal.js
 
-To deposit votes. User can only vote with the deposited tokens (to avoid double voting by sending tokens to someone else).:
+To deposit votes. Deposit is used to enable voting for all proposals. User can only vote with deposited tokens. Deposited tokens can be used for all proposals simultaneously.:
 
     yarn run algob run scripts/run/deposit_vote_token.js
 
@@ -120,7 +120,7 @@ To execute a proposal (`execute_before` is set as 7min from the time of proposal
 
     yarn run algob run scripts/run/vote.js
 
-To withdraw deposited votes. This is used to unlock the deposit and withdraw tokens back to the user. To protect against double vote, user can only withdraw the deposit after the latest voting he participated in ended.:
+To withdraw deposited votes. User can only withdraw the deposit after the latest voting he participated in ended.:
 
     yarn run algob run scripts/run/withdraw_vote_deposit.js
 
