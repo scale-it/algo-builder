@@ -4,7 +4,14 @@ import algosdk, { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } fro
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
-import { ASCCache, ConfirmedTxInfo, FundASCFlags, LsigInfo, SCParams } from "../../src/types";
+import {
+	ASCCache,
+	ConfirmedTxInfo,
+	FundASCFlags,
+	LsigInfo,
+	SCParams,
+	TxnReceipt,
+} from "../../src/types";
 import {
 	MOCK_APPLICATION_ADDRESS,
 	mockAlgod,
@@ -34,9 +41,16 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		return this.sendAndWait([]);
 	}
 
-	getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
+	getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
 		return new Promise((resolve, rejects) => {
-			resolve([mockPendingTransactionInformation]);
+			resolve([
+				{
+					...mockPendingTransactionInformation,
+					txID: algosdk.Transaction.from_obj_for_encoding(
+						mockPendingTransactionInformation.txn.txn
+					).txID(),
+				},
+			]);
 		});
 	}
 

@@ -25,6 +25,7 @@ import type {
 	LsigInfo,
 	Network,
 	SCParams,
+	TxnReceipt,
 } from "../types";
 import { CompileOp } from "./compile";
 import { WAIT_ROUNDS } from "./constants";
@@ -118,7 +119,7 @@ export interface AlgoOperator {
 		scTmplParams?: SCParams
 	) => Promise<wtypes.SourceCompiled>;
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
-	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -153,14 +154,17 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	}
 
 	// Get receipts of group txn
-	async getReceiptTxns(txns: Transaction[]): Promise<ConfirmedTxInfo[]> {
-		const receipts = await Promise.all(
+	async getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
+		const confirmedTxInfos = await Promise.all(
 			txns.map((txn) => {
 				return this.algodClient.pendingTransactionInformation(txn.txID()).do();
 			})
 		);
 
-		return receipts as ConfirmedTxInfo[];
+		return confirmedTxInfos.map((confirmedTxInfo, index) => ({
+			...(confirmedTxInfo as ConfirmedTxInfo),
+			txID: txns[index].txID(),
+		}));
 	}
 
 	/**

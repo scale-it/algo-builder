@@ -9,7 +9,7 @@ import {
 } from "@algo-builder/web";
 import algosdk, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
-import { ConfirmedTxInfo, Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../types";
 import { loadEncodedTxFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
@@ -280,7 +280,7 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
 export async function executeTx(
 	deployer: Deployer,
 	transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-): Promise<ConfirmedTxInfo[]> {
+): Promise<TxnReceipt[]> {
 	let isSDK = false;
 	let signedTxn;
 	if (transactions.length === 0) {
@@ -311,63 +311,6 @@ export async function executeTx(
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
 		} else {
 			console.warn("deploy app/asset will not be stored in checkpoint in run mode");
-		}
-		return confirmedTx;
-	} catch (error) {
-		if (deployer.isDeployMode) {
-			deployer.persistCP();
-		}
-
-		throw error;
-	}
-}
-
-/**
- * @deprecated  Remove in next release
- */
-export async function executeTransaction(
-	deployer: Deployer,
-	transactions:
-		| (wtypes.ExecParams | wtypes.TransactionAndSign)
-		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
-): Promise<ConfirmedTxInfo> {
-	let isSDK = false;
-	let signedTxn;
-	if (Array.isArray(transactions)) {
-		if (transactions.length === 0) {
-			throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
-		}
-		if (wtypes.isSDKTransactionAndSign(transactions[0])) {
-			signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
-			isSDK = true;
-		}
-	} else {
-		if (wtypes.isSDKTransactionAndSign(transactions)) {
-			signedTxn = signTransaction(transactions.transaction, transactions.sign);
-			isSDK = true;
-		}
-	}
-
-	if (isSDK && signedTxn) {
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		return confirmedTx;
-	}
-
-	// Update type here because we are sure this is not transaction object type
-	transactions = Array.isArray(transactions)
-		? (transactions as wtypes.ExecParams[])
-		: (transactions as wtypes.ExecParams);
-
-	const execParams = Array.isArray(transactions) ? transactions : [transactions];
-	deployer.assertCPNotDeleted(transactions);
-	try {
-		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-		const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		if (deployer.isDeployMode) {
-			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
 		}
 		return confirmedTx;
 	} catch (error) {

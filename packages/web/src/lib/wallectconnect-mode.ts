@@ -236,11 +236,4 @@ export class WallectConnectSession {
 		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
 	}
-	/** @deprecated */
-	async executeTransaction(
-		execParams: ExecParams | ExecParams[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams);
-		else return this.executeTx([execParams]);
-	}
 }

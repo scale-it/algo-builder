@@ -109,7 +109,7 @@ describe("DAO test", function () {
 	const daoName = "DAO";
 
 	function setUpDAO() {
-		govTokenID = runtime.addAsset("gov-token", {
+		govTokenID = runtime.deployASA("gov-token", {
 			creator: { ...creator.account, name: "dao-creator" },
 		}).assetIndex;
 
