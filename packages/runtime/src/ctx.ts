@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { tx as webTx, types } from "@algo-builder/web";
-import { AppDefinition, SmartContract, TxParams } from "@algo-builder/web/build/types";
 import algosdk, {
 	getApplicationAddress,
 	makeAssetTransferTxnWithSuggestedParams,
@@ -798,7 +797,7 @@ export class Ctx implements Context {
 		this.verifyAndUpdateInnerAppCallStack();
 		signedTransactions.forEach((signedTransaction, idx) => {
 			const fromAccountAddr = webTx.getTransactionFromAddress(signedTransaction.txn);
-			let payFlags: TxParams = {};
+			let payFlags: types.TxParams = {};
 			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 
@@ -857,7 +856,11 @@ export class Ctx implements Context {
 								if (appDefinition === undefined) {
 									throw new Error("Not supported");
 								}
-								r = this.deployApp(fromAccountAddr, appDefinition[idx] as AppDefinition, idx);
+								r = this.deployApp(
+									fromAccountAddr,
+									appDefinition[idx] as types.AppDefinition,
+									idx
+								);
 								this.knowableID.set(idx, r.appID);
 							} else {
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
@@ -929,7 +932,7 @@ export class Ctx implements Context {
 							}
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
-								appDefinition[idx] as SmartContract,
+								appDefinition[idx] as types.SmartContract,
 								idx
 							);
 							break;

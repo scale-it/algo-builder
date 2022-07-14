@@ -1,5 +1,4 @@
-import { BuilderError, parsing, tx as webTx, types } from "@algo-builder/web";
-import { SmartContract } from "@algo-builder/web/build/types";
+import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, {
 	Account as AccountSDK,
 	decodeAddress,
@@ -866,8 +865,8 @@ export class Runtime {
 		let tx: EncTx;
 		let gtxs: EncTx[];
 		let signedTransactions: algosdk.SignedTransaction[];
-		let appDef: types.AppDefinition | SmartContract | undefined;
-		const appDefinitions: (types.AppDefinition | SmartContract | undefined)[] = [];
+		let appDef: types.AppDefinition | types.SmartContract | undefined;
+		const appDefinitions: (types.AppDefinition | types.SmartContract | undefined)[] = [];
 		const lsigs: (types.Lsig | undefined)[] = [];
 
 		if (types.isExecParams(txnParams[0])) {
