@@ -105,7 +105,7 @@ You can also style your wallet widget with own custom styles or using an externa
 ```
 
 For eg: [Sigma Wallet](https://github.com/scale-it/algobuilder-msig) has a styled wallet widget using [Antd](https://www.antdv.com/) library.
-<img src="./t-wallet/assets/select_network.png" height="200" title="Select Network" />
+<img src="./t-wallet/assets/select_network.png" height="100" title="Select Network" />
 <img src="./t-wallet/assets/styled_wallet.png" height="200" title="Styled Wallet Widget" />
 
 The wallet component and the whole web page can easily be customized to fulfil your UX design requirements along with providing required functionality.
