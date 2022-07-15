@@ -26,7 +26,12 @@ case $1 in
 
   exec)
     cd project-dev
-    ./node_modules/.bin/algob $2 $3 $4
+    echo DIRECTORY: `pwd`
+    ls
+    ls ./node_modules
+    ./node_modules/.bin
+
+    ./node_modules/.bin/algob ${*:2}
     ;;
 
   *)
