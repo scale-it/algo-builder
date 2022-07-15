@@ -21,17 +21,18 @@ case $1 in
     yarn link -r ../../runtime
     yarn link -r ../
     cd node_modules/.bin/
-    ln -s ../../../node_modules/.bin/algob ./
+    ln -s ../../../../../node_modules/.bin/algob ./
   ;;
 
   exec)
     cd project-dev
     echo DIRECTORY: `pwd`
     ls
+    echo ">> list node modules"
     ls ./node_modules
     ./node_modules/.bin
-
-    ./node_modules/.bin/algob ${*:2}
+    echo ">> list node modules/bin"
+    ls ./node_modules/.bin/algob ${*:2}
     ;;
 
   *)
