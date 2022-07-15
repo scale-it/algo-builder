@@ -20,6 +20,10 @@ const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	"ts-node",
 ];
 
+export function pkgManager(isNpm: boolean): string {
+	return isNpm ? "npm" : "yarn";
+}
+
 export async function printWelcomeMessage(): Promise<void> {
 	const packageJson = await getPackageJson();
 
@@ -76,7 +80,7 @@ function copySampleProject(
 export function printSuggestedCommands(isNpm: boolean): void {
 	let npx = "";
 	if (getExecutionMode() !== ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION) {
-		npx = isNpm ? "npm " : "yarn ";
+		npx = pkgManager(isNpm) + " ";
 	}
 
 	console.log(`Try running some of the following tasks:`);
@@ -217,7 +221,7 @@ async function confirmPluginInstallation(isNpm: boolean): Promise<boolean> {
 		shouldInstallPlugin: boolean;
 	};
 
-	const packageManager = isNpm ? "npm" : "yarn";
+	const packageManager = pkgManager(isNpm);
 	const sampleProjectDependencies = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
@@ -276,38 +280,26 @@ export async function installDependencies(
 }
 
 function installDevDependenciesCmd(isNpm: boolean): string[] {
-	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-	const sampleProjectDependencies = isTypeScriptProject()
+	const deps = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
 
-	if (!isNpm) {
-		const cmd = ["yarn"];
-		if (isGlobal) {
-			cmd.push("global");
-		}
-		cmd.push("add", "--dev", ...sampleProjectDependencies);
-		return cmd;
-	}
-
-	const npmInstall = ["npm", "install"];
-	if (isGlobal) {
-		npmInstall.push("--global");
-	}
-
-	return [...npmInstall, "--save-dev", ...sampleProjectDependencies];
+	return pkgInstallCommand(isNpm, deps);
 }
 
 function installDependenciesCmd(isNpm: boolean): string[] {
+	return pkgInstallCommand(isNpm, ["@algo-builder/web"]);
+}
+
+function pkgInstallCommand(isNpm: boolean, deps: string[]): string[] {
 	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-	const sampleProjectDependencies = ["@algo-builder/web"];
 
 	if (!isNpm) {
 		const cmd = ["yarn"];
 		if (isGlobal) {
 			cmd.push("global");
 		}
-		cmd.push("add", ...sampleProjectDependencies);
+		cmd.push("add", ...deps);
 		return cmd;
 	}
 
@@ -316,5 +308,5 @@ function installDependenciesCmd(isNpm: boolean): string[] {
 		npmInstall.push("--global");
 	}
 
-	return [...npmInstall, ...sampleProjectDependencies];
+	return [...npmInstall, ...deps];
 }

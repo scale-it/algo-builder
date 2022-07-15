@@ -22,8 +22,6 @@ export default function (): void {
 					npm: boolean;
 				},
 				_
-			) => {
-				await createProject(newProjectLocation, typescript, infrastructure, npm);
-			}
+			) => await createProject(newProjectLocation, typescript, infrastructure, npm)
 		);
 }
