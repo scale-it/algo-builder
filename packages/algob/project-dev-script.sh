@@ -29,6 +29,8 @@ case $1 in
     echo DIRECTORY: `pwd`
     echo ">> list node modules/bin"
     ls -la ./node_modules/.bin
+    echo ">> list workspace node modules/bin"
+    ls -la ../../../node_modules/.bin
 
     # ./node_modules/.bin/algob ${*:2}
     ../../../node_modules/.bin/algob ${*:2}
