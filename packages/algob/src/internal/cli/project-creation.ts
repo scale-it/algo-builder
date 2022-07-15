@@ -106,7 +106,7 @@ export async function createProject(
 	withInfrastucture: boolean,
 	isNpm: boolean
 ): PromiseAny {
-	printWelcomeMessage();
+	await printWelcomeMessage();
 	copySampleProject(location, isTSProject, withInfrastucture);
 
 	let shouldShowInstallationInstructions = true;

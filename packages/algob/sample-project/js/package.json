@@ -4,6 +4,6 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"algob": "algob"
+		"algob": "./node_modules/.bin/algob"
 	}
 }

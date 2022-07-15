@@ -10,15 +10,19 @@ case $1 in
   create)
     if [ -d "project-dev" ]; then
       echo "% project-dev already exists. skipping the setup"
-    else
-      mkdir -p project-dev/node_modules
-      cd project-dev
-      yarn algob init . $2
-      cd node_modules
-      ln -s ../../build/ algob
-      cd ..
-    fi
-    ;;
+      exit 0;
+    fi;
+    yarn build
+    mkdir -p project-dev/node_modules/.bin
+    cd project-dev
+    yarn algob init . $2
+    touch yarn.lock
+    yarn link -r ../../web
+    yarn link -r ../../runtime
+    yarn link -r ../
+    cd node_modules/.bin/
+    ln -s ../../../node_modules/.bin/algob ./
+  ;;
 
   exec)
     cd project-dev
@@ -26,6 +30,6 @@ case $1 in
     ;;
 
   *)
-    echo -n "unknown"
+    echo -n "unknown command. Expecte create or exec"
     ;;
 esac

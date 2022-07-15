@@ -75,7 +75,7 @@ describe("Init project", () => {
 
 	it("should init npm project in an empty folder(typescript) with `.`", async () => {
 		const location = ".";
-		await createProject(location, true, false, npm);
+		await createProject(location, true, false, true);
 
 		assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
 		assert.isTrue(fs.existsSync(`./${location}/package.lock`));

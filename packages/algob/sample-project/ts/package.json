@@ -4,7 +4,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"algob": "algob",
+		"algob": "./node_modules/.bin/algob",
 		"build": "tsc --build .",
 		"build:watch": "tsc -w -p ."
 	}
