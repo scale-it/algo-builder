@@ -1,5 +1,11 @@
 #!/bin/bash
 
+## Usage
+## start dev project:
+##    ./project-dev-script.sh create
+## run algob command:
+##    ./project-dev-script.sh exec node-info
+
 case $1 in
   create)
     if [ -d "project-dev" ]; then
@@ -7,7 +13,7 @@ case $1 in
     else
       mkdir -p project-dev/node_modules
       cd project-dev
-      node ../build/internal/cli/cli.js init . $2
+      yarn algob init . $2
       cd node_modules
       ln -s ../../build/ algob
       cd ..
@@ -16,7 +22,7 @@ case $1 in
 
   exec)
     cd project-dev
-    node ../build/internal/cli/cli.js $2 $3
+    yarn algob $2 $3 $4
     ;;
 
   *)
