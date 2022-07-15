@@ -100,7 +100,7 @@ Please read the Algo Builder DAO [specification](https://paper.dropbox.com/doc/A
 
  The scripts provide only a sample code to show how to use the template. For your own needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
-To deploy the DAO. We created a deploy script in `scripts/deploy`, this script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
+To deploy the DAO, we created a deploy script in `scripts/deploy`. This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
 
     yarn run algob deploy
 
