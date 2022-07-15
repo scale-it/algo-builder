@@ -26,7 +26,7 @@ case $1 in
 
   exec)
     cd project-dev
-    yarn algob $2 $3 $4
+    npx algob $2 $3 $4
     ;;
 
   *)

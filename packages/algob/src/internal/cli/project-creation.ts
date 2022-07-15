@@ -114,7 +114,6 @@ export async function createProject(
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
 
-	installDependencies(pkgManager(isNpm), []);
 	if (await canInstallPlugin()) {
 		const installedRecommendedDeps = sampleProjectDependencies.filter(isInstalled);
 
