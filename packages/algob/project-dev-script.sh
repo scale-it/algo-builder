@@ -26,7 +26,7 @@ case $1 in
 
   exec)
     cd project-dev
-    npx algob $2 $3 $4
+    ./node_modules/.bin/algob $2 $3 $4
     ;;
 
   *)
