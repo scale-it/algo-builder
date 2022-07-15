@@ -72,7 +72,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - `addAsset` is deprecated and removed and `deployASA` should be used.
 - `addApp` is deprecated and removed and `deployAdd` should be used.
 - `addASADef` is deprecated and removed and `deployASADef` should be used.
-- Renamed `optIntoAsa` to `optInToAsa` bringing naming convention consistency across the project.
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
 
 #### @algo-builder/web
 
@@ -80,6 +80,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
 
 ### Deprecated
+
+### Infrastructure
+
+- Updated indexer version to `2.12.4` in `infrastructure/makefile`
 
 ### Template Updates
 
