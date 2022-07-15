@@ -14,9 +14,13 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
-### Bug Fixes 
+### Features
 
-- Fix `txn AssetSender` should return zero address by default. 
+- add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
+
+### Bug Fixes
+
+- Fix `txn AssetSender` should return zero address by default.
 
 ## v5.0.1 2022-07-11
 
