@@ -24,7 +24,6 @@ describe("Init project", () => {
 		withInfrastructure: boolean,
 		isNpm: boolean
 	) {
-		assert.equal(isNpm, fs.existsSync(`./${location}/package.lock`));
 		assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
 		if (isTs) {
 			assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
