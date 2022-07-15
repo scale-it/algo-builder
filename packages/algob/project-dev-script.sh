@@ -13,6 +13,7 @@ case $1 in
       exit 0;
     fi;
     yarn build
+    mkdir -p project-dev/node_modules/
     cd project-dev
     yarn algob init . $2
     touch yarn.lock
