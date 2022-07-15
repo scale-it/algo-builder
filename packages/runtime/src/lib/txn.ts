@@ -16,6 +16,7 @@ import {
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
+	ZERO_ADDRESS,
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
 import {
@@ -159,10 +160,9 @@ export function txnSpecByField(
 			break;
 		}
 		case "AssetSender": {
-			/// + for asset_transfer transactions, we use "snd"
-			/// + for revoke asset tx (also an asset_transfer) tx, we use "asnd"
+			// if tx.asns is undefined we return zero address;
 			if (tx.type === "axfer") {
-				result = tx.asnd ?? tx.snd;
+				result = tx.asnd ?? Buffer.from(ZERO_ADDRESS);
 			}
 			break;
 		}
@@ -182,6 +182,13 @@ export function txnSpecByField(
 		}
 		case "LastLog": {
 			result = interpreter.runtime.ctx.lastLog;
+			break;
+		}
+
+		case "StateProofPK": {
+			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// so we set up 64 zero bytes as default value of StateProofPK
+			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
 

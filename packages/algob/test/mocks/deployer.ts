@@ -10,6 +10,7 @@ import type {
 	LogicSig,
 	LsigInfo,
 	SCParams,
+	TxnReceipt,
 } from "../../src/types";
 
 export class FakeDeployer implements Deployer {
@@ -268,11 +269,11 @@ export class FakeDeployer implements Deployer {
 
 	executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	): Promise<ConfirmedTxInfo[]> {
+	): Promise<TxnReceipt[]> {
 		throw new Error("Not implemented");
 	}
 
-	getReceiptTxns(txns: algosdk.Transaction[]): Promise<ConfirmedTxInfo[]> {
+	getReceiptTxns(txns: algosdk.Transaction[]): Promise<TxnReceipt[]> {
 		throw new Error("not implemented");
 	}
 }

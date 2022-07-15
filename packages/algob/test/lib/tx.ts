@@ -12,7 +12,7 @@ import { TextEncoder } from "util";
 
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { ConfirmedTxInfo, Deployer } from "../../src/types";
+import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
@@ -72,7 +72,7 @@ describe("Opt-In to ASA", () => {
 	let deployer: Deployer;
 	let execParams: wtypes.OptInASAParam;
 	let algod: AlgoOperatorDryRunImpl;
-	let expected: ConfirmedTxInfo[];
+	let expected: TxnReceipt[];
 	beforeEach(async () => {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
@@ -97,6 +97,7 @@ describe("Opt-In to ASA", () => {
 				txn: {
 					txn: TXN_OBJ,
 				},
+				txID: algosdk.Transaction.from_obj_for_encoding(TXN_OBJ).txID(),
 			},
 		];
 	});

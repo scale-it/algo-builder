@@ -184,7 +184,7 @@ export class WallectConnectSession {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 */
-	private async sendAndWait(
+	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
@@ -235,12 +235,5 @@ export class WallectConnectSession {
 
 		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
-	}
-	/** @deprecated */
-	async executeTransaction(
-		execParams: ExecParams | ExecParams[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams);
-		else return this.executeTx([execParams]);
 	}
 }

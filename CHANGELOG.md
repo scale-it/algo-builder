@@ -14,19 +14,70 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+### Bug Fixes 
+
+- Fix `txn AssetSender` should return zero address by default. 
+
+## v5.0.1 2022-07-11
+
+### Bug Fixes
+
+- added missing dependency (`debug`) to packages.
+
+## v5.0.0 2022-07-8
+
 ### Features
 
-- Add Runtime.getAppByName(appName): get app by name declared in appDefinition.
-- For Algob.balanceOf(deployer, accountAddr, assetID) if assetID is undefined then function will return ALGO account balance.
+#### Algob
+
+- `algob.balanceOf(deployer, accountAddr, assetID)`: if assetID is undefined then the function will return ALGO account balance.
+- `deployer.executeTx` returns list of `TxnReceipt`, which extends `ConfirmedTxInfo`. This is to add a useful `txID` attribute, needed in various scripts.
+
+  ```ts
+  export interface TxnReceipt extends ConfirmedTxInfo {
+  	txID: string;
+  }
+  ```
+
+#### Runtime
+
+- Add `Runtime.getAppByName(appName)`: gets app info based on the name declared in appDefinition.
+- Better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
+- Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
+- Teal v6 support:
+  - Add `Txn LastLog` opcode.
+  - Add `Txn StateProofPK` opcode.
+
+#### Examples
+
 - Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
 
 ### Bug Fixes
 
-- Fix number transaction in one call should be 256(include inner and atomic transaction).
+- Fix: missing schebang to run `algob` as an app directly. BTW, we recommend running algob through `yarn algob` in your project.
+- Fix: max number of transactions in one call should be 256 (include inner and atomic transaction).
+- Fix: Web mode (algo-builder/web) cannot sign by `fromAccount` when `fromAccountAddr` appear in `execParams`.
+- Receipt confirmed txn have `inner-txns` and `txn` field.
 
 ### Breaking Changes
 
+#### @algo-builder/algob
+
+- `ensureCompiled` is deprecated and removed and `compileASC` should be used.
+- `loadLogicFromCache` is deprecated and removed and `getLsigFromCache` should be used.
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
+
+#### @algo-builder/runtime
+
+- `addAsset` is deprecated and removed and `deployASA` should be used.
+- `addApp` is deprecated and removed and `deployAdd` should be used.
+- `addASADef` is deprecated and removed and `deployASADef` should be used.
 - Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
+
+#### @algo-builder/web
+
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
+- Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
 
 ### Deprecated
 
@@ -38,8 +89,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 DAO template:
 
-- [breaking] moving template parameters (`gov_token_id`) to the global state. Because of
-  that change the bytecode remains the same after each deploy hence the hash of the appliction also will remain the same.
+- [breaking] moved template parameter (`gov_token_id`) to the global state. This is to assure constant bytecode fir each deployment. We need it to build an efficient indexer and UI.
+  - Subsequently, `gov_token_id` is required when deploying new DAO approval program.
 
 ## v4.0.0 2022-05-24
 

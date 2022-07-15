@@ -2269,7 +2269,7 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(TXN_OBJ.snd, stack.pop());
+				assert.deepEqual(ZERO_ADDRESS, stack.pop());
 			});
 
 			it("should push txn AssetReceiver to stack", function () {
@@ -2483,6 +2483,12 @@ describe("Teal Opcodes", function () {
 				const op = new Txn(["LastLog"], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
+			});
+
+			it("should return StateProofPK", () => {
+				const op = new Txn(["StateProofPK"], 1, interpreter);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
 			});
 		});
 

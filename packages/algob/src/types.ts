@@ -494,7 +494,7 @@ export interface Deployer {
 	 * @param txns list transaction in group
 	 * @returns confirmed tx info of group
 	 */
-	getReceiptTxns: (txns: Transaction[]) => Promise<ConfirmedTxInfo[]>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 
 	/**
 	 * Funds logic signature account (Contract Account).
@@ -678,12 +678,6 @@ export interface Deployer {
 	loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>;
 
 	/**
-	 * Alias to `this.compileASC`
-	 * @deprecated this function will be removed in the next release.
-	 */
-	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
-
-	/**
 	 * Returns ASCCache (with compiled code)
 	 * @param name: Smart Contract filename (must be present in assets folder)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
@@ -722,7 +716,7 @@ export interface Deployer {
 	 */
 	executeTx: (
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	) => Promise<ConfirmedTxInfo[]>;
+	) => Promise<TxnReceipt[]>;
 }
 
 // ************************
@@ -784,4 +778,8 @@ export interface ConfirmedTxInfo {
 	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
 	"inner-txns"?: ConfirmedTxInfo;
 	txn: algosdk.EncodedSignedTransaction;
+}
+
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
 }
