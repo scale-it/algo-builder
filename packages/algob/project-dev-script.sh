@@ -13,27 +13,22 @@ case $1 in
       exit 0;
     fi;
     yarn build
-    mkdir -p project-dev/node_modules/.bin
     cd project-dev
     yarn algob init . $2
     touch yarn.lock
     yarn link -r ../../web
     yarn link -r ../../runtime
     yarn link -r ../
-    cd node_modules/.bin/
-    ln -s ../../../../../node_modules/.bin/algob ./
   ;;
 
   exec)
     cd project-dev
     echo DIRECTORY: `pwd`
-    echo ">> list node modules/bin"
-    ls -la ./node_modules/.bin
     echo ">> list workspace node modules/bin"
     ls -la ../../../node_modules/.bin
 
-    # ./node_modules/.bin/algob ${*:2}
-    ../../../node_modules/.bin/algob ${*:2}
+    # ../../../node_modules/.bin/algob ${*:2}
+    ./build/internal/cli/cli.js ${*:2}
     ;;
 
   *)
