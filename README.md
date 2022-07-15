@@ -58,6 +58,13 @@ We use **yarn workspaces** to manage all sub packages. here is a list of command
 
 You have to utilize yarn workspaces’ `noHoist` feature to use otherwise incompatible 3rd party dependencies working in the Mono-Repo environment.
 
+### Creating a local project using algob from source
+
+If you want to test the latest algob version from the `develop` branch, you can:
+
+- `cd <path to algo-builder repo>/packages/algob` and run `./project-dev-script.sh`
+- create a new node project and use link (`npm link` or `yarn link`) to link dependencies
+
 ### Testing
 
 Each package has rich test suites. Whenever you add something new make sure you provide a test.
