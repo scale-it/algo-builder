@@ -30,9 +30,10 @@ case $1 in
     ls
     echo ">> list node modules"
     ls ./node_modules
-    ./node_modules/.bin
     echo ">> list node modules/bin"
-    ls ./node_modules/.bin/algob ${*:2}
+    ls ./node_modules/.bin
+
+    ./node_modules/.bin/algob ${*:2}
     ;;
 
   *)
