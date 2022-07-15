@@ -864,8 +864,8 @@ export class Runtime {
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
 		let signedTransactions: algosdk.SignedTransaction[];
 		let appDef: types.AppDefinition | types.SmartContract | undefined;
-		const appDefinitions: (types.AppDefinition | types.SmartContract | undefined)[] = [];
-		const lsigs: (types.Lsig | undefined)[] = [];
+		const appDefMap: Map<number, types.AppDefinition | types.SmartContract> = new Map();
+		const lsigMap: Map<number, types.Lsig> = new Map();
 
 		if (types.isExecParams(txnParams[0])) {
 			const dummySource: types.SourceCompiled = {
@@ -874,17 +874,15 @@ export class Runtime {
 				clearProgramBytes: new Uint8Array(32),
 			};
 
-			const txns = txnParams.map((txnParamerter) => {
+			const txns = txnParams.map((txnParamerter, index) => {
 				const txn = cloneDeep(txnParamerter as types.ExecParams);
 				if (txn.sign === types.SignType.LogicSignature) {
-					lsigs.push(txn);
-				} else {
-					lsigs.push(undefined);
+					lsigMap.set(index, txn);
 				}
+				appDef = undefined;
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
 						if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
-						appDefinitions.push(undefined);
 						break;
 					}
 					case types.TransactionType.DeployApp: {
@@ -893,19 +891,16 @@ export class Runtime {
 							...txn.appDefinition,
 							...dummySource,
 						};
-						appDefinitions.push(appDef);
 						break;
 					}
 					case types.TransactionType.UpdateApp: {
 						appDef = txn.newAppCode;
 						txn.newAppCode = dummySource;
-						appDefinitions.push(appDef);
 						break;
 					}
-					default: {
-						appDefinitions.push(undefined);
-					}
 				}
+
+				if (appDef !== undefined) appDefMap.set(index, appDef);
 				return txn;
 			});
 
@@ -935,7 +930,7 @@ export class Runtime {
 		).length;
 
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
-		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefinitions, lsigs);
+		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
 
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;

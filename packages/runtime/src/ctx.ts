@@ -788,8 +788,8 @@ export class Ctx implements Context {
 	/* eslint-disable sonarjs/cognitive-complexity */
 	processTransactions(
 		signedTransactions: algosdk.SignedTransaction[],
-		appDefinition?: (types.AppDefinition | types.SmartContract | undefined)[],
-		lsigs?: (types.Lsig | undefined)[]
+		appDefMap?: Map<number, types.AppDefinition | types.SmartContract>,
+		lsigMap?: Map<number, types.Lsig>
 	): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
@@ -800,13 +800,11 @@ export class Ctx implements Context {
 			let payFlags: types.TxParams = {};
 			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
-
-			if (lsigs !== undefined && lsigs[idx] !== undefined) {
-				if (lsigs[idx] !== undefined) {
-					this.tx = this.gtxs[idx]; // update current tx to index of stateless
-					r = this.runtime.validateLsigAndRun(lsigs[idx] as types.Lsig, this.debugStack);
-					this.tx = this.gtxs[0];
-				}
+			if (lsigMap !== undefined && lsigMap.get(idx) !== undefined) {
+				let lsig = lsigMap.get(idx);
+				this.tx = this.gtxs[idx]; // update current tx to index of stateless
+				r = this.runtime.validateLsigAndRun(lsig as types.Lsig, this.debugStack);
+				this.tx = this.gtxs[0];
 			} //
 			//after executing stateless tx updating current tx to default (index 0)
 			else if (signedTransaction.sgnr || signedTransaction.sig) {
@@ -851,14 +849,13 @@ export class Ctx implements Context {
 							if (
 								isEncTxApplicationCreate(signedTransaction.txn.get_obj_for_encoding() as EncTx)
 							) {
-								const senderAcc = this.getAccount(fromAccountAddr);
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
-								if (appDefinition === undefined) {
+								if (appDefMap === undefined) {
 									throw new Error("Not supported");
 								}
 								r = this.deployApp(
 									fromAccountAddr,
-									appDefinition[idx] as types.AppDefinition,
+									appDefMap.get(idx) as types.AppDefinition,
 									idx
 								);
 								this.knowableID.set(idx, r.appID);
@@ -927,12 +924,12 @@ export class Ctx implements Context {
 						}
 						case algosdk.OnApplicationComplete.UpdateApplicationOC: {
 							this.tx = this.gtxs[idx]; // update current tx to the requested index
-							if (appDefinition === undefined) {
+							if (appDefMap === undefined) {
 								throw new Error("Not supported");
 							}
 							r = this.updateApp(
 								signedTransaction.txn.appIndex,
-								appDefinition[idx] as types.SmartContract,
+								appDefMap.get(idx) as types.SmartContract,
 								idx
 							);
 							break;

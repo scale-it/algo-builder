@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 
 import { types } from "@algo-builder/web";
-import algosdk, { Account as AccountSDK, EncodedTransaction, modelsv2, Transaction } from "algosdk";
+import algosdk, {
+	Account as AccountSDK,
+	EncodedTransaction,
+	modelsv2,
+	Transaction,
+} from "algosdk";
 
 import {
 	Add,
@@ -174,8 +179,8 @@ export interface Context {
 	closeApp: (sender: AccountAddress, appID: number) => void;
 	processTransactions: (
 		signedTransactions: algosdk.SignedTransaction[],
-		appDefinitions?: (types.AppDefinition | types.SmartContract | undefined) [],
-		lsig?: (types.Lsig | undefined) [],
+		appDefMap?: Map<number, types.AppDefinition | types.SmartContract>,
+		lsigMap?: Map<number, types.Lsig>
 	) => TxReceipt[];
 	deployASA: (
 		name: string,
