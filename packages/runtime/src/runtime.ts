@@ -862,8 +862,6 @@ export class Runtime {
 	): TxReceipt[] {
 		// TODO: union above and create new type in task below:
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
-		let tx: EncTx;
-		let gtxs: EncTx[];
 		let signedTransactions: algosdk.SignedTransaction[];
 		let appDef: types.AppDefinition | types.SmartContract | undefined;
 		const appDefinitions: (types.AppDefinition | types.SmartContract | undefined)[] = [];
@@ -912,17 +910,15 @@ export class Runtime {
 			});
 
 			// get current txn and txn group (as encoded obj)
-			let _;
-			[_, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
-			gtxs = this.getGroupTransaction(signedTransactions);
-			tx = gtxs[0];
+			[, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
 		} else {
 			signedTransactions = txnParams.map((txnParameter) => {
 				return txnParameter as algosdk.SignedTransaction;
 			});
-			gtxs = this.getGroupTransaction(signedTransactions);
-			tx = gtxs[0];
 		}
+
+		const gtxs = this.getGroupTransaction(signedTransactions);
+		const tx = gtxs[0];
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
