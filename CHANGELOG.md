@@ -23,13 +23,16 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Bug Fixes
 
 - Fix number transaction in one call should be 256(include inner and atomic transaction).
-- Updated indexer version to `2.12.4` in `infrastructure/makefile`
 
 ### Breaking Changes
 
 - Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
 
 ### Deprecated
+
+### Infrastructure
+
+- Updated indexer version to `2.12.4` in `infrastructure/makefile`
 
 ### Template Updates
 
