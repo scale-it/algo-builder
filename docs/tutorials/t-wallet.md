@@ -1,4 +1,6 @@
-The purpose of this tutorial is a demonstration of Algorand Wallet Widget integrated with the [@algo-builder/web](https://github.com/scale-it/algo-builder/tree/master/packages/web) package, written in Vue JS. The widget connects to major Algorand wallets (Algo Signer, Wallet Connect, MyAlgoWallet), sign and send transactions constructed with Algo SDK or Algo Builder framework.
+# Algo Builder Wallet Widget 
+
+The purpose of this tutorial is a demonstration of the Algo Builder Wallet Widget integrated with the [@algo-builder/web](https://github.com/scale-it/algo-builder/tree/master/packages/web) package, written in Vue JS. The widget connects to major Algorand wallets (Algo Signer, Wallet Connect, MyAlgoWallet), sign and send transactions constructed with Algo SDK or Algo Builder framework.
 
 ### Requirements
 
