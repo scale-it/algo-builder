@@ -14,7 +14,7 @@ Algorand ecosystem lacks a maintained Vue JS component connected to main Algoran
 
 [Algo Builder](https://algobuilder.dev/) is one of the main major frameworks for smart contract development and integrations. We took a responsibility to provide the community a Vue JS wallet widget, well integrated with the Algo Builder framework and Algo SDK.
 
-In this tutorial we create a basic Vue JS web application which connects web wallets and perform simple transaction (for eg: send Algo or call application). With the wallet widget a user can:
+In this tutorial we will create a basic Vue JS web application which connects web wallets and perform a simple transaction (for eg: send Algo or call application). With the wallet widget a user can:
 
 - select a network (such as MainNet, TestNet, BetaNet),
 - switch an account,
