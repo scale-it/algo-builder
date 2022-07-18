@@ -108,4 +108,4 @@ For eg: [Sigma Wallet](https://github.com/scale-it/algobuilder-msig) has a style
 <img src="./t-wallet/assets/select_network.png" height="100" title="Select Network" />
 <img src="./t-wallet/assets/styled_wallet.png" height="200" title="Styled Wallet Widget" />
 
-The wallet component and the whole web page can easily be customized to fulfil your UX design requirements along with providing required functionality.
+The wallet component above and the whole web page can easily be customized to fulfil your UX design requirements along with providing the required functionality.
