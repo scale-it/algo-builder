@@ -46,7 +46,7 @@ Install all dependencies in your environment:<br/>
 Now, run the app for local development. It will automatically rebuild the app when the code is updated.<br/>
 `yarn run dev` or `npm run dev`
 
-After successfully running, your browser screen will look similar to this.
+App should pop up in your browser, it will look similar to this:
 <img src="./t-wallet/assets/homescreen.png" height="200" title="Home Page" />
 
 #### 3. Using the Wallet Widget
