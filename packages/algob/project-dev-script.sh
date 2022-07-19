@@ -22,13 +22,18 @@ case $1 in
       rm package.json
     fi;
     # yarn algob init ${*:2} .
-    node ../build/internal/cli/cli.js init ${*:2} .
+    echo "n" | node ../build/internal/cli/cli.js init ${*:2} .
 
     # wip: see how we can use yarn link
     if [ "$2" != "--npm" ]; then
       yarn link -r ../../web
       yarn link -r ../../runtime
       yarn link -r ../
+      yarn add -D chai mocha
+    else
+      # npm add file:../../web
+      npm link ..
+      npm add -D chai mocha
     fi;
   ;;
 
