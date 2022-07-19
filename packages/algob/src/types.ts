@@ -443,7 +443,9 @@ export interface Deployer {
 	/**
 	 * Creates and deploys ASA defined in asa.yaml.
 	 * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
-	 * @flags  deployment flags */
+	 * @flags  deployment flags. Required.
+	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign transaction) */
 	deployASA: (
 		name: string,
 		flags: rtypes.ASADeploymentFlags,
@@ -455,7 +457,8 @@ export interface Deployer {
 	 * @name ASA name
 	 * @asaDef ASA definitions
 	 * @flags deployment flags
-	 */
+	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign transaction) */
 	deployASADef: (
 		name: string,
 		asaDef: wtypes.ASADef,
@@ -548,7 +551,8 @@ export interface Deployer {
 
 	/**
 	 * Deploys stateful smart contract.
-	 * @approvalProgram  approval program filename (must be present in assets folder)
+	 * @creator is the signer of the transaction.
+	 * @appDefinition is an object providing details about approval and clear program.
 	 * @clearProgram  clear program filename (must be present in assets folder)
 	 * @flags  AppDeploymentFlags
 	 * @payFlags  Transaction Parameters

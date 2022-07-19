@@ -147,7 +147,8 @@ export class WebMode {
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param transactions transaction parameters, atomic transaction parameters
-	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 * or TransactionAndSign object(SDK transaction object and signer parameters).
+	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
