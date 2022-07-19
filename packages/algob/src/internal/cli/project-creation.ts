@@ -9,7 +9,8 @@ import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
-const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha", "@algo-builder/algob"];
+const ALGOB_PKG = "@algo-builder/algob";
+const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha", ALGOB_PKG];
 
 const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	...SAMPLE_PROJECT_DEPENDENCIES,

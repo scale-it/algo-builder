@@ -2,7 +2,7 @@
 
 ## Usage
 ## start dev project:
-##    ./project-dev-script.sh create
+##    ./project-dev-script.sh create [--npm] [--typescript]
 ## run algob command:
 ##    ./project-dev-script.sh exec node-info
 
@@ -13,15 +13,23 @@ case $1 in
       exit 0;
     fi;
     yarn build
-    mkdir -p project-dev/node_modules/
+    mkdir project-dev
     cd project-dev
-    yarn algob init --npm . $2
+    if [ "$2" != "--npm" ]; then
+      echo "adding yarn"
+      touch yarn.lock
+      yarn install
+      rm package.json
+    fi;
+    # yarn algob init ${*:2} .
+    node ../build/internal/cli/cli.js init ${*:2} .
 
     # wip: see how we can use yarn link
-    # touch yarn.lock
-    # yarn link -r ../../web
-    # yarn link -r ../../runtime
-    # yarn link -r ../
+    if [ "$2" != "--npm" ]; then
+      yarn link -r ../../web
+      yarn link -r ../../runtime
+      yarn link -r ../
+    fi;
   ;;
 
   exec)
