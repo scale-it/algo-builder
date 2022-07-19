@@ -43,7 +43,7 @@ The repository contains the following templates:<br/>
 Install all dependencies in your environment:<br/>
 ` yarn install` or `npm install`
 
-Now, run the app for local development. It will automatically update when there are any changes.<br/>
+Now, run the app for local development. It will automatically rebuild the app when the code is updated.<br/>
 `yarn run dev` or `npm run dev`
 
 After successfully running, your browser screen will look similar to this.
