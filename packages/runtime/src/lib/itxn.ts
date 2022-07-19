@@ -1,5 +1,4 @@
 import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
-import { has } from "lodash";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
