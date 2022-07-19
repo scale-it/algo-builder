@@ -9,7 +9,7 @@ import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
-const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha"];
+const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha", "@algo-builder/algob"];
 
 const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	...SAMPLE_PROJECT_DEPENDENCIES,
@@ -96,7 +96,7 @@ export function printSuggestedCommands(isNpm: boolean): void {
 
 function printPluginInstallationInstructions(isNpm: boolean): void {
 	console.log(`You need to install these dependencies to run the sample project:`);
-	const cmd = installDevDependenciesCmd(isNpm);
+	const cmd = cmdDevDependencies(isNpm);
 	console.log(`  ${cmd.join(" ")}`);
 }
 
@@ -206,12 +206,8 @@ function isTypeScriptProject(): boolean {
 
 async function installRecommendedDependencies(isNpm: boolean): Promise<boolean> {
 	console.log("");
-	const cmd = installDependenciesCmd(isNpm);
-	const cmdDev = installDevDependenciesCmd(isNpm);
-	return (
-		(await installDependencies(cmd[0], cmd.slice(1))) &&
-		(await installDependencies(cmdDev[0], cmdDev.slice(1)))
-	);
+	const cmdDev = cmdDevDependencies(isNpm);
+	return await installDependencies(cmdDev[0], cmdDev.slice(1));
 }
 
 async function confirmPluginInstallation(isNpm: boolean): Promise<boolean> {
@@ -279,34 +275,27 @@ export async function installDependencies(
 	});
 }
 
-function installDevDependenciesCmd(isNpm: boolean): string[] {
+function cmdDevDependencies(isNpm: boolean): string[] {
 	const deps = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
 
-	return pkgInstallCommand(isNpm, deps);
+	return pkgInstallCommand(isNpm, deps, true);
 }
 
-function installDependenciesCmd(isNpm: boolean): string[] {
-	return pkgInstallCommand(isNpm, ["@algo-builder/web"]);
-}
-
-function pkgInstallCommand(isNpm: boolean, deps: string[]): string[] {
+function pkgInstallCommand(isNpm: boolean, deps: string[], isDev: boolean): string[] {
 	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
 
-	if (!isNpm) {
-		const cmd = ["yarn"];
-		if (isGlobal) {
-			cmd.push("global");
-		}
-		cmd.push("add", ...deps);
-		return cmd;
+	if (isNpm) {
+		const cmd = ["npm", "install"];
+		if (isGlobal) cmd.push("--global");
+		if (isDev) cmd.push("-D");
+		return [...cmd, ...deps];
 	}
 
-	const npmInstall = ["npm", "install"];
-	if (isGlobal) {
-		npmInstall.push("--global");
-	}
-
-	return [...npmInstall, ...deps];
+	const cmd = ["yarn"];
+	if (isGlobal) cmd.push("global");
+	if (isDev) cmd.push("-D");
+	cmd.push("add", ...deps);
+	return cmd;
 }
