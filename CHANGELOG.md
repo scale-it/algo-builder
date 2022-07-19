@@ -14,9 +14,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
-### Bug Fixes 
+### Bug Fixes
 
-- Fix `txn AssetSender` should return zero address by default. 
+- Fix `txn AssetSender` should return zero address by default.
+- Fix `KMDCredentialsFromEnv` loading using KMD_DATA.
 
 ## v5.0.1 2022-07-11
 

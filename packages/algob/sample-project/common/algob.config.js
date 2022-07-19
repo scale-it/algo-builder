@@ -6,14 +6,14 @@
 // a sufficient ALGO balance.
 
 /**
-   Check our /docs/algob-config.md documentation (https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md) for more configuration options and ways how to
-  load a private keys:
-  + using mnemonic
-  + using binary secret key
-  + using KMD daemon
-  + loading from a file
-  + loading from an environment variable
-  + ...
+	 Check our /docs/algob-config.md documentation (https://algobuilder.dev/guide/algob-config.html) for more configuration options and ways how to
+	load a private keys:
+	+ using mnemonic
+	+ using binary secret key
+	+ using KMD daemon
+	+ loading from a file
+	+ loading from an environment variable
+	+ ...
 */
 
 // ## ACCOUNTS USING mnemonic ##
@@ -35,13 +35,9 @@ let accounts = mkAccounts([
 // accounts = accounts.concat(accFromFile);
 
 /// ## Enabling KMD access
-/// Please check https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md#credentials for more details and more methods.
+/// Please check https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md#network-credentials for more details and more methods.
+//   let kmdCred = KMDCredentialsFromEnv();
 
-// process.env.$KMD_DATA = "/path_to/KMD_DATA";
-// let kmdCred = KMDCredentialsFromEnv();
-
-// ## Algod Credentials
-// You can set the credentials directly in this file:
 
 // ## config for indexer running on local
 // const indexerCfg = {
@@ -53,18 +49,18 @@ let accounts = mkAccounts([
 let defaultCfg = {
 	host: "http://localhost",
 	port: 4001,
-	// Below is a token created through our script in `/infrastructure`
-	// If you use other setup, update it accordignly (eg content of algorand-node-data/algod.token)
+	/// Below is a token created through our script in `/infrastructure`
+	/// If you use other setup, update it accordignly (eg content of algorand-node-data/algod.token)
 	token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-	// you can also pass token as an object
+	/// you can also pass token as an object:
 	// token: {
 	//   "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	// },
 	accounts: accounts,
-	// if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
-	// algob-config.md documentation for details.
-	// kmdCfg: kmdCfg,
-	// you can pass config of indexer (ideally it should be attached to this network's algod node)
+	/// if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
+	/// Algob Config documentation for details.
+	// kmdCfg: {wallets: [{name: "mywallet", password: "password", accounts: [...]}], ...kmdCred},
+	/// you can pass config of indexer (ideally it should be attached to this network's algod node)
 	// indexerCfg: indexerCfg
 };
 
@@ -78,10 +74,7 @@ let purestakeTestNetCfg = {
 };
 
 // You can also use Environment variables to get Algod credentials
-// Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
-// Method 1
-process.env.ALGOD_ADDR = "127.0.0.1:4001";
-process.env.ALGOD_TOKEN = "algod_token";
+// Please check https://algobuilder.dev/guide/algob-config.html#network-credentials for more details.
 let algodCred = algodCredentialsFromEnv();
 
 let envCfg = {
