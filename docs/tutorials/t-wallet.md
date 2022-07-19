@@ -69,7 +69,7 @@ And finally you can disconnect your chosen wallet.
 
 #### 3. Style the Wallet Widget
 
-You can also style your wallet widget with own custom styles or using an external library by editing the `App.vue` file to integrate your styled classes or components.
+You can also style your wallet widget using your own custom styles or using an external library by editing the `App.vue` file:
 
 ```ts
   <div>
