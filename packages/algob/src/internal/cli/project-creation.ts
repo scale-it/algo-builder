@@ -94,12 +94,6 @@ export function printSuggestedCommands(isNpm: boolean): void {
 	console.log(`  ${npx}${ALGOB_NAME} console`);
 }
 
-function printPluginInstallationInstructions(isNpm: boolean): void {
-	console.log(`You need to install these dependencies to run the sample project:`);
-	const cmd = cmdDevDependencies(isNpm);
-	console.log(`  ${cmd.join(" ")}`);
-}
-
 export async function createProject(
 	location: string,
 	isTSProject: boolean,
@@ -110,19 +104,21 @@ export async function createProject(
 	copySampleProject(location, isTSProject, withInfrastucture);
 
 	let shouldShowInstallationInstructions = true;
-	const sampleProjectDependencies = isTypeScriptProject()
+	const deps = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
+	const cmdDev = pkgInstallCommand(isNpm, deps, false);
 
 	if (await canInstallPlugin()) {
-		const installedRecommendedDeps = sampleProjectDependencies.filter(isInstalled);
+		const installedRecommendedDeps = deps.filter(isInstalled);
 
-		if (installedRecommendedDeps.length === sampleProjectDependencies.length) {
+		if (installedRecommendedDeps.length === deps.length) {
 			shouldShowInstallationInstructions = false;
 		} else if (installedRecommendedDeps.length === 0) {
 			const shouldInstall = await confirmPluginInstallation(isNpm);
 			if (shouldInstall) {
-				const installed = await installRecommendedDependencies(isNpm);
+				console.log("");
+				const installed = await installDependencies(cmdDev[0], cmdDev.slice(1));
 
 				if (!installed) {
 					console.warn(chalk.red("Failed to install the sample project's dependencies"));
@@ -136,8 +132,8 @@ export async function createProject(
 	console.log("\n★", chalk.cyan("Project created"), "★\n");
 
 	if (shouldShowInstallationInstructions) {
-		printPluginInstallationInstructions(isNpm);
-		console.log(``);
+		console.log(`You need to install these dependencies to run the sample project:`);
+		console.log(`  ${cmdDev.join(" ")}`, "\n");
 	}
 
 	printSuggestedCommands(isNpm);
@@ -204,12 +200,6 @@ function isTypeScriptProject(): boolean {
 	return fsExtra.pathExistsSync("tsconfig.json");
 }
 
-async function installRecommendedDependencies(isNpm: boolean): Promise<boolean> {
-	console.log("");
-	const cmdDev = cmdDevDependencies(isNpm);
-	return await installDependencies(cmdDev[0], cmdDev.slice(1));
-}
-
 async function confirmPluginInstallation(isNpm: boolean): Promise<boolean> {
 	const { default: enquirer } = await import("enquirer");
 
@@ -273,14 +263,6 @@ export async function installDependencies(
 			reject(new Error("script process returned not 0 status"));
 		});
 	});
-}
-
-function cmdDevDependencies(isNpm: boolean): string[] {
-	const deps = isTypeScriptProject()
-		? SAMPLE_TS_PROJECT_DEPENDENCIES
-		: SAMPLE_PROJECT_DEPENDENCIES;
-
-	return pkgInstallCommand(isNpm, deps, true);
 }
 
 function pkgInstallCommand(isNpm: boolean, deps: string[], isDev: boolean): string[] {
