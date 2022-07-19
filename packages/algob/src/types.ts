@@ -445,7 +445,8 @@ export interface Deployer {
 	 * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
 	 * @flags  deployment flags. Required.
 	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
-	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign transaction) */
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign
+	 * transaction) */
 	deployASA: (
 		name: string,
 		flags: rtypes.ASADeploymentFlags,
@@ -458,7 +459,8 @@ export interface Deployer {
 	 * @asaDef ASA definitions
 	 * @flags deployment flags
 	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
-	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign transaction) */
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign
+	 * transaction) */
 	deployASADef: (
 		name: string,
 		asaDef: wtypes.ASADef,
