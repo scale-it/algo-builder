@@ -15,21 +15,25 @@ case $1 in
     yarn build
     mkdir -p project-dev/node_modules/
     cd project-dev
-    yarn algob init . $2
-    touch yarn.lock
-    yarn link -r ../../web
-    yarn link -r ../../runtime
-    yarn link -r ../
+    yarn algob init --npm . $2
+
+    # wip: see how we can use yarn link
+    # touch yarn.lock
+    # yarn link -r ../../web
+    # yarn link -r ../../runtime
+    # yarn link -r ../
   ;;
 
   exec)
     cd project-dev
-    echo DIRECTORY: `pwd`
     echo ">> list workspace node modules/bin"
     ls -la ../../../node_modules/.bin
 
-    # ../../../node_modules/.bin/algob ${*:2}
-    ./build/internal/cli/cli.js ${*:2}
+    echo ">> list algob"
+    ls -la ../
+
+    # node ../../../node_modules/.bin/algob ${*:2}
+    node ../build/internal/cli/cli.js ${*:2}
     ;;
 
   *)
