@@ -54,7 +54,7 @@ App should pop up in your browser, it will look similar to this:
 Now you can select your preferred network and connect to a web wallet:
 <img src="./t-wallet/assets/address_selected.png" height="200" title="Account Selected" />
 
-You can now interact with the algorand blockchain, by sending algos, or call an application.
+You can now interact with the algorand blockchain (send algos, or call an application):
 <img src="./t-wallet/assets/algo_transaction.png" height="200" title="Send Transaction" />
 
 You can also update the address to which algos are sent, the algo amount or the application ID by configuring it in `src/constants`.
