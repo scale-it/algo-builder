@@ -34,17 +34,9 @@ let accounts = mkAccounts([
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 
-/// ## Enabling KMD access
+/// ## Load accounts from KMD ##
 /// Please check https://github.com/scale-it/algo-builder/blob/master/docs/guide/algob-config.md#network-credentials for more details and more methods.
 //   let kmdCred = KMDCredentialsFromEnv();
-
-
-// ## config for indexer running on local
-// const indexerCfg = {
-//   host: "http://localhost",
-//   port: 8980,
-//   token: ""
-// };
 
 let defaultCfg = {
 	host: "http://localhost",
@@ -59,9 +51,14 @@ let defaultCfg = {
 	accounts: accounts,
 	/// if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
 	/// Algob Config documentation for details.
-	// kmdCfg: {wallets: [{name: "mywallet", password: "password", accounts: [...]}], ...kmdCred},
+	// kmdCfg: {wallets: [{name: "mywallet", password: process.env.KMD_PASSWD, accounts: [...]}], ...kmdCred},
+
 	/// you can pass config of indexer (ideally it should be attached to this network's algod node)
-	// indexerCfg: indexerCfg
+	// indexerCfg: {
+	// 	host: "http:localhost",
+	// 	port: 8980,
+	// 	token: ""
+	// }
 };
 
 // purestake testnet config
@@ -75,12 +72,11 @@ let purestakeTestNetCfg = {
 
 // You can also use Environment variables to get Algod credentials
 // Please check https://algobuilder.dev/guide/algob-config.html#network-credentials for more details.
+process.env.ALGOD_ADDR = "127.0.0.1:4001";
+process.env.ALGOD_TOKEN = "algod_token";
 let algodCred = algodCredentialsFromEnv();
-
 let envCfg = {
-	host: algodCred.host,
-	port: algodCred.port,
-	token: algodCred.token,
+	...algodCred,
 	accounts: accounts,
 };
 
