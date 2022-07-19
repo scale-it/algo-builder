@@ -57,7 +57,7 @@ Now you can select your preferred network and connect to a web wallet:
 You can now interact with the algorand blockchain (send algos, or call an application):
 <img src="./t-wallet/assets/algo_transaction.png" height="200" title="Send Transaction" />
 
-You can also update the address to which algos are sent, the algo amount or the application ID by configuring it in `src/constants`.
+We present an example of Algo transfer and an application call, with parameters set in `src/constants`.
 
 ```ts
 export const toAddress = "WK73JQQGCRQCZ5GLQHCXXB6OXIGF6SD22F5P7HPXF5PNH23YUUALUMKOZ4";
