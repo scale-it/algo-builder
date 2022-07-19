@@ -32,11 +32,11 @@ The source code for this tutorial can be found on GitHub. Start by cloning the r
     cd algo-builder-templates/wallet
 
 The repository contains the following templates:<br/>
-**htlc** : This is a descriptive example explaining how HTLC contracts work with Algo-Builder.<br/>
-**monitor-payments**: This is a nodejs app which monitors payment transactions to a particular address.<br/>
-**shop**: This demonstrates the usage of a payment widget to trigger a purchase by connecting to different wallets.<br/>
-**wallet**: This helps in connecting to different wallets.<br/>
-**warcraft**: This is a descriptive example explaining how Escrow contract work with Algo-Builder.<br/>
+**htlc** : a descriptive example explaining how HTLC contracts work with Algo-Builder.<br/>
+**monitor-payments**: a nodejs app which monitors payment transactions to a particular address.<br/>
+**shop**: demonstrates a payment widget connected to different web wallets.<br/>
+**wallet**: (this tutorial) Algo Builder Wallet Wideget tutorial.<br/>
+**warcraft**: a descriptive example explaining how to create an escrow account with Algo Builder.<br/>
 
 #### 2. Environment Setup
 
