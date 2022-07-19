@@ -51,7 +51,7 @@ App should pop up in your browser, it will look similar to this:
 
 #### 3. Using the Wallet Widget
 
-Now you can select your preferred network and connect to the wallet as per your choice.
+Now you can select your preferred network and connect to a web wallet:
 <img src="./t-wallet/assets/address_selected.png" height="200" title="Account Selected" />
 
 You can now interact with the algorand blockchain, by sending algos, or call an application.
