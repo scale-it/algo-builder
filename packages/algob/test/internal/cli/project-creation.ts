@@ -75,7 +75,7 @@ describe("Init project", () => {
 	it("should init npm project in an empty folder(typescript) with `.`", async () => {
 		const location = ".";
 		await createProject(location, true, false, true);
-		checkPaths(location, true, true, false);
+		checkPaths(location, true, false, true);
 	});
 
 	it("should not init npm project if it already exists with `.`", async () => {
