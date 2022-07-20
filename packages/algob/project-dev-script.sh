@@ -21,22 +21,26 @@ case $1 in
       yarn install
       rm package.json
     fi;
-    # yarn algob init ${*:2} .
     echo "n" | node ../build/internal/cli/cli.js init ${*:2} .
 
-    # wip: see how we can use yarn link
     if [ "$2" != "--npm" ]; then
-      # yarn add -i ../algo-builder/packages/web
       yarn link -r ../../web
       yarn link -r ../../runtime
       yarn link -r ../
-      #yarn add -D chai mocha
+      ## no need to add chai and mocha - it's inherited from parent workspace
+      # yarn add -D chai mocha
+
+      ## instead of using link we can use portal: protocol
+      # yarn add -i ../algo-builder/packages/web
+
     else
+      npm link ..
+      npm add -D chai mocha
+
+      ## instead of using link we can use file: protocol
       # npm add file:../web
       # npm add file:../runtime
       # npm add file:../algob
-      npm link ..
-      npm add -D chai mocha
     fi;
   ;;
 

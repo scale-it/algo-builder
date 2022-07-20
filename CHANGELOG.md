@@ -16,7 +16,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Features
 
-- add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
+- Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
+- Improved `algob/project-dev-script.sh` which is script setting up a local project.
 
 ### Bug Fixes
 
