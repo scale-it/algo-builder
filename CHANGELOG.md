@@ -54,7 +54,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Added `sendSignedTransaction(signedTransaction)`
 - Added support for `SignedTransaction` object in `executeTx` method.
-- `ProcessTransaction` now works on `SignedTransaction` object array.
 - Added verification for secret key signatures.
 
 #### Examples
