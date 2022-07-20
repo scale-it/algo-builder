@@ -13,7 +13,8 @@ def dao_fund_lsig(ARG_DAO_APP_ID):
     def basic_checks(txn: Txn): return And(
         txn.rekey_to() == Global.zero_address(),
         txn.close_remainder_to() == Global.zero_address(),
-        txn.asset_close_to() == Global.zero_address()
+        txn.asset_close_to() == Global.zero_address(),
+        txn.fee() == Int(0)
     )
 
     # verify funds are transfered only when paired with DAO app (during execute call)
