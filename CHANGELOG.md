@@ -14,9 +14,11 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
-### Bug Fixes 
+- Updated yarn to v3.2.1
 
-- Fix `txn AssetSender` should return zero address by default. 
+### Bug Fixes
+
+- Fix `txn AssetSender` should return zero address by default.
 
 ## v5.0.1 2022-07-11
 
