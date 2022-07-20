@@ -63,6 +63,7 @@ account-list:
 setup-master-account:
 # Create an account with WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE address:
 	goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" -d $(ALGORAND_DATA) || true
+	@goal account rename Unnamed-0 master -d $(ALGORAND_DATA) || true
 # Send lot of ALGO from a primary account to the "master" account we created above
 	@$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
