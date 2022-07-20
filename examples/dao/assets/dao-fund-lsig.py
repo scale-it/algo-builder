@@ -37,7 +37,7 @@ def dao_fund_lsig(ARG_DAO_APP_ID):
         basic_checks(Txn),
         Txn.type_enum() == TxnType.AssetTransfer,
         Txn.asset_amount() == Int(0),
-        Txn.fee() == Int(1000)
+        Txn.fee() <= Int(2000)
     )
 
     program = program = Cond(
