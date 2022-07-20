@@ -16,7 +16,7 @@ case $1 in
     mkdir project-dev
     cd project-dev
     if [ "$2" != "--npm" ]; then
-      echo "adding yarn"
+      # this is to enable creating a project inside this workspace, but not being part of the workspace
       touch yarn.lock
       yarn install
       rm package.json
@@ -26,12 +26,15 @@ case $1 in
 
     # wip: see how we can use yarn link
     if [ "$2" != "--npm" ]; then
+      # yarn add -i ../algo-builder/packages/web
       yarn link -r ../../web
       yarn link -r ../../runtime
       yarn link -r ../
-      yarn add -D chai mocha
+      #yarn add -D chai mocha
     else
-      # npm add file:../../web
+      # npm add file:../web
+      # npm add file:../runtime
+      # npm add file:../algob
       npm link ..
       npm add -D chai mocha
     fi;
@@ -39,11 +42,6 @@ case $1 in
 
   exec)
     cd project-dev
-    echo ">> list workspace node modules/bin"
-    ls -la ../../../node_modules/.bin
-
-    echo ">> list algob"
-    ls -la ../
 
     # node ../../../node_modules/.bin/algob ${*:2}
     node ../build/internal/cli/cli.js ${*:2}
