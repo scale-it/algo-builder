@@ -15,6 +15,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ## Unreleased
 
 - Updated yarn to v3.2.1
+- Changed default sample project license to ISC
 
 ### Bug Fixes
 
