@@ -39,11 +39,11 @@ If you are running a local node, you can find port and token values for your alg
 
 You can specify **Algod** [Network Credentials](https://algobuilder.dev/api/algob/interfaces/types.NetworkCredentials.html) manually or you can load it from ENV.
 
-- Method 1: Specify manually:
+- Method 1: specify manually:
 
         let algodCred = {host: "127.0.0.1", port: 4001, token: "c3e..."}
 
-- Method 2
+- Method 2: use host address and token from environment:
 
   - Set `ALGOD_ADDR` and `ALGOD_TOKEN` in your shell environment:
 
@@ -54,7 +54,7 @@ You can specify **Algod** [Network Credentials](https://algobuilder.dev/api/algo
 
         let algodCred = algodCredentialsFromEnv();
 
-- Method 3: load credentials from algorand data directory.
+- Method 3: load from Algorand data directory.
 
   - Set `ALGORAND_DATA` in your shell environment:
 
@@ -66,11 +66,11 @@ You can specify **Algod** [Network Credentials](https://algobuilder.dev/api/algo
 
 Similarly, **KMD** uses [Network Credentials](https://algobuilder.dev/api/algob/interfaces/types.NetworkCredentials.html) object:
 
-- Method 1: Specify manually:
+- Method 1: specify manually:
 
         let kmdCred = {host: "127.0.0.1", port: 7833, token: "c3e..."}
 
-- Method 2
+- Method 2: use host address and token from environment:
 
   - Set `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following command in terminal:
 
@@ -81,7 +81,7 @@ Similarly, **KMD** uses [Network Credentials](https://algobuilder.dev/api/algob/
 
         let kmdCred = KMDCredentialsFromEnv();
 
-- Method 3
+- Method 3: load from KMD data directory.
 
   - Set `KMD_DATA` (usually it's in your node data directory) in your shell environment:
 
