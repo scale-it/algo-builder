@@ -14,6 +14,9 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+- Updated yarn to v3.2.1
+- Changed default sample project license to ISC
+
 ### Features
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
