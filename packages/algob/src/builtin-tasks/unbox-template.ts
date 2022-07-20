@@ -10,6 +10,7 @@ export default function (): void {
 				"state. Be careful, this\n                will overwrite files " +
 				"that exist in the directory."
 		)
+		.addFlag("npm", "Use npm instead for yarn")
 		.addOptionalPositionalParam<string>(
 			"templateName",
 			"Name of the dapp template. If no template is specified, a default " +
