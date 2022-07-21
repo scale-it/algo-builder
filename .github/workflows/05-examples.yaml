@@ -144,31 +144,31 @@ jobs:
       - name: Setup Network
         run: cd infrastructure && make setup-private-net
 
-      - name: Example permissioned-token-freezing
-        working-directory: ./examples/permissioned-token-freezing
-        run: |
-          pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/transfer/set-clear-level.js
-          pipenv run yarn algob run scripts/transfer/transfer-asset.js
+      # - name: Example permissioned-token-freezing
+      #   working-directory: ./examples/permissioned-token-freezing
+      #   run: |
+      #     pipenv run yarn algob deploy
+      #     pipenv run yarn algob run scripts/transfer/set-clear-level.js
+      #     pipenv run yarn algob run scripts/transfer/transfer-asset.js
 
-      - name: Example permissioned-voting
-        working-directory: ./examples/permissioned-voting
-        run: |
-          pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/vote/vote.js
-          pipenv run yarn algob run scripts/vote/result.js
+      # - name: Example permissioned-voting
+      #   working-directory: ./examples/permissioned-voting
+      #   run: |
+      #     pipenv run yarn algob deploy
+      #     pipenv run yarn algob run scripts/vote/vote.js
+      #     pipenv run yarn algob run scripts/vote/result.js
 
-      - name: Example ref-templates
-        run: |
-          cd examples/ref-templates
-          pipenv run yarn algob deploy
+      # - name: Example ref-templates
+      #   run: |
+      #     cd examples/ref-templates
+      #     pipenv run yarn algob deploy
 
-      - name: Example stateful-counter
-        working-directory: ./examples/stateful-counter
-        run: |
-          pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/interaction/call_application.js
-          pipenv run yarn algob run scripts/interaction/delete_application.js
+      # - name: Example stateful-counter
+      #   working-directory: ./examples/stateful-counter
+      #   run: |
+      #     pipenv run yarn algob deploy
+      #     pipenv run yarn algob run scripts/interaction/call_application.js
+      #     pipenv run yarn algob run scripts/interaction/delete_application.js
 
       - name: Example DAO
         working-directory: ./examples/dao
@@ -177,9 +177,9 @@ jobs:
           pipenv run yarn algob run scripts/run/add_proposal.js
           pipenv run yarn algob run scripts/run/deposit_vote_token.js
           sleep 2m
-          pipenv run yarn algob run script/run/vote.js 
+          pipenv run yarn algob run scripts/run/vote.js 
           sleep 2m 
-          pipenv run yarn algob run script/run/execute.js
+          pipenv run yarn algob run scripts/run/execute.js
 
   run-examples-batch-3:
     runs-on: ubuntu-20.04
