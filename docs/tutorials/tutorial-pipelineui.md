@@ -4,7 +4,7 @@ This tutorial is to demonstrate [`pipeline-ui`](https://github.com/scale-it/algo
 
 ## What is `@algo-builder/web`?
 
-This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](https://algobuilder.dev/api/web/classes/WebMode.html#waitForConfirmation), [`executeTx`](<(https://algobuilder.dev/api/web/classes/WebMode.html#executeTransaction)>), [`signTransaction`](<(https://algobuilder.dev/api/web/classes/WebMode.html#signTransaction)>), etc. These functions help sending transactions and building dapps.
+`@algo-builder/web` provides `WebMode` class which has variety of high level functions like, [`waitForConfirmation`](https://algobuilder.dev/api/web/classes/WebMode.html#waitForConfirmation), [`executeTx`](<(https://algobuilder.dev/api/web/classes/WebMode.html#executeTransaction)>), [`signTransaction`](<(https://algobuilder.dev/api/web/classes/WebMode.html#signTransaction)>), etc. These functions help sending transactions and building dapps.
 
 ## Requirements
 
