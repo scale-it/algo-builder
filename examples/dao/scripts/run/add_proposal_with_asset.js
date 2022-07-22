@@ -4,10 +4,9 @@ const { mkProposalTx } = require("./common/tx-params.js");
 
 // TODO: This script should be remove after we support run algob with custom args.
 async function addProposal(runtimeEnv, deployer) {
-	// NOTE: One account only can create one proposal!
+	// NOTE: There can be only one active proposal per account.
 	const { _, proposer } = accounts(deployer);
 
-	// fund account
 	await fundAccount(deployer, proposer);
 
 	const daoAppInfo = deployer.getApp("DAOApp");
@@ -15,7 +14,7 @@ async function addProposal(runtimeEnv, deployer) {
 	try {
 		await deployer.optInLsigToApp(daoAppInfo.appID, proposalLsig, {}, {});
 	} catch (e) {
-		console.log(e.message);
+		console.log("can't opt in to the DAO app:", e.message);
 	}
 
 	const daoFundLsig = deployer.getLsig("daoFundLsig");
