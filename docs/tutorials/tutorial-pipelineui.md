@@ -17,7 +17,7 @@ This tutorial is to demonstrate [`pipeline-ui`](https://github.com/scale-it/algo
 
 1. Setup the [`pipeline-ui-template`](https://github.com/scale-it/algo-builder-templates/tree/master/pipeline-ui)
 
-2. The above template should be accessbile on your [`localhost`](http://localhost:3000/) with port 3000 and you should be able to see below screen. Be dauft `MainNet` chain network type.
+2. When running the above web app you should be able to access it at [`localhost`](http://localhost:3000/) and you should be able to see below screen. Be default `MainNet` network is selected.
 
 <img src="./tutorial-pipelineui/assets/default-screen-load.png" height="200" title="Default screen on load" />
 
