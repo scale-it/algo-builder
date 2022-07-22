@@ -46,7 +46,7 @@ describe("Credentials loading from env: ", () => {
 
 	it("KMD Credentials Using Method 1", () => {
 		const result = KMDCredentialsFromEnv();
-		assert.deepEqual(result, { host: "127.0.0.1", port: 3480, token: "kmd_token" });
+		assert.deepEqual(result, { host: "http://127.0.0.1", port: 3480, token: "kmd_token" });
 	});
 
 	it("KMD Credentials Missing (Method 1)", () => {
@@ -58,20 +58,20 @@ describe("Credentials loading from env: ", () => {
 
 	it("KMD Credentials Using Method 2", () => {
 		delete process.env.KMD_ADDR;
-		process.env.$KMD_DATA = path.join(getFixtureProjectPath("algorand-node-data"), "Node/kmd");
+		process.env.KMD_DATA = path.join(getFixtureProjectPath("algorand-node-data"), "Node/kmd");
 
 		const result = KMDCredentialsFromEnv();
 		assert.deepEqual(result, {
-			host: "127.0.0.1",
+			host: "http://127.0.0.1",
 			port: 8082,
 			token: "kmd_token_using_method2\n",
 		});
 	});
 
 	it("KMD Credentials Missing (Method 2)", () => {
-		delete process.env.$KMD_DATA;
+		delete process.env.KMD_DATA;
 
-		const errmsg = "Either KMD Credentials or $KMD_DATA should be defined in env";
+		const errmsg = "Either KMD Credentials or KMD_DATA should be defined in env";
 		assert.throws(() => KMDCredentialsFromEnv(), errmsg);
 	});
 });

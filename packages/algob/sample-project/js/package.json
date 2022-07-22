@@ -2,8 +2,8 @@
 	"name": "sample-project",
 	"version": "0.0.1",
 	"main": "index.js",
-	"license": "MIT",
+	"license": "ISC",
 	"scripts": {
-		"algob": "algob"
+		"algob": "./node_modules/.bin/algob"
 	}
 }

@@ -2,9 +2,9 @@
 	"name": "sample-project-ts",
 	"version": "0.0.1",
 	"main": "index.js",
-	"license": "MIT",
+	"license": "ISC",
 	"scripts": {
-		"algob": "algob",
+		"algob": "./node_modules/.bin/algob",
 		"build": "tsc --build .",
 		"build:watch": "tsc -w -p ."
 	}
