@@ -27,6 +27,12 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Fix `txn AssetSender` should return zero address by default.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
 
+### Examples
+
+#### DAO 
+
+- Add `add_proposal_with_asset.js` script use for create proposal with asset funds.
+
 ## v5.0.1 2022-07-11
 
 ### Bug Fixes
