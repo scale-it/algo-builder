@@ -10,7 +10,7 @@ This tutorial is to demonstrate [`pipeline-ui`](https://github.com/scale-it/algo
 
 - Node 16+
 - Clone [`pipeline-ui-template`](https://github.com/scale-it/algo-builder-templates/tree/master/pipeline-ui).
-- Yarn `v3.1+` or NPM `v8.0+` or PNPM `v6.21+`.
+- Yarn `v3.2+` or NPM `v8.0+` or PNPM `v6.21+`.
 - Setup the accounts on [`Algosigner`](https://github.com/PureStake/algosigner) wallet. It could be MainNet, TestNet. By default on template it is `MainNet`.
 
 ## Steps
