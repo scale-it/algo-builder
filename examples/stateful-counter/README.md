@@ -103,7 +103,7 @@ const sscInfo = await deployer.deployApp(
 	creatorAccount,
 	{
 		appName: "CounterApp",
-		metaType: types.MetaType.File
+		metaType: types.MetaType.FILE
 		approvalProgramFilename: "approval_program.teal", // approval program
 		clearProgramFilename: "clear_program.teal", // clear program
 		localInts: 1,

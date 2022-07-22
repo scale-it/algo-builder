@@ -119,9 +119,9 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.File
+      metaType: MetaType.FILE
       approvalProgramFilename: "approval.teal",
-      clearProgramFileName: "clear.teal",
+      clearProgramFilename: "clear.teal",
       localInts: 1,
       localBytes: 1,
       globalInts: 1,
@@ -140,7 +140,7 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.SOURCE_CODE
+      metaType: MetaType.SOURCE_CODE
       approvalProgramCode: "<approval program>",
       clearProgramCode: "<clear state program>",
       localInts: 1,
@@ -161,7 +161,7 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.BYTES
+      metaType: MetaType.BYTES
       approvalProgramBytes: "<compiled bytes from algod client>",
       clearProgramBytes: "<compiled bytes from algod client>",
       localInts: 1,
@@ -211,7 +211,7 @@ We support 3 format of DeloyApp params:
     appID: appId,
     appName: "my-app",
     newAppCode: {
-      metaTypes: MetaType.File
+      metaTypes: MetaType.FILE
       approvalProgramFilename: "approval.teal",
       clearProgramFileName: "clear.teal",
     },
@@ -263,7 +263,7 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 `deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has `transaction` and `sign`. Ex:
 
-```
+```js
 const tx = makeAssetCreateTxn(
   bobAcc.addr, mockSuggestedParam.fee,
   mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
@@ -284,7 +284,7 @@ You can check the implementation in [asa](https://github.com/scale-it/algo-build
 
 This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction
 
-```
+```js
 const transaction: wtypes.TransactionAndSign = [{
   transaction: SDKTx,
   sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
