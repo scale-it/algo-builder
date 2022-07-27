@@ -221,6 +221,14 @@ export function txAppArg(
 ): StackElem {
 	const tealVersion: number = interpreter.tealVersion;
 
+	if (txField === "Logs") {
+		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+		const logs: Uint8Array[] = txReceipt?.logs ?? [];
+		op.checkIndexBound(idx, logs, op.line);
+		const log = logs[idx];
+		return parseToStackElem(log, txField);
+	}
+
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
