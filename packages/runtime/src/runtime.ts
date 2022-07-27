@@ -912,7 +912,7 @@ export class Runtime {
 			});
 		}
 
-		const gtxs = this.getGroupTransaction(signedTransactions);
+		const gtxs = this.getEncodedGroupTxns(signedTransactions);
 		const tx = gtxs[0];
 
 		// validate first and last rounds
@@ -979,7 +979,7 @@ export class Runtime {
 	 * @param signedTransactions : teal code as string
 	 * @returns groupTransactions array of EncTx type
 	 */
-	getGroupTransaction(signedTransactions: SignedTransaction[]): EncTx[] {
+	getEncodedGroupTxns(signedTransactions: SignedTransaction[]): EncTx[] {
 		let gtxs: EncTx[] = [];
 		gtxs = signedTransactions.map((signedTransaction) => {
 			const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
@@ -992,15 +992,18 @@ export class Runtime {
 	/**
 	 * Sends a SignedTransaction object
 	 * @param signedTransaction
+	 * @returns const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
 	 */
-	sendSignedTransaction(signedTransaction: SignedTransaction) {
+	sendSignedTransaction(signedTransaction: SignedTransaction): TxReceipt[] {
 		//TODO: implement verify signature function
+		//TODO: rename the method to be complatible with algob
 		// this.verifySignature(signedTransaction);
 		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
 		encodedTxnObj.txID = signedTransaction.txn.txID();
 		this.ctx = new Ctx(cloneDeep(this.store), encodedTxnObj, [encodedTxnObj], [], this);
-		this.ctx.processTransactions([signedTransaction], undefined);
+		const txReceipt = this.ctx.processTransactions([signedTransaction], undefined);
 		this.store = this.ctx.state;
+		return txReceipt;
 	}
 
 	/**

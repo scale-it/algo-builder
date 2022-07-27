@@ -52,7 +52,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
 
-- Added `sendSignedTransaction(signedTransaction)`
+- Added `sendSignedTransaction(signedTransaction)`. Method takes '`SignedTransaction` type
+from `algosdk` and sends it to the network. 
 - Added support for `SignedTransaction` object in `executeTx` method.
 - Added verification for secret key signatures.
 
