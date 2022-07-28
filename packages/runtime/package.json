@@ -34,7 +34,7 @@
 	"dependencies": {
 		"@algo-builder/web": "workspace:*",
 		"@nodelib/fs.walk": "^1.2.8",
-		"algosdk": "^1.18.1",
+		"algosdk": "^1.19.0",
 		"chalk": "^4.1.2",
 		"debug": "^4.3.4",
 		"elliptic": "^6.5.4",

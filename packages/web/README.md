@@ -141,7 +141,7 @@ const daoAppInfo = await deployer.deployApp(
 	creator,
 	{
 	    appName: "DAO App" // app name passed here
-            metaType: MetaType.File,
+        metaType: MetaType.FILE,
 	    approvalProgramFilename: "dao-app-approval.py",
 	    clearProgramFilename: "dao-app-clear.py",
 	    localInts: 9,

@@ -53,12 +53,20 @@ jobs:
           cd ./project-dev && npx tsc -b . && cd ..
           pipenv run ./project-dev-script.sh exec deploy
 
-      - name: Create algo-builder js project
+      - name: Create algo-builder js project with npm
+        working-directory: ./packages/algob
+        run: |
+          rm -rf ./project-dev
+          ./project-dev-script.sh create --npm
+          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec deploy
+
+      - name: Create algo-builder js project with yarn
         working-directory: ./packages/algob
         run: |
           rm -rf ./project-dev
           ./project-dev-script.sh create
-          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec test
           pipenv run ./project-dev-script.sh exec deploy
 
       - name: Example ASA

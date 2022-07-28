@@ -12,6 +12,7 @@ layout: splash
 - [Private Net](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) creation
 - [Script execution](./user-script-execution.md)
 - [Deployer](./deployer.md)
+- [Execute Transaction](./execute-transaction.md)
 - [Script Checkpoints](./execution-checkpoints.md)
 - [Script Logging](./logs.md).
 - [Algob Console](./algob-console.md)
@@ -19,7 +20,6 @@ layout: splash
 - [Test TEAL](./testing-teal.md)
 - [Advanced Runtime Features](./runtime-advanced.md)
 - [Templates](./templates.md)
-- [Execute Transaction](./execute-transaction.md)
 - [Sign Multisig](./sign-multisig.md)
 - [Debugging TEAL](./debugging-teal.md)
 - [Using algob with WebApp](./algob-web.md)

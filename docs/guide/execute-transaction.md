@@ -4,18 +4,20 @@ layout: splash
 
 # Execute Transaction
 
-`executeTx` is a high level method of Deployer  which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` as parameter.
+`executeTx` is a high level method of Deployer which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` as parameter.
 If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
-Note: For each parameter `type` and `sign` fields are mandatory.
+Note: For each parameter `type` and `sign` attributes are mandatory.
 
 - `type`: type of transaction
-- `sign`: sign type
+- `sign`: signature type
 
-Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams):
+Depending on the transaction `type`, other attributes will specify a signer of the transaction. For example, for `TransactionType.TransferAlgo` the `fromAccount` must be a full account (with secret key) and will sign the transaction.
 
-### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
+## Examples [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage:
+
+#### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
 ```js
   {
@@ -29,8 +31,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
 
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.TxParams.html)
 
-### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
-
+#### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
 ```js
   {
@@ -44,7 +45,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployASAParam)
+#### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployASAParam)
 
 To deploy an ASA using `asa.yaml`:
 
@@ -79,7 +80,7 @@ To deploy an ASA without using `asa.yaml`:
   };
 ```
 
-### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#OptInASAParam)
+#### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#OptInASAParam)
 
 ```js
   {
@@ -91,7 +92,7 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Transfer Asset](https://algobuilder.dev/api/algob/modules/runtime.types.html#AssetTransferParam)
+#### [Transfer Asset](https://algobuilder.dev/api/algob/modules/runtime.types.html#AssetTransferParam)
 
 ```js
   {
@@ -105,11 +106,12 @@ To deploy an ASA without using `asa.yaml`:
   }
 ```
 
-### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployAppParam)
+#### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#DeployAppParam)
 
 We support 3 format of DeloyApp params:
 
 - Deploy source from files(supported in `algob` cli and `runtime`).
+
 ```js
   {
     type: TransactionType.DeployApp,
@@ -117,9 +119,9 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.File
+      metaType: MetaType.FILE
       approvalProgramFilename: "approval.teal",
-      clearProgramFileName: "clear.teal",
+      clearProgramFilename: "clear.teal",
       localInts: 1,
       localBytes: 1,
       globalInts: 1,
@@ -128,7 +130,9 @@ We support 3 format of DeloyApp params:
     payFlags: {}
   }
 ```
-  - Deploy source from code(supported in `algob` cli and `runtime`).
+
+- Deploy source from code(supported in `algob` cli and `runtime`).
+
 ```js
   {
     type: TransactionType.DeployApp,
@@ -136,7 +140,7 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.SOURCE_CODE
+      metaType: MetaType.SOURCE_CODE
       approvalProgramCode: "<approval program>",
       clearProgramCode: "<clear state program>",
       localInts: 1,
@@ -147,6 +151,7 @@ We support 3 format of DeloyApp params:
     payFlags: {}
   }
 ```
+
 - Deploy source from compiled code(supported in `algob` cli and `web`).
 
 ```js
@@ -156,7 +161,7 @@ We support 3 format of DeloyApp params:
     fromAccount: john,
     appDefinition: {
       appName: "my-app",
-      metaTypes: MetaType.BYTES
+      metaType: MetaType.BYTES
       approvalProgramBytes: "<compiled bytes from algod client>",
       clearProgramBytes: "<compiled bytes from algod client>",
       localInts: 1,
@@ -170,7 +175,7 @@ We support 3 format of DeloyApp params:
 
 - To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to App](https://algobuilder.dev/api/runtime/classes/Runtime.html#optInToApp)
+#### [Opt-In to App](https://algobuilder.dev/api/runtime/classes/Runtime.html#optInToApp)
 
 ```js
   {
@@ -182,7 +187,7 @@ We support 3 format of DeloyApp params:
   }
 ```
 
-### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
+#### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
 
 ```js
   {
@@ -194,9 +199,10 @@ We support 3 format of DeloyApp params:
   }
 ```
 
-### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#UpdateAppParam)
+#### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#UpdateAppParam)
 
 `newAppCode` type is `SmartContract`. Please check [types define](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).
+
 ```js
   {
     type: TransactionType.UpdateApp,
@@ -205,15 +211,15 @@ We support 3 format of DeloyApp params:
     appID: appId,
     appName: "my-app",
     newAppCode: {
-      metaTypes: MetaType.File
+      metaTypes: MetaType.FILE
       approvalProgramFilename: "approval.teal",
-      clearProgramFileName: "clear.teal", 
-    }, 
+      clearProgramFileName: "clear.teal",
+    },
     payFlags: {}
   }
 ```
 
-### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
+#### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
 
 ```js
   {
@@ -228,8 +234,8 @@ We support 3 format of DeloyApp params:
 
 ### Pooled Transaction Fees
 
-With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
-Algob now supports pooled fees where one transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
+With [AVM 0.9](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
+One transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
 Ex:
 
 ```js
@@ -257,7 +263,7 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 `deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has `transaction` and `sign`. Ex:
 
-```
+```js
 const tx = makeAssetCreateTxn(
   bobAcc.addr, mockSuggestedParam.fee,
   mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
@@ -274,11 +280,11 @@ const res = await deployer.executeTx([transaction]);
 
 You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
 
-## SignTransactions function
+### SignTransactions function
 
 This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction
 
-```
+```js
 const transaction: wtypes.TransactionAndSign = [{
   transaction: SDKTx,
   sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}

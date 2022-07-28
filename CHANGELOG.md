@@ -14,13 +14,29 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
-### Bug Fixes 
-
+- Updated yarn to v3.2.1
+- Changed default sample project license to ISC
 - Fix `txn AssetSender` should return zero address by default.
 
 #### Examples
 
 - Added secret key to all accounts that are signing transactins in examples. 
+
+### Features
+
+- Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
+- Improved `algob/project-dev-script.sh` which is script setting up a local project.
+
+### Bug Fixes
+
+- Fix `txn AssetSender` should return zero address by default.
+- Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
+
+### Examples
+
+#### DAO 
+
+- Add `add_proposal_with_asset.js` script use for create proposal with asset funds.
 
 ## v5.0.1 2022-07-11
 
@@ -81,7 +97,7 @@ from `algosdk` and sends it to the network.
 - `addAsset` is deprecated and removed and `deployASA` should be used.
 - `addApp` is deprecated and removed and `deployAdd` should be used.
 - `addASADef` is deprecated and removed and `deployASADef` should be used.
-- Renamed `optIntoAsa` to `optInToAsa` bringing naming convention consistency across the project.
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
 
 #### @algo-builder/web
 
@@ -89,6 +105,10 @@ from `algosdk` and sends it to the network.
 - Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
 
 ### Deprecated
+
+### Infrastructure
+
+- Updated indexer version to `2.12.4` in `infrastructure/makefile`
 
 ### Template Updates
 

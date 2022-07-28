@@ -343,7 +343,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   		john.account, // creator
   		{
         appName: "CounterApp",
-        metaType: MetaType.File,
+        metaType: MetaType.FILE,
   		  approvalProgramFilename: "counter-approval.teal",
   		  clearProgramFilename: "clear-program",
   			globalBytes: 32,

@@ -443,6 +443,13 @@ describe("DAO - Failing Paths", function () {
 				RUNTIME_ERR1009
 			);
 		});
+
+		it("Should reject if fee paid by daoFundLsig", () => {
+			executeProposalTx[1].payFlags.totalFee = 3000;
+			assert.throw(() => {
+				ctx.executeTx(executeProposalTx);
+			}, RUNTIME_ERR1009);
+		});
 	});
 
 	describe("Withdraw Vote Deposit", function () {
