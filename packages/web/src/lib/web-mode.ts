@@ -31,7 +31,8 @@ export class WebMode {
 	 * @param txId Transaction id
 	 */
 	async waitForConfirmation(
-		txId: string
+		txId: string,
+		waitRounds = WAIT_ROUNDS
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const response = await this.algoSigner.algod({
 			ledger: this.chainName,
@@ -41,7 +42,7 @@ export class WebMode {
 		const startRound = response[LAST_ROUND] as number;
 		let currentRound = startRound;
 		// eslint-disable-next-line no-constant-condition
-		while (currentRound < startRound + WAIT_ROUNDS) {
+		while (currentRound < startRound + waitRounds) {
 			const pendingInfo = await this.algoSigner.algod({
 				ledger: this.chainName,
 				path: `/v2/transactions/pending/${txId}`,
@@ -59,14 +60,18 @@ export class WebMode {
 				path: `/v2/status/wait-for-block-after/${currentRound}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
 			});
 		}
-		throw new Error(`Transaction not confirmed after ${WAIT_ROUNDS} rounds`);
+		throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
 	}
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param signedTxn Signed Transaction blob encoded in base64
+	 * @param waitRounds number round wait for comfirmed txn - default is 10
 	 */
-	async sendAndWait(signedTxn: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async sendAndWait(
+		signedTxn: string,
+		waitRounds = WAIT_ROUNDS
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
 			tx: signedTxn,

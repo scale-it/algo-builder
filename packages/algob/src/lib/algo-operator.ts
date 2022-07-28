@@ -118,7 +118,10 @@ export interface AlgoOperator {
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
 	) => Promise<wtypes.SourceCompiled>;
-	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+	sendAndWait: (
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds: number
+	) => Promise<ConfirmedTxInfo>;
 	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 }
 
@@ -134,7 +137,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 */
-	async sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	async sendAndWait(
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = WAIT_ROUNDS
+	): Promise<ConfirmedTxInfo> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 		return await this.waitForConfirmation(txInfo.txId);
 	}
@@ -142,8 +148,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	// Source:
 	// https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
 	// Function used to wait for a tx confirmation
-	async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+	async waitForConfirmation(txId: string, waitRounds = WAIT_ROUNDS): Promise<ConfirmedTxInfo> {
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
