@@ -27,9 +27,9 @@ export function encodeNote(
 	return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
 
-export function decodeUint8ArrayToString(toDecode: Uint8Array | undefined): string | undefined {
-	if (toDecode === undefined) return undefined;
-	return new TextDecoder().decode(toDecode);
+export function decodeText(bytes: Uint8Array | undefined): string | undefined {
+	if (bytes === undefined) return undefined;
+	return new TextDecoder().decode(bytes);
 }
 
 /**
@@ -47,7 +47,7 @@ export function getFromAddress(execParams: ExecParams): AccountAddress {
  * Returns revocation targer address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionRevokeAddress(transaction: Transaction): AccountAddress {
+export function getTxRevokeAddress(transaction: Transaction): AccountAddress {
 	if (transaction.assetRevocationTarget !== undefined) {
 		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey);
 	} else {
@@ -59,7 +59,7 @@ export function getTransactionRevokeAddress(transaction: Transaction): AccountAd
  * Returns from address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionFromAddress(transaction: Transaction): AccountAddress {
+export function getTxFromAddress(transaction: Transaction): AccountAddress {
 	return algosdk.encodeAddress(transaction.from.publicKey);
 }
 
@@ -75,7 +75,7 @@ export function getAddress(account: algosdk.Address | undefined): AccountAddress
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionToAddress(transaction: Transaction): AccountAddress {
+export function getTxToAddress(transaction: Transaction): AccountAddress {
 	return algosdk.encodeAddress(transaction.to.publicKey);
 }
 
@@ -83,7 +83,7 @@ export function getTransactionToAddress(transaction: Transaction): AccountAddres
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionCloseReminderToAddress(
+export function getTxCloseReminderToAddress(
 	transaction: Transaction
 ): AccountAddress | undefined {
 	if (transaction.closeRemainderTo !== undefined) {
@@ -97,9 +97,7 @@ export function getTransactionCloseReminderToAddress(
  * Returns  reKeyTo address of the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionReKeyToToAddress(
-	transaction: Transaction
-): AccountAddress | undefined {
+export function getTxReKeyToToAddress(transaction: Transaction): AccountAddress | undefined {
 	if (transaction.reKeyTo !== undefined) {
 		return algosdk.encodeAddress(transaction.reKeyTo.publicKey);
 	} else {
@@ -111,7 +109,7 @@ export function getTransactionReKeyToToAddress(
  * Returns freeze target address of the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionFreezeAddress(transaction: Transaction): AccountAddress {
+export function getTxFreezeAddress(transaction: Transaction): AccountAddress {
 	if (transaction.freezeAccount !== undefined) {
 		return algosdk.encodeAddress(transaction.freezeAccount.publicKey);
 	} else {
@@ -123,7 +121,7 @@ export function getTransactionFreezeAddress(transaction: Transaction): AccountAd
  * Returns ASA definiton
  * @param transaction Transaction Object
  */
-export function getTransactionASADefinition(transaction: Transaction): types.ASADef {
+export function getTxASADefinition(transaction: Transaction): types.ASADef {
 	const asaDef: types.ASADef = {
 		clawback: getAddress(transaction.assetClawback),
 		manager: getAddress(transaction.assetManager),
@@ -147,12 +145,12 @@ export function getTransactionASADefinition(transaction: Transaction): types.ASA
  * Returns to address from the Transaction object
  * @param transaction Transaction Object
  */
-export function getTransactionFlags(transaction: Transaction): types.TxParams {
+export function getTxFlags(transaction: Transaction): types.TxParams {
 	const transactionFlags: types.TxParams = {};
-	transactionFlags.closeRemainderTo = getTransactionCloseReminderToAddress(transaction);
+	transactionFlags.closeRemainderTo = getTxCloseReminderToAddress(transaction);
 	transactionFlags.lease = transaction.lease;
-	transactionFlags.note = decodeUint8ArrayToString(transaction.note);
-	transactionFlags.rekeyTo = getTransactionReKeyToToAddress(transaction);
+	transactionFlags.note = decodeText(transaction.note);
+	transactionFlags.rekeyTo = getTxReKeyToToAddress(transaction);
 	transactionFlags.firstValid = transaction.firstRound;
 	transactionFlags.validRounds = transaction.lastRound - transaction.firstRound;
 	if (transaction.flatFee === true) {

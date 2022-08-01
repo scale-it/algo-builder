@@ -229,13 +229,13 @@ export class Ctx implements Context {
 
 	// transfer ALGO as per transaction parameters
 	transferAlgo(transaction: algosdk.Transaction): TxReceipt {
-		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(transaction));
-		const toAccount = this.getAccount(webTx.getTransactionToAddress(transaction));
+		const fromAccount = this.getAccount(webTx.getTxFromAddress(transaction));
+		const toAccount = this.getAccount(webTx.getTxToAddress(transaction));
 		fromAccount.amount -= BigInt(transaction.amount); // remove 'x' algo from sender
 		toAccount.amount += BigInt(transaction.amount); // add 'x' algo to receiver
 		this.assertAccBalAboveMin(fromAccount.address);
 
-		const closeRemainderToAddress = webTx.getTransactionCloseReminderToAddress(transaction);
+		const closeRemainderToAddress = webTx.getTxCloseReminderToAddress(transaction);
 		if (closeRemainderToAddress !== undefined) {
 			this.verifyCloseRemainderTo(transaction);
 			const closeReminderToAccount = this.getAccount(closeRemainderToAddress);
@@ -514,8 +514,7 @@ export class Ctx implements Context {
 	verifyCloseRemainderTo(transaction: Transaction): void {
 		if (transaction.closeRemainderTo == undefined) return;
 		if (
-			webTx.getTransactionCloseReminderToAddress(transaction) ===
-			webTx.getTransactionFromAddress(transaction)
+			webTx.getTxCloseReminderToAddress(transaction) === webTx.getTxFromAddress(transaction)
 		) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO);
 		}
@@ -558,9 +557,9 @@ export class Ctx implements Context {
 
 	// transfer ASSET as per transaction parameters
 	transferAsset(transaction: Transaction): TxReceipt {
-		const fromAccountAddr = webTx.getTransactionFromAddress(transaction);
-		const toAccountAddr = webTx.getTransactionToAddress(transaction);
-		const transactionFlags = webTx.getTransactionFlags(transaction);
+		const fromAccountAddr = webTx.getTxFromAddress(transaction);
+		const toAccountAddr = webTx.getTxToAddress(transaction);
+		const transactionFlags = webTx.getTxFlags(transaction);
 		if (BigInt(transaction.amount) === 0n && fromAccountAddr === toAccountAddr) {
 			this.optInToASA(transaction.assetIndex, fromAccountAddr, transactionFlags);
 		} else if (BigInt(transaction.amount) !== 0n) {
@@ -772,7 +771,7 @@ export class Ctx implements Context {
 	 */
 	rekeyTo(txn: Transaction, reKeyTo: string | undefined): void {
 		if (reKeyTo === undefined) return;
-		const fromAccount = this.getAccount(webTx.getTransactionFromAddress(txn));
+		const fromAccount = this.getAccount(webTx.getTxFromAddress(txn));
 		fromAccount.rekeyTo(reKeyTo);
 	}
 
@@ -796,9 +795,9 @@ export class Ctx implements Context {
 		this.verifyMinimumFees();
 		this.verifyAndUpdateInnerAppCallStack();
 		signedTransactions.forEach((signedTransaction, idx) => {
-			const fromAccountAddr = webTx.getTransactionFromAddress(signedTransaction.txn);
+			const fromAccountAddr = webTx.getTxFromAddress(signedTransaction.txn);
 			let payFlags: types.TxParams = {};
-			payFlags = webTx.getTransactionFlags(signedTransaction.txn);
+			payFlags = webTx.getTxFlags(signedTransaction.txn);
 			this.deductFee(fromAccountAddr, idx, payFlags);
 			if (lsigMap !== undefined && lsigMap.get(idx) !== undefined) {
 				let lsig = lsigMap.get(idx);
@@ -947,7 +946,7 @@ export class Ctx implements Context {
 						};
 						r = this.deployASADef(
 							signedTransaction.txn.assetName,
-							webTx.getTransactionASADefinition(signedTransaction.txn),
+							webTx.getTxASADefinition(signedTransaction.txn),
 							fromAccountAddr,
 							flags
 						);
@@ -995,9 +994,9 @@ export class Ctx implements Context {
 							throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
 						}
 						r = this.revokeAsset(
-							webTx.getTransactionToAddress(signedTransaction.txn),
+							webTx.getTxToAddress(signedTransaction.txn),
 							signedTransaction.txn.assetIndex,
-							webTx.getTransactionRevokeAddress(signedTransaction.txn),
+							webTx.getTxRevokeAddress(signedTransaction.txn),
 							BigInt(signedTransaction.txn.amount)
 						);
 					} else if (isEncTxAssetOptIn(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
@@ -1012,7 +1011,7 @@ export class Ctx implements Context {
 					}
 					r = this.freezeAsset(
 						signedTransaction.txn.assetIndex,
-						webTx.getTransactionFreezeAddress(signedTransaction.txn),
+						webTx.getTxFreezeAddress(signedTransaction.txn),
 						signedTransaction.txn.freezeState
 					);
 					break;
@@ -1021,9 +1020,9 @@ export class Ctx implements Context {
 			// if closeRemainderTo field occur in txParam
 			// we will change rekeyTo field to webTx.getFromAddress(txParam)
 			if (payFlags.closeRemainderTo) {
-				payFlags.rekeyTo = webTx.getTransactionFromAddress(signedTransaction.txn);
+				payFlags.rekeyTo = webTx.getTxFromAddress(signedTransaction.txn);
 			} else {
-				payFlags.rekeyTo = webTx.getTransactionReKeyToToAddress(signedTransaction.txn);
+				payFlags.rekeyTo = webTx.getTxReKeyToToAddress(signedTransaction.txn);
 			}
 			// apply rekey after pass all logic
 			this.rekeyTo(signedTransaction.txn, payFlags.rekeyTo);

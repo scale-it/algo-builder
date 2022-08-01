@@ -1,7 +1,7 @@
 const { AccountStore } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
 const { assert } = require("chai");
-const { encodeAddress, default: algosdk } = require("algosdk");
+const { encodeAddress, algosdk } = require("algosdk");
 const { Context } = require("./common");
 const STR_TRANSFER = "str:transfer";
 const RUNTIME_ERR1009 = "RUNTIME_ERR1009: TEAL runtime encountered err opcode";

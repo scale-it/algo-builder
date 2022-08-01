@@ -1013,7 +1013,7 @@ export class Runtime {
 	 * @param signedTransaction signedTransaction object.
 	 */
 	validateSecretKeySignature(signedTransaction: SignedTransaction): void {
-		const fromAccountAddr = webTx.getTransactionFromAddress(signedTransaction.txn);
+		const fromAccountAddr = webTx.getTxFromAddress(signedTransaction.txn);
 		const fromAccount = this.getAccount(fromAccountAddr);
 		if (signedTransaction.sig !== undefined) {
 			const accountSpendAddr = fromAccount.getSpendAddress();
