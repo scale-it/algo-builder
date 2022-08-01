@@ -850,7 +850,7 @@ export class Ctx implements Context {
 							) {
 								this.tx = this.gtxs[idx]; // update current tx to the requested index
 								if (appDefMap === undefined) {
-									throw new Error("Not supported");
+									throw new Error("App definition needs to be provided");
 								}
 								r = this.deployApp(
 									fromAccountAddr,
