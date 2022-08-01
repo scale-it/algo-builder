@@ -27,6 +27,11 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
 
+- Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
+from `algosdk` and sends it to the network. 
+- Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
+- Added verification for secret key signatures in `Runtime`.
+
 ### Bug Fixes
 
 - Fix `txn AssetSender` should return zero address by default.
@@ -67,11 +72,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Teal v6 support:
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
-
-- Added `sendSignedTransaction(signedTransaction)`. Method takes '`SignedTransaction` type
-from `algosdk` and sends it to the network. 
-- Added support for `SignedTransaction` object in `executeTx` method.
-- Added verification for secret key signatures.
 
 #### Examples
 
