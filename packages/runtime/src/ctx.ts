@@ -1,8 +1,11 @@
+/* eslint-disable */
 import { tx as webTx, types } from "@algo-builder/web";
-import {
+import algosdk, {
 	getApplicationAddress,
 	makeAssetTransferTxnWithSuggestedParams,
 	modelsv2,
+	Transaction,
+	TransactionType,
 } from "algosdk";
 
 import { AccountStore, getProgram, parseASADef, Runtime } from ".";
@@ -17,7 +20,16 @@ import {
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
-import { calculateFeeCredit } from "./lib/txn";
+import {
+	calculateFeeCredit,
+	isEncTxApplicationCreate,
+	isEncTxAssetCreate,
+	isEncTxAssetDeletion,
+	isEncTxAssetOptIn,
+	isEncTxAssetReconfigure,
+	isEncTxAssetRevoke,
+	isEncTxAssetTransfer,
+} from "./lib/txn";
 import { mockSuggestedParams } from "./mock/tx";
 import { getProgramVersion } from "./parser/parser";
 import {
@@ -216,20 +228,19 @@ export class Ctx implements Context {
 	}
 
 	// transfer ALGO as per transaction parameters
-	transferAlgo(txParam: types.AlgoTransferParam): TxReceipt {
-		const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
-		const toAccount = this.getAccount(txParam.toAccountAddr);
-		txParam.amountMicroAlgos = BigInt(txParam.amountMicroAlgos);
-
-		fromAccount.amount -= txParam.amountMicroAlgos; // remove 'x' algo from sender
-		toAccount.amount += BigInt(txParam.amountMicroAlgos); // add 'x' algo to receiver
+	transferAlgo(transaction: algosdk.Transaction): TxReceipt {
+		const fromAccount = this.getAccount(webTx.getTxFromAddress(transaction));
+		const toAccount = this.getAccount(webTx.getTxToAddress(transaction));
+		fromAccount.amount -= BigInt(transaction.amount); // remove 'x' algo from sender
+		toAccount.amount += BigInt(transaction.amount); // add 'x' algo to receiver
 		this.assertAccBalAboveMin(fromAccount.address);
 
-		if (txParam.payFlags.closeRemainderTo) {
-			this.verifyCloseRemainderTo(txParam);
-			const closeRemToAcc = this.getAccount(txParam.payFlags.closeRemainderTo);
-
-			closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
+		const closeRemainderToAddress = webTx.getTxCloseReminderToAddress(transaction);
+		if (closeRemainderToAddress !== undefined) {
+			this.verifyCloseRemainderTo(transaction);
+			const closeReminderToAccount = this.getAccount(closeRemainderToAddress);
+			// transfer funds of sender to closeRemTo account
+			closeReminderToAccount.amount += fromAccount.amount;
 			fromAccount.amount = 0n; // close sender's account
 		}
 		return this.setAndGetTxReceipt();
@@ -395,8 +406,8 @@ export class Ctx implements Context {
 		this.assertAccBalAboveMin(senderAcc.address);
 		this.state.accounts.set(senderAcc.address, senderAcc);
 		this.state.globalApps.set(app.id, senderAcc.address);
-
-		this.runtime.run(approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack); // execute TEAL code with appID = 0
+		// execute TEAL code with appID = 0
+		this.runtime.run(approvalProgTEAL, ExecutionMode.APPLICATION, idx, this.debugStack);
 
 		// create new application in globalApps map
 		this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -498,11 +509,13 @@ export class Ctx implements Context {
 
 	/**
 	 * Verify closeRemainderTo field is different than fromAccountAddr
-	 * @param txnParams transaction params
+	 * @param transaction transaction params
 	 */
-	verifyCloseRemainderTo(txnParams: types.ExecParams): void {
-		if (!txnParams.payFlags.closeRemainderTo) return;
-		if (txnParams.payFlags.closeRemainderTo === webTx.getFromAddress(txnParams)) {
+	verifyCloseRemainderTo(transaction: Transaction): void {
+		if (transaction.closeRemainderTo == undefined) return;
+		if (
+			webTx.getTxCloseReminderToAddress(transaction) === webTx.getTxFromAddress(transaction)
+		) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_CLOSE_REMAINDER_TO);
 		}
 	}
@@ -543,47 +556,51 @@ export class Ctx implements Context {
 	}
 
 	// transfer ASSET as per transaction parameters
-	transferAsset(txParam: types.AssetTransferParam): TxReceipt {
-		const fromAccountAddr = webTx.getFromAddress(txParam);
-		txParam.amount = BigInt(txParam.amount);
-		if (txParam.amount === 0n && fromAccountAddr === txParam.toAccountAddr) {
-			this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
-		} else if (txParam.amount !== 0n) {
-			this.assertAssetNotFrozen(txParam.assetID as number, fromAccountAddr);
-			this.assertAssetNotFrozen(txParam.assetID as number, txParam.toAccountAddr);
+	transferAsset(transaction: Transaction): TxReceipt {
+		const fromAccountAddr = webTx.getTxFromAddress(transaction);
+		const toAccountAddr = webTx.getTxToAddress(transaction);
+		const transactionFlags = webTx.getTxFlags(transaction);
+		if (BigInt(transaction.amount) === 0n && fromAccountAddr === toAccountAddr) {
+			this.optInToASA(transaction.assetIndex, fromAccountAddr, transactionFlags);
+		} else if (BigInt(transaction.amount) !== 0n) {
+			this.assertAssetNotFrozen(transaction.assetIndex as number, fromAccountAddr);
+			this.assertAssetNotFrozen(transaction.assetIndex as number, toAccountAddr);
 		}
 
-		const fromAssetHolding = this.getAssetHolding(txParam.assetID as number, fromAccountAddr);
-		const toAssetHolding = this.getAssetHolding(
-			txParam.assetID as number,
-			txParam.toAccountAddr
+		const fromAssetHolding = this.getAssetHolding(
+			transaction.assetIndex as number,
+			fromAccountAddr
 		);
-		if (fromAssetHolding.amount - txParam.amount < 0) {
+		const toAssetHolding = this.getAssetHolding(
+			transaction.assetIndex as number,
+			toAccountAddr
+		);
+		if (fromAssetHolding.amount - BigInt(transaction.amount) < 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
-				amount: txParam.amount,
+				amount: transaction.amount,
 				address: fromAccountAddr,
 			});
 		}
-		fromAssetHolding.amount -= txParam.amount;
-		toAssetHolding.amount += BigInt(txParam.amount);
+		fromAssetHolding.amount -= BigInt(transaction.amount);
+		toAssetHolding.amount += BigInt(transaction.amount);
 
-		if (txParam.payFlags.closeRemainderTo) {
-			this.verifyCloseRemainderTo(txParam);
+		if (transactionFlags.closeRemainderTo) {
+			this.verifyCloseRemainderTo(transaction);
 
-			const closeToAddr = txParam.payFlags.closeRemainderTo;
+			const closeToAddr = transactionFlags.closeRemainderTo;
 			if (fromAccountAddr === fromAssetHolding.creator) {
 				throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR);
 			}
-			this.assertAssetNotFrozen(txParam.assetID as number, closeToAddr);
+			this.assertAssetNotFrozen(transaction.assetIndex as number, closeToAddr);
 
 			const closeRemToAssetHolding = this.getAssetHolding(
-				txParam.assetID as number,
+				transaction.assetIndex as number,
 				closeToAddr
 			);
-
-			closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
+			// transfer assets of sender to closeRemTo account
+			closeRemToAssetHolding.amount += fromAssetHolding.amount;
 			const fromAccount = this.getAccount(fromAccountAddr);
-			fromAccount.closeAsset(txParam.assetID as number);
+			fromAccount.closeAsset(transaction.assetIndex as number);
 		}
 		return this.setAndGetTxReceipt();
 	}
@@ -747,12 +764,15 @@ export class Ctx implements Context {
 		return txReceipt;
 	}
 
-	// apply rekey config on from account
-	rekeyTo(txParam: types.ExecParams): void {
-		if (!txParam.payFlags.rekeyTo) return;
-		const fromAccount = this.getAccount(webTx.getFromAddress(txParam));
-		// apply rekey
-		fromAccount.rekeyTo(txParam.payFlags.rekeyTo);
+	/**
+	 * Rekeys the account
+	 * @param txn transaction
+	 * @param rekeyTo address
+	 */
+	rekeyTo(txn: Transaction, reKeyTo: string | undefined): void {
+		if (reKeyTo === undefined) return;
+		const fromAccount = this.getAccount(webTx.getTxFromAddress(txn));
+		fromAccount.rekeyTo(reKeyTo);
 	}
 
 	/**
@@ -765,210 +785,247 @@ export class Ctx implements Context {
 	 * @param txParams Transaction Parameters
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
-	processTransactions(txParams: types.ExecParams[]): TxReceipt[] {
+	processTransactions(
+		signedTransactions: algosdk.SignedTransaction[],
+		appDefMap?: Map<number, types.AppDefinition | types.SmartContract>,
+		lsigMap?: Map<number, types.Lsig>
+	): TxReceipt[] {
 		const txReceipts: TxReceipt[] = [];
 		let r: TxReceipt;
-
 		this.verifyMinimumFees();
 		this.verifyAndUpdateInnerAppCallStack();
-		txParams.forEach((txParam, idx) => {
-			const fromAccountAddr = webTx.getFromAddress(txParam);
-			this.deductFee(fromAccountAddr, idx, txParam.payFlags);
-
-			if (txParam.sign === types.SignType.LogicSignature) {
+		signedTransactions.forEach((signedTransaction, idx) => {
+			const fromAccountAddr = webTx.getTxFromAddress(signedTransaction.txn);
+			let payFlags: types.TxParams = {};
+			payFlags = webTx.getTxFlags(signedTransaction.txn);
+			this.deductFee(fromAccountAddr, idx, payFlags);
+			if (lsigMap !== undefined && lsigMap.get(idx) !== undefined) {
+				let lsig = lsigMap.get(idx);
 				this.tx = this.gtxs[idx]; // update current tx to index of stateless
-				r = this.runtime.validateLsigAndRun(txParam, this.debugStack);
-				this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
-			} else if (txParam.sign === types.SignType.SecretKey) {
-				this.runtime.validateAccountSignature(txParam);
+				r = this.runtime.validateLsigAndRun(lsig as types.Lsig, this.debugStack);
+				this.tx = this.gtxs[0];
+			} //
+			//after executing stateless tx updating current tx to default (index 0)
+			else if (signedTransaction.sgnr || signedTransaction.sig) {
+				this.runtime.validateSecretKeySignature(signedTransaction);
 			}
-
 			//verify and reduce number remain Txn
 			if (this.remainingTxns > 0) {
 				this.remainingTxns--;
 			} else {
 				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.TOO_MANY_INNER_TXN);
 			}
-
 			// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-			switch (txParam.type) {
-				case types.TransactionType.TransferAlgo: {
+			switch (signedTransaction.txn.type) {
+				case TransactionType.pay: {
 					// if toAccountAddre doesn't exist in runtime env
 					// then we will add it to runtime env.
-					if (this.state.accounts.get(txParam.toAccountAddr) === undefined) {
+					if (
+						this.state.accounts.get(
+							algosdk.encodeAddress(signedTransaction.txn.to.publicKey)
+						) === undefined
+					) {
 						this.state.accounts.set(
-							txParam.toAccountAddr,
-							new AccountStore(0, { addr: txParam.toAccountAddr, sk: new Uint8Array(0) })
+							algosdk.encodeAddress(signedTransaction.txn.to.publicKey),
+							new AccountStore(0, {
+								addr: algosdk.encodeAddress(signedTransaction.txn.to.publicKey),
+								sk: new Uint8Array(0),
+							})
 						);
 					}
-
-					r = this.transferAlgo(txParam);
+					r = this.transferAlgo(signedTransaction.txn);
 					break;
 				}
-				case types.TransactionType.TransferAsset: {
-					r = this.transferAsset(txParam);
-					break;
-				}
-				case types.TransactionType.KeyRegistration: {
+				case TransactionType.keyreg: {
 					// noop
 					r = { txn: this.tx, txID: this.tx.txID };
 					break;
 				}
-				case types.TransactionType.CallApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					const appParams = this.getApp(txParam.appID);
-					r = this.runtime.run(
-						appParams[APPROVAL_PROGRAM],
-						ExecutionMode.APPLICATION,
-						idx,
-						this.debugStack
-					);
+				case TransactionType.appl: {
+					switch (signedTransaction.txn.appOnComplete) {
+						case algosdk.OnApplicationComplete.NoOpOC: {
+							//deployApp
+							if (
+								isEncTxApplicationCreate(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+							) {
+								this.tx = this.gtxs[idx]; // update current tx to the requested index
+								if (appDefMap === undefined) {
+									throw new Error("App definition needs to be provided");
+								}
+								r = this.deployApp(
+									fromAccountAddr,
+									appDefMap.get(idx) as types.AppDefinition,
+									idx
+								);
+								this.knowableID.set(idx, r.appID);
+							} else {
+								this.tx = this.gtxs[idx]; // update current tx to the requested index
+								const appParams = this.getApp(signedTransaction.txn.appIndex);
+								r = this.runtime.run(
+									appParams[APPROVAL_PROGRAM],
+									ExecutionMode.APPLICATION,
+									idx,
+									this.debugStack
+								);
+							}
+							break;
+						}
+						case algosdk.OnApplicationComplete.ClearStateOC: {
+							this.tx = this.gtxs[idx]; // update current tx to the requested index
+							const appParams = this.runtime.assertAppDefined(
+								signedTransaction.txn.appIndex,
+								this.getApp(signedTransaction.txn.appIndex)
+							);
+							try {
+								r = this.runtime.run(
+									appParams["clear-state-program"],
+									ExecutionMode.APPLICATION,
+									idx,
+									this.debugStack
+								);
+							} catch (error) {
+								// if transaction type is Clear Call,
+								// remove the app without throwing an error (rejecting tx)
+								// tested by running on algorand network
+							}
+							// remove app from local state
+							this.closeApp(fromAccountAddr, signedTransaction.txn.appIndex);
+							break;
+						}
+						case algosdk.OnApplicationComplete.CloseOutOC: {
+							this.tx = this.gtxs[idx]; // update current tx to the requested index
+							const appParams = this.getApp(signedTransaction.txn.appIndex);
+							r = this.runtime.run(
+								appParams[APPROVAL_PROGRAM],
+								ExecutionMode.APPLICATION,
+								idx,
+								this.debugStack
+							);
+							this.closeApp(fromAccountAddr, signedTransaction.txn.appIndex);
+							break;
+						}
+						case algosdk.OnApplicationComplete.DeleteApplicationOC: {
+							this.tx = this.gtxs[idx]; // update current tx to the requested index
+							const appParams = this.getApp(signedTransaction.txn.appIndex);
+							r = this.runtime.run(
+								appParams[APPROVAL_PROGRAM],
+								ExecutionMode.APPLICATION,
+								idx,
+								this.debugStack
+							);
+							this.deleteApp(signedTransaction.txn.appIndex);
+							break;
+						}
+						case algosdk.OnApplicationComplete.OptInOC: {
+							this.tx = this.gtxs[idx]; // update current tx to tx being exectuted in group
+							r = this.optInToApp(fromAccountAddr, signedTransaction.txn.appIndex, idx);
+							break;
+						}
+						case algosdk.OnApplicationComplete.UpdateApplicationOC: {
+							this.tx = this.gtxs[idx]; // update current tx to the requested index
+							if (appDefMap === undefined) {
+								throw new Error("Not supported");
+							}
+							r = this.updateApp(
+								signedTransaction.txn.appIndex,
+								appDefMap.get(idx) as types.SmartContract,
+								idx
+							);
+							break;
+						}
+					}
 					break;
 				}
-				case types.TransactionType.CloseApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					const appParams = this.getApp(txParam.appID);
-					r = this.runtime.run(
-						appParams[APPROVAL_PROGRAM],
-						ExecutionMode.APPLICATION,
-						idx,
-						this.debugStack
-					);
-					this.closeApp(fromAccountAddr, txParam.appID);
-					break;
-				}
-				case types.TransactionType.UpdateApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-
-					r = this.updateApp(txParam.appID, txParam.newAppCode, idx);
-					break;
-				}
-				case types.TransactionType.ClearApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					const appParams = this.runtime.assertAppDefined(
-						txParam.appID,
-						this.getApp(txParam.appID)
-					);
-					try {
-						r = this.runtime.run(
-							appParams["clear-state-program"],
-							ExecutionMode.APPLICATION,
-							idx,
-							this.debugStack
+				case TransactionType.acfg: {
+					if (isEncTxAssetCreate(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+						this.tx = this.gtxs[idx]; // update current tx to the requested index
+						const senderAcc = this.getAccount(fromAccountAddr);
+						const flags: ASADeploymentFlags = {
+							...payFlags,
+							creator: { ...senderAcc.account, name: senderAcc.address },
+						};
+						r = this.deployASADef(
+							signedTransaction.txn.assetName,
+							webTx.getTxASADefinition(signedTransaction.txn),
+							fromAccountAddr,
+							flags
 						);
-					} catch (error) {
-						// if transaction type is Clear Call,
-						// remove the app without throwing an error (rejecting tx)
-						// tested by running on algorand network
-						// https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+						this.knowableID.set(idx, r.assetIndex);
+					} else if (
+						isEncTxAssetReconfigure(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
+						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
+						if (asset.manager !== fromAccountAddr) {
+							throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
+								address: asset.manager,
+							});
+						}
+						// modify asset in ctx.
+						r = this.modifyAsset(
+							signedTransaction.txn.assetIndex,
+							webTx.getAssetReconfigureFields(signedTransaction.txn)
+						);
+					} else if (
+						isEncTxAssetDeletion(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
+						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
+						if (asset.manager !== fromAccountAddr) {
+							throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
+								address: asset.manager,
+							});
+						}
+						r = this.destroyAsset(signedTransaction.txn.assetIndex as number);
 					}
-
-					this.closeApp(fromAccountAddr, txParam.appID); // remove app from local state
 					break;
 				}
-				case types.TransactionType.DeleteApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					const appParams = this.getApp(txParam.appID);
-					r = this.runtime.run(
-						appParams[APPROVAL_PROGRAM],
-						ExecutionMode.APPLICATION,
-						idx,
-						this.debugStack
-					);
-					this.deleteApp(txParam.appID);
-					break;
-				}
-				case types.TransactionType.ModifyAsset: {
-					const asset = this.getAssetDef(txParam.assetID as number);
-					if (asset.manager !== fromAccountAddr) {
-						throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
-							address: asset.manager,
-						});
+				case TransactionType.axfer: {
+					if (isEncTxAssetTransfer(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+						r = this.transferAsset(signedTransaction.txn);
+					} else if (
+						isEncTxAssetRevoke(signedTransaction.txn.get_obj_for_encoding() as EncTx)
+					) {
+						const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
+						if (asset.clawback !== fromAccountAddr) {
+							throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, {
+								address: asset.clawback,
+							});
+						}
+						if (payFlags.closeRemainderTo) {
+							throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
+						}
+						r = this.revokeAsset(
+							webTx.getTxToAddress(signedTransaction.txn),
+							signedTransaction.txn.assetIndex,
+							webTx.getTxRevokeAddress(signedTransaction.txn),
+							BigInt(signedTransaction.txn.amount)
+						);
+					} else if (isEncTxAssetOptIn(signedTransaction.txn.get_obj_for_encoding() as EncTx)) {
+						r = this.optInToASA(signedTransaction.txn.assetIndex, fromAccountAddr, payFlags);
 					}
-					// modify asset in ctx.
-					r = this.modifyAsset(txParam.assetID as number, txParam.fields);
 					break;
 				}
-				case types.TransactionType.FreezeAsset: {
-					const asset = this.getAssetDef(txParam.assetID as number);
+				case TransactionType.afrz: {
+					const asset = this.getAssetDef(signedTransaction.txn.assetIndex);
 					if (asset.freeze !== fromAccountAddr) {
 						throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
 					}
 					r = this.freezeAsset(
-						txParam.assetID as number,
-						txParam.freezeTarget,
-						txParam.freezeState
+						signedTransaction.txn.assetIndex,
+						webTx.getTxFreezeAddress(signedTransaction.txn),
+						signedTransaction.txn.freezeState
 					);
-					break;
-				}
-				case types.TransactionType.RevokeAsset: {
-					const asset = this.getAssetDef(txParam.assetID as number);
-					if (asset.clawback !== fromAccountAddr) {
-						throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, {
-							address: asset.clawback,
-						});
-					}
-					if (txParam.payFlags.closeRemainderTo) {
-						throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
-					}
-					r = this.revokeAsset(
-						txParam.recipient,
-						txParam.assetID as number,
-						txParam.revocationTarget,
-						BigInt(txParam.amount)
-					);
-					break;
-				}
-				case types.TransactionType.DestroyAsset: {
-					const asset = this.getAssetDef(txParam.assetID as number);
-					if (asset.manager !== fromAccountAddr) {
-						throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, {
-							address: asset.manager,
-						});
-					}
-					r = this.destroyAsset(txParam.assetID as number);
-					break;
-				}
-				case types.TransactionType.DeployASA: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					const senderAcc = this.getAccount(fromAccountAddr);
-					const flags: ASADeploymentFlags = {
-						...txParam.payFlags,
-						creator: { ...senderAcc.account, name: senderAcc.address },
-					};
-					if (txParam.asaDef) {
-						r = this.deployASADef(txParam.asaName, txParam.asaDef, fromAccountAddr, flags);
-					} else {
-						r = this.deployASA(txParam.asaName, fromAccountAddr, flags);
-					}
-					this.knowableID.set(idx, r.assetIndex);
-					break;
-				}
-				case types.TransactionType.OptInASA: {
-					r = this.optInToASA(txParam.assetID as number, fromAccountAddr, txParam.payFlags);
-					break;
-				}
-				case types.TransactionType.DeployApp: {
-					this.tx = this.gtxs[idx]; // update current tx to the requested index
-					r = this.deployApp(fromAccountAddr, txParam.appDefinition, idx);
-					this.knowableID.set(idx, r.appID);
-					break;
-				}
-				case types.TransactionType.OptInToApp: {
-					this.tx = this.gtxs[idx]; // update current tx to tx being exectuted in group
-
-					r = this.optInToApp(fromAccountAddr, txParam.appID, idx);
 					break;
 				}
 			}
 			// if closeRemainderTo field occur in txParam
 			// we will change rekeyTo field to webTx.getFromAddress(txParam)
-			if (txParam.payFlags.closeRemainderTo) {
-				txParam.payFlags.rekeyTo = webTx.getFromAddress(txParam);
+			if (payFlags.closeRemainderTo) {
+				payFlags.rekeyTo = webTx.getTxFromAddress(signedTransaction.txn);
+			} else {
+				payFlags.rekeyTo = webTx.getTxReKeyToToAddress(signedTransaction.txn);
 			}
 			// apply rekey after pass all logic
-			this.rekeyTo(txParam);
-
+			this.rekeyTo(signedTransaction.txn, payFlags.rekeyTo);
 			if (this.isInnerTx) {
 				// pop current application in the inner app call stack
 				this.innerTxAppIDCallStack.pop();

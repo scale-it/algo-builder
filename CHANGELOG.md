@@ -16,11 +16,21 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Updated yarn to v3.2.1
 - Changed default sample project license to ISC
+- Fix `txn AssetSender` should return zero address by default.
+
+#### Examples
+
+- Added secret key to all accounts that are signing transactins in examples. 
 
 ### Features
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
+
+- Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
+from `algosdk` and sends it to the network. 
+- Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
+- Added verification for secret key signatures in `Runtime`.
 
 ### Bug Fixes
 

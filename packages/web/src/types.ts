@@ -156,6 +156,8 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
+export type Lsig = SignWithLsig;
+
 export type Sign = SignWithSk | SignWithLsig;
 
 export type BasicParams = Sign & {
@@ -360,6 +362,18 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 	}
 	const res = isSDKTransaction((object as TransactionAndSign).transaction);
 	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
+}
+// This function checks if given object implements `ExecParams` class
+export function isExecParams(object: unknown): object is ExecParams {
+	if (object === undefined || object === null) {
+		return false;
+	}
+	const props = ["payFlags", "sign"];
+	let res = Object.prototype.hasOwnProperty.call(object, "type");
+	for (const prop of props) {
+		res = res && Object.prototype.hasOwnProperty.call(object, prop);
+	}
+	return res;
 }
 
 /* Wallet Connect types */
