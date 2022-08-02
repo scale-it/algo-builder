@@ -44,7 +44,8 @@ export interface TxParams {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// Any data up to 1000 bytes.
-	note?: string;
+	note?: string | Uint8Array;
+	// base64 encoded string
 	noteb64?: string;
 	// When set, it indicates that the transaction is requesting
 	// that the Sender account should be closed, and all remaining
