@@ -33,6 +33,7 @@ export function encodeNote(
 	if (noteb64) {
 		return Buffer.from(noteb64, "base64");
 	}
+	if (note instanceof Uint8Array) return note;
 	const encoder = new TextEncoder();
 	return encoder.encode(note);
 }
