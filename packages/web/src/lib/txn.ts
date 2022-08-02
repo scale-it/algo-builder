@@ -26,8 +26,9 @@ export function encodeNote(
 		return undefined;
 	}
 	if (noteb64 && note) {
-		throw new BuilderError(ERRORS.GENERAL.PARAM_PARSE_ERROR, {
-			reason: "You can't define both note and noteb64 transaction option",
+		throw new BuilderError(ERRORS.ARGUMENTS.INVALID_TX_PARAM, {
+			param: "note",
+			error: "You can't define both note and noteb64 transaction option",
 		});
 	}
 	if (noteb64) {
