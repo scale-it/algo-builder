@@ -112,7 +112,7 @@ GRANT ALL PRIVILEGES ON TABLE sigma_daos, sigma_dao_proposals TO algorand;
 
 -- Below are objects needed for sigma dao app. Extend it if more sigma dao objects needed
 -- Here, sigma_dao_user should be same as https://github.com/scale-it/algo-builder/blob/cbc2123622a10fbf96f9b99b254abc86a79ac1fb/examples/dao/Makefile#L1
-GRANT SELECT ON TABLE sigma_daos, sigma_dao_proposals, asset, account_asset, account_app TO sigma_dao_user;
+GRANT SELECT ON TABLE sigma_daos, sigma_dao_proposals, asset, account_asset, account_app, account TO sigma_dao_user;
 
 -- Function to search dao name in sigma_daos relation
 CREATE OR REPLACE FUNCTION search_sigma_daos(daoToBeSearched TEXT)
