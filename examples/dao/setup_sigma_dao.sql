@@ -91,13 +91,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- create a trigger (sigmadao_trigger)
--- Event: INSERT on publoc.app relation
+-- Event: INSERT on public.app relation
 CREATE TRIGGER sigmadao_trigger
 AFTER INSERT ON public.app FOR EACH ROW
 EXECUTE FUNCTION sigmadao_trigger_fn();
 
 -- create a trigger (sigmadao_proposals_trigger)
--- Event: UPDATE on publoc.account_app relation
+-- Event: UPDATE on public.account_app relation
 CREATE TRIGGER sigmadao_proposals_trigger
 AFTER UPDATE ON public.account_app FOR EACH ROW
 EXECUTE FUNCTION sigmadao_proposals_trigger_fn();
