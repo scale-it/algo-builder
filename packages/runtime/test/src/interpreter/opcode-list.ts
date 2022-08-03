@@ -6910,19 +6910,26 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
 				txn: interpreter.runtime.ctx.tx,
 				txID: TXN_OBJ.txID,
-				logs: [parsing.stringToBytes("Hello")],
+				logs: [parsing.stringToBytes("Monty"), parsing.stringToBytes("Python")],
 			});
 		});
 
 		it("Should put on top of the stack logs from group transaction", () => {
 			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
 			op.execute(stack);
-			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
 		});
 
 		it("Should throw an error index out of bound", () => {
-			const op = new Gitxna(["1", "Logs", "1"], 1, interpreter);
+			const op = new Gitxna(["1", "Logs", "2"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
+		});
+
+		it("Should put on top of stack all the logs from group transaction", () => {
+			stack.push(1n);
+			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("Python"));
 		});
 	});
 

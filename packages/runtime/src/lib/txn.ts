@@ -225,8 +225,7 @@ export function txAppArg(
 		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 		const logs: Uint8Array[] = txReceipt?.logs ?? [];
 		op.checkIndexBound(idx, logs, op.line);
-		const log = logs[idx];
-		return parseToStackElem(log, txField);
+		return parseToStackElem(logs[idx], txField);
 	}
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
