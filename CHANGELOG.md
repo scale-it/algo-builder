@@ -21,7 +21,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
-- add `Uint8Array` as a supported type for `TxParams.note`
+- Add `Uint8Array` as a supported type for `TxParams.note`
 
 ### Bug Fixes
 
