@@ -438,7 +438,8 @@ def approval_program():
                     And(
                         Global.group_size() == Int(2),
                         Gtxn[1].type_enum() == TxnType.AssetTransfer,
-                        Gtxn[1].asset_sender() == proposal_from,
+                        Gtxn[1].asset_sender() == Global.zero_address(),
+                        Gtxn[1].sender() == proposal_from,
                         Gtxn[1].asset_receiver() == recipient,
                         Gtxn[1].asset_amount() == amount,
                         Gtxn[1].xfer_asset() == asa_id,

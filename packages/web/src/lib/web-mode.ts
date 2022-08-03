@@ -147,7 +147,8 @@ export class WebMode {
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param transactions transaction parameters, atomic transaction parameters
-	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 * or TransactionAndSign object(SDK transaction object and signer parameters).
+	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
@@ -205,11 +206,5 @@ export class WebMode {
 			return await this.waitForConfirmation(txInfo.txId);
 		}
 		throw new Error("Transaction Error");
-	}
-
-	/** @deprecated */
-	async executeTransaction(execParams: ExecParams | ExecParams[]): Promise<JsonPayload> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams) as unknown as JsonPayload;
-		else return this.executeTx([execParams]) as unknown as JsonPayload;
 	}
 }

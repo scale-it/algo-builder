@@ -189,27 +189,6 @@ class DeployerBasicMode {
 	}
 
 	/**
-	 * Loads logic signature from cache for contract mode. This helps user to avoid
-	 * passing templaste parameters always during loading logic signature.
-	 * @param name ASC name
-	 * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
-	 * @deprecated this function will be removed in the next release. Use mkContractLsig to
-	 * store lsig info in checkpoint (against lsigName), and query it in scripts using
-	 * getLsig
-	 */
-	async loadLogicFromCache(name: string): Promise<LogicSigAccount> {
-		return await getLsigFromCache(name);
-	}
-
-	/**
-	 * Alias to `this.compileASC` with last two parameters being swapped.
-	 * @deprecated this function will be removed in the next release.
-	 */
-	ensureCompiled(name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
-		return this.compileASC(name, scTmplParams, force);
-	}
-
-	/**
 	 * Returns ASCCache (with compiled code)
 	 * @param name: Smart Contract filename (must be present in assets folder)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
@@ -887,7 +866,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * Note: If passing transaction object a signer/s must be provided.
 	 * @param transactions transaction parameters or atomic transaction parameters
 	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
-	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 * or TransactionAndSign object(SDK transaction object and signer parameters).
+	 * If `ExecParams` are used, the deployer will connect to appropriate accounts / wallets to sign
+	 * constructed transactions.
 	 */
 	async executeTx(
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]

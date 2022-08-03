@@ -10,7 +10,7 @@ export REACH_PATH = ~/.algorand-reach
 export INDEXER_REMOTE_REPO = https://github.com/algorand/indexer.git
 export INDEXER_PATH = ~/.algorand-indexer-download
 # path to indexer .tar file (https://github.com/algorand/indexer/releases) for local setup
-export INDEXER_LATEST_VERSION = 2.11.1
+export INDEXER_LATEST_VERSION = 2.12.4
 export INDEXER_TAR_NAME = algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION).tar.bz2
 export INDEXER_TAR_URL = https://github.com/algorand/indexer/releases/download/$(INDEXER_LATEST_VERSION)/$(INDEXER_TAR_NAME)
 # default postgres config vars
@@ -163,7 +163,7 @@ start-indexer:
 		wget $(INDEXER_TAR_URL) -P $(INDEXER_PATH); \
 		cd $(INDEXER_PATH); tar -xf $(INDEXER_TAR_NAME) -C $(INDEXER_PATH); fi
 # Start indexer by providing database connection info and path to algod node
-	$(INDEXER_PATH)/algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode --dev-mode
+	$(INDEXER_PATH)/algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION)/algorand-indexer daemon --data-dir /tmp -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode --dev-mode
 
 recreate-indexer: recreate-indexer-db start-indexer
 
