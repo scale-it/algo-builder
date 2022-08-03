@@ -517,6 +517,13 @@ Please double check how you invoked algob.`,
 		description: `You tried to run a task with an invalid JSON parameter.
 Please double check how you invoked algob or run your task.`,
 	},
+	INVALID_TX_PARAM: {
+		number: 312,
+		message: "Invalid tx parameter %param%: %error%",
+		title: "Invalid TX Param",
+		description:
+			"Your Tx Param object is wrong: either there is a type collision or some of the parameters are missing or conflicting.",
+	},
 };
 
 export const taskErrors = {

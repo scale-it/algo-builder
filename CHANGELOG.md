@@ -26,6 +26,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
+- Add `Uint8Array` as a supported type for `TxParams.note`
 
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
 from `algosdk` and sends it to the network. 
@@ -36,10 +37,11 @@ from `algosdk` and sends it to the network.
 
 - Fix `txn AssetSender` should return zero address by default.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
+- Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 
 ### Examples
 
-#### DAO 
+#### DAO
 
 - Add `add_proposal_with_asset.js` script use for create proposal with asset funds.
 

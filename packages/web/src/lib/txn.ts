@@ -16,15 +16,31 @@ import {
 } from "../types";
 import { parseAppArgs } from "./parsing";
 
+/**
+ * Encodes note to bytes
+ * When `note` is provided then uses the TexEncoder to convert note to bytes.
+ * When `noteb64` is provided then uses base64 decoder to convert base64 text to bytes.
+ * Throws an error if both `note` and `noteb64` are provided.
+ * */
 export function encodeNote(
-	note: string | undefined,
+	note: string | Uint8Array | undefined,
 	noteb64: string | undefined
 ): Uint8Array | undefined {
 	if (note === undefined && noteb64 === undefined) {
 		return undefined;
 	}
+	if (noteb64 && note) {
+		throw new BuilderError(ERRORS.ARGUMENTS.INVALID_TX_PARAM, {
+			param: "note",
+			error: "You can't define both note and noteb64 transaction option",
+		});
+	}
+	if (noteb64) {
+		return Buffer.from(noteb64, "base64");
+	}
+	if (note instanceof Uint8Array) return note;
 	const encoder = new TextEncoder();
-	return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
+	return encoder.encode(note);
 }
 
 export function decodeText(bytes: Uint8Array | undefined): string | undefined {
