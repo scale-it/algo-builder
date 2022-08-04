@@ -1,11 +1,8 @@
 const { AccountStore } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
 const { assert } = require("chai");
-const { encodeAddress } = require("algosdk");
+const { encodeAddress, algosdk } = require("algosdk");
 const { Context } = require("./common");
-
-const minBalance = 20e6; // 20 ALGOs
-const ALICE_ADDRESS = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
 const STR_TRANSFER = "str:transfer";
 const RUNTIME_ERR1009 = "RUNTIME_ERR1009: TEAL runtime encountered err opcode";
 const INDEX_OUT_OF_BOUND_ERR = "RUNTIME_ERR1008: Index out of bound";
@@ -19,11 +16,8 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 
 	function setUpCtx() {
 		master = new AccountStore(10000e6);
-		alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
-		bob = new AccountStore(minBalance);
-		elon = new AccountStore(minBalance);
-
-		ctx = new Context(master, alice, bob, elon);
+		ctx = new Context(master);
+		[alice, bob, elon] = ctx.defaultAccounts();
 		asaDef = ctx.getAssetDef();
 		asaReserve = ctx.getAccount(asaDef.reserve);
 		asaManager = ctx.getAccount(asaDef.manager);

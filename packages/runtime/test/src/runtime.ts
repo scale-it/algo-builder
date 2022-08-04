@@ -1,4 +1,5 @@
 import { types } from "@algo-builder/web";
+import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
@@ -7,6 +8,7 @@ import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
 import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
@@ -14,6 +16,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
+const basicFixture = "basic-teal";
 const minBalance = BigInt(1e7);
 
 describe("Transfer Algo Transaction", function () {
@@ -157,12 +160,12 @@ describe("Transfer Algo Transaction", function () {
 			assert.equal(externalRuntimeAccount.amount, amount);
 		});
 
-		it("Can create transaction from external account", () => {
+		it("Should transfer algo to an external account", () => {
 			const transferAlgoTx: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
-				fromAccount: externalRuntimeAccount.account,
-				toAccountAddr: alice.address,
+				fromAccount: alice.account,
+				toAccountAddr: externalRuntimeAccount.account.addr,
 				amountMicroAlgos: 1000n,
 				payFlags: {
 					totalFee: 1000,
@@ -175,7 +178,7 @@ describe("Transfer Algo Transaction", function () {
 });
 
 describe("Logic Signature Transaction in Runtime", function () {
-	useFixture("basic-teal");
+	useFixture(basicFixture);
 	const john = new AccountStore(minBalance);
 	const bob = new AccountStore(minBalance);
 	const alice = new AccountStore(minBalance);
@@ -242,7 +245,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 });
 
 describe("Rounds Test", function () {
-	useFixture("basic-teal");
+	useFixture(basicFixture);
 	let john = new AccountStore(minBalance);
 	let bob = new AccountStore(minBalance);
 	let runtime: Runtime;
@@ -1218,5 +1221,120 @@ describe("Deafult Accounts", function () {
 		syncAccounts();
 
 		assert.equal(initialCharlieBalance + BigInt(amount), charlie.balance());
+	});
+});
+
+describe("Algo transfer using sendSignedTransaction", function () {
+	let alice: AccountStore;
+	let bob: AccountStore;
+	let runtime: Runtime;
+	const amount = 1e6;
+	const fee = 1000;
+
+	this.beforeEach(() => {
+		runtime = new Runtime([]);
+		[alice, bob] = runtime.defaultAccounts();
+	});
+
+	it("Should send signedTransacion from one account to another", () => {
+		//Create transaction
+		const initialAliceBalance = alice.balance();
+		const initialBobBalance = bob.balance();
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: alice.account.addr,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(alice.account.sk));
+		// Send the transaction
+		runtime.sendSignedTransaction(signedTransaction);
+		[alice, bob] = runtime.defaultAccounts();
+		assert.equal(initialAliceBalance, alice.balance() + BigInt(amount) + BigInt(fee));
+		assert.equal(initialBobBalance + BigInt(amount), bob.balance()); //(got, expected)
+	});
+
+	it("Should close alice account and send all the balance to bob the account", () => {
+		// Create transaction
+		const initialAliceBalance = alice.balance();
+		const initialBobBalance = bob.balance();
+		console.log(initialAliceBalance);
+		console.log(initialBobBalance);
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: alice.account.addr,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+			closeRemainderTo: bob.address,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(alice.account.sk));
+		// Send the transaction
+		runtime.sendSignedTransaction(signedTransaction);
+		[alice, bob] = runtime.defaultAccounts();
+		assert.equal(0n, alice.balance()); //(got, expected)
+		assert.equal(initialBobBalance + initialAliceBalance - BigInt(fee), bob.balance());
+		//-199999000n
+		//+101000000n
+	});
+});
+//enable this tests when the signature validation is ready
+describe.skip("Logic Signature Transaction in Runtime using sendSignedTransaction", function () {
+	useFixture(basicFixture);
+	let alice: AccountStore;
+	let bob: AccountStore;
+	let john: AccountStore;
+	let runtime: Runtime;
+	const amount = 1e6;
+	const fee = 1000;
+	let lsig: LogicSigAccount;
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+		[alice, bob, john] = runtime.defaultAccounts();
+		lsig = runtime.loadLogic(programName);
+		lsig.sign(john.account.sk);
+	});
+
+	it("should execute the lsig and verify john(delegated signature)", () => {
+		const initialJohnBalance = john.balance();
+		const initialBobBalance = bob.balance();
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: john.address,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(
+			algosdk.signLogicSigTransactionObject(txn, lsig).blob
+		);
+		// Send the transaction
+		runtime.sendSignedTransaction(signedTransaction);
+		[john, bob] = runtime.defaultAccounts();
+		assert.equal(initialJohnBalance - BigInt(amount) - BigInt(fee), john.balance());
+		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
+	});
+
+	it("should not verify signature because alice sent it", () => {
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: john.address,
+			to: bob.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(
+			algosdk.signLogicSigTransactionObject(txn, lsig).blob
+		);
+		// Send the transaction
+		expectRuntimeError(
+			() => runtime.sendSignedTransaction(signedTransaction),
+			RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
+		);
 	});
 });

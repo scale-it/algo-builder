@@ -1,9 +1,13 @@
-import algosdk, { SuggestedParams, Transaction } from "algosdk";
+import { Txn } from "@randlabs/myalgo-connect";
+import algosdk, { SignedTransaction, SuggestedParams, Transaction } from "algosdk";
+import { ALGORAND_ZERO_ADDRESS_STRING } from "algosdk/dist/types/src/encoding/address";
 
+import { types } from "..";
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import {
 	AccountAddress,
+	AssetModFields,
 	ExecParams,
 	MetaType,
 	SignType,
@@ -12,15 +16,36 @@ import {
 } from "../types";
 import { parseAppArgs } from "./parsing";
 
+/**
+ * Encodes note to bytes
+ * When `note` is provided then uses the TexEncoder to convert note to bytes.
+ * When `noteb64` is provided then uses base64 decoder to convert base64 text to bytes.
+ * Throws an error if both `note` and `noteb64` are provided.
+ * */
 export function encodeNote(
-	note: string | undefined,
+	note: string | Uint8Array | undefined,
 	noteb64: string | undefined
 ): Uint8Array | undefined {
 	if (note === undefined && noteb64 === undefined) {
 		return undefined;
 	}
+	if (noteb64 && note) {
+		throw new BuilderError(ERRORS.ARGUMENTS.INVALID_TX_PARAM, {
+			param: "note",
+			error: "You can't define both note and noteb64 transaction option",
+		});
+	}
+	if (noteb64) {
+		return Buffer.from(noteb64, "base64");
+	}
+	if (note instanceof Uint8Array) return note;
 	const encoder = new TextEncoder();
-	return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
+	return encoder.encode(note);
+}
+
+export function decodeText(bytes: Uint8Array | undefined): string | undefined {
+	if (bytes === undefined) return undefined;
+	return new TextDecoder().decode(bytes);
 }
 
 /**
@@ -32,6 +57,125 @@ export function getFromAddress(execParams: ExecParams): AccountAddress {
 		return execParams.fromAccountAddr || execParams.fromAccount.addr; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 	}
 	return execParams.fromAccountAddr;
+}
+
+/**
+ * Returns revocation targer address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxRevokeAddress(transaction: Transaction): AccountAddress {
+	if (transaction.assetRevocationTarget !== undefined) {
+		return algosdk.encodeAddress(transaction.assetRevocationTarget.publicKey);
+	} else {
+		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
+	}
+}
+
+/**
+ * Returns from address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxFromAddress(transaction: Transaction): AccountAddress {
+	return algosdk.encodeAddress(transaction.from.publicKey);
+}
+
+export function getAddress(account: algosdk.Address | undefined): AccountAddress | undefined {
+	if (account !== undefined) {
+		return algosdk.encodeAddress(account.publicKey);
+	} else {
+		return undefined;
+	}
+}
+
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxToAddress(transaction: Transaction): AccountAddress {
+	return algosdk.encodeAddress(transaction.to.publicKey);
+}
+
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxCloseReminderToAddress(
+	transaction: Transaction
+): AccountAddress | undefined {
+	if (transaction.closeRemainderTo !== undefined) {
+		return algosdk.encodeAddress(transaction.closeRemainderTo.publicKey);
+	} else {
+		return undefined;
+	}
+}
+
+/**
+ * Returns  reKeyTo address of the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxReKeyToToAddress(transaction: Transaction): AccountAddress | undefined {
+	if (transaction.reKeyTo !== undefined) {
+		return algosdk.encodeAddress(transaction.reKeyTo.publicKey);
+	} else {
+		return undefined;
+	}
+}
+
+/**
+ * Returns freeze target address of the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxFreezeAddress(transaction: Transaction): AccountAddress {
+	if (transaction.freezeAccount !== undefined) {
+		return algosdk.encodeAddress(transaction.freezeAccount.publicKey);
+	} else {
+		return "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
+	}
+}
+
+/**
+ * Returns ASA definiton
+ * @param transaction Transaction Object
+ */
+export function getTxASADefinition(transaction: Transaction): types.ASADef {
+	const asaDef: types.ASADef = {
+		clawback: getAddress(transaction.assetClawback),
+		manager: getAddress(transaction.assetManager),
+		reserve: getAddress(transaction.assetReserve),
+		freeze: getAddress(transaction.assetFreeze),
+		name: transaction.assetName,
+		total: transaction.assetTotal,
+		decimals: transaction.assetDecimals,
+		defaultFrozen: transaction.assetDefaultFrozen,
+		unitName: transaction.assetUnitName,
+		url: transaction.assetURL,
+		metadataHash: transaction.assetMetadataHash
+			? new TextDecoder().decode(transaction.assetMetadataHash)
+			: undefined,
+		note: undefined,
+	};
+	return asaDef;
+}
+
+/**
+ * Returns to address from the Transaction object
+ * @param transaction Transaction Object
+ */
+export function getTxFlags(transaction: Transaction): types.TxParams {
+	const transactionFlags: types.TxParams = {};
+	transactionFlags.closeRemainderTo = getTxCloseReminderToAddress(transaction);
+	transactionFlags.lease = transaction.lease;
+	transactionFlags.note = decodeText(transaction.note);
+	transactionFlags.rekeyTo = getTxReKeyToToAddress(transaction);
+	transactionFlags.firstValid = transaction.firstRound;
+	transactionFlags.validRounds = transaction.lastRound - transaction.firstRound;
+	if (transaction.flatFee === true) {
+		transactionFlags.totalFee = transaction.fee;
+		transactionFlags.flatFee = true;
+	} else {
+		transactionFlags.feePerByte = transaction.fee;
+	}
+	return transactionFlags;
 }
 
 /**
@@ -220,10 +364,10 @@ export function mkTransaction(
 					BigInt(execParams.asaDef.total || 0), // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 					execParams.asaDef.decimals as number,
 					execParams.asaDef.defaultFrozen ? execParams.asaDef.defaultFrozen : false,
-					execParams.asaDef.manager,
-					execParams.asaDef.reserve,
-					execParams.asaDef.freeze,
-					execParams.asaDef.clawback,
+					execParams.asaDef.manager !== "" ? execParams.asaDef.manager : undefined,
+					execParams.asaDef.reserve !== "" ? execParams.asaDef.reserve : undefined,
+					execParams.asaDef.freeze !== "" ? execParams.asaDef.freeze : undefined,
+					execParams.asaDef.clawback !== "" ? execParams.asaDef.clawback : undefined,
 					execParams.asaDef.unitName,
 					execParams.asaName,
 					execParams.asaDef.url,
@@ -265,7 +409,10 @@ export function mkTransaction(
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
 				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
-				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + appDef.metaType);
+				throw new Error(
+					"Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " +
+						appDef.metaType
+				);
 			}
 		}
 		case TransactionType.UpdateApp: {
@@ -287,7 +434,10 @@ export function mkTransaction(
 				return updateTxFee(execParams.payFlags, tx);
 			} else {
 				// we can't compile a source code nor access local files (as we do in algob) in the web mode.
-				throw new Error("Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " + execParams.newAppCode.metaType);
+				throw new Error(
+					"Only MetaType.BYTES is supported for deploying apps in the web mode. Provided mode: " +
+						execParams.newAppCode.metaType
+				);
 			}
 		}
 		case TransactionType.OptInToApp: {
@@ -340,4 +490,32 @@ export function mkTransaction(
 			});
 		}
 	}
+}
+
+/**
+ * Returns the fields necessary for an Asset Modification
+ * @param transaction Transaction Object
+ */
+export function getAssetReconfigureFields(transaction: Transaction): AssetModFields {
+	const modificationFields: AssetModFields = {};
+	const encodedTransaction = transaction.get_obj_for_encoding();
+	if (encodedTransaction.apar !== undefined) {
+		modificationFields.clawback =
+			encodedTransaction.apar.c !== undefined
+				? algosdk.encodeAddress(transaction.assetClawback.publicKey)
+				: "";
+		modificationFields.freeze =
+			encodedTransaction.apar.f !== undefined
+				? algosdk.encodeAddress(transaction.assetFreeze.publicKey)
+				: "";
+		modificationFields.manager =
+			encodedTransaction.apar.m !== undefined
+				? algosdk.encodeAddress(transaction.assetManager.publicKey)
+				: "";
+		modificationFields.reserve =
+			encodedTransaction.apar.r !== undefined
+				? algosdk.encodeAddress(transaction.assetReserve.publicKey)
+				: "";
+	}
+	return modificationFields;
 }

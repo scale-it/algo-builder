@@ -6,7 +6,7 @@ import { encodeBase64 } from "tweetnacl-ts";
 import { AccountStore } from "../../../src";
 import { encTxToExecParams } from "../../../src/lib/txn";
 import { Runtime } from "../../../src/runtime";
-import { AccountStoreI } from "../../../src/types";
+import { AccountStoreI, EncTx } from "../../../src/types";
 import * as testdata from "../../helpers/data";
 import { useFixture } from "../../helpers/integration";
 
@@ -46,7 +46,9 @@ describe("Convert encoded Txn to ExecParams", function () {
 		}
 		// add approvalProgram and clearProgram to encTx
 		// TODO: recheck it
-		const [encTx] = runtime.createTxnContext(cloneExecParams);
+		const [transaction] = runtime.createTxnContext([cloneExecParams]);
+		const encTx = transaction.txn.get_obj_for_encoding() as EncTx;
+		encTx.txID = transaction.txn.txID();
 
 		if (execParams.type === types.TransactionType.DeployApp) {
 			encTx.metaType = execParams.appDefinition.metaType;
@@ -120,7 +122,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.TransferAsset,
 				toAccountAddr: smith.address,
-				amount: 10,
+				amount: 10n,
 				assetID: 10,
 				payFlags: {
 					totalFee: 1000,

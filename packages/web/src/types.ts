@@ -44,7 +44,8 @@ export interface TxParams {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// Any data up to 1000 bytes.
-	note?: string;
+	note?: string | Uint8Array;
+	// base64 encoded string
 	noteb64?: string;
 	// When set, it indicates that the transaction is requesting
 	// that the Sender account should be closed, and all remaining
@@ -155,6 +156,8 @@ interface SignWithLsig {
 	/** logic signature args */
 	args?: Uint8Array[];
 }
+
+export type Lsig = SignWithLsig;
 
 export type Sign = SignWithSk | SignWithLsig;
 
@@ -360,6 +363,18 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 	}
 	const res = isSDKTransaction((object as TransactionAndSign).transaction);
 	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
+}
+// This function checks if given object implements `ExecParams` class
+export function isExecParams(object: unknown): object is ExecParams {
+	if (object === undefined || object === null) {
+		return false;
+	}
+	const props = ["payFlags", "sign"];
+	let res = Object.prototype.hasOwnProperty.call(object, "type");
+	for (const prop of props) {
+		res = res && Object.prototype.hasOwnProperty.call(object, prop);
+	}
+	return res;
 }
 
 /* Wallet Connect types */
