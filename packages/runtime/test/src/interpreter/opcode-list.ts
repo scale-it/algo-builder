@@ -6914,7 +6914,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("Should put on top of the stack logs from group transaction", () => {
+		it("Should put on top of the stack log from group transaction", () => {
 			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
@@ -6925,7 +6925,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("Should put on top of stack all the logs from group transaction", () => {
+		it("Should put on top of stack log from group transaction", () => {
 			stack.push(1n);
 			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
 			op.execute(stack);
