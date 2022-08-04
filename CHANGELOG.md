@@ -37,6 +37,7 @@ from `algosdk` and sends it to the network.
 
 - Fix `txn AssetSender` should return zero address by default.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
+- Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 
 ### Examples
