@@ -5,7 +5,7 @@ import {
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
+import type { Account, EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -13,7 +13,12 @@ import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
+import {
+	CheckpointFunctionsImpl,
+	persistCheckpoint,
+	registerCheckpoints,
+} from "../lib/script-checkpoints";
+import { executeTx, makeAndSignTx, signTransactions } from "../lib/tx";
 import type {
 	AppCache,
 	ASCCache,
@@ -26,6 +31,7 @@ import type {
 	LsigInfo,
 	RuntimeEnv,
 	SCParams,
+	TxnReceipt,
 } from "../types";
 import { DeployerConfig } from "./deployer_cfg";
 
@@ -143,15 +149,6 @@ class DeployerBasicMode {
 
 	/**
 	 * Loads stateful smart contract info from checkpoint
-	 * @param approvalFileName Approval program file name
-	 * @param clearFileName clear program file name
-	 */
-	getAppByFile(approvalFileName: string, clearFileName: string): rtypes.AppInfo {
-		return this.assertAppExistsInCP(approvalFileName + "-" + clearFileName);
-	}
-
-	/**
-	 * Loads stateful smart contract info from checkpoint
 	 * @param appName name of the app (defined by user during deployment)
 	 */
 	getApp(appName: string): rtypes.AppInfo {
@@ -192,27 +189,6 @@ class DeployerBasicMode {
 	}
 
 	/**
-	 * Loads logic signature from cache for contract mode. This helps user to avoid
-	 * passing template parameters always during loading logic signature.
-	 * @param name ASC name
-	 * @returns loaded logic signature from artifacts/cache/<file_name>.teal.yaml
-	 * @deprecated this function will be removed in the next release. Use mkContractLsig to
-	 * store lsig info in checkpoint (against lsigName), and query it in scripts using
-	 * getLsig
-	 */
-	async loadLogicFromCache(name: string): Promise<LogicSigAccount> {
-		return await getLsigFromCache(name);
-	}
-
-	/**
-	 * Alias to `this.compileASC` with last two parameters being swapped.
-	 * @deprecated this function will be removed in the next release.
-	 */
-	ensureCompiled(name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
-		return this.compileASC(name, scTmplParams, force);
-	}
-
-	/**
 	 * Returns ASCCache (with compiled code)
 	 * @param name: Smart Contract filename (must be present in assets folder)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
@@ -220,7 +196,22 @@ class DeployerBasicMode {
 	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
 	 */
 	compileASC(name: string, scTmplParams?: SCParams, force?: boolean): Promise<ASCCache> {
-		return this.algoOp.ensureCompiled(name, force, scTmplParams);
+		return this.algoOp.ensureCompiled(name, "", force, scTmplParams);
+	}
+
+	/**
+	 * Return application in bytes source format
+	 * @param appName app name
+	 * @param source
+	 * @param scTmplParams
+	 * @returns application in bytes format
+	 */
+	compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceCompiled> {
+		return this.algoOp.compileApplication(appName, source, scTmplParams);
 	}
 
 	/**
@@ -485,8 +476,16 @@ class DeployerBasicMode {
 		}
 		return app;
 	}
-}
 
+	/**
+	 * Return receipts for each transaction in group txn
+	 * @param txns list transaction in group
+	 * @returns confirmed tx info of group
+	 */
+	async getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
+		return await this.algoOp.getReceiptTxns(txns);
+	}
+}
 /**
  * This class is what user interacts with in deploy task
  */
@@ -772,32 +771,25 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
 	/**
 	 * Deploys Algorand Stateful Smart Contract
-	 * @param approvalProgram filename which has approval program
-	 * @param clearProgram filename which has clear program
-	 * @param flags AppDeploymentFlags
 	 * @param payFlags Transaction Params
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
-	 * @param appName name of the app to deploy. This name (if passed) will be used as
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: Account,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
-		const name = appName ?? approvalProgram + "-" + clearProgram;
+		const name = appDefinition.appName;
 
 		this.assertNoApp(name);
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.deployApp(
-				approvalProgram,
-				clearProgram,
-				flags,
+				creator,
+				appDefinition,
 				payFlags,
 				this.txWriter,
 				scTmplParams
@@ -818,8 +810,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Account from which call needs to be made
 	 * @param payFlags Transaction Flags
 	 * @param appID ID of the application being configured or empty if creating
-	 * @param newApprovalProgram New Approval Program filename
-	 * @param newClearProgram New Clear Program filename
+	 * @param newAppCode new source of application
 	 * @param flags Optional parameters to SSC (accounts, args..)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
@@ -827,34 +818,33 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	 * the checkpoint "key", and app information will be associated with this name
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
 		this.assertCPNotDeleted({
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
+			appName,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
-		const cpKey = appName ?? newApprovalProgram + "-" + newClearProgram;
+		const cpKey = appName;
 
 		let sscInfo = {} as rtypes.AppInfo;
 		try {
 			sscInfo = await this.algoOp.updateApp(
+				appName,
 				sender,
 				payFlags,
 				appID,
-				newApprovalProgram,
-				newClearProgram,
+				newAppCode,
 				flags,
 				this.txWriter,
 				scTmplParams
@@ -868,6 +858,22 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
 		this.registerSSCInfo(cpKey, sscInfo);
 		return sscInfo;
+	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactions transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters).
+	 * If `ExecParams` are used, the deployer will connect to appropriate accounts / wallets to sign
+	 * constructed transactions.
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<TxnReceipt[]> {
+		return await executeTx(this, transactions);
 	}
 }
 
@@ -992,9 +998,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scInitParam?: unknown,
 		appName?: string
@@ -1010,18 +1015,16 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 	 * @param sender Sender account
 	 * @param payFlags transaction parameters
 	 * @param appID application index
-	 * @param newApprovalProgram new approval program name
-	 * @param newClearProgram new clear program name
 	 * @param flags SSC optional flags
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
 	 *     (used only when compiling PyTEAL to TEAL)
 	 */
 	async updateApp(
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		scTmplParams?: SCParams
 	): Promise<rtypes.AppInfo> {
@@ -1029,20 +1032,34 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
 			fromAccount: sender,
-			newApprovalProgram: newApprovalProgram,
-			newClearProgram: newClearProgram,
+			appName,
+			newAppCode,
 			appID: appID,
 			payFlags: {},
 		});
 		return await this.algoOp.updateApp(
+			appName,
 			sender,
 			payFlags,
 			appID,
-			newApprovalProgram,
-			newClearProgram,
+			newAppCode,
 			flags,
 			this.txWriter,
 			scTmplParams
 		);
+	}
+	/**
+	 * Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactions transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	async executeTx(
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	): Promise<TxnReceipt[]> {
+		return await executeTx(this, transactions);
 	}
 }

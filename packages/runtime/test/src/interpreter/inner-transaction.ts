@@ -6,8 +6,8 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, TransactionTypeEnum } from "../../../src/lib/constants";
-import { AccountAddress, AccountStoreI, ExecutionMode } from "../../../src/types";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { AccountAddress, AccountStoreI, ExecutionMode, TxOnComplete } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -76,10 +76,10 @@ describe("Inner Transactions", function () {
 		reset();
 	};
 
-	const executeTEAL = (tealCode: string): void => {
+	const executeTEAL = (tealCode: string, onComplete = TxOnComplete.NoOp): void => {
 		// reset interpreter
 		reset();
-
+		interpreter.runtime.ctx.tx.apan = Number(onComplete);
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
@@ -282,6 +282,28 @@ describe("Inner Transactions", function () {
 			expectRuntimeError(
 				() => executeTEAL(tealCode),
 				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+			);
+		});
+
+		it("should fail: issue itxn when clear state txn", function () {
+			// increase balance
+			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
+			if (acc) {
+				acc.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE) * 10n;
+			}
+
+			interpreter.runtime.ctx.tx.apan = Number(TxOnComplete.ClearState);
+			tealCode = `
+			itxn_begin
+			byte "pay"
+			itxn_field Type
+			itxn_submit
+			int 1
+			`;
+
+			expectRuntimeError(
+				() => executeTEAL(tealCode, TxOnComplete.ClearState),
+				RUNTIME_ERRORS.TEAL.ISSUE_ITXN_WHEN_CLEAR_PROGRAM
 			);
 		});
 
@@ -669,6 +691,7 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should test ASA optin, asa transfer`, function () {
+			TXN_OBJ.apas = [1, 9]; // set foreign asset
 			const optin = `
         itxn_begin
         int axfer
@@ -682,13 +705,17 @@ describe("Inner Transactions", function () {
         itxn_submit
         int 1
       `;
-
+			const acc = interpreter.runtime.ctx.state.accounts.get(appAccAddr);
+			if (acc) {
+				acc.amount = 1000000n;
+			}
 			// does not exist
 			expectRuntimeError(() => executeTEAL(optin), RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND);
 
 			let assetID = 0;
 			const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 			if (elonAcc) {
+				elonAcc.amount = 1000000n;
 				assetID = interpreter.runtime.ctx.deployASADef(
 					"test-asa",
 					{ total: 10, decimals: 0, unitName: "TASA" },
@@ -845,7 +872,7 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should create new holding in appAccount`, function () {
-			interpreter.runtime.ctx.optIntoASA(assetID1, appAccAddr, {});
+			interpreter.runtime.ctx.optInToASA(assetID1, appAccAddr, {});
 			// increase asa balance to 5
 			const holding = interpreter.runtime.ctx.state.accounts
 				.get(appAccAddr)
@@ -879,7 +906,7 @@ describe("Inner Transactions", function () {
 
 		it(`should fail: insufficient balance`, function () {
 			// optin by txn Account1
-			interpreter.runtime.ctx.optIntoASA(assetID1, johnAddr, {});
+			interpreter.runtime.ctx.optInToASA(assetID1, johnAddr, {});
 
 			const teal =
 				`
@@ -1048,7 +1075,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
-			const lastAssetID = interpreter.runtime.ctx.createdAssetID;
+			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
 
 			const create = `
         itxn_begin
@@ -1071,8 +1098,8 @@ describe("Inner Transactions", function () {
       `;
 
 			assert.doesNotThrow(() => executeTEAL(create));
-			const createdAssetID = interpreter.runtime.ctx.createdAssetID;
-			assert.equal(createdAssetID, lastAssetID + 1);
+			const createdAssetID = lastAssetID + 1;
+			assert.equal(createdAssetID, interpreter.runtime.ctx.state.assetCounter);
 
 			const freeze = `
         itxn_begin
@@ -1098,7 +1125,7 @@ describe("Inner Transactions", function () {
 			expectRuntimeError(() => executeTEAL(freeze), RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN);
 
 			// should freeze now
-			interpreter.runtime.optIntoASA(createdAssetID, johnAddr, {});
+			interpreter.runtime.optInToASA(createdAssetID, johnAddr, {});
 			assert.doesNotThrow(() => executeTEAL(freeze));
 
 			// verify freeze
@@ -1145,10 +1172,10 @@ describe("Inner Transactions", function () {
 
 			if (logs !== undefined) {
 				for (let i = 0; i < 30; ++i) {
-					assert.equal(logs[i], "a");
+					assert.deepEqual(logs[i], new Uint8Array([97]));
 				}
-				assert.equal(logs[30], "b");
-				assert.equal(logs[31], "c");
+				assert.deepEqual(logs[30], new Uint8Array([98]));
+				assert.deepEqual(logs[31], new Uint8Array([99]));
 			}
 		});
 
@@ -1204,7 +1231,7 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Teal v6 update", function () {
-		this.beforeAll(() => {
+		this.beforeEach(() => {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
@@ -1257,7 +1284,7 @@ describe("Inner Transactions", function () {
 
 		describe("RekeyTo", () => {
 			let rekeyProgram: string;
-			this.beforeAll(() => {
+			this.beforeEach(() => {
 				setUpInterpreter(6);
 				rekeyProgram = `
           itxn_begin

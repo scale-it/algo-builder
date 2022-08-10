@@ -57,12 +57,14 @@ class Context {
 		// const daoApprovalProgram = getProgram(approvalProgram, , false);
 		// const daoClearProgram = getProgram(clearStateProgram, {}, false);
 
-		const daoPlaceholderParam = { ARG_GOV_TOKEN: this.govTokenID };
-		const appCreationFlags = {
-			sender: sender.account,
+		const appDef = {
+			appName: "daoApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: daoApprovalProgramFileName,
+			clearProgramFilename: daoClearStateProgramFileName,
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 		};
 
@@ -70,20 +72,21 @@ class Context {
 		const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 		const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 		const url = "www.my-url.com";
+		const daoName = "DAO";
 		const daoAppArgs = [
 			`int:${deposit}`,
 			`int:${minSupport}`,
 			`int:${minDuration}`,
 			`int:${maxDuration}`,
 			`str:${url}`,
+			`str:${daoName}`,
+			`int:${this.govTokenID}`,
 		];
 
 		this.daoAppID = this.runtime.deployApp(
-			daoApprovalProgramFileName,
-			daoClearStateProgramFileName,
-			{ ...appCreationFlags, appArgs: daoAppArgs },
-			{},
-			daoPlaceholderParam
+			sender.account,
+			{ ...appDef, appArgs: daoAppArgs, foreignAssets: [this.govTokenID] },
+			{}
 		).appID;
 
 		// initialize app account as DAO's deposit acc
@@ -169,7 +172,7 @@ class Context {
 
 	// Opt-In account to ASA (Gov Token)
 	optInToGovToken(address) {
-		this.runtime.optIntoASA(this.govTokenID, address, {});
+		this.runtime.optInToASA(this.govTokenID, address, {});
 	}
 
 	// Opt-In to DAO App by address

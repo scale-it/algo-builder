@@ -44,7 +44,8 @@ export interface TxParams {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// Any data up to 1000 bytes.
-	note?: string;
+	note?: string | Uint8Array;
+	// base64 encoded string
 	noteb64?: string;
 	// When set, it indicates that the transaction is requesting
 	// that the Sender account should be closed, and all remaining
@@ -156,6 +157,8 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
+export type Lsig = SignWithLsig;
+
 export type Sign = SignWithSk | SignWithLsig;
 
 export type BasicParams = Sign & {
@@ -169,30 +172,63 @@ export type DeployASAParam = BasicParams & {
 	overrideAsaDef?: Partial<ASADef>;
 };
 
-export type DeployAppParam = BasicParams &
-	AppOptionalFlags & {
-		type: TransactionType.DeployApp;
-		approvalProgram: string;
-		clearProgram: string;
-		localInts: number;
-		localBytes: number;
-		globalInts: number;
-		globalBytes: number;
-		extraPages?: number;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
-	};
+export enum MetaType {
+	FILE,
+	SOURCE_CODE,
+	BYTES,
+}
+export type StorageConfig = {
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+	appName: string; // name of app to store info against in checkpoint, now it's required
+};
+
+export type SourceFile = {
+	metaType: MetaType.FILE;
+	approvalProgramFilename: string;
+	clearProgramFilename: string;
+};
+
+export type SourceCode = {
+	metaType: MetaType.SOURCE_CODE;
+	approvalProgramCode: string;
+	clearProgramCode: string;
+};
+
+// Compiled bytes of a TEAL program.
+export type SourceCompiled = {
+	metaType: MetaType.BYTES;
+	approvalProgramBytes: Uint8Array;
+	clearProgramBytes: Uint8Array;
+};
+
+export type SmartContract = SourceFile | SourceCode | SourceCompiled;
+
+export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
+
+export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
+
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceCompiled;
+
+export type AppDefinition =
+	| AppDefinitionFromFile
+	| AppDefinitionFromSource
+	| AppDefinitionFromSourceCompiled;
+
+export type DeployAppParam = BasicParams & {
+	type: TransactionType.DeployApp;
+	appDefinition: AppDefinition;
+};
 
 export type UpdateAppParam = BasicParams &
 	AppOptionalFlags & {
 		type: TransactionType.UpdateApp;
 		appID: number;
-		newApprovalProgram: string;
-		newClearProgram: string;
-		approvalProg?: Uint8Array;
-		clearProg?: Uint8Array;
-		appName?: string; // name of app to store info against in checkpoint
+		newAppCode: SmartContract;
+		appName: string; // name of app to store info against in checkpoint
 	};
 
 export type AppCallsParam = BasicParams &
@@ -328,12 +364,25 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 	const res = isSDKTransaction((object as TransactionAndSign).transaction);
 	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }
+// This function checks if given object implements `ExecParams` class
+export function isExecParams(object: unknown): object is ExecParams {
+	if (object === undefined || object === null) {
+		return false;
+	}
+	const props = ["payFlags", "sign"];
+	let res = Object.prototype.hasOwnProperty.call(object, "type");
+	for (const prop of props) {
+		res = res && Object.prototype.hasOwnProperty.call(object, prop);
+	}
+	return res;
+}
 
 /* Wallet Connect types */
 
 export enum ChainType {
 	MainNet = "MainNet",
 	TestNet = "TestNet",
+	BetaNet = "BetaNet",
 }
 
 export interface SessionConnectResponse {
@@ -368,4 +417,19 @@ export interface TransactionInGroup {
 	signers?: string | string[];
 	msig?: WalletMultisigMetadata;
 	message?: string;
+}
+
+export interface AlgodTokenHeader {
+	"X-Algo-API-Token": string;
+}
+
+export interface CustomTokenHeader {
+	[headerName: string]: string;
+}
+
+export interface HttpNetworkConfig {
+	server: string; // with optional http o https prefix
+	port: string | number;
+	token: string | AlgodTokenHeader | CustomTokenHeader;
+	httpHeaders?: { [name: string]: string };
 }

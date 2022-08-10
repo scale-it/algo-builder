@@ -6,7 +6,7 @@ layout: splash
 
 [TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a stack based language that executes inside Algorand transactions to program logic signatures and smart contracts. `@algo-builder/runtime` provides a TypeScript and JavaScript, lightweight runtime and TEAL interpreter to test Algorand transactions, ASA and Smart Contracts.
 
-You can test your smart contracts and flows by starting a local node (see our [infrastructure](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) guide) and creating [_deploy_ and _run_](<(./deployer.md)>) scripts to automate the process of creating dapps and running them against the official Algorand implementation.
+You can test your smart contracts and flows by starting a local node (see our [infrastructure](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) guide) and creating [_deploy_ and _run_](./deployer.md) scripts to automate the process of creating dapps and running them against the official Algorand implementation.
 
 However, this is not efficient for sustainable development. You need a proper automated test process, we strongly advice you to use our `@algo-builder/runtime` package and the testing framework. It essentially brings the unit and integration testing experience form traditional software development to Algorand smart contracts development.
 
@@ -340,10 +340,12 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
 
   	// create new app
   	txnParams.appId = await runtime.deployApp(
-  		"counter-approval.teal",
-  		"clear-program",
+  		john.account, // creator
   		{
-  			sender: john.account,
+        appName: "CounterApp",
+        metaType: MetaType.FILE,
+  		  approvalProgramFilename: "counter-approval.teal",
+  		  clearProgramFilename: "clear-program",
   			globalBytes: 32,
   			globalInts: 32,
   			localBytes: 8,

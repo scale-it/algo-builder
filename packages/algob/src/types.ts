@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2, Transaction } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -443,7 +443,10 @@ export interface Deployer {
 	/**
 	 * Creates and deploys ASA defined in asa.yaml.
 	 * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
-	 * @flags  deployment flags */
+	 * @flags  deployment flags. Required.
+	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign
+	 * transaction) */
 	deployASA: (
 		name: string,
 		flags: rtypes.ASADeploymentFlags,
@@ -455,7 +458,9 @@ export interface Deployer {
 	 * @name ASA name
 	 * @asaDef ASA definitions
 	 * @flags deployment flags
-	 */
+	 *   `flags.creator` must be defined - it's an account which will sign the constructed transaction.
+	 * NOTE: support for rekeyed accounts is limited (creator must have updated sk to properly sign
+	 * transaction) */
 	deployASADef: (
 		name: string,
 		asaDef: wtypes.ASADef,
@@ -488,6 +493,13 @@ export interface Deployer {
 	 * @param rawTxns Signed Transaction(s)
 	 */
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+
+	/**
+	 * Return receipts for each transaction in group txn
+	 * @param txns list transaction in group
+	 * @returns confirmed tx info of group
+	 */
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 
 	/**
 	 * Funds logic signature account (Contract Account).
@@ -541,7 +553,8 @@ export interface Deployer {
 
 	/**
 	 * Deploys stateful smart contract.
-	 * @approvalProgram  approval program filename (must be present in assets folder)
+	 * @creator is the signer of the transaction.
+	 * @appDefinition is an object providing details about approval and clear program.
 	 * @clearProgram  clear program filename (must be present in assets folder)
 	 * @flags  AppDeploymentFlags
 	 * @payFlags  Transaction Parameters
@@ -551,9 +564,8 @@ export interface Deployer {
 	 * the checkpoint "key", and app information will be stored agaisnt this name
 	 */
 	deployApp: (
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinitionFromFile,
 		payFlags: wtypes.TxParams,
 		scTmplParams?: SCParams,
 		appName?: string
@@ -573,14 +585,13 @@ export interface Deployer {
 	 * the checkpoint "key", and app information will be stored agaisnt this name
 	 */
 	updateApp: (
+		appName: string,
 		sender: algosdk.Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
-		scTmplParams?: SCParams,
-		appName?: string
+		scTmplParams?: SCParams
 	) => Promise<rtypes.AppInfo>;
 
 	/**
@@ -653,10 +664,6 @@ export interface Deployer {
 	loadMultiSig: (name: string) => Promise<LogicSig>;
 
 	/**
-	 * Queries a stateful smart contract info from checkpoint. */
-	getAppByFile: (nameApproval: string, nameClear: string) => rtypes.AppInfo | undefined;
-
-	/**
 	 * Queries a stateful smart contract info from checkpoint name
 	 * passed by user during deployment */
 	getApp: (appName: string) => rtypes.AppInfo;
@@ -677,12 +684,6 @@ export interface Deployer {
 	loadLogicByFile: (name: string, scTmplParams?: SCParams) => Promise<LogicSigAccount>;
 
 	/**
-	 * Alias to `this.compileASC`
-	 * @deprecated this function will be removed in the next release.
-	 */
-	ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>;
-
-	/**
 	 * Returns ASCCache (with compiled code)
 	 * @param name: Smart Contract filename (must be present in assets folder)
 	 * @param scTmplParams: scTmplParams: Smart contract template parameters
@@ -690,6 +691,12 @@ export interface Deployer {
 	 * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
 	 */
 	compileASC: (name: string, scTmplParams?: SCParams, force?: boolean) => Promise<ASCCache>;
+
+	compileApplication: (
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	) => Promise<wtypes.SourceCompiled>;
 
 	/**
 	 * Returns cached program (from artifacts/cache) `ASCCache` object by app/lsig name.
@@ -704,6 +711,18 @@ export interface Deployer {
 	 * @param execParams Transaction execution parameters
 	 */
 	assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void;
+
+	/** Execute single transaction or group of transactions (atomic transaction)
+	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+	 * will be signed and sent to network. User can use SDK functions to create transactions.
+	 * Note: If passing transaction object a signer/s must be provided.
+	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+	 * or TransactionAndSign object(SDK transaction object and signer parameters)
+	 */
+	executeTx: (
+		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
+	) => Promise<TxnReceipt[]>;
 }
 
 // ************************
@@ -761,6 +780,12 @@ export interface ConfirmedTxInfo {
 	"confirmed-round": number;
 	"asset-index": number;
 	"application-index": number;
-	"global-state-delta": string;
-	"local-state-delta": string;
+	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
+	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
+	"inner-txns"?: ConfirmedTxInfo;
+	txn: algosdk.EncodedSignedTransaction;
+}
+
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
 }

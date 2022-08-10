@@ -1,10 +1,10 @@
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await executeTx(deployer, txnParams);
-		else await executeTx(deployer, [txnParams]);
+		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
+		else await deployer.executeTx([txnParams]);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 	}
@@ -34,7 +34,7 @@ exports.fundAccount = async function (deployer, account) {
 	}
 
 	try {
-		await executeTx(deployer, params);
+		await deployer.executeTx(params);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error.text : e);
 	}

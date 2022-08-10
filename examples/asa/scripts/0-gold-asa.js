@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { mkParam } = require("./transfer/common");
 /*
 	Create "gold" Algorand Standard Asset (ASA).
@@ -20,15 +20,20 @@ async function run(runtimeEnv, deployer) {
 	// Accounts can only be active if they poses minimum amont of ALGOs.
 	// Here we fund the accounts with 5e6, 5e6 and 1e6 micro AlGOs.
 	const message = "funding account";
+	// or encode the text manually if you use SDK transactions directly:
+	// let note = new TextEncoder().encode(message); // note must be Uint8Array
+
 	const promises = [
-		executeTx(deployer, mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })),
-		executeTx(deployer, mkParam(masterAccount, john.addr, 5e6, { note: message })),
-		executeTx(deployer, mkParam(masterAccount, bob.addr, 1e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, goldOwner.addr, 5e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, john.addr, 5e6, { note: message })),
+		deployer.executeTx(mkParam(masterAccount, bob.addr, 1e6, { note: message })),
 	];
 	await Promise.all(promises);
 
 	// create an assetMetadataHash as Uint8Array
-	const metadataHash = crypto.createHash("sha256").update("some content").digest();
+	const metadataHash = new Uint8Array(
+		crypto.createHash("sha256").update("some content").digest()
+	);
 	// or UTF-8 string:
 	// let metadataHash = "this must be 32 chars long text."
 	// or from hex:

@@ -19,7 +19,6 @@ import { assertValidSchema } from "./lib/stateful";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppLocalStateM,
 	AssetHoldingM,
 	CreatedAppM,
@@ -334,17 +333,10 @@ export class AccountStore implements AccountStoreI {
 	 * Deploy application in account's state
 	 * check maximum account creation limit
 	 * @param appID application index
-	 * @param params SSCDeployment Flags
-	 * @param approvalProgram application approval program
-	 * @param clearProgram application clear program
+	 * @param appDefinition application definition metadata
 	 * NOTE - approval and clear program must be the TEAL code as string
 	 */
-	addApp(
-		appID: number,
-		params: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string
-	): CreatedAppM {
+	addApp(appID: number, appDefinition: types.AppDefinitionFromSource): CreatedAppM {
 		if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
 				address: this.address,
@@ -356,9 +348,9 @@ export class AccountStore implements AccountStoreI {
 		// https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 		this.minBalance +=
 			APPLICATION_BASE_FEE +
-			SSC_VALUE_UINT * params.globalInts +
-			SSC_VALUE_BYTES * params.globalBytes;
-		const app = new App(appID, params, approvalProgram, clearProgram);
+			SSC_VALUE_UINT * appDefinition.globalInts +
+			SSC_VALUE_BYTES * appDefinition.globalBytes;
+		const app = new App(this.address, appID, appDefinition);
 		this.createdApps.set(app.id, app.attributes);
 		return app;
 	}
@@ -453,27 +445,26 @@ class App {
 
 	// NOTE - approval and clear program must be the TEAL code as string
 	constructor(
+		creatorAddr: AccountAddress,
 		appID: number,
-		params: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string
+		appDefinition: types.AppDefinitionFromSource
 	) {
 		this.id = appID;
 		const base: BaseModel = new BaseModelI();
 		this.attributes = {
-			"approval-program": approvalProgram,
-			"clear-state-program": clearProgram,
-			creator: params.sender.addr,
+			"approval-program": appDefinition.approvalProgramCode,
+			"clear-state-program": appDefinition.clearProgramCode,
+			creator: creatorAddr,
 			"global-state": new Map<string, StackElem>(),
 			"global-state-schema": {
 				...base,
-				numByteSlice: params.globalBytes,
-				numUint: params.globalInts,
+				numByteSlice: appDefinition.globalBytes,
+				numUint: appDefinition.globalInts,
 			},
 			"local-state-schema": {
 				...base,
-				numByteSlice: params.localBytes,
-				numUint: params.localInts,
+				numByteSlice: appDefinition.localBytes,
+				numUint: appDefinition.localInts,
 			},
 		};
 	}
@@ -547,12 +538,12 @@ export class BaseModelI implements BaseModel {
 //list of 16 predefined accounts
 export const defaultSDKAccounts = {
 	alice: {
-		addr: "PGULB7GWBUYTL7OTKA4QPFWAXWOC4VFMF3VOLS4BOKWH4RNR26Y35J32ZI",
+		addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 		sk: new Uint8Array([
-			253, 135, 164, 87, 131, 97, 35, 35, 62, 165, 40, 193, 119, 96, 152, 236, 218, 70, 137, 4,
-			158, 6, 11, 87, 173, 60, 37, 109, 53, 193, 73, 177, 121, 168, 176, 252, 214, 13, 49, 53,
-			253, 211, 80, 57, 7, 150, 192, 189, 156, 46, 84, 172, 46, 234, 229, 203, 129, 114, 172,
-			126, 69, 177, 215, 177,
+			216, 208, 24, 102, 119, 86, 131, 225, 119, 183, 127, 17, 94, 11, 60, 39, 234, 161, 247,
+			147, 158, 200, 187, 99, 233, 40, 118, 215, 63, 134, 206, 221, 32, 238, 110, 24, 193, 33,
+			202, 182, 223, 192, 249, 77, 61, 151, 217, 220, 224, 100, 83, 214, 173, 82, 215, 92, 216,
+			93, 91, 53, 216, 110, 17, 18,
 		]),
 	},
 	bob: {

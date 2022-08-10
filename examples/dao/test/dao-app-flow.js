@@ -1,4 +1,3 @@
-const { convert } = require("@algo-builder/algob");
 const { Runtime, AccountStore } = require("@algo-builder/runtime");
 const { types, parsing } = require("@algo-builder/web");
 const { assert } = require("chai");
@@ -20,7 +19,6 @@ const {
 	executeBefore,
 } = require("../scripts/run/common/tx-params");
 const { getApplicationAddress } = require("algosdk");
-const { aliceAcc } = require("@algo-builder/algob/test/mocks/account");
 
 const minBalance = 10e6; // 10 ALGO's
 const initialBalance = 200e6;
@@ -42,28 +40,30 @@ const initialBalance = 200e6;
  * https://paper.dropbox.com/doc/Algo-DAO--BTR~tKj8P788NMZqnVfKwS7BAg-ncLdytuFa7EJrRerIASSl
  */
 describe("DAO test", function () {
-	const master = new AccountStore(1000e6);
-	let creator = new AccountStore(initialBalance);
-	let proposerA = new AccountStore(initialBalance);
-	let proposerB = new AccountStore(initialBalance);
-	let voterA = new AccountStore(initialBalance);
-	let voterB = new AccountStore(initialBalance);
+	let master;
+	let creator;
+	let proposerA;
+	let proposerB;
+	let voterA;
+	let voterB;
 	let depositAcc; // runtime.account of deposit
-	let daoFundLsigAcc = new AccountStore(initialBalance);
-	let proposalALsigAcc = new AccountStore(initialBalance);
-	let proposalBLsigAcc = new AccountStore(initialBalance);
+	let daoFundLsigAcc;
+	let proposalALsigAcc;
+	let proposalBLsigAcc;
 	let alice;
 
 	let runtime;
-	let appCreationFlags; // deploy app params (sender, storage schema)
+	let appStorageConfig; // deploy app params (sender, storage schema)
 	let appID; // DAO app
 	let govTokenID;
 	let daoFundLsig;
 	let proposalALsig;
 	let proposalBLsig;
 
-	this.beforeAll(async function () {
-		runtime = new Runtime([
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+		[
+			alice,
 			master,
 			creator,
 			proposerA,
@@ -73,16 +73,16 @@ describe("DAO test", function () {
 			daoFundLsigAcc,
 			proposalALsigAcc,
 			proposalBLsigAcc,
-		]);
-		[alice] = runtime.defaultAccounts();
+		] = runtime.defaultAccounts();
 
-		appCreationFlags = {
-			sender: creator.account,
+		appStorageConfig = {
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 		};
+
+		setUpDAO();
 	});
 
 	const getGlobal = (key) => runtime.getGlobalState(appID, key);
@@ -106,9 +106,10 @@ describe("DAO test", function () {
 	const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
+	const daoName = "DAO";
 
 	function setUpDAO() {
-		govTokenID = runtime.addAsset("gov-token", {
+		govTokenID = runtime.deployASA("gov-token", {
 			creator: { ...creator.account, name: "dao-creator" },
 		}).assetIndex;
 
@@ -118,18 +119,25 @@ describe("DAO test", function () {
 			`int:${minDuration}`,
 			`int:${maxDuration}`,
 			`str:${url}`,
+			`str:${daoName}`,
+			`int:${govTokenID}`,
 		];
 
-		const approvalFileName = "dao-app-approval.py";
-		const clearFilename = "dao-app-clear.py";
-		const placeholderParam = { ARG_GOV_TOKEN: govTokenID };
+		const approvalProgramFilename = "dao-app-approval.py";
+		const clearProgramFilename = "dao-app-clear.py";
 		// deploy application
 		appID = runtime.deployApp(
-			approvalFileName,
-			clearFilename,
-			{ ...appCreationFlags, appArgs: daoAppArgs },
-			{},
-			placeholderParam
+			creator.account,
+			{
+				...appStorageConfig,
+				appName: "daoApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appArgs: daoAppArgs,
+				foreignAssets: [govTokenID],
+			},
+			{}
 		).appID;
 
 		// Fund DAO app account with some ALGO
@@ -179,6 +187,8 @@ describe("DAO test", function () {
 		assert.deepEqual(getGlobal("min_duration"), BigInt(minDuration));
 		assert.deepEqual(getGlobal("max_duration"), BigInt(maxDuration));
 		assert.deepEqual(getGlobal("url"), parsing.stringToBytes(url));
+		assert.deepEqual(getGlobal("dao_name"), parsing.stringToBytes(daoName));
+		assert.deepEqual(getGlobal("gov_token_id"), BigInt(govTokenID));
 
 		// opt in deposit account (dao app account) to gov_token asa
 		const optInToGovASAParam = [
@@ -197,7 +207,7 @@ describe("DAO test", function () {
 
 		// optIn to ASA(Gov Token) by accounts
 		for (const acc of [proposerA, proposerB, voterA, voterB, daoFundLsigAcc]) {
-			runtime.optIntoASA(govTokenID, acc.address, {});
+			runtime.optInToASA(govTokenID, acc.address, {});
 		}
 		syncAccounts();
 
@@ -258,8 +268,6 @@ describe("DAO test", function () {
 		 *   a) optIn to Gov Token by proposalALsig
 		 *   b) Call to DAO app by proposalALsig + asset transfer transaction from depositAcc -> proposalALsig
 		 */
-
-		setUpDAO();
 
 		/* --------------------  Add proposal  -------------------- */
 
@@ -556,8 +564,6 @@ describe("DAO test", function () {
 		 * + VoterA tries to voter again with newly locked tokens (fail)
 		 */
 
-		setUpDAO();
-
 		/* --------------------  Add proposal  -------------------- */
 
 		// optIn to DAO by proposalALsig
@@ -704,8 +710,6 @@ describe("DAO test", function () {
 		 * + VoterA tries to vote for proposalB (passes)
 		 */
 
-		setUpDAO();
-
 		/* --------------------  Add proposal(s)  -------------------- */
 
 		// optIn to DAO by proposalALsig & proposalBLsig
@@ -833,7 +837,6 @@ describe("DAO test", function () {
 		 * + Add proposalA
 		 * + Close proposalA (passes if past execution)
 		 */
-		setUpDAO();
 
 		/* --------------------  Add proposal  -------------------- */
 
@@ -986,7 +989,7 @@ describe("DAO test", function () {
 		);
 
 		//verify that the funds from proposalLsig cannot be withdrawed to an non-owner account
-		runtime.optIntoASA(govTokenID, alice.address, {});
+		runtime.optInToASA(govTokenID, alice.address, {});
 		[alice] = runtime.defaultAccounts();
 		const withdrawTxFail = withdrawTx.map((item) => ({
 			...item,

@@ -1,11 +1,10 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const creatorAccount = deployer.accountsByName.get("alice");
 
-	await executeTx(deployer, {
+	await deployer.executeTx({
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -41,7 +40,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	console.log("Deleting Application transaction in process");
-	await executeTx(deployer, txGroup);
+	await deployer.executeTx(txGroup);
 	console.log("Application Deleted and Fund transferred to creator account");
 }
 

@@ -1,4 +1,4 @@
-import {
+import algosdk, {
 	Algodv2,
 	getApplicationAddress,
 	LogicSigAccount,
@@ -39,12 +39,78 @@ export const mockSuggestedParam: SuggestedParams = {
 	genesisHash: "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
 };
 
+const account = algosdk.generateAccount();
+const addr = algosdk.decodeAddress(account.addr);
+
+//MOCK Algorand Encoded Transaction
+export const TXN_OBJ: algosdk.EncodedTransaction = {
+	snd: Buffer.from(addr.publicKey),
+	rcv: Buffer.from(addr.publicKey),
+	arcv: Buffer.from(addr.publicKey),
+	fee: 1000,
+	amt: 20200,
+	aamt: 100,
+	fv: 258820,
+	lv: 259820,
+	note: Buffer.from("Note"),
+	gen: "default-v1",
+	gh: Buffer.from("default-v1"),
+	lx: Buffer.from(""),
+	aclose: Buffer.from(addr.publicKey),
+	close: Buffer.from(addr.publicKey),
+	votekey: Buffer.from("voteKey"),
+	selkey: Buffer.from("selectionKey"),
+	votefst: 123,
+	votelst: 345,
+	votekd: 1234,
+	xaid: 1101,
+	caid: 101,
+	apar: {
+		t: 10,
+		dc: 0,
+		df: false,
+		m: Buffer.from(addr.publicKey),
+		r: Buffer.from(addr.publicKey),
+		f: Buffer.from(addr.publicKey),
+		c: Buffer.from(addr.publicKey),
+		un: "tst",
+		an: "testcoin",
+		au: "testURL",
+		am: Buffer.from("test-hash"),
+	},
+	fadd: Buffer.from(addr.publicKey),
+	faid: 202,
+	afrz: false,
+	apid: 1828,
+	apan: 0,
+	apap: Buffer.from("approval"),
+	apsu: Buffer.from("clear"),
+	apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
+	apat: [],
+	apfa: [1828, 1002, 1003],
+	apas: [2001, 2002, 2003],
+	type: "pay",
+	apls: {
+		nui: 1,
+		nbs: 2,
+	},
+	apgs: {
+		nui: 3,
+		nbs: 4,
+	},
+	rekey: Buffer.from(addr.publicKey),
+	grp: Buffer.from("group"),
+	apep: 1,
+	nonpart: true,
+};
+
 export const mockConfirmedTx: ConfirmedTxInfo = {
 	"confirmed-round": 1,
 	"asset-index": 1,
 	"application-index": 1,
-	"global-state-delta": "string",
-	"local-state-delta": "string",
+	txn: {
+		txn: TXN_OBJ,
+	},
 };
 
 export const mockAssetInfo: modelsv2.Asset = {
@@ -139,6 +205,15 @@ export const mockApplicationResponse = {
 		"global-state": [],
 		"global-state-schema": { "num-byte-slice": 1, "num-uint": 2 },
 		"local-state-schema": { "num-byte-slice": 0, "num-uint": 1 },
+	},
+};
+
+export const mockPendingTransactionInformation = {
+	"confirmed-round": 1,
+	"asset-index": 1,
+	"application-index": 1,
+	txn: {
+		txn: TXN_OBJ,
 	},
 };
 

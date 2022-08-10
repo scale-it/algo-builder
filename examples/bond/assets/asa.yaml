@@ -6,7 +6,7 @@ bond-token-0:
   url: "url"
   # User may get "signature validation failed" from node if shorter hash is used.
   metadataHash: "12312442142141241244444411111133"
-  noteb64: "noteb64"
+  note: "deploying token"
   manager: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"

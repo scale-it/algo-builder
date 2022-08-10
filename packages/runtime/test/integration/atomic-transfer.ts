@@ -13,8 +13,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 	let john: AccountStore;
 	let alice: AccountStore;
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let assetId: number;
 	let appID: number;
 
@@ -26,15 +26,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
 		}).assetIndex;
-		approvalProgramFileName = "counter-approval.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
 
 		// deploy a new app
 		appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
+			john.account,
 			{
-				sender: john.account,
+				appName: "app",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
 				globalBytes: 32,
 				globalInts: 32,
 				localBytes: 8,
@@ -45,7 +47,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		// opt-in to app
 		runtime.optInToApp(john.address, appID, {}, {});
 		// opt-in for alice
-		runtime.optIntoASA(assetId, alice.address, {});
+		runtime.optInToASA(assetId, alice.address, {});
 		syncAccounts();
 	});
 
@@ -265,15 +267,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 	it("should not revoke asset if payment fails", () => {
 		// transfer asset to alice
-		runtime.executeTx([{
-			type: types.TransactionType.TransferAsset,
-			sign: types.SignType.SecretKey,
-			fromAccount: john.account,
-			toAccountAddr: alice.account.addr,
-			amount: 20,
-			assetID: assetId,
-			payFlags: { totalFee: 1000 },
-		}]);
+		runtime.executeTx([
+			{
+				type: types.TransactionType.TransferAsset,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: alice.account.addr,
+				amount: 20,
+				assetID: assetId,
+				payFlags: { totalFee: 1000 },
+			},
+		]);
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.RevokeAsset,
@@ -392,13 +396,15 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 	it("should fail asset payment, and algo payment if ssc call fails", () => {
 		// close out from app
-		runtime.executeTx([{
-			type: types.TransactionType.ClearApp,
-			sign: types.SignType.SecretKey,
-			fromAccount: john.account,
-			appID: appID,
-			payFlags: { totalFee: 1000 },
-		}]);
+		runtime.executeTx([
+			{
+				type: types.TransactionType.ClearApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appID,
+				payFlags: { totalFee: 1000 },
+			},
+		]);
 		syncAccounts();
 		const txGroup: types.ExecParams[] = [
 			{

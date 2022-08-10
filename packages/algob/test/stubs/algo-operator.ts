@@ -1,15 +1,23 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import { Account, Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { Account, Algodv2, LogicSigAccount, modelsv2, Transaction } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
-import { ASCCache, ConfirmedTxInfo, FundASCFlags, LsigInfo, SCParams } from "../../src/types";
+import {
+	ASCCache,
+	ConfirmedTxInfo,
+	FundASCFlags,
+	LsigInfo,
+	SCParams,
+	TxnReceipt,
+} from "../../src/types";
 import {
 	MOCK_APPLICATION_ADDRESS,
 	mockAlgod,
 	mockAssetInfo,
 	mockConfirmedTx,
+	mockPendingTransactionInformation,
 } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -31,6 +39,19 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
 	waitForConfirmation(_txID: string): Promise<ConfirmedTxInfo> {
 		return this.sendAndWait([]);
+	}
+
+	getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
+		return new Promise((resolve, rejects) => {
+			resolve([
+				{
+					...mockPendingTransactionInformation,
+					txID: algosdk.Transaction.from_obj_for_encoding(
+						mockPendingTransactionInformation.txn.txn
+					).txID(),
+				},
+			]);
+		});
 	}
 
 	async deployASA(
@@ -65,16 +86,15 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 	}
 
 	async deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: rtypes.AppDeploymentFlags,
+		creator: algosdk.Account,
+		appDefinition: wtypes.AppDefinition,
 		payFlags: wtypes.TxParams,
 		txWriter: txWriter,
 		scInitParam?: unknown,
 		appName?: string
 	): Promise<rtypes.AppInfo> {
 		return {
-			creator: String(flags.sender.addr) + "-get-address-dry-run",
+			creator: String(creator.addr) + "-get-address-dry-run",
 			applicationAccount: MOCK_APPLICATION_ADDRESS,
 			txID: "tx-id-dry-run",
 			confirmedRound: -1,
@@ -87,11 +107,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 	}
 
 	async updateApp(
+		appName: string,
 		sender: Account,
 		payFlags: wtypes.TxParams,
 		appID: number,
-		newApprovalProgram: string,
-		newClearProgram: string,
+		newAppCode: wtypes.SmartContract,
 		flags: rtypes.AppOptionalFlags,
 		txWriter: txWriter
 	): Promise<rtypes.AppInfo> {
@@ -110,6 +130,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
 	async ensureCompiled(
 		name: string,
+		source: string,
 		force?: boolean,
 		scInitParam?: unknown,
 		scParams?: SCParams
@@ -128,6 +149,18 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 				alice: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 				hash_image: "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=",
 			},
+		};
+	}
+
+	async compileApplication(
+		appName: string,
+		source: wtypes.SmartContract,
+		scTmplParams?: SCParams
+	): Promise<wtypes.SourceCompiled> {
+		return {
+			metaType: wtypes.MetaType.BYTES,
+			approvalProgramBytes: new Uint8Array(32).fill(0),
+			clearProgramBytes: new Uint8Array(32).fill(0),
 		};
 	}
 

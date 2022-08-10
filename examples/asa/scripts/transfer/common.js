@@ -1,9 +1,8 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
-		await executeTx(deployer, txnParams);
+		await deployer.executeTx(txnParams);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 	}

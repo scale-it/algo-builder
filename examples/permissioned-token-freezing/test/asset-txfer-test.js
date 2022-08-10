@@ -4,8 +4,6 @@ import { assert } from "chai";
 const { types } = require("@algo-builder/web");
 
 const minBalance = 10e6; // 10 ALGO's
-const aliceAddr = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
-const bobAddr = "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ";
 const ACCRED_LEVEL = "Accred-Level";
 const CLAWBACK_ESCROW_PY = "clawback-escrow.py";
 describe("Test for transferring asset using custom logic", function () {
@@ -15,20 +13,18 @@ describe("Test for transferring asset using custom logic", function () {
 	let escrow; // initialized later (using runtime.loadLogic)
 
 	let runtime;
-	let creationFlags;
+	let appStorageConfig;
 	let applicationId;
 	let assetId;
 	let assetDef;
-	const approvalProgramFileName = "poi-approval.teal";
-	const clearProgramFileName = "poi-clear.teal";
+	const approvalProgramFilename = "poi-approval.teal";
+	const clearProgramFilename = "poi-clear.teal";
 
-	this.beforeEach(async function () {
-		alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
-		bob = new AccountStore(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
-		runtime = new Runtime([master, alice, bob]);
+	this.beforeEach(function () {
+		runtime = new Runtime([master]);
+		[alice, bob] = runtime.defaultAccounts();
 
-		creationFlags = {
-			sender: alice.account,
+		appStorageConfig = {
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 2,
@@ -49,9 +45,9 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(assetDef.manager, alice.address);
 		assert.equal(assetDef.clawback, alice.address);
 
-		runtime.optIntoASA(assetId, bob.address, {});
-		const aliceAssetHolding = runtime.getAssetHolding(assetId, aliceAddr);
-		const bobAssetHolding = runtime.getAssetHolding(assetId, bobAddr);
+		runtime.optInToASA(assetId, bob.address, {});
+		const aliceAssetHolding = runtime.getAssetHolding(assetId, alice.address);
+		const bobAssetHolding = runtime.getAssetHolding(assetId, bob.address);
 		assert.isDefined(aliceAssetHolding);
 		assert.isDefined(bobAssetHolding);
 
@@ -62,9 +58,15 @@ describe("Test for transferring asset using custom logic", function () {
 		];
 
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			alice.account,
+			{
+				...appStorageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appName: "app",
+				appArgs: creationArgs,
+			},
 			{}
 		).appID;
 
@@ -143,7 +145,6 @@ describe("Test for transferring asset using custom logic", function () {
 			payFlags: { totalFee: 1000 },
 		};
 		runtime.executeTx([assetConfigParams]);
-
 		// verify clawback is updated & manager, freeze address is set to ""
 		assetDef = runtime.getAssetDef(assetId);
 		assert.equal(assetDef.clawback, escrowAddress);
@@ -187,8 +188,8 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(bob.getLocalState(applicationId, ACCRED_LEVEL), 2n);
 
 		/* Transfer 1000 assets from Alice to Bob (assets are revoken via clawback escrow) */
-		const prevAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
-		const prevBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
+		const prevAliceAssets = runtime.getAssetHolding(assetId, alice.address).amount;
+		const prevBobAssets = runtime.getAssetHolding(assetId, bob.address).amount;
 		const txGroup = [
 			{
 				type: types.TransactionType.CallApp,
@@ -223,8 +224,8 @@ describe("Test for transferring asset using custom logic", function () {
 		runtime.executeTx(txGroup);
 		syncAccounts();
 
-		const afterAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
-		const afterBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
+		const afterAliceAssets = runtime.getAssetHolding(assetId, alice.address).amount;
+		const afterBobAssets = runtime.getAssetHolding(assetId, bob.address).amount;
 		assert.equal(afterAliceAssets, prevAliceAssets - 1000n);
 		assert.equal(afterBobAssets, prevBobAssets + 1000n); // Bob received 1000 GLD
 	});
@@ -266,7 +267,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...alice.account, name: "alice" },
 		}).assetIndex;
-		runtime.optIntoASA(assetId, bob.address, {});
+		runtime.optInToASA(assetId, bob.address, {});
 
 		/* Create application + optIn to app */
 		const creationArgs = [
@@ -275,9 +276,15 @@ describe("Test for transferring asset using custom logic", function () {
 		];
 
 		applicationId = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, appArgs: creationArgs },
+			alice.account,
+			{
+				...appStorageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appName: "rejectApp",
+				appArgs: creationArgs,
+			},
 			{}
 		).appID;
 

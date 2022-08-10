@@ -1,5 +1,11 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { decodeAddress, modelsv2 } from "algosdk";
+import algosdk, {
+	Account as AccountSDK,
+	decodeAddress,
+	decodeSignedTransaction,
+	modelsv2,
+	SignedTransaction,
+} from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
@@ -10,17 +16,16 @@ import { getProgram, Interpreter, loadASAFile } from "./index";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
-import { transactionAndSignToExecParams } from "./lib/txn";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
 	AccountAddress,
 	AccountStoreI,
-	AppDeploymentFlags,
 	AppInfo,
 	AppOptionalFlags,
 	ASADeploymentFlags,
@@ -36,6 +41,7 @@ import {
 	State,
 	TxReceipt,
 } from "./types";
+// const nacl = require('algosdk/dist/cjs/src/nacl/naclWrappers');
 
 export class Runtime {
 	/**
@@ -62,7 +68,7 @@ export class Runtime {
 			globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
 			assetDefs: new Map<number, AccountAddress>(), // number represents assetId
 			assetNameInfo: new Map<string, ASAInfo>(),
-			appNameInfo: new Map<string, AppInfo>(),
+			appNameMap: new Map<string, AppInfo>(),
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
@@ -226,6 +232,19 @@ export class Runtime {
 	}
 
 	/**
+	 * Ensure no duplicate transaction in group txn
+	 * @param gtxns group transaction
+	 */
+	assertNoDuplicateTransaction(gtxns: EncTx[]): void {
+		for (const txn of gtxns) {
+			const isDuplicate = gtxns.filter((anotherTxn) => anotherTxn.txID === txn.txID).length > 1;
+			if (isDuplicate) {
+				throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.TRANSACTION_ALREADY_IN_LEDGER);
+			}
+		}
+	}
+
+	/**
 	 * set current round with timestamp for a block
 	 * @param r current round
 	 * @param timestamp block's timestamp
@@ -313,7 +332,7 @@ export class Runtime {
 
 	/**
 	 * Returns asset creator account or throws error is it doesn't exist
-	 * @param Asset Index
+	 * @param assetId Index
 	 */
 	getAssetAccount(assetId: number): AccountStoreI {
 		const addr = this.store.assetDefs.get(assetId);
@@ -350,7 +369,16 @@ export class Runtime {
 	 * @param clear
 	 */
 	getAppInfoFromName(approval: string, clear: string): AppInfo | undefined {
-		return this.store.appNameInfo.get(approval + "-" + clear);
+		return this.store.appNameMap.get(approval + "-" + clear);
+	}
+
+	/**
+	 * Queries app id by app name from global state.
+	 * Returns undefined if app is not found.
+	 * @param appName
+	 */
+	getAppByName(appName: string): AppInfo | undefined {
+		return this.store.appNameMap.get(appName);
 	}
 
 	/**
@@ -381,40 +409,49 @@ export class Runtime {
 	}
 
 	/**
-	 * Creates new transaction object (tx, gtxs) from given txnParams
+	 * Creates new transaction object (tx, gtxs) from given txnParams and signes it
 	 * @param txnParams : Transaction parameters for current txn or txn Group
-	 * @returns: [current transaction, transaction group]
+	 * @returns: [current SignedTransaction, SignedTransaction group]
 	 */
-	createTxnContext(txnParams: types.ExecParams | types.ExecParams[]): [EncTx, EncTx[]] {
+	/* eslint-disable sonarjs/cognitive-complexity */
+	createTxnContext(txnParams: types.ExecParams[]): [SignedTransaction, SignedTransaction[]] {
 		// if txnParams is array, then user is requesting for a group txn
-		if (Array.isArray(txnParams)) {
-			if (txnParams.length > 16) {
-				throw new Error("Maximum size of an atomic transfer group is 16");
-			}
-
-			const txns = [];
-			for (const txnParam of txnParams) {
-				// create encoded_obj for each txn in group
-				const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
-				const tx = webTx.mkTransaction(txnParam, mockParams);
-				// convert to encoded obj for compatibility
-				const encodedTxnObj = tx.get_obj_for_encoding() as EncTx;
-				encodedTxnObj.txID = tx.txID();
-				txns.push(encodedTxnObj);
-			}
-			return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
-		} else {
-			// if not array, then create a single transaction
-			const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
-			const tx = webTx.mkTransaction(txnParams, mockParams);
-
-			const encodedTxnObj = tx.get_obj_for_encoding() as EncTx;
-			encodedTxnObj.txID = tx.txID();
-			return [encodedTxnObj, [encodedTxnObj]];
+		let signedTx: SignedTransaction;
+		if (txnParams.length === 0) {
+			throw new Error("ExecParams length is zero");
 		}
-	}
+		if (txnParams.length > 16) {
+			throw new Error("Maximum size of an atomic transfer group is 16");
+		}
 
-	// creates new asset creation transaction object.
+		const txns = [];
+		for (const txnParam of txnParams) {
+			const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
+			const tx = webTx.mkTransaction(txnParam, mockParams);
+			if (txnParam.sign === types.SignType.SecretKey) {
+				if (txnParam.fromAccount.sk.length !== 64) {
+					throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, {
+						secretkey: txnParam.fromAccount.sk,
+					});
+				}
+				signedTx = decodeSignedTransaction(tx.signTxn(txnParam.fromAccount.sk));
+				signedTx = { sig: signedTx.sig, sgnr: signedTx.sgnr, txn: tx };
+			} else {
+				//in case of lsig we do not sign it we just mock the signature
+				signedTx = { sig: Buffer.alloc(5), txn: tx };
+			}
+			txns.push(signedTx);
+		}
+		return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
+	}
+	/* eslint-enable sonarjs/cognitive-complexity */
+
+	/**
+	 * Creates new asset creation transaction object.
+	 * @param name : asset name
+	 * @param flags: asa deployment flags
+	 * @param asaDef: asa definition
+	 */
 	mkAssetCreateTx(name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
 		// this funtion is called only for validation of parameters passed
 		const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
@@ -445,18 +482,8 @@ export class Runtime {
 	}
 
 	/**
-	 * Create Asset in Runtime using asa.yaml
-	 * @deprecated `deployASA` should be used instead
-	 * @param name ASA name
-	 * @param flags ASA Deployment Flags
-	 */
-	addAsset(asa: string, flags: ASADeploymentFlags): ASAInfo {
-		return this.deployASA(asa, flags);
-	}
-
-	/**
 	 * Deploy Asset in Runtime using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASA(asa: string, flags: ASADeploymentFlags): ASAInfo {
@@ -468,18 +495,8 @@ export class Runtime {
 	}
 
 	/**
-	 * Create Asset in Runtime without using asa.yaml
-	 * @deprecated `deployASADef` should be used instead
-	 * @param name ASA name
-	 * @param flags ASA Deployment Flags
-	 */
-	addASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
-		return this.deployASADef(asa, asaDef, flags);
-	}
-
-	/**
 	 * Deploy Asset in Runtime without using asa.yaml
-	 * @param name ASA name
+	 * @param asa ASA name
 	 * @param flags ASA Deployment Flags
 	 */
 	deployASADef(asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): ASAInfo {
@@ -492,8 +509,8 @@ export class Runtime {
 
 	/**
 	 * Opt-In to all accounts given in asa.yaml to a specific asset.
-	 * @param name Asset name
 	 * @param assetID Asset Index
+	 * @param accounts list account opt to asa
 	 */
 	optInToASAMultiple(assetID: number, accounts?: string[]): void {
 		if (accounts === undefined) {
@@ -502,7 +519,7 @@ export class Runtime {
 		for (const accName of accounts) {
 			const address = this.store.accountNameAddress.get(accName);
 			if (address) {
-				this.optIntoASA(assetID, address, {});
+				this.optInToASA(assetID, address, {});
 			}
 		}
 	}
@@ -513,8 +530,8 @@ export class Runtime {
 	 * @param address Account address to opt-into asset
 	 * @param flags Transaction Parameters
 	 */
-	optIntoASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
-		const txReceipt = this.ctx.optIntoASA(assetIndex, address, flags);
+	optInToASA(assetIndex: number, address: AccountAddress, flags: types.TxParams): TxReceipt {
+		const txReceipt = this.ctx.optInToASA(assetIndex, address, flags);
 
 		this.store = this.ctx.state;
 		return txReceipt;
@@ -538,23 +555,27 @@ export class Runtime {
 	}
 
 	// creates new application transaction object and update context
-	addCtxAppCreateTxn(flags: AppDeploymentFlags, payFlags: types.TxParams): void {
+	addCtxAppCreateTxn(
+		creator: AccountSDK,
+		appDef: types.AppDefinition,
+		payFlags: types.TxParams
+	): void {
 		const txn = algosdk.makeApplicationCreateTxn(
-			flags.sender.addr,
+			creator.addr,
 			mockSuggestedParams(payFlags, this.round),
 			algosdk.OnApplicationComplete.NoOpOC,
 			new Uint8Array(32), // mock approval program
 			new Uint8Array(32), // mock clear progam
-			flags.localInts,
-			flags.localBytes,
-			flags.globalInts,
-			flags.globalBytes,
-			parsing.parseAppArgs(flags.appArgs),
-			flags.accounts,
-			flags.foreignApps,
-			flags.foreignAssets,
-			flags.note,
-			flags.lease,
+			appDef.localInts,
+			appDef.localBytes,
+			appDef.globalInts,
+			appDef.globalBytes,
+			parsing.parseAppArgs(appDef.appArgs),
+			appDef.accounts,
+			appDef.foreignApps,
+			appDef.foreignAssets,
+			appDef.note,
+			appDef.lease,
 			payFlags.rekeyTo
 		);
 
@@ -564,66 +585,24 @@ export class Runtime {
 	}
 
 	/**
-	 * create new application and returns application id
-	 * @deprecated `deployApp` should be used instead.
-	 * @param approvalProgram application approval program
-	 * @param clearProgram application clear program
-	 * @param flags SSCDeployment flags
-	 * @param payFlags Transaction parameters
-	 * @param debugStack: if passed then TEAL Stack is logged to console after
-	 * each opcode execution (upto depth = debugStack)
-	 * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
-	 */
-	addApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: AppDeploymentFlags,
-		payFlags: types.TxParams,
-		debugStack?: number
-	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
-		this.ctx.debugStack = debugStack;
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0
-		);
-
-		this.store = this.ctx.state;
-		return txReceipt;
-	}
-
-	/**
 	 * deploy a new application and returns application id
-	 * @param approvalProgram application approval program (TEAL code or program filename)
-	 * @param clearProgram application clear program (TEAL code or program filename)
-	 * @param flags SSCDeployment flags
 	 * @param payFlags Transaction parameters
+	 * @param appDefinition app definition
 	 * @param scTmplParams Smart Contract template parameters
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	deployApp(
-		approvalProgram: string,
-		clearProgram: string,
-		flags: AppDeploymentFlags,
+		sender: AccountSDK,
+		appDefinition: types.AppDefinition,
 		payFlags: types.TxParams,
 		scTmplParams?: SCParams,
 		debugStack?: number
 	): AppInfo {
-		this.addCtxAppCreateTxn(flags, payFlags);
+		this.addCtxAppCreateTxn(sender, appDefinition, payFlags);
 		this.ctx.debugStack = debugStack;
-
-		const txReceipt = this.ctx.deployApp(
-			flags.sender.addr,
-			flags,
-			approvalProgram,
-			clearProgram,
-			0,
-			scTmplParams
-		);
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		const txReceipt = this.ctx.deployApp(sender.addr, appDefinition, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;
 	}
@@ -671,6 +650,7 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
 		const txReceipt = this.ctx.optInToApp(accountAddr, appID, 0);
 
 		this.store = this.ctx.state;
@@ -706,20 +686,20 @@ export class Runtime {
 
 	/**
 	 * Update application
+	 * @param appName application Name. Note in runtime application name just placeholder params
 	 * @param senderAddr sender address
 	 * @param appID application Id
-	 * @param approvalProgram new approval program (TEAL code or program filename)
-	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param newAppCode new application source code
 	 * @param payFlags Transaction parameters
 	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	updateApp(
+		appName: string,
 		senderAddr: string,
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		newAppCode: types.SmartContract,
 		payFlags: types.TxParams,
 		flags: AppOptionalFlags,
 		scTmplParams?: SCParams,
@@ -727,7 +707,8 @@ export class Runtime {
 	): TxReceipt {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
-		const txReceipt = this.ctx.updateApp(appID, approvalProgram, clearProgram, 0, scTmplParams);
+		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		const txReceipt = this.ctx.updateApp(appID, newAppCode, 0, scTmplParams);
 
 		// If successful, Update programs and state
 		this.store = this.ctx.state;
@@ -828,14 +809,15 @@ export class Runtime {
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 */
-	validateLsigAndRun(txnParam: types.ExecParams, debugStack?: number): TxReceipt {
+	validateLsigAndRun(txnParam: types.Lsig, debugStack?: number): TxReceipt {
 		// check if transaction is signed by logic signature,
 		// if yes verify signature and run logic
+
 		if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
 			this.ctx.args = txnParam.args ?? txnParam.lsig.lsig.args;
 
 			// signature validation
-			const fromAccountAddr = webTx.getFromAddress(txnParam);
+			const fromAccountAddr = txnParam.fromAccountAddr;
 			const lsigAccountAddr = txnParam.lsig.address();
 
 			const signerAddr = txnParam.lsig.isDelegated() ? fromAccountAddr : lsigAccountAddr;
@@ -875,54 +857,80 @@ export class Runtime {
 	 * each opcode execution (upto depth = debugStack)
 	 */
 	executeTx(
-		txnParams: types.ExecParams[] | types.TransactionAndSign[],
+		txnParams: types.ExecParams[] | algosdk.SignedTransaction[],
 		debugStack?: number
 	): TxReceipt[] {
 		// TODO: union above and create new type in task below:
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
-		let tx, gtxs;
+		let signedTransactions: algosdk.SignedTransaction[];
+		let appDef: types.AppDefinition | types.SmartContract | undefined;
+		const appDefMap: Map<number, types.AppDefinition | types.SmartContract> = new Map();
+		const lsigMap: Map<number, types.Lsig> = new Map();
 
-		if (types.isSDKTransactionAndSign(txnParams[0])) {
-			const sdkTxns: EncTx[] = txnParams.map((txnParamerter): EncTx => {
-				const txn = txnParamerter as types.TransactionAndSign;
-				return txn.transaction.get_obj_for_encoding() as EncTx;
-			});
-			tx = sdkTxns[0];
-			gtxs = sdkTxns;
-		} else {
-			for (const txnParamerter of txnParams) {
-				const txn = txnParamerter as types.ExecParams;
+		if (types.isExecParams(txnParams[0])) {
+			const dummySource: types.SourceCompiled = {
+				metaType: types.MetaType.BYTES,
+				approvalProgramBytes: new Uint8Array(32),
+				clearProgramBytes: new Uint8Array(32),
+			};
+
+			const txns = txnParams.map((txnParamerter, index) => {
+				const txn = cloneDeep(txnParamerter as types.ExecParams);
+				if (txn.sign === types.SignType.LogicSignature) {
+					lsigMap.set(index, txn);
+				}
+				appDef = undefined;
 				switch (txn.type) {
 					case types.TransactionType.DeployASA: {
 						if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
 						break;
 					}
 					case types.TransactionType.DeployApp: {
-						txn.approvalProg = new Uint8Array(32); // mock approval program
-						txn.clearProg = new Uint8Array(32); // mock clear program
+						appDef = txn.appDefinition;
+						txn.appDefinition = {
+							...txn.appDefinition,
+							...dummySource,
+						};
+						break;
+					}
+					case types.TransactionType.UpdateApp: {
+						appDef = txn.newAppCode;
+						txn.newAppCode = dummySource;
 						break;
 					}
 				}
-			}
+
+				if (appDef !== undefined) appDefMap.set(index, appDef);
+				return txn;
+			});
+
 			// get current txn and txn group (as encoded obj)
-			[tx, gtxs] = this.createTxnContext(txnParams as types.ExecParams[]);
+			[, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
+		} else {
+			signedTransactions = txnParams.map((txnParameter) => {
+				return txnParameter as algosdk.SignedTransaction;
+			});
 		}
+
+		const gtxs = this.getEncodedGroupTxns(signedTransactions);
+		const tx = gtxs[0];
 
 		// validate first and last rounds
 		this.validateTxRound(gtxs);
-
+		// checks if the transactions are not duplicated
+		this.assertNoDuplicateTransaction(gtxs);
 		// initialize context before each execution
 		// Prepare shared space at each execution of transaction/s.
 		// state is a deep copy of store
 		this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
-		// Run TEAL program associated with each transaction and
-		// then execute the transaction without interacting with store.
-		const runtimeTxnParams: types.ExecParams[] = txnParams.map((txn) =>
-			types.isSDKTransactionAndSign(txn) ? transactionAndSignToExecParams(txn, this.ctx) : txn
-		);
+		// calculate budget for single/group tx
+		const applCallTxNumber = gtxs.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
 
-		const txReceipts = this.ctx.processTransactions(runtimeTxnParams);
+		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
+		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
 
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;
@@ -935,6 +943,7 @@ export class Runtime {
 	 * This function executes TEAL code line by line
 	 * @param program : teal code as string
 	 * @param executionMode : execution Mode (Stateless or Stateful)
+	 * @param indexInGroup: txn index in transaction group.
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)
 	 * NOTE: Application mode is only supported in TEALv > 1
@@ -952,10 +961,9 @@ export class Runtime {
 			txID: this.ctx.tx.txID,
 		};
 		this.ctx.state.txReceipts.set(this.ctx.tx.txID, txReceipt);
-
 		// reset pooled opcode cost for single tx, this is to handle singular functions
 		// which don't "initialize" a new ctx (eg. deployApp)
-		if (this.ctx.gtxs.length === 1) {
+		if (this.ctx.gtxs.length === 1 && !this.ctx.isInnerTx) {
 			this.ctx.pooledApplCost = 0;
 		}
 		interpreter.execute(program, executionMode, this, debugStack);
@@ -964,5 +972,67 @@ export class Runtime {
 			this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
 		}
 		return txReceipt;
+	}
+
+	/**
+	 * Creates a group transaction array
+	 * @param signedTransactions : teal code as string
+	 * @returns groupTransactions array of EncTx type
+	 */
+	getEncodedGroupTxns(signedTransactions: SignedTransaction[]): EncTx[] {
+		let gtxs: EncTx[] = [];
+		gtxs = signedTransactions.map((signedTransaction) => {
+			const txn = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+			txn.txID = signedTransaction.txn.txID();
+			return txn;
+		});
+		return gtxs;
+	}
+
+	/**
+	 * Sends a SignedTransaction object
+	 * @param signedTransaction
+	 * @returns const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
+	 */
+	sendSignedTransaction(signedTransaction: SignedTransaction): TxReceipt[] {
+		//TODO: implement verify signature function
+		//TODO: rename the method to be complatible with algob
+		// this.verifySignature(signedTransaction);
+		const encodedTxnObj = signedTransaction.txn.get_obj_for_encoding() as EncTx;
+		encodedTxnObj.txID = signedTransaction.txn.txID();
+		this.ctx = new Ctx(cloneDeep(this.store), encodedTxnObj, [encodedTxnObj], [], this);
+		const txReceipt = this.ctx.processTransactions([signedTransaction], undefined);
+		this.store = this.ctx.state;
+		return txReceipt;
+	}
+
+	/**
+	 * Validate signature for Algorand account on transaction params.
+	 * Include check spending account when creating a transaction from Algorand account
+	 * Throw RuntimeError if signature is invalid.
+	 * @param signedTransaction signedTransaction object.
+	 */
+	validateSecretKeySignature(signedTransaction: SignedTransaction): void {
+		const fromAccountAddr = webTx.getTxFromAddress(signedTransaction.txn);
+		const fromAccount = this.getAccount(fromAccountAddr);
+		if (signedTransaction.sig !== undefined) {
+			const accountSpendAddr = fromAccount.getSpendAddress();
+			let signerAddr;
+			if (signedTransaction.sgnr !== undefined) {
+				signerAddr = algosdk.encodeAddress(signedTransaction.sgnr);
+			} else {
+				//if .sgnr is undefined it means the singer is 'from'
+				signerAddr = fromAccountAddr;
+			}
+			if (accountSpendAddr !== signerAddr) {
+				throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_AUTH_ACCOUNT, {
+					spend: accountSpendAddr,
+					signer: signerAddr,
+				});
+			}
+		} else {
+			// throw error if your don't provide account `signature`.
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
+		}
 	}
 }

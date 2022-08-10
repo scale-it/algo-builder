@@ -2,14 +2,9 @@
 	"name": "sample-project-ts",
 	"version": "0.0.1",
 	"main": "index.js",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/mocha": "^9.1.0",
-		"mocha": "^9.1.3",
-		"ts-mocha": "^9.0.2"
-	},
+	"license": "ISC",
 	"scripts": {
-		"algob": "algob",
+		"algob": "./node_modules/.bin/algob",
 		"build": "tsc --build .",
 		"build:watch": "tsc -w -p ."
 	}

@@ -1,4 +1,4 @@
-const { executeTx, balanceOf } = require("@algo-builder/algob");
+const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -7,15 +7,17 @@ async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
 	const elon = deployer.accountsByName.get("elon-musk");
 
-	await executeTx(deployer, {
-		type: types.TransactionType.TransferAsset,
-		sign: types.SignType.SecretKey,
-		fromAccount: elon,
-		toAccountAddr: john.addr,
-		amount: 184467440737095516n, // use bigint for large transfer amount
-		assetID: "tesla", // passing asa name is also supported
-		payFlags: { totalFee: 1000 },
-	});
+	await deployer.executeTx([
+		{
+			type: types.TransactionType.TransferAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: elon,
+			toAccountAddr: john.addr,
+			amount: 184467440737095516n, // use bigint for large transfer amount
+			assetID: "tesla", // passing asa name is also supported
+			payFlags: { totalFee: 1000 },
+		},
+	]);
 
 	console.log("Balance: ", await balanceOf(deployer, john.addr, teslaAssetID));
 }

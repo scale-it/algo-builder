@@ -126,7 +126,8 @@ by an index that does not exist.`,
 	},
 	PRAGMA_VERSION_ERROR: {
 		number: 1017,
-		message: "Pragma version Error - Expected version: %expected%, got: %got%, Line: %line%",
+		message:
+			"Pragma version Error - Expected version up to: %expected%, got: %got%, Line: %line%",
 		title: PARSE_ERROR,
 		description: ``,
 	},
@@ -398,6 +399,24 @@ maximun uint128`,
 		title: "itxn_next without itxn_begin",
 		description: `itxn_next without itxn_begin`,
 	},
+	UNKNOWN_ENCODING: {
+		number: 1058,
+		message: "Encoding e must be {URLEncoding, StdEncoding}, got :%encoding%, at line %line%",
+		title: "Unknown encoding",
+		description: "Unknown encoding",
+	},
+	INVALID_BASE64URL: {
+		number: 1059,
+		message: "Invalid Base64Url Error - value %val% is not base64Url, Line: %line%",
+		title: PARSE_ERROR,
+		description: `value %exp% is not base64Url`,
+	},
+	ISSUE_ITXN_WHEN_CLEAR_PROGRAM: {
+		number: 1060,
+		message: "Clear state programs cannot issue inner transactions.",
+		title: "Clear state programs cannot issue inner transactions.",
+		description: "Clear state programs cannot issue inner transactions",
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -513,11 +532,23 @@ const runtimeGeneralErrors = {
 		description: `Account and address mismatch in the current state`,
 	},
 	MAX_SCHEMA_ENTRIES_EXCEEDED: {
-		number: 1508,
+		number: 1318,
 		message: "Local/Global state keys has too many entries",
 		title: "Max schema entries exceeded",
 		description:
 			"Local key entires: used: %localState%, max: %localMax%. Global  key entires: used: %globalState, max: %globalMax%.",
+	},
+	APP_NAME_ALREADLY_USED: {
+		number: 1319,
+		message: "%appName% already used. Please choose another name.",
+		title: "%appName% already used",
+		description: "%appName% already used. Please choose another name.",
+	},
+	TOO_MANY_INNER_TXN: {
+		number: 1320,
+		message: "Too many inner transaction.",
+		title: "Too many inner transaction.",
+		description: "Too many inner transaction in one call, maximum is 256.",
 	},
 };
 
@@ -589,6 +620,12 @@ const transactionErrors = {
 		message: "Inner transaction appl self-call",
 		title: "Inner transaction appl self-call.",
 		description: "Inner transaction appl self-call",
+	},
+	TRANSACTION_ALREADY_IN_LEDGER: {
+		number: 1411,
+		message: "Transaction already in ledger",
+		title: "Transaction already in ledger",
+		description: "Transaction already in ledger.",
 	},
 };
 
@@ -666,6 +703,18 @@ const runtimeAsaErrors = {
 		message: `Assetholding of creator account cannot be closed to another account`,
 		title: "Cannot close asset ID in allocating account",
 		description: "Asset holding of Asset creator cannot be closed to other account",
+	},
+	ASA_FILE_IS_UNDEFINED: {
+		number: 1511,
+		message: "ASA file is undefined.",
+		title: "ASA file is undefined.",
+		description: "Attempt to read an undefined ASA file (asa.yaml)",
+	},
+	ASA_DEFINITION_NO_FOUND_IN_ASA_FILE: {
+		number: 1511,
+		message: "ASA defition not found in asa file(asa.yaml)",
+		title: "ASA definition not found in asa file(asa.yaml)",
+		description: "ASA definition not found in asa file. Please check asa.yaml",
 	},
 };
 

@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 
 import { types } from "@algo-builder/web";
-import { Account as AccountSDK, EncodedTransaction, modelsv2 } from "algosdk";
+import algosdk, {
+	Account as AccountSDK,
+	EncodedTransaction,
+	modelsv2,
+	Transaction,
+} from "algosdk";
 
 import {
 	Add,
@@ -20,20 +25,6 @@ import {
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
 
-export type Operator =
-	| Len
-	| Add
-	| Sub
-	| Mul
-	| Div
-	| Arg
-	| Bytecblock
-	| Bytec
-	| Addr
-	| Int
-	| Byte
-	| Pragma;
-
 export type AppArgs = Array<string | number>;
 
 export type StackElem = bigint | Uint8Array;
@@ -43,6 +34,7 @@ export interface EncTx extends EncodedTransaction {
 	txID: string;
 	// user should push raw string TEAL code - not compiled code
 	// for approvalProgram and clearProgram
+	metaType?: types.MetaType;
 	approvalProgram?: string;
 	clearProgram?: string;
 }
@@ -95,7 +87,7 @@ export interface BaseTxReceipt {
 	txn: EncTx;
 	txID: string;
 	gas?: number;
-	logs?: string[];
+	logs?: Uint8Array[];
 }
 
 export type TxReceipt = BaseTxReceipt | AppInfo | ASAInfo;
@@ -106,7 +98,7 @@ export interface State {
 	globalApps: Map<number, string>;
 	assetDefs: Map<number, AccountAddress>;
 	assetNameInfo: Map<string, ASAInfo>;
-	appNameInfo: Map<string, AppInfo>;
+	appNameMap: Map<string, AppInfo>;
 	appCounter: number;
 	assetCounter: number;
 	txReceipts: Map<string, TxReceipt>; // map of {txID: txReceipt}
@@ -123,7 +115,7 @@ export interface DeployedAssetInfo {
 export interface ASAInfo extends DeployedAssetInfo {
 	assetIndex: number;
 	assetDef: types.ASADef;
-	logs?: string[];
+	logs?: Uint8Array[];
 }
 
 // Stateful smart contract deployment information (log)
@@ -133,8 +125,17 @@ export interface AppInfo extends DeployedAssetInfo {
 	timestamp: number;
 	approvalFile: string;
 	clearFile: string;
-	logs?: string[];
+	logs?: Uint8Array[];
 	gas?: number; // used in runtime
+}
+
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
 }
 
 // describes interpreter's local context (state + txns)
@@ -146,23 +147,25 @@ export interface Context {
 	gtxs: EncTx[]; // all transactions
 	args?: Uint8Array[];
 	debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
+	lastLog: Uint8Array;
+	budget: number;
 	pooledApplCost: number; // total opcode cost for each application call for single/group tx
 	// inner transaction props
 	isInnerTx: boolean; // true if "ctx" is switched to an inner transaction
 	// save appID use inner tx call stack
 	innerTxAppIDCallStack: number[];
+	remainingTxns: number; // number txn can execute on current call, include inner txn and normal txn.
 	// remaining fee from pool
 	remainingFee: number;
-	createdAssetID: number; // Asset ID allocated by the creation of an ASA (for an inner-tx)
 	getAccount: (address: string) => AccountStoreI;
 	getAssetAccount: (assetId: number) => AccountStoreI;
 	getApp: (appID: number, line?: number) => SSCAttributesM;
 	getCallerApplicationID: () => number;
 	getCallerApplicationAddress: () => AccountAddress;
-	transferAlgo: (txnParam: types.AlgoTransferParam) => void;
+	transferAlgo: (transaction: Transaction) => void;
 	verifyMinimumFees: () => void;
 	deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void;
-	transferAsset: (txnParam: types.AssetTransferParam) => void;
+	transferAsset: (transaction: Transaction) => void;
 	modifyAsset: (assetId: number, fields: types.AssetModFields) => void;
 	freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void;
 	revokeAsset: (
@@ -174,7 +177,11 @@ export interface Context {
 	destroyAsset: (assetId: number) => void;
 	deleteApp: (appID: number) => void;
 	closeApp: (sender: AccountAddress, appID: number) => void;
-	processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[];
+	processTransactions: (
+		signedTransactions: algosdk.SignedTransaction[],
+		appDefMap?: Map<number, types.AppDefinition | types.SmartContract>,
+		lsigMap?: Map<number, types.Lsig>
+	) => TxReceipt[];
 	deployASA: (
 		name: string,
 		fromAccountAddr: AccountAddress,
@@ -186,20 +193,17 @@ export interface Context {
 		fromAccountAddr: AccountAddress,
 		flags: ASADeploymentFlags
 	) => ASAInfo;
-	optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
+	optInToASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => TxReceipt;
 	deployApp: (
 		fromAccountAddr: string,
-		flags: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string,
+		appDefinition: types.AppDefinition,
 		idx: number,
 		scTmplParams?: SCParams
 	) => AppInfo;
 	optInToApp: (accountAddr: string, appID: number, idx: number) => TxReceipt;
 	updateApp: (
 		appID: number,
-		approvalProgram: string,
-		clearProgram: string,
+		appSourceCode: types.SmartContract,
 		idx: number,
 		scTmplParams?: SCParams
 	) => TxReceipt;
@@ -262,12 +266,7 @@ export interface AccountStoreI {
 	getSpendAddress: () => AccountAddress;
 	getApp: (appID: number) => SSCAttributesM | undefined;
 	getAppFromLocal: (appID: number) => AppLocalStateM | undefined;
-	addApp: (
-		appID: number,
-		params: AppDeploymentFlags,
-		approvalProgram: string,
-		clearProgram: string
-	) => CreatedAppM;
+	addApp: (appID: number, appDefinition: types.AppDefinitionFromSource) => CreatedAppM;
 	getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined;
 	getAssetHolding: (assetId: number) => AssetHoldingM | undefined;
 	addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams;
@@ -315,7 +314,7 @@ export enum ExecutionMode {
 
 /**
  * Stateful Smart contract flags for specifying sender and schema */
-export interface AppDeploymentFlags extends AppOptionalFlags {
+export interface types extends AppOptionalFlags {
 	sender: AccountSDK;
 	localInts: number;
 	localBytes: number;
@@ -356,6 +355,17 @@ export interface AppOptionalFlags {
 	// you can learn more about these parameters from here.(https://developer.algorand.org/docs/reference/transactions/#application-call-transaction)
 }
 
+/**
+ * Stateful Smart contract flags for specifying sender and schema */
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+}
+
 export interface AnyMap {
 	[key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
@@ -391,4 +401,9 @@ export interface SCParams {
 
 export interface ReplaceParams {
 	[key: string]: string;
+}
+
+export enum Base64Encoding {
+	URL = 0,
+	STD = 1,
 }

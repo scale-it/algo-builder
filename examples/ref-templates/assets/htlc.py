@@ -99,5 +99,6 @@ def htlc(ARG_RCV,
     # whether or not it has been approved by this contract.
     return And(Or(scenario_1, scenario_2), common_checks)
 
+optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature, version = 4))
+    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature, version = 5, optimize=optimize_options))

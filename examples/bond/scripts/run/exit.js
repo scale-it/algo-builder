@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { tokenMap, nominalPrice } = require("./common/common");
 
@@ -54,7 +53,7 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
 
 	console.log("Exiting");
 	try {
-		await executeTx(deployer, exitTx);
+		await deployer.executeTx(exitTx);
 	} catch (error) {
 		console.log(error.response?.error);
 	}

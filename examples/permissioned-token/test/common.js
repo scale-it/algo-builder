@@ -30,16 +30,14 @@ class Context {
 	 * - Setup permissions smart contract
 	 * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
 	 */
-	constructor(master, alice, bob, elon) {
+	constructor(master) {
 		this.master = master;
-		this.alice = alice;
-		this.bob = bob;
-		this.elon = elon;
-		this.runtime = new Runtime([master, alice, bob, elon]);
-		this.deployASA("tesla", { ...alice.account, name: "alice" });
-		this.deployController(alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
-		this.deployClawback(alice, CLAWBACK_STATELESS_PROGRAM);
-		this.deployPermissions(alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
+		this.runtime = new Runtime([master]);
+		[this.alice, this.bob, this.elon] = this.runtime.defaultAccounts();
+		this.deployASA("tesla", { ...this.alice.account, name: "alice" });
+		this.deployController(this.alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
+		this.deployClawback(this.alice, CLAWBACK_STATELESS_PROGRAM);
+		this.deployPermissions(this.alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
 		this.syncAccounts();
 	}
 
@@ -49,14 +47,20 @@ class Context {
 		this.bob = this.getAccount(this.bob.address);
 		this.elon = this.getAccount(this.elon.address);
 	}
+	defaultAccounts() {
+		return this.runtime.defaultAccounts();
+	}
 
 	deployASA(name, creator) {
 		this.assetIndex = this.runtime.deployASA(name, { creator: creator }).assetIndex;
 	}
 
 	deployController(sender, controllerProgram, clearProgram) {
-		const sscFlags = {
-			sender: sender.account,
+		const appDef = {
+			appName: "controler",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: controllerProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 0,
 			localBytes: 0,
 			globalInts: 2,
@@ -64,9 +68,8 @@ class Context {
 			foreignAssets: [this.assetIndex],
 		};
 		this.controllerappID = this.runtime.deployApp(
-			controllerProgram,
-			clearProgram,
-			sscFlags,
+			sender.account,
+			appDef,
 			{},
 			{ TOKEN_ID: this.assetIndex }
 		).appID;
@@ -101,8 +104,11 @@ class Context {
 	}
 
 	deployPermissions(permManager, permissionsProgram, clearProgram) {
-		const sscFlags = {
-			sender: permManager.account,
+		const appDef = {
+			appName: "Permissions",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: permissionsProgram,
+			clearProgramFilename: clearProgram,
 			localInts: 1,
 			localBytes: 0,
 			globalInts: 2,
@@ -110,9 +116,8 @@ class Context {
 			appArgs: [`int:${this.controllerappID}`],
 		};
 		this.permissionsappID = this.runtime.deployApp(
-			permissionsProgram,
-			clearProgram,
-			sscFlags,
+			permManager.account,
+			appDef,
 			{},
 			{ PERM_MANAGER: permManager.address }
 		).appID;
@@ -146,7 +151,7 @@ class Context {
 
 	// Opt-In account to ASA
 	optInToASA(address) {
-		this.runtime.optIntoASA(this.assetIndex, address, {});
+		this.runtime.optInToASA(this.assetIndex, address, {});
 	}
 
 	// Opt-In address to Permissions SSC

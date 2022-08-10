@@ -10,14 +10,25 @@ import { Interpreter } from "..";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
+import { ITxn, ITxna } from "../interpreter/opcode-list";
 import {
 	ALGORAND_MIN_TX_FEE,
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
+	ZERO_ADDRESS,
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
-import { Context, EncTx, RuntimeAccountI, StackElem, TxField, TxnType } from "../types";
+import {
+	AppInfo,
+	ASAInfo,
+	Context,
+	EncTx,
+	RuntimeAccountI,
+	StackElem,
+	TxField,
+	TxnType,
+} from "../types";
 import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
@@ -44,16 +55,21 @@ const globalAndLocalNumTxnFields = new Set([
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
+	if (a instanceof Uint8Array) {
+		return a;
+	}
+
 	if (Buffer.isBuffer(a)) {
 		return new Uint8Array(a);
 	}
+
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
+
 	if (typeof a === "string") {
 		return parsing.stringToBytes(a);
 	}
-
 	return TxFieldDefaults[field];
 }
 
@@ -76,17 +92,17 @@ export function checkIfAssetDeletionTx(txn: Transaction): boolean {
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
  * @param tx Current transaction
- * @param txns Transaction group
- * @param tealVersion version of TEAL
+ * @param gtxns Transaction group
+ * @param interpreter interpreter object
  */
 export function txnSpecByField(
 	txField: string,
 	tx: EncTx,
 	gtxns: EncTx[],
-	tealVersion: number
+	interpreter: Interpreter
 ): StackElem {
 	let result; // store raw result, parse and return
-
+	const tealVersion = interpreter.tealVersion;
 	// handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
 	if (assetTxnFields.has(txField)) {
 		const s = TxnFields[tealVersion][txField];
@@ -143,13 +159,38 @@ export function txnSpecByField(
 			break;
 		}
 		case "AssetSender": {
-			/// + for asset_transfer transactions, we use "snd"
-			/// + for revoke asset tx (also an asset_transfer) tx, we use "asnd"
+			// if tx.asns is undefined we return zero address;
 			if (tx.type === "axfer") {
-				result = tx.asnd ?? tx.snd;
+				result = tx.asnd ?? Buffer.from(ZERO_ADDRESS);
 			}
 			break;
 		}
+		case "CreatedAssetID": {
+			const asaInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
+			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
+			else result = 0n;
+			break;
+		}
+		case "CreatedApplicationID": {
+			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
+			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
+			else if (isEncTxApplicationCreate(tx))
+				result = BigInt(interpreter.runtime.ctx.state.appCounter + 1);
+			else result = 0n;
+			break;
+		}
+		case "LastLog": {
+			result = interpreter.runtime.ctx.lastLog;
+			break;
+		}
+
+		case "StateProofPK": {
+			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// so we set up 64 zero bytes as default value of StateProofPK
+			result = new Uint8Array(64).fill(0); // 64 zero bytes
+			break;
+		}
+
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
@@ -166,7 +207,7 @@ export function txnSpecByField(
  * @param txField transaction field
  * @param idx index in EncodedTransaction[txField]
  * @param op Op object
- * @param tealVersion version of TEAL
+ * @param interpreter interpreter object
  * @param line line number in TEAL file
  */
 export function txAppArg(
@@ -179,9 +220,15 @@ export function txAppArg(
 ): StackElem {
 	const tealVersion: number = interpreter.tealVersion;
 
+	if (txField === "Logs") {
+		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+		const logs: Uint8Array[] = txReceipt?.logs ?? [];
+		op.checkIndexBound(idx, logs, op.line);
+		return parseToStackElem(logs[idx], txField);
+	}
+
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
-
 	if (!result) {
 		// handle defaults
 		return TxFieldDefaults[txField];
@@ -226,7 +273,7 @@ export function isEncTxAssetDeletion(txn: EncTx): boolean {
 }
 
 /**
- * Check if given encoded transaction obj is asset deletion
+ * Check if given encoded transaction obj is asset config
  * @param txn Encoded EncTx Object
  */
 export function isEncTxAssetConfig(txn: EncTx): boolean {
@@ -234,10 +281,68 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
 		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
 		txn.caid !== undefined &&
 		txn.caid !== 0 && // assetIndex should not be 0
-		!isEncTxAssetDeletion(txn)
-	); // AND should not be asset deletion
+		!isEncTxAssetDeletion(txn) // AND should not be asset deletion
+	);
 }
 
+/**
+ * Check if given encoded transaction obj is asset creation
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetCreate(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid === undefined && // assetIndex should be undefined
+		txn.apar !== undefined // assetParameters should not be undefined
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset reconfiguration
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetReconfigure(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid !== undefined && // assetIndex should be undefined
+		txn.apar !== undefined && // assetParameters should not be undefined
+		(txn.apar.m !== undefined || // manager
+			txn.apar.f !== undefined || // freeze
+			txn.apar.c !== undefined || // clawback
+			txn.apar.r !== undefined) // reserve
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset revoke
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetRevoke(txn: EncTx): boolean {
+	return txn.asnd !== undefined;
+}
+/**
+ * Checks if given encoded transaction obj is asset freeze
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetFreeze(txn: EncTx): boolean {
+	return txn.afrz !== undefined && txn.fadd !== undefined;
+}
+/**
+ * Checks if given encoded transaction obj is asset opt in
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetOptIn(txn: EncTx): boolean {
+	if (txn.arcv !== undefined) {
+		return !txn.arcv.compare(txn.snd) as boolean;
+	} else {
+		return false;
+	}
+}
+/**
+ * Checks if given encoded transaction obj is asset opt in
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetTransfer(txn: EncTx): boolean {
+	return txn.arcv !== undefined && txn.snd !== undefined && txn.asnd === undefined;
+}
 /**
  * Check if given encoded transaction object is app creation
  * @param txn Encoded EncTx Object
@@ -291,17 +396,24 @@ export function encTxToExecParams(
 	};
 
 	execParams.payFlags.totalFee = encTx.fee;
-
+	if (ArrayBuffer.isView(encTx.type)) {
+		encTx.type = Buffer.from(encTx.type).toString("utf-8");
+	}
 	switch (encTx.type) {
 		case TransactionTypeEnum.APPLICATION_CALL: {
 			if (isEncTxApplicationCreate(encTx)) {
+				const appDefinition: types.AppDefinition = {
+					appName: "Mock",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: encTx.approvalProgram as string,
+					clearProgramFilename: encTx.clearProgram as string,
+					localInts: encTx.apls?.nui as number,
+					localBytes: encTx.apls?.nbs as number,
+					globalInts: encTx.apgs?.nui as number,
+					globalBytes: encTx.apgs?.nbs as number,
+				};
 				execParams.type = types.TransactionType.DeployApp;
-				execParams.approvalProgram = encTx.approvalProgram;
-				execParams.clearProgram = encTx.clearProgram;
-				execParams.localInts = encTx.apls?.nui;
-				execParams.localBytes = encTx.apls?.nbs;
-				execParams.globalInts = encTx.apgs?.nui;
-				execParams.globalBytes = encTx.apgs?.nbs;
+				execParams.appDefinition = appDefinition;
 			} else if (isEncTxApplicationCall(encTx)) {
 				execParams.type = types.TransactionType.CallApp;
 				execParams.appID = encTx.apid;
@@ -315,7 +427,7 @@ export function encTxToExecParams(
 			execParams.fromAccountAddr = _getAddress(encTx.snd);
 			execParams.toAccountAddr =
 				getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
-			execParams.amountMicroAlgos = encTx.amt ?? 0n;
+			execParams.amountMicroAlgos = encTx.amt ? BigInt(encTx.amt) : 0n;
 			if (encTx.close) {
 				execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.close, ctx, line);
 			}
@@ -346,7 +458,7 @@ export function encTxToExecParams(
 				execParams.toAccountAddr = getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
 			}
 			// set common fields (asset amount, index, closeRemainderTo)
-			execParams.amount = encTx.aamt ?? 0n;
+			execParams.amount = encTx.aamt ? BigInt(encTx.aamt) : 0n;
 			execParams.assetID = encTx.xaid ?? 0;
 			// option fields
 			if (encTx.aclose) {
@@ -396,8 +508,14 @@ export function encTxToExecParams(
 
 		case TransactionTypeEnum.KEY_REGISTRATION: {
 			execParams.type = types.TransactionType.KeyRegistration;
-			execParams.voteKey = encTx.votekey?.toString("base64");
-			execParams.selectionKey = encTx.selkey?.toString("base64");
+			// execParams.voteKey = encTx.votekey?.toString("base64");
+			if (encTx.votekey !== undefined) {
+				execParams.voteKey = Buffer.from(encTx.votekey).toString("base64");
+			}
+			// execParams.selectionKey = encTx.selkey?.toString("base64");
+			if (encTx.selkey !== undefined) {
+				execParams.selectionKey = Buffer.from(encTx.selkey).toString("base64");
+			}
 			execParams.voteFirst = encTx.votefst;
 			execParams.voteLast = encTx.votelst;
 			execParams.voteKeyDilution = encTx.votekd;
@@ -476,4 +594,38 @@ export function calculateFeeCredit(groupTx: EncTx[]): CreditFeeType {
 		collectedFee,
 		requiredFee,
 	};
+}
+
+/**
+ * Retunrs field f of the last inner transaction
+ * @param op ITxna or ITxn opcode
+ * @returns result
+ */
+export function executeITxn(op: ITxna | ITxn): StackElem {
+	const groupTx = op.interpreter.innerTxnGroups[op.interpreter.innerTxnGroups.length - 1];
+	const tx = groupTx[groupTx.length - 1];
+	let result: StackElem;
+	switch (op.field) {
+		case "Logs": {
+			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+			const logs: Uint8Array[] = txReceipt?.logs ?? [];
+			op.checkIndexBound(op.idx, logs, op.line);
+			result = logs[op.idx];
+			break;
+		}
+		case "NumLogs": {
+			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+			const logs: Uint8Array[] = txReceipt?.logs ?? [];
+			result = BigInt(logs.length);
+			break;
+		}
+		default: {
+			result = txnSpecByField(op.field, tx, [tx], op.interpreter);
+			if (result === undefined || Object(result).length === 0) {
+				result = txAppArg(op.field, tx, op.idx, op, op.interpreter, op.line);
+				break;
+			}
+		}
+	}
+	return result;
 }

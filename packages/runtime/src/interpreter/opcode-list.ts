@@ -1,7 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { parsing, types } from "@algo-builder/web";
+import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, {
-	ALGORAND_MIN_TX_FEE,
 	decodeAddress,
 	decodeUint64,
 	encodeAddress,
@@ -9,8 +8,11 @@ import algosdk, {
 	getApplicationAddress,
 	isValidAddress,
 	modelsv2,
+	SignedTransaction,
+	Transaction,
 	verifyBytes,
 } from "algosdk";
+import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -27,7 +29,9 @@ import {
 	AppParamDefined,
 	AssetParamMap,
 	GlobalFields,
+	ITxArrFields,
 	MathOp,
+	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
 	MAX_INNER_TRANSACTIONS,
 	MAX_INPUT_BYTE_LEN,
@@ -35,6 +39,7 @@ import {
 	MAX_UINT64,
 	MAX_UINT128,
 	MaxTEALVersion,
+	OpGasCost,
 	TransactionTypeEnum,
 	TxArrFields,
 	ZERO_ADDRESS,
@@ -42,6 +47,8 @@ import {
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
+	assertBase64,
+	assertBase64Url,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -55,14 +62,17 @@ import {
 import { Stack } from "../lib/stack";
 import {
 	encTxToExecParams,
+	executeITxn,
 	isEncTxApplicationCall,
 	txAppArg,
 	txnSpecByField,
 } from "../lib/txn";
+import { mockSuggestedParams } from "../mock/tx";
 import {
 	DecodingMode,
 	EncodingType,
 	EncTx,
+	ExecutionMode,
 	StackElem,
 	TEALStack,
 	TxnType,
@@ -96,7 +106,7 @@ export class Pragma extends Op {
 			interpreter.tealVersion = this.version;
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
-				expected: "till #4",
+				expected: MaxTEALVersion,
 				got: args.join(" "),
 				line: line,
 			});
@@ -108,9 +118,13 @@ export class Pragma extends Op {
 		return this.version;
 	}
 
-	execute(
-		_stack: TEALStack
-	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
+	computeCost(): number {
+		return 0;
+	}
+
+	execute(_stack: TEALStack): number {
+		return this.computeCost();
+	} /* eslint-disable-line @typescript-eslint/no-empty-function */
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -128,10 +142,11 @@ export class Len extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBytes(stack.pop(), this.line);
 		stack.push(BigInt(last.length));
+		return this.computeCost();
 	}
 }
 
@@ -151,13 +166,14 @@ export class Add extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		const result = prev + last;
 		this.checkOverflow(result, this.line, MAX_UINT64);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -177,13 +193,14 @@ export class Sub extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		const result = prev - last;
 		this.checkUnderflow(result, this.line);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -203,7 +220,7 @@ export class Div extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -211,6 +228,7 @@ export class Div extends Op {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
 		}
 		stack.push(prev / last);
+		return this.computeCost();
 	}
 }
 
@@ -230,13 +248,14 @@ export class Mul extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		const result = prev * last;
 		this.checkOverflow(result, this.line, MAX_UINT64);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -264,12 +283,13 @@ export class Arg extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// get args from context
 		const args = this.interpreter.runtime.ctx.args ?? [];
 		this.checkIndexBound(this.index, args, this.line);
 		const argN = this.assertBytes(args?.[this.index], this.line);
 		stack.push(argN);
+		return this.computeCost();
 	}
 }
 
@@ -298,9 +318,10 @@ export class Bytecblock extends Op {
 		this.bytecblock = bytecblock;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		this.assertArrLength(this.bytecblock, this.line);
 		this.interpreter.bytecblock = this.bytecblock;
+		return this.computeCost();
 	}
 }
 
@@ -326,10 +347,11 @@ export class Bytec extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.checkIndexBound(this.index, this.interpreter.bytecblock, this.line);
 		const bytec = this.assertBytes(this.interpreter.bytecblock[this.index], this.line);
 		stack.push(bytec);
+		return this.computeCost();
 	}
 }
 
@@ -359,9 +381,10 @@ export class Intcblock extends Op {
 		this.intcblock = intcblock;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		this.assertArrLength(this.intcblock, this.line);
 		this.interpreter.intcblock = this.intcblock;
+		return this.computeCost();
 	}
 }
 
@@ -387,10 +410,11 @@ export class Intc extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.checkIndexBound(this.index, this.interpreter.intcblock, this.line);
 		const intc = this.assertBigInt(this.interpreter.intcblock[this.index], this.line);
 		stack.push(intc);
+		return this.computeCost();
 	}
 }
 
@@ -410,7 +434,7 @@ export class Mod extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -418,6 +442,7 @@ export class Mod extends Op {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
 		}
 		stack.push(prev % last);
+		return this.computeCost();
 	}
 }
 
@@ -436,11 +461,12 @@ export class BitwiseOr extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		stack.push(prev | last);
+		return this.computeCost();
 	}
 }
 
@@ -459,11 +485,12 @@ export class BitwiseAnd extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		stack.push(prev & last);
+		return this.computeCost();
 	}
 }
 
@@ -482,11 +509,12 @@ export class BitwiseXor extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
 		stack.push(prev ^ last);
+		return this.computeCost();
 	}
 }
 
@@ -505,10 +533,11 @@ export class BitwiseNot extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		stack.push(~last);
+		return this.computeCost();
 	}
 }
 
@@ -535,11 +564,12 @@ export class Store extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.checkIndexBound(this.index, this.interpreter.scratch, this.line);
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = stack.pop();
 		this.interpreter.scratch[this.index] = top;
+		return this.computeCost();
 	}
 }
 
@@ -566,9 +596,10 @@ export class Load extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.checkIndexBound(this.index, this.interpreter.scratch, this.line);
 		stack.push(this.interpreter.scratch[this.index]);
+		return this.computeCost();
 	}
 }
 
@@ -587,7 +618,7 @@ export class Err extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
 	}
 }
@@ -596,18 +627,25 @@ export class Err extends Op {
 // push to stack [...stack, bytes]
 export class Sha256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["sha256"];
+	}
+
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const hash = sha256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
@@ -615,6 +653,7 @@ export class Sha256 extends Op {
 		const hashedOutput = Buffer.from(hash.hex(), "hex");
 		const arrByte = Uint8Array.from(hashedOutput);
 		stack.push(arrByte);
+		return this.computeCost();
 	}
 }
 
@@ -622,18 +661,25 @@ export class Sha256 extends Op {
 // push to stack [...stack, bytes]
 export class Sha512_256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["sha512_256"];
+	}
+
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const hash = sha512_256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
@@ -641,6 +687,7 @@ export class Sha512_256 extends Op {
 		const hashedOutput = Buffer.from(hash.hex(), "hex");
 		const arrByte = Uint8Array.from(hashedOutput);
 		stack.push(arrByte);
+		return this.computeCost();
 	}
 }
 
@@ -649,18 +696,25 @@ export class Sha512_256 extends Op {
 // push to stack [...stack, bytes]
 export class Keccak256 extends Op {
 	readonly line: number;
+	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
+		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["keccak256"];
+	}
+
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBytes(stack.pop(), this.line);
 
@@ -668,6 +722,7 @@ export class Keccak256 extends Op {
 		hash.update(convertToString(top));
 		const arrByte = Uint8Array.from(hash.digest());
 		stack.push(arrByte);
+		return this.computeCost();
 	}
 }
 
@@ -687,7 +742,11 @@ export class Ed25519verify extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	computeCost(): number {
+		return OpGasCost[1]["ed25519verify"];
+	}
+
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const pubkey = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
@@ -700,6 +759,7 @@ export class Ed25519verify extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -718,7 +778,7 @@ export class LessThan extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -727,6 +787,7 @@ export class LessThan extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -745,7 +806,7 @@ export class GreaterThan extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -754,6 +815,7 @@ export class GreaterThan extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -772,7 +834,7 @@ export class LessThanEqualTo extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -781,6 +843,7 @@ export class LessThanEqualTo extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -799,7 +862,7 @@ export class GreaterThanEqualTo extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -808,6 +871,7 @@ export class GreaterThanEqualTo extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -826,7 +890,7 @@ export class And extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -835,6 +899,7 @@ export class And extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -853,7 +918,7 @@ export class Or extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		const prev = this.assertBigInt(stack.pop(), this.line);
@@ -862,6 +927,7 @@ export class Or extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -880,7 +946,7 @@ export class EqualTo extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = stack.pop();
 		const prev = stack.pop();
@@ -899,6 +965,7 @@ export class EqualTo extends Op {
 				compareArray(this.assertBytes(last, this.line), this.assertBytes(prev, this.line))
 			);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -917,7 +984,7 @@ export class NotEqualTo extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const last = stack.pop();
 		const prev = stack.pop();
@@ -936,6 +1003,7 @@ export class NotEqualTo extends Op {
 				!compareArray(this.assertBytes(last, this.line), this.assertBytes(prev, this.line))
 			);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -954,7 +1022,7 @@ export class Not extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 		if (last === 0n) {
@@ -962,6 +1030,7 @@ export class Not extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -980,10 +1049,11 @@ export class Itob extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const uint64 = this.assertBigInt(stack.pop(), this.line);
 		stack.push(encodeUint64(uint64));
+		return this.computeCost();
 	}
 }
 
@@ -1003,11 +1073,12 @@ export class Btoi extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const bytes = this.assertBytes(stack.pop(), this.line);
 		const uint64 = decodeUint64(bytes, DecodingMode.BIGINT);
 		stack.push(uint64);
+		return this.computeCost();
 	}
 }
 
@@ -1026,7 +1097,7 @@ export class Addw extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const valueA = this.assertBigInt(stack.pop(), this.line);
 		const valueB = this.assertBigInt(stack.pop(), this.line);
@@ -1040,6 +1111,7 @@ export class Addw extends Op {
 			stack.push(0n);
 			stack.push(valueC);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1058,7 +1130,7 @@ export class Mulw extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const valueA = this.assertBigInt(stack.pop(), this.line);
 		const valueB = this.assertBigInt(stack.pop(), this.line);
@@ -1072,6 +1144,8 @@ export class Mulw extends Op {
 
 		stack.push(high);
 		stack.push(low);
+
+		return this.computeCost();
 	}
 }
 
@@ -1093,7 +1167,7 @@ export class Divw extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const valueC = this.assertBigInt(stack.pop(), this.line);
 		const valueB = this.assertBigInt(stack.pop(), this.line);
@@ -1108,6 +1182,8 @@ export class Divw extends Op {
 		this.checkOverflow(result, this.line, MAX_UINT64);
 
 		stack.push(result);
+
+		return this.computeCost();
 	}
 }
 // Pop one element from stack
@@ -1125,9 +1201,10 @@ export class Pop extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		stack.pop();
+		return this.computeCost();
 	}
 }
 
@@ -1146,12 +1223,14 @@ export class Dup extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const lastValue = stack.pop();
 
 		stack.push(lastValue);
 		stack.push(lastValue);
+
+		return this.computeCost();
 	}
 }
 
@@ -1170,15 +1249,15 @@ export class Dup2 extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const lastValueA = stack.pop();
 		const lastValueB = stack.pop();
-
 		stack.push(lastValueB);
 		stack.push(lastValueA);
 		stack.push(lastValueB);
 		stack.push(lastValueA);
+		return this.computeCost();
 	}
 }
 
@@ -1198,7 +1277,7 @@ export class Concat extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const valueA = this.assertBytes(stack.pop(), this.line);
 		const valueB = this.assertBytes(stack.pop(), this.line);
@@ -1210,6 +1289,7 @@ export class Concat extends Op {
 		c.set(valueB);
 		c.set(valueA, valueB.length);
 		stack.push(c);
+		return this.computeCost();
 	}
 }
 
@@ -1239,13 +1319,13 @@ export class Substring extends Op {
 		this.end = BigInt(args[1]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const end = this.assertUint8(this.end, this.line);
 		const start = this.assertUint8(this.start, this.line);
 		const byteString = this.assertBytes(stack.pop(), this.line);
-
 		const subString = this.subString(byteString, start, end, this.line);
 		stack.push(subString);
+		return this.computeCost();
 	}
 }
 
@@ -1267,13 +1347,13 @@ export class Substring3 extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const end = this.assertBigInt(stack.pop(), this.line);
 		const start = this.assertBigInt(stack.pop(), this.line);
 		const byteString = this.assertBytes(stack.pop(), this.line);
-
 		const subString = this.subString(byteString, start, end, this.line);
 		stack.push(subString);
+		return this.computeCost();
 	}
 }
 
@@ -1313,7 +1393,7 @@ export class Txn extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		let result;
 		if (this.idx !== undefined) {
 			// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
@@ -1330,10 +1410,11 @@ export class Txn extends Op {
 				this.field,
 				this.interpreter.runtime.ctx.tx,
 				this.interpreter.runtime.ctx.gtxs,
-				this.interpreter.tealVersion
+				this.interpreter
 			);
 		}
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -1370,25 +1451,24 @@ export class Gtxn extends Op {
 		}
 		assertOnlyDigits(args[0], line);
 		this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
-
 		this.txIdx = Number(args[0]); // transaction group index
 		this.field = args[1]; // field
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertUint8(BigInt(this.txIdx), this.line);
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		let result;
-
 		const tx = this.groupTxn[this.txIdx]; // current tx
 		if (this.txFieldIdx !== undefined) {
 			result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter, this.line);
 		} else {
-			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter.tealVersion);
+			result = txnSpecByField(this.field, tx, this.groupTxn, this.interpreter);
 		}
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -1426,7 +1506,7 @@ export class Txna extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const result = txAppArg(
 			this.field,
 			this.interpreter.runtime.ctx.tx,
@@ -1436,6 +1516,7 @@ export class Txna extends Op {
 			this.line
 		);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -1483,12 +1564,13 @@ export class Gtxna extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertUint8(BigInt(this.txIdx), this.line);
 		this.checkIndexBound(this.txIdx, this.groupTxn, this.line);
 		const tx = this.groupTxn[this.txIdx];
 		const result = txAppArg(this.field, tx, this.fieldIdx, this, this.interpreter, this.line);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -1510,9 +1592,13 @@ export class Label extends Op {
 		this.line = line;
 	}
 
-	execute(
-		_stack: TEALStack
-	): void {} /* eslint-disable-line @typescript-eslint/no-empty-function */
+	computeCost(): number {
+		return 0;
+	}
+
+	execute(_stack: TEALStack): number {
+		return this.computeCost();
+	}
 }
 
 // branch unconditionally to label - Tealv <= 3
@@ -1536,8 +1622,10 @@ export class Branch extends Op {
 		this.line = line;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		this.interpreter.jumpForward(this.label, this.line);
+
+		return this.computeCost();
 	}
 }
 
@@ -1545,8 +1633,9 @@ export class Branch extends Op {
 // can also jump backward
 // push to stack [...stack]
 export class Branchv4 extends Branch {
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		this.interpreter.jumpToLabel(this.label, this.line);
+		return this.computeCost();
 	}
 }
 
@@ -1571,13 +1660,14 @@ export class BranchIfZero extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 
 		if (last === 0n) {
 			this.interpreter.jumpForward(this.label, this.line);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1585,13 +1675,15 @@ export class BranchIfZero extends Op {
 // can jump forward also
 // push to stack [...stack]
 export class BranchIfZerov4 extends BranchIfZero {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 
 		if (last === 0n) {
 			this.interpreter.jumpToLabel(this.label, this.line);
 		}
+
+		return this.computeCost();
 	}
 }
 
@@ -1616,13 +1708,14 @@ export class BranchIfNotZero extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 
 		if (last !== 0n) {
 			this.interpreter.jumpForward(this.label, this.line);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1630,13 +1723,15 @@ export class BranchIfNotZero extends Op {
 // can jump forward as well
 // push to stack [...stack]
 export class BranchIfNotZerov4 extends BranchIfNotZero {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const last = this.assertBigInt(stack.pop(), this.line);
 
 		if (last !== 0n) {
 			this.interpreter.jumpToLabel(this.label, this.line);
 		}
+
+		return this.computeCost();
 	}
 }
 
@@ -1659,7 +1754,7 @@ export class Return extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 
 		const last = stack.pop();
@@ -1668,6 +1763,8 @@ export class Return extends Op {
 		}
 		stack.push(last); // use last value as success
 		this.interpreter.instructionIndex = this.interpreter.instructions.length; // end execution
+
+		return this.computeCost();
 	}
 }
 
@@ -1693,7 +1790,7 @@ export class Global extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		let result;
 		switch (this.field) {
 			case "GroupSize": {
@@ -1741,16 +1838,26 @@ export class Global extends Op {
 				result = decodeAddress(callerAddress).publicKey;
 				break;
 			}
+
+			case "OpcodeBudget": {
+				const maxBudget = this.interpreter.getBudget();
+				const currentTotalCost =
+					this.interpreter.mode === ExecutionMode.SIGNATURE
+						? this.interpreter.cost
+						: this.interpreter.runtime.ctx.pooledApplCost;
+				result = maxBudget - (currentTotalCost + 1); // include global OpcodeBudget
+				break;
+			}
 			default: {
 				result = GlobalFields[this.interpreter.tealVersion][this.field];
 			}
 		}
-
 		if (typeof result === "number") {
 			stack.push(BigInt(result));
 		} else {
 			stack.push(result);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1775,7 +1882,7 @@ export class AppOptedIn extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const appRef = this.assertBigInt(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop(); // index to tx.accounts[] OR an address directly
@@ -1790,6 +1897,7 @@ export class AppOptedIn extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1813,7 +1921,7 @@ export class AppLocalGet extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop();
@@ -1827,6 +1935,7 @@ export class AppLocalGet extends Op {
 		} else {
 			stack.push(0n); // The value is zero if the key does not exist.
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1849,7 +1958,7 @@ export class AppLocalGetEx extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 		const appRef = this.assertBigInt(stack.pop(), this.line);
@@ -1865,6 +1974,7 @@ export class AppLocalGetEx extends Op {
 			stack.push(0n); // The value is zero if the key does not exist.
 			stack.push(0n); // did_exist_flag
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1888,7 +1998,7 @@ export class AppGlobalGet extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 
@@ -1899,6 +2009,7 @@ export class AppGlobalGet extends Op {
 		} else {
 			stack.push(0n); // The value is zero if the key does not exist.
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1923,7 +2034,7 @@ export class AppGlobalGetEx extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 		// appRef could be index to foreign apps array,
@@ -1939,6 +2050,7 @@ export class AppGlobalGetEx extends Op {
 			stack.push(0n); // The value is zero if the key does not exist.
 			stack.push(0n); // did_exist_flag
 		}
+		return this.computeCost();
 	}
 }
 
@@ -1962,7 +2074,7 @@ export class AppLocalPut extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const value = stack.pop();
 		const key = this.assertBytes(stack.pop(), this.line);
@@ -1979,6 +2091,7 @@ export class AppLocalPut extends Op {
 			this.line
 		);
 		acc.appsLocalState.set(appID, localState);
+		return this.computeCost();
 	}
 }
 
@@ -2001,13 +2114,14 @@ export class AppGlobalPut extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const value = stack.pop();
 		const key = this.assertBytes(stack.pop(), this.line);
 
 		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0; // if undefined use 0 as default
 		this.interpreter.setGlobalState(appID, key, value, this.line);
+		return this.computeCost();
 	}
 }
 
@@ -2030,7 +2144,7 @@ export class AppLocalDel extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop();
@@ -2046,6 +2160,7 @@ export class AppLocalDel extends Op {
 			acc = this.interpreter.runtime.assertAccountDefined(account.address, acc, this.line);
 			acc.appsLocalState.set(appID, localState);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2068,7 +2183,7 @@ export class AppGlobalDel extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
 
@@ -2079,6 +2194,7 @@ export class AppGlobalDel extends Op {
 			const globalState = app["global-state"];
 			globalState.delete(key.toString());
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2105,12 +2221,12 @@ export class Balance extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const accountRef: StackElem = stack.pop();
 		const acc = this.interpreter.getAccount(accountRef, this.line);
-
 		stack.push(BigInt(acc.balance()));
+		return this.computeCost();
 	}
 }
 
@@ -2135,11 +2251,10 @@ export class GetAssetHolding extends Op {
 		this.interpreter = interpreter;
 		this.line = line;
 		assertLen(args.length, 1, line);
-
 		this.field = args[0];
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const assetRef = this.assertBigInt(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop();
@@ -2155,7 +2270,7 @@ export class GetAssetHolding extends Op {
 		if (assetInfo === undefined) {
 			stack.push(0n);
 			stack.push(0n);
-			return;
+			return this.computeCost();
 		}
 		let value: StackElem;
 		switch (this.field) {
@@ -2168,9 +2283,9 @@ export class GetAssetHolding extends Op {
 			default:
 				throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_FIELD_TYPE, { line: this.line });
 		}
-
 		stack.push(value);
 		stack.push(1n);
+		return this.computeCost();
 	}
 }
 
@@ -2207,7 +2322,7 @@ export class GetAssetDef extends Op {
 		this.field = args[0];
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const assetRef = this.assertBigInt(stack.pop(), this.line);
 		const assetID = this.interpreter.getAssetIDByReference(
@@ -2251,6 +2366,7 @@ export class GetAssetDef extends Op {
 			stack.push(value);
 			stack.push(1n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2288,8 +2404,9 @@ export class Int extends Op {
 		this.uint64 = uint64;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		stack.push(this.uint64);
+		return this.computeCost();
 	}
 }
 
@@ -2311,9 +2428,10 @@ export class Byte extends Op {
 		[this.str, this.encoding] = getEncoding(args, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const buffer = convertToBuffer(this.str, this.encoding);
 		stack.push(new Uint8Array(buffer));
+		return this.computeCost();
 	}
 }
 
@@ -2338,9 +2456,10 @@ export class Addr extends Op {
 		this.line = line;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const addr = decodeAddress(this.addr);
 		stack.push(addr.publicKey);
+		return this.computeCost();
 	}
 }
 
@@ -2361,12 +2480,13 @@ export class Assert extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		if (top === 0n) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2395,8 +2515,9 @@ export class PushInt extends Op {
 		this.uint64 = BigInt(args[0]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		stack.push(this.uint64);
+		return this.computeCost();
 	}
 }
 
@@ -2429,9 +2550,10 @@ export class PushBytes extends Op {
 		}
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const buffer = convertToBuffer(this.str, this.encoding);
 		stack.push(new Uint8Array(buffer));
+		return this.computeCost();
 	}
 }
 
@@ -2451,12 +2573,13 @@ export class Swap extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const a = stack.pop();
 		const b = stack.pop();
 		stack.push(a);
 		stack.push(b);
+		return this.computeCost();
 	}
 }
 
@@ -2483,7 +2606,7 @@ export class SetBit extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const bit = this.assertBigInt(stack.pop(), this.line);
 		const index = this.assertBigInt(stack.pop(), this.line);
@@ -2518,6 +2641,7 @@ export class SetBit extends Op {
 			}
 			stack.push(target);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2539,7 +2663,7 @@ export class GetBit extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const index = this.assertBigInt(stack.pop(), this.line);
 		const target = stack.pop();
@@ -2558,6 +2682,7 @@ export class GetBit extends Op {
 			const str = binary.padStart(8, "0");
 			stack.push(BigInt(str[targetBit]));
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2580,7 +2705,7 @@ export class SetByte extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const smallInteger = this.assertBigInt(stack.pop(), this.line);
 		const index = this.assertBigInt(stack.pop(), this.line);
@@ -2590,6 +2715,7 @@ export class SetByte extends Op {
 
 		target[Number(index)] = Number(smallInteger);
 		stack.push(target);
+		return this.computeCost();
 	}
 }
 
@@ -2611,13 +2737,15 @@ export class GetByte extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const index = this.assertBigInt(stack.pop(), this.line);
 		const target = this.assertBytes(stack.pop(), this.line);
 		this.assertBytesIndex(Number(index), target, this.line);
 
 		stack.push(BigInt(target[Number(index)]));
+
+		return this.computeCost();
 	}
 }
 
@@ -2644,7 +2772,7 @@ export class Dig extends Op {
 		this.depth = Number(args[0]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, this.depth + 1, this.line);
 		const tempStack = new Stack<StackElem>(this.depth + 1); // depth = 2 means 3rd slot from top of stack
 		let target;
@@ -2656,6 +2784,7 @@ export class Dig extends Op {
 			stack.push(tempStack.pop());
 		}
 		stack.push(target as StackElem);
+		return this.computeCost();
 	}
 }
 
@@ -2676,7 +2805,7 @@ export class Select extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const toCheck = this.assertBigInt(stack.pop(), this.line);
 		const notZeroSelection = stack.pop();
@@ -2687,6 +2816,7 @@ export class Select extends Op {
 		} else {
 			stack.push(isZeroSelection);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -2713,12 +2843,13 @@ export class Gtxns extends Gtxn {
 		super([mockTxIdx, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		this.assertUint8(top, this.line);
 		this.txIdx = Number(top);
 		super.execute(stack);
+		return this.computeCost();
 	}
 }
 
@@ -2742,12 +2873,12 @@ export class Gtxnsa extends Gtxna {
 		super([mockTxIdx, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		this.assertUint8(top, this.line);
 		this.txIdx = Number(top);
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -2777,12 +2908,12 @@ export class MinBalance extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const accountRef: StackElem = stack.pop();
 		const acc = this.interpreter.getAccount(accountRef, this.line);
-
 		stack.push(BigInt(acc.minBalance));
+		return this.computeCost();
 	}
 }
 
@@ -2817,7 +2948,7 @@ export class Gload extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const scratch = this.interpreter.runtime.ctx.sharedScratchSpace.get(this.txIndex);
 		if (scratch === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR, {
@@ -2827,6 +2958,7 @@ export class Gload extends Op {
 		}
 		this.checkIndexBound(this.scratchIndex, scratch, this.line);
 		stack.push(scratch[this.scratchIndex]);
+		return this.computeCost();
 	}
 }
 
@@ -2846,10 +2978,10 @@ export class Gloads extends Gload {
 		super([mockTxIdx, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -2868,11 +3000,11 @@ export class Gloadss extends Gload {
 		super([mockTxIdx, mockScratchIndex, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		this.scratchIndex = Number(this.assertBigInt(stack.pop(), this.line));
 		this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -2904,11 +3036,12 @@ export class Callsub extends Op {
 		this.line = line;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		// the current location in the program is saved
 		this.interpreter.callStack.push(this.interpreter.instructionIndex);
 		// immediately jumps to the label passed to the opcode.
 		this.interpreter.jumpToLabel(this.label, this.line);
+		return this.computeCost();
 	}
 }
 
@@ -2937,13 +3070,14 @@ export class Retsub extends Op {
 		this.line = line;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		// get current location from saved point
 		// jump to saved instruction opcode
 		if (this.interpreter.callStack.length() === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY, { line: this.line });
 		}
 		this.interpreter.instructionIndex = this.interpreter.callStack.pop();
+		return this.computeCost();
 	}
 }
 
@@ -2952,6 +3086,7 @@ export class Retsub extends Op {
 // `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`
 export class ByteOp extends Op {
 	readonly line: number;
+	op: MathOp | undefined;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
@@ -2963,7 +3098,30 @@ export class ByteOp extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack, op: MathOp): void {
+	computeCost(): number {
+		switch (this.op) {
+			case MathOp.Add:
+			case MathOp.Sub: {
+				return OpGasCost[4]["b+"];
+			}
+			case MathOp.Mul:
+			case MathOp.Div:
+			case MathOp.Mod: {
+				return OpGasCost[4]["b*"];
+			}
+			case MathOp.BitwiseOr:
+			case MathOp.BitwiseAnd:
+			case MathOp.BitwiseXor: {
+				return OpGasCost[4]["b|"];
+			}
+			default: {
+				return 1;
+			}
+		}
+	}
+
+	execute(stack: TEALStack, op: MathOp): number {
+		this.op = op;
 		this.assertMinStackLen(stack, 2, this.line);
 		const byteB = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
 		const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
@@ -3062,6 +3220,7 @@ export class ByteOp extends Op {
 				stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
 			}
 		}
+		return this.computeCost();
 	}
 }
 
@@ -3070,8 +3229,8 @@ export class ByteOp extends Op {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteAdd extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.Add);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.Add);
 	}
 }
 
@@ -3080,8 +3239,8 @@ export class ByteAdd extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteSub extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.Sub);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.Sub);
 	}
 }
 
@@ -3089,8 +3248,8 @@ export class ByteSub extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteMul extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.Mul);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.Mul);
 	}
 }
 
@@ -3099,8 +3258,8 @@ export class ByteMul extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteDiv extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.Div);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.Div);
 	}
 }
 
@@ -3109,17 +3268,17 @@ export class ByteDiv extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, []byte]
 export class ByteMod extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.Mod);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.Mod);
 	}
 }
 
 // A is greater than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
-export class ByteGreatorThan extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.GreaterThan);
+export class ByteGreaterThan extends ByteOp {
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.GreaterThan);
 	}
 }
 
@@ -3127,8 +3286,8 @@ export class ByteGreatorThan extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteLessThan extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.LessThan);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.LessThan);
 	}
 }
 
@@ -3137,8 +3296,8 @@ export class ByteLessThan extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteGreaterThanEqualTo extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.GreaterThanEqualTo);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.GreaterThanEqualTo);
 	}
 }
 
@@ -3147,8 +3306,8 @@ export class ByteGreaterThanEqualTo extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteLessThanEqualTo extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.LessThanEqualTo);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.LessThanEqualTo);
 	}
 }
 
@@ -3156,8 +3315,8 @@ export class ByteLessThanEqualTo extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteEqualTo extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.EqualTo);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.EqualTo);
 	}
 }
 
@@ -3165,8 +3324,8 @@ export class ByteEqualTo extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteNotEqualTo extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.NotEqualTo);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.NotEqualTo);
 	}
 }
 
@@ -3174,8 +3333,8 @@ export class ByteNotEqualTo extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseOr extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.BitwiseOr);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.BitwiseOr);
 	}
 }
 
@@ -3183,8 +3342,8 @@ export class ByteBitwiseOr extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseAnd extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.BitwiseAnd);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.BitwiseAnd);
 	}
 }
 
@@ -3192,8 +3351,8 @@ export class ByteBitwiseAnd extends ByteOp {
 // Pops: ... stack, {[]byte A}, {[]byte B}
 // push to stack [...stack, uint64]
 export class ByteBitwiseXor extends ByteOp {
-	execute(stack: TEALStack): void {
-		super.execute(stack, MathOp.BitwiseXor);
+	execute(stack: TEALStack): number {
+		return super.execute(stack, MathOp.BitwiseXor);
 	}
 }
 
@@ -3201,10 +3360,14 @@ export class ByteBitwiseXor extends ByteOp {
 // Pops: ... stack, []byte
 // push to stack [...stack, byte[]]
 export class ByteBitwiseInvert extends ByteOp {
-	execute(stack: TEALStack): void {
+	computeCost(): number {
+		return OpGasCost[4]["b~"];
+	}
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
 		stack.push(byteA.map((b) => 255 - b));
+		return this.computeCost();
 	}
 }
 
@@ -3212,11 +3375,13 @@ export class ByteBitwiseInvert extends ByteOp {
 // Pops: ... stack, uint64
 // push to stack [...stack, byte[]]
 export class ByteZero extends ByteOp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const len = this.assertBigInt(stack.pop(), this.line);
 		const result = new Uint8Array(Number(len)).fill(0);
 		stack.push(this.assertBytes(result, this.line, 4096));
+
+		return this.computeCost();
 	}
 }
 
@@ -3237,16 +3402,19 @@ export class Bsqrt extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
-		this.assertMinStackLen(stack, 1, this.line);
+	computeCost(): number {
+		return OpGasCost[6]["bsqrt"];
+	}
 
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
 		const value = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
 		// convert to bigint
 		const bigintValue = bigEndianBytesToBigInt(value);
 		// compute sqrt
 		const bigintResult = bigintSqrt(bigintValue);
-
 		stack.push(bigintToBigEndianBytes(bigintResult));
+		return this.computeCost();
 	}
 }
 /**
@@ -3272,7 +3440,7 @@ export class DivModw extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// Go-algorand implementation: https://github.com/algorand/go-algorand/blob/8f743a98827372bfd8928de3e0b70390ff34f407/data/transactions/logic/eval.go#L927
 		const firstLow = this.assertBigInt(stack.pop(), this.line);
 		const firstHigh = this.assertBigInt(stack.pop(), this.line);
@@ -3305,6 +3473,7 @@ export class DivModw extends Op {
 
 		stack.push(high);
 		stack.push(low);
+		return this.computeCost();
 	}
 }
 
@@ -3324,18 +3493,16 @@ export class Exp extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const b = this.assertBigInt(stack.pop(), this.line);
 		const a = this.assertBigInt(stack.pop(), this.line);
-
 		if (a === 0n && b === 0n) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
 		}
-
 		const res = a ** b;
 		this.checkOverflow(res, this.line, MAX_UINT64);
-
 		stack.push(res);
+		return this.computeCost();
 	}
 }
 
@@ -3345,7 +3512,7 @@ export class Exp extends Op {
 // Pops: ... stack, {uint64 A}, {uint64 B}
 // Pushes: ... stack, uint64, uint64
 export class Expw extends Exp {
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const b = this.assertBigInt(stack.pop(), this.line);
 		const a = this.assertBigInt(stack.pop(), this.line);
 
@@ -3363,6 +3530,8 @@ export class Expw extends Exp {
 
 		stack.push(high);
 		stack.push(low);
+
+		return this.computeCost();
 	}
 }
 
@@ -3382,13 +3551,15 @@ export class Shl extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const b = this.assertBigInt(stack.pop(), this.line);
 		const a = this.assertBigInt(stack.pop(), this.line);
 
 		const res = (a << b) % 2n ** 64n;
 
 		stack.push(res);
+
+		return this.computeCost();
 	}
 }
 
@@ -3408,13 +3579,15 @@ export class Shr extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const b = this.assertBigInt(stack.pop(), this.line);
 		const a = this.assertBigInt(stack.pop(), this.line);
 
 		const res = a >> b;
 
 		stack.push(res);
+
+		return this.computeCost();
 	}
 }
 
@@ -3434,11 +3607,12 @@ export class Sqrt extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
 		const value = this.assertBigInt(stack.pop(), this.line);
 		const result = bigintSqrt(value);
 		stack.push(result);
+		return this.computeCost();
 	}
 }
 
@@ -3464,7 +3638,7 @@ export class Gaid extends Op {
 		this.txIndex = Number(args[0]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		const knowableID = this.interpreter.runtime.ctx.knowableID.get(this.txIndex);
 		if (knowableID === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.GROUP_INDEX_EXIST_ERROR, {
@@ -3474,6 +3648,7 @@ export class Gaid extends Op {
 		}
 
 		stack.push(BigInt(knowableID));
+		return this.computeCost();
 	}
 }
 
@@ -3493,10 +3668,10 @@ export class Gaids extends Gaid {
 		super([mockTxIdx, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -3526,7 +3701,7 @@ export class Extract extends Op {
 		this.length = Number(args[1]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const array = this.assertBytes(stack.pop(), this.line);
 
@@ -3534,8 +3709,8 @@ export class Extract extends Op {
 		if (this.length === 0) {
 			this.length = array.length - this.start;
 		}
-
 		stack.push(this.opExtractImpl(array, this.start, this.length));
+		return this.computeCost();
 	}
 }
 
@@ -3558,13 +3733,13 @@ export class Extract3 extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
-		const length = this.assertUInt8(stack.pop(), this.line);
-		const start = this.assertUInt8(stack.pop(), this.line);
+		const length = Number(this.assertBigInt(stack.pop(), this.line));
+		const start = Number(this.assertBigInt(stack.pop(), this.line));
 		const array = this.assertBytes(stack.pop(), this.line);
-
 		stack.push(this.opExtractImpl(array, start, length));
+		return this.computeCost();
 	}
 }
 
@@ -3594,13 +3769,14 @@ class ExtractUintN extends Op {
 		// this.extractBytes = 2;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
-		const start = this.assertUInt8(stack.pop(), this.line);
+		const start = Number(this.assertBigInt(stack.pop(), this.line));
 		const array = this.assertBytes(stack.pop(), this.line);
 
 		const sliced = this.opExtractImpl(array, start, this.extractBytes); // extract n bytes
 		stack.push(bigEndianBytesToBigInt(sliced));
+		return this.computeCost();
 	}
 }
 
@@ -3612,8 +3788,8 @@ class ExtractUintN extends Op {
 // If B+2 is larger than the array length, the program fails
 export class ExtractUint16 extends ExtractUintN {
 	extractBytes = 2;
-	execute(stack: TEALStack): void {
-		super.execute(stack);
+	execute(stack: TEALStack): number {
+		return super.execute(stack);
 	}
 }
 
@@ -3625,9 +3801,8 @@ export class ExtractUint16 extends ExtractUintN {
 // If B+4 is larger than the array length, the program fails
 export class ExtractUint32 extends ExtractUintN {
 	extractBytes = 4;
-
-	execute(stack: TEALStack): void {
-		super.execute(stack);
+	execute(stack: TEALStack): number {
+		return super.execute(stack);
 	}
 }
 
@@ -3640,8 +3815,8 @@ export class ExtractUint32 extends ExtractUintN {
 export class ExtractUint64 extends ExtractUintN {
 	extractBytes = 8;
 
-	execute(stack: TEALStack): void {
-		super.execute(stack);
+	execute(stack: TEALStack): number {
+		return super.execute(stack);
 	}
 }
 
@@ -3665,6 +3840,10 @@ export class EcdsaVerify extends Op {
 		this.curveIndex = Number(args[0]);
 	}
 
+	computeCost(): number {
+		return OpGasCost[5]["ecdsa_verify"];
+	}
+
 	/**
 	 * The 32 byte Y-component of a public key is the last element on the stack,
 	 * preceded by X-component of a pubkey, preceded by S and R components of a
@@ -3672,7 +3851,7 @@ export class EcdsaVerify extends Op {
 	 * All values are big-endian encoded. The signed data must be 32 bytes long,
 	 * and signatures in lower-S form are only accepted.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 5, this.line);
 		const pubkeyE = this.assertBytes(stack.pop(), this.line);
 		const pubkeyD = this.assertBytes(stack.pop(), this.line);
@@ -3694,8 +3873,8 @@ export class EcdsaVerify extends Op {
 		};
 		const key = ec.keyFromPublic(pub);
 		const signature = { r: signatureB, s: signatureC };
-
 		this.pushBooleanCheck(stack, key.verify(data, signature));
+		return this.computeCost();
 	}
 }
 
@@ -3718,11 +3897,15 @@ export class EcdsaPkDecompress extends Op {
 		this.curveIndex = Number(args[0]);
 	}
 
+	computeCost(): number {
+		return OpGasCost[6]["ecdsa_pk_decompress"];
+	}
+
 	/**
 	 * The 33 byte public key in a compressed form to be decompressed into X and Y (top)
 	 * components. All values are big-endian encoded.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
 
@@ -3737,9 +3920,9 @@ export class EcdsaPkDecompress extends Op {
 		const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, "hex").getPublic();
 		const x = publicKeyUncompressed.getX();
 		const y = publicKeyUncompressed.getY();
-
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
+		return this.computeCost();
 	}
 }
 
@@ -3762,12 +3945,16 @@ export class EcdsaPkRecover extends Op {
 		this.curveIndex = Number(args[0]);
 	}
 
+	computeCost(): number {
+		return OpGasCost[6]["ecdsa_pk_recover"];
+	}
+
 	/**
 	 * S (top) and R elements of a signature, recovery id and data (bottom) are
 	 * expected on the stack and used to deriver a public key. All values are
 	 * big-endian encoded. The signed data must be 32 bytes long.
 	 */
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 4, this.line);
 		const signatureD = this.assertBytes(stack.pop(), this.line);
 		const signatureC = this.assertBytes(stack.pop(), this.line);
@@ -3786,9 +3973,9 @@ export class EcdsaPkRecover extends Op {
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
 		const y = pubKey.getY();
-
 		stack.push(x.toBuffer());
 		stack.push(y.toBuffer());
+		return this.computeCost();
 	}
 }
 
@@ -3812,7 +3999,7 @@ export class Cover extends Op {
 		this.nthInStack = Number(args[0]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
 
 		const top = stack.pop();
@@ -3824,6 +4011,7 @@ export class Cover extends Op {
 		for (let i = this.nthInStack - 1; i >= 0; --i) {
 			stack.push(temp[i]);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -3847,7 +4035,7 @@ export class Uncover extends Op {
 		this.nthInStack = Number(args[0]);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, this.nthInStack + 1, this.line);
 
 		const temp = [];
@@ -3861,6 +4049,8 @@ export class Uncover extends Op {
 			stack.push(temp[i]);
 		}
 		stack.push(deepValue);
+
+		return this.computeCost();
 	}
 }
 
@@ -3880,10 +4070,10 @@ export class Loads extends Load {
 		super([mockScratchIndex, ...args], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		this.index = Number(this.assertBigInt(stack.pop(), this.line));
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -3907,12 +4097,13 @@ export class Stores extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const value = stack.pop();
 		const index = this.assertBigInt(stack.pop(), this.line);
 		this.checkIndexBound(Number(index), this.interpreter.scratch, this.line);
 		this.interpreter.scratch[Number(index)] = value;
+		return this.computeCost();
 	}
 }
 
@@ -3936,7 +4127,7 @@ export class ITxnBegin extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		if (this.interpreter.currentInnerTxnGroup.length > 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_BEGIN_WITHOUT_ITXN_SUBMIT, {
 				line: this.line,
@@ -3951,7 +4142,12 @@ export class ITxnBegin extends Op {
 			});
 		}
 
+		// cannot issue itxn when clear state application.
+		if (this.interpreter.runtime.ctx.tx.apan === Number(TxOnComplete.ClearState)) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ISSUE_ITXN_WHEN_CLEAR_PROGRAM);
+		}
 		this.interpreter.currentInnerTxnGroup = [addInnerTransaction(this.interpreter, this.line)];
+		return this.computeCost();
 	}
 }
 
@@ -3984,7 +4180,7 @@ export class ITxnField extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const valToSet: StackElem = stack.pop();
 
@@ -4005,6 +4201,8 @@ export class ITxnField extends Op {
 		);
 
 		this.interpreter.currentInnerTxnGroup[lastInnerTxID] = lastInnerTx;
+
+		return this.computeCost();
 	}
 }
 
@@ -4029,15 +4227,11 @@ export class ITxnSubmit extends Op {
 	}
 
 	// eslint-disable-next-line sonarjs/cognitive-complexity
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		if (this.interpreter.currentInnerTxnGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_SUBMIT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
 			});
-		}
-
-		if (!this.interpreter.runtime.ctx.isInnerTx) {
-			this.interpreter.runtime.ctx.remainingFee = 0;
 		}
 
 		if (this.interpreter.runtime.parentCtx === undefined) {
@@ -4045,7 +4239,7 @@ export class ITxnSubmit extends Op {
 		}
 
 		// calculate remaining fee after executing an inner tx
-		const credit = calculateInnerTxCredit(this.interpreter, true);
+		const credit = calculateInnerTxCredit(this.interpreter);
 
 		// remaining fee is negative => can't paid for transaction => fail
 		if (credit.remainingFee < 0) {
@@ -4063,10 +4257,18 @@ export class ITxnSubmit extends Op {
 		// Supports only calling app(NoOpt) for app transaction type.
 		for (const tx of this.interpreter.currentInnerTxnGroup) {
 			if (tx.type === TransactionTypeEnum.APPLICATION_CALL && !isEncTxApplicationCall(tx)) {
-				console.warn("Only supports application call in this version");
-				return;
+				console.log(
+					chalk.yellowBright("Current Runtime version only supports application call!!!")
+				);
+				return this.computeCost();
 			}
 		}
+
+		// increase Budget when submit application call transaction
+		const applCallTxNumber = this.interpreter.currentInnerTxnGroup.filter(
+			(txn) => txn.type === TransactionTypeEnum.APPLICATION_CALL
+		).length;
+		this.interpreter.runtime.ctx.budget += MAX_APP_PROGRAM_COST * applCallTxNumber;
 
 		// get execution txn params (parsed from encoded sdk txn obj)
 		// singer will be contractAccount
@@ -4081,7 +4283,6 @@ export class ITxnSubmit extends Op {
 				this.line
 			)
 		);
-
 		try {
 			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
@@ -4092,8 +4293,19 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
-			// execute innner transaction
-			this.interpreter.runtime.ctx.processTransactions(execParams);
+			// TODO check minimum fee
+			//this.interpreter.runtime.ctx.deductFee()
+
+			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
+				types.isExecParams(txnParam)
+					? {
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
+					: txnParam
+			);
+			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution
 			this.interpreter.runtime.ctx.tx = baseCurrTx;
@@ -4101,6 +4313,8 @@ export class ITxnSubmit extends Op {
 
 			// save executed tx
 			this.interpreter.innerTxnGroups.push(this.interpreter.currentInnerTxnGroup);
+
+			return this.computeCost();
 		} catch (err: any) {
 			// throw new error
 			throw new RuntimeError(err.errorDescriptor, err.args);
@@ -4108,7 +4322,6 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.parentCtx = undefined;
 			this.interpreter.runtime.ctx.isInnerTx = false;
 			this.interpreter.currentInnerTxnGroup = [];
-			this.interpreter.runtime.ctx.remainingFee = 0;
 		}
 	}
 }
@@ -4117,7 +4330,7 @@ export class ITxnSubmit extends Op {
 // push to stack [...stack, transaction field]
 export class ITxn extends Op {
 	readonly field: string;
-	readonly idx: number | undefined;
+	readonly idx: number;
 	readonly interpreter: Interpreter;
 	readonly line: number;
 
@@ -4132,10 +4345,12 @@ export class ITxn extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
-		this.idx = undefined;
-
+		this.idx = -1;
 		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-		if (TxArrFields[interpreter.tealVersion].has(args[0])) {
+		if (
+			TxArrFields[interpreter.tealVersion].has(args[0]) ||
+			ITxArrFields[interpreter.tealVersion].has(args[0])
+		) {
 			// eg. itxn Accounts 1
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
@@ -4143,59 +4358,14 @@ export class ITxn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
-
 		this.field = args[0]; // field
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-
-		let result;
-		// what is "last "
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		const tx = groupTx[groupTx.length - 1];
-
-		switch (this.field) {
-			case "Logs": {
-				// TODO handle this after log opcode is implemented
-				// https://www.pivotaltracker.com/story/show/179855820
-				result = 0n;
-				break;
-			}
-			case "NumLogs": {
-				// TODO handle this after log opcode is implemented
-				result = 0n;
-				break;
-			}
-			case "CreatedAssetID": {
-				result = BigInt(this.interpreter.runtime.ctx.createdAssetID);
-				break;
-			}
-			case "CreatedApplicationID": {
-				result = 0n; // can we create an app in inner-tx?
-				break;
-			}
-			default: {
-				// similarly as Txn Op
-				if (this.idx !== undefined) {
-					// if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
-					result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-				} else {
-					result = txnSpecByField(this.field, tx, [tx], this.interpreter.tealVersion);
-				}
-
-				break;
-			}
-		}
-
-		stack.push(result);
+	execute(stack: TEALStack): number {
+		this.assertInnerTransactionExists(this.interpreter);
+		stack.push(executeITxn(this));
+		return this.computeCost();
 	}
 }
 
@@ -4225,28 +4395,10 @@ export class ITxna extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(stack: TEALStack): void {
-		if (this.interpreter.innerTxnGroups.length === 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
-				tealVersion: this.interpreter.tealVersion,
-				line: this.line,
-			});
-		}
-		const groupTx = this.interpreter.innerTxnGroups[this.interpreter.innerTxnGroups.length - 1];
-		let result: StackElem;
-
-		const tx = groupTx[groupTx.length - 1];
-		if (this.interpreter.tealVersion >= 5 && this.field === "Logs") {
-			// handle Logs
-			const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
-			let logs: Buffer[] | string[] = txReceipt?.logs ?? [];
-			logs = logs.map((log) => convertToBuffer(log));
-			this.checkIndexBound(this.idx, logs, this.line);
-			result = logs[this.idx];
-		} else {
-			result = txAppArg(this.field, tx, this.idx, this, this.interpreter, this.line);
-		}
-		stack.push(result);
+	execute(stack: TEALStack): number {
+		this.assertInnerTransactionExists(this.interpreter);
+		stack.push(executeITxn(this));
+		return this.computeCost();
 	}
 }
 
@@ -4265,12 +4417,12 @@ export class ITxnas extends ITxna {
 		super([...args, mockTxIdx], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		// TODO: should change idx type to bigint ???
 		// load idx from stack
 		this.idx = Number(this.assertBigInt(stack.pop(), this.line));
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4295,11 +4447,11 @@ export class Txnas extends Txna {
 		super([...args, mockTxFieldIdx], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		this.fieldIdx = Number(top);
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4325,11 +4477,11 @@ export class Gtxnas extends Gtxna {
 		super([...args, mockTxFieldIdx], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		this.fieldIdx = Number(top);
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4355,13 +4507,13 @@ export class Gtxnsas extends Gtxna {
 		super([mockTxIdx, args[0], mockTxFieldIdx], line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const arrFieldIdx = this.assertBigInt(stack.pop(), this.line);
 		const txIdxInGrp = this.assertBigInt(stack.pop(), this.line);
 		this.fieldIdx = Number(arrFieldIdx);
 		this.txIdx = Number(txIdxInGrp);
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4382,11 +4534,11 @@ export class Args extends Arg {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const top = this.assertBigInt(stack.pop(), this.line);
 		this.index = Number(top);
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4410,12 +4562,15 @@ export class Log extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const logByte = this.assertBytes(stack.pop(), this.line);
 		const txID = this.interpreter.runtime.ctx.tx.txID;
 		const txReceipt = this.interpreter.runtime.ctx.state.txReceipts.get(txID);
-		// for Log opcode we assume receipt is alway exist
+
+		// update last log
+		this.interpreter.runtime.ctx.lastLog = logByte;
+		// for Log opcode we assume receipt always exists
 		// TODO: recheck when log opcode failed
 		if (txReceipt) {
 			if (txReceipt.logs === undefined) {
@@ -4440,8 +4595,9 @@ export class Log extends Op {
 				});
 			}
 
-			txReceipt.logs.push(convertToString(logByte));
+			txReceipt.logs.push(logByte);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -4463,7 +4619,7 @@ export class BitLen extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	execute(stack: Stack<StackElem>): void {
+	execute(stack: Stack<StackElem>): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const value = stack.pop();
 
@@ -4479,8 +4635,8 @@ export class BitLen extends Op {
 				bitlen += value[0].toString(2).length;
 			}
 		}
-
 		stack.push(BigInt(bitlen));
+		return this.computeCost();
 	}
 }
 
@@ -4514,7 +4670,7 @@ export class AppParamsGet extends Op {
 		this.field = args[0];
 	}
 
-	execute(stack: Stack<StackElem>): void {
+	execute(stack: Stack<StackElem>): number {
 		this.assertMinStackLen(stack, 1, this.line);
 
 		const appID = this.assertBigInt(stack.pop(), this.line);
@@ -4559,6 +4715,7 @@ export class AppParamsGet extends Op {
 			stack.push(0n);
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 export class AcctParamsGet extends Op {
@@ -4590,7 +4747,7 @@ export class AcctParamsGet extends Op {
 		this.field = args[0];
 	}
 
-	execute(stack: Stack<StackElem>): void {
+	execute(stack: Stack<StackElem>): number {
 		this.assertMinStackLen(stack, 1, this.line);
 
 		const acctAddress = this.assertAlgorandAddress(stack.pop(), this.line);
@@ -4625,6 +4782,7 @@ export class AcctParamsGet extends Op {
 		} else {
 			stack.push(0n);
 		}
+		return this.computeCost();
 	}
 }
 
@@ -4648,7 +4806,7 @@ export class ITxnNext extends Op {
 		this.interpreter = interpreter;
 	}
 
-	execute(_stack: TEALStack): void {
+	execute(_stack: TEALStack): number {
 		if (this.interpreter.currentInnerTxnGroup.length === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN, {
 				line: this.line,
@@ -4666,6 +4824,7 @@ export class ITxnNext extends Op {
 		this.interpreter.currentInnerTxnGroup.push(
 			addInnerTransaction(this.interpreter, this.line)
 		);
+		return this.computeCost();
 	}
 }
 
@@ -4684,12 +4843,12 @@ export class Gitxn extends Gtxn {
 		super(args, line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4710,12 +4869,12 @@ export class Gitxna extends Gtxna {
 		super(args, line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
-		super.execute(stack);
+		return super.execute(stack);
 	}
 }
 
@@ -4734,11 +4893,71 @@ export class Gitxnas extends Gtxnas {
 		super(args, line, interpreter);
 	}
 
-	execute(stack: TEALStack): void {
+	execute(stack: TEALStack): number {
 		// change context to last inner txn submitted
 		const lastInnerTxnGroupIndex = this.interpreter.innerTxnGroups.length - 1;
 		const lastInnerTxnGroup = this.interpreter.innerTxnGroups[lastInnerTxnGroupIndex];
 		this.groupTxn = lastInnerTxnGroup;
-		super.execute(stack);
+		return super.execute(stack);
+	}
+}
+
+/**
+ * Takes the last value from stack and if base64encoded, decodes it acording to the
+ * encoding e and pushes it back to the stack, otherwise throws an error
+ */
+export class Base64Decode extends Op {
+	readonly line: number;
+	readonly encoding: BufferEncoding;
+	length = 1;
+
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {URLEncoding, StdEncoding}.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		switch (argument) {
+			case "URLEncoding": {
+				this.encoding = "base64url";
+				break;
+			}
+			case "StdEncoding": {
+				this.encoding = "base64";
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ENCODING, {
+					encoding: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+
+	computeCost(): number {
+		return 1 + Math.ceil(this.length / 16); // cost = 1 + ceil(bytes / 16)
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const last = this.assertBytes(stack.pop(), this.line);
+		this.length = last.length;
+		const enc = new TextDecoder("utf-8");
+		const decoded = enc.decode(last);
+		switch (this.encoding) {
+			case "base64url":
+				assertBase64Url(convertToString(last), this.line);
+				break;
+			case "base64":
+				assertBase64(convertToString(last), this.line);
+				break;
+		}
+		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
+		return this.computeCost();
 	}
 }

@@ -18,14 +18,14 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	let runtime: Runtime;
 	let oldApprovalProgramFileName: string;
 	let newApprovalProgramFileName: string;
-	let clearProgramFileName: string;
+	let clearProgramFilename: string;
 
 	let oldApprovalProgram: string;
 	let newApprovalProgram: string;
 	let clearProgram: string;
 	let appID: number;
-	const flags = {
-		sender: creator.account,
+	const storageConfig = {
+		appName: "app",
 		globalBytes: 4,
 		globalInts: 4,
 		localBytes: 2,
@@ -36,25 +36,41 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		oldApprovalProgramFileName = "oldapproval.teal";
 		newApprovalProgramFileName = "newapproval.teal";
-		clearProgramFileName = "clear.teal";
+		clearProgramFilename = "clear.teal";
 
 		oldApprovalProgram = getProgram(oldApprovalProgramFileName);
 		newApprovalProgram = getProgram(newApprovalProgramFileName);
-		clearProgram = getProgram(clearProgramFileName);
+		clearProgram = getProgram(clearProgramFilename);
 	});
 
 	it("should fail during update application if app id is not defined", function () {
 		expectRuntimeError(
-			() => runtime.updateApp(creator.address, 1111, oldApprovalProgram, clearProgram, {}, {}),
+			() =>
+				runtime.updateApp(
+					"app",
+					creator.address,
+					1111,
+					{
+						metaType: types.MetaType.FILE,
+						approvalProgramFilename: oldApprovalProgramFileName,
+						clearProgramFilename: clearProgramFilename,
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
 		);
 	});
 
 	it("should update application", function () {
 		appID = runtime.deployApp(
-			oldApprovalProgramFileName,
-			clearProgramFileName,
-			flags,
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
+				...storageConfig,
+			},
 			{}
 		).appID;
 		runtime.optInToApp(creator.address, appID, {}, {});
@@ -65,7 +81,18 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.deepEqual(app[approvalStr], oldApprovalProgram);
 		assert.deepEqual(app["clear-state-program"], clearProgram);
 
-		runtime.updateApp(creator.address, appID, newApprovalProgram, clearProgram, {}, {});
+		runtime.updateApp(
+			storageConfig.appName,
+			creator.address,
+			appID,
+			{
+				metaType: types.MetaType.SOURCE_CODE,
+				approvalProgramCode: newApprovalProgram,
+				clearProgramCode: clearProgram,
+			},
+			{},
+			{}
+		);
 		app = runtime.getApp(appID);
 
 		// check if program & state is updated after tx execution
@@ -105,9 +132,14 @@ describe("Algorand Smart Contracts - Update Application", function () {
 	it("should not update application if logic is rejected", function () {
 		// create app
 		appID = runtime.deployApp(
-			oldApprovalProgramFileName,
-			clearProgramFileName,
-			flags,
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: oldApprovalProgramFileName,
+				clearProgramFilename,
+				...storageConfig,
+				appName: "RejectUpdate",
+			},
 			{}
 		).appID;
 		runtime.optInToApp(creator.address, appID, {}, {});
@@ -118,7 +150,19 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		// update should be rejected because sender is not creator
 		expectRuntimeError(
-			() => runtime.updateApp(alice.address, appID, newApprovalProgram, clearProgram, {}, {}),
+			() =>
+				runtime.updateApp(
+					storageConfig.appName,
+					alice.address,
+					appID,
+					{
+						metaType: types.MetaType.SOURCE_CODE,
+						approvalProgramCode: newApprovalProgram,
+						clearProgramCode: clearProgram,
+					},
+					{},
+					{}
+				),
 			RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 		);
 

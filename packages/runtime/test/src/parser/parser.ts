@@ -22,6 +22,7 @@ import {
 	Arg,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -2266,7 +2267,14 @@ describe("Parser", function () {
 			);
 		});
 
-		it("Should failed if declare pragma greater than 6", () => {
+		it("Supported pragma version 7", () => {
+			const fileWithPragmav7 = "test-pragma-v7.teal";
+			assert.doesNotThrow(() =>
+				parser(getProgram(fileWithPragmav7), ExecutionMode.SIGNATURE, interpreter)
+			);
+		});
+
+		it("Should fail if declare pragma greater than 7", () => {
 			const fileWithPragmaInvalid = "test-pragma-invalid.teal";
 			expectRuntimeError(
 				() => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
@@ -2440,9 +2448,9 @@ describe("Parser", function () {
 		it("Should return correct opcode list for 'Crypto opcodes'", async () => {
 			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
-				new Sha256([], 1),
-				new Keccak256([], 2),
-				new Sha512_256([], 3),
+				new Sha256([], 1, interpreter),
+				new Keccak256([], 2, interpreter),
+				new Sha512_256([], 3, interpreter),
 				new Ed25519verify([], 4),
 			];
 			assert.deepEqual(res, expected);
@@ -2582,6 +2590,17 @@ describe("Parser", function () {
 			];
 
 			assert.deepEqual(res, expected);
+		});
+
+		it("should return correct opcode list for `teal v7`", async () => {
+			const file = "teal-v7.teal";
+			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const expected = [
+				new Pragma(["version", "7"], 1, interpreter),
+				new Base64Decode(["URLEncoding"], 2),
+			];
+
+			assert.deepEqual(expected, res);
 		});
 	});
 

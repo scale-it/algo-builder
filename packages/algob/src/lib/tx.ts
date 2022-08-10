@@ -9,7 +9,7 @@ import {
 } from "@algo-builder/web";
 import algosdk, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
-import { ConfirmedTxInfo, Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../types";
 import { loadEncodedTxFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
@@ -158,12 +158,15 @@ async function mkTx(
 			break;
 		}
 		case wtypes.TransactionType.DeployApp: {
-			const name = txn.appName ?? String(txn.approvalProgram) + "-" + String(txn.clearProgram);
+			const appDefinition = txn.appDefinition;
+			const name = appDefinition.appName;
 			deployer.assertNoApp(name);
-			const approval = await deployer.compileASC(txn.approvalProgram);
-			const clear = await deployer.compileASC(txn.clearProgram);
-			txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-			txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+			const appProgramBytes = await deployer.compileApplication(name, appDefinition);
+			txn.appDefinition = {
+				...appDefinition,
+				...appProgramBytes,
+			};
+
 			txIdxMap.set(index, [
 				name,
 				{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
@@ -171,12 +174,8 @@ async function mkTx(
 			break;
 		}
 		case wtypes.TransactionType.UpdateApp: {
-			const cpKey =
-				txn.appName ?? String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
-			const approval = await deployer.compileASC(txn.newApprovalProgram);
-			const clear = await deployer.compileASC(txn.newClearProgram);
-			txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-			txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+			const cpKey = txn.appName;
+			txn.newAppCode = await deployer.compileApplication(txn.appName, txn.newAppCode);
 			txIdxMap.set(index, [
 				cpKey,
 				{ total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false },
@@ -268,19 +267,22 @@ export function signTransactions(txnAndSign: wtypes.TransactionAndSign[]): Uint8
 }
 
 /**
+ * This function should not be used directly.
  * Execute single transaction or group of transactions (atomic transaction)
  * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
  * will be signed and sent to network. User can use SDK functions to create transactions.
  * Note: If passing transaction object a signer/s must be provided.
  * @param deployer Deployer
- * @param transactionParam transaction parameters or atomic transaction parameters
+ * @param transactions transaction parameters or atomic transaction parameters
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
- * or TransactionAndSign object(SDK transaction object and signer parameters)
+ * or TransactionAndSign object(SDK transaction object and signer parameters).
+ * If `ExecParams` are used, the deployer will connect to appropriate deployer accounts / wallets
+ * to sign constructed transactions.
  */
 export async function executeTx(
 	deployer: Deployer,
 	transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-): Promise<ConfirmedTxInfo> {
+): Promise<TxnReceipt[]> {
 	let isSDK = false;
 	let signedTxn;
 	if (transactions.length === 0) {
@@ -292,9 +294,10 @@ export async function executeTx(
 	}
 
 	if (isSDK && signedTxn) {
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		return confirmedTx;
+		await deployer.sendAndWait(signedTxn);
+		return await deployer.getReceiptTxns(
+			(transactions as wtypes.TransactionAndSign[]).map((txn) => txn.transaction)
+		);
 	}
 
 	const execParams = transactions as wtypes.ExecParams[];
@@ -303,67 +306,13 @@ export async function executeTx(
 	try {
 		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
 		const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
+		await deployer.sendAndWait(signedTxn);
+		const confirmedTx = await deployer.getReceiptTxns(txns);
 		console.debug(confirmedTx);
 		if (deployer.isDeployMode) {
 			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
-		}
-		return confirmedTx;
-	} catch (error) {
-		if (deployer.isDeployMode) {
-			deployer.persistCP();
-		}
-
-		throw error;
-	}
-}
-
-/**
- * @deprecated  Remove in next release
- */
-export async function executeTransaction(
-	deployer: Deployer,
-	transactions:
-		| (wtypes.ExecParams | wtypes.TransactionAndSign)
-		| (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
-): Promise<ConfirmedTxInfo> {
-	let isSDK = false;
-	let signedTxn;
-	if (Array.isArray(transactions)) {
-		if (transactions.length === 0) {
-			throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
-		}
-		if (wtypes.isSDKTransactionAndSign(transactions[0])) {
-			signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
-			isSDK = true;
-		}
-	} else {
-		if (wtypes.isSDKTransactionAndSign(transactions)) {
-			signedTxn = signTransaction(transactions.transaction, transactions.sign);
-			isSDK = true;
-		}
-	}
-
-	if (isSDK && signedTxn) {
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		return confirmedTx;
-	}
-
-	// Update type here because we are sure this is not transaction object type
-	transactions = Array.isArray(transactions)
-		? (transactions as wtypes.ExecParams[])
-		: (transactions as wtypes.ExecParams);
-
-	const execParams = Array.isArray(transactions) ? transactions : [transactions];
-	deployer.assertCPNotDeleted(transactions);
-	try {
-		const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-		const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
-		const confirmedTx = await deployer.sendAndWait(signedTxn);
-		console.debug(confirmedTx);
-		if (deployer.isDeployMode) {
-			await registerCheckpoints(deployer, execParams, txns, txIdxMap);
+		} else {
+			console.warn("deploy app/asset will not be stored in checkpoint in run mode");
 		}
 		return confirmedTx;
 	} catch (error) {

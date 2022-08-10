@@ -20,6 +20,7 @@ async function run(runtimeEnv, deployer) {
 	const minDuration = 1 * 60; // 1min (minimum voting time in number of seconds)
 	const maxDuration = 5 * 60; // 5min (maximum voting time in number of seconds)
 	const url = "www.my-url.com";
+	const daoName = "DAO";
 
 	const appArgs = [
 		`int:${deposit}`,
@@ -27,23 +28,25 @@ async function run(runtimeEnv, deployer) {
 		`int:${minDuration}`,
 		`int:${maxDuration}`,
 		`str:${url}`,
+		`str:${daoName}`,
+		`int:${govToken.assetIndex}`,
 	];
-	const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
 	// Create Application
 	const daoAppInfo = await deployer.deployApp(
-		"dao-app-approval.py",
-		"dao-app-clear.py",
+		creator,
 		{
-			sender: creator,
+			appName: "DAOApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "dao-app-approval.py",
+			clearProgramFilename: "dao-app-clear.py",
 			localInts: 9,
 			localBytes: 7,
-			globalInts: 4,
+			globalInts: 5,
 			globalBytes: 2,
 			appArgs: appArgs,
+			foreignAssets: [govToken.assetIndex],
 		},
-		{},
-		templateParam,
-		"DAOApp"
+		{}
 	);
 	console.log(daoAppInfo);
 

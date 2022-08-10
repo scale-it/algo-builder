@@ -51,12 +51,14 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
 		const lsig = runtime.loadLogic("basic.teal");
 		lsig.sign(john.account.sk);
 
-		runtime.executeTx([{
-			...txParams,
-			sign: types.SignType.LogicSignature,
-			fromAccountAddr: john.address,
-			lsig: lsig,
-		}]);
+		runtime.executeTx([
+			{
+				...txParams,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: john.address,
+				lsig: lsig,
+			},
+		]);
 
 		syncAccounts();
 		assert.equal(john.balance(), initialJohnHolding - 100n - BigInt(fee));

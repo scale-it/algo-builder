@@ -14,9 +14,17 @@ tealdbg
 
 If it displays the `tealdbg` help, you're good to go.
 
+Before beginning, make sure you have `tealdbg` installed. It is included as part of the default Algorand Node when [installed via the updater script](https://developer.algorand.org/docs/run-a-node/setup/install/#installation-with-the-updater-script) but must be [installed seperately](https://developer.algorand.org/docs/run-a-node/setup/install/#installing-the-devtools) if you installed the Algorand Node via a Linux package manager. Try to run:
+
+```bash
+tealdbg
+```
+
+If it displays the `tealdbg` help, you're good to go.
+
 ## Using TEAL debugger with algob
 
-Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTx](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).
+Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTx](https://algobuilder.dev/api/algob/modules.html#executeTransaction) to execute same transaction on network).
 
 NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run` commands.
 

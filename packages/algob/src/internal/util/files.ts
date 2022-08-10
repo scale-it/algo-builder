@@ -23,9 +23,15 @@ export function loadFilenames(directory: string, taskType?: string): string[] {
 			});
 		}
 	}
-
-	return glob
-		.sync(path.join(directory, "*.js"))
-		.concat(glob.sync(path.join(directory, "*.ts")))
-		.sort(cmpStr);
+	if (taskType === "test") {
+		return glob
+			.sync(path.join(directory, "**/*.js"))
+			.concat(glob.sync(path.join(directory, "**/*.ts")))
+			.sort(cmpStr);
+	} else {
+		return glob
+			.sync(path.join(directory, "*.js"))
+			.concat(glob.sync(path.join(directory, "*.ts")))
+			.sort(cmpStr);
+	}
 }

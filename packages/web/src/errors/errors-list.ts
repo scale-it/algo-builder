@@ -194,6 +194,13 @@ Please check algob output for more details.`,
 		title: "App by name not found in checkpoint",
 		description: "App by name not found in checkpoint",
 	},
+	TRANSACTION_LENGTH_ERROR: {
+		number: 21,
+		message: "Invalid length of transaction parameter",
+		title: "Transaction parameter length",
+		description:
+			"Transaction parameter needs to have between 1 and 16 transactions, got: %length%",
+	},
 };
 
 export const networkErrors = {
@@ -509,6 +516,13 @@ Please double check how you invoked algob.`,
 		title: "Invalid JSON parameter",
 		description: `You tried to run a task with an invalid JSON parameter.
 Please double check how you invoked algob or run your task.`,
+	},
+	INVALID_TX_PARAM: {
+		number: 312,
+		message: "Invalid tx parameter %param%: %error%",
+		title: "Invalid TX Param",
+		description:
+			"Your Tx Param object is wrong: either there is a type collision or some of the parameters are missing or conflicting.",
 	},
 };
 

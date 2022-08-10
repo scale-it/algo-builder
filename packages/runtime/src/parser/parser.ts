@@ -1,6 +1,7 @@
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Interpreter } from "../interpreter/interpreter";
+import { Op } from "../interpreter/opcode";
 import {
 	AcctParamsGet,
 	Add,
@@ -21,6 +22,7 @@ import {
 	Args,
 	Assert,
 	Balance,
+	Base64Decode,
 	BitLen,
 	BitwiseAnd,
 	BitwiseNot,
@@ -44,8 +46,8 @@ import {
 	Bytecblock,
 	ByteDiv,
 	ByteEqualTo,
+	ByteGreaterThan,
 	ByteGreaterThanEqualTo,
-	ByteGreatorThan,
 	ByteLessThan,
 	ByteLessThanEqualTo,
 	ByteMod,
@@ -148,14 +150,14 @@ import {
 	Uncover,
 } from "../interpreter/opcode-list";
 import {
-	LogicSigMaxCost,
+	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
-	MaxAppProgramCost,
+	MAX_APP_PROGRAM_COST,
 	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
-import { ExecutionMode, Operator } from "../types";
+import { ExecutionMode } from "../types";
 
 // teal v1 opcodes
 const opCodeMap: { [key: number]: { [key: string]: any } } = {
@@ -313,7 +315,7 @@ opCodeMap[4] = {
 	"b/": ByteDiv,
 	"b%": ByteMod,
 	"b<": ByteLessThan,
-	"b>": ByteGreatorThan,
+	"b>": ByteGreaterThan,
 	"b<=": ByteLessThanEqualTo,
 	"b>=": ByteGreaterThanEqualTo,
 	"b==": ByteEqualTo,
@@ -388,6 +390,14 @@ opCodeMap[6] = {
 	itxnas: ITxnas,
 };
 
+/**
+ * TEALv7
+ */
+opCodeMap[7] = {
+	...opCodeMap[6],
+	base64_decode: Base64Decode,
+};
+
 // list of opcodes with exactly one parameter.
 const interpreterReqList = new Set([
 	"#pragma",
@@ -448,6 +458,9 @@ const interpreterReqList = new Set([
 	"gitxna",
 	"gitxnas",
 	"itxnas",
+	"sha256",
+	"sha512_256",
+	"keccak256",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -704,7 +717,7 @@ export function opcodeFromSentence(
 	counter: number,
 	interpreter: Interpreter,
 	mode: ExecutionMode
-): Operator {
+): Op {
 	let opCode = words[0];
 	const tealVersion = interpreter.tealVersion;
 
@@ -801,19 +814,19 @@ export function assertMaxCost(
 ): void {
 	if (mode === ExecutionMode.SIGNATURE) {
 		// check max cost (for stateless)
-		if (gas > LogicSigMaxCost) {
+		if (gas > LOGIC_SIG_MAX_COST) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: LogicSigMaxCost,
+				maxcost: LOGIC_SIG_MAX_COST,
 				mode: "Stateless",
 			});
 		}
 	} else {
-		if (gas > (maxPooledApplCost ?? MaxAppProgramCost)) {
+		if (gas > (maxPooledApplCost ?? MAX_APP_PROGRAM_COST)) {
 			// check max cost (for stateful)
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
 				cost: gas,
-				maxcost: maxPooledApplCost ?? MaxAppProgramCost,
+				maxcost: maxPooledApplCost ?? MAX_APP_PROGRAM_COST,
 				mode: "Stateful",
 			});
 		}
@@ -849,12 +862,8 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
  * @param mode : execution mode of TEAL code (Stateless or Application)
  * @param interpreter: interpreter object
  */
-export function parser(
-	program: string,
-	mode: ExecutionMode,
-	interpreter: Interpreter
-): Operator[] {
-	const opCodeList = [] as Operator[];
+export function parser(program: string, mode: ExecutionMode, interpreter: Interpreter): Op[] {
+	const opCodeList: Op[] = [];
 	let counter = 0;
 
 	const lines = program.split("\n");
@@ -880,6 +889,50 @@ export function parser(
 	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
 	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
+}
+
+// check algorand is auto added intcblock for optimize size contract
+export function isAddIntcblock(ops: Op[], interpreter: Interpreter): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Intcblock || ops[1] instanceof Intcblock) return false;
+	const intCount: { [key: string]: number } = {};
+	for (const int of interpreter.intcblock) {
+		intCount[int.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Int) {
+			if (intCount[op.uint64.toString()] === undefined) {
+				intCount[op.uint64.toString()] = 0;
+			}
+			intCount[op.uint64.toString()] += 1;
+			if (intCount[op.uint64.toString()] >= 2) return true;
+		}
+	}
+
+	return false;
+}
+
+// check algorand is auto added byteblock for optimize size contract
+export function isAddedBytecblock(ops: Op[], interpreter: Interpreter): boolean {
+	if (interpreter.tealVersion < 4) return false;
+	if (ops[0] instanceof Bytecblock || ops[1] instanceof Bytecblock) return false;
+	const byteCount: { [key: string]: number } = {};
+	for (const byte of interpreter.bytecblock) {
+		byteCount[byte.toString()] = 1;
+	}
+
+	for (const op of ops) {
+		if (op instanceof Byte) {
+			if (byteCount[op.str] === undefined) {
+				byteCount[op.str] = 0;
+			}
+			byteCount[op.str] += 1;
+			if (byteCount[op.str] >= 2) return true;
+		}
+	}
+
+	return false;
 }
 
 /**

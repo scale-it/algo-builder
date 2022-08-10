@@ -6,7 +6,7 @@ This package provides a class `WebMode` which has variety of high level function
 
 You can use `@algo-builder/web` with [pipeline UI](https://www.pipeline-ui.com/docs/algocomponents/algobutton) to easily integrate with web wallets.
 
-### Relation to algob
+## Relation to algob
 
 `algob` uses `@algo-builder/web` package. However It is not possible to use `algob` directly in a web app, because `algob` uses nodejs file system. Therefore we created a lightweight `@algo-builder/web` package to provide common functionality and support dapp development.
 
@@ -22,48 +22,63 @@ In the `@algo-builder/web` package we pass transaction [parameters](https://gith
 
 `@algo-builder/web` can be included as a library using `yarn add @algo-builder/web` and then import it using `import * from '@algo-builder/web'`.
 
-### Example
+## Example
 
 You can connect to `web` package in your react app by using different wallets. Currently supported wallets include:
 
-1.  ##### AlgoSigner:
+1.  ### AlgoSigner:
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
-        const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+      ```js
+      const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+      ```
 
-2.  ##### MyAlgo Wallet:
+2.  ### MyAlgo Wallet:
 
-    Create an instance of the `MyAlgoWalletSession` class by passing the chain name and connect it using `connectToMyAlgo`.
-
-         ```js
-         const wcSession = new MyAlgoWalletSession(CHAIN_NAME)
-         await wcSession.connectToMyAlgo();
-         ```
-
-3.  ##### Wallet Connect:
-
-    Create an instance of the `WallectConnectSession` class by passing the chain name and create a new session using `create` and connect to it using `onConnect`.
+    Create an instance of the `MyAlgoWalletSession` class by passing the walletURL(token, server, port) and connect it using `connectToMyAlgo`.
 
     ```js
-    const wcSession = new WallectConnectSession(CHAIN_NAME);
+    const walletURL = {
+    	token: token,
+    	server: server,
+    	port: port,
+    };
+    const wcSession = new MyAlgoWalletSession(walletURL);
+    await wcSession.connectToMyAlgo();
+    ```
+
+3.  ### Wallet Connect:
+
+    Create an instance of the `WallectConnectSession` class by passing the walletURL(token, server, port) and create a new session using `create` and connect to it using `onConnect`.
+
+    ```js
+    const walletURL = {
+    	token: token,
+    	server: server,
+    	port: port,
+    };
+    const wcSession = new WallectConnectSession(walletURL);
+
     await wcSession.create(true);
     wcSession.onConnect((error, response) => console.log(error, response));
     ```
 
 Now you can use it to execute a transaction:
 
-    const txParams = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccountAddr: fromAddress,
-      toAccountAddr: toAddress,
-      amountMicroAlgos: amount,
-      payFlags: {},
-    };
-    let response = await wcSession.executeTx(txParams);
+```javascript
+const txParams = {
+	type: types.TransactionType.TransferAlgo,
+	sign: types.SignType.SecretKey,
+	fromAccountAddr: fromAddress,
+	toAccountAddr: toAddress,
+	amountMicroAlgos: amount,
+	payFlags: {},
+};
+let response = await wcSession.executeTx(txParams);
+```
 
-This code will make the transaction, let the user sign it using wallet selected and send it to the network.
+This code will create the transaction, let the user sign it using selected wallet and send it to the network.
 
 You can also use `wcSession.sendTransaction()` or `wcSession.signTransaction()` in a react app.
 The example using these wallets can be found [here] (https://github.com/scale-it/algo-builder-templates/tree/master/shop)
@@ -90,7 +105,7 @@ console.log(2, debug.enabled("test"));
 
 print:
 
-```
+```bash
 1 true
 2 false
 ```
@@ -113,3 +128,34 @@ debug.log = console.info.bind(console);
 error("now goes to stdout via console.info");
 log("still goes to stdout, but via console.info now");
 ```
+
+## deployApp
+
+`deployer.deployApp` deploys stateful smart contract. Read more about [`deployApp parameters`](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html#deployApp)
+
+### Example
+
+```javascript
+// deployment
+const daoAppInfo = await deployer.deployApp(
+	creator,
+	{
+	    appName: "DAO App" // app name passed here
+        metaType: MetaType.FILE,
+	    approvalProgramFilename: "dao-app-approval.py",
+	    clearProgramFilename: "dao-app-clear.py",
+	    localInts: 9,
+	    localBytes: 7,
+	    globalInts: 4,
+	    globalBytes: 2,
+	    appArgs: appArgs,
+	},
+	{},
+	{},
+);
+
+// now during querying, you only need this app name
+const appInfo = deployer.getApp("DAO App");
+```
+
+**Note:** We don't support checkpoints yet. Currently `deployASA`, `deployApp` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.

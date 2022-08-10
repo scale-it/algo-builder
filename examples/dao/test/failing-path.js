@@ -20,6 +20,7 @@ const RUNTIME_ERR1009 = "RUNTIME_ERR1009: TEAL runtime encountered err opcode";
 const INDEX_OUT_OF_BOUND_ERR = "RUNTIME_ERR1008: Index out of bound";
 const INTEGER_UNDERFLOW_ERR = "Result of current operation caused integer underflow";
 const APP_NOT_FOUND = "RUNTIME_ERR1306: Application Index 9 not found or is invalid";
+const RUNTIME_ERR1406 = "Fee required 1000 is greater than fee collected 0";
 
 describe("DAO - Failing Paths", function () {
 	let master, creator, proposer, voterA, voterB;
@@ -77,7 +78,15 @@ describe("DAO - Failing Paths", function () {
 						...optInToGovASAParam,
 						payFlags: { totalFee: 1000 },
 					}),
-				"Fee required 2000 is greater than fee collected 1000"
+				RUNTIME_ERR1406
+			);
+		});
+
+		it("Should fail when deploy dao app because gov token doesn't exist", () => {
+			ctx.govTokenID = 100000; // token id doesn't exist
+			assert.throws(
+				() => ctx.deployDAOApp(ctx.creator, "dao-app-approval.py", "dao-app-clear.py"),
+				RUNTIME_ERR1009
 			);
 		});
 	});
@@ -434,6 +443,13 @@ describe("DAO - Failing Paths", function () {
 				RUNTIME_ERR1009
 			);
 		});
+
+		it("Should reject if fee paid by daoFundLsig", () => {
+			executeProposalTx[1].payFlags.totalFee = 3000;
+			assert.throw(() => {
+				ctx.executeTx(executeProposalTx);
+			}, RUNTIME_ERR1009);
+		});
 	});
 
 	describe("Withdraw Vote Deposit", function () {
@@ -488,13 +504,20 @@ describe("DAO - Failing Paths", function () {
 		it("should reject withdrawal if total fees is not paid by sender", () => {
 			assert.throws(
 				() => ctx.executeTx({ ...withdrawVoteDepositTx, payFlags: { totalFee: 1000 } }),
-				"Fee required 2000 is greater than fee collected 1000"
+				RUNTIME_ERR1406
 			);
 		});
 
 		it("should reject withdrawal if groupsize not valid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...withdrawVoteDepositTx }, { ...withdrawVoteDepositTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...withdrawVoteDepositTx },
+						{
+							...withdrawVoteDepositTx,
+							payFlags: { ...withdrawVoteDepositTx.payFlags, note: "salt" },
+						},
+					]),
 				RUNTIME_ERR1009
 			);
 		});
@@ -604,7 +627,11 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject tx if groupSize !== 1", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...clearVoteRecordTx }, { ...clearVoteRecordTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...clearVoteRecordTx },
+						{ ...clearVoteRecordTx, payFlags: { totalFee: 1000, note: "salt" } },
+					]),
 				RUNTIME_ERR1009
 			);
 		});
@@ -636,7 +663,11 @@ describe("DAO - Failing Paths", function () {
 
 		it("should reject close_proposal if group size is invalid", () => {
 			assert.throws(
-				() => ctx.executeTx([{ ...closeProposalTx }, { ...closeProposalTx }]),
+				() =>
+					ctx.executeTx([
+						{ ...closeProposalTx },
+						{ ...closeProposalTx, payFlags: { totalFee: 1000, note: "salt" } },
+					]),
 				RUNTIME_ERR1009
 			);
 		});

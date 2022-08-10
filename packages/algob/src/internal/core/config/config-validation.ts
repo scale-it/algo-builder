@@ -1,5 +1,5 @@
 import { parseZodError } from "@algo-builder/runtime";
-import { BuilderError, ERRORS } from "@algo-builder/web";
+import { BuilderError, ERRORS, mainnetURL, testnetURL } from "@algo-builder/web";
 import * as z from "zod";
 
 import { validateAccount } from "../../../lib/account";
@@ -78,7 +78,10 @@ const HttpNetworkType = z
 		// from: z.string().optional(),
 		host: z.string().optional(),
 		port: z.union([z.number(), z.string()]).optional(),
-		token: z.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType]).optional(),
+		token: z
+			.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType])
+			.nullable()
+			.optional(),
 		httpHeaders: HttpHeaders.optional(),
 		kmdCfg: KmdCfg.optional(),
 		indexerCfg: IndexerCfg.optional(),
@@ -156,9 +159,7 @@ export function getValidationErrors(config: any): CfgErrors {
 				errors.push(net, "host", host, "hostname string (eg: http://example.com)");
 			}
 			const token = hcfg.token;
-			if (typeof token === "string" && token.length < 10) {
-				errors.push(net, "token", token, "string (with length > 10)");
-			} else if (typeof token !== "object" && typeof token !== "string") {
+			if (typeof token !== "object" && typeof token !== "string") {
 				errors.push(net, "token", token, "string or object");
 			}
 

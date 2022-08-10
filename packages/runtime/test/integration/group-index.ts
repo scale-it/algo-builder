@@ -14,9 +14,10 @@ describe("Current Transaction Tests", function () {
 	let runtime: Runtime;
 	let master: AccountStore, creator: AccountStore;
 	let applicationId1: number, applicationId2: number;
-	let approvalProgramFileName: string, clearProgramFileName: string;
+	let approvalProgramFilename: string, clearProgramFilename: string;
 
-	const flags = {
+	const storageConfig = {
+		appName: "app",
 		localInts: 0,
 		localBytes: 0,
 		globalInts: 0,
@@ -28,26 +29,34 @@ describe("Current Transaction Tests", function () {
 		creator = new AccountStore(initialCreatorBalance);
 
 		runtime = new Runtime([master, creator]);
-		approvalProgramFileName = "test1.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "test1.teal";
+		clearProgramFilename = "clear.teal";
 	});
 
 	function setupApps(): void {
-		const creationFlags = Object.assign({}, flags);
-
 		// deploy first application
 		applicationId1 = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			{ ...creationFlags, sender: creator.account },
+			creator.account,
+			{
+				...storageConfig,
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				appName: "firstApp" + Date.now(),
+			},
 			{}
 		).appID;
 
 		// deploy second application
 		applicationId2 = runtime.deployApp(
-			"test2.teal",
-			clearProgramFileName,
-			{ ...creationFlags, sender: creator.account },
+			creator.account,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "test2.teal",
+				clearProgramFilename,
+				...storageConfig,
+				appName: "secondApp" + Date.now(),
+			},
 			{}
 		).appID;
 	}

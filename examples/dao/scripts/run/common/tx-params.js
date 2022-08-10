@@ -8,9 +8,18 @@ const votingStart = now + 1 * 60;
 const votingEnd = now + 3 * 60;
 const executeBefore = now + 7 * 60;
 
-function mkProposalTx(daoAppID, govTokenID, proposerAcc, proposalLsig, daoFundLsig) {
+function mkProposalTx(
+	daoAppID,
+	govTokenID,
+	proposerAcc,
+	proposalLsig,
+	daoFundLsig,
+	{ proposalType, assetID, messages } = {
+		proposalType: ProposalType.ALGO_TRANSFER,
+	}
+) {
 	const proposerAddr = proposerAcc.addr ?? proposerAcc.address;
-	const proposalParams = [
+	let proposalParams = [
 		DAOActions.addProposal,
 		`str:${ExampleProposalConfig.name}`, // name
 		`str:${ExampleProposalConfig.URL}`, // url
@@ -19,11 +28,37 @@ function mkProposalTx(daoAppID, govTokenID, proposerAcc, proposalLsig, daoFundLs
 		`int:${votingStart}`, // voting_start (now + 1min)
 		`int:${votingEnd}`, // voting_end (now + 3min)
 		`int:${executeBefore}`, // execute_before (now + 7min)
-		`int:${ProposalType.ALGO_TRANSFER}`, // type
-		`addr:${daoFundLsig.address()}`, // from (DAO treasury)
-		`addr:${proposerAddr}`, // recepient
-		`int:${2e6}`, // amount (in microalgos)
 	];
+
+	switch (proposalType) {
+		case ProposalType.ALGO_TRANSFER: {
+			proposalParams = proposalParams.concat([
+				`int:${ProposalType.ALGO_TRANSFER}`, // type
+				`addr:${daoFundLsig.address()}`, // from (DAO treasury)
+				`addr:${proposerAddr}`, // recepient
+				`int:${2e6}`, // amount (in microalgos)
+			]);
+			break;
+		}
+
+		case ProposalType.ASA_TRANSFER: {
+			proposalParams = proposalParams.concat([
+				`int:${ProposalType.ASA_TRANSFER}`, // type
+				`addr:${daoFundLsig.address()}`, // from (DAO treasury)
+				`int:${assetID}`,
+				`addr:${proposerAddr}`, // recepient
+				`int:${2e6}`, // amount (in microalgos)
+			]);
+			break;
+		}
+		case ProposalType.MESSAGE: {
+			proposalParams = proposalParams.concat([
+				`int:${ProposalType.MESSAGE}`,
+				`str:${messages}`,
+			]);
+			break;
+		}
+	}
 
 	return [
 		{

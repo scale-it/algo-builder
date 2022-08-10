@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { fundAccount, optInAccountToApp } = require("../common/common");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
@@ -21,17 +20,19 @@ async function whitelist(deployer, permissionsManager, address) {
 	 * - If address is already whitelisted then tx is accepted (with no change)
 	 * - Pass the address you wish to whitelist in Txn.accounts[1] to add to whitelist
 	 */
-	const whiteListParams = {
-		type: types.TransactionType.CallApp,
-		sign: types.SignType.SecretKey,
-		fromAccount: permissionsManager, // permissions manager account (fails otherwise)
-		appID: permissionAppInfo.appID,
-		payFlags: { totalFee: 1000 },
-		appArgs: ["str:add_whitelist"],
-		accounts: [address], // pass address to add to whitelisted addresses
-	};
+	const whiteListParams = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: permissionsManager, // permissions manager account (fails otherwise)
+			appID: permissionAppInfo.appID,
+			payFlags: { totalFee: 1000 },
+			appArgs: ["str:add_whitelist"],
+			accounts: [address], // pass address to add to whitelisted addresses
+		},
+	];
 	console.log(`* Adding [${address}] to whitelisted accounts *`);
-	await executeTx(deployer, whiteListParams);
+	await deployer.executeTx(whiteListParams);
 }
 
 /**

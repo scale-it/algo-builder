@@ -1,8 +1,8 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { AppDeploymentFlags } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
@@ -13,16 +13,19 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 	const john = new AccountStore(minBalance + fee);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let appID: number;
-	let creationFlags: AppDeploymentFlags;
+	let appDefinition: types.AppDefinitionFromFile;
+
 	this.beforeAll(function () {
 		runtime = new Runtime([alice, john]); // setup test
-		clearProgramFileName = "clear.teal";
-
-		creationFlags = {
-			sender: john.account,
+		clearProgramFilename = "clear.teal";
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
 			globalBytes: 1,
 			globalInts: 1,
 			localBytes: 1,
@@ -34,11 +37,10 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
 	it("should opt-in to app successfully and update local state", function () {
 		// deploy new app
-		approvalProgramFileName = "accept-optin.teal";
+		approvalProgramFilename = "accept-optin.teal";
 		appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
+			john.account,
+			{ ...appDefinition, approvalProgramFilename },
 			{}
 		).appID;
 
@@ -53,11 +55,14 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
 	it("should reject opt-in to app", function () {
 		// deploy new app
-		approvalProgramFileName = "reject-optin.teal";
+		approvalProgramFilename = "reject-optin.teal";
 		appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			creationFlags,
+			john.account,
+			{
+				...appDefinition,
+				approvalProgramFilename,
+				appName: "rejectedOptin",
+			},
 			{}
 		).appID;
 

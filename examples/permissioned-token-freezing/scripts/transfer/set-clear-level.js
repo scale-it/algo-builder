@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -21,8 +20,8 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	console.log("* Setting level 2 for Alice and Bob *");
-	await executeTx(deployer, [setLevelParams]);
-	await executeTx(deployer, [
+	await deployer.executeTx([setLevelParams]);
+	await deployer.executeTx([
 		{
 			...setLevelParams,
 			accounts: [bob.addr],
@@ -42,7 +41,7 @@ async function run(runtimeEnv, deployer) {
       payFlags: {},
       appArgs: [ "str:clear" ]
     };
-    await executeTx(deployer, clearLevelParams);
+    await deployer.executeTx([clearLevelParams]);
   */
 }
 

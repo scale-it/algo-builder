@@ -2,11 +2,8 @@
 	"name": "sample-project",
 	"version": "0.0.1",
 	"main": "index.js",
-	"license": "MIT",
-	"devDependencies": {
-		"mocha": "^9.2.0"
-	},
+	"license": "ISC",
 	"scripts": {
-		"algob": "algob"
+		"algob": "./node_modules/.bin/algob"
 	}
 }

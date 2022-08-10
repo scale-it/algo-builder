@@ -19,20 +19,25 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	let alice = new AccountStore(minBalance + 1000);
 
 	let runtime: Runtime;
-	let approvalProgramFileName: string;
-	let clearProgramFileName: string;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
 	let closeOutParams: types.AppCallsParam;
-	const flags = {
-		sender: john.account,
-		globalBytes: 2,
-		globalInts: 2,
-		localBytes: 3,
-		localInts: 3,
-	};
+	let appDefinition: types.AppDefinitionFromFile;
+
 	this.beforeAll(async function () {
-		runtime = new Runtime([john, alice]); // setup test
-		approvalProgramFileName = "close-clear-ssc.teal";
-		clearProgramFileName = "clear.teal";
+		approvalProgramFilename = "close-clear-ssc.teal";
+		clearProgramFilename = "clear.teal";
+
+		appDefinition = {
+			appName: "app",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename,
+			clearProgramFilename,
+			globalBytes: 2,
+			globalInts: 2,
+			localBytes: 3,
+			localInts: 3,
+		};
 
 		closeOutParams = {
 			type: types.TransactionType.CloseApp,
@@ -43,6 +48,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		};
 	});
 
+	this.beforeEach(() => {
+		runtime = new Runtime([john, alice]); // setup test
+	});
 	const syncAccount = (): void => {
 		john = runtime.getAccount(john.address);
 		alice = runtime.getAccount(alice.address);
@@ -56,12 +64,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	});
 
 	it("should successfully closeOut from app and update state according to asc", function () {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			flags,
-			{}
-		).appID; // create app
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID; // create app
 		const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
 
 		runtime.optInToApp(john.address, appID, {}, {}); // opt-in to app (set new local state)
@@ -96,12 +99,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
 	it("should throw error if user is not opted-in for closeOut call", function () {
 		// create app
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			flags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		closeOutParams.appID = appID;
 
 		expectRuntimeError(
@@ -112,12 +110,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	});
 
 	it("should not delete application on CloseOut call if logic is rejected", function () {
-		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			clearProgramFileName,
-			flags,
-			{}
-		).appID;
+		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
 		runtime.optInToApp(john.address, appID, {}, {}); // opt-in to app (set new local state)
 		syncAccount();
@@ -153,13 +146,13 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 	// even if transaction fails
 	it("should delete application on clearState call even if logic is rejected", function () {
 		// create app
-		const rejectClearProgramFileNme = "rejectClear.teal";
+		const rejectClearProgramFileName = "rejectClear.teal";
 		const appID = runtime.deployApp(
-			approvalProgramFileName,
-			rejectClearProgramFileNme,
-			flags,
+			john.account,
+			{ ...appDefinition, clearProgramFilename: rejectClearProgramFileName },
 			{}
 		).appID;
+
 		const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
 		const clearAppParams: types.AppCallsParam = {
 			type: types.TransactionType.ClearApp,

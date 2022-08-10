@@ -17,22 +17,10 @@ export class BuilderPluginError extends Error {
 	/**
 	 * Creates a BuilderPluginError.
 	 *
-	 * @param pluginName The name of the plugin.
-	 * @param message An error message that will be shown to the user.
+	 * @param pluginNameOrMessage The name of the plugin.
+	 * @param messageOrParent An error message that will be shown to the user.
 	 * @param parent The error that causes this error to be thrown.
 	 */
-	public constructor(pluginName: string, message: string, parent?: Error);
-
-	/**
-	 * A DEPRECATED constructor that automatically obtains the caller package and
-	 * use it as plugin name.
-	 *
-	 * @deprecated Use the above constructor.
-	 *
-	 * @param message An error message that will be shown to the user.
-	 * @param parent The error that causes this error to be thrown.
-	 */
-	public constructor(message: string, parent?: Error);
 
 	public constructor(
 		pluginNameOrMessage: string,

@@ -1,6 +1,9 @@
 {
 	"Genesis": {
-		"NetworkName": "",
+		"NetworkName": "devnet",
+		"ConsensusProtocol": "future",
+		"FirstPartKeyRound": 0,
+        "LastPartKeyRound":  30000,
 		"Wallets": [
 			{
 				"Name": "Wallet1",
@@ -13,7 +16,7 @@
 	"Nodes": [
 		{
 			"Name": "PrimaryNode",
-			"IsRelay": true,
+			"IsRelay": false,
 			"Wallets": [
 				{
 					"Name": "Wallet1",

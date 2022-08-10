@@ -7,36 +7,155 @@ Guidelines:
 + if relevant, you can also provide a link to a pull request.
 
 Organize change log in the following section (in that order):
-Features, Bug Fixes, Breaking Changes, Deprecated
+Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 -->
 
 # CHANGELOG
 
 ## Unreleased
 
+- Updated yarn to v3.2.1
+- Changed default sample project license to ISC
+- Fix `txn AssetSender` should return zero address by default.
+
+#### Examples
+
+- Added secret key to all accounts that are signing transactins in examples. 
+
 ### Features
 
-Added:
+- Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
+- Improved `algob/project-dev-script.sh` which is script setting up a local project.
+- Add `Uint8Array` as a supported type for `TxParams.note`
 
-- `logger` a debugging utility which returns a decorated version of console.error to which debug statements can be passed.
-- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
-- `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
-- unit tests that cover new scenarios when `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
-  Changed:
-- `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+- Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
+from `algosdk` and sends it to the network. 
+- Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
+- Added verification for secret key signatures in `Runtime`.
+
+### Bug Fixes
+
+- Fix `txn AssetSender` should return zero address by default.
+- Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
+- Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
+- Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
+
+### Examples
+
+#### DAO
+
+- Add `add_proposal_with_asset.js` script use for create proposal with asset funds.
+
+## v5.0.1 2022-07-11
+
+### Bug Fixes
+
+- added missing dependency (`debug`) to packages.
+
+## v5.0.0 2022-07-8
+
+### Features
+
+#### Algob
+
+- `algob.balanceOf(deployer, accountAddr, assetID)`: if assetID is undefined then the function will return ALGO account balance.
+- `deployer.executeTx` returns list of `TxnReceipt`, which extends `ConfirmedTxInfo`. This is to add a useful `txID` attribute, needed in various scripts.
+
+  ```ts
+  export interface TxnReceipt extends ConfirmedTxInfo {
+  	txID: string;
+  }
+  ```
+
+#### Runtime
+
+- Add `Runtime.getAppByName(appName)`: gets app info based on the name declared in appDefinition.
+- Better warning/error when deploying ASA. Throws an error when ASA definition is wrong or when ASA is not found in asa.yaml, eg when Runtime needs to query ASA.
+- Add `Runtime.getAppByName(appName)`. We can get application in Runtime now.
+- Teal v6 support:
+  - Add `Txn LastLog` opcode.
+  - Add `Txn StateProofPK` opcode.
+
+#### Examples
+
+- Add new example [Trampoline](https://github.com/algorand-devrel/demo-avm1.1/tree/master/demos/trampoline)
+
+### Bug Fixes
+
+- Fix: missing schebang to run `algob` as an app directly. BTW, we recommend running algob through `yarn algob` in your project.
+- Fix: max number of transactions in one call should be 256 (include inner and atomic transaction).
+- Fix: Web mode (algo-builder/web) cannot sign by `fromAccount` when `fromAccountAddr` appear in `execParams`.
+- Receipt confirmed txn have `inner-txns` and `txn` field.
+
+### Breaking Changes
+
+#### @algo-builder/algob
+
+- `ensureCompiled` is deprecated and removed and `compileASC` should be used.
+- `loadLogicFromCache` is deprecated and removed and `getLsigFromCache` should be used.
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
+
+#### @algo-builder/runtime
+
+- `addAsset` is deprecated and removed and `deployASA` should be used.
+- `addApp` is deprecated and removed and `deployAdd` should be used.
+- `addASADef` is deprecated and removed and `deployASADef` should be used.
+- Renamed `optIntoAsa` to `optInToAsa` to remain naming convention consistency across the project.
+
+#### @algo-builder/web
+
+- `executeTransaction` is deprecated and removed and `executeTx` should be used.
+- Renamed `sendTransaction` to `sendAndWait` in WebMode and parameter is updated to accept `string` to bring consistency with other wallets class.
+
+### Deprecated
+
+### Infrastructure
+
+- Updated indexer version to `2.12.4` in `infrastructure/makefile`
+
+### Template Updates
+
+DAO template:
+
+- [breaking] moved template parameter (`gov_token_id`) to the global state. This is to assure constant bytecode fir each deployment. We need it to build an efficient indexer and UI.
+  - Subsequently, `gov_token_id` is required when deploying new DAO approval program.
+
+## v4.0.0 2022-05-24
+
+### Features
+
+- use`logger` from `debug` package for logging utility in place of all console calls.
+
+Core:
+
+- Added support for saving smart contract template params in ASCCache.
 - The `compile.ts` has been updated and now the tealCode is stored in cache when `scTmplParams` are used to compile TEAL with hardcoded params.
-- Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
-- Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in _signature_ mode, and parser will reject the execution if run in application mode.
-- Support RekeyTo field in the inner transaction for TEAL v6.
-- Support `keyreg` transaction in inner transaction.
 - Added following functions in `deployer` API
   - `getDeployedASC`: returns cached program (from artifacts/cache) `ASCCache` object by name. Supports both App and Lsig.
-- Support `RekeyTo` field in the inner transaction for TEAL v6.
-- Enable transfer ALGO to implicit account.
 - You can initialize an new `algob` project with `infrastructure` scripts (a copy the `/infrastructure` directory in repository) by adding the `--infrastructure` flag. Example:
   ```bash
     algob init --infrastructure
   ```
+- Return list of receipts for each txn in group txn. Example:
+
+```js
+const receipts = deployer.executeTx([txn0, txn1]);
+console.log("txn0 information: ", receipts[0]);
+console.log("txn1 information: ", receipts[2]);
+```
+
+JS Runtime and testing features:
+
+- `runtime.defaultAccounts` - a list of pre-generated 16 accounts with pre-defined addresses and keys, each with 1e8 microAlgos (100 Algos)
+- `runtime.resetDefaultAccounts()` - will recreate the default accounts (reset their state).
+- unit tests that cover new scenarios when `runtime.defaultAccounts` and `runtime.resetDefaultAccounts()` are used.
+  - `bond-token-flow` test to also use runtime.defaultAccounts. (see [example](https://github.com/scale-it/algo-builder/blob/develop/examples/bond/test/bond-token-flow.js))
+- Support execution of algo-sdk-js `transactionAndSign` in Runtime [#601](https://github.com/scale-it/algo-builder/pull/601).
+- Added support for checking against opcode their execution mode in runtime. For eg. `arg` can only be run in _signature_ mode, and parser will reject the execution if run in application mode.
+- Support RekeyTo field in the inner transaction for TEAL v6.
+- Support `keyreg` transaction in inner transaction in JS runtime.
+- Enable transfer ALGO to a not regeistred account.
+- Every opcode class has been updated and now their `execute` method returns its cost.
 - Teal V6 support:
 
   - Add new opcode `bsqrt` and `divw`([##605](https://github.com/scale-it/algo-builder/pull/605)).
@@ -45,33 +164,181 @@ Added:
   - Add new opcode `itxn_next`([#626](https://github.com/scale-it/algo-builder/pull/626)).
   - Add new opcode `gitxn`, `gitxna` and `gitxnas`.([#628](https://github.com/scale-it/algo-builder/pull/628)).
   - Contract to contract calls. However we limit c2c call with only AppCall(NoOpt) transactions.([#611](https://github.com/scale-it/algo-builder/pull/611))
+  - Full support for inner transactions: `itxn`, `itxna` and `itxnas`
 
-- Added support for saving smart contract template params in ASCCache.
+- Teal v7 support:
 
-### Template improvements
+  - opcode `base64decode` ([##653](https://github.com/scale-it/algo-builder/pull/653))
 
-- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
+- `algob test` now runs tests recursively in `test` directory and subdirectories. Before only the files inside the test directory where run.
 
-### API breaking
+Dependencies:
 
-- We have changed the naming convetion for the clearing proposal part of the DAO:
+- Upgraded PyTEAL version [`0.13.0`](https://github.com/algorand/pyteal/releases/tag/v0.13.0) in Pipfile.
+- Upgraded JS SDK to v1.16.0
+
+### API Breaking
+
+- Improved the smart contract deployment process. We changed the `DeployASAParam` and `DeployASCParam` to make it more explicit. The `deployer.deploy*` also got improvemetns with a cost of API breaking. We created the following types to describe the smart-contract to be deplyed:
+
+```ts
+// from file
+type SourceFile = {
+	metaType: MetaType.FILE;
+	approvalProgramFilename: string;
+	clearProgramFilename: string;
+};
+
+// from teal source code (string).
+type SourceCode = {
+	metaType: MetaType.SOURCE_CODE;
+	approvalProgramCode: string;
+	clearProgramCode: string;
+};
+
+// from compiled source code.
+type SourceCompiled = {
+	metaType: MetaType.BYTES;
+	approvalProgramBytes: Uint8Array;
+	clearProgramBytes: Uint8Array;
+};
+```
+
+And the following types are added for the Smart Contract definition
+
+```ts
+export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
+
+export type AppDefinitionFromSource = StorageConfig & AppOptionalFlags & SourceCode;
+
+export type AppDefinitionFromSourceCompiled = StorageConfig & AppOptionalFlags & SourceCompiled;
+
+export type AppDefinition =
+	| AppDefinitionFromFile
+	| AppDefinitionFromSource
+	| AppDefinitionFromSourceCompiled;
+
+export type DeployAppParam = BasicParams & {
+	type: TransactionType.DeployApp;
+	appDefinition: AppDefinition;
+};
+```
+
+See [packages/web/src/types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts) for more details.
+
+- We have updated parameters of `deployApp` method:
+
+```ts
+/// old
+  /**
+	 * deploy a new application and returns application id
+	 * @param approvalProgram application approval program (TEAL code or program filename)
+	 * @param clearProgram application clear program (TEAL code or program filename)
+	 * @param flags SSCDeployment flags
+	 * @param payFlags Transaction parameters
+	 * @param scTmplParams Smart Contract template parameters
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	deployApp(
+		approvalProgram: string,
+		clearProgram: string,
+		flags: AppDeploymentFlags,
+		payFlags: types.TxParams,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	): {...}
+
+/// new
+	/**
+	 * deploy a new application and returns application id
+	 * @param payFlags Transaction parameters
+	 * @param appDefinition app definition
+	 * @param scTmplParams Smart Contract template parameters
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	deployApp(
+		sender: AccountSDK,
+		appDefinition: types.AppDefinition,
+		payFlags: types.TxParams,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	):
+```
+
+- We have changed the parameters of `updateApp` method. Details:
+
+```ts
+  // old
+	/**
+	 * Update application
+	 * @param senderAddr sender address
+	 * @param appID application Id
+	 * @param approvalProgram new approval program (TEAL code or program filename)
+	 * @param clearProgram new clear program (TEAL code or program filename)
+	 * @param payFlags Transaction parameters
+	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	updateApp(
+		senderAddr: string,
+		appID: number,
+		approvalProgram: string,
+		clearProgram: string,
+		payFlags: types.TxParams,
+		flags: AppOptionalFlags,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	)
+
+  // new
+  /**
+	 * Update application
+	 * @param appName application Name. Note in runtime application name just placeholder params
+	 * @param senderAddr sender address
+	 * @param appID application Id
+	 * @param newAppCode new application source code
+	 * @param payFlags Transaction parameters
+	 * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+	 * @param debugStack: if passed then TEAL Stack is logged to console after
+	 * each opcode execution (upto depth = debugStack)
+	 */
+	updateApp(
+		appName: string,
+		senderAddr: string,
+		appID: number,
+		newAppCode: types.SmartContract,
+		payFlags: types.TxParams,
+		flags: AppOptionalFlags,
+		scTmplParams?: SCParams,
+		debugStack?: number
+	)
+```
+
+- The `appName` field is required now. We can use `deployer.getApp(appName)` to get checkpoint data of application. In web-mode, you can set it empty.
+
+- We removed `runtime.addApp`, `deployer.getAppByFile` methods.
+
+- We have changed the naming convention for the clearing proposal part of the DAO:
 
   - Renamed `clearProposal` to `closeProposal`,
   - Renamed `clear_proposal` to `close_proposal`,
   - Renamed `mkClearProposalTx` to `mkCloseProposalTx`.
 
-- We have updated the default behaviour of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
+- We have updated the default behavior of algob deployer for loading data from checkpoint to be queried by "app/lsig" name (note: passing name is required). The existing functionality has been moved to `<func>ByFile` functions (legacy functions based on file querying):
 
   - Application:
 
-    - Pervious `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
+    - Previous `getApp(approval.py, clear.py)` has been changed to `getAppByFile(approval.py, clear.py)`.
     - New `getApp(appName)` function queries app info using the app name.
 
   - Smart signatures:
-    - Exisiting `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` funtion to query logic signature from name or filename in a checkpoint.
+    - Existing `getDelegatedLsig(lsig.py)`, `getContractLsig(lsig.py)` **have been removed**. Use `getLsig` function to query logic signature from name or filename in a checkpoint.
     - New `getApp(appName)` function queries app info using the app name.
     - Existing `fundLsig(lsig.py, ..)` function has been changed to `fundLsigByFile(lsig.py, ..)`. Now `fundLsig(lsigName, ..)` will take lsig name.
-    - Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required paramter (first parameter passed to function)**:
+    - Existing `mkDelegatedLsig(fileName, signer, ..)`, `mkContractLsig(fileName, ..)` have been updated to take the **lsigName as a required parameter (first parameter passed to function)**:
       - `mkDelegatedLsig(lsigName, fileName, signer)`
       - `mkContractLsig(lsigName, fileName)`.
         Here `fileName` represent the name of smart contract file (eg. `treasury-lsig.teal`), and `lsigName` represents the "name" you want to assign to this lsig (eg. `treasuryLsig`).
@@ -79,7 +346,7 @@ Added:
   For reference you can check out `examples/asa`.
 
 - Updated `getLsig`, `getDelegatedLsigByFile`, `getContractLsigByFile`, `getApp` to throw an error if information against checkpoint (by name or file) is not found.
-- Updated `TxReceipts` for runtime's `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
+- Updated `TxReceipts` for runtimes' `deployApp`, `deployASA` to use same types as algob (`AppInfo`, `ASAInfo`).
 - Updated `txId` key in returned App/ASA info to `txID`.
 
 - `printLocalStateSCC` renamed to `printLocalStateApp`.
@@ -87,16 +354,32 @@ Added:
 
 - The ` PyASCCache` has been merged to `ASCCache` and is not used anymore.
 - Only use list transaction in executeTx.
+- Rename the executeTransaction to executeTx
+
+- The `Deployer` interface now contains a new method `executeTx` while the old function is still supporoted it is
+  recommended to use the method from `Deployer` rather than the function dirrectly.
+
+- `executeTx` method from `WebMode` class now returns `Promise<algosdk.modelsv2.PendingTransactionResponse>` .
 
 ### Bug fixes
 
 - Return error when closeRemainderTo and fromAccountAddr is the same.
 - When close account should remove auth/spend address. Fixed in [#575](https://github.com/scale-it/algo-builder/pull/575).
-- Approval program and clear propram should throw error if they are mismatch version. Fixed in [620](https://github.com/scale-it/algo-builder/pull/620)
+- Approval program and clear program should throw error if they are mismatch version. Fixed in [#620](https://github.com/scale-it/algo-builder/pull/620)
+- Allow token to be empty.
+- Throw error when issue inner transactions in clear program. Fixed in [#667](https://github.com/scale-it/algo-builder/pull/667).
+- Parameters in `extract*` opcodes can greater than uint8. Fixed in [#666](https://github.com/scale-it/algo-builder/pull/666).
+- Wallet constructor come from a parameter walletURL(token, server, port)
+- Restrict duplicate transaction in group transaction.
 
 ### Infrastructure
 
 - Updated `setup-master-account` and `sandbox-setup-master-account` commands to run multiple times.
+
+### Template Updates
+
+- We updated the examples/DAO design. We removed treasury Smart Signature to simplify deposit management. Now a DAO app is managing voting, deposits and treasury.
+- Enabled PyTEAL Optimizer option in all our examples.
 
 ## v3.2.0 2022-02-03
 

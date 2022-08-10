@@ -10,11 +10,11 @@ import type {
 import algosdk, { Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
-import { ExecParams, TransactionInGroup } from "../types";
+import { ExecParams, HttpNetworkConfig, TransactionInGroup } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
-import { mkTransaction } from "./txn";
 import { error, log } from "./logger";
+import { mkTransaction } from "./txn";
 
 interface MyAlgoConnect {
 	/**
@@ -57,19 +57,18 @@ export class MyAlgoWalletSession {
 	accounts: Accounts[] = [];
 	addresses: Address[] = [];
 
-	constructor(chain: string, connector?: MyAlgoConnect) {
-		this.algodClient = algoexplorerAlgod(chain);
-		import("@randlabs/myalgo-connect")
-			.then((MyAlgoConnect) => {
-				if (connector) {
-					this.connector = connector;
-				} else {
-					this.connector = new MyAlgoConnect.default();
-				}
-			})
-			.catch((err) => {
-				error(err);
-			});
+	constructor(walletURL: HttpNetworkConfig, connector?: MyAlgoConnect) {
+		this.algodClient = algoexplorerAlgod(walletURL);
+		try {
+			const MyAlgoConnect = require("@randlabs/myalgo-connect"); // eslint-disable-line @typescript-eslint/no-var-requires
+			if (connector) {
+				this.connector = connector;
+			} else {
+				this.connector = new MyAlgoConnect();
+			}
+		} catch (err) {
+			error(err);
+		}
 	}
 
 	// https://connect.myalgo.com/docs/interactive-examples/Connect
@@ -113,7 +112,7 @@ export class MyAlgoWalletSession {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 */
-	private async sendAndWait(
+	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
@@ -160,12 +159,5 @@ export class MyAlgoWalletSession {
 
 		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
-	}
-	/** @deprecated */
-	async executeTransaction(
-		execParams: ExecParams | ExecParams[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		if (Array.isArray(execParams)) return this.executeTx(execParams);
-		else return this.executeTx([execParams]);
 	}
 }

@@ -4,7 +4,7 @@ import * as base32 from "hi-base32";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { EncodingType } from "../types";
-import { reBase32, reBase64, reDec, reDigit, reHex, reOct } from "./constants";
+import { reBase32, reBase64, reBase64Url, reDec, reDigit, reHex, reOct } from "./constants";
 
 /**
  * assert if string contains digits only
@@ -65,6 +65,17 @@ export function assertLen(val: number, expected: number, line: number): void {
 export function assertBase64(str: string, line: number): void {
 	if (!reBase64.test(str)) {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_BASE64, { val: str, line: line });
+	}
+}
+
+/**
+ * Checks if string is base64Url
+ * @param str : string that needs to be checked
+ * @param line : line number in TEAL file
+ */
+export function assertBase64Url(str: string, line: number): void {
+	if (!reBase64Url.test(str)) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_BASE64URL, { val: str, line: line });
 	}
 }
 

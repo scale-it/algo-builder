@@ -1,5 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
-
 const { issueTx } = require("./common/common");
 /**
  * In this function tokens are issued to issuer from token creator.
@@ -13,6 +11,6 @@ exports.issue = async function (deployer) {
 	const groupTx = issueTx(creatorAccount, issuerLsig, appInfo.appID, asaInfo.assetIndex);
 
 	console.log("Issuing tokens!");
-	await executeTx(deployer, groupTx);
+	await deployer.executeTx(groupTx);
 	console.log("Tokens issued to issuer");
 };

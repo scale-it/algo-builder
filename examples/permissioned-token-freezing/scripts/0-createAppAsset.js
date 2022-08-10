@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -15,9 +14,9 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200e6,
 		payFlags: {},
 	};
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 	algoTxnParams.toAccountAddr = bob.addr;
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 
 	const asaInfo = await deployer.deployASA("gold", { creator: creator });
 	await deployer.optInAccountToASA("gold", "bob", {}); // asa optIn for bob
@@ -31,19 +30,19 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	const sscInfo = await deployer.deployApp(
-		"poi-approval.teal", // approval program
-		"poi-clear.teal", // clear program
+		creator,
 		{
-			sender: creator,
+			appName: "PermissionedTokenApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "poi-approval.teal", // approval program
+			clearProgramFilename: "poi-clear.teal", // clear program
 			localInts: 1, // to store level of asset for account
 			localBytes: 0,
 			globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset
 			globalBytes: 1, // to store creator address
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"PermissionedTokenApp"
+		{}
 	);
 
 	console.log(sscInfo);

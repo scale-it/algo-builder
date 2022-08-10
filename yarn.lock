@@ -23,11 +23,11 @@ __metadata:
     "@types/semver": ^7.3.9
     "@types/sinon": ^10.0.11
     "@types/tmp": ^0.2.3
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     chai: ^4.3.6
     chalk: ^4.1.2
     cross-env: ^7.0.3
-    debug: ^4.3.3
+    debug: ^4.3.4
     deep-equal: ^2.0.5
     deepmerge: ^4.2.2
     download-git-repo: ^3.0.2
@@ -63,13 +63,16 @@ __metadata:
     "@algo-builder/web": "workspace:*"
     "@nodelib/fs.walk": ^1.2.8
     "@types/chai": ^4.3.0
+    "@types/debug": ^4.1.7
     "@types/elliptic": ^6.4.14
     "@types/lodash.clonedeep": ^4.5.6
     "@types/mocha": ^9.1.0
     "@types/node": ^17.0.21
     "@types/sinon": ^10.0.11
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     chai: ^4.3.6
+    chalk: ^4.1.2
+    debug: ^4.3.4
     elliptic: ^6.5.4
     eslint: ^8.10.0
     hi-base32: ^0.5.1
@@ -98,14 +101,16 @@ __metadata:
     "@json-rpc-tools/utils": ^1.7.6
     "@randlabs/myalgo-connect": ^1.1.2
     "@types/chai": ^4.3.0
+    "@types/debug": ^4.1.7
     "@types/mocha": ^9.1.0
     "@types/node": ^17.0.21
     "@types/sinon": ^10.0.11
     "@walletconnect/client": ^1.6.6
     "@walletconnect/types": ^1.7.1
     algorand-walletconnect-qrcode-modal: ^1.7.4
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     chai: ^4.3.6
+    debug: ^4.3.4
     eslint: ^8.10.0
     mocha: ^9.2.1
     nyc: ^15.1.0
@@ -1269,7 +1274,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -1289,12 +1294,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"algosdk@npm:^1.14.0":
-  version: 1.14.0
-  resolution: "algosdk@npm:1.14.0"
+"algosdk@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "algosdk@npm:1.19.0"
   dependencies:
     algo-msgpack-with-bigint: ^2.1.1
     buffer: ^6.0.2
+    fsevents: 2.1.2
     hi-base32: ^0.5.1
     js-sha256: ^0.9.0
     js-sha3: ^0.8.0
@@ -1302,8 +1308,11 @@ __metadata:
     json-bigint: ^1.0.0
     superagent: ^6.1.0
     tweetnacl: ^1.0.3
-    url-parse: ^1.5.1
-  checksum: 9c19191d2a2d7e4e3a20756603f5b321590cfe5d09bdf522614a6a6ce9872c4e533b03b6c92e35b886ae3ce15d049d046f004154dd45d1b120bde191c0da427d
+    vlq: ^2.0.4
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  checksum: e7503171a587cab6816459cb68b37e2e8a8b9fd253d02843026bc14120f883be593cdfd55ba490ca57cb2399ffaaf68a4704d3e9a7a19dbf97fb094514a5abfe
   languageName: node
   linkType: hard
 
@@ -2077,6 +2086,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"create-inner-asset@workspace:examples/inner-tx-create-assets":
+  version: 0.0.0-use.local
+  resolution: "create-inner-asset@workspace:examples/inner-tx-create-assets"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
+    algosdk: ^1.19.0
+    dotenv: ^16.0.0
+    eslint: ^8.10.0
+    mocha: ^9.2.1
+  languageName: unknown
+  linkType: soft
+
 "create-require@npm:^1.1.0":
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
@@ -2114,7 +2137,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2127,7 +2150,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2166,6 +2189,18 @@ __metadata:
     supports-color:
       optional: true
   checksum: 820ea160e267e23c953c9ed87e7ad93494d8cda2f7349af5e7e3bb236d23707ee3022f477d5a7d2ee86ef2bf7d60aa9ab22d1f58080d7deb9dccd073585e1e43
+  languageName: node
+  linkType: hard
+
+"debug@npm:^4.3.4":
+  version: 4.3.4
+  resolution: "debug@npm:4.3.4"
+  dependencies:
+    ms: 2.1.2
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 3dbad3f94ea64f34431a9cbf0bafb61853eda57bff2880036153438f50fb5a84f27683ba0d8e5426bf41a8c6ff03879488120cf5b3a761e77953169c0600a708
   languageName: node
   linkType: hard
 
@@ -2824,7 +2859,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -2837,7 +2872,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -3183,12 +3218,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fsevents@npm:2.1.2":
+  version: 2.1.2
+  resolution: "fsevents@npm:2.1.2"
+  dependencies:
+    node-gyp: latest
+  checksum: 63fe1ba77b63d5da5dde6112c5f0eb161b9d18a61427a8a49d661eeed080189d99e8f9da11bb6b75ecd5129a69edc5757d60a4eb0bbada6de68d5156c382c5e1
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
 "fsevents@npm:~2.3.2":
   version: 2.3.2
   resolution: "fsevents@npm:2.3.2"
   dependencies:
     node-gyp: latest
   checksum: 97ade64e75091afee5265e6956cb72ba34db7819b4c3e94c431d4be2b19b8bb7a2d4116da417950c3425f17c8fe693d25e20212cac583ac1521ad066b77ae31f
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
+"fsevents@patch:fsevents@2.1.2#~builtin<compat/fsevents>":
+  version: 2.1.2
+  resolution: "fsevents@patch:fsevents@npm%3A2.1.2#~builtin<compat/fsevents>::version=2.1.2&hash=18f3a7"
+  dependencies:
+    node-gyp: latest
   conditions: os=darwin
   languageName: node
   linkType: hard
@@ -3590,7 +3644,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     js-sha256: ^0.9.0
     mocha: ^9.2.1
@@ -4852,7 +4906,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5288,7 +5342,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5301,7 +5355,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5314,7 +5368,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -5498,13 +5552,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"querystringify@npm:^2.1.1":
-  version: 2.2.0
-  resolution: "querystringify@npm:2.2.0"
-  checksum: 5641ea231bad7ef6d64d9998faca95611ed4b11c2591a8cae741e178a974f6a8e0ebde008475259abe1621cb15e692404e6b6626e927f7b849d5c09392604b15
-  languageName: node
-  linkType: hard
-
 "queue-microtask@npm:^1.2.2":
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
@@ -5563,7 +5610,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     dotenv: ^16.0.0
     eslint: ^8.10.0
     mocha: ^9.2.1
@@ -5607,13 +5654,6 @@ __metadata:
   version: 2.0.0
   resolution: "require-main-filename@npm:2.0.0"
   checksum: e9e294695fea08b076457e9ddff854e81bffbe248ed34c1eec348b7abbd22a0d02e8d75506559e2265e96978f3c4720bd77a6dad84755de8162b357eb6c778c7
-  languageName: node
-  linkType: hard
-
-"requires-port@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "requires-port@npm:1.0.0"
-  checksum: eee0e303adffb69be55d1a214e415cf42b7441ae858c76dfc5353148644f6fd6e698926fc4643f510d5c126d12a705e7c8ed7e38061113bdf37547ab356797ff
   languageName: node
   linkType: hard
 
@@ -5847,7 +5887,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -6039,7 +6079,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -6383,6 +6423,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"trampoline@workspace:examples/trampoline":
+  version: 0.0.0-use.local
+  resolution: "trampoline@workspace:examples/trampoline"
+  dependencies:
+    "@algo-builder/algob": "workspace:*"
+    "@algo-builder/runtime": "workspace:*"
+    "@algo-builder/web": "workspace:*"
+    algosdk: ^1.19.0
+    eslint: ^8.10.0
+    mocha: ^9.2.1
+  languageName: unknown
+  linkType: soft
+
 "trim-repeated@npm:^1.0.0":
   version: 1.0.0
   resolution: "trim-repeated@npm:1.0.0"
@@ -6602,7 +6655,7 @@ __metadata:
 
 "typescript@patch:typescript@^4.6.2#~builtin<compat/typescript>":
   version: 4.6.2
-  resolution: "typescript@patch:typescript@npm%3A4.6.2#~builtin<compat/typescript>::version=4.6.2&hash=bda367"
+  resolution: "typescript@patch:typescript@npm%3A4.6.2#~builtin<compat/typescript>::version=4.6.2&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
@@ -6648,7 +6701,7 @@ __metadata:
     "@algo-builder/algob": "workspace:*"
     "@algo-builder/runtime": "workspace:*"
     "@algo-builder/web": "workspace:*"
-    algosdk: ^1.14.0
+    algosdk: ^1.19.0
     eslint: ^8.10.0
     mocha: ^9.2.1
   languageName: unknown
@@ -6688,16 +6741,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"url-parse@npm:^1.5.1":
-  version: 1.5.3
-  resolution: "url-parse@npm:1.5.3"
-  dependencies:
-    querystringify: ^2.1.1
-    requires-port: ^1.0.0
-  checksum: c6b32fff835e43f3b1b4150239f459744f0ab1a908841dbfecbfc79bf67f4d6c8d9af1841d0c6d814d45bfa08525cc29312a0bef31db7aa894306b3db07e4ee0
-  languageName: node
-  linkType: hard
-
 "url-to-options@npm:^1.0.1":
   version: 1.0.1
   resolution: "url-to-options@npm:1.0.1"
@@ -6732,6 +6775,13 @@ __metadata:
   version: 2.3.0
   resolution: "v8-compile-cache@npm:2.3.0"
   checksum: adb0a271eaa2297f2f4c536acbfee872d0dd26ec2d76f66921aa7fc437319132773483344207bdbeee169225f4739016d8d2dbf0553913a52bb34da6d0334f8e
+  languageName: node
+  linkType: hard
+
+"vlq@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "vlq@npm:2.0.4"
+  checksum: b2ed0d3a5423f34bba98a18250f8b13a96eebff9c8f9427fa9cd78065d31f35641f6fd659c5642253b79532000a37aec0582abac95d1ef4af2cd0c96a716f1b6
   languageName: node
   linkType: hard
 

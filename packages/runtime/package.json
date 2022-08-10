@@ -1,6 +1,6 @@
 {
 	"name": "@algo-builder/runtime",
-	"version": "3.2.0",
+	"version": "5.0.1",
 	"license": "Apache-2.0",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
@@ -34,7 +34,9 @@
 	"dependencies": {
 		"@algo-builder/web": "workspace:*",
 		"@nodelib/fs.walk": "^1.2.8",
-		"algosdk": "^1.14.0",
+		"algosdk": "^1.19.0",
+		"chalk": "^4.1.2",
+		"debug": "^4.3.4",
 		"elliptic": "^6.5.4",
 		"hi-base32": "^0.5.1",
 		"js-sha256": "^0.9.0",
@@ -49,6 +51,7 @@
 	},
 	"devDependencies": {
 		"@types/chai": "^4.3.0",
+		"@types/debug": "^4.1.7",
 		"@types/elliptic": "^6.4.14",
 		"@types/lodash.clonedeep": "^4.5.6",
 		"@types/mocha": "^9.1.0",

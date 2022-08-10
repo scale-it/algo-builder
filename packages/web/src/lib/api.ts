@@ -1,18 +1,9 @@
 import algosdk, { Algodv2, ALGORAND_MIN_TX_FEE, SuggestedParams } from "algosdk";
 
-import { ChainType, TxParams } from "../types";
+import { HttpNetworkConfig, TxParams } from "../types";
 
-export function algoexplorerAlgod(chain: string): algosdk.Algodv2 {
-	const mainnetAlgoExplorer = new Algodv2("", "https://algoexplorerapi.io", "");
-	const testnetAlgoExplorer = new Algodv2("", "https://node.testnet.algoexplorerapi.io", "");
-	switch (chain) {
-		case ChainType.MainNet:
-			return mainnetAlgoExplorer;
-		case ChainType.TestNet:
-			return testnetAlgoExplorer;
-		default:
-			throw new Error(`Unknown chain type: ${chain}`);
-	}
+export function algoexplorerAlgod(walletURL: HttpNetworkConfig): algosdk.Algodv2 {
+	return new Algodv2(walletURL.token, walletURL.server, walletURL.port);
 }
 
 /**

@@ -7,6 +7,7 @@ import { copyTemplatetoDestination, fetchRepository, setUpTempDirectory } from "
 import {
 	createConfirmationPrompt,
 	installDependencies,
+	pkgManager,
 	printSuggestedCommands,
 	printWelcomeMessage,
 } from "./project-creation";
@@ -14,29 +15,29 @@ import {
 const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = "scale-it/algo-builder-templates";
 const DEFAULT_DAPP_TEMPLATE = "default";
 
-function isYarnProject(destination: string): boolean {
-	return fse.existsSync(path.join(destination, "yarn.lock"));
-}
-
 /**
  * Confirm if user wants to install project dependencies in template directory
  * @param name Selected Dapp template name
  * @param destination location to initialize template
  */
-async function confirmDepInstallation(name: string, destination: string): Promise<boolean> {
+async function confirmDepInstallation(
+	name: string,
+	destination: string,
+	isNpm: boolean
+): Promise<boolean> {
 	const { default: enquirer } = await import("enquirer");
 
 	let responses: {
 		shouldInstall: boolean;
 	};
 
-	const packageManager = isYarnProject(destination) ? "yarn" : "npm";
-
 	try {
 		responses = await enquirer.prompt([
 			createConfirmationPrompt(
 				"shouldInstall",
-				`Do you want to install dapp template ${name}'s dependencies with ${packageManager} ?`
+				`Do you want to install dapp template ${name}'s dependencies with ${pkgManager(
+					isNpm
+				)} ?`
 			),
 		]);
 	} catch (e) {
@@ -167,10 +168,12 @@ export async function unbox({
 	force,
 	templateName,
 	destination,
+	isNpm,
 }: {
 	force: boolean;
 	templateName?: string;
 	destination?: string;
+	isNpm: boolean;
 }): Promise<void> {
 	await printWelcomeMessage();
 
@@ -203,13 +206,14 @@ export async function unbox({
 	);
 
 	// install dependencies in /templatePath
-	const shouldInstallDependencies = await confirmDepInstallation(
+	const shouldInstallDeps = await confirmDepInstallation(
 		templateName,
-		normalizedDestination
+		normalizedDestination,
+		isNpm
 	);
-	const packageManager = isYarnProject(normalizedDestination) ? "yarn" : "npm";
+	const packageManager = pkgManager(isNpm);
 	let shouldShowInstallationInstructions;
-	if (shouldInstallDependencies) {
+	if (shouldInstallDeps) {
 		const installed = await installDependencies(
 			packageManager,
 			["install"],
@@ -228,6 +232,6 @@ export async function unbox({
 			chalk.yellow(`\nInstall your project dependencies using '${packageManager} install'`)
 		);
 	}
-	printSuggestedCommands();
+	printSuggestedCommands(isNpm);
 	printSuggestedDAppCommands(packageManager);
 }

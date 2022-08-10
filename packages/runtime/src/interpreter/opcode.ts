@@ -6,6 +6,7 @@ import {
 	GlobalFields,
 	ITxArrFields,
 	ITxnFields,
+	MathOp,
 	MAX_UINT6,
 	MAX_UINT8,
 	MAX_UINT64,
@@ -16,8 +17,23 @@ import {
 	TxnFields,
 } from "../lib/constants";
 import type { TEALStack } from "../types";
+import { Interpreter } from "./interpreter";
 
-export class Op {
+export abstract class Op {
+	//line number in TEAL file
+	abstract line: number;
+	/**
+	 * executes the opcode and returns its cost if different from 1
+	 * @param stack TEAL stack
+	 * @param op math operator for the ByteOp class
+	 * @returns either the cost or if cost is default (equal to 1) void;
+	 */
+	abstract execute(stack: TEALStack, op?: MathOp): number;
+
+	computeCost(): number {
+		return 1;
+	}
+
 	/**
 	 * assert stack length is atleast minLen
 	 * @param stack TEAL stack
@@ -339,5 +355,17 @@ export class Op {
 		}
 
 		return array.slice(start, end);
+	}
+	/**
+	 * asserts if inner transaction exists
+	 * @param interpreter interpreter
+	 */
+	assertInnerTransactionExists(interpreter: Interpreter) {
+		if (interpreter.innerTxnGroups.length === 0) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE, {
+				tealVersion: interpreter.tealVersion,
+				line: this.line,
+			});
+		}
 	}
 }

@@ -35,6 +35,6 @@ export async function compile(force: boolean, op: CompileOp): Promise<void> {
 		if ((!f.endsWith(tealExt) && !f.endsWith(pyExt)) || p.includes(ALGOBPY_DIR)) {
 			continue;
 		}
-		await op.ensureCompiled(f, force);
+		await op.ensureCompiled(f, "", force);
 	}
 }

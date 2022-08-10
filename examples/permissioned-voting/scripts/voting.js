@@ -1,4 +1,4 @@
-const { executeTx, convert } = require("@algo-builder/algob");
+const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -14,10 +14,10 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	};
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 
 	algoTxnParams.toAccountAddr = alice.addr;
-	await executeTx(deployer, algoTxnParams);
+	await deployer.executeTx(algoTxnParams);
 
 	// Create ASA - Vote Token
 	const asaInfo = await deployer.deployASA("vote-token", { creator: votingAdminAccount });
@@ -33,7 +33,7 @@ async function run(runtimeEnv, deployer) {
 		assetID: asaInfo.assetIndex,
 		payFlags: { note: "Sending Vote Token" },
 	};
-	await executeTx(deployer, txnParam);
+	await deployer.executeTx(txnParam);
 
 	// Get last round and Initialize rounds
 	const status = await deployer.algodClient.status().do();
@@ -52,19 +52,19 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const res = await deployer.deployApp(
-		"permissioned-voting-approval.py",
-		"permissioned-voting-clear.py",
+		votingAdminAccount,
 		{
-			sender: votingAdminAccount,
+			appName: "PermissionedVotingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "permissioned-voting-approval.py",
+			clearProgramFilename: "permissioned-voting-clear.py",
 			localInts: 0,
 			localBytes: 1,
 			globalInts: 6,
 			globalBytes: 1,
 			appArgs: appArgs,
 		},
-		{},
-		{},
-		"PermissionedVotingApp"
+		{}
 	);
 
 	console.log(res);

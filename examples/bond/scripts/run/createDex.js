@@ -1,4 +1,4 @@
-const { executeTx, readAppGlobalState, balanceOf } = require("@algo-builder/algob");
+const { readAppGlobalState, balanceOf } = require("@algo-builder/algob");
 const {
 	asaDef,
 	fundAccount,
@@ -28,16 +28,18 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 	console.log("Issuer address: ", issuerLsig.address());
 	const newBondToken = "bond-token-" + String(i);
-	const deployTx = {
-		type: types.TransactionType.DeployASA,
-		sign: types.SignType.SecretKey,
-		fromAccount: creatorAccount,
-		asaName: newBondToken,
-		asaDef: asaDef,
-		payFlags: {},
-	};
+	const deployTx = [
+		{
+			type: types.TransactionType.DeployASA,
+			sign: types.SignType.SecretKey,
+			fromAccount: creatorAccount,
+			asaName: newBondToken,
+			asaDef: asaDef,
+			payFlags: {},
+		},
+	];
 	// Create B_[i+1]
-	const newAsaInfo = await executeTx(deployer, deployTx);
+	const newAsaInfo = (await deployer.executeTx(deployTx))[0];
 	console.log(newAsaInfo);
 	const newIndex = newAsaInfo["asset-index"];
 	tokenMap.set(newBondToken, newIndex);
@@ -80,7 +82,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 	);
 
 	console.log(`* Creating dex ${i}! *`);
-	await executeTx(deployer, groupTx);
+	await deployer.executeTx(groupTx);
 	console.log("Dex created!");
 	return newIndex;
 };

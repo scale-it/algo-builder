@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
@@ -14,23 +13,23 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 	// transfer some algos to creator account
-	await executeTx(deployer, [algoTxnParams]);
+	await deployer.executeTx([algoTxnParams]);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const sscInfo = await deployer.deployApp(
-		"approval_program.teal", // approval program
-		"clear_program.teal", // clear program
+		creatorAccount,
 		{
-			sender: creatorAccount,
+			appName: "CounterApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: "approval_program.teal", // approval program
+			clearProgramFilename: "clear_program.teal", // clear program
 			localInts: 1,
 			localBytes: 1,
 			globalInts: 1,
 			globalBytes: 1,
 		},
-		{},
-		{},
-		"CounterApp"
+		{}
 	);
 
 	console.log(sscInfo);

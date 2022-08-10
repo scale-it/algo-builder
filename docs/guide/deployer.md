@@ -110,15 +110,14 @@ You can deploy Stateful/Stateless Smart Contracts (SSC).
 
 Check our [examples/permissioned-voting](https://github.com/scale-it/algo-builder/tree/master/examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
 
-    await deployer.deployApp("approval.teal", "clear.teal", {...});
+    await deployer.deployApp(creator, appDefinition,...);
 
 Smart contracts must be stored in `assets` folder.
 
 The main difference between deploying an ASA and App is that ASA takes `asset-name` and `ASADeploymentFlags` as input and App takes `smart-contract-names` and `AppDeploymentFlags` as input.
 
-You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
-You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
-
+You can learn more about the flags from [Deployer API](https://algobuilder.dev/api/algob/interfaces/types.Deployer.html);
+You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/).
 #### OptIn to App
 
 For opting in to App, `deployer` supports the following methods:
@@ -211,19 +210,20 @@ Algob creates [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.h
 ```js
 // deployment
 const daoAppInfo = await deployer.deployApp(
-	"dao-app-approval.py",
-	"dao-app-clear.py",
+	creator,
 	{
-		sender: creator,
+    metaType: MetaType.FILE
+	  approvalProgramFilename: "dao-app-approval.py",
+	  clearProgramFilename: "dao-app-clear.py",
 		localInts: 9,
 		localBytes: 7,
 		globalInts: 4,
 		globalBytes: 2,
 		appArgs: appArgs,
+    appName: 'DAO App'
 	},
 	{},
 	{},
-	"DAO App"
 ); // app name passed here
 
 // now during querying, you only need this app name

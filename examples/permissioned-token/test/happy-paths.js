@@ -3,9 +3,6 @@ const { types } = require("@algo-builder/web");
 const { encodeAddress } = require("algosdk");
 const { assert } = require("chai");
 const { Context } = require("./common");
-
-const minBalance = 20e6; // 20 ALGOs
-const ALICE_ADDRESS = "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY";
 const FORCE_TRANSFER_APPARG = "str:force_transfer";
 
 describe("Permissioned Token Tests - Happy Paths", function () {
@@ -15,11 +12,8 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 
 	function setUpCtx() {
 		master = new AccountStore(10000e6);
-		alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
-		bob = new AccountStore(minBalance);
-		elon = new AccountStore(minBalance);
-
-		ctx = new Context(master, alice, bob, elon);
+		ctx = new Context(master);
+		[alice, bob, elon] = ctx.defaultAccounts();
 		asaDef = ctx.getAssetDef();
 		asaReserve = ctx.getAccount(asaDef.reserve);
 		asaManager = ctx.getAccount(asaDef.manager);

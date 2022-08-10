@@ -1,4 +1,3 @@
-const { executeTx } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 require("dotenv").config();
 
@@ -11,10 +10,10 @@ const showError = () => {
 	return true;
 };
 
-exports.executeTx = async function (deployer, txnParams) {
+exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await executeTx(deployer, txnParams);
-		else await executeTx(deployer, [txnParams]);
+		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
+		else await deployer.executeTx([txnParams]);
 	} catch (e) {
 		if (showError()) {
 			console.error("Transaction Failed", e.response ? e.response.error : e);
