@@ -5,6 +5,7 @@ import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
 
 import { WalletMultisigMetadata, WalletTransaction } from "./algo-signer-types";
+import { WAIT_ROUNDS } from "./lib/constants";
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
@@ -418,3 +419,5 @@ export interface HttpNetworkConfig {
 	token: string | AlgodTokenHeader | CustomTokenHeader;
 	httpHeaders?: { [name: string]: string };
 }
+
+export { WAIT_ROUNDS };

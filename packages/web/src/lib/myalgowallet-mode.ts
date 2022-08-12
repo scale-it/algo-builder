@@ -111,7 +111,7 @@ export class MyAlgoWalletSession {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
-	 * @param waitRounds number round wait for comfirmed txn - default is 10
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],

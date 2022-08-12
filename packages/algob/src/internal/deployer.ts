@@ -11,7 +11,6 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
-import { WAIT_ROUNDS } from "../lib/constants";
 import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import {
@@ -262,11 +261,11 @@ class DeployerBasicMode {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
-	 * @param waitRounds number round wait for transaction confirm  - default is 6 rounds
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
-		waitRounds = WAIT_ROUNDS
+		waitRounds = wtypes.WAIT_ROUNDS
 	): Promise<ConfirmedTxInfo> {
 		return this.algoOp.sendAndWait(rawTxns, waitRounds);
 	}

@@ -28,7 +28,6 @@ import type {
 	TxnReceipt,
 } from "../types";
 import { CompileOp } from "./compile";
-import { WAIT_ROUNDS } from "./constants";
 import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
@@ -136,19 +135,23 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
-		waitRounds = WAIT_ROUNDS
+		waitRounds = wtypes.WAIT_ROUNDS
 	): Promise<ConfirmedTxInfo> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
-		return await this.waitForConfirmation(txInfo.txId);
+		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
 	// Source:
 	// https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
 	// Function used to wait for a tx confirmation
-	async waitForConfirmation(txId: string, waitRounds = WAIT_ROUNDS): Promise<ConfirmedTxInfo> {
+	async waitForConfirmation(
+		txId: string,
+		waitRounds = wtypes.WAIT_ROUNDS
+	): Promise<ConfirmedTxInfo> {
 		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);

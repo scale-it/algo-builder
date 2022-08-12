@@ -66,7 +66,7 @@ export class WebMode {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param signedTxn Signed Transaction blob encoded in base64
-	 * @param waitRounds number round wait for comfirmed txn - default is 10
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
 		signedTxn: string,
