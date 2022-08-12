@@ -26,8 +26,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
+- Add `waitRounds` params to `sendAndWait` method. `waitRounds` is option argument and have dlsefault value is 10.
 - Add `Uint8Array` as a supported type for `TxParams.note`
-
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
 from `algosdk` and sends it to the network. 
 - Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
