@@ -7,7 +7,7 @@
 		"@algo-builder/algob": "workspace:*",
 		"@algo-builder/runtime": "workspace:*",
 		"@algo-builder/web": "workspace:*",
-		"algosdk": "^1.18.1",
+		"algosdk": "^1.19.0",
 		"dotenv": "^16.0.0"
 	},
 	"devDependencies": {

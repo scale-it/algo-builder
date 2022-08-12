@@ -22,4 +22,7 @@ drop-sigma-dao-user:
 
 # execute sigma dao setup file. Indexer should be running before executing this script
 setup-sigma-dao:
+# pg_trgm extension.
+	@psql -d $(POSTGRES_DBNAME) -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+# execute file
 	@psql -U $(POSTGRES_UNAME) -d $(POSTGRES_DBNAME) -a -f $(SIGMA_DAO_SETUP_FILE)

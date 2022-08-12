@@ -212,7 +212,7 @@ Algob creates [checkpoint](https://algobuilder.dev/guide/execution-checkpoints.h
 const daoAppInfo = await deployer.deployApp(
 	creator,
 	{
-    metaType: MetaType.File
+    metaType: MetaType.FILE
 	  approvalProgramFilename: "dao-app-approval.py",
 	  clearProgramFilename: "dao-app-clear.py",
 		localInts: 9,

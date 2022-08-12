@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { parsing, types } from "@algo-builder/web";
-import {
+import { parsing, tx as webTx, types } from "@algo-builder/web";
+import algosdk, {
 	decodeAddress,
 	decodeUint64,
 	encodeAddress,
@@ -8,6 +8,8 @@ import {
 	getApplicationAddress,
 	isValidAddress,
 	modelsv2,
+	SignedTransaction,
+	Transaction,
 	verifyBytes,
 } from "algosdk";
 import chalk from "chalk";
@@ -65,6 +67,7 @@ import {
 	txAppArg,
 	txnSpecByField,
 } from "../lib/txn";
+import { mockSuggestedParams } from "../mock/tx";
 import {
 	DecodingMode,
 	EncodingType,
@@ -4280,7 +4283,6 @@ export class ITxnSubmit extends Op {
 				this.line
 			)
 		);
-
 		try {
 			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
@@ -4291,8 +4293,19 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
-			// execute innner transaction
-			this.interpreter.runtime.ctx.processTransactions(execParams);
+			// TODO check minimum fee
+			//this.interpreter.runtime.ctx.deductFee()
+
+			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
+				types.isExecParams(txnParam)
+					? {
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
+					: txnParam
+			);
+			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution
 			this.interpreter.runtime.ctx.tx = baseCurrTx;

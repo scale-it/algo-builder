@@ -30,21 +30,32 @@ import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 describe("Note in TxParams", () => {
 	const encoder = new TextEncoder();
 	const note = "Hello Algob!";
-	const noteb64 = "asdisaddas";
+	const noteb64Src = "hello";
+	const noteb64 = Buffer.from(noteb64Src).toString("base64");
 
 	it("Both notes given", () => {
-		const result = webTx.encodeNote(note, noteb64);
-		assert.deepEqual(result, encoder.encode(noteb64), "noteb64 not encoded");
+		assert.throw(() => {
+			webTx.encodeNote(note, noteb64);
+		}, "both note and noteb64");
 	});
 
 	it("Only note given", () => {
-		const result = webTx.encodeNote(note, undefined);
+		let result = webTx.encodeNote(note, undefined);
 		assert.deepEqual(result, encoder.encode(note), "note not encoded");
+
+		const noteEncoded = encoder.encode(note);
+		result = webTx.encodeNote(noteEncoded, undefined);
+		assert.deepEqual(result, noteEncoded, "note not encoded");
 	});
 
 	it("Only noteb64 given", () => {
 		const result = webTx.encodeNote(undefined, noteb64);
-		assert.deepEqual(result, encoder.encode(noteb64), "noteb64 not encoded");
+		assert.isDefined(result);
+		assert.deepEqual(
+			Buffer.from(result as Uint8Array).toString(),
+			noteb64Src,
+			"noteb64 not encoded"
+		);
 	});
 });
 

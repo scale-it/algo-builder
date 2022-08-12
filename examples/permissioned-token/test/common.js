@@ -30,16 +30,14 @@ class Context {
 	 * - Setup permissions smart contract
 	 * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
 	 */
-	constructor(master, alice, bob, elon) {
+	constructor(master) {
 		this.master = master;
-		this.alice = alice;
-		this.bob = bob;
-		this.elon = elon;
-		this.runtime = new Runtime([master, alice, bob, elon]);
-		this.deployASA("tesla", { ...alice.account, name: "alice" });
-		this.deployController(alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
-		this.deployClawback(alice, CLAWBACK_STATELESS_PROGRAM);
-		this.deployPermissions(alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
+		this.runtime = new Runtime([master]);
+		[this.alice, this.bob, this.elon] = this.runtime.defaultAccounts();
+		this.deployASA("tesla", { ...this.alice.account, name: "alice" });
+		this.deployController(this.alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
+		this.deployClawback(this.alice, CLAWBACK_STATELESS_PROGRAM);
+		this.deployPermissions(this.alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
 		this.syncAccounts();
 	}
 
@@ -48,6 +46,9 @@ class Context {
 		this.alice = this.getAccount(this.alice.address);
 		this.bob = this.getAccount(this.bob.address);
 		this.elon = this.getAccount(this.elon.address);
+	}
+	defaultAccounts() {
+		return this.runtime.defaultAccounts();
 	}
 
 	deployASA(name, creator) {

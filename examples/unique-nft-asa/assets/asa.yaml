@@ -7,7 +7,6 @@ nft-asa:
   url: "url"
   metadataHash: "12312442142141241244444411111133"
   note: "note"
-  noteb64: "noteb64"
   manager: ""
   reserve: ""
   freeze: ""
