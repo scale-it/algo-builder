@@ -27,13 +27,21 @@ const TxnTypeMap: { [key: string]: { version: number; field: string | number } }
 	6: { version: 6, field: "appl" },
 };
 
+// each value here is number but they come in array
+const arrayNumberFields = new Set(["Assets", "Applications"]);
 // requires their type as number
 const numberTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Fee", "FreezeAssetFrozen", "ConfigAssetDecimals", "ConfigAssetDefaultFrozen"]),
+	5: new Set([
+		"Fee",
+		"FreezeAssetFrozen",
+		"ConfigAssetDecimals",
+		"ConfigAssetDefaultFrozen",
+		...arrayNumberFields,
+	]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 ["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
@@ -217,6 +225,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
+
 		case "ConfigAssetDecimals": {
 			const assetDecimals = txValue as bigint;
 			if (assetDecimals > 19n || assetDecimals < 0n) {
@@ -297,7 +306,7 @@ export function setInnerTxField(
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
 	} else {
-		if (field === "ApplicationArgs") {
+		if (field === "ApplicationArgs" || arrayNumberFields.has(field)) {
 			if ((subTxn as any)[encodedField] === undefined) {
 				(subTxn as any)[encodedField] = [];
 			}
