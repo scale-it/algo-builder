@@ -32,6 +32,9 @@ def approval_program():
                 TxnField.applications: [
                     Int(1)
                 ],
+                TxnField.accounts: [
+                    Global.current_application_address()
+                ],
             }
         ),
         InnerTxnBuilder.Submit(),
