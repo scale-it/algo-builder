@@ -128,6 +128,8 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
+	replace2,
+	replace3,
 	Retsub,
 	Return,
 	Select,
@@ -396,6 +398,8 @@ opCodeMap[6] = {
 opCodeMap[7] = {
 	...opCodeMap[6],
 	base64_decode: Base64Decode,
+	replace2: replace2,
+	replace3: replace3,
 };
 
 // list of opcodes with exactly one parameter.

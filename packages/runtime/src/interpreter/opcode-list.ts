@@ -4961,3 +4961,86 @@ export class Base64Decode extends Op {
 		return this.computeCost();
 	}
 }
+
+/**
+ * Opcode: replace2 s
+ * Stack: ..., A: []byte, B: []byte → ..., []byte
+ * Copy of A with the bytes starting at S replaced by the bytes of B. Fails if S+len(B) exceeds len(A)
+ */
+export class replace2 extends Op {
+	readonly line: number;
+	readonly start: number;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [start_index]
+	 * @param line line number in TEAL file
+	 */
+	 constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		this.start = Number(args[0]);
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const replace = this.assertBytes(stack.pop(), this.line);
+		const original = this.assertBytes(stack.pop(), this.line);
+		if (this.start + replace.length > original.length) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR, {});
+		}
+		const result = new Uint8Array(original.length);
+		for (let i = 0, j = 0; i < original.length; ++i) {
+			if (i >= this.start && i < this.start + replace.length) {
+				result[i] = replace[j++];
+			}
+			else {
+				result[i] = original[i];
+			}
+		}
+		stack.push(result);
+
+		return this.computeCost();
+	}
+}
+
+/**
+ * Opcode: replace3 
+ * Stack: ..., A: []byte, B: uint64, C: []byte → ..., []byte
+ * Copy of A with the bytes starting at B replaced by the bytes of C. Fails if B+len(C) exceeds len(A)
+ */
+ export class replace3 extends Op {
+	readonly line: number;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param line line number in TEAL file
+	 */
+	 constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, line);
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const replace = this.assertBytes(stack.pop(), this.line);
+		const start = this.assertBigInt(stack.pop(), this.line);
+		const original = this.assertBytes(stack.pop(), this.line);
+		if (start + BigInt(replace.length) > original.length) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR, {});
+		}
+		const result = new Uint8Array(original.length);
+		for (let i = 0, j = 0; i < original.length; ++i) {
+			if (i >= start && i < start + BigInt(replace.length)) {
+				result[i] = replace[j++];
+			}
+			else {
+				result[i] = original[i];
+			}
+		}
+		stack.push(result);
+
+		return this.computeCost();
+	}
+
+}
