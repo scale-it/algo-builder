@@ -7052,6 +7052,11 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 
+			//push a random bytes to stack for testing if the data in stack remain the same
+			const remainBytes = "0x112233";
+			const expectedRemain = strHexToBytes(remainBytes);
+			stack.push(strHexToBytes(remainBytes)); 
+
 			hexStr = "0x11112222";
 			expectedBytes = strHexToBytes(hexStr);
 			stack.push(strHexToBytes(original));
@@ -7059,6 +7064,8 @@ describe("Teal Opcodes", function () {
 			op = new Replace2(["2"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
+			
+			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
 		});
 
 		it("Should throw an error when argument not provided", () => {
