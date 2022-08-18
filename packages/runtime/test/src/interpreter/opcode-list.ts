@@ -130,8 +130,8 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
-	replace2,
-	replace3,
+	Replace2,
+	Replace3,
 	Return,
 	Select,
 	SetBit,
@@ -167,6 +167,7 @@ import {
 	bigintToBigEndianBytes,
 	convertToBuffer,
 	getEncoding,
+	strHexToBytes,
 } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -7035,43 +7036,42 @@ describe("Teal Opcodes", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			let hexStr = "0x22221111";
-			let expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
+			let expectedBytes = strHexToBytes(hexStr);
 
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			let op = new replace2(["0"], 0);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			let op = new Replace2(["0"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 
 			hexStr = "0x11222211";
-			expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			op = new replace2(["1"], 0);
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["1"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 
 			hexStr = "0x11112222";
-			expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			op = new replace2(["2"], 0);
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["2"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 		});
 
 		it("Should throw an error when argument not provided", () => {
-			expectRuntimeError(() => new replace2([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
+			expectRuntimeError(() => new Replace2([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
 
 		it("Should throw error for wrong index replace", () => {
 			const original = "0x11111111";
 			const replace = "0x2222";
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			let op = new replace2(["3"], 0);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			const op = new Replace2(["3"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
-
 		});
 	});
 
@@ -7085,30 +7085,30 @@ describe("Teal Opcodes", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			let hexStr = "0x22221111";
-			let expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
+			let expectedBytes = strHexToBytes(hexStr);
 
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
+			stack.push(strHexToBytes(original));
 			stack.push(0n);
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			let op = new replace3([], 0);
+			stack.push(strHexToBytes(replace));
+			let op = new Replace3([], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 
 			hexStr = "0x11222211";
-			expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
 			stack.push(1n);
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			op = new replace3([], 0);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 
 			hexStr = "0x11112222";
-			expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), "hex"));
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
 			stack.push(2n);
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			op = new replace3([], 0);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
 		});
@@ -7116,12 +7116,11 @@ describe("Teal Opcodes", function () {
 		it("Should throw error for wrong index replace", () => {
 			const original = "0x11111111";
 			const replace = "0x2222";
-			stack.push(new Uint8Array(Buffer.from(original.slice(2), "hex")));
+			stack.push(strHexToBytes(original));
 			stack.push(3n);
-			stack.push(new Uint8Array(Buffer.from(replace.slice(2), "hex")));
-			let op = new replace3([], 0);
+			stack.push(strHexToBytes(replace));
+			const op = new Replace3([], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
-
 		});
 	});
 
