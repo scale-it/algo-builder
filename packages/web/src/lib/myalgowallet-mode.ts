@@ -6,6 +6,7 @@ import type {
 	ConnectionSettings,
 	EncodedTransaction,
 	SignedTx,
+	SignTransactionOptions,
 } from "@randlabs/myalgo-connect";
 import algosdk, { Transaction } from "algosdk";
 
@@ -29,17 +30,21 @@ interface MyAlgoConnect {
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed transaction
 	 */
-	signTransaction(transaction: AlgorandTxn | EncodedTransaction): Promise<SignedTx>;
+	signTransaction(transaction: AlgorandTxn | EncodedTransaction, 
+		signOptions?: SignTransactionOptions): Promise<SignedTx>;
 
 	/**
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction array.
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed an array of signed transactions.
 	 */
-	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[]): Promise<SignedTx[]>;
+	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[], 
+		signOptions?: SignTransactionOptions): Promise<SignedTx[]>;
 
 	/**
 	 * @async
@@ -90,8 +95,8 @@ export class MyAlgoWalletSession {
 	 * @param txn { SDK transaction object, shouldSign, signers, msig } object
 	 * @returns raw signed txn
 	 */
-	async signTransaction(txn: algosdk.Transaction): Promise<SignedTx> {
-		return await this.connector.signTransaction(txn.toByte());
+	async signTransaction(txn: algosdk.Transaction, signOptions?: SignTransactionOptions): Promise<SignedTx> {
+		return await this.connector.signTransaction(txn.toByte(), signOptions);
 	}
 
 	/**
