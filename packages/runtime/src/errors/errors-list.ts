@@ -419,9 +419,9 @@ maximun uint128`,
 	},
 	BYTES_REPLACE_ERROR: {
 		number: 1061,
-		message: "Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of ogirinal bytes(%lenOriginal%) at line %line%",
-		title: "replace got error",
-		description: "Can not replace bytes due to invalid start or end replace index",
+		message: "Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
+		title: "replace opcode error",
+		description: "Can not replace bytes due to invalid start or end index",
 	},
 };
 
