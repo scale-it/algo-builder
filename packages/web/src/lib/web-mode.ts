@@ -162,7 +162,7 @@ export class WebMode {
 			const partialTxn = algosdk.decodeObj(
 				this.algoSigner.encoding.base64ToMsgpack(txn.txn)) as EncodedSignedTransaction; 
 			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
-				throw new Error("Input transaction must be multisigature transaction signed at least 1 signature");
+				throw new Error("Input transaction must be multisigature transaction signed with at least 1 signature");
 			} 
 			const noSigTxn = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
 			const noSigTxnBytes = algosdk.encodeObj(noSigTxn.get_obj_for_encoding());
@@ -187,8 +187,8 @@ export class WebMode {
 				},
 			]);
 
-			const json = signedTxn[0] as JsonPayload;
-			const blob = json.blob as string;
+			const signedTxnJson = signedTxn[0] as JsonPayload;
+			const blob = signedTxnJson.blob as string;
 
 			const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
 			const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
