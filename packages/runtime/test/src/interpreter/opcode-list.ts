@@ -130,6 +130,8 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
+	Replace2,
+	Replace3,
 	Return,
 	Select,
 	SetBit,
@@ -165,6 +167,7 @@ import {
 	bigintToBigEndianBytes,
 	convertToBuffer,
 	getEncoding,
+	strHexToBytes,
 } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -7022,4 +7025,117 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => new Base64Decode([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
 	});
+
+	describe("Tealv7: replace2 opcode", function () {
+		let stack: Stack<StackElem>;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should replace bytes correctly", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			let hexStr = "0x22221111";
+			let expectedBytes = strHexToBytes(hexStr);
+
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			let op = new Replace2(["0"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			hexStr = "0x11222211";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["1"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			//push a random bytes to stack for testing if the data in stack remain the same
+			const remainBytes = "0x112233";
+			const expectedRemain = strHexToBytes(remainBytes);
+			stack.push(strHexToBytes(remainBytes)); 
+
+			hexStr = "0x11112222";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["2"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+			
+			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
+		});
+
+		it("Should throw an error when argument not provided", () => {
+			expectRuntimeError(() => new Replace2([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
+		});
+
+		it("Should throw error for wrong index replace", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			const op = new Replace2(["3"], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
+		});
+	});
+
+	describe("Tealv7: replace3 opcode", function () {
+		let stack: Stack<StackElem>;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should replace bytes correctly", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			let hexStr = "0x22221111";
+			let expectedBytes = strHexToBytes(hexStr);
+
+			stack.push(strHexToBytes(original));
+			stack.push(0n);
+			stack.push(strHexToBytes(replace));
+			let op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			hexStr = "0x11222211";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(1n);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			//push a random bytes to stack for testing if the data in stack remain the same
+			const remainBytes = "0x112233";
+			const expectedRemain = strHexToBytes(remainBytes);
+			stack.push(strHexToBytes(remainBytes)); 
+
+			hexStr = "0x11112222";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(2n);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
+		});
+
+		it("Should throw error for wrong index replace", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			stack.push(strHexToBytes(original));
+			stack.push(3n);
+			stack.push(strHexToBytes(replace));
+			const op = new Replace3([], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
+		});
+	});
+
 });

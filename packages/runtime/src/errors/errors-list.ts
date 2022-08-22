@@ -417,6 +417,12 @@ maximun uint128`,
 		title: "Clear state programs cannot issue inner transactions.",
 		description: "Clear state programs cannot issue inner transactions",
 	},
+	BYTES_REPLACE_ERROR: {
+		number: 1061,
+		message: "Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
+		title: "replace opcode error",
+		description: "Can not replace bytes due to invalid start or end index",
+	},
 };
 
 const runtimeGeneralErrors = {
