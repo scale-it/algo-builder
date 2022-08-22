@@ -1,4 +1,4 @@
-import algosdk, { EncodedSignedTransaction,SuggestedParams, Transaction } from "algosdk";
+import algosdk, { EncodedSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
