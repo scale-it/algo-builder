@@ -32,6 +32,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 from `algosdk` and sends it to the network. 
 - Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
 - Added verification for secret key signatures in `Runtime`.
+- Added replace2 and replace3 opcode to `runtime`.
+
 #### @algo-builder/web
 - Add `appendSignMultisigTransaction` function  to `WebMode` for appending  signature to multisig transaction in the algosigner.
 
