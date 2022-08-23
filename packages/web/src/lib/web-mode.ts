@@ -153,7 +153,7 @@ export class WebMode {
 	 * Append signature multisig transaction using algosigner
 	 * @param txns array of multisignature transaction with at least one signature
 	 * @param signers a subset of addresses to sign the transaction
-	 * return an object contain blob attribute in base64
+	 * return an object containing a blob attribute encoded in base64
 	 */
 	async appendSignMultisigTransaction(txns: WalletTransaction[], signers: string[]): Promise<JsonPayload> {
 		const result:JsonPayload = {};
