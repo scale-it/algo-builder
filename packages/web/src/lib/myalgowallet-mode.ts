@@ -106,11 +106,12 @@ export class MyAlgoWalletSession {
 	 * @returns array of raw signed txns | null. null representes that the txn in array is NOT signed
 	 * by wallet user (i.e signable by someone else).
 	 */
-	async signTransactionGroup(txns: TransactionInGroup[]): Promise<SignedTx[]> {
+	async signTransactionGroup(txns: TransactionInGroup[], 
+		signOptions?: SignTransactionOptions): Promise<SignedTx[]> {
 		const txnsGroup = txns.map((v) => v.txn);
 		const groupID = algosdk.computeGroupID(txnsGroup);
 		for (let i = 0; i < txns.length; i++) txnsGroup[i].group = groupID;
-		return await this.connector.signTransaction(txnsGroup.map((txn) => txn.toByte()));
+		return await this.connector.signTransaction(txnsGroup.map((txn) => txn.toByte()), signOptions);
 	}
 
 	/**
