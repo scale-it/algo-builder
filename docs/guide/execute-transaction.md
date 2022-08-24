@@ -43,6 +43,14 @@ appCall = () => {
 	};
 ```
 
+Below examples demonstrates, how to use `SignedTransaction` and `executeTx` in runtime.
+
+```js
+    const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
+    let signedTx: SignedTransaction = {txn: tx};
+    runtime.executeTx(signedTx);
+```
+
 ## Examples [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage:
 
 #### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
