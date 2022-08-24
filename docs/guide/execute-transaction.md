@@ -43,7 +43,7 @@ appCall = () => {
 	};
 ```
 
-Below examples demonstrates, how to use `SignedTransaction` and `executeTx` in runtime.
+We can also use `SignedTransaction` and `executeTx` in runtime:
 
 ```js
     const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
