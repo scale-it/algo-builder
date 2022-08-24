@@ -164,9 +164,9 @@ export class WebMode {
 			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
 				throw new Error("Input transaction must be multisigature transaction signed with at least 1 signature");
 			} 
-			const noSigTxn = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
-			const noSigTxnBytes = algosdk.encodeObj(noSigTxn.get_obj_for_encoding());
-			const noSigTxnBase64 = this.algoSigner.encoding.msgpackToBase64(noSigTxnBytes);
+			const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
+			const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
+			const txnToBeSign_Base64 = this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
 
 			const mparams = partialTxn.msig as algosdk.EncodedMultisig;
 			const addrs = mparams.subsig.map((signData) => {
@@ -181,7 +181,7 @@ export class WebMode {
 
 			const signedTxn = await this.signTransaction([
 				{
-					txn: noSigTxnBase64,
+					txn: txnToBeSign_Base64,
 					msig: multisigParams,
 					signers: signers,
 				},
