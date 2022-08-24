@@ -716,7 +716,9 @@ export interface Deployer {
 	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
 	 * will be signed and sent to network. User can use SDK functions to create transactions.
 	 * Note: If passing transaction object a signer/s must be provided.
-	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
+	 * for more info.
+	 * @param transactions transaction parameters or atomic transaction parameters
 	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
 	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
