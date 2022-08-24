@@ -467,6 +467,7 @@ OpGasCost[6] = {
 };
 OpGasCost[7] = {
 	...OpGasCost[6],
+	sha3_256: 130,
 };
 
 export const enum MathOp {

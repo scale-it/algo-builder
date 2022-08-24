@@ -17,7 +17,7 @@ import { ec as EC } from "elliptic";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
-import { Keccak } from "sha3";
+import { Keccak, SHA3 } from "sha3";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -5046,4 +5046,40 @@ export class Replace2 extends Replace {
 		return super.execute(stack);
 	}
 
+}
+
+
+// SHA3_256 hash of value A, yields [32]byte
+// https://github.com/phusion/node-sha3#generating-a-sha3-512-hash
+// push to stack [...stack, bytes]
+export class Sha3_256 extends Op {
+	readonly line: number;
+	readonly interpreter: Interpreter;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		this.interpreter = interpreter;
+		assertLen(args.length, 0, line);
+	}
+
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["sha3_256"];
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const top = this.assertBytes(stack.pop(), this.line);
+
+		const hash = new SHA3(256);
+		hash.update(convertToString(top));
+		const arrByte = Uint8Array.from(hash.digest());
+		stack.push(arrByte);
+		return this.computeCost();
+	}
 }
