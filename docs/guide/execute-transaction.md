@@ -22,7 +22,7 @@ console.log("txn0 information: ", receipts[0]);
 console.log("txn1 information: ", receipts[2]);
 ```
 
-Below examples demonstrates, how to perform application call using `ExecParam` and `WebMode`.
+Below we demonstrate how to perform application call using `ExecParam` and `WebMode`:
 
 ```js
 appCall = () => {
