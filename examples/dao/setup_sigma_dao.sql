@@ -19,7 +19,7 @@ $$ LANGUAGE SQL STABLE;
 CREATE OR REPLACE FUNCTION sigma_daos_proposal_filter(appId BIGINT, filterType INT)
 RETURNS SETOF account_app AS $$
 DECLARE
-	voting_end CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
+	voting_end_byte CHAR(255) := 'dm90aW5nX2VuZA=='; -- Byte code of 'voting_end'
 	timestamp BIGINT := extract(EPOCH FROM NOW()); -- epoch in seconds
 	filter_all INT := 1; -- filter type -> all
 	filter_ongoing INT := 2; -- ongoing
@@ -27,13 +27,13 @@ DECLARE
 	filter_past INT := 4; -- filter type -> past
 BEGIN
 	IF (filterType = filter_ongoing) THEN
-		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND timestamp BETWEEN account_app.voting_start AND account_app.voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND (SELECT account_app.localstate::jsonb -> 'tkv' -> voting_end_byte) IS NOT NULL AND timestamp BETWEEN account_app.voting_start AND account_app.voting_end ORDER BY account_app.voting_start;
 	ELSIF (filterType = filter_active) THEN
-		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND timestamp < account_app.voting_end ORDER BY voting_start;
+		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND (SELECT account_app.localstate::jsonb -> 'tkv' -> voting_end_byte) IS NOT NULL AND timestamp < account_app.voting_end ORDER BY account_app.voting_start;
 	ELSIF (filterType = filter_past) THEN
-		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND account_app.voting_end < timestamp ORDER BY voting_end DESC;
+		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND (SELECT account_app.localstate::jsonb -> 'tkv' -> voting_end_byte) IS NOT NULL AND account_app.voting_end < timestamp ORDER BY account_app.voting_end DESC;
 	ELSE
-		RETURN QUERY SELECT * FROM account_app WHERE app = appId;
+		RETURN QUERY SELECT * FROM account_app WHERE app = appId AND (SELECT account_app.localstate::jsonb -> 'tkv' -> voting_end_byte) IS NOT NULL;
 	END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;
