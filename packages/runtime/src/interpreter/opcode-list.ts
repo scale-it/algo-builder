@@ -652,18 +652,15 @@ abstract class HashOp extends Op {
 
 abstract class HashOpSHA3 extends Op {
 	readonly line: number;
-	readonly interpreter: Interpreter;
 
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
-	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number, interpreter: Interpreter) {
+	constructor(args: string[], line: number) {
 		super();
 		this.line = line;
-		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
@@ -703,6 +700,19 @@ export class Sha512_256 extends HashOp {
 // https://github.com/phusion/node-sha3#example-2
 // push to stack [...stack, bytes]
 export class Keccak256 extends HashOpSHA3 {
+
+	readonly interpreter: Interpreter;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter object
+	 */
+	 constructor(args: string[], line: number, interpreter: Interpreter) {
+		super(args, line);
+		this.interpreter = interpreter;
+	}
+
 	computeCost(): number {
 		return OpGasCost[this.interpreter.tealVersion]["keccak256"];
 	}
@@ -716,7 +726,7 @@ export class Keccak256 extends HashOpSHA3 {
 // push to stack [...stack, bytes]
 export class Sha3_256 extends HashOpSHA3 {
 	computeCost(): number {
-		return OpGasCost[this.interpreter.tealVersion]["sha3_256"];
+		return OpGasCost[7]["sha3_256"];
 	}
 	execute(stack: TEALStack): number {
 		return super._execute(stack, new SHA3(256));

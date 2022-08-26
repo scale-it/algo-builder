@@ -7141,11 +7141,10 @@ describe("Teal Opcodes", function () {
 
 	describe("sha3_256", function () {
 		const stack = new Stack<StackElem>();
-		const interpreter = new Interpreter();
 
 		it("should return correct hash for sha3_256", function () {
 			stack.push(parsing.stringToBytes("ALGORAND"));
-			const op = new Sha3_256([], 1, interpreter);
+			const op = new Sha3_256([], 1);
 			op.execute(stack);
 
 			// http://emn178.github.io/online-tools/sha3_256.html
@@ -7159,29 +7158,28 @@ describe("Teal Opcodes", function () {
 		});
 
 		it(
-			"should throw invalid type error Keccak256",
+			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
 			execExpectError(
 				stack,
 				[1n],
-				new Sha3_256([], 1, interpreter),
+				new Sha3_256([], 1),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			)
 		);
 
 		it(
-			"should throw error with sha3_256 if stack is below min length",
+			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
 			execExpectError(
 				stack,
 				[],
-				new Sha3_256([], 1, interpreter),
+				new Sha3_256([], 1),
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
 
 		it("Should return correct cost", () => {
 			stack.push(parsing.stringToBytes("MESSAGE"));
-			interpreter.tealVersion = 7;
-			const op = new Sha3_256([], 1, interpreter);
+			const op = new Sha3_256([], 1);
 			assert.equal(130, op.execute(stack));
 		});
 	});
