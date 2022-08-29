@@ -4,7 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTx` is a high level method of Deployer which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` or `SignedTransaction[]` as parameter. If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction` otherwise `single transaction`.
+`executeTx` is a high level method of Deployer which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` or `SignedTransaction[]` as parameter.
 In below sections we will demonstrate how to pass these parameters.
 
 Note: For each parameter `type` and `sign` attributes are mandatory.
@@ -51,7 +51,9 @@ We can also use `SignedTransaction` and `executeTx` in runtime:
     runtime.executeTx(signedTx);
 ```
 
-## Examples [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage:
+## ExecParams
+
+If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction` otherwise `single transaction`.Examples of [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage.
 
 #### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
