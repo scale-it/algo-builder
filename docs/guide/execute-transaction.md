@@ -53,7 +53,7 @@ We can also use `SignedTransaction` and `executeTx` in runtime:
 
 ## ExecParams
 
-If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction` otherwise `single transaction`.Examples of [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage.
+If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction` otherwise `single transaction`.Examples of [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage. `ExecParams` is preferred when there is a transaction which is not already signed and want to be executed.
 
 #### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
@@ -339,7 +339,7 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 
 ### SignTransactions function
 
-This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction
+This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction. `SignedTransaction` is preferred when there is a transaction which is already signed and has to be sent to network.
 
 ```js
 const transaction: wtypes.TransactionAndSign = [{
