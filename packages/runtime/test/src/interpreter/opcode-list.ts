@@ -3642,6 +3642,25 @@ describe("Teal Opcodes", function () {
 			assert.equal(5n, stack.pop());
 		});
 
+		it("Int: Should not throw an overflow error", () => {
+			const total = BigInt(2 ** 64) - 1n;
+			assert.doesNotThrow(() => new Int([total.toString()], 0));
+		});
+		it("Int: Should throw an overflow error", () => {
+			const total = BigInt(2 ** 64);
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+		it("Int: Should throw an overflow error", () => {
+			const total = BigInt(2 ** 64) + 1n;
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+
 		it("Int: should push correct TypeEnumConstants enum value to stack", function () {
 			let op = new Int(["unknown"], 0);
 			op.execute(stack);

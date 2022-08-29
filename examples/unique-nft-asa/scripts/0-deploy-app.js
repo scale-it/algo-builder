@@ -13,7 +13,7 @@ async function run(runtimeEnv, deployer) {
 		{
 			appName: "NftApp",
 			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "nft-app-approval.py",
+			approvalProgramFilename: "test.teal",
 			clearProgramFilename: "nft-app-clear.py",
 			localInts: 1, // p
 			localBytes: 1, // creator
@@ -23,12 +23,12 @@ async function run(runtimeEnv, deployer) {
 	console.log(nftAppInfo);
 
 	// fund C_p lsig
-	await deployer.fundLsigByFile(
-		"stateless.py",
-		{ funder: creator, fundingMicroAlgo: 1e6 },
-		{}, // 1 algo
-		{ ARG_P: p, ARG_NFT_APP_ID: nftAppInfo.appID }
-	);
+	// await deployer.fundLsigByFile(
+	// 	"stateless.py",
+	// 	{ funder: creator, fundingMicroAlgo: 1e6 },
+	// 	{}, // 1 algo
+	// 	{ ARG_P: p, ARG_NFT_APP_ID: nftAppInfo.appID }
+	// );
 
 	console.log("Contracts deployed successfully!");
 }
