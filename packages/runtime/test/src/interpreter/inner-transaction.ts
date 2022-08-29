@@ -1072,41 +1072,6 @@ describe("Inner Transactions", function () {
 			assert.doesNotThrow(() => executeTEAL(create));
 		});
 	});
-	describe.only("Test  Pact's CPMM smart contract", () => {
-		it("should execute asset configuration branch", () => {
-			const create = `
-			itxn_begin
-			int 0
-			itxn_field Fee
-			int acfg
-			itxn_field TypeEnum
-			int 18446744073709551615
-			itxn_field ConfigAssetTotal
-			int 6
-			itxn_field ConfigAssetDecimals
-			load 0
-			byte "/"
-			concat
-			load 1
-			concat
-			byte " PACT LP Token"
-			concat
-			itxn_field ConfigAssetName
-			byte "PLP"
-			itxn_field ConfigAssetUnitName
-			byte "https://pact.fi/"
-			itxn_field ConfigAssetURL
-			global CurrentApplicationAddress
-			itxn_field ConfigAssetReserve
-			itxn_submit
-			byte "LTID"
-			itxn CreatedAssetID
-			app_global_put
-			int 1
-			`;
-			assert.doesNotThrow(() => executeTEAL(create));
-		});
-	});
 
 	describe("TestAssetFreeze", () => {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
