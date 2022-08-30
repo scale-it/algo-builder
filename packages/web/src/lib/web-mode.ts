@@ -150,7 +150,7 @@ export class WebMode {
 	}
 
 	/**
-	 * Append signature multisig transaction using algosigner
+	 * Appends signature to a multisig transaction using algosigner
 	 * @param txns array of multisignature transaction with at least one signature
 	 * @param signers a subset of addresses to sign the transaction
 	 * return an object containing a blob attribute encoded in base64
