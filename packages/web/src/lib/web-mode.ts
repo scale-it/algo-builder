@@ -151,6 +151,8 @@ export class WebMode {
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
+	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
+	 * for more info.
 	 * @param transactions transaction parameters, atomic transaction parameters
 	 * or TransactionAndSign object(SDK transaction object and signer parameters).
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.
