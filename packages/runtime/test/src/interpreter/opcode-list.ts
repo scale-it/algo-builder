@@ -3642,18 +3642,18 @@ describe("Teal Opcodes", function () {
 			assert.equal(5n, stack.pop());
 		});
 
-		it("Int: Should not throw an overflow error", () => {
-			const total = BigInt(2 ** 64) - 1n;
+		it("Int: Should work with 2^64 - 1 (max supported number)", () => {
+			const total = 2n**64n - 1n;
 			assert.doesNotThrow(() => new Int([total.toString()], 0));
 		});
-		it("Int: Should throw an overflow error", () => {
+		it("Int: Should throw an overflow error on 2^64", () => {
 			const total = BigInt(2 ** 64);
 			expectRuntimeError(
 				() => new Int([total.toString()], 0),
 				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
 			);
 		});
-		it("Int: Should throw an overflow error", () => {
+		it("Int: Should throw an overflow error on 2^64+1", () => {
 			const total = BigInt(2 ** 64) + 1n;
 			expectRuntimeError(
 				() => new Int([total.toString()], 0),
