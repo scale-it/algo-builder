@@ -137,6 +137,7 @@ import {
 	SetBit,
 	SetByte,
 	Sha256,
+	Sha3_256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -7135,6 +7136,51 @@ describe("Teal Opcodes", function () {
 			stack.push(strHexToBytes(replace));
 			const op = new Replace3([], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
+		});
+	});
+
+	describe("sha3_256", function () {
+		const stack = new Stack<StackElem>();
+
+		it("should return correct hash for sha3_256", function () {
+			stack.push(parsing.stringToBytes("ALGORAND"));
+			const op = new Sha3_256([], 1);
+			op.execute(stack);
+
+			// http://emn178.github.io/online-tools/sha3_256.html
+			const expected = Buffer.from(
+				"ae39517df229f45df862c060e693c0e69691dac70fa65605a62fabad8029a4e7",
+				"hex"
+			);
+
+			const top = stack.pop();
+			assert.deepEqual(expected, top);
+		});
+
+		it(
+			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
+			execExpectError(
+				stack,
+				[1n],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
+			execExpectError(
+				stack,
+				[],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			const op = new Sha3_256([], 1);
+			assert.equal(130, op.execute(stack));
 		});
 	});
 
