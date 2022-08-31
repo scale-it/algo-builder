@@ -1,4 +1,4 @@
-import algosdk, { SuggestedParams, Transaction } from "algosdk";
+import algosdk, { SignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
@@ -213,5 +213,24 @@ export class WebMode {
 			return await this.waitForConfirmation(txInfo.txId);
 		}
 		throw new Error("Transaction Error");
+	}
+
+	makeTx(transactions: ExecParams[]): Transaction[] {
+		const transactionsToReturn: Transaction[] = [];
+		return transactionsToReturn;
+	}
+	signTx(transaction: algosdk.Transaction, signer: algosdk.Account): SignedTransaction[] {
+		const signedTransactions: SignedTransaction[] = [];
+		return signedTransactions;
+	}
+	makeAndSignTx(transactions: ExecParams[]): SignedTransaction[] {
+		const sender = algosdk.generateAccount();
+		return this.signTx(this.makeTx(transactions)[0], sender);
+	}
+	sendTxAndWait(
+		txs: SignedTransaction[],
+		rounds?: number
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		throw Error("not implemented");
 	}
 }
