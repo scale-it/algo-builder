@@ -78,6 +78,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -136,8 +137,8 @@ import {
 	Select,
 	SetBit,
 	SetByte,
-	Sha256,
 	Sha3_256,
+	Sha256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -7181,6 +7182,74 @@ describe("Teal Opcodes", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			const op = new Sha3_256([], 1);
 			assert.equal(130, op.execute(stack));
+		});
+	});
+
+	describe("Ed25519verify_bare", function () {
+		const stack = new Stack<StackElem>();
+
+		it("should push 1 to stack if signature is valid", function () {
+			const account = generateAccount();
+			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signed = signBytes(toSign, account.sk);
+
+			stack.push(toSign); // data
+			stack.push(signed); // signature
+			stack.push(decodeAddress(account.addr).publicKey); // pk
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 1n);
+		});
+
+		it("should push 0 to stack if signature is invalid", function () {
+			const account = generateAccount();
+			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signed = signBytes(toSign, account.sk);
+			signed[0] = (Number(signed[0]) + 1) % 256;
+
+			stack.push(toSign); // data
+			stack.push(signed); // signature
+			stack.push(decodeAddress(account.addr).publicKey); // pk
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 0n);
+		});
+
+		it(
+			"should throw invalid type error Ed25519verify",
+			execExpectError(
+				stack,
+				["1", "1", "1"].map(BigInt),
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"should throw error with Ed25519verify if stack is below min length",
+			execExpectError(
+				stack,
+				[],
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			const account = generateAccount();
+			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signed = signBytes(toSign, account.sk);
+
+			stack.push(toSign); // data
+			stack.push(signed); // signature
+			stack.push(decodeAddress(account.addr).publicKey); // pk
+
+			const op = new Ed25519verify_bare([], 1);
+			assert.equal(1900, op.execute(stack));
 		});
 	});
 
