@@ -2,7 +2,7 @@
 layout: splash
 ---
 
-# algob config
+# Algob Config
 
 Algo Builder project must have an `algob.config.js` file present in a root directory. You can use the [sample file](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/common/algob.config.js).
 The config is used to list available algorand networks, accounts and how to connect to them.
@@ -33,55 +33,61 @@ loggingEnabled?: boolean;
 initialDate?: string;
 ```
 
-## Credentials
+## Network Credentials
 
 If you are running a local node, you can find port and token values for your algod in `$ALGORAND_DATA/algod.net` and `$ALGORAND_DATA/algod.token` files.
 
-You can specify **Algod** Credentials in network object or you can load it from ENV.
-To load it from ENV:
+You can specify **Algod** [Network Credentials](https://algobuilder.dev/api/algob/interfaces/types.NetworkCredentials.html) manually or you can load it from ENV.
 
-- Method 1
+- Method 1: specify manually:
 
-  - To add `ALGOD_ADDR` and `ALGOD_TOKEN` in env, you can use the following commands in terminal:
+        let algodCred = {host: "127.0.0.1", port: 4001, token: "c3e..."}
+
+- Method 2: use host address and token from environment:
+
+  - Set `ALGOD_ADDR` and `ALGOD_TOKEN` in your shell environment:
 
         export ALGOD_ADDR = "127.0.0.1:4001"
         export ALGOD_TOKEN = "algod_token"
 
-  - To load algod credentials from env in config, you can use:
+  - Load credentials in algob config:
 
         let algodCred = algodCredentialsFromEnv();
 
-- Method 2
+- Method 3: load from Algorand data directory.
 
-  - To add `ALGORAND_DATA` in env, you can use the following command in terminal:
+  - Set `ALGORAND_DATA` in your shell environment:
 
-          export ALGORAND_DATA="content_of/algorand-node-data"
+          export ALGORAND_DATA="path_to/algorand-node-data"
 
-  - To load algod credentials from env in config, you can use:
+  - Load credentials in algob config (same function as in method_2):
 
           let algodCred = algodCredentialsFromEnv();
 
-Similarly, for **KMD** credentials you can either specify credentials in KMD object or load it from ENV.
-To load it from ENV:
+Similarly, **KMD** uses [Network Credentials](https://algobuilder.dev/api/algob/interfaces/types.NetworkCredentials.html) object:
 
-- Method 1
+- Method 1: specify manually:
 
-  - To add `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following commands in terminal:
+        let kmdCred = {host: "127.0.0.1", port: 7833, token: "c3e..."}
 
-        export KMD_ADDR = "127.0.0.1:4001"
+- Method 2: use host address and token from environment:
+
+  - Set `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following command in terminal:
+
+        export KMD_ADDR = "127.0.0.1:7833"
         export KMD_TOKEN = "kmd_token"
 
-  - To load kmd credentials from env in config, you can use:
+  - Load credentials in algob config:
 
         let kmdCred = KMDCredentialsFromEnv();
 
-- Method 2
+- Method 3: load from KMD data directory.
 
-  - To add `$KMD_DATA` in env, you can use the following command in terminal:
+  - Set `KMD_DATA` (usually it's in your node data directory) in your shell environment:
 
-          export $KMD_DATA = "content_of/kmd-data"
+          export KMD_DATA = "path_to/kmd-vX"
 
-  - To load kmd credentials from env in config, you can use:
+  - Load credentials in algob config (same function as in method_2):
 
           let kmdCred = KMDCredentialsFromEnv();
 
@@ -110,14 +116,13 @@ Each network configuration requires a list of accounts. These accounts are then 
           mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
         }]);
 
-You can extract private keys from KMD through mnemonic phrase using `goal` command. However, we recommend not doing that and using the KMD client directly to avoid writing a plaintext menmonic in a config file.
+    You can extract private keys from KMD through mnemonic phrase using `goal` command. However, we recommend not doing that and using the KMD client directly to avoid writing a plaintext menmonic in a config file.
 
         goal -d $(ALGORAND_DATA) account list
         goal -d $(ALGORAND_DATA) account export -a <account address>
 
 1.  Loading from a Key Management Daemon (KMD).
-    You will have to specify KMD config and provide it to each network you want to expose some
-    of your KMD accounts. `algob` will connect to the KMD client and load accounts with
+    You will have to specify KMD config and provide it to each network you want to expose your KMD accounts. `algob` will connect to the KMD client and load accounts with
     specified addresses and assign names to that account according to the `kmdCfg`. If an
     account with same name is already listed in given `network.accounts` then KMD loader will
     ignore that account. Similarly, account will be ignored if KMD wallet doesn't have a
@@ -126,11 +131,14 @@ You can extract private keys from KMD through mnemonic phrase using `goal` comma
 
          // KMD credentials
          let kmdCfg = {
+           // host, port and token can be loaded using `KMDCredentialsFromEnv`
+           // as described in the previous section
            host: "127.0.0.1",
            port: 7833,
            token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232",
            wallets: [
-             {name: "unencrypted-default-wallet", password: "",
+             {name: "unencrypted-default-wallet",
+              password: "",
               accounts: [
                 {name: "abc", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU"}]}
            ]

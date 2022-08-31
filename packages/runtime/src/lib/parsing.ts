@@ -275,3 +275,11 @@ export function bigEndianBytesToBigInt(bytes: Uint8Array | Buffer): bigint {
 	}
 	return BigInt(buffToHex(bytes));
 }
+
+/**
+ * Parse String hex to bytes(represented as Uint8array)
+ * @param str 
+ */
+export function strHexToBytes(str: string): Uint8Array {
+	return new Uint8Array(Buffer.from(str.slice(2), "hex"));
+}

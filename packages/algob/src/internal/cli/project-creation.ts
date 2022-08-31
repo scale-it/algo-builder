@@ -9,7 +9,8 @@ import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
-const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha"];
+const ALGOB_PKG = "@algo-builder/algob";
+const SAMPLE_PROJECT_DEPENDENCIES = ["chai", "mocha", ALGOB_PKG];
 
 const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	...SAMPLE_PROJECT_DEPENDENCIES,
@@ -19,6 +20,10 @@ const SAMPLE_TS_PROJECT_DEPENDENCIES = [
 	"typescript",
 	"ts-node",
 ];
+
+export function pkgManager(isNpm: boolean): string {
+	return isNpm ? "npm" : "yarn";
+}
 
 export async function printWelcomeMessage(): Promise<void> {
 	const packageJson = await getPackageJson();
@@ -73,9 +78,11 @@ function copySampleProject(
 	copy(projectDir, location);
 }
 
-export function printSuggestedCommands(): void {
-	const npx =
-		getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION ? "" : "npx ";
+export function printSuggestedCommands(isNpm: boolean): void {
+	let npx = "";
+	if (getExecutionMode() !== ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION) {
+		npx = pkgManager(isNpm) + " ";
+	}
 
 	console.log(`Try running some of the following tasks:`);
 	console.log(`  ${npx}${ALGOB_NAME} gen-accounts`);
@@ -88,38 +95,31 @@ export function printSuggestedCommands(): void {
 	console.log(`  ${npx}${ALGOB_NAME} console`);
 }
 
-async function printPluginInstallationInstructions(): Promise<void> {
-	console.log(`You need to install these dependencies to run the sample project:`);
-
-	const cmd = await installDevDependenciesCmd();
-
-	console.log(`  ${cmd.join(" ")}`);
-}
-
 export async function createProject(
 	location: string,
 	isTSProject: boolean,
-	withInfrastucture: boolean
+	withInfrastucture: boolean,
+	isNpm: boolean
 ): PromiseAny {
 	await printWelcomeMessage();
-
 	copySampleProject(location, isTSProject, withInfrastucture);
 
 	let shouldShowInstallationInstructions = true;
-
-	const sampleProjectDependencies = isTypeScriptProject()
+	const deps = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
+	const cmdDev = pkgInstallCommand(isNpm, deps, false);
 
 	if (await canInstallPlugin()) {
-		const installedRecommendedDeps = sampleProjectDependencies.filter(isInstalled);
+		const installedRecommendedDeps = deps.filter(isInstalled);
 
-		if (installedRecommendedDeps.length === sampleProjectDependencies.length) {
+		if (installedRecommendedDeps.length === deps.length) {
 			shouldShowInstallationInstructions = false;
 		} else if (installedRecommendedDeps.length === 0) {
-			const shouldInstall = await confirmPluginInstallation();
+			const shouldInstall = await confirmPluginInstallation(isNpm);
 			if (shouldInstall) {
-				const installed = await installRecommendedDependencies();
+				console.log("");
+				const installed = await installDependencies(cmdDev[0], cmdDev.slice(1));
 
 				if (!installed) {
 					console.warn(chalk.red("Failed to install the sample project's dependencies"));
@@ -133,11 +133,11 @@ export async function createProject(
 	console.log("\n★", chalk.cyan("Project created"), "★\n");
 
 	if (shouldShowInstallationInstructions) {
-		await printPluginInstallationInstructions();
-		console.log(``);
+		console.log(`You need to install these dependencies to run the sample project:`);
+		console.log(`  ${cmdDev.join(" ")}`, "\n");
 	}
 
-	printSuggestedCommands();
+	printSuggestedCommands(isNpm);
 }
 
 export function createConfirmationPrompt(name: string, message: string) {
@@ -197,32 +197,18 @@ function isInstalled(dep: string): boolean {
 	return dep in allDependencies;
 }
 
-function isYarnProject(): boolean {
-	return fsExtra.pathExistsSync("yarn.lock");
-}
-
 function isTypeScriptProject(): boolean {
 	return fsExtra.pathExistsSync("tsconfig.json");
 }
 
-async function installRecommendedDependencies(): Promise<boolean> {
-	console.log("");
-	const installDevDependCmd = await installDevDependenciesCmd();
-	const installDependCmd = await installDependenciesCmd();
-	return (
-		(await installDependencies(installDevDependCmd[0], installDevDependCmd.slice(1))) &&
-		(await installDependencies(installDependCmd[0], installDependCmd.slice(1)))
-	);
-}
-
-async function confirmPluginInstallation(): Promise<boolean> {
+async function confirmPluginInstallation(isNpm: boolean): Promise<boolean> {
 	const { default: enquirer } = await import("enquirer");
 
 	let responses: {
 		shouldInstallPlugin: boolean;
 	};
 
-	const packageManager = isYarnProject() ? "yarn" : "npm";
+	const packageManager = pkgManager(isNpm);
 	const sampleProjectDependencies = isTypeScriptProject()
 		? SAMPLE_TS_PROJECT_DEPENDENCIES
 		: SAMPLE_PROJECT_DEPENDENCIES;
@@ -261,7 +247,7 @@ export async function installDependencies(
 		cwd: location,
 	});
 
-	return await new Promise<boolean>((resolve, reject) => {
+	return new Promise<boolean>((resolve, reject) => {
 		childProcess.once("close", (status) => {
 			childProcess.removeAllListeners("error");
 
@@ -273,53 +259,26 @@ export async function installDependencies(
 			reject(new Error("script process returned not 0 status"));
 		});
 
-		childProcess.once("error", (status) => {
+		childProcess.once("error", (_status) => {
 			childProcess.removeAllListeners("close");
 			reject(new Error("script process returned not 0 status"));
 		});
 	});
 }
 
-async function installDevDependenciesCmd(): Promise<string[]> {
+function pkgInstallCommand(isNpm: boolean, deps: string[], isDev: boolean): string[] {
 	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-	const sampleProjectDependencies = isTypeScriptProject()
-		? SAMPLE_TS_PROJECT_DEPENDENCIES
-		: SAMPLE_PROJECT_DEPENDENCIES;
 
-	if (isYarnProject()) {
-		const cmd = ["yarn"];
-		if (isGlobal) {
-			cmd.push("global");
-		}
-		cmd.push("add", "--dev", ...sampleProjectDependencies);
-		return cmd;
+	if (isNpm) {
+		const cmd = ["npm", "install"];
+		if (isGlobal) cmd.push("--global");
+		if (isDev) cmd.push("-D");
+		return [...cmd, ...deps];
 	}
 
-	const npmInstall = ["npm", "install"];
-	if (isGlobal) {
-		npmInstall.push("--global");
-	}
-
-	return [...npmInstall, "--save-dev", ...sampleProjectDependencies];
-}
-
-async function installDependenciesCmd(): Promise<string[]> {
-	const isGlobal = getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
-	const sampleProjectDependencies = ["@algo-builder/web"];
-
-	if (isYarnProject()) {
-		const cmd = ["yarn"];
-		if (isGlobal) {
-			cmd.push("global");
-		}
-		cmd.push("add", ...sampleProjectDependencies);
-		return cmd;
-	}
-
-	const npmInstall = ["npm", "install"];
-	if (isGlobal) {
-		npmInstall.push("--global");
-	}
-
-	return [...npmInstall, ...sampleProjectDependencies];
+	const cmd = ["yarn"];
+	if (isGlobal) cmd.push("global");
+	if (isDev) cmd.push("-D");
+	cmd.push("add", ...deps);
+	return cmd;
 }

@@ -6,6 +6,7 @@ import type {
 	ConnectionSettings,
 	EncodedTransaction,
 	SignedTx,
+	SignTransactionOptions,
 } from "@randlabs/myalgo-connect";
 import algosdk, { Transaction } from "algosdk";
 
@@ -29,17 +30,21 @@ interface MyAlgoConnect {
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed transaction
 	 */
-	signTransaction(transaction: AlgorandTxn | EncodedTransaction): Promise<SignedTx>;
+	signTransaction(transaction: AlgorandTxn | EncodedTransaction, 
+		signOptions?: SignTransactionOptions): Promise<SignedTx>;
 
 	/**
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction array.
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed an array of signed transactions.
 	 */
-	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[]): Promise<SignedTx[]>;
+	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[], 
+		signOptions?: SignTransactionOptions): Promise<SignedTx[]>;
 
 	/**
 	 * @async
@@ -90,8 +95,8 @@ export class MyAlgoWalletSession {
 	 * @param txn { SDK transaction object, shouldSign, signers, msig } object
 	 * @returns raw signed txn
 	 */
-	async signTransaction(txn: algosdk.Transaction): Promise<SignedTx> {
-		return await this.connector.signTransaction(txn.toByte());
+	async signTransaction(txn: algosdk.Transaction, signOptions?: SignTransactionOptions): Promise<SignedTx> {
+		return await this.connector.signTransaction(txn.toByte(), signOptions);
 	}
 
 	/**
@@ -101,29 +106,33 @@ export class MyAlgoWalletSession {
 	 * @returns array of raw signed txns | null. null representes that the txn in array is NOT signed
 	 * by wallet user (i.e signable by someone else).
 	 */
-	async signTransactionGroup(txns: TransactionInGroup[]): Promise<SignedTx[]> {
+	async signTransactionGroup(txns: TransactionInGroup[], 
+		signOptions?: SignTransactionOptions): Promise<SignedTx[]> {
 		const txnsGroup = txns.map((v) => v.txn);
 		const groupID = algosdk.computeGroupID(txnsGroup);
 		for (let i = 0; i < txns.length; i++) txnsGroup[i].group = groupID;
-		return await this.connector.signTransaction(txnsGroup.map((txn) => txn.toByte()));
+		return await this.connector.signTransaction(txnsGroup.map((txn) => txn.toByte()), signOptions);
 	}
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
-		rawTxns: Uint8Array | Uint8Array[]
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = WAIT_ROUNDS
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
-		return await this.waitForConfirmation(txInfo.txId);
+		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
 	// Function used to wait for a tx confirmation
 	private async waitForConfirmation(
-		txId: string
+		txId: string,
+		waitRounds = WAIT_ROUNDS
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}

@@ -3,7 +3,7 @@
 	"description": "Framework to automate development of Algorand Assets and Smart Contracts.",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
-	"packageManager": "yarn@3.2.0",
+	"packageManager": "yarn@3.2.1",
 	"license": "Apache-2.0",
 	"private": true,
 	"workspaces": [
@@ -20,7 +20,7 @@
 		"build": "yarn workspaces foreach -t run build",
 		"build:apidocs": "yarn workspaces foreach -t run build:docs",
 		"build:apidocs-push": "yarn workspaces foreach -t run build:docs; git add docs; git ci -am 'generating api docs' -n; HUSKY=0 git push -f",
-		"watch": "tsc --build --watch packages/web packages/runtime packages/algob",
+		"build:watch": "tsc --build --watch packages/web packages/runtime packages/algob",
 		"test": "yarn workspaces foreach -p run test",
 		"test:watch": "yarn workspaces foreach run test:watch:p",
 		"format": "prettier --loglevel warn --write .",

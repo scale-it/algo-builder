@@ -1,4 +1,4 @@
-import algosdk, { SuggestedParams, Transaction } from "algosdk";
+import algosdk, { EncodedSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
@@ -31,7 +31,8 @@ export class WebMode {
 	 * @param txId Transaction id
 	 */
 	async waitForConfirmation(
-		txId: string
+		txId: string,
+		waitRounds = WAIT_ROUNDS
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const response = await this.algoSigner.algod({
 			ledger: this.chainName,
@@ -41,7 +42,7 @@ export class WebMode {
 		const startRound = response[LAST_ROUND] as number;
 		let currentRound = startRound;
 		// eslint-disable-next-line no-constant-condition
-		while (currentRound < startRound + WAIT_ROUNDS) {
+		while (currentRound < startRound + waitRounds) {
 			const pendingInfo = await this.algoSigner.algod({
 				ledger: this.chainName,
 				path: `/v2/transactions/pending/${txId}`,
@@ -59,14 +60,18 @@ export class WebMode {
 				path: `/v2/status/wait-for-block-after/${currentRound}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
 			});
 		}
-		throw new Error(`Transaction not confirmed after ${WAIT_ROUNDS} rounds`);
+		throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
 	}
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param signedTxn Signed Transaction blob encoded in base64
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
-	async sendAndWait(signedTxn: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async sendAndWait(
+		signedTxn: string,
+		waitRounds = WAIT_ROUNDS
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
 		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
 			tx: signedTxn,
@@ -145,7 +150,64 @@ export class WebMode {
 	}
 
 	/**
+	 * Appends signature to a multisig transaction using algosigner
+	 * @param txns array of multisignature transaction with at least one signature
+	 * @param signers a subset of addresses to sign the transaction
+	 * return an object containing a blob attribute encoded in base64
+	 */
+	async appendSignMultisigTransaction(txns: WalletTransaction[], signers: string[]): Promise<JsonPayload> {
+		const result:JsonPayload = {};
+		for (let i = 0; i < txns.length; ++i) {
+			const txn = txns[i];
+			const partialTxn = algosdk.decodeObj(
+				this.algoSigner.encoding.base64ToMsgpack(txn.txn)) as EncodedSignedTransaction; 
+			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
+				throw new Error("Input transaction must be multisigature transaction signed with at least 1 signature");
+			} 
+			const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
+			const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
+			const txnToBeSign_Base64 = this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
+
+			const mparams = partialTxn.msig as algosdk.EncodedMultisig;
+			const addrs = mparams.subsig.map((signData) => {
+				return algosdk.encodeAddress(signData.pk);
+			});
+
+			const multisigParams = {
+				version: mparams.v,
+				threshold: mparams.thr,
+				addrs: addrs,
+			}
+
+			const signedTxn = await this.signTransaction([
+				{
+					txn: txnToBeSign_Base64,
+					msig: multisigParams,
+					signers: signers,
+				},
+			]);
+
+			const signedTxnJson = signedTxn[0] as JsonPayload;
+			const blob = signedTxnJson.blob as string;
+
+			const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
+			const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
+			const combineBlob = algosdk.mergeMultisigTransactions([
+				blob1,
+				blob2,
+			]);
+			const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
+			result[i] = {
+				blob: outputBase64
+			};
+		}
+		return result;
+	}
+
+	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
+	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
+	 * for more info.
 	 * @param transactions transaction parameters, atomic transaction parameters
 	 * or TransactionAndSign object(SDK transaction object and signer parameters).
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.

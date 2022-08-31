@@ -130,11 +130,14 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
+	Replace2,
+	Replace3,
 	Return,
 	Select,
 	SetBit,
 	SetByte,
 	Sha256,
+	Sha3_256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -165,6 +168,7 @@ import {
 	bigintToBigEndianBytes,
 	convertToBuffer,
 	getEncoding,
+	strHexToBytes,
 } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -6897,6 +6901,42 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
+	describe("Logs", function () {
+		let stack: Stack<StackElem>;
+		let interpreter: Interpreter;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.tx = TXN_OBJ;
+			interpreter.tealVersion = 6;
+			interpreter.innerTxnGroups = [[TXN_OBJ, { ...TXN_OBJ, fee: 1000 }]];
+			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+				txn: interpreter.runtime.ctx.tx,
+				txID: TXN_OBJ.txID,
+				logs: [parsing.stringToBytes("Monty"), parsing.stringToBytes("Python")],
+			});
+		});
+
+		it("Should put on top of the stack log from group transaction", () => {
+			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
+		});
+
+		it("Should throw an error index out of bound", () => {
+			const op = new Gitxna(["1", "Logs", "2"], 1, interpreter);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
+		});
+
+		it("Should put on top of stack log from group transaction", () => {
+			stack.push(1n);
+			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), parsing.stringToBytes("Python"));
+		});
+	});
+
 	describe("Tealv7: base64Decode opcode", function () {
 		let stack: Stack<StackElem>;
 		const encoded64BaseStd = "YWJjMTIzIT8kKiYoKSctPUB+";
@@ -6986,4 +7026,162 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => new Base64Decode([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
 	});
+
+	describe("Tealv7: replace2 opcode", function () {
+		let stack: Stack<StackElem>;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should replace bytes correctly", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			let hexStr = "0x22221111";
+			let expectedBytes = strHexToBytes(hexStr);
+
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			let op = new Replace2(["0"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			hexStr = "0x11222211";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["1"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			//push a random bytes to stack for testing if the data in stack remain the same
+			const remainBytes = "0x112233";
+			const expectedRemain = strHexToBytes(remainBytes);
+			stack.push(strHexToBytes(remainBytes)); 
+
+			hexStr = "0x11112222";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			op = new Replace2(["2"], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+			
+			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
+		});
+
+		it("Should throw an error when argument not provided", () => {
+			expectRuntimeError(() => new Replace2([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
+		});
+
+		it("Should throw error for wrong index replace", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			stack.push(strHexToBytes(original));
+			stack.push(strHexToBytes(replace));
+			const op = new Replace2(["3"], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
+		});
+	});
+
+	describe("Tealv7: replace3 opcode", function () {
+		let stack: Stack<StackElem>;
+		this.beforeEach(() => {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should replace bytes correctly", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			let hexStr = "0x22221111";
+			let expectedBytes = strHexToBytes(hexStr);
+
+			stack.push(strHexToBytes(original));
+			stack.push(0n);
+			stack.push(strHexToBytes(replace));
+			let op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			hexStr = "0x11222211";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(1n);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			//push a random bytes to stack for testing if the data in stack remain the same
+			const remainBytes = "0x112233";
+			const expectedRemain = strHexToBytes(remainBytes);
+			stack.push(strHexToBytes(remainBytes)); 
+
+			hexStr = "0x11112222";
+			expectedBytes = strHexToBytes(hexStr);
+			stack.push(strHexToBytes(original));
+			stack.push(2n);
+			stack.push(strHexToBytes(replace));
+			op = new Replace3([], 0);
+			op.execute(stack);
+			assert.deepEqual(stack.pop(), expectedBytes);
+
+			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
+		});
+
+		it("Should throw error for wrong index replace", () => {
+			const original = "0x11111111";
+			const replace = "0x2222";
+			stack.push(strHexToBytes(original));
+			stack.push(3n);
+			stack.push(strHexToBytes(replace));
+			const op = new Replace3([], 0);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR);
+		});
+	});
+
+	describe("sha3_256", function () {
+		const stack = new Stack<StackElem>();
+
+		it("should return correct hash for sha3_256", function () {
+			stack.push(parsing.stringToBytes("ALGORAND"));
+			const op = new Sha3_256([], 1);
+			op.execute(stack);
+
+			// http://emn178.github.io/online-tools/sha3_256.html
+			const expected = Buffer.from(
+				"ae39517df229f45df862c060e693c0e69691dac70fa65605a62fabad8029a4e7",
+				"hex"
+			);
+
+			const top = stack.pop();
+			assert.deepEqual(expected, top);
+		});
+
+		it(
+			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
+			execExpectError(
+				stack,
+				[1n],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
+			execExpectError(
+				stack,
+				[],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			const op = new Sha3_256([], 1);
+			assert.equal(130, op.execute(stack));
+		});
+	});
+
 });

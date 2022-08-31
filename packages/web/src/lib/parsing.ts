@@ -52,7 +52,7 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 		// if appArg already bytes, then we don't need to parse
 		// just push to array and continue
 		if (appArg instanceof Uint8Array) {
-			args.push(appArg);
+			args.push(new Uint8Array(appArg)); //in case its a Buffer object
 			continue;
 		}
 

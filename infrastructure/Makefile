@@ -10,7 +10,7 @@ export REACH_PATH = ~/.algorand-reach
 export INDEXER_REMOTE_REPO = https://github.com/algorand/indexer.git
 export INDEXER_PATH = ~/.algorand-indexer-download
 # path to indexer .tar file (https://github.com/algorand/indexer/releases) for local setup
-export INDEXER_LATEST_VERSION = 2.12.4
+export INDEXER_LATEST_VERSION = 2.13.0
 export INDEXER_TAR_NAME = algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION).tar.bz2
 export INDEXER_TAR_URL = https://github.com/algorand/indexer/releases/download/$(INDEXER_LATEST_VERSION)/$(INDEXER_TAR_NAME)
 # default postgres config vars
@@ -63,6 +63,7 @@ account-list:
 setup-master-account:
 # Create an account with WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE address:
 	goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" -d $(ALGORAND_DATA) || true
+	@goal account rename Unnamed-0 master -d $(ALGORAND_DATA) || true
 # Send lot of ALGO from a primary account to the "master" account we created above
 	@$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))

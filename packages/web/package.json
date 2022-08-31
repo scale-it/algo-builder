@@ -33,11 +33,11 @@
 	},
 	"dependencies": {
 		"@json-rpc-tools/utils": "^1.7.6",
-		"@randlabs/myalgo-connect": "^1.1.2",
+		"@randlabs/myalgo-connect": "^1.2.0",
 		"@walletconnect/client": "^1.6.6",
 		"@walletconnect/types": "^1.7.1",
 		"algorand-walletconnect-qrcode-modal": "^1.7.4",
-		"algosdk": "^1.18.1",
+		"algosdk": "^1.19.0",
 		"debug": "^4.3.4",
 		"zod": "^3.13.4"
 	},

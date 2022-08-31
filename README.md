@@ -71,21 +71,26 @@ Each package has rich test suites. Whenever you add something new make sure you 
 
 Restarting tests by hand is a bit more time consuming. We are using `mocha` framework to execute tests. It has a very useful feature: `mocha --watch` -- which will monitor for all file changes and re-execute tests when a file changed without adding a time overhead to start node and load all TypeScript modules.
 
-To execute tests in a workspace (eg `packages/runtime`) run:
+To execute tests in a package (eg `packages/runtime`) run:
 
 ```
 cd packages/runtime
+yarn build
 yarn run test
 ```
 
-To execute and watch tests in a workspace (eg `packages/runtime`) run:
+NOTE: you always have to build the typescript files first. If you are in a development mode, then it's worth to run build in a _watch_ mode (will watch for file changes and automatically recompile project, very fast). You can combine it with a watch mode for tests:
 
 ```
+# in the project root:
+yarn build:watch
+
+# in new terminal:
 cd packages/runtime
 yarn run test -w
 ```
 
-To execute tests in all workspaces, run the following from the root directory:
+To execute tests in all workspace projects, run the following from the root directory:
 
 ```
 yarn run test

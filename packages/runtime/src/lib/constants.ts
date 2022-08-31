@@ -188,7 +188,7 @@ export const TxArrFields: { [key: number]: Set<string> } = {
 };
 TxArrFields[3] = new Set([...TxArrFields[2], "Assets", "Applications"]);
 TxArrFields[4] = cloneDeep(TxArrFields[3]);
-TxArrFields[5] = cloneDeep(TxArrFields[4]);
+TxArrFields[5] = new Set([...TxArrFields[4], "Logs"]);
 TxArrFields[6] = cloneDeep(TxArrFields[5]);
 TxArrFields[7] = cloneDeep(TxArrFields[6]);
 
@@ -467,6 +467,7 @@ OpGasCost[6] = {
 };
 OpGasCost[7] = {
 	...OpGasCost[6],
+	sha3_256: 130,
 };
 
 export const enum MathOp {

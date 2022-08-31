@@ -261,9 +261,13 @@ class DeployerBasicMode {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
-	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-		return this.algoOp.sendAndWait(rawTxns);
+	sendAndWait(
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = wtypes.WAIT_ROUNDS
+	): Promise<ConfirmedTxInfo> {
+		return this.algoOp.sendAndWait(rawTxns, waitRounds);
 	}
 
 	/**

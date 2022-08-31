@@ -13,7 +13,7 @@ def dao_fund_lsig(ARG_DAO_APP_ID):
     def basic_checks(txn: Txn): return And(
         txn.rekey_to() == Global.zero_address(),
         txn.close_remainder_to() == Global.zero_address(),
-        txn.asset_close_to() == Global.zero_address()
+        txn.asset_close_to() == Global.zero_address(),
     )
 
     # verify funds are transfered only when paired with DAO app (during execute call)
@@ -23,20 +23,21 @@ def dao_fund_lsig(ARG_DAO_APP_ID):
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
         Gtxn[0].application_id() == Int(ARG_DAO_APP_ID),
         Gtxn[0].application_args[0] == Bytes("execute"),
-
         # verify second transaction (either payment in asa or ALGO)
         basic_checks(Gtxn[1]),
         Or(
             Gtxn[1].type_enum() == TxnType.AssetTransfer,
             Gtxn[1].type_enum() == TxnType.Payment,
-        )
+        ),
+        Gtxn[1].fee() == Int(0)
     )
 
     # Opt-in transaction is allowed
     opt_in = And(
         basic_checks(Txn),
         Txn.type_enum() == TxnType.AssetTransfer,
-        Txn.asset_amount() == Int(0)
+        Txn.asset_amount() == Int(0),
+        Txn.fee() <= Int(2000)
     )
 
     program = program = Cond(
