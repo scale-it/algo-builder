@@ -68,6 +68,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -402,6 +403,7 @@ opCodeMap[7] = {
 	replace2: Replace2,
 	replace3: Replace3,
 	sha3_256: Sha3_256,
+	ed25519verify_bare: Ed25519verify_bare,
 };
 
 // list of opcodes with exactly one parameter.
@@ -515,6 +517,7 @@ const commonModeOps = new Set([
 	"sha3_256",
 	"sha512_256",
 	"ed25519verify",
+	"Ed25519verify_bare",
 	"ecdsa_verify",
 	"ecdsa_pk_decompress",
 	"+",
