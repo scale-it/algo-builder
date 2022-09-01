@@ -215,22 +215,45 @@ export class WebMode {
 		throw new Error("Transaction Error");
 	}
 
-	makeTx(transactions: ExecParams[]): Transaction[] {
-		const transactionsToReturn: Transaction[] = [];
-		return transactionsToReturn;
+	async makeTx(transactions: ExecParams[]): Promise<Transaction[]> {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of transactions.entries()) {
+			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+		}
+		return txns;
 	}
-	signTx(transaction: algosdk.Transaction, signer: algosdk.Account): SignedTransaction[] {
-		const signedTransactions: SignedTransaction[] = [];
-		return signedTransactions;
+	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
+		const binaryTx = transaction.toByte();
+		const base64Tx = this.algoSigner.encoding.msgpackToBase64(binaryTx);
+		const signedTx = await this.algoSigner.signTxn([
+			{
+				txn: base64Tx,
+			},
+		]);
+		const signedTxJson = signedTx as JsonPayload;
+		const blob = signedTxJson.blob as string;
+		const blobArray = Uint8Array.from(Buffer.from(blob, "base64"));
+		return algosdk.decodeSignedTransaction(blobArray);
 	}
-	makeAndSignTx(transactions: ExecParams[]): SignedTransaction[] {
-		const sender = algosdk.generateAccount();
-		return this.signTx(this.makeTx(transactions)[0], sender);
+	async makeAndSignTx(transactions: ExecParams[]): Promise<SignedTransaction[]> {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = await this.makeTx(transactions);
+		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+		return signedTxns;
 	}
-	sendTxAndWait(
+	async sendTxAndWait(
 		txs: SignedTransaction[],
 		rounds?: number
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		throw Error("not implemented");
+		if (txs.length < 1) {
+			throw Error("No transactions to process");
+		} else {
+			const txInfo = await this.sendGroupTransaction(txs);
+
+			if (txInfo && typeof txInfo.txId === "string") {
+				return await this.waitForConfirmation(txInfo.txId, rounds);
+			}
+			throw new Error("Transaction Incorrect");
+		}
 	}
 }
