@@ -7190,12 +7190,16 @@ describe("Teal Opcodes", function () {
 
 		it("should push 1 to stack if signature is valid", function () {
 			const account = generateAccount();
-			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
-			const signed = signBytes(toSign, account.sk);
+			const hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			const data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
 
-			stack.push(toSign); // data
-			stack.push(signed); // signature
-			stack.push(decodeAddress(account.addr).publicKey); // pk
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);
 			op.execute(stack);
@@ -7205,13 +7209,21 @@ describe("Teal Opcodes", function () {
 
 		it("should push 0 to stack if signature is invalid", function () {
 			const account = generateAccount();
-			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
-			const signed = signBytes(toSign, account.sk);
-			signed[0] = (Number(signed[0]) + 1) % 256;
-
-			stack.push(toSign); // data
-			stack.push(signed); // signature
-			stack.push(decodeAddress(account.addr).publicKey); // pk
+			let hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			let data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
+			//flip a bit and it should not pass
+			hexStr = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd"
+			data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);
 			op.execute(stack);
@@ -7230,7 +7242,7 @@ describe("Teal Opcodes", function () {
 		);
 
 		it(
-			"should throw error with Ed25519verify if stack is below min length",
+			"should throw an error if stack is below min length",
 			execExpectError(
 				stack,
 				[],
@@ -7241,16 +7253,15 @@ describe("Teal Opcodes", function () {
 
 		it("Should return correct cost", () => {
 			const account = generateAccount();
-			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
-			const signed = signBytes(toSign, account.sk);
+			const data = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signature = signBytes(data, account.sk);
 
-			stack.push(toSign); // data
-			stack.push(signed); // signature
-			stack.push(decodeAddress(account.addr).publicKey); // pk
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);
 			assert.equal(1900, op.execute(stack));
 		});
 	});
-
 });
