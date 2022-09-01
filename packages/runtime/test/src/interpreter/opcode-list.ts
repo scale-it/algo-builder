@@ -3646,6 +3646,25 @@ describe("Teal Opcodes", function () {
 			assert.equal(5n, stack.pop());
 		});
 
+		it("Int: Should work with 2^64 - 1 (max supported number)", () => {
+			const total = 2n ** 64n - 1n;
+			assert.doesNotThrow(() => new Int([total.toString()], 0));
+		});
+		it("Int: Should throw an overflow error on 2^64", () => {
+			const total = 2n ** 64n;
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+		it("Int: Should throw an overflow error on 2^64+1", () => {
+			const total = 2n ** 64n + 1n;
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+
 		it("Int: should push correct TypeEnumConstants enum value to stack", function () {
 			let op = new Int(["unknown"], 0);
 			op.execute(stack);
