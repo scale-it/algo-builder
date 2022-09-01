@@ -14,10 +14,10 @@ import algosdk, {
 } from "algosdk";
 import chalk from "chalk";
 import { ec as EC } from "elliptic";
-import { Message, sha256 } from "js-sha256";
+import { Hasher, Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
-import { Keccak } from "sha3";
+import { Keccak, SHA3 } from "sha3";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -623,11 +623,10 @@ export class Err extends Op {
 	}
 }
 
-// SHA256 hash of value X, yields [32]byte
-// push to stack [...stack, bytes]
-export class Sha256 extends Op {
+abstract class HashOp extends Op {
 	readonly line: number;
 	readonly interpreter: Interpreter;
+
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
@@ -641,61 +640,67 @@ export class Sha256 extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	computeCost(): number {
-		return OpGasCost[this.interpreter.tealVersion]["sha256"];
-	}
-
-	execute(stack: TEALStack): number {
+	_execute(stack: TEALStack, hasher: Hasher): number {
 		this.assertMinStackLen(stack, 1, this.line);
-		const hash = sha256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
-		hash.update(val);
-		const hashedOutput = Buffer.from(hash.hex(), "hex");
-		const arrByte = Uint8Array.from(hashedOutput);
+		hasher.update(val);
+		const arrByte = Uint8Array.from(hasher.digest());
 		stack.push(arrByte);
 		return this.computeCost();
 	}
 }
 
-// SHA512_256 hash of value X, yields [32]byte
-// push to stack [...stack, bytes]
-export class Sha512_256 extends Op {
+abstract class HashOpSHA3 extends Op {
 	readonly line: number;
-	readonly interpreter: Interpreter;
+
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
-	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number, interpreter: Interpreter) {
+	constructor(args: string[], line: number) {
 		super();
 		this.line = line;
-		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
+	_execute(stack: TEALStack, hasher: Keccak): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const top = this.assertBytes(stack.pop(), this.line);
+		hasher.update(convertToString(top));
+		const arrByte = Uint8Array.from(hasher.digest());
+		stack.push(arrByte);
+		return this.computeCost();
+	}
+}
+
+// SHA256 hash of value X, yields [32]byte
+// push to stack [...stack, bytes]
+export class Sha256 extends HashOp {
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["sha256"];
+	}
+	execute(stack: TEALStack): number {
+		return super._execute(stack, sha256.create());
+	}
+}
+
+// SHA512_256 hash of value X, yields [32]byte
+// push to stack [...stack, bytes]
+export class Sha512_256 extends HashOp {
 	computeCost(): number {
 		return OpGasCost[this.interpreter.tealVersion]["sha512_256"];
 	}
-
 	execute(stack: TEALStack): number {
-		this.assertMinStackLen(stack, 1, this.line);
-		const hash = sha512_256.create();
-		const val = this.assertBytes(stack.pop(), this.line) as Message;
-		hash.update(val);
-		const hashedOutput = Buffer.from(hash.hex(), "hex");
-		const arrByte = Uint8Array.from(hashedOutput);
-		stack.push(arrByte);
-		return this.computeCost();
+		return super._execute(stack, sha512_256.create());
 	}
 }
 
 // Keccak256 hash of value X, yields [32]byte
 // https://github.com/phusion/node-sha3#example-2
 // push to stack [...stack, bytes]
-export class Keccak256 extends Op {
-	readonly line: number;
+export class Keccak256 extends HashOpSHA3 {
+
 	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
@@ -703,26 +708,28 @@ export class Keccak256 extends Op {
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number, interpreter: Interpreter) {
-		super();
-		this.line = line;
+	 constructor(args: string[], line: number, interpreter: Interpreter) {
+		super(args, line);
 		this.interpreter = interpreter;
-		assertLen(args.length, 0, line);
 	}
 
 	computeCost(): number {
 		return OpGasCost[this.interpreter.tealVersion]["keccak256"];
 	}
-
 	execute(stack: TEALStack): number {
-		this.assertMinStackLen(stack, 1, this.line);
-		const top = this.assertBytes(stack.pop(), this.line);
+		return super._execute(stack, new Keccak(256));
+	}
+}
 
-		const hash = new Keccak(256);
-		hash.update(convertToString(top));
-		const arrByte = Uint8Array.from(hash.digest());
-		stack.push(arrByte);
-		return this.computeCost();
+// SHA3_256 hash of value A, yields [32]byte
+// https://github.com/phusion/node-sha3#generating-a-sha3-512-hash
+// push to stack [...stack, bytes]
+export class Sha3_256 extends HashOpSHA3 {
+	computeCost(): number {
+		return OpGasCost[7]["sha3_256"];
+	}
+	execute(stack: TEALStack): number {
+		return super._execute(stack, new SHA3(256));
 	}
 }
 
@@ -4972,8 +4979,8 @@ export class Replace extends Op {
 		super();
 		this.line = line;
 		this.start = start;
-		this.original = new Uint8Array;
-		this.replace = new Uint8Array;
+		this.original = new Uint8Array();
+		this.replace = new Uint8Array();
 	}
 
 	execute(stack: TEALStack): number {
@@ -4989,8 +4996,7 @@ export class Replace extends Op {
 		for (let i = 0, j = 0; i < this.original.length; ++i) {
 			if (i >= this.start && i < this.start + this.replace.length) {
 				result[i] = this.replace[j++];
-			}
-			else {
+			} else {
 				result[i] = this.original[i];
 			}
 		}
@@ -5010,7 +5016,7 @@ export class Replace2 extends Replace {
 	 * @param args Expected arguments: [start_index]
 	 * @param line line number in TEAL file
 	 */
-	 constructor(args: string[], line: number) {
+	constructor(args: string[], line: number) {
 		assertLen(args.length, 1, line);
 		super(Number(args[0]), line);
 	}
@@ -5024,16 +5030,16 @@ export class Replace2 extends Replace {
 }
 
 /**
- * Opcode: replace3 
+ * Opcode: replace3
  * Stack: ..., A: []byte, B: uint64, C: []byte → ..., []byte
  * Copy of A with the bytes starting at B replaced by the bytes of C. Fails if B+len(C) exceeds len(A)
  */
- export class Replace3 extends Replace {
+export class Replace3 extends Replace {
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param line line number in TEAL file
 	 */
-	 constructor(args: string[], line: number) {
+	constructor(args: string[], line: number) {
 		assertLen(args.length, 0, line);
 		super(0, line);
 	}
@@ -5045,5 +5051,4 @@ export class Replace2 extends Replace {
 		this.original = this.assertBytes(stack.pop(), this.line);
 		return super.execute(stack);
 	}
-
 }

@@ -136,6 +136,7 @@ import {
 	SetBit,
 	SetByte,
 	Sha256,
+	Sha3_256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -400,6 +401,7 @@ opCodeMap[7] = {
 	base64_decode: Base64Decode,
 	replace2: Replace2,
 	replace3: Replace3,
+	sha3_256: Sha3_256,
 };
 
 // list of opcodes with exactly one parameter.
@@ -465,6 +467,7 @@ const interpreterReqList = new Set([
 	"sha256",
 	"sha512_256",
 	"keccak256",
+	"sha3_256",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -509,6 +512,7 @@ const commonModeOps = new Set([
 	"err",
 	"sha256",
 	"keccak256",
+	"sha3_256",
 	"sha512_256",
 	"ed25519verify",
 	"ecdsa_verify",

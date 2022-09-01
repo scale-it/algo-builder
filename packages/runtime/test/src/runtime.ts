@@ -452,6 +452,32 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res.url, "url");
 	});
 
+	it("Should create asset with total = 2^64-1 (max value possible)", () => {
+		const maxUint64 = 2n ** 64n - 1n;
+		const execParams: types.ExecParams = {
+			type: types.TransactionType.DeployASA,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			asaName: "maxTotal",
+			asaDef: {
+				total: maxUint64,
+				decimals: 0,
+				defaultFrozen: false,
+				unitName: "TTL",
+				url: "url",
+				metadataHash: "12312442142141241244444411111134",
+				note: "note",
+			},
+			payFlags: {},
+		};
+		runtime.executeTx([execParams]);
+		syncAccounts();
+
+		const res = runtime.getAssetInfoFromName("maxTotal");
+		assert.isDefined(res);
+		assert.equal(res?.assetDef.total, maxUint64);
+	});
+
 	it("should create asset without using asa.yaml (execute transaction)", () => {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.DeployASA,
