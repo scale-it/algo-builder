@@ -7232,7 +7232,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it(
-			"should throw invalid type error Ed25519verify",
+			"should throw an invalid type error",
 			execExpectError(
 				stack,
 				["1", "1", "1"].map(BigInt),
