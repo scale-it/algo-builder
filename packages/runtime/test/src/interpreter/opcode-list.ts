@@ -7188,7 +7188,7 @@ describe("Teal Opcodes", function () {
 	describe("Ed25519verify_bare", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1 to stack if signature is valid", function () {
+		it("Should push 1 to stack if signature is valid", function () {
 			const account = generateAccount();
 			const hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
 			const data = Buffer.from(
@@ -7207,7 +7207,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should push 0 to stack if signature is invalid", function () {
+		it("Should push 0 to stack if signature is invalid", function () {
 			const account = generateAccount();
 			let hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
 			let data = Buffer.from(
@@ -7232,7 +7232,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it(
-			"should throw an invalid type error",
+			"Should throw an invalid type error",
 			execExpectError(
 				stack,
 				["1", "1", "1"].map(BigInt),
@@ -7242,7 +7242,7 @@ describe("Teal Opcodes", function () {
 		);
 
 		it(
-			"should throw an error if stack is below min length",
+			"Should throw an error if stack is below min length",
 			execExpectError(
 				stack,
 				[],
