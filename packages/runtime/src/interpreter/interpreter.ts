@@ -67,6 +67,7 @@ export class Interpreter {
 	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
 	innerTxnGroups: EncTx[][]; // executed inner transactions
 	cost: number; // total code
+	program: string;
 	constructor() {
 		this.stack = new Stack<StackElem>();
 		this.mode = ExecutionMode.APPLICATION;
@@ -88,6 +89,7 @@ export class Interpreter {
 		this.labelMap = new Map<string, number>();
 		this.currentInnerTxnGroup = [];
 		this.innerTxnGroups = [];
+		this.program = "";
 	}
 
 	/**
@@ -507,6 +509,7 @@ export class Interpreter {
 		debugStack?: number
 	): StackElem | undefined {
 		this.runtime = runtime;
+		this.program = program;
 		this.instructions = parser(program, this.mode, this);
 
 		this.mapLabelWithIndexes();

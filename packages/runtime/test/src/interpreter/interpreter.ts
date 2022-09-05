@@ -1,5 +1,5 @@
 import { bobAcc } from "@algo-builder/algob/test/mocks/account";
-import { decodeAddress, getApplicationAddress } from "algosdk";
+import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
 import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
@@ -32,6 +32,7 @@ describe("Interpreter", function () {
 		while (interpreter.stack.length() !== 0) {
 			interpreter.stack.pop();
 		}
+		interpreter.runtime.ctx.budget = 5000000;
 		interpreter.currentInnerTxnGroup = [];
 		interpreter.runtime.ctx.pooledApplCost = 0;
 		interpreter.instructions = [];
@@ -45,7 +46,7 @@ describe("Interpreter", function () {
 			txn: TXN_OBJ,
 			txID: TXN_OBJ.txID,
 		});
-		interpreter.tealVersion = 1;
+		interpreter.tealVersion = 6;
 	};
 
 	const setUpInterpreter = (
@@ -111,7 +112,7 @@ describe("Interpreter", function () {
 
 		it("Should return correct cost for a .teal program for different version(v2)", () => {
 			const file = "test-sha256-v2.teal";
-			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
+			interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
 			assert.equal(interpreter.cost, 42);
 		});
 
@@ -122,6 +123,23 @@ describe("Interpreter", function () {
 				() =>
 					interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime),
 				RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+			);
+		});
+		it.only("Should not throw an exception when executing a correct teal file", () => {
+			const file = "test-ed25519verify.teal";
+			const msg = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			const msgUint8Array = new Uint8Array(Buffer.from(msg));
+			interpreter.runtime.ctx.args = [
+				msgUint8Array,
+				new Uint8Array([
+					71, 22, 19, 134, 252, 186, 106, 200, 21, 161, 109, 86, 161, 231, 22, 15, 127, 149, 91,
+					252, 39, 135, 76, 43, 44, 221, 113, 188, 152, 212, 13, 229, 196, 41, 163, 134, 66, 94,
+					41, 233, 90, 27, 98, 255, 230, 191, 196, 143, 224, 57, 23, 142, 83, 10, 5, 45, 15, 58,
+					212, 226, 51, 146, 24, 15,
+				]),
+			];
+			assert.doesNotThrow(() =>
+				interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime)
 			);
 		});
 	});

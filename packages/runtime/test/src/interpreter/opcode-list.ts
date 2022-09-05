@@ -136,8 +136,8 @@ import {
 	Select,
 	SetBit,
 	SetByte,
-	Sha256,
 	Sha3_256,
+	Sha256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -1033,6 +1033,7 @@ describe("Teal Opcodes", function () {
 
 	describe("Ed25519verify", function () {
 		const stack = new Stack<StackElem>();
+		const interpreter = new Interpreter();
 
 		it("should push 1 to stack if signature is valid", function () {
 			const account = generateAccount();
@@ -1043,7 +1044,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signed); // signature
 			stack.push(decodeAddress(account.addr).publicKey); // pk
 
-			const op = new Ed25519verify([], 1);
+			const op = new Ed25519verify([], 1, interpreter);
 			op.execute(stack);
 			const top = stack.pop();
 			assert.equal(top, 1n);
@@ -1059,7 +1060,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signed); // signature
 			stack.push(decodeAddress(account.addr).publicKey); // pk
 
-			const op = new Ed25519verify([], 1);
+			const op = new Ed25519verify([], 1, interpreter);
 			op.execute(stack);
 			const top = stack.pop();
 			assert.equal(top, 0n);
@@ -1070,7 +1071,7 @@ describe("Teal Opcodes", function () {
 			execExpectError(
 				stack,
 				["1", "1", "1"].map(BigInt),
-				new Ed25519verify([], 1),
+				new Ed25519verify([], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			)
 		);
@@ -1080,7 +1081,7 @@ describe("Teal Opcodes", function () {
 			execExpectError(
 				stack,
 				[],
-				new Ed25519verify([], 1),
+				new Ed25519verify([], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
@@ -1094,7 +1095,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signed); // signature
 			stack.push(decodeAddress(account.addr).publicKey); // pk
 
-			const op = new Ed25519verify([], 1);
+			const op = new Ed25519verify([], 1, interpreter);
 			assert.equal(1900, op.execute(stack));
 		});
 	});
@@ -7075,7 +7076,7 @@ describe("Teal Opcodes", function () {
 			//push a random bytes to stack for testing if the data in stack remain the same
 			const remainBytes = "0x112233";
 			const expectedRemain = strHexToBytes(remainBytes);
-			stack.push(strHexToBytes(remainBytes)); 
+			stack.push(strHexToBytes(remainBytes));
 
 			hexStr = "0x11112222";
 			expectedBytes = strHexToBytes(hexStr);
@@ -7084,7 +7085,7 @@ describe("Teal Opcodes", function () {
 			op = new Replace2(["2"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
-			
+
 			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
 		});
 
@@ -7133,7 +7134,7 @@ describe("Teal Opcodes", function () {
 			//push a random bytes to stack for testing if the data in stack remain the same
 			const remainBytes = "0x112233";
 			const expectedRemain = strHexToBytes(remainBytes);
-			stack.push(strHexToBytes(remainBytes)); 
+			stack.push(strHexToBytes(remainBytes));
 
 			hexStr = "0x11112222";
 			expectedBytes = strHexToBytes(hexStr);
@@ -7178,22 +7179,12 @@ describe("Teal Opcodes", function () {
 
 		it(
 			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
-			execExpectError(
-				stack,
-				[1n],
-				new Sha3_256([], 1),
-				RUNTIME_ERRORS.TEAL.INVALID_TYPE
-			)
+			execExpectError(stack, [1n], new Sha3_256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 		);
 
 		it(
 			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
-			execExpectError(
-				stack,
-				[],
-				new Sha3_256([], 1),
-				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
-			)
+			execExpectError(stack, [], new Sha3_256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
 		);
 
 		it("Should return correct cost", () => {
@@ -7202,5 +7193,4 @@ describe("Teal Opcodes", function () {
 			assert.equal(130, op.execute(stack));
 		});
 	});
-
 });

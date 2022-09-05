@@ -135,8 +135,8 @@ import {
 	Select,
 	SetBit,
 	SetByte,
-	Sha256,
 	Sha3_256,
+	Sha256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -468,6 +468,7 @@ const interpreterReqList = new Set([
 	"sha512_256",
 	"keccak256",
 	"sha3_256",
+	"ed25519verify",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);

@@ -18,6 +18,7 @@ import { Hasher, Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
+import nacl from "tweetnacl";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -54,6 +55,7 @@ import {
 	assertOnlyDigits,
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToBuffer,
 	convertToString,
 	getEncoding,
@@ -700,7 +702,6 @@ export class Sha512_256 extends HashOp {
 // https://github.com/phusion/node-sha3#example-2
 // push to stack [...stack, bytes]
 export class Keccak256 extends HashOpSHA3 {
-
 	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
@@ -708,7 +709,7 @@ export class Keccak256 extends HashOpSHA3 {
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
-	 constructor(args: string[], line: number, interpreter: Interpreter) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super(args, line);
 		this.interpreter = interpreter;
 	}
@@ -738,15 +739,17 @@ export class Sha3_256 extends HashOpSHA3 {
 // push to stack [...stack, bigint]
 export class Ed25519verify extends Op {
 	readonly line: number;
+	readonly program;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
 	 */
-	constructor(args: string[], line: number) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		this.line = line;
 		assertLen(args.length, 0, line);
+		this.program = interpreter.program;
 	}
 
 	computeCost(): number {
@@ -755,12 +758,17 @@ export class Ed25519verify extends Op {
 
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
-		const pubkey = this.assertBytes(stack.pop(), this.line);
+		const addr = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		const addr = encodeAddress(pubkey);
-		const isValid = verifyBytes(data, signature, addr);
+		const programHash = Buffer.from(sha512_256(this.program));
+		const prefix = Buffer.from("ProgData");
+		const toBeVerified = Buffer.from(concatArrays(programHash, data));
+		// const encodedAddr = encodeAddress(addr);
+		// const pk = algosdk.decodeAddress(encodedAddr).publicKey;
+		const isValid = nacl.sign.detached.verify(toBeVerified, signature, addr);
+
 		if (isValid) {
 			stack.push(1n);
 		} else {
