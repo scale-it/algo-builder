@@ -770,6 +770,41 @@ export class Ed25519verify extends Op {
 	}
 }
 
+// for (data A, signature B, pubkey C) verify the signature of the data against the pubkey => {0 or 1}
+// push to stack [...stack, bigint]
+export class Ed25519verify_bare extends Ed25519verify {
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super(args, line);
+	}
+
+	computeCost(): number {
+		return OpGasCost[7]["ed25519verify_bare"];
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const pubkey = this.assertBytes(stack.pop(), this.line);
+		const signature = this.assertBytes(stack.pop(), this.line);
+		const data = this.assertBytes(stack.pop(), this.line);
+
+		const addr = encodeAddress(pubkey);
+		const isValid = verifyBytes(data, signature, addr);
+		if (isValid) {
+			stack.push(1n);
+		} else {
+			stack.push(0n);
+		}
+		return this.computeCost();
+	}
+}
+
+
+
 // If A < B pushes '1' else '0'
 // push to stack [...stack, bigint]
 export class LessThan extends Op {
