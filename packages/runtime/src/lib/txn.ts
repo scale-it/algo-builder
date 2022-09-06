@@ -132,7 +132,8 @@ export function txnSpecByField(
 			return parsing.stringToBytes(tx.txID);
 		}
 		case "GroupIndex": {
-			result = gtxns.indexOf(tx);
+      const gtxnIDs = gtxns.map((gtx) => gtx.txID);
+      result = gtxnIDs.indexOf(tx.txID);
 			break;
 		}
 		case "NumAppArgs": {
