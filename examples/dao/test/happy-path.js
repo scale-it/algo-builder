@@ -2,7 +2,7 @@ const { AccountStore } = require("@algo-builder/runtime");
 const { types, parsing } = require("@algo-builder/web");
 const { assert } = require("chai");
 const { Context, initialBalance, minSupport, deposit } = require("./common");
-const { ProposalType, Vote, DAOActions } = require("../scripts/run/common/common");
+const { ProposalType, Vote } = require("../scripts/run/common/common");
 const {
 	mkProposalTx,
 	mkDepositVoteTokenTx,
@@ -99,7 +99,7 @@ describe("DAO - Happy Paths", function () {
 				ctx.daoFundLsig
 			);
 			// update transfer amount of proposal deposit tx
-			addProposalTx[1].amount = 15;
+			addProposalTx[1].amount = deposit;
 
 			ctx.optInToDAOApp(ctx.proposalLsig.address()); // opt-in
 		});
@@ -649,6 +649,7 @@ describe("DAO - Happy Paths", function () {
 
 			// verify proposal config is deleted from localstate
 			for (const key of [
+				"id",
 				"name",
 				"url",
 				"url_hash",
