@@ -1,5 +1,6 @@
 import { parsing } from "@algo-builder/web";
 import * as base32 from "hi-base32";
+import JSONbig from "json-bigint";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -282,4 +283,19 @@ export function bigEndianBytesToBigInt(bytes: Uint8Array | Buffer): bigint {
  */
 export function strHexToBytes(str: string): Uint8Array {
 	return new Uint8Array(Buffer.from(str.slice(2), "hex"));
+}
+
+/**
+ * assert if string given is a valid JSON object
+ * @param jsonString
+ */
+ export function assertJSON(jsonString: string, line: number): void {
+	const strictBigJSON = JSONbig({ strict: true });
+	try {
+		strictBigJSON.parse(jsonString);
+	} catch (e) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING, {
+			line: line
+		});
+	}
 }

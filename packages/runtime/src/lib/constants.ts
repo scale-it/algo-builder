@@ -504,3 +504,9 @@ export enum TransactionTypeEnum {
 	ASSET_FREEZE = "afrz",
 	APPLICATION_CALL = "appl",
 }
+
+export const json_refTypes = {
+	JSONString: "JSONString",
+	JSONUint64: "JSONUint64",
+	JSONObject: "JSONObject",
+}

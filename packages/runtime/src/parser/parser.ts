@@ -110,6 +110,7 @@ import {
 	ITxnField,
 	ITxnNext,
 	ITxnSubmit,
+	Json_ref,
 	Keccak256,
 	Label,
 	Len,
@@ -136,8 +137,8 @@ import {
 	Select,
 	SetBit,
 	SetByte,
-	Sha256,
 	Sha3_256,
+	Sha256,
 	Sha512_256,
 	Shl,
 	Shr,
@@ -404,6 +405,7 @@ opCodeMap[7] = {
 	replace3: Replace3,
 	sha3_256: Sha3_256,
 	ed25519verify_bare: Ed25519verify_bare,
+	json_ref: Json_ref,
 };
 
 // list of opcodes with exactly one parameter.

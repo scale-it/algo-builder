@@ -423,6 +423,24 @@ maximun uint128`,
 		title: "replace opcode error",
 		description: "Can not replace bytes due to invalid start or end index",
 	},
+	UNKNOWN_JSON_TYPE: {
+		number: 1062,
+		message: "JSON TYPE must be {JSONString, JSONUint64 and JSONObject}, got :%jsonType%, at line %line%",
+		title: "Unknown json type",
+		description: "Unknown json type",
+	},
+	INVALID_JSON_PARSING: {
+		number: 1063,
+		message: "Invalid json parsing at line %line%",
+		title: "Invalid json parsing",
+		description: "Invalid json parsing",
+	},
+	UNKNOWN_KEY_JSON: {
+		number: 1064,
+		message: "Unkown key %key% in json object at line %line%",
+		title: "Unknown key json",
+		description: "Unknown key json"
+	}
 };
 
 const runtimeGeneralErrors = {
