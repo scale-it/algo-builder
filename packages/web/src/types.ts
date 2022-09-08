@@ -119,6 +119,7 @@ export type ExecParams =
 export enum SignType {
 	SecretKey,
 	LogicSignature,
+	MultiSignature
 }
 
 export enum TransactionType {
@@ -143,6 +144,7 @@ export enum TransactionType {
 interface SignWithSk {
 	sign: SignType.SecretKey;
 	fromAccount: AccountSDK;
+	mparams?: WalletMultisigMetadata;
 	/**
 	 * if passed then it will be used as the from account address, but tx will be signed
 	 * by fromAcount's sk. This is used if an account address is rekeyed to another account. */
@@ -153,14 +155,24 @@ interface SignWithLsig {
 	sign: SignType.LogicSignature;
 	fromAccount?: AccountSDK;
 	fromAccountAddr: AccountAddress;
+	mparams?: WalletMultisigMetadata;
 	lsig: LogicSigAccount;
 	/** logic signature args */
 	args?: Uint8Array[];
 }
 
+interface SignWithMultisig {
+	sign: SignType.MultiSignature;
+	mparams: WalletMultisigMetadata;
+	fromAccount?: AccountSDK;
+	fromAccountAddr: AccountAddress;
+}
+
 export type Lsig = SignWithLsig;
 
-export type Sign = SignWithSk | SignWithLsig;
+export type MultiSig = SignWithMultisig;
+
+export type Sign = SignWithSk | SignWithLsig | SignWithMultisig;
 
 export type BasicParams = Sign & {
 	payFlags: TxParams;
@@ -235,11 +247,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-			| TransactionType.CallApp
-			| TransactionType.ClearApp
-			| TransactionType.CloseApp
-			| TransactionType.DeleteApp
-			| TransactionType.OptInToApp;
+		| TransactionType.CallApp
+		| TransactionType.ClearApp
+		| TransactionType.CloseApp
+		| TransactionType.DeleteApp
+		| TransactionType.OptInToApp;
 		appID: number;
 	};
 

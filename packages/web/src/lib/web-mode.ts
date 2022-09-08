@@ -156,14 +156,14 @@ export class WebMode {
 	 * return an object containing a blob attribute encoded in base64
 	 */
 	async appendSignMultisigTransaction(txns: WalletTransaction[], signers: string[]): Promise<JsonPayload> {
-		const result:JsonPayload = {};
+		const result: JsonPayload = {};
 		for (let i = 0; i < txns.length; ++i) {
 			const txn = txns[i];
 			const partialTxn = algosdk.decodeObj(
-				this.algoSigner.encoding.base64ToMsgpack(txn.txn)) as EncodedSignedTransaction; 
+				this.algoSigner.encoding.base64ToMsgpack(txn.txn)) as EncodedSignedTransaction;
 			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
 				throw new Error("Input transaction must be multisigature transaction signed with at least 1 signature");
-			} 
+			}
 			const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
 			const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
 			const txnToBeSign_Base64 = this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
@@ -242,19 +242,24 @@ export class WebMode {
 
 		// with logic signature we don't need signers.
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
-			return execParams[txnId].sign === SignType.LogicSignature
-				? { txn: txn, signers: [] } // logic signature
-				: { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
+			switch (execParams[txnId].sign) {
+				case SignType.LogicSignature:
+					return { txn: txn, signers: [] } // logic signature
+				case SignType.MultiSignature:
+					return { txn: txn, mparams: execParams[txnId].mparams }; // multi singature
+				default:
+					return { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
+			}
 		});
 
 		const signedTxn = await this.signTransaction(toBeSignedTxns);
 
 		// sign smart signature transaction
 		for (const [txnId, txn] of txns.entries()) {
-			const singer: Sign = execParams[txnId];
-			if (singer.sign === SignType.LogicSignature) {
-				singer.lsig.lsig.args = singer.args ? singer.args : [];
-				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
+			const signer: Sign = execParams[txnId];
+			if (signer.sign === SignType.LogicSignature) {
+				signer.lsig.lsig.args = signer.args ? signer.args : [];
+				const lsigTxn = algosdk.signLogicSigTransaction(txn, signer.lsig);
 				signedTxn[txnId] = {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
 					txId: lsigTxn.txID,
