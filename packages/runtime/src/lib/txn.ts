@@ -132,7 +132,7 @@ export function txnSpecByField(
 			return parsing.stringToBytes(tx.txID);
 		}
 		case "GroupIndex": {
-			result = gtxns.find(gt => gt.txID === txID) 
+			result = gtxns.find(gt => gt.txID === tx.txID) 
 			break;
 		}
 		case "NumAppArgs": {
