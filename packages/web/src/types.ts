@@ -144,7 +144,6 @@ export enum TransactionType {
 interface SignWithSk {
 	sign: SignType.SecretKey;
 	fromAccount: AccountSDK;
-	mparams?: WalletMultisigMetadata;
 	/**
 	 * if passed then it will be used as the from account address, but tx will be signed
 	 * by fromAcount's sk. This is used if an account address is rekeyed to another account. */
@@ -155,7 +154,6 @@ interface SignWithLsig {
 	sign: SignType.LogicSignature;
 	fromAccount?: AccountSDK;
 	fromAccountAddr: AccountAddress;
-	mparams?: WalletMultisigMetadata;
 	lsig: LogicSigAccount;
 	/** logic signature args */
 	args?: Uint8Array[];
