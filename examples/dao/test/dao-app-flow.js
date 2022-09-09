@@ -528,7 +528,7 @@ describe("DAO test", function () {
 		runtime.executeTx([closeProposalParam]);
 		syncAccounts();
 
-		// verify proposalALsig recieved back deposit of 15 tokens
+		// verify proposalALsig recieved back deposit
 		assert.equal(proposalALsigAcc.getAssetHolding(govTokenID).amount, deposit);
 
 		// verify proposal config is deleted from localstate
