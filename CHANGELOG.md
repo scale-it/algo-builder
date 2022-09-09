@@ -20,7 +20,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 #### Examples
 
-- Added secret key to all accounts that are signing transactins in examples.
+- Added secret key to all accounts that are signing transactions in examples.
 - Increase test coverage of examples/dao.
 
 ### Features
