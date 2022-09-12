@@ -11,7 +11,14 @@ import type {
 import algosdk, { Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
-import { ExecParams, HttpNetworkConfig, Sign, SignType, TransactionInGroup } from "../types";
+import {
+	ExecParams,
+	HttpNetworkConfig,
+	isSDKTransactionAndSign,
+	Sign,
+	SignType,
+	TransactionInGroup,
+} from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
 import { error, log } from "./logger";
@@ -103,7 +110,6 @@ export class MyAlgoWalletSession {
 		txn: algosdk.Transaction,
 		signOptions?: SignTransactionOptions
 	): Promise<SignedTx> {
-		console.log("txn", txn);
 		return await this.connector.signTransaction(txn.toByte(), signOptions);
 	}
 
@@ -163,6 +169,10 @@ export class MyAlgoWalletSession {
 		if (execParams.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
+
+		if (isSDKTransactionAndSign(execParams[0]))
+			throw new Error("We don't support this case now");
+
 		for (const [_, txn] of execParams.entries()) {
 			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
 		}
