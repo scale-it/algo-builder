@@ -158,6 +158,7 @@ export class WebMode {
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		let signedTxn: any;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16 || transactions.length == 0) {
 			throw new BuilderError(ERRORS.GENERAL.TRANSACTION_LENGTH_ERROR, {
@@ -189,8 +190,10 @@ export class WebMode {
 				? { txn: txn, signers: [] } // logic signature
 				: { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
 		});
-
-		const signedTxn = await this.signTransaction(toBeSignedTxns);
+		// check if any sign txn exists else it throws error of empty signers array
+		if (toBeSignedTxns.find((txn) => txn.authAddr)) {
+			signedTxn = await this.signTransaction(toBeSignedTxns);
+		}
 
 		// sign smart signature transaction
 		for (const [txnId, txn] of txns.entries()) {
@@ -198,13 +201,14 @@ export class WebMode {
 			if (singer.sign === SignType.LogicSignature) {
 				singer.lsig.lsig.args = singer.args ? singer.args : [];
 				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
+				if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
 				signedTxn[txnId] = {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
-					txId: lsigTxn.txID,
+					txID: lsigTxn.txID,
 				};
 			}
 		}
-
+		signedTxn = signedTxn?.filter((stxn: any) => stxn);
 		const txInfo = await this.sendGroupTransaction(signedTxn);
 
 		if (txInfo && typeof txInfo.txId === "string") {
