@@ -18,6 +18,7 @@ import { Hasher, Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
+import { buffer } from "stream/consumers";
 import nacl from "tweetnacl";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -761,13 +762,14 @@ export class Ed25519verify extends Op {
 		const addr = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
+		const bytes = Buffer.from(this.program);
 
-		const programHash = Buffer.from(sha512_256(this.program));
-		const prefix = Buffer.from("ProgData");
+		const toBeHashed = "ProgData".concat(this.program);
+		const programHash = Buffer.from(sha512_256(toBeHashed));
 		const toBeVerified = Buffer.from(concatArrays(programHash, data));
-		// const encodedAddr = encodeAddress(addr);
-		// const pk = algosdk.decodeAddress(encodedAddr).publicKey;
-		const isValid = nacl.sign.detached.verify(toBeVerified, signature, addr);
+		const encodedAddr = encodeAddress(addr);
+		const pk = algosdk.decodeAddress(encodedAddr).publicKey;
+		const isValid = nacl.sign.detached.verify(toBeVerified, signature, pk);
 
 		if (isValid) {
 			stack.push(1n);
