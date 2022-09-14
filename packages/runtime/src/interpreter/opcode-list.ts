@@ -782,14 +782,17 @@ export class Ed25519verify extends Op {
 
 // for (data A, signature B, pubkey C) verify the signature of the data against the pubkey => {0 or 1}
 // push to stack [...stack, bigint]
-export class Ed25519verify_bare extends Ed25519verify {
+export class Ed25519verify_bare extends Op {
+	readonly line: number;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
 	 */
 	constructor(args: string[], line: number) {
-		super(args, line);
+		super();
+		this.line = line;
+		assertLen(args.length, 0, line);
 	}
 
 	computeCost(): number {
@@ -798,11 +801,11 @@ export class Ed25519verify_bare extends Ed25519verify {
 
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
-		const pubkey = this.assertBytes(stack.pop(), this.line);
+		const pubKey = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		const addr = encodeAddress(pubkey);
+		const addr = encodeAddress(pubKey);
 		const isValid = verifyBytes(data, signature, addr);
 		if (isValid) {
 			stack.push(1n);
@@ -812,8 +815,6 @@ export class Ed25519verify_bare extends Ed25519verify {
 		return this.computeCost();
 	}
 }
-
-
 
 // If A < B pushes '1' else '0'
 // push to stack [...stack, bigint]
