@@ -20,7 +20,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 #### Examples
 
-- Added secret key to all accounts that are signing transactins in examples. 
+- Added secret key to all accounts that are signing transactions in examples.
+- Increase test coverage of examples/dao.
 
 ### Features
 
@@ -34,6 +35,7 @@ from `algosdk` and sends it to the network.
 - Added verification for secret key signatures in `Runtime`.
 - Added replace2 and replace3 opcode to `runtime`.
 - Added sha3_256 opcode to `Runtime`
+- Added ed25519verify_bare opcode to `Runtime`
 
 #### @algo-builder/web
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.

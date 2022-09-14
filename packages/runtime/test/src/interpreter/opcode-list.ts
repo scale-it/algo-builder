@@ -78,6 +78,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -7192,6 +7193,86 @@ describe("Teal Opcodes", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			const op = new Sha3_256([], 1);
 			assert.equal(130, op.execute(stack));
+		});
+	});
+
+	describe("Ed25519verify_bare", function () {
+		const stack = new Stack<StackElem>();
+
+		it("Should push 1 to stack if signature is valid", function () {
+			const account = generateAccount();
+			const hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			const data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
+
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 1n);
+		});
+
+		it("Should push 0 to stack if signature is invalid", function () {
+			const account = generateAccount();
+			let hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			let data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
+			//flip a bit and it should not pass
+			hexStr = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd"
+			data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 0n);
+		});
+
+		it(
+			"Should throw an invalid type error",
+			execExpectError(
+				stack,
+				["1", "1", "1"].map(BigInt),
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"Should throw an error if stack is below min length",
+			execExpectError(
+				stack,
+				[],
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			const account = generateAccount();
+			const data = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signature = signBytes(data, account.sk);
+
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			assert.equal(1900, op.execute(stack));
 		});
 	});
 });

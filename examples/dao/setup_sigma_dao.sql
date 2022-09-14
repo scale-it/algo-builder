@@ -1,6 +1,6 @@
 -- #Note: Indexer should be running before executing the queries present in this file
 -- Indexer schema:
--- https://github.com/algorand/indexer/blob/develop/idb/postgres/internal/schema/setup_postgres.sql
+-- https://github.com/scale-it/sigmadao-indexer/blob/develop/idb/postgres/internal/schema/setup_postgres.sql
 
 -- create an index to do efficient text search using `%<text>%`, it requires
 CREATE INDEX sigma_daos_dao_name_idx ON app USING gin (CAST(dao_name AS TEXT) gin_trgm_ops);
