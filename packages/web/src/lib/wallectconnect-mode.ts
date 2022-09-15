@@ -247,12 +247,12 @@ export class WallectConnectSession {
 		}
 
 		// sign smart signature transaction
-		for (const [txnId, txn] of txns.entries()) {
-			const singer: Sign = execParams[txnId];
+		for (const [index, txn] of txns.entries()) {
+			const singer: Sign = execParams[index];
 			if (singer.sign === SignType.LogicSignature) {
 				singer.lsig.lsig.args = singer.args ? singer.args : [];
 				if (!Array.isArray(signedTxn)) signedTxn = [];
-				signedTxn[txnId] = algosdk.signLogicSigTransaction(txn, singer.lsig).blob;
+				signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, singer.lsig).blob);
 			}
 		}
 

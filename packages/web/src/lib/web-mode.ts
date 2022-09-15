@@ -196,16 +196,16 @@ export class WebMode {
 		}
 
 		// sign smart signature transaction
-		for (const [txnId, txn] of txns.entries()) {
-			const singer: Sign = execParams[txnId];
+		for (const [index, txn] of txns.entries()) {
+			const singer: Sign = execParams[index];
 			if (singer.sign === SignType.LogicSignature) {
 				singer.lsig.lsig.args = singer.args ? singer.args : [];
 				const lsigTxn = algosdk.signLogicSigTransaction(txn, singer.lsig);
 				if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
-				signedTxn[txnId] = {
+				signedTxn.splice(index, 0, {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
 					txID: lsigTxn.txID,
-				};
+				});
 			}
 		}
 		signedTxn = signedTxn?.filter((stxn: any) => stxn);

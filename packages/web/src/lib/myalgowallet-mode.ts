@@ -125,7 +125,15 @@ export class MyAlgoWalletSession {
 		signOptions?: SignTransactionOptions
 	): Promise<SignedTx[]> {
 		let txnsGroup = txns.map((v) => v.txn);
-		txnsGroup = algosdk.assignGroupID(txnsGroup);
+		const groupID = algosdk.computeGroupID(txnsGroup);
+		for (let i = 0; i < txns.length; i++) {
+			// called from executeTx where groupID is already assigned
+			if (txnsGroup[i].group) {
+				continue;
+			} else {
+				txnsGroup[i].group = groupID;
+			}
+		}
 		return await this.connector.signTransaction(
 			txnsGroup.map((txn) => txn.toByte()),
 			signOptions
@@ -188,19 +196,19 @@ export class MyAlgoWalletSession {
 			}
 		);
 
-		// only shouldSign txn are to be signed
+		// only shouldSign txn are to be signed, algowallet doesn't accept lsig ones
 		const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
 		if (nonLsigTxn.length > 0) {
-			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+			signedTxn = await this.signTransactionGroup(nonLsigTxn);
 		}
 
 		// sign smart signature transaction
-		for (const [txnId, txn] of txns.entries()) {
-			const singer: Sign = execParams[txnId];
+		for (const [index, txn] of txns.entries()) {
+			const singer: Sign = execParams[index];
 			if (singer.sign === SignType.LogicSignature) {
 				singer.lsig.lsig.args = singer.args ? singer.args : [];
 				if (!Array.isArray(signedTxn)) signedTxn = [];
-				signedTxn[txnId] = algosdk.signLogicSigTransaction(txn, singer.lsig);
+				signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, singer.lsig));
 			}
 		}
 
