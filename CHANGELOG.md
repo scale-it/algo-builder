@@ -39,7 +39,7 @@ from `algosdk` and sends it to the network.
 
 #### @algo-builder/web
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
-- Added `MultiSignature` support in `executeTx` method.
+- Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 
 ### Bug Fixes
 
