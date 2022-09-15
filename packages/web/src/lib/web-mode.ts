@@ -9,7 +9,7 @@ import {
 	SignType,
 	TransactionAndSign,
 	TxParams,
-	MultiSig
+	SignWithMultisig
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
@@ -247,7 +247,7 @@ export class WebMode {
 				case SignType.LogicSignature:
 					return { txn: txn, signers: [] } // logic signature
 				case SignType.MultiSignature: {
-					const msig: MultiSig = execParams[txnId] as MultiSig;
+					const msig: SignWithMultisig = execParams[txnId] as SignWithMultisig;
 					return { txn: txn, msig: msig.mparams }; // multi singature
 				}
 				default:

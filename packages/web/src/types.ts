@@ -159,7 +159,7 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
-interface SignWithMultisig {
+export interface SignWithMultisig {
 	sign: SignType.MultiSignature;
 	mparams: WalletMultisigMetadata;
 	fromAccount?: AccountSDK;
@@ -167,8 +167,6 @@ interface SignWithMultisig {
 }
 
 export type Lsig = SignWithLsig;
-
-export type MultiSig = SignWithMultisig;
 
 export type Sign = SignWithSk | SignWithLsig | SignWithMultisig;
 
