@@ -139,9 +139,11 @@ export class Interpreter {
 	private _getAccountFromAddr(
 		accountPk: Uint8Array,
 		line: number,
-		create: boolean
+		create: boolean,
+		imutable: boolean,
 	): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
+		const foreignAppIdArr = this.runtime.ctx.tx.apfa;
 		const appID = this.runtime.ctx.tx.apid ?? 0;
 		if (this.tealVersion <= 3) {
 			// address can only be passed directly since tealv4
@@ -168,7 +170,11 @@ export class Interpreter {
 				undefined ||
 			compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
 			// since tealv5, currentApplicationAddress is also allowed (directly)
-			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey)
+			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey) ||
+			// since tealv7, foreign application account is allowed
+			(this.tealVersion >= 7 && imutable && foreignAppIdArr?.find((foreignAppID) => 
+				compareArray(accountPk, 
+					decodeAddress(getApplicationAddress(foreignAppID)).publicKey)) !== undefined)
 		) {
 			const address = encodeAddress(pkBuffer);
 			const account = create
@@ -192,9 +198,10 @@ export class Interpreter {
 	 * @param accountRef index of account to fetch from account list
 	 * @param line line number
 	 * @param create create flag, default is true
+	 * @param imutable allow to access foreign application account, default is true
 	 * NOTE: index 0 represents txn sender account
 	 */
-	getAccount(accountRef: StackElem, line: number, create = false): AccountStoreI {
+	getAccount(accountRef: StackElem, line: number, create = false, imutable = true): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
 		if (typeof accountRef === "bigint") {
@@ -216,7 +223,7 @@ export class Interpreter {
 					: this.runtime.ctx.state.accounts.get(address);
 			}
 		} else {
-			return this._getAccountFromAddr(accountRef, line, create);
+			return this._getAccountFromAddr(accountRef, line, create, imutable);
 		}
 
 		return this.runtime.assertAccountDefined(address, account, line);
