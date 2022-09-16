@@ -36,7 +36,7 @@ from `algosdk` and sends it to the network.
 - Added replace2 and replace3 opcode to `runtime`.
 - Added sha3_256 opcode to `Runtime`
 - Added ed25519verify_bare opcode to `Runtime`
-- `Runtime` can now access to foreign app account
+- Added support for foreign app account access in `Runtime`
 
 #### @algo-builder/web
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.

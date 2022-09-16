@@ -159,12 +159,12 @@ describe("Interpreter", function () {
 		});
 	});
 
-	describe("foreign application access", () => {
+	describe("Foreign application access", () => {
 		describe("foreign application account can not be access by opcode that modify local storage", () => {
 			this.beforeEach(() => {
 				setUpInterpreter(7, 1e9);
 			});
-			it("Should fail when accessing account that are not in transaction's account field", () => {
+			it("Should throw an error when accessing account that are not in transaction's account field", () => {
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress
@@ -180,11 +180,11 @@ describe("Interpreter", function () {
 			})
 		})
 
-		describe("foreign application account can be access by opcode that modify local storage in specific case", () => {
+		describe("Foreign application account can be accessed by opcode that modify local storage in specific case", () => {
 			this.beforeEach(() => {
 				setUpInterpreter(7, 1e9);
 			});
-			it("Should success when accessing account that are in transaction's account field", () => {
+			it("Should not throw an error when accessing account that are in transaction's account field", () => {
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress

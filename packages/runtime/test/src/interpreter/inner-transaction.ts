@@ -1409,7 +1409,7 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe("Foreign application account should be accessed in teal v7 ", () => {
+		describe("Foreign application account access in teal v7 ", () => {
 			this.beforeEach(() => {
 				setUpInterpreter(7, 1e9);
 			});
