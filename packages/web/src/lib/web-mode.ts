@@ -190,7 +190,7 @@ export class WebMode {
 				? { txn: txn, signers: [] } // logic signature
 				: { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
 		});
-		// check if any sign txn exists else it throws error of empty signers array
+		// checks if any sign txn exists else it throws error of empty signers array
 		if (toBeSignedTxns.find((txn) => txn.authAddr)) {
 			signedTxn = await this.signTransaction(toBeSignedTxns);
 		}
