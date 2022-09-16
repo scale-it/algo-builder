@@ -5196,7 +5196,6 @@ export class Json_ref extends Op {
 				break;
 			}
 		}
-		
 		return this.computeCost();
 	}
 }
