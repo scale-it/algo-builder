@@ -244,7 +244,6 @@ export class WallectConnectSession {
 		if (nonLsigTxn.length > 0) {
 			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
 		}
-
 		// sign smart signature transaction
 		for (const [index, txn] of txns.entries()) {
 			const singer: Sign = execParams[index];
