@@ -200,7 +200,6 @@ export class MyAlgoWalletSession {
 		if (nonLsigTxn.length > 0) {
 			signedTxn = await this.signTransactionGroup(nonLsigTxn);
 		}
-
 		// sign smart signature transaction
 		for (const [index, txn] of txns.entries()) {
 			const singer: Sign = execParams[index];
