@@ -102,10 +102,7 @@ export class MyAlgoWalletSession {
 	 * @param txn { SDK transaction object, shouldSign, signers, msig } object
 	 * @returns raw signed txn
 	 */
-	async signTransaction(
-		txn: algosdk.Transaction,
-		signOptions?: SignTransactionOptions
-	): Promise<SignedTx> {
+	async signTransaction(txn: algosdk.Transaction, signOptions?: SignTransactionOptions): Promise<SignedTx> {
 		return await this.connector.signTransaction(txn.toByte(), signOptions);
 	}
 
