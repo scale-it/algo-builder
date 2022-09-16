@@ -220,8 +220,9 @@ export class WallectConnectSession {
 		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-		if (isSDKTransactionAndSign(transactions[0]))
+		if (isSDKTransactionAndSign(transactions[0])) {
 			throw new Error("We don't support this case now");
+			}
 
 		const execParams = transactions as ExecParams[];
 		for (const [_, txn] of execParams.entries()) {
