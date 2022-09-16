@@ -286,7 +286,7 @@ export function strHexToBytes(str: string): Uint8Array {
 }
 
 /**
- * assert if string given is a valid JSON object
+ * assert if given string is a valid JSON object
  * @param jsonString
  */
  export function assertJSON(jsonString: string, line: number): void {

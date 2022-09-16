@@ -5143,12 +5143,12 @@ export class Json_ref extends Op {
 		const key = this.assertBytes(stack.pop(), this.line);
 		const object = this.assertBytes(stack.pop(), this.line);
 		this.length = object.length;
-		const enc = new TextDecoder("utf-8");
-		const decoded = enc.decode(object);
-		const keyString = enc.decode(key);
-		assertJSON(decoded, this.line);
+		const utf8decoder = new TextDecoder("utf-8");
+		const decodedObj = utf8decoder.decode(object);
+		const keyString = utf8decoder.decode(key);
+		assertJSON(decodedObj, this.line);
 		const nativeBigJSON = JSONbig({ useNativeBigInt: true });
-		const jsonObject = nativeBigJSON.parse(decoded);
+		const jsonObject = nativeBigJSON.parse(decodedObj);
 		if (jsonObject[keyString] === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_KEY_JSON, {
 				key: keyString,

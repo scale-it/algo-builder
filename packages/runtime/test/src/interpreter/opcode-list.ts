@@ -7285,11 +7285,11 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("json_ref", function () {
+	describe("json_ref", () => {
 		const stack = new Stack<StackElem>();
 		const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10}}, \"key5\": 18446744073709551615 }";
 
-		it("should return correct JSONUint64", function () {
+		it("Should return correct JSONUint64", function () {
 			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONUint64"], 1);
@@ -7299,14 +7299,14 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(18446744073709551615n, top);
 		});
 
-		it("should throw when get wrong type JSON(expect byte but got uint64)", function () {
+		it("Should throw when get wrong JSON type(expect byte but got uint64)", function () {
 			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONString"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should return correct JSONString", function () {
+		it("Should return correct JSONString", function () {
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONString"], 1);
@@ -7317,7 +7317,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(expected, top);
 		});
 
-		it("should return correct JSONObject", function () {
+		it("Should return correct JSONObject", function () {
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key2"));
 			const op1 = new Json_ref(["JSONObject"], 1);
