@@ -78,6 +78,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -136,6 +137,7 @@ import {
 	Select,
 	SetBit,
 	SetByte,
+	Sha3_256,
 	Sha256,
 	Sha512_256,
 	Shl,
@@ -3645,6 +3647,25 @@ describe("Teal Opcodes", function () {
 			assert.equal(5n, stack.pop());
 		});
 
+		it("Int: Should work with 2^64 - 1 (max supported number)", () => {
+			const total = 2n ** 64n - 1n;
+			assert.doesNotThrow(() => new Int([total.toString()], 0));
+		});
+		it("Int: Should throw an overflow error on 2^64", () => {
+			const total = 2n ** 64n;
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+		it("Int: Should throw an overflow error on 2^64+1", () => {
+			const total = 2n ** 64n + 1n;
+			expectRuntimeError(
+				() => new Int([total.toString()], 0),
+				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+			);
+		});
+
 		it("Int: should push correct TypeEnumConstants enum value to stack", function () {
 			let op = new Int(["unknown"], 0);
 			op.execute(stack);
@@ -7138,4 +7159,128 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
+	describe("sha3_256", function () {
+		const stack = new Stack<StackElem>();
+
+		it("should return correct hash for sha3_256", function () {
+			stack.push(parsing.stringToBytes("ALGORAND"));
+			const op = new Sha3_256([], 1);
+			op.execute(stack);
+
+			// http://emn178.github.io/online-tools/sha3_256.html
+			const expected = Buffer.from(
+				"ae39517df229f45df862c060e693c0e69691dac70fa65605a62fabad8029a4e7",
+				"hex"
+			);
+
+			const top = stack.pop();
+			assert.deepEqual(expected, top);
+		});
+
+		it(
+			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
+			execExpectError(
+				stack,
+				[1n],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
+			execExpectError(
+				stack,
+				[],
+				new Sha3_256([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			stack.push(parsing.stringToBytes("MESSAGE"));
+			const op = new Sha3_256([], 1);
+			assert.equal(130, op.execute(stack));
+		});
+	});
+
+	describe("Ed25519verify_bare", function () {
+		const stack = new Stack<StackElem>();
+
+		it("Should push 1 to stack if signature is valid", function () {
+			const account = generateAccount();
+			const hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			const data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
+
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 1n);
+		});
+
+		it("Should push 0 to stack if signature is invalid", function () {
+			const account = generateAccount();
+			let hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			let data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			const signature = signBytes(data, account.sk);
+			//flip a bit and it should not pass
+			hexStr = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd"
+			data = Buffer.from(
+				hexStr,
+				"hex"
+			);
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			op.execute(stack);
+			const top = stack.pop();
+			assert.equal(top, 0n);
+		});
+
+		it(
+			"Should throw an invalid type error",
+			execExpectError(
+				stack,
+				["1", "1", "1"].map(BigInt),
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.INVALID_TYPE
+			)
+		);
+
+		it(
+			"Should throw an error if stack is below min length",
+			execExpectError(
+				stack,
+				[],
+				new Ed25519verify_bare([], 1),
+				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+			)
+		);
+
+		it("Should return correct cost", () => {
+			const account = generateAccount();
+			const data = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+			const signature = signBytes(data, account.sk);
+
+			stack.push(data); 
+			stack.push(signature); 
+			stack.push(decodeAddress(account.addr).publicKey);
+
+			const op = new Ed25519verify_bare([], 1);
+			assert.equal(1900, op.execute(stack));
+		});
+	});
 });
