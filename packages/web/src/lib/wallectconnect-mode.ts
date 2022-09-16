@@ -222,7 +222,7 @@ export class WallectConnectSession {
 		}
 		if (isSDKTransactionAndSign(transactions[0])) {
 			throw new Error("We don't support this case now");
-			}
+		}
 
 		const execParams = transactions as ExecParams[];
 		for (const [_, txn] of execParams.entries()) {

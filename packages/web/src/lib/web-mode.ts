@@ -155,6 +155,7 @@ export class WebMode {
 	 * or TransactionAndSign object(SDK transaction object and signer parameters).
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
+	/* eslint-disable sonarjs/cognitive-complexity */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {

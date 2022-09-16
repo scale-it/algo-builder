@@ -40,10 +40,8 @@ interface MyAlgoConnect {
 	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed transaction
 	 */
-	signTransaction(
-		transaction: AlgorandTxn | EncodedTransaction,
-		signOptions?: SignTransactionOptions
-	): Promise<SignedTx>;
+	signTransaction(transaction: AlgorandTxn | EncodedTransaction,
+		signOptions?: SignTransactionOptions): Promise<SignedTx>;
 
 	/**
 	 * @async
@@ -52,10 +50,8 @@ interface MyAlgoConnect {
 	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed an array of signed transactions.
 	 */
-	signTransaction(
-		transaction: (AlgorandTxn | EncodedTransaction)[],
-		signOptions?: SignTransactionOptions
-	): Promise<SignedTx[]>;
+	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[],
+		signOptions?: SignTransactionOptions): Promise<SignedTx[]>;
 
 	/**
 	 * @async
