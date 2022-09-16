@@ -195,7 +195,6 @@ export class MyAlgoWalletSession {
 					: { txn: txns[index], shouldSign: true }; // to be signed
 			}
 		);
-
 		// only shouldSign txn are to be signed, algowallet doesn't accept lsig ones
 		const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
 		if (nonLsigTxn.length > 0) {
