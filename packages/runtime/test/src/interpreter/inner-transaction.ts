@@ -1414,7 +1414,7 @@ describe("Inner Transactions", function () {
 				setUpInterpreter(7, 1e9);
 			});
 
-			it("Should succeed: create inner group transactions", () => {
+			it("Should not throw error access foreign application in create inner transaction", () => {
 				const prog = `
 				itxn_begin
 				int pay
