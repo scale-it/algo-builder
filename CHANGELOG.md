@@ -38,6 +38,7 @@ from `algosdk` and sends it to the network.
 - Added ed25519verify_bare opcode to `Runtime`
 
 #### @algo-builder/web
+- Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 
