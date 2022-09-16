@@ -1044,33 +1044,17 @@ describe("Teal Opcodes", function () {
 		let elonAcc: AccountStoreI;
 		const elonPk = decodeAddress(elonAddr).publicKey;
 
-		const resetInterpreterState = (): void => {
-			while (interpreter.stack.length() !== 0) {
-				interpreter.stack.pop();
-			}
-			interpreter.currentInnerTxnGroup = [];
-			interpreter.runtime.ctx.pooledApplCost = 0;
-			interpreter.instructions = [];
-			interpreter.innerTxnGroups = [];
-			interpreter.instructionIndex = 0;
-			interpreter.runtime.ctx.tx = { ...TXN_OBJ, snd: Buffer.from(elonPk) };
-			interpreter.runtime.ctx.gtxs = [interpreter.runtime.ctx.tx];
-			interpreter.runtime.ctx.isInnerTx = false;
-			// set new tx receipt
-			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
-				txn: TXN_OBJ,
-				txID: TXN_OBJ.txID,
-			});
-			interpreter.tealVersion = 6;
-		};
-
 		const setUpInterpreter = (tealVersion: number): void => {
 			elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
 			setDummyAccInfo(elonAcc);
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([elonAcc]);
 			interpreter.tealVersion = tealVersion;
-			resetInterpreterState();
+			interpreter.runtime.ctx.tx = { ...TXN_OBJ, snd: Buffer.from(elonPk) };
+			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+				txn: TXN_OBJ,
+				txID: TXN_OBJ.txID,
+			});
 		};
 		this.beforeAll(() => {
 			setUpInterpreter(6); //setup interpreter for execute
@@ -1078,7 +1062,7 @@ describe("Teal Opcodes", function () {
 
 		describe("Verification", () => {
 			this.beforeEach(() => {
-				resetInterpreterState();
+				interpreter.instructionIndex = 0;
 			});
 
 			const account = algosdk.generateAccount();

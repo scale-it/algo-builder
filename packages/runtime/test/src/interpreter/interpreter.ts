@@ -44,7 +44,6 @@ describe("Interpreter", function () {
 			txn: TXN_OBJ,
 			txID: TXN_OBJ.txID,
 		});
-		interpreter.tealVersion = 6;
 	};
 
 	const setUpInterpreter = (
