@@ -239,7 +239,6 @@ export class WallectConnectSession {
 					: { txn: txns[index], shouldSign: true }; // to be signed
 			}
 		);
-
 		// only shouldSign txn are to be signed
 		const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
 		if (nonLsigTxn.length > 0) {
