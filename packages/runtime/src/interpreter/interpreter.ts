@@ -66,8 +66,8 @@ export class Interpreter {
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
 	innerTxnGroups: EncTx[][]; // executed inner transactions
-	cost: number; // total code
-	program: string;
+	cost: number; // total cost
+	program: string; // teal code
 	constructor() {
 		this.stack = new Stack<StackElem>();
 		this.mode = ExecutionMode.APPLICATION;

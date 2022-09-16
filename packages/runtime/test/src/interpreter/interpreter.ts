@@ -1,14 +1,10 @@
 import { bobAcc } from "@algo-builder/algob/test/mocks/account";
-import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
+import { decodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
-import { sha512_256 } from "js-sha512";
-import nacl from "tweetnacl";
 
 import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { concatArrays } from "../../../src/lib/parsing";
-import { Stack } from "../../../src/lib/stack";
 import { AccountAddress, AccountStoreI, ExecutionMode, StackElem } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
@@ -35,7 +31,6 @@ describe("Interpreter", function () {
 		while (interpreter.stack.length() !== 0) {
 			interpreter.stack.pop();
 		}
-		interpreter.runtime.ctx.budget = 5000000;
 		interpreter.currentInnerTxnGroup = [];
 		interpreter.runtime.ctx.pooledApplCost = 0;
 		interpreter.instructions = [];
@@ -126,55 +121,6 @@ describe("Interpreter", function () {
 				() =>
 					interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime),
 				RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-			);
-		});
-	});
-	describe("ed25519verify", () => {
-		const account = algosdk.generateAccount();
-		let tealCode = `
-			arg 0
-			arg 1
-			addr ${account.addr}
-			ed25519verify`;
-		let msg = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
-		let msgUint8Array = new Uint8Array(Buffer.from(msg));
-		const toBeHashed = "ProgData".concat(tealCode);
-		const programHash = Buffer.from(sha512_256(toBeHashed));
-		const toBeSigned = Buffer.from(concatArrays(programHash, msgUint8Array));
-		const signature = nacl.sign.detached(toBeSigned, account.sk);
-		beforeEach(() => {
-			resetInterpreterState(); //resetInterpreterState the state of interpreter
-			interpreter.cost = 0;
-		});
-		it("Should not throw an exception when executing a correct teal file", () => {
-			interpreter.runtime.ctx.args = [msgUint8Array, signature];
-			assert.doesNotThrow(() =>
-				interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime)
-			);
-		});
-		it("Should throw an exeption when the message is different", () => {
-			// flip a bit in the message and the test does not pass
-			msg = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
-			msgUint8Array = new Uint8Array(Buffer.from(msg));
-			interpreter.runtime.ctx.args = [msgUint8Array, signature];
-			assert.throws(
-				() => interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime),
-				"RUNTIME_ERR1007: Teal code rejected by logic"
-			);
-		});
-		it("Should throw an exeption when the program is different", () => {
-			//change the program code and the test does not pass
-			// flip a bit in the message and the test does not pass
-			tealCode = `
-				int 1
-				arg 0
-				arg 1
-				addr ${account.addr}
-				ed25519verify`;
-			interpreter.runtime.ctx.args = [msgUint8Array, signature];
-			assert.throws(
-				() => interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime),
-				"RUNTIME_ERR1007: Teal code rejected by logic"
 			);
 		});
 	});
