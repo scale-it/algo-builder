@@ -2451,7 +2451,7 @@ describe("Parser", function () {
 				new Sha256([], 1, interpreter),
 				new Keccak256([], 2, interpreter),
 				new Sha512_256([], 3, interpreter),
-				new Ed25519verify([], 4),
+				new Ed25519verify([], 4, interpreter),
 			];
 			assert.deepEqual(res, expected);
 		});

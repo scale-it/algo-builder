@@ -278,8 +278,27 @@ export function bigEndianBytesToBigInt(bytes: Uint8Array | Buffer): bigint {
 
 /**
  * Parse String hex to bytes(represented as Uint8array)
- * @param str 
+ * @param str
  */
 export function strHexToBytes(str: string): Uint8Array {
 	return new Uint8Array(Buffer.from(str.slice(2), "hex"));
+}
+
+/**
+ * Function taken from algosdk.utils
+ * ConcatArrays takes n number arrays and returns a joint Uint8Array
+ * @param arrs - An arbitrary number of n array-like number list arguments
+ * @returns [a,b]
+ */
+export function concatArrays(...arrs: ArrayLike<number>[]) {
+	const size = arrs.reduce((sum, arr) => sum + arr.length, 0);
+	const c = new Uint8Array(size);
+
+	let offset = 0;
+	for (let i = 0; i < arrs.length; i++) {
+		c.set(arrs[i], offset);
+		offset += arrs[i].length;
+	}
+
+	return c;
 }

@@ -5,7 +5,6 @@ import { assert } from "chai";
 import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { Stack } from "../../../src/lib/stack";
 import { AccountAddress, AccountStoreI, ExecutionMode, StackElem } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
@@ -45,7 +44,6 @@ describe("Interpreter", function () {
 			txn: TXN_OBJ,
 			txID: TXN_OBJ.txID,
 		});
-		interpreter.tealVersion = 1;
 	};
 
 	const setUpInterpreter = (
@@ -111,7 +109,7 @@ describe("Interpreter", function () {
 
 		it("Should return correct cost for a .teal program for different version(v2)", () => {
 			const file = "test-sha256-v2.teal";
-			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
+			interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
 			assert.equal(interpreter.cost, 42);
 		});
 

@@ -18,6 +18,8 @@ import { Hasher, Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
+import { buffer } from "stream/consumers";
+import nacl from "tweetnacl";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -54,6 +56,7 @@ import {
 	assertOnlyDigits,
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToBuffer,
 	convertToString,
 	getEncoding,
@@ -700,7 +703,6 @@ export class Sha512_256 extends HashOp {
 // https://github.com/phusion/node-sha3#example-2
 // push to stack [...stack, bytes]
 export class Keccak256 extends HashOpSHA3 {
-
 	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
@@ -708,7 +710,7 @@ export class Keccak256 extends HashOpSHA3 {
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
-	 constructor(args: string[], line: number, interpreter: Interpreter) {
+	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super(args, line);
 		this.interpreter = interpreter;
 	}
@@ -738,6 +740,50 @@ export class Sha3_256 extends HashOpSHA3 {
 // push to stack [...stack, bigint]
 export class Ed25519verify extends Op {
 	readonly line: number;
+	readonly program;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, line);
+		this.program = interpreter.program;
+	}
+
+	computeCost(): number {
+		return OpGasCost[1]["ed25519verify"];
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const addr = this.assertBytes(stack.pop(), this.line);
+		const signature = this.assertBytes(stack.pop(), this.line);
+		const data = this.assertBytes(stack.pop(), this.line);
+		const bytes = Buffer.from(this.program);
+
+		const toBeHashed = "ProgData".concat(this.program);
+		const programHash = Buffer.from(sha512_256(toBeHashed));
+		const toBeVerified = Buffer.from(concatArrays(programHash, data));
+		const encodedAddr = encodeAddress(addr);
+		const pk = algosdk.decodeAddress(encodedAddr).publicKey;
+		const isValid = nacl.sign.detached.verify(toBeVerified, signature, pk);
+
+		if (isValid) {
+			stack.push(1n);
+		} else {
+			stack.push(0n);
+		}
+		return this.computeCost();
+	}
+}
+
+// for (data A, signature B, pubkey C) verify the signature of the data against the pubkey => {0 or 1}
+// push to stack [...stack, bigint]
+export class Ed25519verify_bare extends Op {
+	readonly line: number;
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
@@ -750,49 +796,16 @@ export class Ed25519verify extends Op {
 	}
 
 	computeCost(): number {
-		return OpGasCost[1]["ed25519verify"];
-	}
-
-	execute(stack: TEALStack): number {
-		this.assertMinStackLen(stack, 3, this.line);
-		const pubkey = this.assertBytes(stack.pop(), this.line);
-		const signature = this.assertBytes(stack.pop(), this.line);
-		const data = this.assertBytes(stack.pop(), this.line);
-
-		const addr = encodeAddress(pubkey);
-		const isValid = verifyBytes(data, signature, addr);
-		if (isValid) {
-			stack.push(1n);
-		} else {
-			stack.push(0n);
-		}
-		return this.computeCost();
-	}
-}
-
-// for (data A, signature B, pubkey C) verify the signature of the data against the pubkey => {0 or 1}
-// push to stack [...stack, bigint]
-export class Ed25519verify_bare extends Ed25519verify {
-	/**
-	 * Asserts 0 arguments are passed.
-	 * @param args Expected arguments: [] // none
-	 * @param line line number in TEAL file
-	 */
-	constructor(args: string[], line: number) {
-		super(args, line);
-	}
-
-	computeCost(): number {
 		return OpGasCost[7]["ed25519verify_bare"];
 	}
 
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
-		const pubkey = this.assertBytes(stack.pop(), this.line);
+		const pubKey = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		const addr = encodeAddress(pubkey);
+		const addr = encodeAddress(pubKey);
 		const isValid = verifyBytes(data, signature, addr);
 		if (isValid) {
 			stack.push(1n);
@@ -802,8 +815,6 @@ export class Ed25519verify_bare extends Ed25519verify {
 		return this.computeCost();
 	}
 }
-
-
 
 // If A < B pushes '1' else '0'
 // push to stack [...stack, bigint]

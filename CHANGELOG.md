@@ -47,6 +47,7 @@ from `algosdk` and sends it to the network.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
+- Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
 
 ### Examples
 
