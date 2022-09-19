@@ -1098,7 +1098,6 @@ describe("Teal Opcodes", function () {
 
 			it("Should throw an exeption when the program is different", () => {
 				//change the program code and the test does not pass
-				// flip a bit in the message and the test does not pass
 				tealCode = `
 					int 1
 					arg 0
