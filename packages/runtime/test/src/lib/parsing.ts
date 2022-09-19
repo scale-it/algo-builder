@@ -217,7 +217,7 @@ describe("Parse appArgs to App to bytes", () => {
 		assert.throws(() => parsing.parseAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
 	});
 });
-describe.only("utils", () => {
+describe("utils", () => {
 	it("Should concat two arrays", () => {
 		const arr1 = new Uint8Array([1, 2]);
 		const arr2 = new Uint8Array([3, 4]);
