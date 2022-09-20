@@ -121,9 +121,7 @@ export class MyAlgoWalletSession {
 		const groupID = algosdk.computeGroupID(txnsGroup);
 		for (let i = 0; i < txns.length; i++) {
 			// called from executeTx where groupID is already assigned
-			if (txnsGroup[i].group) {
-				continue;
-			} else {
+			if (!txnsGroup[i].group) {
 				txnsGroup[i].group = groupID;
 			}
 		}
