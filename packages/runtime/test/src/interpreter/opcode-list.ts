@@ -7330,5 +7330,21 @@ describe("Teal Opcodes", function () {
 			const expected = parsing.stringToBytes("{\"key40\":10}");
 			assert.deepEqual(top, expected);
 		});
+
+		it("Should throw error when parsing invalid JSON object(missing comma in JSON object)", function () {
+			const jsonByte = "{\"key0\": 0 \"key1\": 2}";
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key1"));
+			const op = new Json_ref(["JSONObject"], 1);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
+		});
+
+		it("Should throw error when parsing invalid JSON object(duplicate key is not allowed in JSON object)", function () {
+			const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10, \"key40\": \"should fail!\"}}}";
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key1"));
+			const op = new Json_ref(["JSONObject"], 1);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
+		});		
 	});
 });

@@ -425,21 +425,21 @@ maximun uint128`,
 	},
 	UNKNOWN_JSON_TYPE: {
 		number: 1062,
-		message: "JSON TYPE must be {JSONString, JSONUint64 and JSONObject}, got :%jsonType%, at line %line%",
-		title: "Unknown json type",
-		description: "Unknown json type",
+		message: "JSON TYPE must be {JSONString, JSONUint64 or JSONObject}, got :%jsonType%, at line %line%",
+		title: "Unknown JSON type",
+		description: "Unknown JSON type",
 	},
 	INVALID_JSON_PARSING: {
 		number: 1063,
-		message: "Invalid json parsing at line %line%",
-		title: "Invalid json parsing",
-		description: "Invalid json parsing",
+		message: "Invalid JSON parsing at line %line%",
+		title: "Invalid JSON parsing",
+		description: "Invalid JSON parsing",
 	},
 	UNKNOWN_KEY_JSON: {
 		number: 1064,
-		message: "Unkown key %key% in json object at line %line%",
-		title: "Unknown key json",
-		description: "Unknown key json"
+		message: "Unkown key %key% in JSON object at line %line%",
+		title: "Unknown key JSON",
+		description: "Unknown key JSON"
 	}
 };
 
