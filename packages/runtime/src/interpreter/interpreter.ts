@@ -66,7 +66,8 @@ export class Interpreter {
 	labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 	currentInnerTxnGroup: EncTx[]; // "current" inner transaction
 	innerTxnGroups: EncTx[][]; // executed inner transactions
-	cost: number; // total code
+	cost: number; // total cost
+	program: string; // teal code
 	constructor() {
 		this.stack = new Stack<StackElem>();
 		this.mode = ExecutionMode.APPLICATION;
@@ -88,6 +89,7 @@ export class Interpreter {
 		this.labelMap = new Map<string, number>();
 		this.currentInnerTxnGroup = [];
 		this.innerTxnGroups = [];
+		this.program = "";
 	}
 
 	/**
@@ -515,6 +517,7 @@ export class Interpreter {
 		debugStack?: number
 	): StackElem | undefined {
 		this.runtime = runtime;
+		this.program = program;
 		this.instructions = parser(program, this.mode, this);
 
 		this.mapLabelWithIndexes();

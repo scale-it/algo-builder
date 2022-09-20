@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
+import { bobAcc } from "@algo-builder/algob/test/mocks/account";
 import { parsing, types } from "@algo-builder/web";
-import {
+import algosdk, {
 	decodeAddress,
 	encodeAddress,
 	generateAccount,
@@ -10,8 +11,11 @@ import {
 } from "algosdk";
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
+import { sha512_256 } from "js-sha512";
 import { describe } from "mocha";
+import nacl from "tweetnacl";
 
+import { ExecutionMode } from "../../../build/types";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
@@ -167,6 +171,7 @@ import {
 import {
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToBuffer,
 	getEncoding,
 	strHexToBytes,
@@ -182,6 +187,7 @@ import {
 } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
+import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
@@ -1034,36 +1040,76 @@ describe("Teal Opcodes", function () {
 
 	describe("Ed25519verify", function () {
 		const stack = new Stack<StackElem>();
+		let interpreter = new Interpreter();
+		let elonAcc: AccountStoreI;
+		const elonPk = decodeAddress(elonAddr).publicKey;
 
-		it("should push 1 to stack if signature is valid", function () {
-			const account = generateAccount();
-			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
-			const signed = signBytes(toSign, account.sk);
-
-			stack.push(toSign); // data
-			stack.push(signed); // signature
-			stack.push(decodeAddress(account.addr).publicKey); // pk
-
-			const op = new Ed25519verify([], 1);
-			op.execute(stack);
-			const top = stack.pop();
-			assert.equal(top, 1n);
+		const setUpInterpreter = (tealVersion: number): void => {
+			elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
+			setDummyAccInfo(elonAcc);
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([elonAcc]);
+			interpreter.tealVersion = tealVersion;
+			interpreter.runtime.ctx.tx = { ...TXN_OBJ, snd: Buffer.from(elonPk) };
+			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+				txn: TXN_OBJ,
+				txID: TXN_OBJ.txID,
+			});
+		};
+		this.beforeAll(() => {
+			setUpInterpreter(6); //setup interpreter for execute
 		});
 
-		it("should push 0 to stack if signature is invalid", function () {
-			const account = generateAccount();
-			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
-			const signed = signBytes(toSign, account.sk);
-			signed[0] = (Number(signed[0]) + 1) % 256;
+		describe("Verification", () => {
+			this.beforeEach(() => {
+				interpreter.instructionIndex = 0;
+			});
 
-			stack.push(toSign); // data
-			stack.push(signed); // signature
-			stack.push(decodeAddress(account.addr).publicKey); // pk
+			const account = algosdk.generateAccount();
+			let tealCode = `
+				arg 0
+				arg 1
+				addr ${account.addr}
+				ed25519verify`;
+			let msg = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			let msgUint8Array = new Uint8Array(Buffer.from(msg));
+			const toBeHashed = "ProgData".concat(tealCode);
+			const programHash = Buffer.from(sha512_256(toBeHashed));
+			const toBeSigned = Buffer.from(concatArrays(programHash, msgUint8Array));
+			const signature = nacl.sign.detached(toBeSigned, account.sk);
 
-			const op = new Ed25519verify([], 1);
-			op.execute(stack);
-			const top = stack.pop();
-			assert.equal(top, 0n);
+			it("Should not throw an exception when executing a correct teal file", () => {
+				interpreter.runtime.ctx.args = [msgUint8Array, signature];
+				assert.doesNotThrow(() =>
+					interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime)
+				);
+			});
+
+			it("Should throw an exeption when the message is different", () => {
+				// flip a bit in the message and the test does not pass
+				msg = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+				msgUint8Array = new Uint8Array(Buffer.from(msg));
+				interpreter.runtime.ctx.args = [msgUint8Array, signature];
+				assert.throws(
+					() => interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime),
+					"RUNTIME_ERR1007: Teal code rejected by logic"
+				);
+			});
+
+			it("Should throw an exeption when the program is different", () => {
+				//change the program code and the test does not pass
+				tealCode = `
+					int 1
+					arg 0
+					arg 1
+					addr ${account.addr}
+					ed25519verify`;
+				interpreter.runtime.ctx.args = [msgUint8Array, signature];
+				assert.throws(
+					() => interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime),
+					"RUNTIME_ERR1007: Teal code rejected by logic"
+				);
+			});
 		});
 
 		it(
@@ -1071,7 +1117,7 @@ describe("Teal Opcodes", function () {
 			execExpectError(
 				stack,
 				["1", "1", "1"].map(BigInt),
-				new Ed25519verify([], 1),
+				new Ed25519verify([], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			)
 		);
@@ -1081,7 +1127,7 @@ describe("Teal Opcodes", function () {
 			execExpectError(
 				stack,
 				[],
-				new Ed25519verify([], 1),
+				new Ed25519verify([], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
 			)
 		);
@@ -1095,7 +1141,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signed); // signature
 			stack.push(decodeAddress(account.addr).publicKey); // pk
 
-			const op = new Ed25519verify([], 1);
+			const op = new Ed25519verify([], 1, interpreter);
 			assert.equal(1900, op.execute(stack));
 		});
 	});
@@ -7076,7 +7122,7 @@ describe("Teal Opcodes", function () {
 			//push a random bytes to stack for testing if the data in stack remain the same
 			const remainBytes = "0x112233";
 			const expectedRemain = strHexToBytes(remainBytes);
-			stack.push(strHexToBytes(remainBytes)); 
+			stack.push(strHexToBytes(remainBytes));
 
 			hexStr = "0x11112222";
 			expectedBytes = strHexToBytes(hexStr);
@@ -7085,7 +7131,7 @@ describe("Teal Opcodes", function () {
 			op = new Replace2(["2"], 0);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), expectedBytes);
-			
+
 			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
 		});
 
@@ -7134,7 +7180,7 @@ describe("Teal Opcodes", function () {
 			//push a random bytes to stack for testing if the data in stack remain the same
 			const remainBytes = "0x112233";
 			const expectedRemain = strHexToBytes(remainBytes);
-			stack.push(strHexToBytes(remainBytes)); 
+			stack.push(strHexToBytes(remainBytes));
 
 			hexStr = "0x11112222";
 			expectedBytes = strHexToBytes(hexStr);
@@ -7179,22 +7225,12 @@ describe("Teal Opcodes", function () {
 
 		it(
 			"should throw invalid type error Sha3_256(Expected bytes but got bigint at line 1)",
-			execExpectError(
-				stack,
-				[1n],
-				new Sha3_256([], 1),
-				RUNTIME_ERRORS.TEAL.INVALID_TYPE
-			)
+			execExpectError(stack, [1n], new Sha3_256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 		);
 
 		it(
 			"should throw error with sha3_256 if stack is below min length(at least 1 element in Stack)",
-			execExpectError(
-				stack,
-				[],
-				new Sha3_256([], 1),
-				RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
-			)
+			execExpectError(stack, [], new Sha3_256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
 		);
 
 		it("Should return correct cost", () => {
@@ -7210,14 +7246,11 @@ describe("Teal Opcodes", function () {
 		it("Should push 1 to stack if signature is valid", function () {
 			const account = generateAccount();
 			const hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
-			const data = Buffer.from(
-				hexStr,
-				"hex"
-			);
+			const data = Buffer.from(hexStr, "hex");
 			const signature = signBytes(data, account.sk);
 
-			stack.push(data); 
-			stack.push(signature); 
+			stack.push(data);
+			stack.push(signature);
 			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);
@@ -7229,19 +7262,13 @@ describe("Teal Opcodes", function () {
 		it("Should push 0 to stack if signature is invalid", function () {
 			const account = generateAccount();
 			let hexStr = "62fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
-			let data = Buffer.from(
-				hexStr,
-				"hex"
-			);
+			let data = Buffer.from(hexStr, "hex");
 			const signature = signBytes(data, account.sk);
 			//flip a bit and it should not pass
-			hexStr = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd"
-			data = Buffer.from(
-				hexStr,
-				"hex"
-			);
-			stack.push(data); 
-			stack.push(signature); 
+			hexStr = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
+			data = Buffer.from(hexStr, "hex");
+			stack.push(data);
+			stack.push(signature);
 			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);
@@ -7275,8 +7302,8 @@ describe("Teal Opcodes", function () {
 			const data = new Uint8Array(Buffer.from([1, 9, 25, 49]));
 			const signature = signBytes(data, account.sk);
 
-			stack.push(data); 
-			stack.push(signature); 
+			stack.push(data);
+			stack.push(signature);
 			stack.push(decodeAddress(account.addr).publicKey);
 
 			const op = new Ed25519verify_bare([], 1);

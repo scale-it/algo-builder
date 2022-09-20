@@ -6,6 +6,7 @@ import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToString,
 } from "../../../src/lib/parsing";
 
@@ -214,5 +215,14 @@ describe("Parse appArgs to App to bytes", () => {
 
 		const errorMsg = "Invalid uint64 18446744073709551625";
 		assert.throws(() => parsing.parseAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
+	});
+});
+describe("utils", () => {
+	it("Should concat two arrays", () => {
+		const arr1 = new Uint8Array([1, 2]);
+		const arr2 = new Uint8Array([3, 4]);
+		const expectedResult = new Uint8Array([1, 2, 3, 4]);
+		const result = concatArrays(arr1, arr2);
+		assert.deepEqual(result, expectedResult);
 	});
 });
