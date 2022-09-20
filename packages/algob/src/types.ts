@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import algosdk, { EncodedTransaction, LogicSigAccount, modelsv2, Transaction, Account as AccountSDK } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -391,6 +391,57 @@ export interface AssetScriptMap {
 	[assetName: string]: string;
 }
 
+export interface EncTx extends EncodedTransaction {
+	txID: string;
+	metaType?: wtypes.MetaType;
+	approvalProgram?: string;
+	clearProgram?: string;
+}
+
+export interface BaseTxReceipt {
+	txn: EncTx;
+	txID: string;
+	gas?: number;
+	logs?: Uint8Array[];
+}
+
+export type TxReceipt = BaseTxReceipt | AppInfo | ASAInfo;
+
+export interface DeployedAssetInfo {
+	creator: AccountAddress;
+	txID: string;
+	confirmedRound: number;
+	deleted: boolean;
+}
+
+// ASA deployment information (log)
+export interface ASAInfo extends DeployedAssetInfo {
+	assetIndex: number;
+	assetDef: wtypes.ASADef;
+	logs?: Uint8Array[];
+}
+
+// Stateful smart contract deployment information (log)
+export interface AppInfo extends DeployedAssetInfo {
+	appID: number;
+	applicationAccount: string;
+	timestamp: number;
+	approvalFile: string;
+	clearFile: string;
+	logs?: Uint8Array[];
+	gas?: number; // used in runtime
+}
+
+export interface AppDeploymentFlags extends wtypes.AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
+}
+
+
 export interface CheckpointFunctions {
 	/**
 	 * Queries a stateful smart contract info from checkpoint using key. */
@@ -499,7 +550,7 @@ export interface Deployer {
 	 * @param txns list transaction in group
 	 * @returns confirmed tx info of group
 	 */
-	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxReceipt[]>;
 
 	/**
 	 * Funds logic signature account (Contract Account).
@@ -724,7 +775,7 @@ export interface Deployer {
 	 */
 	executeTx: (
 		transactions: wtypes.ExecParams[] | wtypes.TransactionAndSign[]
-	) => Promise<TxnReceipt[]>;
+	) => Promise<TxReceipt[]>;
 }
 
 // ************************

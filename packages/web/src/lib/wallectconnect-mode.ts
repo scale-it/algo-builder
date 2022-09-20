@@ -16,10 +16,12 @@ import {
 	TransactionAndSign,
 	TransactionInGroup,
 	Sign,
+	TxReceipt,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
 import { error, log, warn } from "./logger";
+import { convertKeysToCamelCase } from "./parsing";
 import { mkTransaction } from "./txn";
 
 export class WallectConnectSession {
@@ -190,7 +192,7 @@ export class WallectConnectSession {
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
@@ -199,12 +201,14 @@ export class WallectConnectSession {
 	private async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
-		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		const txnReceipt = { txID: txId, ...convertKeysToCamelCase(pendingInfo) }
+		return txnReceipt as TxReceipt;
+
 	}
 
 	/**
@@ -214,7 +218,7 @@ export class WallectConnectSession {
 	 */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		let signedTxn: (Uint8Array | null)[] | undefined;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16) {

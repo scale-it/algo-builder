@@ -14,6 +14,7 @@ import algosdk, {
 	modelsv2,
 	Transaction,
 } from "algosdk";
+import { toCamelCase } from "../internal/constants";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -25,7 +26,7 @@ import type {
 	LsigInfo,
 	Network,
 	SCParams,
-	TxnReceipt,
+	TxReceipt,
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
@@ -121,7 +122,7 @@ export interface AlgoOperator {
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds: number
 	) => Promise<ConfirmedTxInfo>;
-	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
+	getReceiptTxns: (txns: Transaction[]) => Promise<TxReceipt[]>;
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -163,17 +164,19 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	}
 
 	// Get receipts of group txn
-	async getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
+	async getReceiptTxns(txns: Transaction[]): Promise<TxReceipt[]> {
 		const confirmedTxInfos = await Promise.all(
 			txns.map((txn) => {
 				return this.algodClient.pendingTransactionInformation(txn.txID()).do();
 			})
 		);
-
-		return confirmedTxInfos.map((confirmedTxInfo, index) => ({
-			...(confirmedTxInfo as ConfirmedTxInfo),
-			txID: txns[index].txID(),
-		}));
+		return confirmedTxInfos.map((confirmedTxInfo, index) => {
+			let txnReceipt: any = { txID: txns[index].txID() }
+			Object.keys(confirmedTxInfo).forEach((key) => {
+				txnReceipt[toCamelCase(key)] = confirmedTxInfo[key]
+			})
+			return txnReceipt
+		});
 	}
 
 	/**

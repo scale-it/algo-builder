@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 
 import { IClientMeta } from "@walletconnect/types";
-import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
+import { Account as AccountSDK, EncodedTransaction, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
+import { types } from ".";
 
 import { WalletMultisigMetadata, WalletTransaction } from "./algo-signer-types";
 import { WAIT_ROUNDS } from "./lib/constants";
@@ -441,6 +442,56 @@ export interface HttpNetworkConfig {
 	port: string | number;
 	token: string | AlgodTokenHeader | CustomTokenHeader;
 	httpHeaders?: { [name: string]: string };
+}
+
+export interface EncTx extends EncodedTransaction {
+	txID: string;
+	metaType?: types.MetaType;
+	approvalProgram?: string;
+	clearProgram?: string;
+}
+
+export interface BaseTxReceipt {
+	txn: EncTx;
+	txID: string;
+	gas?: number;
+	logs?: Uint8Array[];
+}
+
+export type TxReceipt = BaseTxReceipt | AppInfo | ASAInfo;
+
+export interface DeployedAssetInfo {
+	creator: AccountAddress;
+	txID: string;
+	confirmedRound: number;
+	deleted: boolean;
+}
+
+// ASA deployment information (log)
+export interface ASAInfo extends DeployedAssetInfo {
+	assetIndex: number;
+	assetDef: types.ASADef;
+	logs?: Uint8Array[];
+}
+
+// Stateful smart contract deployment information (log)
+export interface AppInfo extends DeployedAssetInfo {
+	appID: number;
+	applicationAccount: string;
+	timestamp: number;
+	approvalFile: string;
+	clearFile: string;
+	logs?: Uint8Array[];
+	gas?: number; // used in runtime
+}
+
+export interface AppDeploymentFlags extends AppOptionalFlags {
+	sender: AccountSDK;
+	localInts: number;
+	localBytes: number;
+	globalInts: number;
+	globalBytes: number;
+	extraPages?: number;
 }
 
 export { WAIT_ROUNDS };

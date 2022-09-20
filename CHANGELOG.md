@@ -50,6 +50,17 @@ from `algosdk` and sends it to the network.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 - Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
 
+### Breaking Changes
+
+#### @algo-builder/algob
+
+- `executeTx` promise now returns `TxReceipt[]` instead of `TxnReceipt[]`.
+- `getReceiptTxns` promise now returns `TxReceipt[]` instead of `TxnReceipt[]`.
+
+#### @algo-builder/web
+
+- `executeTx` promise now returns `TxReceipt` instead of `algosdk.modelsv2.PendingTransactionResponse`.
+
 ### Examples
 
 #### DAO

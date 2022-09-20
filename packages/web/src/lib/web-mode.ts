@@ -9,10 +9,12 @@ import {
 	SignType,
 	TransactionAndSign,
 	TxParams,
-	SignWithMultisig
+	SignWithMultisig,
+	TxReceipt
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
+import { convertKeysToCamelCase } from "./parsing";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -34,7 +36,7 @@ export class WebMode {
 	async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		const response = await this.algoSigner.algod({
 			ledger: this.chainName,
 			path: "/v2/status",
@@ -52,7 +54,8 @@ export class WebMode {
 				pendingInfo[CONFIRMED_ROUND] !== null &&
 				(pendingInfo[CONFIRMED_ROUND] as number) > 0
 			) {
-				return pendingInfo as unknown as algosdk.modelsv2.PendingTransactionResponse;
+				const txnReceipt = { txID: txId, ...convertKeysToCamelCase(pendingInfo) }
+				return txnReceipt as TxReceipt;
 			}
 			// TODO: maybe we should use "sleep" instead of pinging a node again?
 			currentRound += 1;
@@ -67,12 +70,10 @@ export class WebMode {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param signedTxn Signed Transaction blob encoded in base64
-	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
 		signedTxn: string,
-		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
 			tx: signedTxn,
@@ -216,7 +217,7 @@ export class WebMode {
 	/* eslint-disable sonarjs/cognitive-complexity */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxReceipt> {
 		let signedTxn: any;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16 || transactions.length == 0) {

@@ -95,3 +95,15 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 	}
 	return args as Uint8Array[];
 }
+
+export function toCamelCase(str: string) {
+	return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+}
+
+export function convertKeysToCamelCase(object: any) {
+	let newObject: any = {}
+	Object.keys(object).forEach((key) => {
+		newObject[toCamelCase(key)] = object[key]
+	})
+	return newObject
+}
