@@ -91,7 +91,6 @@ describe("Interpreter", function () {
 	};
 
 	const executeTEAL = (tealCode: string, onComplete = TxOnComplete.NoOp): void => {
-		// reset interpreter
 		resetInterpreterState();
 		interpreter.runtime.ctx.tx.apan = Number(onComplete);
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
@@ -113,7 +112,7 @@ describe("Interpreter", function () {
 	describe("Teal cost", () => {
 		useFixture("teal-files");
 		beforeEach(() => {
-			resetInterpreterState(); //resetInterpreterState the state of interpreter
+			resetInterpreterState(); 
 			interpreter.cost = 0;
 			interpreter.tealVersion = 1;
 		});

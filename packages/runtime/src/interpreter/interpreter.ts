@@ -134,13 +134,14 @@ export class Interpreter {
 	 * @param accountPk public key of account
 	 * @param line line number in TEAL file
 	 * @param create create flag
+	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
 	private _getAccountFromAddr(
 		accountPk: Uint8Array,
 		line: number,
 		create: boolean,
-		imutable: boolean,
+		immutable: boolean,
 	): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
 		const foreignAppIdArr = this.runtime.ctx.tx.apfa;
@@ -172,7 +173,7 @@ export class Interpreter {
 			// since tealv5, currentApplicationAddress is also allowed (directly)
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey) ||
 			// since tealv7, foreign application account is allowed
-			(this.tealVersion >= 7 && imutable && foreignAppIdArr?.find((foreignAppID) => 
+			(this.tealVersion >= 7 && immutable && foreignAppIdArr?.find((foreignAppID) => 
 				compareArray(accountPk, 
 					decodeAddress(getApplicationAddress(foreignAppID)).publicKey)) !== undefined)
 		) {
@@ -198,10 +199,10 @@ export class Interpreter {
 	 * @param accountRef index of account to fetch from account list
 	 * @param line line number
 	 * @param create create flag, default is true
-	 * @param imutable allow to access foreign application account, default is true
+	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * NOTE: index 0 represents txn sender account
 	 */
-	getAccount(accountRef: StackElem, line: number, create = false, imutable = true): AccountStoreI {
+	getAccount(accountRef: StackElem, line: number, create = false, immutable = true): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
 		if (typeof accountRef === "bigint") {
@@ -223,7 +224,7 @@ export class Interpreter {
 					: this.runtime.ctx.state.accounts.get(address);
 			}
 		} else {
-			return this._getAccountFromAddr(accountRef, line, create, imutable);
+			return this._getAccountFromAddr(accountRef, line, create, immutable);
 		}
 
 		return this.runtime.assertAccountDefined(address, account, line);
