@@ -234,9 +234,12 @@ export class WallectConnectSession {
 		// with logic signature we set shouldSign to false
 		const toBeSignedTxns: TransactionInGroup[] = execParams.map(
 			(txn: ExecParams, index: number) => {
-				return txn.sign === SignType.LogicSignature
-					? { txn: txns[index], shouldSign: false } // logic signature
-					: { txn: txns[index], shouldSign: true }; // to be signed
+				switch (txn.sign) {
+					case SignType.LogicSignature:
+						return { txn: txns[index], shouldSign: false } // logic signature
+					default:
+						return { txn: txns[index], shouldSign: true }; // to be signed
+				}
 			}
 		);
 		// only shouldSign txn are to be signed
