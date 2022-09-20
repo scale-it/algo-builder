@@ -181,12 +181,9 @@ export class MyAlgoWalletSession {
 		// with logic signature we set shouldSign to false
 		const toBeSignedTxns: TransactionInGroup[] = execParams.map(
 			(txn: ExecParams, index: number) => {
-				switch (txn.sign) {
-					case SignType.LogicSignature:
-						return { txn: txns[index], shouldSign: false } // logic signature
-					default:
-						return { txn: txns[index], shouldSign: true }; // to be signed
-				}
+				return txn.sign === SignType.LogicSignature
+					? { txn: txns[index], shouldSign: false } // logic signature
+					: { txn: txns[index], shouldSign: true }; // to be signed
 			}
 		);
 		// only shouldSign txn are to be signed, algowallet doesn't accept lsig ones
