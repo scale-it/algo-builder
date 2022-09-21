@@ -6,23 +6,27 @@ import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
+import * as testdata from "../helpers/data";
+import { BaseTxReceipt } from "../../src/types";
 
 describe("Algorand Smart Contracts - Execute transaction", function () {
 	useFixture("stateful");
 	const initialBalance = BigInt(5e6);
+	const vKey = testdata.key1;
+	const sKey = testdata.key2;
 	let john: AccountStore;
 	let alice: AccountStore;
+	let elonMusk: AccountStore;
 	let runtime: Runtime;
 	let approvalProgramFilename: string;
 	let clearProgramFilename: string;
-	let approvalProgram: string;
-	let clearProgram: string;
 	let assetId: number;
 
 	this.beforeEach(() => {
 		john = new AccountStore(initialBalance, elonMuskAccount);
 		alice = new AccountStore(initialBalance);
-		runtime = new Runtime([john, alice]); // setup test
+		elonMusk = new AccountStore(initialBalance);
+		runtime = new Runtime([john, alice, elonMusk]); // setup test
 
 		approvalProgramFilename = "counter-approval.teal";
 		clearProgramFilename = "clear.teal";
@@ -57,6 +61,24 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			{}
 		);
 	}
+
+	it("should fund account (Transfer txn only), throught execute transaction", function () {
+		const txn: types.ExecParams[] = [{
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			toAccountAddr: alice.address,
+			amountMicroAlgos: 100,
+			payFlags: { totalFee: 1000 },
+		}];
+
+		runtime.executeTx(txn);
+
+		// check initial balance
+		syncAccounts();
+		assert.equal(john.balance(), initialBalance - 1100n);
+		assert.equal(alice.balance(), initialBalance + 100n);
+	});
 
 	it("should execute group of (payment + asset creation) successfully", () => {
 		const txGroup: types.ExecParams[] = [
@@ -224,6 +246,248 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			];
 
 			runtime.executeTx(tx);
+		}
+	});
+
+	it("Should opt-in and call app, through execute transaction", () => {
+		setupApp();
+		syncAccounts();
+
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		let tx: types.ExecParams[];
+		if (appInfo !== undefined) {
+			tx = [
+				{
+					type: types.TransactionType.OptInToApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account,
+					appID: appInfo?.appID,
+					payFlags: { totalFee: 1000 },
+				},
+				{
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account,
+					appID: appInfo?.appID,
+					payFlags: { totalFee: 1000 },
+				},
+			];
+
+			runtime.executeTx(tx);
+		}
+
+		syncAccounts();
+		assert.equal(alice.balance(), initialBalance - 2000n);
+	});
+
+	it("Should opt-in ASA and transfer asset, through execute transaction", () => {
+		setupAsset();
+
+		let tx: types.ExecParams[];
+		tx = [
+			{
+				type: types.TransactionType.OptInASA,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				assetID: assetId,
+				payFlags: { totalFee: 100 },
+			},
+			{
+				type: types.TransactionType.TransferAsset,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				toAccountAddr: john.address,
+				amount: 0n,
+				assetID: assetId,
+				payFlags: { totalFee: 2000 },
+			},
+		];
+
+		runtime.executeTx(tx);
+
+		syncAccounts();
+		assert.equal(alice.balance(), initialBalance - 2100n);
+		assert.equal(john.balance(), initialBalance);
+
+	});
+
+	it("Should do key registration, through execute transaction", () => {
+		const txSKParams: types.KeyRegistrationParam = {
+			type: types.TransactionType.KeyRegistration, // payment
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			voteKey: vKey,
+			selectionKey: sKey,
+			voteFirst: 43,
+			voteLast: 1000,
+			voteKeyDilution: 5,
+			payFlags: { totalFee: 1000 },
+		};
+		const r = runtime.executeTx([txSKParams])[0] as BaseTxReceipt;
+		assert.isDefined(r);
+		assert.isDefined(r.txn);
+		assert.isDefined(r.txID);
+		syncAccounts();
+	});
+
+	it("Should modify asset, through execute transaction", () => {
+		setupAsset();
+		let modFields: types.AssetModFields = {
+			manager: elonMusk.address,
+			reserve: elonMusk.address,
+			clawback: alice.address,
+			freeze: alice.address,
+		};
+		const modifyParam: types.ModifyAssetParam = {
+			type: types.TransactionType.ModifyAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			assetID: assetId,
+			fields: modFields,
+			payFlags: {},
+		};
+		runtime.executeTx([modifyParam]);
+		const res = runtime.getAssetDef(assetId);
+		assert.equal(res.manager, elonMusk.address);
+		assert.equal(res.reserve, elonMusk.address);
+		assert.equal(res.clawback, alice.address);
+		assert.equal(res.freeze, alice.address);
+	});
+
+	it("should freeze asset, through execute transaction", () => {
+		setupAsset();
+		runtime.optInToASA(assetId, alice.address, {});
+		const freezeParam: types.FreezeAssetParam = {
+			type: types.TransactionType.FreezeAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			assetID: assetId,
+			freezeTarget: alice.address,
+			freezeState: true,
+			payFlags: {},
+		};
+		runtime.executeTx([freezeParam]);
+
+		const aliceAssetHolding = runtime.getAssetHolding(assetId, alice.address);
+		assert.equal(aliceAssetHolding["is-frozen"], true);
+	});
+
+	it("should revoke asset, through execute transaction", () => {
+		setupAsset();
+		runtime.optInToASA(assetId, alice.address, {});
+
+		const revokeParam: types.RevokeAssetParam = {
+			type: types.TransactionType.RevokeAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			recipient: john.address,
+			assetID: assetId,
+			revocationTarget: alice.address,
+			amount: 0n,
+			payFlags: { totalFee: 1000 },
+		};
+		runtime.executeTx([revokeParam]);
+
+		syncAccounts();
+		assert.equal(john.balance(), initialBalance - 1000n);
+	});
+
+	it("Should destroy asset, through execute transaction", () => {
+		setupAsset();
+		const destroyParam: types.DestroyAssetParam = {
+			type: types.TransactionType.DestroyAsset,
+			sign: types.SignType.SecretKey,
+			fromAccount: john.account,
+			assetID: assetId,
+			payFlags: { totalFee: 1000 },
+		};
+
+		runtime.executeTx([destroyParam]);
+
+		syncAccounts();
+		assert.equal(john.balance(), initialBalance - 1000n);
+	});
+
+	it("Should clear app, through execute transaction", () => {
+		setupApp();
+		syncAccounts();
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		let tx: types.AppCallsParam;
+		if (appInfo !== undefined) {
+			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			tx = {
+				type: types.TransactionType.ClearApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account, // sending txn sender other than creator (john), so txn should be rejected
+				appID: appInfo.appID,
+				payFlags: {},
+			};
+			runtime.executeTx([tx]);
+		}
+	});
+
+	it("Should close app, through execute transaction", () => {
+		setupApp();
+		syncAccounts();
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		let tx: types.AppCallsParam;
+		if (appInfo !== undefined) {
+			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			tx = {
+				type: types.TransactionType.CloseApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appInfo.appID,
+				payFlags: {},
+			};
+			runtime.executeTx([tx]);
+		}
+	});
+
+	it("Should delete app, through execute transaction", () => {
+		setupApp();
+		syncAccounts();
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		let tx: types.AppCallsParam;
+		if (appInfo !== undefined) {
+			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			tx = {
+				type: types.TransactionType.DeleteApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appInfo.appID,
+				payFlags: {},
+			};
+			runtime.executeTx([tx]);
+		}
+	});
+
+	it("Should update app, through execute transaction", () => {
+		setupApp();
+		syncAccounts();
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		let tx: types.ExecParams;
+		if (appInfo !== undefined) {
+			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			tx = {
+				type: types.TransactionType.UpdateApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				appID: appInfo.appID,
+				newAppCode: {
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: approvalProgramFilename,
+					clearProgramFilename: clearProgramFilename,
+				},
+				appName: "app",
+				payFlags: {},
+			};
+			runtime.executeTx([tx]);
 		}
 	});
 });
