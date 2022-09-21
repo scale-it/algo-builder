@@ -284,7 +284,7 @@ export function bigEndianBytesToBigInt(bytes: Uint8Array | Buffer): bigint {
 export function strHexToBytes(str: string): Uint8Array {
 	return new Uint8Array(Buffer.from(str.slice(2), "hex"));
 }
-
+/*
  * Function taken from algosdk.utils
  * ConcatArrays takes n number arrays and returns a joint Uint8Array
  * @param arrs - An arbitrary number of n array-like number list arguments
