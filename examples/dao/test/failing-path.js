@@ -119,7 +119,7 @@ describe("DAO - Failing Paths", function () {
 				ctx.daoFundLsig
 			);
 			// update transfer amount of proposal deposit tx
-			addProposalTx[1].amount = 15;
+			addProposalTx[1].amount = deposit;
 		});
 
 		it("should fail if proposalLsig not opted-in to DAO App", () => {
@@ -292,7 +292,33 @@ describe("DAO - Failing Paths", function () {
 
 		it("should fail if latest_timestamp is < votingStart (i.e voting is not open)", () => {
 			// set now < votingStart
-			ctx.runtime.setRoundAndTimestamp(10, now + 30);
+			ctx.runtime.setRoundAndTimestamp(10, votingStart - 30);
+
+			// deposit votes by voterB
+			ctx.depositVoteToken(ctx.voterB, 8);
+
+			assert.throws(
+				() => ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterB.account }),
+				RUNTIME_ERR1009
+			);
+		});
+
+		it("should fail if latest_timestamp is > votingEnd (i.e voting is not open)", () => {
+			// set now > votingEnd
+			ctx.runtime.setRoundAndTimestamp(10, votingEnd + 30);
+
+			// deposit votes by voterB
+			ctx.depositVoteToken(ctx.voterB, 8);
+
+			assert.throws(
+				() => ctx.executeTx({ ...registerVoteParam, fromAccount: ctx.voterB.account }),
+				RUNTIME_ERR1009
+			);
+		});
+
+		it("should fail if latest_timestamp is > executeBefore (i.e voting is not open)", () => {
+			// set now > executeBefore
+			ctx.runtime.setRoundAndTimestamp(10, executeBefore + 30);
 
 			// deposit votes by voterB
 			ctx.depositVoteToken(ctx.voterB, 8);

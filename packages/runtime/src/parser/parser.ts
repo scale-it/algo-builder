@@ -472,6 +472,7 @@ const interpreterReqList = new Set([
 	"sha512_256",
 	"keccak256",
 	"sha3_256",
+	"ed25519verify",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
