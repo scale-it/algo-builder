@@ -960,3 +960,25 @@ export function getProgramVersion(program: string): number {
 	opcodeFromSentence(wordsFromLine(firstLine), 1, ip, ExecutionMode.APPLICATION);
 	return ip.tealVersion;
 }
+
+/**
+ *
+ * @param str string to convert
+ * @returns fooBar to foo-bar
+ */
+export function convertCapitalToHyphens(str: string): string {
+	return str.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+}
+
+/**
+ *
+ * @param object 
+ * @returns object keys from fooBar to foo-bar
+ */
+export function convertKeysToHyphens(object: any) {
+	let newObject: any = {}
+	Object.keys(object).forEach((key) => {
+		newObject[convertCapitalToHyphens(key)] = object[key]
+	})
+	return newObject
+}

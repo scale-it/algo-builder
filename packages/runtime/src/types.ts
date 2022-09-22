@@ -407,3 +407,17 @@ export enum Base64Encoding {
 	URL = 0,
 	STD = 1,
 }
+
+export interface ConfirmedTxInfo {
+	"confirmed-round": number;
+	"asset-index": number;
+	"application-index": number;
+	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
+	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
+	"inner-txns"?: ConfirmedTxInfo;
+	txn: algosdk.EncodedSignedTransaction;
+}
+
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
+}
