@@ -408,16 +408,32 @@ export enum Base64Encoding {
 	STD = 1,
 }
 
-export interface ConfirmedTxInfo {
-	"confirmed-round": number;
-	"asset-index": number;
-	"application-index": number;
-	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
-	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
-	"inner-txns"?: ConfirmedTxInfo;
-	txn: algosdk.EncodedSignedTransaction;
+export interface BaseTxnReceipt {
+	txn: EncTx;
+	txID: string;
+	gas?: number;
+	logs?: Uint8Array[];
 }
 
-export interface TxnReceipt extends ConfirmedTxInfo {
+export declare type TxnReceipt = BaseTxnReceipt | AppInfoReceipt | ASAInfoReceipt;
+
+export interface DeployedAssetInfoReceipt {
+	creator: AccountAddress;
 	txID: string;
+	"confirmed-round": number;
+	deleted: boolean;
+}
+export interface ASAInfoReceipt extends DeployedAssetInfoReceipt {
+	"asset-index": number;
+	"asset-def": types.ASADef;
+	logs?: Uint8Array[];
+}
+export interface AppInfoReceipt extends DeployedAssetInfoReceipt {
+	"application-id": number;
+	"application-account": string;
+	timestamp: number;
+	"approval-file": string;
+	"clear-file": string;
+	logs?: Uint8Array[];
+	gas?: number;
 }

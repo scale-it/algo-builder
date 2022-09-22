@@ -967,18 +967,18 @@ export function getProgramVersion(program: string): number {
  * @returns fooBar to foo-bar
  */
 export function convertCapitalToHyphens(str: string): string {
-	return str.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+	return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 }
 
 /**
  *
- * @param object 
+ * @param object
  * @returns object keys from fooBar to foo-bar
  */
 export function convertKeysToHyphens(object: any) {
-	let newObject: any = {}
+	let newObject: any = {};
 	Object.keys(object).forEach((key) => {
-		newObject[convertCapitalToHyphens(key)] = object[key]
-	})
-	return newObject
+		newObject[convertCapitalToHyphens(key)] = object[key];
+	});
+	return newObject;
 }

@@ -205,8 +205,8 @@ export class WallectConnectSession {
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
-		const txnReceipt = { txID: txId, ...pendingInfo }
-		return txnReceipt as TxnReceipt
+		const txnReceipt = { txID: txId, ...pendingInfo };
+		return txnReceipt as TxnReceipt;
 	}
 
 	/**
@@ -214,9 +214,7 @@ export class WallectConnectSession {
 	 * @param transactions transaction parameters,  atomic transaction parameters
 	 *  or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
-	async executeTx(
-		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<TxnReceipt> {
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
 		let signedTxn: (Uint8Array | null)[] | undefined;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16) {

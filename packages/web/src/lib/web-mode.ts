@@ -10,7 +10,7 @@ import {
 	TransactionAndSign,
 	TxParams,
 	SignWithMultisig,
-	TxnReceipt
+	TxnReceipt,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
@@ -54,8 +54,8 @@ export class WebMode {
 				pendingInfo[CONFIRMED_ROUND] !== null &&
 				(pendingInfo[CONFIRMED_ROUND] as number) > 0
 			) {
-				const txnReceipt = { txID: txId, ...pendingInfo }
-				return txnReceipt as TxnReceipt
+				const txnReceipt = { txID: txId, ...pendingInfo };
+				return txnReceipt as TxnReceipt;
 			}
 			// TODO: maybe we should use "sleep" instead of pinging a node again?
 			currentRound += 1;
@@ -72,10 +72,7 @@ export class WebMode {
 	 * @param signedTxn Signed Transaction blob encoded in base64
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
-	async sendAndWait(
-		signedTxn: string,
-		waitRounds: number = WAIT_ROUNDS
-	): Promise<TxnReceipt> {
+	async sendAndWait(signedTxn: string, waitRounds: number = WAIT_ROUNDS): Promise<TxnReceipt> {
 		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
 			tx: signedTxn,
@@ -159,18 +156,25 @@ export class WebMode {
 	 * @param signers a subset of addresses to sign the transaction
 	 * return an object containing a blob attribute encoded in base64
 	 */
-	async appendSignMultisigTransaction(txns: WalletTransaction[], signers: string[]): Promise<JsonPayload> {
+	async appendSignMultisigTransaction(
+		txns: WalletTransaction[],
+		signers: string[]
+	): Promise<JsonPayload> {
 		const result: JsonPayload = {};
 		for (let i = 0; i < txns.length; ++i) {
 			const txn = txns[i];
 			const partialTxn = algosdk.decodeObj(
-				this.algoSigner.encoding.base64ToMsgpack(txn.txn)) as EncodedSignedTransaction;
+				this.algoSigner.encoding.base64ToMsgpack(txn.txn)
+			) as EncodedSignedTransaction;
 			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
-				throw new Error("Input transaction must be multisigature transaction signed with at least 1 signature");
+				throw new Error(
+					"Input transaction must be multisigature transaction signed with at least 1 signature"
+				);
 			}
 			const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
 			const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
-			const txnToBeSign_Base64 = this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
+			const txnToBeSign_Base64 =
+				this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
 
 			const mparams = partialTxn.msig as algosdk.EncodedMultisig;
 			const addrs = mparams.subsig.map((signData) => {
@@ -181,7 +185,7 @@ export class WebMode {
 				version: mparams.v,
 				threshold: mparams.thr,
 				addrs: addrs,
-			}
+			};
 
 			const signedTxn = await this.signTransaction([
 				{
@@ -196,13 +200,10 @@ export class WebMode {
 
 			const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
 			const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
-			const combineBlob = algosdk.mergeMultisigTransactions([
-				blob1,
-				blob2,
-			]);
+			const combineBlob = algosdk.mergeMultisigTransactions([blob1, blob2]);
 			const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
 			result[i] = {
-				blob: outputBase64
+				blob: outputBase64,
 			};
 		}
 		return result;
@@ -217,9 +218,7 @@ export class WebMode {
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
-	async executeTx(
-		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<TxnReceipt> {
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
 		let signedTxn: any;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16 || transactions.length == 0) {
@@ -250,7 +249,7 @@ export class WebMode {
 		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
 			switch (execParams[txnId].sign) {
 				case SignType.LogicSignature:
-					return { txn: txn, signers: [] } // logic signature
+					return { txn: txn, signers: [] }; // logic signature
 				case SignType.MultiSignature: {
 					const msig: SignWithMultisig = execParams[txnId] as SignWithMultisig;
 					return { txn: txn, msig: msig.mparams }; // multi singature

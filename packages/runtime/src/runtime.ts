@@ -935,9 +935,9 @@ export class Runtime {
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
 		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
 
-		let txnReceipt: TxnReceipt[] | any
+		let txnReceipt: TxnReceipt[] | any;
 		for (const txn of txReceipts) {
-			txReceipts.push(convertKeysToHyphens(txn))
+			txReceipts.push(convertKeysToHyphens(txn));
 		}
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;

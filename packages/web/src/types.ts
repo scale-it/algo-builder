@@ -119,7 +119,7 @@ export type ExecParams =
 export enum SignType {
 	SecretKey,
 	LogicSignature,
-	MultiSignature
+	MultiSignature,
 }
 
 export enum TransactionType {
@@ -243,11 +243,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-		| TransactionType.CallApp
-		| TransactionType.ClearApp
-		| TransactionType.CloseApp
-		| TransactionType.DeleteApp
-		| TransactionType.OptInToApp;
+			| TransactionType.CallApp
+			| TransactionType.ClearApp
+			| TransactionType.CloseApp
+			| TransactionType.DeleteApp
+			| TransactionType.OptInToApp;
 		appID: number;
 	};
 
@@ -444,7 +444,6 @@ export interface HttpNetworkConfig {
 }
 
 export { WAIT_ROUNDS };
-
 
 export interface ConfirmedTxInfo {
 	"confirmed-round": number;
