@@ -86,6 +86,7 @@ from `algosdk` and sends it to the network.
 - Teal v6 support:
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
+- Add unit tests for all transaction types in runtime executeTx.
 
 #### Examples
 
