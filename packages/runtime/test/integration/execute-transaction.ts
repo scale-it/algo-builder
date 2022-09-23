@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
-
+import algosdk from "algosdk";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -8,12 +8,15 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 import * as testdata from "../helpers/data";
 import { BaseTxReceipt } from "../../src/types";
+import { mockSuggestedParams } from "../../src/mock/tx";
 
 describe("Algorand Smart Contracts - Execute transaction", function () {
 	useFixture("stateful");
 	const initialBalance = BigInt(5e6);
 	const vKey = testdata.key1;
 	const sKey = testdata.key2;
+	const fee = 1000;
+	const amount = 1000000;
 	let john: AccountStore;
 	let alice: AccountStore;
 	let elonMusk: AccountStore;
@@ -490,4 +493,22 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			runtime.executeTx([tx]);
 		}
 	});
+
+	it("Should be able to pass signed transaction in executeTx", () => {
+		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
+		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+			from: john.address,
+			to: alice.address,
+			amount: amount,
+			suggestedParams: suggestedParams,
+		});
+		// Sign the transaction
+		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(john.account.sk));
+		runtime.executeTx([signedTransaction])
+
+		syncAccounts();
+		assert.equal(john.balance(), initialBalance - BigInt(amount) - BigInt(fee));
+		assert.equal(alice.balance(), initialBalance + BigInt(amount));
+	});
+
 });
