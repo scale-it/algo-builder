@@ -140,23 +140,20 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
 	it("Should opt-in to asset, through execute transaction", () => {
 		setupAsset();
-		syncAccounts();
-		const assetInfo = runtime.getAssetInfoFromName("gold");
-		assert.isDefined(assetInfo);
-		let tx: types.ExecParams[];
-		if (assetInfo !== undefined) {
-			tx = [
-				{
-					type: types.TransactionType.OptInASA,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account,
-					assetID: assetInfo.assetIndex,
-					payFlags: { totalFee: 1000 },
-				},
-			];
+		let tx: types.ExecParams[] = [
+			{
+				type: types.TransactionType.OptInASA,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				assetID: assetId,
+				payFlags: { totalFee: 1000 },
+			},
+		];
 
-			runtime.executeTx(tx);
-		}
+		runtime.executeTx(tx);
+		syncAccounts();
+		// verify opt-in
+		assert.isDefined(alice.getAssetHolding(assetId));
 	});
 
 	it("should execute group of (payment + app creation) successfully", () => {
@@ -249,6 +246,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			];
 
 			runtime.executeTx(tx);
+			syncAccounts();
+			// verify
+			assert.exists(alice.getAppFromLocal(appInfo?.appID))
 		}
 	});
 
@@ -265,23 +265,22 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 					type: types.TransactionType.OptInToApp,
 					sign: types.SignType.SecretKey,
 					fromAccount: alice.account,
-					appID: appInfo?.appID,
+					appID: appInfo.appID,
 					payFlags: { totalFee: 1000 },
 				},
 				{
 					type: types.TransactionType.CallApp,
 					sign: types.SignType.SecretKey,
 					fromAccount: alice.account,
-					appID: appInfo?.appID,
+					appID: appInfo.appID,
 					payFlags: { totalFee: 1000 },
 				},
 			];
 
 			runtime.executeTx(tx);
+			syncAccounts();
+			assert.equal(alice.balance(), initialBalance - 2000n);
 		}
-
-		syncAccounts();
-		assert.equal(alice.balance(), initialBalance - 2000n);
 	});
 
 	it("Should opt-in ASA and transfer asset, through execute transaction", () => {
@@ -312,7 +311,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		syncAccounts();
 		assert.equal(alice.balance(), initialBalance - 2100n);
 		assert.equal(john.balance(), initialBalance);
-
+		assert.isDefined(alice.getAssetHolding(assetId));
 	});
 
 	it("Should do key registration, through execute transaction", () => {
@@ -331,7 +330,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
 		assert.isDefined(r.txID);
-		syncAccounts();
 	});
 
 	it("Should modify asset, through execute transaction", () => {
@@ -352,6 +350,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		};
 		runtime.executeTx([modifyParam]);
 		const res = runtime.getAssetDef(assetId);
+		assert.exists(res);
 		assert.equal(res.manager, elonMusk.address);
 		assert.equal(res.reserve, elonMusk.address);
 		assert.equal(res.clawback, alice.address);
@@ -361,6 +360,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 	it("should freeze asset, through execute transaction", () => {
 		setupAsset();
 		runtime.optInToASA(assetId, alice.address, {});
+		syncAccounts();
+		assert.isDefined(alice.getAssetHolding(assetId));
 		const freezeParam: types.FreezeAssetParam = {
 			type: types.TransactionType.FreezeAsset,
 			sign: types.SignType.SecretKey,
@@ -379,7 +380,8 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 	it("should revoke asset, through execute transaction", () => {
 		setupAsset();
 		runtime.optInToASA(assetId, alice.address, {});
-
+		syncAccounts();
+		assert.isDefined(alice.getAssetHolding(assetId));
 		const revokeParam: types.RevokeAssetParam = {
 			type: types.TransactionType.RevokeAsset,
 			sign: types.SignType.SecretKey,
@@ -420,6 +422,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		let tx: types.AppCallsParam;
 		if (appInfo !== undefined) {
 			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			assert.exists(john.getApp(appInfo.appID));
 			tx = {
 				type: types.TransactionType.ClearApp,
 				sign: types.SignType.SecretKey,
@@ -428,6 +431,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				payFlags: {},
 			};
 			runtime.executeTx([tx]);
+			// verify
+			const res = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+			assert.exists(res);
 		}
 	});
 
@@ -439,6 +445,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		let tx: types.AppCallsParam;
 		if (appInfo !== undefined) {
 			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			assert.exists(john.getApp(appInfo.appID));
 			tx = {
 				type: types.TransactionType.CloseApp,
 				sign: types.SignType.SecretKey,
@@ -447,6 +454,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				payFlags: {},
 			};
 			runtime.executeTx([tx]);
+			// verify
+			const res = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+			assert.exists(res);
 		}
 	});
 
@@ -458,6 +468,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		let tx: types.AppCallsParam;
 		if (appInfo !== undefined) {
 			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			assert.exists(john.getApp(appInfo.appID));
 			tx = {
 				type: types.TransactionType.DeleteApp,
 				sign: types.SignType.SecretKey,
@@ -466,6 +477,9 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 				payFlags: {},
 			};
 			runtime.executeTx([tx]);
+			// verify deleted app
+			syncAccounts();
+			assert.notExists(john.getApp(appInfo.appID));
 		}
 	});
 
@@ -477,6 +491,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		let tx: types.ExecParams;
 		if (appInfo !== undefined) {
 			runtime.optInToApp(john.address, appInfo.appID, {}, {});
+			assert.exists(john.getApp(appInfo.appID));
 			tx = {
 				type: types.TransactionType.UpdateApp,
 				sign: types.SignType.SecretKey,
