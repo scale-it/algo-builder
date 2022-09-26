@@ -252,37 +252,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		}
 	});
 
-	it("Should opt-in and call app, through execute transaction", () => {
-		setupApp();
-		syncAccounts();
-
-		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
-		assert.isDefined(appInfo);
-		let tx: types.ExecParams[];
-		if (appInfo !== undefined) {
-			tx = [
-				{
-					type: types.TransactionType.OptInToApp,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account,
-					appID: appInfo.appID,
-					payFlags: { totalFee: 1000 },
-				},
-				{
-					type: types.TransactionType.CallApp,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account,
-					appID: appInfo.appID,
-					payFlags: { totalFee: 1000 },
-				},
-			];
-
-			runtime.executeTx(tx);
-			syncAccounts();
-			assert.equal(alice.balance(), initialBalance - 2000n);
-		}
-	});
-
 	it("Should opt-in ASA and transfer asset, through execute transaction", () => {
 		setupAsset();
 
