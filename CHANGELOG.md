@@ -17,6 +17,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Updated yarn to v3.2.1
 - Changed default sample project license to ISC
 - Fix `txn AssetSender` should return zero address by default.
+- Add unit tests for all transaction types in runtime executeTx.
 
 #### Examples
 
