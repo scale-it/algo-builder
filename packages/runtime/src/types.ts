@@ -408,14 +408,7 @@ export enum Base64Encoding {
 	STD = 1,
 }
 
-export interface BaseTxnReceipt {
-	txn: EncTx;
-	txID: string;
-	gas?: number;
-	logs?: Uint8Array[];
-}
-
-export declare type TxnReceipt = BaseTxnReceipt | AppInfoReceipt | ASAInfoReceipt;
+export declare type TxnReceipt = BaseTxReceipt | AppInfoReceipt | ASAInfoReceipt;
 
 export interface DeployedAssetInfoReceipt {
 	creator: AccountAddress;
