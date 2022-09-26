@@ -19,7 +19,7 @@ export function getDeployerAccount(
 	return account;
 }
 
-export async function WithdrawExecuteTx(
+export async function withdrawExecuteTx(
 	deployer: algob.types.Deployer,
 	txnParams: wtypes.ExecParams
 ): Promise<void> {
@@ -28,9 +28,11 @@ export async function WithdrawExecuteTx(
 	} catch (e) {
 		if (wtypes.isRequestError(e)) {
 			console.error("Transaction Failed", e?.response?.error);
+			throw e
 		}
 		if (e instanceof BuilderError) console.error("Transaction Failed", e.message);
 		console.error("An unexpected error occurred:", e);
+		throw e
 	}
 }
 
