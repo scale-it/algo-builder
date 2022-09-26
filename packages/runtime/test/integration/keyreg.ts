@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { BaseTxReceipt } from "../../src/types";
+import { BaseTxnReceipt } from "../../src/types";
 import * as testdata from "../helpers/data";
 import { useFixture } from "../helpers/integration";
 
@@ -41,7 +41,7 @@ describe("Key Registration transaction", function () {
 			voteKeyDilution: 5,
 			payFlags: { totalFee: 1000 },
 		};
-		const r = runtime.executeTx([txSKParams])[0] as BaseTxReceipt;
+		const r = runtime.executeTx([txSKParams])[0] as BaseTxnReceipt;
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
 		assert.isDefined(r.txID);
@@ -65,7 +65,7 @@ describe("Key Registration transaction", function () {
 			payFlags: { totalFee: 1000 },
 		};
 
-		const r = runtime.executeTx([txLsigParams])[0] as BaseTxReceipt;
+		const r = runtime.executeTx([txLsigParams])[0] as BaseTxnReceipt;
 		assert.isDefined(r);
 		assert.isDefined(r.txn);
 		assert.isDefined(r.txID);

@@ -964,7 +964,7 @@ export function getProgramVersion(program: string): number {
 /**
  *
  * @param str string to convert
- * @returns fooBar to foo-bar
+ * @returns camelCase to hypenated string eg(fooBar to foo-bar)
  */
 export function convertCapitalToHyphens(str: string): string {
 	return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
@@ -973,12 +973,17 @@ export function convertCapitalToHyphens(str: string): string {
 /**
  *
  * @param object
- * @returns object keys from fooBar to foo-bar
+ * @returns object keys parsed from camelCase to hypenated str eg(fooBar to foo-bar)
  */
 export function convertKeysToHyphens(object: any) {
 	let newObject: any = {};
 	Object.keys(object).forEach((key) => {
-		newObject[convertCapitalToHyphens(key)] = object[key];
+		// not parsing txID
+		if (key === "txID") {
+			newObject[key] = object[key];
+		} else {
+			newObject[convertCapitalToHyphens(key)] = object[key];
+		}
 	});
 	return newObject;
 }
