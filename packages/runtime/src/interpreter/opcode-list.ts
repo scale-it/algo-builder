@@ -2137,7 +2137,7 @@ export class AppLocalPut extends Op {
 		const key = this.assertBytes(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop();
 
-		const account = this.interpreter.getAccount(accountRef, this.line);
+		const account = this.interpreter.getAccount(accountRef, this.line, false, false);
 		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
 		// get updated local state for account
