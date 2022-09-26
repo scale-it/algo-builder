@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { stringToBytes } from "@algo-builder/web/build/lib/parsing";
 import algosdk, {
 	decodeAddress,
 	decodeUint64,
@@ -16,6 +17,7 @@ import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Hasher, Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
+import JSONbig from "json-bigint";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
 import { buffer } from "stream/consumers";
@@ -32,6 +34,7 @@ import {
 	AssetParamMap,
 	GlobalFields,
 	ITxArrFields,
+	json_refTypes,
 	MathOp,
 	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
@@ -51,6 +54,7 @@ import { bigintSqrt } from "../lib/math";
 import {
 	assertBase64,
 	assertBase64Url,
+	assertJSON,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
@@ -5096,5 +5100,113 @@ export class Replace3 extends Replace {
 		this.start = Number(this.assertBigInt(stack.pop(), this.line));
 		this.original = this.assertBytes(stack.pop(), this.line);
 		return super.execute(stack);
+	}
+}
+
+/**
+ * Opcode: json_ref r
+ * Stack: ..., A: []byte, B: []byte → ..., any
+ * return key B's value from a valid utf-8 encoded json object A
+ */
+export class Json_ref extends Op {
+	readonly line: number;
+	readonly jsonType: string;
+	length = 1;
+
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {JSONString, JSONUint64 and JSONObject}.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		switch (argument) {
+			case json_refTypes.JSONString: {
+				this.jsonType = "byte";
+				break;
+			}
+			case json_refTypes.JSONUint64: {
+				this.jsonType = "int";
+				break;
+			}
+			case json_refTypes.JSONObject: {
+				this.jsonType = "object";
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_JSON_TYPE, {
+					jsonType: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+
+	computeCost(): number {
+		return 25 + 2 * Math.ceil(this.length / 7); // cost = 25 + ceil(bytes / 7)
+	}
+	
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const key = this.assertBytes(stack.pop(), this.line);
+		const object = this.assertBytes(stack.pop(), this.line);
+		this.length = object.length;
+		const utf8decoder = new TextDecoder("utf-8");
+		const decodedObj = utf8decoder.decode(object);
+		const keyString = utf8decoder.decode(key);
+		assertJSON(decodedObj, this.line);
+		const nativeBigJSON = JSONbig({ useNativeBigInt: true });
+		const jsonObject = nativeBigJSON.parse(decodedObj);
+		if (jsonObject[keyString] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_KEY_JSON, {
+				key: keyString,
+				line: this.line,
+			});
+		}
+		switch (this.jsonType) {
+			case "byte": {
+				if (typeof jsonObject[keyString] === 'string') {
+					stack.push(stringToBytes(jsonObject[keyString]));
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: 'byte',
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				}
+				break;
+			}
+			case "int": {
+				if (typeof jsonObject[keyString] === 'number' || 
+					typeof jsonObject[keyString] === 'bigint') {
+					const result = BigInt(jsonObject[keyString]);
+					this.checkOverflow(result, this.line, MAX_UINT64);
+					stack.push(result);
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: 'Uint64',
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				}
+				break;
+			}
+			case "object": {
+				if (typeof jsonObject[keyString] === 'object') {
+					stack.push(stringToBytes(nativeBigJSON.stringify(jsonObject[keyString])));
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: 'object',
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				} 
+				break;
+			}
+		}
+		return this.computeCost();
 	}
 }

@@ -213,9 +213,11 @@ export class WebMode {
 	 * or TransactionAndSign object(SDK transaction object and signer parameters).
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
+	/* eslint-disable sonarjs/cognitive-complexity */
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		let signedTxn: any;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16 || transactions.length == 0) {
 			throw new BuilderError(ERRORS.GENERAL.TRANSACTION_LENGTH_ERROR, {
@@ -254,22 +256,25 @@ export class WebMode {
 					return { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
 			}
 		});
-
-		const signedTxn = await this.signTransaction(toBeSignedTxns);
+		// checks if any sign txn exists else it throws error of empty signers array
+		if (toBeSignedTxns.find((txn) => txn.authAddr)) {
+			signedTxn = await this.signTransaction(toBeSignedTxns);
+		}
 
 		// sign smart signature transaction
-		for (const [txnId, txn] of txns.entries()) {
-			const signer: Sign = execParams[txnId];
+		for (const [index, txn] of txns.entries()) {
+			const signer: Sign = execParams[index];
 			if (signer.sign === SignType.LogicSignature) {
 				signer.lsig.lsig.args = signer.args ? signer.args : [];
 				const lsigTxn = algosdk.signLogicSigTransaction(txn, signer.lsig);
-				signedTxn[txnId] = {
+				if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
+				signedTxn.splice(index, 0, {
 					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
-					txId: lsigTxn.txID,
-				};
+					txID: lsigTxn.txID,
+				});
 			}
 		}
-
+		signedTxn = signedTxn?.filter((stxn: any) => stxn);
 		const txInfo = await this.sendGroupTransaction(signedTxn);
 
 		if (txInfo && typeof txInfo.txId === "string") {

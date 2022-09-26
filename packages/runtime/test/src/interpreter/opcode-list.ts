@@ -117,6 +117,7 @@ import {
 	Itob,
 	ITxn,
 	ITxnas,
+	Json_ref,
 	Keccak256,
 	Label,
 	Len,
@@ -7309,5 +7310,68 @@ describe("Teal Opcodes", function () {
 			const op = new Ed25519verify_bare([], 1);
 			assert.equal(1900, op.execute(stack));
 		});
+	});
+
+	describe("json_ref", () => {
+		const stack = new Stack<StackElem>();
+		const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10}}, \"key5\": 18446744073709551615 }";
+
+		it("Should return correct JSONUint64", function () {
+			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes("maxUint64"));
+			const op = new Json_ref(["JSONUint64"], 1);
+			op.execute(stack);
+
+			const top = stack.pop();
+			assert.deepEqual(18446744073709551615n, top);
+		});
+
+		it("Should throw when get wrong JSON type(expect byte but got uint64)", function () {
+			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes("maxUint64"));
+			const op = new Json_ref(["JSONString"], 1);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
+		});
+
+		it("Should return correct JSONString", function () {
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key1"));
+			const op = new Json_ref(["JSONString"], 1);
+			op.execute(stack);
+
+			const top = stack.pop();
+			const expected = parsing.stringToBytes("algo");
+			assert.deepEqual(expected, top);
+		});
+
+		it("Should return correct JSONObject", function () {
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key2"));
+			const op1 = new Json_ref(["JSONObject"], 1);
+			op1.execute(stack);
+			stack.push(parsing.stringToBytes("key4"));
+			const op2 = new Json_ref(["JSONObject"], 1);
+			op2.execute(stack);
+
+			const top = stack.pop();
+			const expected = parsing.stringToBytes("{\"key40\":10}");
+			assert.deepEqual(top, expected);
+		});
+
+		it("Should throw error when parsing invalid JSON object(missing comma in JSON object)", function () {
+			const jsonByte = "{\"key0\": 0 \"key1\": 2}";
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key1"));
+			const op = new Json_ref(["JSONObject"], 1);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
+		});
+
+		it("Should throw error when parsing invalid JSON object(duplicate key is not allowed in JSON object)", function () {
+			const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10, \"key40\": \"should fail!\"}}}";
+			stack.push(parsing.stringToBytes(jsonByte));
+			stack.push(parsing.stringToBytes("key1"));
+			const op = new Json_ref(["JSONObject"], 1);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
+		});		
 	});
 });

@@ -36,9 +36,11 @@ from `algosdk` and sends it to the network.
 - Added replace2 and replace3 opcode to `runtime`.
 - Added sha3_256 opcode to `Runtime`
 - Added ed25519verify_bare opcode to `Runtime`
+- Added json_ref opcode to `Runtime`
 - Added support for foreign app account access in `Runtime`
 
 #### @algo-builder/web
+- Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 
