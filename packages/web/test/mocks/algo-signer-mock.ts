@@ -18,7 +18,7 @@ const suggestedParamsMock = {
 	"genesis-hash": "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
 };
 
-// refer from algo-singer
+// refer from algo-signer
 function base64ToByteArray(blob: string): Uint8Array {
 	return stringToByteArray(atob(blob));
 }

@@ -12,8 +12,10 @@ import {
 	SessionDisconnectResponse,
 	SessionUpdateResponse,
 	SignTxnParams,
+	SignType,
 	TransactionAndSign,
 	TransactionInGroup,
+	Sign,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
@@ -213,27 +215,49 @@ export class WallectConnectSession {
 	async executeTx(
 		transactions: ExecParams[] | TransactionAndSign[]
 	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		let signedTxn;
+		let signedTxn: (Uint8Array | null)[] | undefined;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-		if (!isSDKTransactionAndSign(transactions[0])) {
-			const execParams = transactions as ExecParams[];
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		if (isSDKTransactionAndSign(transactions[0])) {
+			throw new Error("We don't support this case now");
+		}
+
+		const execParams = transactions as ExecParams[];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		}
+
+		txns = algosdk.assignGroupID(txns);
+
+		// with logic signature we set shouldSign to false
+		const toBeSignedTxns: TransactionInGroup[] = execParams.map(
+			(txn: ExecParams, index: number) => {
+				return txn.sign === SignType.LogicSignature
+					? { txn: txns[index], shouldSign: false } // logic signature
+					: { txn: txns[index], shouldSign: true }; // to be signed
+			}
+		);
+		// only shouldSign txn are to be signed
+		const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
+		if (nonLsigTxn.length > 0) {
+			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+		}
+		// sign smart signature transaction
+		for (const [index, txn] of txns.entries()) {
+			const signer: Sign = execParams[index];
+			if (signer.sign === SignType.LogicSignature) {
+				signer.lsig.lsig.args = signer.args ? signer.args : [];
+				if (!Array.isArray(signedTxn)) signedTxn = [];
+				signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig).blob);
 			}
 		}
-		txns = algosdk.assignGroupID(txns);
-		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-			return { txn: txn, shouldSign: true };
-		});
 
-		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
 		// remove null values from signed txns array
 		// TODO: replace null values with "externally" signed txns, otherwise
 		// signedtxns with nulls will always fail!
-		signedTxn = signedTxn.filter((stxn) => stxn);
+		signedTxn = signedTxn?.filter((stxn) => stxn);
 		const confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
 
 		log("confirmedTx: ", confirmedTx);
