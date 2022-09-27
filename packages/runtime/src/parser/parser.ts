@@ -960,30 +960,3 @@ export function getProgramVersion(program: string): number {
 	opcodeFromSentence(wordsFromLine(firstLine), 1, ip, ExecutionMode.APPLICATION);
 	return ip.tealVersion;
 }
-
-/**
- *
- * @param str string to convert
- * @returns camelCase to hypenated string eg(fooBar to foo-bar)
- */
-export function convertCapitalToHyphens(str: string): string {
-	return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
-}
-
-/**
- *
- * @param object
- * @returns object keys parsed from camelCase to hypenated str eg(fooBar to foo-bar)
- */
-export function convertKeysToHyphens(object: any) {
-	let newObject: any = {};
-	Object.keys(object).forEach((key) => {
-		// not parsing txID
-		if (key === "txID") {
-			newObject[key] = object[key];
-		} else {
-			newObject[convertCapitalToHyphens(key)] = object[key];
-		}
-	});
-	return newObject;
-}

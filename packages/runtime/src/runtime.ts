@@ -23,7 +23,6 @@ import {
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import { convertKeysToHyphens } from "./parser/parser";
 import {
 	AccountAddress,
 	AccountStoreI,
@@ -937,7 +936,7 @@ export class Runtime {
 
 		const txnReceipt: TxnReceipt[] = [];
 		for (const txn of txReceipts) {
-			txnReceipt.push(convertKeysToHyphens(txn));
+			txnReceipt.push(parsing.convertKeysToHyphens(txn));
 		}
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;
