@@ -34,22 +34,19 @@ async function run(
 		args: [algob.convert.stringToBytes(wrongSecret)],
 		payFlags: { totalFee: 1000 },
 	};
-	// Transaction Fails : as wrong secret value is used 
-	try {
-		await withdrawExecuteTx(deployer, txnParams);
-	} catch (error) {
-		console.log(error)
-	}
 
+	// Transaction Fails : as wrong secret value is used 
+	await withdrawExecuteTx(deployer, txnParams)
+		.catch(error => {
+			console.log(error)
+		})
 
 	// Transaction Passes: as right secret value is used
 	txnParams.args = [algob.convert.stringToBytes(secret)];
-
-	try {
-		await withdrawExecuteTx(deployer, txnParams);
-	} catch (error) {
-		throw error
-	}
+	await withdrawExecuteTx(deployer, txnParams)
+		.catch(error => {
+			throw error
+		})
 
 }
 
