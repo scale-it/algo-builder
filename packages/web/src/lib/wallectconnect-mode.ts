@@ -1,7 +1,7 @@
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import algosdk, { Transaction } from "algosdk";
+import algosdk, { SignedTransaction, Transaction } from "algosdk";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
@@ -238,5 +238,77 @@ export class WallectConnectSession {
 
 		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signes a Transaction object using walletconnect
+	 * @param transaction transaction object.
+	 * @returns SignedTransaction
+	 */
+	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
+		const txns = [transaction];
+		const txnsToSign = txns.map((txn) => {
+			const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString("base64");
+			return { txn: encodedTxn };
+		});
+		const requestParams = [txnsToSign];
+		const request = formatJsonRpcRequest(ALGORAND_SIGN_TRANSACTION_REQUEST, requestParams);
+		const result: Array<string | null> = await this.connector.sendCustomRequest(request);
+		const decodedResult = result.map((element) => {
+			return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
+		});
+		if (decodedResult[0] === null) {
+			throw new Error("Transaction was returned unsigned");
+		}
+		return algosdk.decodeSignedTransaction(decodedResult[0]);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it using walletconnect
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	async makeAndSignTx(
+		execParams: ExecParams[],
+		txParams: algosdk.SuggestedParams
+	): Promise<SignedTransaction[]> {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @param rounds number of rounds to wait for response
+	 * @returns algosdk.modelsv2.PendingTransactionResponse
+	 */
+	async sendTxAndWait(
+		transactions: SignedTransaction[],
+		rounds?: number
+	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		if (transactions.length < 1) {
+			throw Error("No transactions to process");
+		} else {
+			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
+			return await this.sendAndWait(Uint8ArraySignedTx, rounds);
+		}
 	}
 }

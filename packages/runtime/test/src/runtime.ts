@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/web";
 import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
-import algosdk, { LogicSigAccount } from "algosdk";
+import algosdk, { LogicSigAccount, Transaction } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -1362,5 +1362,83 @@ describe.skip("Logic Signature Transaction in Runtime using sendSignedTransactio
 			() => runtime.sendSignedTransaction(signedTransaction),
 			RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
 		);
+	});
+});
+describe("helper functions", () => {
+	let alice: AccountStoreI;
+	let bob: AccountStoreI;
+	let runtime: Runtime;
+
+	function syncAccounts(): void {
+		[alice, bob] = runtime.defaultAccounts();
+	}
+
+	beforeEach(() => {
+		runtime = new Runtime([]);
+		syncAccounts();
+	});
+
+	it("Should return a transaction object based on provided execParams", async () => {
+		const execParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.account.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const txnParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
+		const transactions: Transaction[] = runtime.makeTx([execParams], txnParams);
+		assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
+		assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), alice.account.addr);
+		assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), bob.account.addr);
+		assert.deepEqual(transactions[0].amount, 10000n);
+	});
+
+	it("Should sign a transaction and return a SignedTransaction object", async () => {
+		const execParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.account.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const txnParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
+		const transactions: Transaction[] = runtime.makeTx([execParams], txnParams);
+		assert.doesNotThrow(() => {
+			runtime.signTx(transactions[0], alice.account);
+		});
+	});
+
+	it("Should return a SignedTransaction object based on ExecParams", async () => {
+		const execParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.account.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const txnParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
+		assert.doesNotThrow(() => {
+			runtime.makeAndSignTx([execParams], txnParams, alice.account);
+		});
+	});
+
+	it("Should send a signed transaction and wait specified rounds for confirmation", async () => {
+		const execParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.SecretKey,
+			fromAccount: alice.account,
+			toAccountAddr: bob.account.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const txnParams = mockSuggestedParams(execParams.payFlags, runtime.getRound());
+		const signedTx = runtime.makeAndSignTx([execParams], txnParams, alice.account);
+		assert.doesNotThrow(() => {
+			runtime.sendTxAndWait(signedTx);
+		});
 	});
 });

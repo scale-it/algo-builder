@@ -1,7 +1,8 @@
 import algosdk, { Account, SignedTransaction, Transaction } from "algosdk";
 import assert from "assert";
+import { exec } from "child_process";
 
-import { types, WebMode } from "../../../src";
+import { getSuggestedParams, types, WebMode } from "../../../src";
 import { ExecParams } from "../../../src/types";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
 
@@ -31,7 +32,7 @@ describe("Webmode - Algosigner test cases ", function () {
 	});
 	describe("helper functions", () => {
 		it("Should return a transaction object based on provided execParams", async () => {
-			const txnParams: types.AlgoTransferParam = {
+			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
@@ -39,7 +40,8 @@ describe("Webmode - Algosigner test cases ", function () {
 				amountMicroAlgos: 10000n,
 				payFlags: {},
 			};
-			const transactions: Transaction[] = await webMode.makeTx([txnParams]);
+			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
+			const transactions: Transaction[] = await webMode.makeTx([execParams], txnParams);
 			assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), sender.addr);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), receiver.addr);
@@ -47,7 +49,7 @@ describe("Webmode - Algosigner test cases ", function () {
 		});
 
 		it("Should sign a transaction and return a SignedTransaction object", async () => {
-			const txnParams: types.AlgoTransferParam = {
+			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
@@ -55,14 +57,15 @@ describe("Webmode - Algosigner test cases ", function () {
 				amountMicroAlgos: 10000n,
 				payFlags: {},
 			};
-			const transactions: Transaction[] = await webMode.makeTx([txnParams]);
+			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
+			const transactions: Transaction[] = await webMode.makeTx([execParams], txnParams);
 			assert.doesNotThrow(() => {
 				webMode.signTx(transactions[0]);
 			});
 		});
 
 		it("Should return a SignedTransaction object based on ExecParams", async () => {
-			const txnParams: types.AlgoTransferParam = {
+			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
@@ -70,13 +73,14 @@ describe("Webmode - Algosigner test cases ", function () {
 				amountMicroAlgos: 10000n,
 				payFlags: {},
 			};
+			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			assert.doesNotThrow(() => {
-				webMode.makeAndSignTx([txnParams]);
+				webMode.makeAndSignTx([execParams], txnParams);
 			});
 		});
 
 		it("Should send a signed transaction and wait specified rounds for confirmation", async () => {
-			const txnParams: types.AlgoTransferParam = {
+			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
@@ -84,7 +88,8 @@ describe("Webmode - Algosigner test cases ", function () {
 				amountMicroAlgos: 10000n,
 				payFlags: {},
 			};
-			const signedTx = await webMode.makeAndSignTx([txnParams]);
+			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
+			const signedTx = await webMode.makeAndSignTx([execParams], txnParams);
 			assert.doesNotThrow(() => {
 				webMode.sendTxAndWait(signedTx);
 			});
