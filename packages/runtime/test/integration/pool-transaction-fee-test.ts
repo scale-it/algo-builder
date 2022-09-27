@@ -93,7 +93,6 @@ describe("Pooled Transaction Fees Test", function () {
 		const amount = 4000;
 		const fee = 3000;
 		const johnInitialBalance = john.balance();
-		const bobInitialBalance = john.balance();
 		// group with fee distribution. Pooled transaction fee
 		const groupTx: types.ExecParams[] = [
 			{
@@ -108,15 +107,15 @@ describe("Pooled Transaction Fees Test", function () {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				toAccountAddr: bob.address,
+				toAccountAddr: elon.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: 0 }, // with 0 txn fee.
 			},
 			{
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
-				fromAccount: bob.account,
-				toAccountAddr: elon.address,
+				fromAccount: elon.account,
+				toAccountAddr: john.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: 0 }, // with 0 txn fee.
 			},
@@ -125,8 +124,8 @@ describe("Pooled Transaction Fees Test", function () {
 		runtime.executeTx(groupTx);
 
 		syncAccounts();
-		assert.equal(john.balance(), johnInitialBalance - BigInt(fee) - BigInt(amount));
+		assert.equal(john.balance(), johnInitialBalance - BigInt(fee));
 		assert.equal(alice.balance(), BigInt(minBalance));
-		assert.equal(elon.balance(), BigInt(minBalance + amount));
+		assert.equal(elon.balance(), BigInt(minBalance));
 	});
 });
