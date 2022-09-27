@@ -1,3 +1,4 @@
+#pragma version 7
 itxn_begin
 int pay
 itxn_field TypeEnum
