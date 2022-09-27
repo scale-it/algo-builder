@@ -20,7 +20,7 @@ describe("Pooled Transaction Fees Test", function () {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
-		elon = new AccountStore(initialBalance, "elon");
+		elon = new AccountStore(0, "elon");
 		runtime = new Runtime([john, bob, alice, elon]); // setup test
 	});
 
