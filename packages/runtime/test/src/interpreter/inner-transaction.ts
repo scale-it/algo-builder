@@ -4,12 +4,13 @@ import { assert } from "chai";
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { Runtime } from "../../../src/index";
+import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
 import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
+import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -1409,6 +1410,25 @@ describe("Inner Transactions", function () {
 			});
 		});
 
+	});
+
+	describe("Teal v7 update", function () {
+		this.beforeEach(() => {
+			setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
+		});
+		describe("Inner transaction can run in v7", () => {
+			useFixture("teal-files");
+			this.beforeEach(() => {
+				setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
+			});
+			it("Should run for a .teal program and return innter transaction group", () => {
+				const file = "test-innerTxn-v7.teal";
+				interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
+				assert.equal(interpreter.innerTxnGroups.length, 0);
+				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
+			});
+		})
+
 		describe("Foreign application account access in teal v7 ", () => {
 			this.beforeEach(() => {
 				setUpInterpreter(7, 1e9);
@@ -1449,4 +1469,5 @@ describe("Inner Transactions", function () {
 			});
 		});
 	});
+
 });

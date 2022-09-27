@@ -1,0 +1,18 @@
+itxn_begin
+int pay
+itxn_field TypeEnum
+txn Sender
+itxn_field Receiver
+int 1000
+itxn_field Amount
+itxn_next
+int pay
+itxn_field TypeEnum
+txn Sender
+itxn_field Receiver
+int 1000
+itxn_field Amount
+int 2000
+itxn_field Fee
+int 1
+return
