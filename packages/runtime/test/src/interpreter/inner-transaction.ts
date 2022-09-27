@@ -1412,20 +1412,18 @@ describe("Inner Transactions", function () {
 
 	});
 
-	describe("Teal v7 update", function () {
-		this.beforeEach(() => {
-			setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
-		});
+	describe("Teal v7", function () {
 		describe("Inner transaction can run in v7", () => {
 			useFixture("teal-files");
 			this.beforeEach(() => {
 				setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
 			});
-			it("Should run for a .teal program and return innter transaction group", () => {
+			it("Should execute a teal version 7 file successful ", () => {
 				const file = "test-innerTxn-v7.teal";
 				interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
 				assert.equal(interpreter.innerTxnGroups.length, 0);
 				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
+				assert.equal(interpreter.tealVersion, 7);
 			});
 		})
 
