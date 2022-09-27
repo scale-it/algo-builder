@@ -140,7 +140,7 @@ describe("Pooled Transaction Fees Test", function () {
 
 	it("Should unfunded accounts be able to issue transactions and opt-in", () => {
 		setupAsset();
-		const amount = 4000;
+		const amount = 200000;
 		const fee = 3000;
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
@@ -163,7 +163,7 @@ describe("Pooled Transaction Fees Test", function () {
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
-				fromAccount: elon.account,
+				fromAccount: elon.account, // unfunded account
 				assetID: assetId,
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
@@ -174,7 +174,7 @@ describe("Pooled Transaction Fees Test", function () {
 		syncAccounts();
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
-		assert.equal(elon.balance(), BigInt(initialBalance) + BigInt(amount));
+		assert.equal(elon.balance(), BigInt(0) + BigInt(amount)); // unfunded account
 		// verify holding
 		assert.isDefined(elon.getAssetHolding(assetId));
 	});
