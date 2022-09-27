@@ -16,7 +16,7 @@ describe("Pooled Transaction Fees Test", function () {
 	let assetId: number;
 	let runtime: Runtime;
 
-	this.beforeEach(async function () {
+	this.beforeEach(() => {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
@@ -102,7 +102,6 @@ describe("Pooled Transaction Fees Test", function () {
 	it("Should unfunded accounts be able to issue transactions of group size 3", () => {
 		const amount = 4000;
 		const fee = 3000;
-		const johnInitialBalance = john.balance();
 		// group with fee distribution. Pooled transaction fee
 		const groupTx: types.ExecParams[] = [
 			{
@@ -117,14 +116,14 @@ describe("Pooled Transaction Fees Test", function () {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				toAccountAddr: elon.address,
+				toAccountAddr: bob.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: 0 }, // with 0 txn fee.
 			},
 			{
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
-				fromAccount: elon.account,
+				fromAccount: bob.account,
 				toAccountAddr: john.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: 0 }, // with 0 txn fee.
@@ -136,7 +135,7 @@ describe("Pooled Transaction Fees Test", function () {
 		syncAccounts();
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(fee));
 		assert.equal(alice.balance(), BigInt(initialBalance));
-		assert.equal(elon.balance(), BigInt(initialBalance));
+		assert.equal(bob.balance(), BigInt(initialBalance));
 	});
 
 	it("Should unfunded accounts be able to issue transactions and opt-in", () => {
@@ -177,7 +176,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
 		assert.equal(elon.balance(), BigInt(initialBalance) + BigInt(amount));
 		// verify holding
-		assert.isDefined(john.getAssetHolding(assetId));
+		assert.isDefined(elon.getAssetHolding(assetId));
 	});
 
 });
