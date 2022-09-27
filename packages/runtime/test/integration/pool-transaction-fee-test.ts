@@ -13,11 +13,12 @@ describe("Pooled Transaction Fees Test", function () {
 	let john = new AccountStore(1e30);
 	let alice = new AccountStore(minBalance);
 	let bob = new AccountStore(minBalance);
+	let elon = new AccountStore(minBalance);
 
 	let runtime: Runtime;
 
 	this.beforeEach(async function () {
-		runtime = new Runtime([john, alice, bob]); // setup test
+		runtime = new Runtime([john, alice, bob, elon]); // setup test
 	});
 
 	// helper function
@@ -25,6 +26,7 @@ describe("Pooled Transaction Fees Test", function () {
 		john = runtime.getAccount(john.address);
 		bob = runtime.getAccount(bob.address);
 		alice = runtime.getAccount(alice.address);
+		elon = runtime.getAccount(elon.address);
 	}
 
 	it("Should pass if second account doesn't pay fees and first account is covering fees", () => {
@@ -85,5 +87,46 @@ describe("Pooled Transaction Fees Test", function () {
 			() => runtime.executeTx(groupTx),
 			RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
 		);
+	});
+
+	it("Should unfunded accounts be able to issue transactions, through execute transaction", () => {
+		const amount = 4000;
+		const fee = 3000;
+		const johnInitialBalance = john.balance();
+		const bobInitialBalance = john.balance();
+		// group with fee distribution. Pooled transaction fee
+		const groupTx: types.ExecParams[] = [
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: alice.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: fee }, // this covers fee of entire group txns.
+			},
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				toAccountAddr: bob.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: 0 }, // with 0 txn fee.
+			},
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: bob.account,
+				toAccountAddr: elon.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: 0 }, // with 0 txn fee.
+			},
+		];
+
+		runtime.executeTx(groupTx);
+
+		syncAccounts();
+		assert.equal(john.balance(), johnInitialBalance - BigInt(fee) - BigInt(amount));
+		assert.equal(alice.balance(), BigInt(minBalance));
+		assert.equal(elon.balance(), BigInt(minBalance + amount));
 	});
 });
