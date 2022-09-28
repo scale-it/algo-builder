@@ -119,6 +119,7 @@ export type ExecParams =
 export enum SignType {
 	SecretKey,
 	LogicSignature,
+	MultiSignature,
 }
 
 export enum TransactionType {
@@ -158,9 +159,16 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
+export interface SignWithMultisig {
+	sign: SignType.MultiSignature;
+	mparams: WalletMultisigMetadata;
+	fromAccount?: AccountSDK;
+	fromAccountAddr: AccountAddress;
+}
+
 export type Lsig = SignWithLsig;
 
-export type Sign = SignWithSk | SignWithLsig;
+export type Sign = SignWithSk | SignWithLsig | SignWithMultisig;
 
 export type BasicParams = Sign & {
 	payFlags: TxParams;
