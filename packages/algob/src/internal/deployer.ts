@@ -15,7 +15,6 @@ import type {
 	Transaction,
 } from "algosdk";
 import * as algosdk from "algosdk";
-import { decode } from "punycode";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
