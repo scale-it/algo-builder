@@ -99,7 +99,7 @@ describe("Pooled Transaction Fees Test", function () {
 		);
 	});
 
-	it("Should unfunded accounts be able to issue transactions of group size 3", () => {
+	it("Should pass if two out of three doesn't pay the txn fee in a group txn of size three", () => {
 		const amount = 4000;
 		const fee = 3000;
 		// group with fee distribution. Pooled transaction fee
