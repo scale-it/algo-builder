@@ -172,6 +172,7 @@ describe("Pooled Transaction Fees Test", function () {
 		runtime.executeTx(groupTx);
 
 		syncAccounts();
+		assert(elon.balance() !== BigInt(0));
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
 		assert.equal(elon.balance(), BigInt(amount)); // unfunded account
