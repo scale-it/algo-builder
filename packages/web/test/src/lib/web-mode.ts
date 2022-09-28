@@ -37,7 +37,7 @@ describe("Webmode - Algosigner test cases ", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1000n,
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
@@ -54,11 +54,11 @@ describe("Webmode - Algosigner test cases ", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1000n,
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
-			const transactions: Transaction[] = await webMode.makeTx([execParams], txnParams);
+			const transactions: Transaction[] = webMode.makeTx([execParams], txnParams);
 			assert.doesNotThrow(async () => {
 				await webMode.signTx(transactions[0]);
 			});
@@ -70,7 +70,7 @@ describe("Webmode - Algosigner test cases ", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1000n,
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
@@ -85,7 +85,7 @@ describe("Webmode - Algosigner test cases ", function () {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1000n,
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
