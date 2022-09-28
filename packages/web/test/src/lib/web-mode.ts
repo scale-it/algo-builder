@@ -17,7 +17,7 @@ describe("Webmode - Algosigner test cases ", function () {
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
 	});
 
-	it("Should executeTx without throwing an error", async function () {
+	it("Should executeTx without throwing an error", async () => {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -30,7 +30,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			await webMode.executeTx([txnParams]);
 		});
 	});
-	describe("helper functions", () => {
+	describe("Helper functions", () => {
 		it("Should return a transaction object based on provided execParams", async () => {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
@@ -41,7 +41,7 @@ describe("Webmode - Algosigner test cases ", function () {
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
-			const transactions: Transaction[] = await webMode.makeTx([execParams], txnParams);
+			const transactions: Transaction[] = webMode.makeTx([execParams], txnParams);
 			assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), sender.addr);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), receiver.addr);
@@ -59,8 +59,8 @@ describe("Webmode - Algosigner test cases ", function () {
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			const transactions: Transaction[] = await webMode.makeTx([execParams], txnParams);
-			assert.doesNotThrow(() => {
-				webMode.signTx(transactions[0]);
+			assert.doesNotThrow(async () => {
+				await webMode.signTx(transactions[0]);
 			});
 		});
 
@@ -74,8 +74,8 @@ describe("Webmode - Algosigner test cases ", function () {
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
-			assert.doesNotThrow(() => {
-				webMode.makeAndSignTx([execParams], txnParams);
+			assert.doesNotThrow(async () => {
+				await webMode.makeAndSignTx([execParams], txnParams);
 			});
 		});
 
@@ -90,8 +90,8 @@ describe("Webmode - Algosigner test cases ", function () {
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			const signedTx = await webMode.makeAndSignTx([execParams], txnParams);
-			assert.doesNotThrow(() => {
-				webMode.sendTxAndWait(signedTx);
+			assert.doesNotThrow(async () => {
+				await webMode.sendTxAndWait(signedTx);
 			});
 		});
 	});

@@ -679,7 +679,7 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(res.assetDef, asaDef);
 	});
 });
-describe("helper functions", () => {
+describe("Helper functions", () => {
 	const env = mkEnv("network1");
 	const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 	let deployer: DeployerDeployMode;
@@ -692,7 +692,7 @@ describe("helper functions", () => {
 		bob = generateAccount();
 	});
 
-	it("Should return a transaction object based on provided execParams", async () => {
+	it("Should return a transaction object based on provided execParams", () => {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -709,7 +709,7 @@ describe("helper functions", () => {
 		assert.deepEqual(transactions[0].amount, 10000n);
 	});
 
-	it("Should sign a transaction and return a SignedTransaction object", async () => {
+	it("Should sign a transaction and return a SignedTransaction object", () => {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -724,12 +724,12 @@ describe("helper functions", () => {
 		};
 		const txnParams = mockSuggestedParam;
 		const transactions: Transaction[] = deployer.makeTx([execParams], txnParams);
-		assert.doesNotThrow(() => {
-			deployer.signTx(transactions[0], signature);
+		assert.doesNotThrow(async () => {
+			await deployer.signTx(transactions[0], signature);
 		});
 	});
 
-	it("Should return a SignedTransaction object based on ExecParams", async () => {
+	it("Should return a SignedTransaction object based on ExecParams", () => {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -743,8 +743,8 @@ describe("helper functions", () => {
 			fromAccount: alice,
 		};
 		const txnParams = mockSuggestedParam;
-		assert.doesNotThrow(() => {
-			deployer.makeAndSignTx([execParams], txnParams, signature);
+		assert.doesNotThrow(async () => {
+			await deployer.makeAndSignTx([execParams], txnParams, signature);
 		});
 	});
 
@@ -763,8 +763,8 @@ describe("helper functions", () => {
 		};
 		const txnParams = mockSuggestedParam;
 		const signedTx = await deployer.makeAndSignTx([execParams], txnParams, signature);
-		assert.doesNotThrow(() => {
-			deployer.sendTxAndWait(signedTx, 10);
+		assert.doesNotThrow(async () => {
+			await deployer.sendTxAndWait(signedTx, 10);
 		});
 	});
 });
