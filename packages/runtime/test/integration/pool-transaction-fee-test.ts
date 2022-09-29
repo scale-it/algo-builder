@@ -1,6 +1,5 @@
 import { types } from "@algo-builder/web";
 import { assert } from "chai";
-
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { useFixture } from "../helpers/integration";
@@ -180,7 +179,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.isDefined(elon.getAssetHolding(assetId));
 	});
 
-	it("Should fail when no fund is sent to unfunded account in group txn", () => {
+	it("Should fail when tried to optin to unfunded account in group txn", () => {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
