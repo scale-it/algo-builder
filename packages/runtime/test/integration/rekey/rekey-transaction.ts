@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
+import { AccountAddress } from "@algo-builder/web/build/types";
 import algosdk, {
 	LogicSigAccount,
 	multisigAddress,
@@ -100,26 +101,11 @@ describe("Re-keying transactions", function () {
 		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
-	//TODO: delete this function and make use of the function below rekeyFromAccountToMultiSig
-	// rekey normal account
 	function rekeyFromAccount(
 		runtime: Runtime,
 		signer: AccountStoreI,
 		from: AccountStoreI,
-		to: AccountStoreI
-	): void {
-		mkTxAlgoTransferFromAccount(runtime, signer, from, from, 0n, {
-			totalFee: FEE,
-			rekeyTo: to.address,
-		});
-	}
-	//TODO: change name to rekey from Account, check if there is a type for address instead of string
-	//there is a type accountAddress from web https://algobuilder.dev/api/web/modules/types.html#AccountAddress
-	function rekeyFromAccountToMultiSig(
-		runtime: Runtime,
-		signer: AccountStoreI,
-		from: AccountStoreI,
-		to: string
+		to: AccountAddress
 	): void {
 		mkTxAlgoTransferFromAccount(runtime, signer, from, from, 0n, {
 			totalFee: FEE,
@@ -292,7 +278,7 @@ describe("Re-keying transactions", function () {
 
 	describe("Account to account", function () {
 		this.beforeEach(() => {
-			rekeyFromAccount(runtime, alice, alice, bob);
+			rekeyFromAccount(runtime, alice, alice, bob.address);
 		});
 
 		it("Spend address of alice account should changed to bob account", function () {
@@ -317,13 +303,13 @@ describe("Re-keying transactions", function () {
 		});
 
 		it("Can rekey account again", () => {
-			rekeyFromAccount(runtime, bob, alice, lsigAccount);
+			rekeyFromAccount(runtime, bob, alice, lsigAccount.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), lsigAccount.address);
 		});
 
 		it("Can Rekey again back to orginal account", () => {
-			rekeyFromAccount(runtime, bob, alice, alice);
+			rekeyFromAccount(runtime, bob, alice, alice.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), alice.address);
 		});
@@ -337,7 +323,7 @@ describe("Re-keying transactions", function () {
 	describe("Account to Lsig", function () {
 		this.beforeEach(() => {
 			// create rekey transaction
-			rekeyFromAccount(runtime, alice, alice, lsigAccount);
+			rekeyFromAccount(runtime, alice, alice, lsigAccount.address);
 		});
 
 		it("spend address of alice account should be lsig address", () => {
@@ -475,7 +461,7 @@ describe("Re-keying transactions", function () {
 	});
 	describe.only("Account to MultiSig", () => {
 		this.beforeEach(() => {
-			rekeyFromAccountToMultiSig(runtime, alice, alice, multSigAddr);
+			rekeyFromAccount(runtime, alice, alice, multSigAddr);
 			syncAccounts();
 		});
 

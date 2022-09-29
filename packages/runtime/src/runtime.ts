@@ -1038,12 +1038,18 @@ export class Runtime {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
 		}
 	}
+
+	/**
+	 * Verifies multi-signature and throws an error if signatures are not valid
+	 * @param signedTransaction signedTransaction object
+	 */
 	validateMultisignature(signedTransaction: algosdk.SignedTransaction) {
 		this.verifyMultisig(signedTransaction);
 		if (!this.verifyMultisig(signedTransaction)) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_MULTISIG);
 		}
 	}
+
 	/**
 	 * Verify multi-signature
 	 * @param signedTxn signedTransaction object

@@ -39,6 +39,9 @@ from `algosdk` and sends it to the network.
 - Added ed25519verify_bare opcode to `Runtime`
 - Added json_ref opcode to `Runtime`
 - Added support for foreign app account access in `Runtime`
+- Added multisignatue verification in `Runtime`.
+- Added support to rekey account to multisig in `Runtime`.
+- Added support to withdraw from account rekeyd to multisignature in `Runtime`.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
