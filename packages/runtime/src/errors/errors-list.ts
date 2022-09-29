@@ -419,13 +419,15 @@ maximun uint128`,
 	},
 	BYTES_REPLACE_ERROR: {
 		number: 1061,
-		message: "Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
+		message:
+			"Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
 		title: "replace opcode error",
 		description: "Can not replace bytes due to invalid start or end index",
 	},
 	UNKNOWN_JSON_TYPE: {
 		number: 1062,
-		message: "JSON TYPE must be {JSONString, JSONUint64 or JSONObject}, got :%jsonType%, at line %line%",
+		message:
+			"JSON TYPE must be {JSONString, JSONUint64 or JSONObject}, got :%jsonType%, at line %line%",
 		title: "Unknown JSON type",
 		description: "Unknown JSON type",
 	},
@@ -439,8 +441,8 @@ maximun uint128`,
 		number: 1064,
 		message: "Unkown key %key% in JSON object at line %line%",
 		title: "Unknown key JSON",
-		description: "Unknown key JSON"
-	}
+		description: "Unknown key JSON",
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -573,6 +575,13 @@ const runtimeGeneralErrors = {
 		message: "Too many inner transaction.",
 		title: "Too many inner transaction.",
 		description: "Too many inner transaction in one call, maximum is 256.",
+	},
+	INVALID_MULTISIG: {
+		number: 1321,
+		message: "Invalid multisignature",
+		title: "Invalid multisignature",
+		description:
+			"Provided multisignature is invalid and was not able to authentiace the transaction",
 	},
 };
 

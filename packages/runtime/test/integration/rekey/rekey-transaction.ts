@@ -1,10 +1,16 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
-import { LogicSigAccount, multisigAddress, MultisigMetadata } from "algosdk";
+import algosdk, {
+	LogicSigAccount,
+	multisigAddress,
+	MultisigMetadata,
+	SignedTransaction,
+} from "algosdk";
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
+import { RUNTIME_ERROR_RANGES, RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
+import { mockSuggestedParams } from "../../../src/mock/tx";
 import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
@@ -94,7 +100,7 @@ describe("Re-keying transactions", function () {
 		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
-    //TODO: delete this function and make use of the function below rekeyFromAccountToMultiSig
+	//TODO: delete this function and make use of the function below rekeyFromAccountToMultiSig
 	// rekey normal account
 	function rekeyFromAccount(
 		runtime: Runtime,
@@ -107,7 +113,7 @@ describe("Re-keying transactions", function () {
 			rekeyTo: to.address,
 		});
 	}
-    //TODO: change name to rekey from Account, check if there is a type for address instead of string
+	//TODO: change name to rekey from Account, check if there is a type for address instead of string
 	//there is a type accountAddress from web https://algobuilder.dev/api/web/modules/types.html#AccountAddress
 	function rekeyFromAccountToMultiSig(
 		runtime: Runtime,
@@ -269,7 +275,7 @@ describe("Re-keying transactions", function () {
 		const addrs = [john.address, bob.address];
 		multiSigParams = {
 			version: 1,
-			threshold: 1,
+			threshold: 2,
 			addrs: addrs,
 		};
 		multSigAddr = multisigAddress(multiSigParams);
@@ -467,18 +473,68 @@ describe("Re-keying transactions", function () {
 			assert.equal(alice.getSpendAddress(), bob.address);
 		});
 	});
-	describe("Account to MultiSig", function () {
+	describe.only("Account to MultiSig", () => {
 		this.beforeEach(() => {
 			rekeyFromAccountToMultiSig(runtime, alice, alice, multSigAddr);
+			syncAccounts();
 		});
 
-		it("Spend address of alice account should change multiSig account", function () {
+		it("Spend address of alice account should change to multiSig address", () => {
 			assert.isNotNull(alice.account.spend);
 			assert.equal(alice.getSpendAddress(), multSigAddr);
 		});
 
-		it("Should transfer ALGO if spend account provided", function () {
-			verifyTransferAlgoAuthByAccount(runtime, john, alice, bob, DEFAULT_AMOUNT);
+		it("Should transfer ALGO if correct multisig provided", () => {
+			const alicePreTxnBalance = alice.balance();
+			const bobPreTxnBalance = bob.balance();
+			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
+			const txn = algosdk.makePaymentTxnWithSuggestedParams(
+				alice.account.addr,
+				bob.account.addr,
+				10,
+				undefined,
+				undefined,
+				suggestedParams
+			);
+			// Sign with first account
+			const rawSignedTxn = algosdk.signMultisigTransaction(
+				txn,
+				multiSigParams,
+				john.account.sk
+			).blob;
+			// Sign with second account
+			const twosigs = algosdk.appendSignMultisigTransaction(
+				rawSignedTxn,
+				multiSigParams,
+				bob.account.sk
+			).blob;
+			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);
+			runtime.executeTx([signedTxn]);
+			syncAccounts();
+			assert.deepEqual(alice.balance(), alicePreTxnBalance - 10n - BigInt(FEE));
+			assert.deepEqual(bob.balance(), bobPreTxnBalance + 10n);
+		});
+		it("Should throw an error when threshold not met", () => {
+			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
+			const txn = algosdk.makePaymentTxnWithSuggestedParams(
+				alice.account.addr,
+				bob.account.addr,
+				10,
+				undefined,
+				undefined,
+				suggestedParams
+			);
+			// Sign with first acount only
+			const rawSignedTxn = algosdk.signMultisigTransaction(
+				txn,
+				multiSigParams,
+				john.account.sk
+			).blob;
+			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(rawSignedTxn);
+			expectRuntimeError(
+				() => runtime.executeTx([signedTxn]),
+				RUNTIME_ERRORS.GENERAL.INVALID_MULTISIG
+			);
 		});
 	});
 });
