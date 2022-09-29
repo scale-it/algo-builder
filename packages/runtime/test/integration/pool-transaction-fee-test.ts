@@ -351,7 +351,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		);
 	});
 
-	it("Should a funded account in txn group be able to cover the partial fee", () => {
+	it("Should not fail when a funded account in txn group is trying cover the partial fee", () => {
 		setupApp();
 		const amount = 200000;
 		const fee = 1999;
