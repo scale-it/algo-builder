@@ -2,7 +2,6 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, getSuggestedParams, types as wtypes } from "@algo-builder/web";
 import { AlgoTransferParam, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { generateAccount, LogicSigAccount, Transaction } from "algosdk";
-import { Account } from "algosdk/dist/types/src/client/v2/algod/models/types";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
