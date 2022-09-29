@@ -40,6 +40,7 @@ from `algosdk` and sends it to the network.
 - Added json_ref opcode to `Runtime`
 - Added support for foreign app account access in `Runtime`
 - Added new section in `Deployer` guide about helper methods across all deployers.
+- Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in `Runtime` and `Deployer`.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
@@ -90,7 +91,6 @@ from `algosdk` and sends it to the network.
 - Teal v6 support:
   - Add `Txn LastLog` opcode.
   - Add `Txn StateProofPK` opcode.
-  - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
 
 #### Examples
 
