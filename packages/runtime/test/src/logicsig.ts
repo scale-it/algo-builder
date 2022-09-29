@@ -100,7 +100,7 @@ describe("Logic Signature", () => {
 		assert.equal(result, false);
 	});
 
-	it("should handle contract lsig (crowd fund escrow account) verification correctly with non-empty smart contract parmas", () => {
+	it ("Should handle contract lsig (crowd fund escrow account) verification correctly with non-empty smart contract params", () => {
 		// create application
 		applicationId = runtime.deployApp(
 			bob.account,
