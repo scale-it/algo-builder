@@ -256,3 +256,179 @@ describe("Pooled Transaction Fees Test", function () {
 	});
 
 });
+
+describe("Pooled Transaction Fees Test with App and Asset", function () {
+	useFixture("stateful");
+	const initialBalance = 1e30;
+	let john: AccountStore;
+	let bob: AccountStore;
+	let elon: AccountStore;
+	let alice: AccountStore;
+	let assetId: number;
+	let approvalProgramFilename: string;
+	let clearProgramFilename: string;
+	let runtime: Runtime;
+
+	this.beforeEach(() => {
+		john = new AccountStore(initialBalance, "john");
+		bob = new AccountStore(initialBalance, "bob");
+		alice = new AccountStore(initialBalance, "alice");
+		elon = new AccountStore(0, "elon");
+		runtime = new Runtime([john, bob, alice, elon]); // setup test
+
+		approvalProgramFilename = "counter-approval.teal";
+		clearProgramFilename = "clear.teal";
+	});
+
+	function setupAsset(): void {
+		// create asset
+		assetId = runtime.deployASA("gold", {
+			creator: { ...john.account, name: "john" },
+		}).assetIndex;
+	}
+
+	function setupApp(): void {
+		// deploy new app
+		runtime.deployApp(
+			john.account,
+			{
+				appName: "app",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename,
+				clearProgramFilename,
+				globalBytes: 1,
+				globalInts: 1,
+				localBytes: 1,
+				localInts: 1,
+			},
+			{}
+		);
+	}
+
+	// helper function
+	function syncAccounts(): void {
+		john = runtime.getAccount(john.address);
+		bob = runtime.getAccount(bob.address);
+		alice = runtime.getAccount(alice.address);
+		elon = runtime.getAccount(elon.address);
+	}
+
+	it("Should fail when tried to optin to unfunded account in group txn", () => {
+		setupAsset();
+		const amount = 200000;
+		const fee = 3000;
+		// group with fee distribution
+		const groupTx: types.ExecParams[] = [
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: alice.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: 0 }, // with 0 txn fee
+			},
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: alice.account,
+				toAccountAddr: bob.address,
+				amountMicroAlgos: amount,
+				payFlags: { totalFee: fee }, // this covers fee of entire group txns
+			},
+			{
+				type: types.TransactionType.OptInASA,
+				sign: types.SignType.SecretKey,
+				fromAccount: elon.account, // unfunded account and no fund is sent to this account
+				assetID: assetId,
+				payFlags: { totalFee: 0 }, // with 0 txn fee
+			},
+		];
+
+		// Fails as account in last txn in group txn is unfunded
+		expectRuntimeError(
+			() => runtime.executeTx(groupTx),
+			RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+		);
+	});
+
+	it("Should a funded account in txn group be able to cover the partial fee", () => {
+		setupApp();
+		const amount = 200000;
+		const fee = 1999;
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		if (appInfo !== undefined) {
+			const tx: types.ExecParams[] = [
+				{
+					type: types.TransactionType.OptInToApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account, // funded account
+					appID: appInfo.appID,
+					payFlags: { totalFee: 1000 } // partially covering it's fee
+				},
+			];
+			runtime.executeTx(tx);
+			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
+			const groupTx: types.ExecParams[] = [
+				{
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account, // funded account
+					appID: appInfo.appID,
+					payFlags: { totalFee: 1 } // partially covering it's fee
+				},
+				{
+					type: types.TransactionType.TransferAlgo,
+					sign: types.SignType.SecretKey,
+					fromAccount: john.account,
+					toAccountAddr: elon.address,
+					amountMicroAlgos: amount,
+					payFlags: { totalFee: fee }
+				},
+			];
+
+			runtime.executeTx(groupTx);
+			syncAccounts();
+			assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(1001));
+			assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount) - BigInt(fee));
+			assert.equal(elon.balance(), BigInt(amount));
+		}
+	});
+
+	it("Should fail when unfunded account is trying to cover it's own fee", () => {
+		setupApp();
+		const amount = 200000;
+		const fee = 1999;
+		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
+		assert.isDefined(appInfo);
+		if (appInfo !== undefined) {
+			runtime.optInToApp(alice.address, appInfo.appID, {}, {});
+			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
+			runtime.getAccount(alice.address).amount = BigInt(0); // set balance 0
+
+			const groupTx: types.ExecParams[] = [
+				{
+					type: types.TransactionType.CallApp,
+					sign: types.SignType.SecretKey,
+					fromAccount: alice.account, // unfunded account
+					appID: appInfo.appID,
+					payFlags: { totalFee: 1 },
+				},
+				{
+					type: types.TransactionType.TransferAlgo,
+					sign: types.SignType.SecretKey,
+					fromAccount: john.account,
+					toAccountAddr: elon.address,
+					amountMicroAlgos: amount,
+					payFlags: { totalFee: fee },
+				},
+			];
+			// Fails as account in first txn in group txn is unfunded
+			expectRuntimeError(
+				() => runtime.executeTx(groupTx),
+				RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+			);
+		}
+	});
+
+});
