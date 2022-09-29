@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
