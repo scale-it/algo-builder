@@ -65,6 +65,7 @@ __metadata:
     "@types/chai": ^4.3.0
     "@types/debug": ^4.1.7
     "@types/elliptic": ^6.4.14
+    "@types/json-bigint": ^1.0.1
     "@types/lodash.clonedeep": ^4.5.6
     "@types/mocha": ^9.1.0
     "@types/node": ^17.0.21
@@ -99,7 +100,7 @@ __metadata:
   resolution: "@algo-builder/web@workspace:packages/web"
   dependencies:
     "@json-rpc-tools/utils": ^1.7.6
-    "@randlabs/myalgo-connect": ^1.1.2
+    "@randlabs/myalgo-connect": ^1.2.0
     "@types/chai": ^4.3.0
     "@types/debug": ^4.1.7
     "@types/mocha": ^9.1.0
@@ -556,12 +557,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@randlabs/myalgo-connect@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@randlabs/myalgo-connect@npm:1.1.2"
+"@randlabs/myalgo-connect@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@randlabs/myalgo-connect@npm:1.2.0"
   dependencies:
     "@randlabs/communication-bridge": ^1.0.0
-  checksum: 4932c0704272eebf88e825821ffa0f16402751f1063030b3bee18fdc62764f63f978c3cc4a832f29b61cdea5cbb340bcc97a0eb048be176d53f18b7eaa7ab74f
+  checksum: 3ea50cce5689c02228234487c493d62980861bde7299068fb0adcacc4cd1431cd88a9b3110787251525b04224d623d59c1d164b273625f92df3c310ab269a1d9
   languageName: node
   linkType: hard
 
@@ -722,6 +723,13 @@ __metadata:
     "@types/minimatch": "*"
     "@types/node": "*"
   checksum: 6ae717fedfdfdad25f3d5a568323926c64f52ef35897bcac8aca8e19bc50c0bd84630bbd063e5d52078b2137d8e7d3c26eabebd1a2f03ff350fff8a91e79fc19
+  languageName: node
+  linkType: hard
+
+"@types/json-bigint@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@types/json-bigint@npm:1.0.1"
+  checksum: b39e55a811f554bd25f1d991bc4fc70655216dff466f21f97160097573a4bc7b478c1907aa5194c79022c115f509f8e4712083c51f57665e7a2de7412ff7801f
   languageName: node
   linkType: hard
 

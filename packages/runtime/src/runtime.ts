@@ -850,8 +850,9 @@ export class Runtime {
 	}
 
 	/**
-	 * This function executes a transaction based on a smart
-	 * contract logic and updates state afterwards
+	 * This function executes a transaction based on a smart contract logic and updates state afterwards
+	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
+	 * for more info.
 	 * @param txnParams : Transaction parameters
 	 * @param debugStack: if passed then TEAL Stack is logged to console after
 	 * each opcode execution (upto depth = debugStack)

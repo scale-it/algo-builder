@@ -68,6 +68,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -109,6 +110,7 @@ import {
 	ITxnField,
 	ITxnNext,
 	ITxnSubmit,
+	Json_ref,
 	Keccak256,
 	Label,
 	Len,
@@ -128,11 +130,14 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
+	Replace2,
+	Replace3,
 	Retsub,
 	Return,
 	Select,
 	SetBit,
 	SetByte,
+	Sha3_256,
 	Sha256,
 	Sha512_256,
 	Shl,
@@ -396,6 +401,11 @@ opCodeMap[6] = {
 opCodeMap[7] = {
 	...opCodeMap[6],
 	base64_decode: Base64Decode,
+	replace2: Replace2,
+	replace3: Replace3,
+	sha3_256: Sha3_256,
+	ed25519verify_bare: Ed25519verify_bare,
+	json_ref: Json_ref,
 };
 
 // list of opcodes with exactly one parameter.
@@ -461,6 +471,8 @@ const interpreterReqList = new Set([
 	"sha256",
 	"sha512_256",
 	"keccak256",
+	"sha3_256",
+	"ed25519verify",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -505,8 +517,10 @@ const commonModeOps = new Set([
 	"err",
 	"sha256",
 	"keccak256",
+	"sha3_256",
 	"sha512_256",
 	"ed25519verify",
+	"Ed25519verify_bare",
 	"ecdsa_verify",
 	"ecdsa_pk_decompress",
 	"+",

@@ -10,7 +10,7 @@ export REACH_PATH = ~/.algorand-reach
 export INDEXER_REMOTE_REPO = https://github.com/algorand/indexer.git
 export INDEXER_PATH = ~/.algorand-indexer-download
 # path to indexer .tar file (https://github.com/algorand/indexer/releases) for local setup
-export INDEXER_LATEST_VERSION = 2.12.4
+export INDEXER_LATEST_VERSION = 2.14.0
 export INDEXER_TAR_NAME = algorand-indexer_$(OS)_amd64_$(INDEXER_LATEST_VERSION).tar.bz2
 export INDEXER_TAR_URL = https://github.com/algorand/indexer/releases/download/$(INDEXER_LATEST_VERSION)/$(INDEXER_TAR_NAME)
 # default postgres config vars

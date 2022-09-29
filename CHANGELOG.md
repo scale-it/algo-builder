@@ -17,21 +17,33 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Updated yarn to v3.2.1
 - Changed default sample project license to ISC
 - Fix `txn AssetSender` should return zero address by default.
+- Add unit tests for all transaction types in runtime executeTx.
 
 #### Examples
 
-- Added secret key to all accounts that are signing transactins in examples. 
+- Added secret key to all accounts that are signing transactions in examples.
+- Increase test coverage of examples/dao.
 
 ### Features
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
+- Add `waitRounds` params to `sendAndWait` method. `waitRounds` is option argument and have dlsefault value is 10.
 - Add `Uint8Array` as a supported type for `TxParams.note`
-
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
 from `algosdk` and sends it to the network. 
 - Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
 - Added verification for secret key signatures in `Runtime`.
+- Added replace2 and replace3 opcode to `runtime`.
+- Added sha3_256 opcode to `Runtime`
+- Added ed25519verify_bare opcode to `Runtime`
+- Added json_ref opcode to `Runtime`
+- Added support for foreign app account access in `Runtime`
+
+#### @algo-builder/web
+- Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
+- Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
+- Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 
 ### Bug Fixes
 
@@ -39,6 +51,7 @@ from `algosdk` and sends it to the network.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
+- Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
 
 ### Examples
 

@@ -467,6 +467,8 @@ OpGasCost[6] = {
 };
 OpGasCost[7] = {
 	...OpGasCost[6],
+	sha3_256: 130,
+	ed25519verify_bare: 1900,
 };
 
 export const enum MathOp {
@@ -501,4 +503,10 @@ export enum TransactionTypeEnum {
 	ASSET_TRANSFER = "axfer",
 	ASSET_FREEZE = "afrz",
 	APPLICATION_CALL = "appl",
+}
+
+export const json_refTypes = {
+	JSONString: "JSONString",
+	JSONUint64: "JSONUint64",
+	JSONObject: "JSONObject",
 }

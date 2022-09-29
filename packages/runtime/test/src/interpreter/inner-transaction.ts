@@ -1,4 +1,4 @@
-import { decodeAddress, getApplicationAddress } from "algosdk";
+import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
 
 import { bobAcc } from "../../../../algob/test/mocks/account";
@@ -6,8 +6,10 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
+import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { AccountAddress, AccountStoreI, ExecutionMode, TxOnComplete } from "../../../src/types";
+import { Stack } from "../../../src/lib/stack";
+import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -29,6 +31,8 @@ describe("Inner Transactions", function () {
 	let bobAccount: AccountStoreI;
 	let appAccAddr: AccountAddress;
 	let applicationAccount: AccountStoreI;
+	let foreignAppAccAddr: AccountAddress;
+	let foreignApplicationAccount: AccountStoreI;
 
 	const reset = (): void => {
 		while (interpreter.stack.length() !== 0) {
@@ -70,8 +74,16 @@ describe("Inner Transactions", function () {
 			sk: new Uint8Array(0),
 		});
 
+		// setup foreign application account
+		foreignAppAccAddr = getApplicationAddress(TXN_OBJ.apfa[1]);
+		foreignApplicationAccount = new AccountStore(appBalance, {
+			addr: foreignAppAccAddr,
+			sk: new Uint8Array(0),
+		});
+
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, applicationAccount]);
+		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, 
+			applicationAccount, foreignApplicationAccount]);
 		interpreter.tealVersion = tealVersion;
 		reset();
 	};
@@ -1394,6 +1406,46 @@ describe("Inner Transactions", function () {
 					() => executeTEAL(prog),
 					RUNTIME_ERRORS.TEAL.ITXN_NEXT_WITHOUT_ITXN_BEGIN
 				);
+			});
+		});
+
+		describe("Foreign application account access in teal v7 ", () => {
+			this.beforeEach(() => {
+				setUpInterpreter(7, 1e9);
+			});
+
+			it("Should not throw error when accessing foreign application in create inner transaction", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 2000
+				itxn_field Fee
+				int 1
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+
+				assert.equal(interpreter.innerTxnGroups.length, 0);
+				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
+				//Assert if the receiver of the transaction is foreign application address
+				const rcvBuffer = interpreter.currentInnerTxnGroup[0].rcv as Buffer;
+				const rcvArray = new Uint8Array(rcvBuffer);
+				const receiver = encodeAddress(rcvArray);
+				assert.equal(receiver, foreignAppAccAddr);
 			});
 		});
 	});

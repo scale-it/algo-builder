@@ -4,8 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTx` is a high level method of Deployer which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` as parameter.
-If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction`.
+`executeTx` is a high level method of Deployer which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTx` takes `ExecParams[]` or `SignedTransaction[]` as parameter.
 In below sections we will demonstrate how to pass these parameters.
 
 Note: For each parameter `type` and `sign` attributes are mandatory.
@@ -15,7 +14,46 @@ Note: For each parameter `type` and `sign` attributes are mandatory.
 
 Depending on the transaction `type`, other attributes will specify a signer of the transaction. For example, for `TransactionType.TransferAlgo` the `fromAccount` must be a full account (with secret key) and will sign the transaction.
 
-## Examples [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage:
+`deployer.executeTx` returns list of `TxnReceipt`, which extends `ConfirmedTxInfo`.
+
+```js
+const receipts = deployer.executeTx([txn0, txn1]);
+console.log("txn0 information: ", receipts[0]);
+console.log("txn1 information: ", receipts[2]);
+```
+
+Below we demonstrate how to perform application call using `ExecParam` and `WebMode`:
+
+```js
+appCall = () => {
+		const webMode: WebMode = new WebMode(AlgoSigner, networkType);
+		const tx: types.ExecParams[] = [
+			{
+				type: types.TransactionType.CallApp,
+				sign: types.SignType.SecretKey,
+				fromAccount: {
+					addr: addr,
+					sk: new Uint8Array(0),
+				},
+				appID: 100,
+				payFlags: {},
+			},
+		];
+		webMode.executeTx(tx);
+	};
+```
+
+We can also use `SignedTransaction` and `executeTx` in runtime:
+
+```js
+    const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
+    let signedTx: SignedTransaction = {txn: tx};
+    runtime.executeTx(signedTx);
+```
+
+## ExecParams
+
+If the length of `ExecParams` array is greater than one, it will be considered as `atomic transaction` otherwise `single transaction`.Examples of [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#ExecParams) usage. `ExecParams` is preferred when there is a transaction which is not already signed and want to be executed.
 
 #### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#AlgoTransferParam)
 
@@ -26,7 +64,8 @@ Depending on the transaction `type`, other attributes will specify a signer of t
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: fee }  }
+    payFlags: { totalFee: fee }  
+  }
 ```
 
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.TxParams.html)
@@ -261,7 +300,12 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 ## Sign and Send SDK Transaction object using `executeTx` method
 
-`deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has `transaction` and `sign`. Ex:
+`deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has following properties:
+
+- `type`: type of transaction.
+- `sign`: signature [`types`](https://github.com/scale-it/algo-builder/blob/2bcef8f611b349dfb8dc3542ed2f0a129a0c405c/packages/web/src/types.ts#L117).
+
+Ex:
 
 ```js
 const tx = makeAssetCreateTxn(
@@ -270,6 +314,7 @@ const tx = makeAssetCreateTxn(
   undefined, mockSuggestedParam.genesisHash, mockSuggestedParam.genesisID,
   1e6, 0, false, undefined, undefined, undefined, undefined, "UM", "ASM", undefined
 );
+
 const transaction: wtypes.TransactionAndSign = {
   transaction: tx,
   sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
@@ -280,9 +325,21 @@ const res = await deployer.executeTx([transaction]);
 
 You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
 
+There is also a function to check if given object implements `Transaction` class and has `Sign`.
+
+```js
+export function isSDKTransactionAndSign(object: unknown): object is TransactionAndSign {
+	if (object === undefined || object === null) {
+		return false;
+	}
+	const res = isSDKTransaction((object as TransactionAndSign).transaction);
+	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
+}
+```
+
 ### SignTransactions function
 
-This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction
+This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction. `SignedTransaction` is preferred when there is a transaction which is already signed and has to be sent to network.
 
 ```js
 const transaction: wtypes.TransactionAndSign = [{
