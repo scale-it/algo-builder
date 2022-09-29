@@ -518,10 +518,7 @@ class DeployerBasicMode {
 	 * @param signer object that signes the transaction
 	 * @returns SignedTransaction
 	 */
-	async signTx(
-		transaction: algosdk.Transaction,
-		signer: wtypes.Sign
-	): Promise<SignedTransaction> {
+	signTx(transaction: algosdk.Transaction, signer: wtypes.Sign): SignedTransaction {
 		let decodedResult: Uint8Array;
 		switch (signer.sign) {
 			case wtypes.SignType.SecretKey: {
@@ -548,14 +545,14 @@ class DeployerBasicMode {
 	 * @param signer object that signes the transaction
 	 * @returns array of algosdk.SignedTransaction objects
 	 */
-	async makeAndSignTx(
+	makeAndSignTx(
 		execParams: wtypes.ExecParams[],
 		txParams: algosdk.SuggestedParams,
 		signer: wtypes.Sign
-	): Promise<SignedTransaction[]> {
+	): SignedTransaction[] {
 		const signedTxns: SignedTransaction[] = [];
 		const txns: Transaction[] = this.makeTx(execParams, txParams);
-		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn, signer)));
+		txns.forEach(async (txn) => signedTxns.push(this.signTx(txn, signer)));
 		return signedTxns;
 	}
 
@@ -565,15 +562,12 @@ class DeployerBasicMode {
 	 * @param rounds number of rounds to wait for response
 	 * @returns ConfirmedTxInfo
 	 */
-	async sendTxAndWait(
-		transactions: SignedTransaction[],
-		rounds?: number
-	): Promise<ConfirmedTxInfo> {
+	sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<ConfirmedTxInfo> {
 		if (transactions.length < 1) {
 			throw Error("No transactions to process");
 		} else {
 			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
-			return await this.sendAndWait(Uint8ArraySignedTx, rounds);
+			return this.sendAndWait(Uint8ArraySignedTx, rounds);
 		}
 	}
 }
