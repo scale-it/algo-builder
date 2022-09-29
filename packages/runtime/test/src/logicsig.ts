@@ -1,18 +1,90 @@
 import { decodeAddress, multisigAddress, MultisigMetadata } from "algosdk";
 import { assert } from "chai";
-const { convert } = require("@algo-builder/algob");
+import { convert } from "@algo-builder/algob";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
-const { types } = require("@algo-builder/web");
+import { types } from "@algo-builder/web";
 
 const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
 const crowdFundEscrow = "crowdFundEscrow.teal";
 
 describe("Logic Signature", () => {
+	useFixture("escrow-account");
+	let john: AccountStore;
+	let bob: AccountStore;
+	let runtime: Runtime;
+	let johnPk: Uint8Array;
+	let goal: number;
+	let crowdfundApprovalFileName: string;
+	let crowdFundClearFileName: string;
+	let now: Date;
+	let beginDate: Date;
+	let endDate: Date;
+	let fundCloseDate: Date;
+
+	before(() => {
+		goal = 0.01e6;
+		crowdfundApprovalFileName = "crowdFundApproval.teal";
+		crowdFundClearFileName = "crowdFundClear.teal";
+		john = new AccountStore(10);
+		bob = new AccountStore(10e6);
+		runtime = new Runtime([john, bob]);
+		johnPk = decodeAddress(john.address).publicKey;
+		now = new Date();
+		beginDate = endDate = fundCloseDate = now
+		beginDate.setSeconds(now.getSeconds() + 2);
+		endDate.setSeconds(now.getSeconds() + 12000);
+		fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
+	});
+
+	it("john should be able to create a delegated signature", () => {
+		const lsig = runtime.loadLogic(programName);
+
+		lsig.sign(john.account.sk);
+		assert.isTrue(lsig.lsig.verify(johnPk));
+	});
+
+	it("should fail to verify delegated signature signed by someone else", () => {
+		const lsig = runtime.loadLogic(programName);
+
+		lsig.sign(bob.account.sk);
+		const result = lsig.lsig.verify(johnPk);
+
+		assert.equal(result, false);
+	});
+
+	it("should handle contract lsig (escrow account) verification correctly", () => {
+		const lsig = runtime.loadLogic(programName);
+
+		let result = lsig.lsig.verify(decodeAddress(lsig.address()).publicKey);
+		assert.equal(result, true);
+
+		result = lsig.lsig.verify(johnPk);
+		assert.equal(result, false);
+	});
+
+	it("should fail if empty program is passed", () => {
+		expectRuntimeError(
+			() => runtime.createLsigAccount("", []),
+			RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM
+		);
+	});
+
+	it("should return same address for same program", () => {
+		let lsig = runtime.loadLogic(programName);
+
+		const addr = lsig.address();
+		lsig = runtime.loadLogic(programName);
+
+		assert.equal(lsig.address(), addr);
+	});
+});
+
+describe("Load logic for teal program", () => {
 	useFixture("escrow-account");
 	let john: AccountStore;
 	let bob: AccountStore;
@@ -63,33 +135,7 @@ describe("Logic Signature", () => {
 		};
 	});
 
-	it("john should be able to create a delegated signature", () => {
-		const lsig = runtime.loadLogic(programName);
-
-		lsig.sign(john.account.sk);
-		assert.isTrue(lsig.lsig.verify(johnPk));
-	});
-
-	it("should fail to verify delegated signature signed by someone else", () => {
-		const lsig = runtime.loadLogic(programName);
-
-		lsig.sign(bob.account.sk);
-		const result = lsig.lsig.verify(johnPk);
-
-		assert.equal(result, false);
-	});
-
-	it("should handle contract lsig (escrow account) verification correctly", () => {
-		const lsig = runtime.loadLogic(programName);
-
-		let result = lsig.lsig.verify(decodeAddress(lsig.address()).publicKey);
-		assert.equal(result, true);
-
-		result = lsig.lsig.verify(johnPk);
-		assert.equal(result, false);
-	});
-
-	it("should handle contract lsig (escrow account) verification correctly with empty smart contract parmas", () => {
+	it("Should handle contract lsig (escrow account) verification correctly with empty smart contract params", () => {
 		// empty smart contract param with teal
 		const lsig = runtime.loadLogic(programName, {});
 
@@ -100,7 +146,7 @@ describe("Logic Signature", () => {
 		assert.equal(result, false);
 	});
 
-	it ("Should handle contract lsig (crowd fund escrow account) verification correctly with non-empty smart contract params", () => {
+	it("Should handle contract lsig (crowd fund escrow account) verification correctly with non-empty smart contract params", () => {
 		// create application
 		applicationId = runtime.deployApp(
 			bob.account,
@@ -116,22 +162,6 @@ describe("Logic Signature", () => {
 
 		result = lsig.lsig.verify(johnPk);
 		assert.equal(result, false);
-	});
-
-	it("should fail if empty program is passed", () => {
-		expectRuntimeError(
-			() => runtime.createLsigAccount("", []),
-			RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM
-		);
-	});
-
-	it("should return same address for same program", () => {
-		let lsig = runtime.loadLogic(programName);
-
-		const addr = lsig.address();
-		lsig = runtime.loadLogic(programName);
-
-		assert.equal(lsig.address(), addr);
 	});
 });
 
