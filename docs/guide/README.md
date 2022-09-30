@@ -18,7 +18,6 @@ layout: splash
 - [Algob Console](./algob-console.md)
 - [PyTeal](./py-teal.md)
 - [Test TEAL](./testing-teal.md)
-- [Working with algosdk.SignedTransaction](./signedTransaction.md)
 - [Advanced Runtime Features](./runtime-advanced.md)
 - [Templates](./templates.md)
 - [Sign Multisig](./sign-multisig.md)
