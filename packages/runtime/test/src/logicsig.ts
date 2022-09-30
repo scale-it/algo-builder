@@ -12,7 +12,7 @@ const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
 const crowdFundEscrow = "crowdFundEscrow.teal";
 
-describe("Logic Signature", () => {
+describe("Load logic for teal program", () => {
 	useFixture("escrow-account");
 	let john: AccountStore;
 	let bob: AccountStore;
@@ -25,20 +25,42 @@ describe("Logic Signature", () => {
 	let beginDate: Date;
 	let endDate: Date;
 	let fundCloseDate: Date;
+	let creationArgs: Array<{}>;
+	let appDefinition: any;
+	let applicationId: any
 
 	before(() => {
-		goal = 0.01e6;
-		crowdfundApprovalFileName = "crowdFundApproval.teal";
-		crowdFundClearFileName = "crowdFundClear.teal";
 		john = new AccountStore(10);
 		bob = new AccountStore(10e6);
 		runtime = new Runtime([john, bob]);
 		johnPk = decodeAddress(john.address).publicKey;
+		goal = 0.01e6;
+		crowdfundApprovalFileName = "crowdFundApproval.teal";
+		crowdFundClearFileName = "crowdFundClear.teal";
 		now = new Date();
 		beginDate = endDate = fundCloseDate = now
 		beginDate.setSeconds(now.getSeconds() + 2);
 		endDate.setSeconds(now.getSeconds() + 12000);
 		fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
+
+		creationArgs = [
+			convert.uint64ToBigEndian(beginDate.getTime()),
+			convert.uint64ToBigEndian(endDate.getTime()),
+			`int:${goal}`, // args similar to `goal --app-arg ..` are also supported
+			convert.addressToPk(bob.address),
+			convert.uint64ToBigEndian(fundCloseDate.getTime()),
+		];
+
+		appDefinition = {
+			appName: "crowdfundingApp",
+			metaType: types.MetaType.FILE,
+			approvalProgramFilename: crowdfundApprovalFileName,
+			clearProgramFilename: crowdFundClearFileName,
+			localInts: 1,
+			localBytes: 0,
+			globalInts: 5,
+			globalBytes: 3,
+		};
 	});
 
 	it("john should be able to create a delegated signature", () => {
@@ -81,58 +103,6 @@ describe("Logic Signature", () => {
 		lsig = runtime.loadLogic(programName);
 
 		assert.equal(lsig.address(), addr);
-	});
-});
-
-describe("Load logic for teal program", () => {
-	useFixture("escrow-account");
-	let john: AccountStore;
-	let bob: AccountStore;
-	let runtime: Runtime;
-	let johnPk: Uint8Array;
-	let goal: number;
-	let crowdfundApprovalFileName: string;
-	let crowdFundClearFileName: string;
-	let now: Date;
-	let beginDate: Date;
-	let endDate: Date;
-	let fundCloseDate: Date;
-	let creationArgs: Array<{}>;
-	let appDefinition: any;
-	let applicationId: any
-
-	before(() => {
-		goal = 0.01e6;
-		crowdfundApprovalFileName = "crowdFundApproval.teal";
-		crowdFundClearFileName = "crowdFundClear.teal";
-		john = new AccountStore(10);
-		bob = new AccountStore(10e6);
-		runtime = new Runtime([john, bob]);
-		johnPk = decodeAddress(john.address).publicKey;
-		now = new Date();
-		beginDate = endDate = fundCloseDate = now
-		beginDate.setSeconds(now.getSeconds() + 2);
-		endDate.setSeconds(now.getSeconds() + 12000);
-		fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
-
-		creationArgs = [
-			convert.uint64ToBigEndian(beginDate.getTime()),
-			convert.uint64ToBigEndian(endDate.getTime()),
-			`int:${goal}`, // args similar to `goal --app-arg ..` are also supported
-			convert.addressToPk(bob.address),
-			convert.uint64ToBigEndian(fundCloseDate.getTime()),
-		];
-
-		appDefinition = {
-			appName: "crowdfundingApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: crowdfundApprovalFileName,
-			clearProgramFilename: crowdFundClearFileName,
-			localInts: 1,
-			localBytes: 0,
-			globalInts: 5,
-			globalBytes: 3,
-		};
 	});
 
 	it("Should handle contract lsig (escrow account) verification correctly with empty smart contract params", () => {
