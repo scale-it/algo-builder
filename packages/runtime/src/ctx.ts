@@ -253,7 +253,7 @@ export class Ctx implements Context {
 	 * @param flags asa deployment flags
 	 */
 	deployASA(name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): ASAInfo {
-		if (this.runtime.loadedAssetsDefs === undefined) {
+		if (this.runtime.loadedAssetsDefs === {}) {
 			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_FILE_IS_UNDEFINED);
 		}
 		if (this.runtime.loadedAssetsDefs[name] === undefined) {
