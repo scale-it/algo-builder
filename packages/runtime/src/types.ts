@@ -407,3 +407,28 @@ export enum Base64Encoding {
 	URL = 0,
 	STD = 1,
 }
+
+export declare type TxnReceipt = BaseTxReceipt | AppInfoReceipt | ASAInfoReceipt;
+
+export interface DeployedAssetInfoReceipt {
+	creator: AccountAddress;
+	txID: string;
+	"confirmed-round": number;
+	deleted: boolean;
+}
+
+export interface ASAInfoReceipt extends DeployedAssetInfoReceipt {
+	"asset-index": number;
+	"asset-def": types.ASADef;
+	logs?: Uint8Array[];
+}
+
+export interface AppInfoReceipt extends DeployedAssetInfoReceipt {
+	"application-id": number;
+	"application-account": string;
+	timestamp: number;
+	"approval-file": string;
+	"clear-file": string;
+	logs?: Uint8Array[];
+	gas?: number;
+}
