@@ -55,12 +55,12 @@ from `algosdk` and sends it to the network.
 
 #### @algo-builder/runtime
 
-- `executeTx` now returns `TxnReceipt[]` instead of `TxReceipt[]`.
-- `fundLsig` now returns `TxnReceipt[]` instead of `TxReceipt[]`.
+- `executeTx` now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/types.ts#L411) instead of `TxReceipt[]`.
+- `fundLsig` now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/types.ts#L411) instead of `TxReceipt[]`.
 
 #### @algo-builder/web
 
-- `executeTx` promise now returns `TxnReceipt` instead of `algosdk.modelsv2.PendingTransactionResponse`.
+- `executeTx` promise now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts#L458) instead of `algosdk.modelsv2.PendingTransactionResponse`.
 
 ### Examples
 
