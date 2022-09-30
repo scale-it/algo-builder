@@ -41,7 +41,7 @@ from `algosdk` and sends it to the network.
 - Added support for foreign app account access in `Runtime`
 - Added multisignatue verification in `Runtime`.
 - Added support to rekey account to multisig in `Runtime`.
-- Added support to withdraw from account rekeyd to multisignature in `Runtime`.
+- Added support to withdraw from account rekeyed to multisignature in `Runtime`.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
