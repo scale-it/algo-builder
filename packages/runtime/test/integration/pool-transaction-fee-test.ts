@@ -179,45 +179,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.isDefined(elon.getAssetHolding(assetId));
 	});
 
-	it("Should fail when tried to optin to unfunded account in group txn", () => {
-		setupAsset();
-		const amount = 200000;
-		const fee = 3000;
-		// group with fee distribution
-		const groupTx: types.ExecParams[] = [
-			{
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: john.account,
-				toAccountAddr: alice.address,
-				amountMicroAlgos: amount,
-				payFlags: { totalFee: 0 }, // with 0 txn fee
-			},
-			{
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: alice.account,
-				toAccountAddr: bob.address,
-				amountMicroAlgos: amount,
-				payFlags: { totalFee: fee }, // this covers fee of entire group txns
-			},
-			{
-				type: types.TransactionType.OptInASA,
-				sign: types.SignType.SecretKey,
-				fromAccount: elon.account, // unfunded account and no fund is sent to this account
-				assetID: assetId,
-				payFlags: { totalFee: 0 }, // with 0 txn fee
-			},
-		];
-
-		// Fails as account in last txn in group txn is unfunded
-		expectRuntimeError(
-			() => runtime.executeTx(groupTx),
-			RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
-		);
-	});
-
-	it("Should fail when account in first txn of group txn is unfunded account and trying to opt-in", () => {
+	it("Should not fail when account in first txn of group txn is unfunded account and trying to opt-in", () => {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
@@ -248,11 +210,7 @@ describe("Pooled Transaction Fees Test", function () {
 			}
 		];
 
-		// Fails as account in first txn in group txn is unfunded
-		expectRuntimeError(
-			() => runtime.executeTx(groupTx),
-			RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
-		);
+		runtime.executeTx(groupTx)
 	});
 
 });
@@ -313,7 +271,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		elon = runtime.getAccount(elon.address);
 	}
 
-	it("Should fail when tried to optin to unfunded account in group txn", () => {
+	it("Should not fail when tried to optin to unfunded account in group txn", () => {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
@@ -343,12 +301,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
 		];
-
-		// Fails as account in last txn in group txn is unfunded
-		expectRuntimeError(
-			() => runtime.executeTx(groupTx),
-			RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
-		);
+		runtime.executeTx(groupTx)
 	});
 
 	it("Should not fail when a funded account in txn group is trying cover the partial fee", () => {
