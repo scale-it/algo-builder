@@ -581,7 +581,7 @@ const runtimeGeneralErrors = {
 		message: "Invalid multisignature",
 		title: "Invalid multisignature",
 		description:
-			"Provided multisignature is invalid and was not able to authentiace the transaction",
+			"Provided multisignature is invalid and was not able to authenticate the transaction",
 	},
 };
 
