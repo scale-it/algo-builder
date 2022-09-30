@@ -47,7 +47,7 @@ Please read more about usage of `runtime` from [here](https://scale-it.github.io
   - [Asset Freeze](https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction)
   - [Asset Configuration](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
 
-- Multisignature - `Runtime` now allows to to withdraw from accounts that has been rekeyd to
+- Multisignature - `Runtime` now allows to to withdraw from accounts that has been rekeyed to
 multisignature account. In order to do it:
   1. Create multisignature address with `algosdk`.
   2. Rekey account to multisig address. 
