@@ -32,3 +32,69 @@ const confirmedTxn = runtime.executeTx([signedTransacion]);
 console.log(confirmedTxn);
 ```
 Check the example in our [tests](../../packages/runtime/test/src/guide-examples.ts).
+
+# Multisignature
+
+Support of `SignedTransaction` objects in `Runtime` enables users to test their multisignatures. Again with the help of `algosdk` we can create multisignarue address, rekey an existing runtime account to this address and then sign transactions using multisignature accounts. `Runtime` verifies the signature and if its valid process the transaction.
+
+## Example
+
+This example shows how to create a multisignature address using `algosdk`, rekey an existing runtime account to multisignautre, create a transaction and sign it using multisignature. For more details check the [algorand docs](https://developer.algorand.org/docs/get-details/transactions/signatures/#multisignatures).
+
+```ts
+// create runtime
+const runtime = new Runtime([]);
+// get two funded accounts
+const [alice, bob, charlie, elon] = runtime.defaultAccounts();
+// mock suggested params
+const suggestedParams = mockSuggestedParams({ totalFee: 1000 }, runtime.getRound());
+// create multisignature parameters
+const addrs = [bob.address, charlie.address];
+ 		multiSigParams = {
+ 			version: 1,
+ 			threshold: 2,
+ 			addrs: addrs,
+ 		};
+// create multisignature address
+const multSigAddr = algosdk.multisigAddress(multiSigParams);
+// rekey alice to multi sig
+const txParam: types.AlgoTransferParam = {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: alice.account,
+    fromAccountAddr: alice.address,
+    toAccountAddr: alice.address,
+    amountMicroAlgos: 0,
+    payFlags: {totalFee: 1000, rekeyTo: multSigAddr},
+};
+runtime.executeTx([txParam]);
+// sync accounts
+[alice, bob, charlie, elon] = runtime.defaultAccounts();
+// create transaction using algosdk
+const txn = algosdk.makePaymentTxnWithSuggestedParams(
+ 				alice.account.addr, // from
+ 				elon.account.addr, // to
+ 				5e6, // 5 algo
+ 				undefined,
+ 				undefined,
+ 				suggestedParams
+ 			);
+// Sign with first account
+const rawSignedTxn = algosdk.signMultisigTransaction(
+    txn,
+    multiSigParams,
+    bob.account.sk
+).blob;
+// Sign with second account
+const twosigs = algosdk.appendSignMultisigTransaction(
+    rawSignedTxn,
+    multiSigParams,
+    charlie.account.sk
+).blob;
+// decode the transaction
+const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);
+// submit the transaction
+const confirmedTxn = runtime.executeTx([signedTxn]);
+console.log(confirmedTxn);
+```
+Check the example in our [tests](../../packages/runtime/test/src/guide-examples.ts).
