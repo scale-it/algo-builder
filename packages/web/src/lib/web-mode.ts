@@ -315,7 +315,7 @@ export class WebMode {
 	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
 		const binaryTx = transaction.toByte();
 		const base64Tx = this.algoSigner.encoding.msgpackToBase64(binaryTx);
-		const signedTx = await this.algoSigner.signTxn([
+		const signedTx = await this.signTransaction([
 			{
 				txn: base64Tx,
 			},
