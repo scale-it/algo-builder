@@ -97,6 +97,7 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 }
 
 /**
+ * Converts camelCase to hypenCase
  * @param str string to convert
  * @returns fooBar to foo-bar
  */
@@ -105,6 +106,7 @@ export function convertCapitalToHyphens(str: string): string {
 }
 
 /**
+ * Converts object keys from camelCase to hypenCase
  * @param object
  * @returns object keys from fooBar to foo-bar
  */
