@@ -12,7 +12,7 @@ const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
 const crowdFundEscrow = "crowdFundEscrow.teal";
 
-describe("Load logic for teal program", () => {
+describe("Logic Signature", () => {
 	useFixture("escrow-account");
 	let john: AccountStore;
 	let bob: AccountStore;
