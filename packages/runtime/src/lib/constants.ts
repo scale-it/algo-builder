@@ -28,7 +28,7 @@ export const MAX_KEY_VAL_BYTES = 128; // max combined length of key-value pair
 export const LOGIC_SIG_MAX_COST = 20000;
 export const MAX_APP_PROGRAM_COST = 700;
 export const LogicSigMaxSize = 1000;
-export const MaxAppProgramLen = 1024;
+export const MaxAppProgramLen = 2048;
 export const MaxTxnNoteBytes = 1024;
 export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
@@ -509,4 +509,4 @@ export const json_refTypes = {
 	JSONString: "JSONString",
 	JSONUint64: "JSONUint64",
 	JSONObject: "JSONObject",
-}
+};
