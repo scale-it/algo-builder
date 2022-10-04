@@ -12,7 +12,7 @@ async function run(runtimeEnv, deployer) {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
 			fromAccount: masterAccount,
-			toAccountAddr: managerAcc,
+			toAccountAddr: managerAcc.addr,
 			amountMicroAlgos: 10e6,
 			payFlags: {},
 		},
