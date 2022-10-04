@@ -1418,12 +1418,12 @@ describe("Inner Transactions", function () {
 			this.beforeEach(() => {
 				setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
 			});
-			it("Should execute a teal file successful ", () => {
+			it("Should execute a teal file successfully", () => {
 				const file = "test-innerTxn-v7.teal";
 				interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
-				assert.equal(interpreter.innerTxnGroups.length, 0);
-				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
-				assert.equal(interpreter.tealVersion, 7);
+				assert.deepEqual(interpreter.innerTxnGroups.length, 0);
+				assert.deepEqual(interpreter.currentInnerTxnGroup.length, 2);
+				assert.deepEqual(interpreter.tealVersion, 7);
 			});
 		})
 

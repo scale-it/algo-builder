@@ -16,4 +16,6 @@ itxn_field Amount
 int 2000
 itxn_field Fee
 int 1
+byte "Log"
+log
 return
