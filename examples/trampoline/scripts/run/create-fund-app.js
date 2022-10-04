@@ -11,7 +11,6 @@ const algosdk = require("algosdk");
 const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
-	const masterAccount = deployer.accountsByName.get("master-account");
 	const john = deployer.accountsByName.get("john");
 
 	//Get the app that have been created and funded it

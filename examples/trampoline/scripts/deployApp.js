@@ -44,7 +44,6 @@ async function run(runtimeEnv, deployer) {
 		});
 
 	const appInfo = await deployer.getApp("proxy_trampoline");
-	const appID = appInfo.appID;
 	console.log(appInfo);
 
 	//transfer algo to app proxy

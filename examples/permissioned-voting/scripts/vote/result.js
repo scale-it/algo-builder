@@ -1,5 +1,4 @@
 const { readAppGlobalState } = require("@algo-builder/algob");
-const { default: deploy } = require("@algo-builder/algob/build/builtin-tasks/deploy");
 const { types } = require("@algo-builder/web");
 const { tryExecuteTx } = require("./common");
 

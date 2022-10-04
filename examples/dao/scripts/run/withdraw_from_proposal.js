@@ -1,5 +1,4 @@
 const { tryExecuteTx } = require("./common/common.js");
-const { types } = require("@algo-builder/web");
 const { accounts } = require("./common/accounts.js");
 const { mkWithdrawFromProposalTx } = require("./common/tx-params.js");
 
