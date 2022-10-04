@@ -2,7 +2,7 @@ const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 const accounts = require("../common/accounts");
-const { fundAccount, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp, tryExecuteTx } = require("../common/common");
 const { issue } = require("./issue");
 const { whitelist } = require("../permissions/whitelist");
 
@@ -81,7 +81,7 @@ async function forceTransfer(deployer, fromAddr, toAddr, amount) {
 
 	console.log(`* Transferring ${amount} tokens from
     [${fromAddr}] to [${toAddr}] *`);
-	await deployer.executeTx(forceTxGroup);
+	await tryExecuteTx(deployer, forceTxGroup);
 
 	console.log(`* ${toAddr}(receiver) asset holding: *`);
 	console.log(await balanceOf(deployer, toAddr, tesla.assetIndex));
@@ -110,7 +110,7 @@ async function run(runtimeEnv, deployer) {
 		optInAccountToApp(deployer, elon, permissionsAppInfo.appID, {}, {}),
 		optInAccountToApp(deployer, bob, permissionsAppInfo.appID, {}, {}),
 		optInAccountToApp(deployer, john, permissionsAppInfo.appID, {}, {}),
-	]);
+	]).catch((error) => console.log(error));
 
 	/*
 	 * use below function to whitelist accounts
@@ -127,7 +127,7 @@ async function run(runtimeEnv, deployer) {
 		deployer.optInAccountToASA("tesla", elon.name, {}),
 		deployer.optInAccountToASA("tesla", bob.name, {}),
 		deployer.optInAccountToASA("tesla", john.name, {}),
-	]);
+	]).catch((error) => console.log(error));
 
 	// note: if reserve is multisig, then user will use executeSignedTxnFromFile function
 	await issue(deployer, bob.addr, 200); // issue(mint) 100 tokens to bob from reserve

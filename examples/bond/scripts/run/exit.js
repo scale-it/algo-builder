@@ -1,5 +1,5 @@
 const { types } = require("@algo-builder/web");
-const { tokenMap, nominalPrice } = require("./common/common");
+const { tokenMap, nominalPrice, tryExecuteTx } = require("./common/common");
 
 /**
  * In this function buyer exits from all their bonds in exchange of algos
@@ -17,7 +17,11 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
 		TMPL_APP_MANAGER: managerAcc.addr,
 		TMPL_BOND: bondToken,
 	};
-	const buybackLsig = await deployer.loadLogicByFile("buyback-lsig.py", scInitParam);
+	const buybackLsig = await deployer
+		.loadLogicByFile("buyback-lsig.py", scInitParam)
+		.catch((error) => {
+			throw error;
+		});
 	const exitAmount = Number(amount) * Number(nominalPrice);
 	const exitTx = [
 		//  Bond token transfer to buyback address
@@ -52,10 +56,6 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
 	];
 
 	console.log("Exiting");
-	try {
-		await deployer.executeTx(exitTx);
-	} catch (error) {
-		console.log(error.response?.error);
-	}
+	await tryExecuteTx(deployer, exitTx);
 	console.log("Exited");
 };

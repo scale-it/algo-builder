@@ -8,6 +8,7 @@
 const { types } = require("@algo-builder/web");
 const { convert, balanceOf } = require("@algo-builder/algob");
 const algosdk = require("algosdk");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -37,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	//Transaction that will transfer money to the new application
+	// Transaction that will transfer money to the new application
 	const fundAppTxtParam = {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
@@ -48,7 +49,7 @@ async function run(runtimeEnv, deployer) {
 			totalFee: 2000,
 		},
 	};
-	//Transaction application call
+	// Transaction application call
 	const callAppTxn = {
 		type: types.TransactionType.CallApp,
 		sign: types.SignType.SecretKey,
@@ -60,7 +61,11 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptsTx = await deployer.executeTx([createAppTxnParam, fundAppTxtParam, callAppTxn]);
+	const receiptsTx = await tryExecuteTx(deployer, [
+		createAppTxnParam,
+		fundAppTxtParam,
+		callAppTxn,
+	]);
 
 	// log all transaction have been confirmed including application-index created
 	console.log(receiptsTx);

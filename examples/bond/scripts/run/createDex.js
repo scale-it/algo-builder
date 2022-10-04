@@ -6,6 +6,7 @@ const {
 	optInTx,
 	couponValue,
 	createDexTx,
+	tryExecuteTx,
 } = require("./common/common.js");
 const { types } = require("@algo-builder/web");
 
@@ -39,7 +40,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 		},
 	];
 	// Create B_[i+1]
-	const newAsaInfo = (await deployer.executeTx(deployTx))[0];
+	const newAsaInfo = (await tryExecuteTx(deployer, deployTx))[0];
 	console.log(newAsaInfo);
 	const newIndex = newAsaInfo["asset-index"];
 	tokenMap.set(newBondToken, newIndex);
@@ -54,14 +55,20 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 		TMPL_APPLICATION_ID: appInfo.appID,
 		TMPL_APP_MANAGER: managerAcc.addr,
 	};
-	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", lsigParams);
+	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", lsigParams).catch((error) => {
+		throw error;
+	});
 
 	await fundAccount(deployer, dexLsig.address());
 
 	await optInTx(deployer, managerAcc, dexLsig, newIndex);
 	await optInTx(deployer, managerAcc, dexLsig, oldBond);
 
-	const globalState = await readAppGlobalState(deployer, managerAcc.addr, appInfo.appID);
+	const globalState = await readAppGlobalState(deployer, managerAcc.addr, appInfo.appID).catch(
+		(error) => {
+			throw error;
+		}
+	);
 	const total = globalState.get("total") ?? 0;
 	console.log("Total issued: ", total);
 
@@ -82,7 +89,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 	);
 
 	console.log(`* Creating dex ${i}! *`);
-	await deployer.executeTx(groupTx);
+	await tryExecuteTx(deployer, groupTx);
 	console.log("Dex created!");
 	return newIndex;
 };

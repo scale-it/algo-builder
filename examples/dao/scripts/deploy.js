@@ -11,7 +11,11 @@ async function run(runtimeEnv, deployer) {
 	await fundAccount(deployer, [creator, proposer, voterA, voterB]);
 
 	// Create DAO Gov Token
-	const govToken = await deployer.deployASA("gov-token", { creator: creator });
+	const govToken = await deployer
+		.deployASA("gov-token", { creator: creator })
+		.catch((error) => {
+			throw error;
+		});
 	console.log(govToken);
 
 	// DAO App initialization parameters
@@ -32,22 +36,26 @@ async function run(runtimeEnv, deployer) {
 		`int:${govToken.assetIndex}`,
 	];
 	// Create Application
-	const daoAppInfo = await deployer.deployApp(
-		creator,
-		{
-			appName: "DAOApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "dao-app-approval.py",
-			clearProgramFilename: "dao-app-clear.py",
-			localInts: 9,
-			localBytes: 7,
-			globalInts: 5,
-			globalBytes: 2,
-			appArgs: appArgs,
-			foreignAssets: [govToken.assetIndex],
-		},
-		{}
-	);
+	const daoAppInfo = await deployer
+		.deployApp(
+			creator,
+			{
+				appName: "DAOApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "dao-app-approval.py",
+				clearProgramFilename: "dao-app-clear.py",
+				localInts: 9,
+				localBytes: 7,
+				globalInts: 5,
+				globalBytes: 2,
+				appArgs: appArgs,
+				foreignAssets: [govToken.assetIndex],
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 	console.log(daoAppInfo);
 
 	// Fund application account with some ALGO(5)
@@ -76,15 +84,23 @@ async function run(runtimeEnv, deployer) {
 	await tryExecuteTx(deployer, optInToGovASAParam);
 
 	// save lsig's (by name in checkpoint)
-	await deployer.mkContractLsig("daoFundLsig", "dao-fund-lsig.py", {
-		ARG_GOV_TOKEN: govToken.assetIndex,
-		ARG_DAO_APP_ID: daoAppInfo.appID,
-	});
+	await deployer
+		.mkContractLsig("daoFundLsig", "dao-fund-lsig.py", {
+			ARG_GOV_TOKEN: govToken.assetIndex,
+			ARG_DAO_APP_ID: daoAppInfo.appID,
+		})
+		.catch((error) => {
+			throw error;
+		});
 
-	await deployer.mkContractLsig("proposalLsig", "proposal-lsig.py", {
-		ARG_OWNER: proposer.addr,
-		ARG_DAO_APP_ID: daoAppInfo.appID,
-	});
+	await deployer
+		.mkContractLsig("proposalLsig", "proposal-lsig.py", {
+			ARG_OWNER: proposer.addr,
+			ARG_DAO_APP_ID: daoAppInfo.appID,
+		})
+		.catch((error) => {
+			throw error;
+		});
 
 	// fund lsig's
 	await Promise.all([
@@ -108,7 +124,9 @@ async function run(runtimeEnv, deployer) {
 		deployer.optInAccountToASA(govToken.assetIndex, proposer.name, {}),
 		deployer.optInAccountToASA(govToken.assetIndex, voterA.name, {}),
 		deployer.optInAccountToASA(govToken.assetIndex, voterB.name, {}),
-	]);
+	]).catch((error) => {
+		throw error;
+	});
 
 	const distributeGovTokenParams = {
 		type: types.TransactionType.TransferAsset,

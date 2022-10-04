@@ -1,6 +1,6 @@
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { optInTx } = require("./run/common/common.js");
+const { optInTx, tryExecuteTx } = require("./run/common/common.js");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -12,17 +12,21 @@ async function run(runtimeEnv, deployer) {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
 			fromAccount: masterAccount,
-			toAccountAddr: managerAcc.addr,
+			toAccountAddr: managerAcc,
 			amountMicroAlgos: 10e6,
 			payFlags: {},
 		},
 	];
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 	algoTxnParams[0].toAccountAddr = creatorAccount.addr;
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
 	// Create B_0 - Bond Token
-	const asaInfo = await deployer.deployASA("bond-token-0", { creator: creatorAccount });
+	const asaInfo = await deployer
+		.deployASA("bond-token-0", { creator: creatorAccount })
+		.catch((error) => {
+			throw error;
+		});
 	console.log(asaInfo);
 
 	// Bond-Dapp initialization parameters
@@ -30,7 +34,9 @@ async function run(runtimeEnv, deployer) {
 	const issuePrice = "int:1000";
 	const couponValue = "int:20";
 	const currentBond = convert.uint64ToBigEndian(asaInfo.assetIndex);
-	const asset = await deployer.getAssetByID(asaInfo.assetIndex);
+	const asset = await deployer.getAssetByID(asaInfo.assetIndex).catch((error) => {
+		throw error;
+	});
 	const maxIssuance = convert.uint64ToBigEndian(asset.params.total);
 	const creator = convert.addressToPk(creatorAccount.addr);
 
@@ -40,22 +46,26 @@ async function run(runtimeEnv, deployer) {
 		TMPL_MATURITY_DATE: Math.round(new Date().getTime() / 1000) + 240,
 	};
 	// Create Application
-	const bondAppInfo = await deployer.deployApp(
-		managerAcc,
-		{
-			appName: "BondApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "bond-dapp-stateful.py",
-			clearProgramFilename: "bond-dapp-clear.py",
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 8,
-			globalBytes: 15,
-			appArgs: appArgs,
-		},
-		{},
-		placeholderParam
-	);
+	const bondAppInfo = await deployer
+		.deployApp(
+			managerAcc,
+			{
+				appName: "BondApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "bond-dapp-stateful.py",
+				clearProgramFilename: "bond-dapp-clear.py",
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 8,
+				globalBytes: 15,
+				appArgs: appArgs,
+			},
+			{},
+			placeholderParam
+		)
+		.catch((error) => {
+			throw error;
+		});
 	console.log(bondAppInfo);
 
 	// Initialize issuer lsig with bond-app ID
@@ -65,11 +75,13 @@ async function run(runtimeEnv, deployer) {
 		TMPL_APP_MANAGER: managerAcc.addr,
 	};
 
-	await deployer.mkContractLsig("IssuerLsig", "issuer-lsig.py", scInitParam);
+	await deployer.mkContractLsig("IssuerLsig", "issuer-lsig.py", scInitParam).catch((error) => {
+		throw error;
+	});
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 
 	algoTxnParams[0].toAccountAddr = issuerLsig.address();
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
 	// Only app manager can opt-in issueer lsig to ASA
 	await optInTx(deployer, managerAcc, issuerLsig, asaInfo.assetIndex);
@@ -87,7 +99,7 @@ async function run(runtimeEnv, deployer) {
 			appArgs: appArgs,
 		},
 	];
-	await deployer.executeTx(appCallParams);
+	await tryExecuteTx(deployer, appCallParams);
 
 	console.log("Issuer address updated!");
 }

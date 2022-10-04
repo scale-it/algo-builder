@@ -4,6 +4,7 @@
  */
 const { types } = require("@algo-builder/web");
 const { balanceOf } = require("@algo-builder/algob");
+const { tryExecuteTx } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -21,22 +22,26 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await deployer.executeTx(algoTxnParams); // execute Create app transaction
+	await tryExecuteTx(deployer, algoTxnParams); // execute Create app transaction
 
-	await deployer.deployApp(
-		john,
-		{
-			appName: "proxy_trampoline",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "approval.teal",
-			clearProgramFilename: "clear.teal",
-			localInts: 0,
-			localBytes: 0,
-			globalInts: 0,
-			globalBytes: 0,
-		},
-		{}
-	); //execute create App Transction
+	await deployer
+		.deployApp(
+			john,
+			{
+				appName: "proxy_trampoline",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "approval.teal",
+				clearProgramFilename: "clear.teal",
+				localInts: 0,
+				localBytes: 0,
+				globalInts: 0,
+				globalBytes: 0,
+			},
+			{}
+		) // execute create App Transction
+		.catch((error) => {
+			throw error;
+		});
 
 	const appInfo = await deployer.getApp("proxy_trampoline");
 	const appID = appInfo.appID;
@@ -53,7 +58,7 @@ async function run(runtimeEnv, deployer) {
 			payFlags: { note: "funding application" },
 		},
 	];
-	await deployer.executeTx(algoTxnFundProxy);
+	await tryExecuteTx(deployer, algoTxnFundProxy);
 	console.log(
 		"Balance of application: ",
 		await balanceOf(deployer, appInfo.applicationAccount)

@@ -29,7 +29,7 @@ async function addProposal(runtimeEnv, deployer) {
 	);
 
 	// Transaction FAIL (asset_transfer amount is less than min_deposit)
-	await tryExecuteTx(deployer, addProposalTx);
+	await tryExecuteTx(deployer, addProposalTx).catch((error) => console.log(error));
 
 	// Transaction PASS
 	addProposalTx[1].amount = 15; // deposit is set as 15 in DAO App

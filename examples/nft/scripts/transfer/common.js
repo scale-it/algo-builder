@@ -3,9 +3,11 @@ const { default: algosdk } = require("algosdk");
 
 exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
-		await deployer.executeTx(deployer, txnParams);
+		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+		return await deployer.executeTx(txnParameters);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
+		throw e;
 	}
 };
 

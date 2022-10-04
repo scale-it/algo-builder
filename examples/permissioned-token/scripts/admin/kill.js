@@ -42,7 +42,7 @@ async function run(runtimeEnv, deployer) {
 	await kill(deployer); // kill token 'tesla'
 
 	// transaction FAIL: token is killed, we can't issue tokens
-	await issue(deployer, elon.addr, 15);
+	await issue(deployer, elon.addr, 15).catch((error) => console.log(error));
 }
 
 module.exports = { default: run, kill: kill };

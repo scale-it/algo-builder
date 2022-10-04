@@ -1,5 +1,5 @@
 const { balanceOf } = require("@algo-builder/algob");
-const { mkParam } = require("./transfer/common");
+const { mkParam, tryExecuteTx } = require("./transfer/common");
 
 /*
   Create "tesla" Algorand Standard Asset (ASA)
@@ -15,10 +15,12 @@ async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
 
 	// activate elon account
-	await deployer.executeTx(
+	await tryExecuteTx(
+		deployer,
 		mkParam(masterAccount, elon.addr, 40e6, { note: "funding account" })
 	);
-	await deployer.executeTx(
+	await tryExecuteTx(
+		deployer,
 		mkParam(masterAccount, john.addr, 40e6, { note: "funding account" })
 	);
 

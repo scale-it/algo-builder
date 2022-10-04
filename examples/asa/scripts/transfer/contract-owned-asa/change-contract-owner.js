@@ -5,14 +5,14 @@
  */
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { mkParam } = require("../common");
+const { mkParam, tryExecuteTx } = require("../common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await deployer.executeTx(mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
+	await tryExecuteTx(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
 
 	// Get AppInfo from checkpoint.
 	const appInfo = deployer.getApp("StatefulASA_App");
@@ -31,7 +31,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await deployer.executeTx(tx);
+	await tryExecuteTx(deployer, tx);
 }
 
 module.exports = { default: run };

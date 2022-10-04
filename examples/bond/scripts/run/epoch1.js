@@ -1,5 +1,5 @@
 const { accounts } = require("./common/accounts.js");
-const { issuePrice, tokenMap, buyTxNode } = require("./common/common.js");
+const { issuePrice, tokenMap, buyTxNode, tryExecuteTx } = require("./common/common.js");
 const { redeem } = require("./redeem.js");
 
 /**
@@ -17,8 +17,14 @@ exports.epoch1 = async function (deployer) {
 	const appInfo = deployer.getApp("BondApp");
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 	const bondToken = tokenMap.get("bond-token-1");
-	await deployer.optInAccountToASA(bondToken, "bob", { totalFee: 1000 });
-	await deployer.optInAccountToASA(bondToken, "elon-musk", { totalFee: 1000 });
+	await deployer.optInAccountToASA(bondToken, "bob", { totalFee: 1000 }).catch((error) => {
+		throw error;
+	});
+	await deployer
+		.optInAccountToASA(bondToken, "elon-musk", { totalFee: 1000 })
+		.catch((error) => {
+			throw error;
+		});
 
 	// elon buys 4 bonds
 	const algoAmount = 4 * issuePrice;
@@ -33,6 +39,6 @@ exports.epoch1 = async function (deployer) {
 	);
 
 	console.log("Elon buying 4 more bonds!");
-	await deployer.executeTx(groupTx);
+	await tryExecuteTx(deployer, groupTx);
 	console.log("Elon bought 4 more bonds!");
 };

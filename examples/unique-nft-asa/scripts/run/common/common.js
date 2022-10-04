@@ -6,6 +6,7 @@ async function tryExecuteTx(deployer, txnParams) {
 		else await deployer.executeTx([txnParams]);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
+		throw e;
 	}
 }
 
@@ -33,7 +34,7 @@ async function fundAccount(deployer, accounts) {
 	}
 
 	try {
-		await deployer.executeTx(params);
+		await tryExecuteTx(deployer, params);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error.text : e);
 	}

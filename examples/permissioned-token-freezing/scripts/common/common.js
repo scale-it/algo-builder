@@ -1,4 +1,4 @@
-exports.tryExecuteTx = async function (deployer, txnParams) {
+async function tryExecuteTx(deployer, txnParams) {
 	try {
 		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
 		return await deployer.executeTx(txnParameters);
@@ -6,4 +6,8 @@ exports.tryExecuteTx = async function (deployer, txnParams) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 		throw e;
 	}
+}
+
+module.exports = {
+	tryExecuteTx,
 };

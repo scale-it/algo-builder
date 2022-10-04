@@ -9,14 +9,14 @@
  */
 const { types } = require("@algo-builder/web");
 const { balanceOf } = require("@algo-builder/algob");
-const { executeTx, mkParam } = require("../common");
+const { mkParam, tryExecuteTx } = require("../common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 	const bob = deployer.accountsByName.get("bob");
 
-	await deployer.executeTx(mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
+	await tryExecuteTx(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: "Funding" }));
 
 	// Get AppInfo and AssetID from checkpoints.
 	const appInfo = deployer.getApp("StatefulASA_App");
@@ -49,21 +49,22 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await deployer.executeTx(txGroup);
+	await tryExecuteTx(txGroup);
+
 	// print assetHolding of alice
 	console.log("Alice assetHolding balance: ", await balanceOf(deployer, alice.addr, assetID));
 
 	try {
 		// tx FAIL: trying to receive asset from another account
 		txGroup[0].fromAccount = bob;
-		await deployer.executeTx(txGroup);
+		await tryExecuteTx(txGroup);
 	} catch (e) {
 		console.error(e);
 	}
 
 	try {
 		// tx FAIL: trying to send asset directly without calling stateful smart contract
-		await deployer.executeTx([
+		await tryExecuteTx(deployer, [
 			{
 				type: types.TransactionType.TransferAsset,
 				sign: types.SignType.LogicSignature,

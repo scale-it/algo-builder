@@ -3,7 +3,7 @@ exports.tryExecuteTx = async function (deployer, txnParams) {
 		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
 		else await deployer.executeTx([txnParams]);
 	} catch (e) {
-		console.error("Transaction Failed", e.response ? e.response.error : e.error);
+		console.error("Transaction Failed", e.response ? e.response.error : e);
 		throw e;
 	}
 };

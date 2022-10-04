@@ -1,6 +1,6 @@
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
-const { tokenMap, optInTx, fundAccount } = require("./common/common");
+const { tokenMap, optInTx, fundAccount, tryExecuteTx } = require("./common/common");
 
 /**
  * This function creates buyback lsig and store it's address in bond-dapp(stateful contract)
@@ -17,7 +17,11 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
 		TMPL_APP_MANAGER: managerAcc.addr,
 		TMPL_BOND: bondToken,
 	};
-	const buybackLsig = await deployer.loadLogicByFile("buyback-lsig.py", scInitParam);
+	const buybackLsig = await deployer
+		.loadLogicByFile("buyback-lsig.py", scInitParam)
+		.catch((error) => {
+			throw error;
+		});
 	await fundAccount(deployer, buybackLsig.address());
 
 	const buybackTx = [
@@ -35,6 +39,6 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
 	await optInTx(deployer, managerAcc, buybackLsig, bondToken);
 
 	console.log("Setting buyback address!");
-	await deployer.executeTx(buybackTx);
+	await tryExecuteTx(deployer, buybackTx);
 	console.log("Buyback address set successfully!");
 };

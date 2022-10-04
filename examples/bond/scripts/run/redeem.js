@@ -1,4 +1,4 @@
-const { tokenMap, couponValue, redeemCouponTx } = require("./common/common.js");
+const { tokenMap, couponValue, redeemCouponTx, tryExecuteTx } = require("./common/common.js");
 
 /**
  * Redeem old tokens, get coupon_value + new bond tokens
@@ -19,8 +19,12 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
 		TMPL_APPLICATION_ID: appInfo.appID,
 		TMPL_APP_MANAGER: managerAcc.addr,
 	};
-	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", scInitParam);
-	await deployer.optInAccountToASA(newBond, buyerAccount.name, {});
+	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", scInitParam).catch((error) => {
+		throw error;
+	});
+	await deployer.optInAccountToASA(newBond, buyerAccount.name, {}).catch((error) => {
+		throw error;
+	});
 	const groupTx = redeemCouponTx(
 		buyerAccount,
 		dexLsig,
@@ -32,6 +36,6 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
 	);
 
 	console.log(`* Redeeming ${amount} tokens for ${buyerAccount.name} from Dex: ${dex}!`);
-	await deployer.executeTx(groupTx);
+	await tryExecuteTx(deployer, groupTx);
 	console.log("Tokens redeemed!");
 };
