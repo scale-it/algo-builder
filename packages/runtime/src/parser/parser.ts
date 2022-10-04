@@ -860,6 +860,8 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
 		}
 	} else {
 		if (len > MaxAppProgramLen) {
+			// TODO: // When MaxExtraAppProgramPages > 0, this is the size of those pages.
+			// So two "extra pages" would mean 3*MaxAppProgramLen bytes are available.
 			// check max program length (for stateful)
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
 				length: len,

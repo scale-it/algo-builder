@@ -13,6 +13,7 @@ import { Op } from "../interpreter/opcode";
 import { ITxn, ITxna } from "../interpreter/opcode-list";
 import {
 	ALGORAND_MIN_TX_FEE,
+	maxByteArrayLength,
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
@@ -54,23 +55,32 @@ const globalAndLocalNumTxnFields = new Set([
 
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
+// checks if byte array size is inbound
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
-	if (a instanceof Uint8Array) {
-		return a;
-	}
-
-	if (Buffer.isBuffer(a)) {
-		return new Uint8Array(a);
-	}
-
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
-
-	if (typeof a === "string") {
-		return parsing.stringToBytes(a);
+	let byteArray: Uint8Array = new Uint8Array();
+	if (a === undefined) {
+		const result = TxFieldDefaults[field];
+		if (result !== Uint8Array) {
+			return result;
+		}
+		byteArray = result;
 	}
-	return TxFieldDefaults[field];
+	if (a instanceof Uint8Array) {
+		byteArray = a;
+	}
+	if (Buffer.isBuffer(a)) {
+		byteArray = new Uint8Array(a);
+	}
+	if (typeof a === "string") {
+		byteArray = parsing.stringToBytes(a);
+	}
+	if (byteArray.length > maxByteArrayLength) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
+	}
+	return byteArray;
 }
 
 /**
