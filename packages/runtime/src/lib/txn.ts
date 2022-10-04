@@ -80,6 +80,9 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (byteArray.length > maxByteArrayLength) {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
 	}
+	if (field === "ApprovalProgram" && byteArray.length > 2048) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.APPROVAL_PROGRAM_LENGTH);
+	}
 	return byteArray;
 }
 

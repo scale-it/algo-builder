@@ -449,6 +449,13 @@ maximun uint128`,
 		title: "Maximum byte array length exceeded",
 		description: "Maximum byte array length is 4096",
 	},
+	APPROVAL_PROGRAM_LENGTH: {
+		number: 1066,
+		message: "Maximum approval length exceeded",
+		title: "Approval program length",
+		description:
+			"Maximum program length (2048 bytes) exceeded. Use `ApprovalProgramPages` instead",
+	},
 };
 
 const runtimeGeneralErrors = {
