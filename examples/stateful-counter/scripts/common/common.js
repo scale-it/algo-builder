@@ -1,7 +1,7 @@
 exports.tryExecuteTx = async function (deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
-		else await deployer.executeTx([txnParams]);
+		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+		return await deployer.executeTx(txnParameters);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.error : e);
 		throw e;
