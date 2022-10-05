@@ -42,6 +42,7 @@ import {
 	SSCAttributesM,
 	StackElem,
 	State,
+	TxnReceipt,
 	TxReceipt,
 } from "./types";
 
@@ -793,7 +794,7 @@ export class Runtime {
 	 * @param to to address
 	 * @param amount amount of algo in microalgos
 	 */
-	fundLsig(from: RuntimeAccountI, to: AccountAddress, amount: number): TxReceipt {
+	fundLsig(from: RuntimeAccountI, to: AccountAddress, amount: number): TxnReceipt {
 		const fundParam: types.ExecParams = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -862,7 +863,7 @@ export class Runtime {
 	executeTx(
 		txnParams: types.ExecParams[] | algosdk.SignedTransaction[],
 		debugStack?: number
-	): TxReceipt[] {
+	): TxnReceipt[] {
 		// TODO: union above and create new type in task below:
 		// https://www.pivotaltracker.com/n/projects/2452320/stories/181295625
 		let signedTransactions: algosdk.SignedTransaction[];
@@ -935,11 +936,15 @@ export class Runtime {
 		this.ctx.budget = MAX_APP_PROGRAM_COST * applCallTxNumber;
 		const txReceipts = this.ctx.processTransactions(signedTransactions, appDefMap, lsigMap);
 
+		const txnReceipt: TxnReceipt[] = [];
+		for (const txn of txReceipts) {
+			txnReceipt.push(parsing.convertKeysToHyphens(txn));
+		}
 		// update store only if all the transactions are passed
 		this.store = this.ctx.state;
 
 		// return transaction receipt(s)
-		return txReceipts;
+		return txnReceipt;
 	}
 
 	/**

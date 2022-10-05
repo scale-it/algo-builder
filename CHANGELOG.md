@@ -18,6 +18,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Changed default sample project license to ISC
 - Fix `txn AssetSender` should return zero address by default.
 - Add unit tests for all transaction types in runtime executeTx.
+- Add support loadLogic for *.teal program and SCParam.
 
 #### Examples
 
@@ -42,6 +43,7 @@ from `algosdk` and sends it to the network.
 - Added multisignatue verification in `Runtime`.
 - Added support for rekey account to multisignature in `Runtime`.
 - Added support to withdraw from account rekeyed to multisignature in `Runtime`.
+- Added support for teal v7 in `Runtime` and a test case.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
@@ -55,6 +57,17 @@ from `algosdk` and sends it to the network.
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 - Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
+
+### Breaking Changes
+
+#### @algo-builder/runtime
+
+- `executeTx` now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/types.ts#L411) instead of `TxReceipt[]`.
+- `fundLsig` now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/src/types.ts#L411) instead of `TxReceipt[]`.
+
+#### @algo-builder/web
+
+- `executeTx` promise now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts#L458) instead of `algosdk.modelsv2.PendingTransactionResponse`.
 
 ### Examples
 

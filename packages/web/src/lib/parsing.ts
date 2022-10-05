@@ -95,3 +95,30 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 	}
 	return args as Uint8Array[];
 }
+
+/**
+ * Converts camelCase to hypenCase
+ * @param str string to convert
+ * @returns fooBar to foo-bar
+ */
+export function convertCapitalToHyphens(str: string): string {
+	return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+}
+
+/**
+ * Converts object keys from camelCase to hypenCase
+ * @param object
+ * @returns object keys from fooBar to foo-bar
+ */
+export function convertKeysToHyphens(object: any) {
+	let newObject: any = {};
+	Object.keys(object).forEach((key) => {
+		// not parse txnID
+		if (key === "txID") {
+			newObject[key] = object[key];
+		} else {
+			newObject[convertCapitalToHyphens(key)] = object[key];
+		}
+	});
+	return newObject;
+}
