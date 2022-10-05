@@ -115,36 +115,44 @@ describe("Pooling Inner Transactions", function () {
                 TXN_OBJ.apas = [assetID];
 
                 const prog = `
-					itxn_begin
-					int axfer
-					itxn_field TypeEnum
-					global CurrentApplicationAddress
-					itxn_field AssetReceiver
-					int ${assetID}
-					itxn_field XferAsset
-					int 0
-					itxn_field AssetAmount
-					int 0
-					itxn_field Fee
-					itxn_next
-					int pay
-					itxn_field TypeEnum
-					txn Sender
-					itxn_field Receiver
-					addr ${bobAccount.address}
-					itxn_field Sender
-					int 1000
-					itxn_field Amount
-					int 2000
-					itxn_field Fee
-					itxn_submit
-					int 1
-					return
-					`;
+                itxn_begin
+                int axfer
+                itxn_field TypeEnum
+                global CurrentApplicationAddress
+                itxn_field AssetReceiver
+                int ${assetID}
+                itxn_field XferAsset
+                int 0
+                itxn_field AssetAmount
+                int 0
+                itxn_field Fee
+                itxn_next
+                int pay
+                itxn_field TypeEnum
+                global CurrentApplicationAddress
+                itxn_field Receiver
+                addr ${bobAccount.address}
+                itxn_field Sender
+                int 1000
+                itxn_field Amount
+                int 2000
+                itxn_field Fee
+                itxn_submit
+                int 1
+                return
+                `;
 
-                executeTEAL(prog)
+                executeTEAL(prog);
 
-                // assert.doesNotThrow(() => executeTEAL(prog));
+                assert.equal(interpreter.runtime.ctx.state.accounts
+                    .get(bobAccount.address)?.balance()
+                    , 1000000n - 3000n);
+                assert.equal(interpreter.runtime.ctx.state.accounts
+                    .get(appAccAddr)?.balance()
+                    , 1000n);
+                assert.isDefined(interpreter.runtime.ctx.state.accounts
+                    .get(appAccAddr)?.getAssetHolding(assetID));
+
             }
 
         });
@@ -163,7 +171,7 @@ describe("Pooling Inner Transactions", function () {
 				//partially covering it's own fee
 				int 1
 				itxn_field Fee
-				itxn_next
+                itxn_next
 				int pay
 				itxn_field TypeEnum
 				txn Sender
@@ -178,6 +186,10 @@ describe("Pooling Inner Transactions", function () {
 				return
 				`;
             assert.doesNotThrow(() => executeTEAL(prog));
+            // verify deducted fee
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(appAccAddr)?.balance()
+                , BigInt(1e9) - 3000n);
         });
 
         it("Should succeed: when txn fee is covered in group txns", () => {
@@ -207,6 +219,11 @@ describe("Pooling Inner Transactions", function () {
 				return
 				`;
             assert.doesNotThrow(() => executeTEAL(prog));
+
+            // verify deducted fee
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(appAccAddr)?.balance()
+                , BigInt(1e9) - 4000n);
         });
 
         it("Should fail: when txn fee is not covered in group txns", () => {
