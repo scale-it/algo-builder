@@ -1066,7 +1066,7 @@ export class Runtime {
 			if (signedTxn.msig.subsig.length < threshold) {
 				return false;
 			}
-			let multiSigaddr;
+			let multisigAddr;
 			try {
 				const mparams = {
 					version: version,

@@ -40,7 +40,7 @@ from `algosdk` and sends it to the network.
 - Added json_ref opcode to `Runtime`
 - Added support for foreign app account access in `Runtime`
 - Added multisignatue verification in `Runtime`.
-- Added support to rekey account to multisig in `Runtime`.
+- Added support for rekey account to multisignature in `Runtime`.
 - Added support to withdraw from account rekeyed to multisignature in `Runtime`.
 
 #### @algo-builder/web

@@ -259,12 +259,12 @@ describe("Re-keying transactions", function () {
 
 		//create multiSig account address
 		const addrs = [john.address, bob.address];
-		multiSigParams = {
+		multisigParams = {
 			version: 1,
 			threshold: 2,
 			addrs: addrs,
 		};
-		multSigAddr = multisigAddress(multiSigParams);
+		multisigAddr = multisigAddress(multiSigParams);
 
 		syncAccounts();
 	});
@@ -465,7 +465,7 @@ describe("Re-keying transactions", function () {
 			syncAccounts();
 		});
 
-		it("Spend address of alice account should change to multiSig address", () => {
+		it("Spend address of alice account should change to multisignature address", () => {
 			assert.isNotNull(alice.account.spend);
 			assert.equal(alice.getSpendAddress(), multSigAddr);
 		});
