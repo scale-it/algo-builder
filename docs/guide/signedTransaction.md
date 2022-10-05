@@ -35,11 +35,11 @@ Check the example in our [tests](../../packages/runtime/test/src/guide-examples.
 
 # Multisignature
 
-Support of `SignedTransaction` objects in `Runtime` enables users to test their multisignatures. Again with the help of `algosdk` we can create multisignarue address, rekey an existing runtime account to this address and then sign transactions using multisignature accounts. `Runtime` verifies the signature and if its valid process the transaction.
+Support of `SignedTransaction` objects in `Runtime` enables users to test their multisignatures. Again with the help of `algosdk` we can create multisignature address, rekey an existing runtime account to this address and then sign transactions using multisignature accounts. `Runtime` verifies the signature and if it's valid, it process the transaction.
 
 ## Example
 
-This example shows how to create a multisignature address using `algosdk`, rekey an existing runtime account to multisignautre, create a transaction and sign it using multisignature. For more details check the [algorand docs](https://developer.algorand.org/docs/get-details/transactions/signatures/#multisignatures).
+This example shows how to create a multisignature address using `algosdk`, rekey an existing runtime account to multisignature, create a transaction and sign it using multisignature. For more details check the [algorand docs](https://developer.algorand.org/docs/get-details/transactions/signatures/#multisignatures).
 
 ```ts
 // create runtime
@@ -57,7 +57,7 @@ const addrs = [bob.address, charlie.address];
  		};
 // create multisignature address
 const multSigAddr = algosdk.multisigAddress(multiSigParams);
-// rekey alice to multi sig
+// rekey alice to multisignature account
 const txParam: types.AlgoTransferParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,

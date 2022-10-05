@@ -30,7 +30,7 @@ describe.only("Guide examples", function () {
 			note: undefined,
 			suggestedParams: mockSuggestedParams({ totalFee: fee }, runtime.getRound()),
 		});
-		// sign it and decode it to signedTransaction object
+		// signs and decode it to signedTransaction object
 		const signedTransacion = algosdk.decodeSignedTransaction(
 			transaction.signTxn(alice.account.sk)
 		);
@@ -52,7 +52,7 @@ describe.only("Guide examples", function () {
 		};
 		// create multisignature address
 		const multSigAddr = algosdk.multisigAddress(multiSigParams);
-		// rekey alice to multi sig
+		// rekey alice to multisigature account
 		const txParam: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
