@@ -4,18 +4,13 @@ import { assert } from "chai";
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { Runtime } from "../../../src/index";
+import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
-import {
-	AccountAddress,
-	AccountStoreI,
-	ExecutionMode,
-	StackElem,
-	TxOnComplete,
-} from "../../../src/types";
+import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
+import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -88,13 +83,8 @@ describe("Inner Transactions", function () {
 		});
 
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([
-			elonAcc,
-			johnAcc,
-			bobAccount,
-			applicationAccount,
-			foreignApplicationAccount,
-		]);
+		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount,
+			applicationAccount, foreignApplicationAccount]);
 		interpreter.tealVersion = tealVersion;
 		reset();
 	};
@@ -1420,7 +1410,24 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe("Foreign application account access in teal v7 ", () => {
+	});
+
+	describe("Teal v7", function () {
+		describe("Inner transaction", () => {
+			useFixture("teal-files");
+			this.beforeEach(() => {
+				setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
+			});
+			it("Should execute a teal file successfully", () => {
+				const file = "test-innerTxn-v7.teal";
+				interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
+				assert.deepEqual(interpreter.innerTxnGroups.length, 0);
+				assert.deepEqual(interpreter.currentInnerTxnGroup.length, 2);
+				assert.deepEqual(interpreter.tealVersion, 7);
+			});
+		})
+
+		describe("Foreign application account access", () => {
 			this.beforeEach(() => {
 				setUpInterpreter(7, 1e9);
 			});

@@ -16,6 +16,8 @@ import {
 	SignWithMultisig,
 	TransactionAndSign,
 	TxParams,
+	SignWithMultisig,
+	TxnReceipt,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
@@ -36,11 +38,12 @@ export class WebMode {
 	/**
 	 * wait for confirmation for transaction using transaction id
 	 * @param txId Transaction id
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async waitForConfirmation(
 		txId: string,
-		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		waitRounds: number = WAIT_ROUNDS
+	): Promise<TxnReceipt> {
 		const response = await this.algoSigner.algod({
 			ledger: this.chainName,
 			path: "/v2/status",
@@ -58,7 +61,8 @@ export class WebMode {
 				pendingInfo[CONFIRMED_ROUND] !== null &&
 				(pendingInfo[CONFIRMED_ROUND] as number) > 0
 			) {
-				return pendingInfo as unknown as algosdk.modelsv2.PendingTransactionResponse;
+				const txnReceipt = { txID: txId, ...pendingInfo };
+				return txnReceipt as TxnReceipt;
 			}
 			// TODO: maybe we should use "sleep" instead of pinging a node again?
 			currentRound += 1;
@@ -75,16 +79,13 @@ export class WebMode {
 	 * @param signedTxn Signed Transaction blob encoded in base64
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
-	async sendAndWait(
-		signedTxn: string,
-		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async sendAndWait(signedTxn: string, waitRounds: number = WAIT_ROUNDS): Promise<TxnReceipt> {
 		const txInfo = await this.algoSigner.send({
 			ledger: this.chainName,
 			tx: signedTxn,
 		});
 		if (txInfo && typeof txInfo.txId === "string") {
-			return await this.waitForConfirmation(txInfo.txId);
+			return await this.waitForConfirmation(txInfo.txId, waitRounds);
 		}
 		throw new Error("Transaction Error");
 	}
@@ -224,9 +225,7 @@ export class WebMode {
 	 * When list of ExecParams is used, the function will request wallet to sign transactions.
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
-	async executeTx(
-		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
 		let signedTxn: any;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16 || transactions.length == 0) {

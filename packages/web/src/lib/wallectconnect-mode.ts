@@ -16,6 +16,8 @@ import {
 	SignType,
 	TransactionAndSign,
 	TransactionInGroup,
+	Sign,
+	TxnReceipt,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
@@ -190,7 +192,7 @@ export class WallectConnectSession {
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxnReceipt> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
@@ -199,12 +201,13 @@ export class WallectConnectSession {
 	private async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	): Promise<TxnReceipt> {
 		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
-		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		const txnReceipt = { txID: txId, ...pendingInfo };
+		return txnReceipt as TxnReceipt;
 	}
 
 	/**
@@ -212,9 +215,7 @@ export class WallectConnectSession {
 	 * @param transactions transaction parameters,  atomic transaction parameters
 	 *  or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
-	async executeTx(
-		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
 		let signedTxn: (Uint8Array | null)[] | undefined;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16) {

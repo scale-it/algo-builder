@@ -5,13 +5,7 @@ import { assert, expect } from "chai";
 import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import {
-	AccountAddress,
-	AccountStoreI,
-	ExecutionMode,
-	StackElem,
-	TxOnComplete,
-} from "../../../src/types";
+import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
