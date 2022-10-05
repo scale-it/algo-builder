@@ -212,7 +212,7 @@ export function txnSpecByField(
 			else result = 0n;
 			break;
 		}
-		case "NumClearProgramPages": {
+		case "NumClearStateProgramPages": {
 			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxByteArrayLength);
 			else result = 0n;
 			break;
