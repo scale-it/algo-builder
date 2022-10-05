@@ -80,8 +80,11 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (byteArray.length > maxByteArrayLength) {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
 	}
-	if (field === "ApprovalProgram" && byteArray.length > 2048) {
-		throw new RuntimeError(RUNTIME_ERRORS.TEAL.APPROVAL_PROGRAM_LENGTH);
+	if (
+		(field === "ApprovalProgram" || field === "ClearStateProgram") &&
+		byteArray.length > 2048
+	) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED);
 	}
 	return byteArray;
 }
@@ -108,6 +111,7 @@ export function checkIfAssetDeletionTx(txn: Transaction): boolean {
  * @param gtxns Transaction group
  * @param interpreter interpreter object
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export function txnSpecByField(
 	txField: string,
 	tx: EncTx,
@@ -203,7 +207,16 @@ export function txnSpecByField(
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
-
+		case "NumApprovalProgramPages": {
+			if (tx.apap) result = Math.ceil(tx.apap.length / maxByteArrayLength);
+			else result = 0n;
+			break;
+		}
+		case "NumClearProgramPages": {
+			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxByteArrayLength);
+			else result = 0n;
+			break;
+		}
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
@@ -223,6 +236,7 @@ export function txnSpecByField(
  * @param interpreter interpreter object
  * @param line line number in TEAL file
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export function txAppArg(
 	txField: TxField,
 	tx: EncTx,
@@ -238,6 +252,36 @@ export function txAppArg(
 		const logs: Uint8Array[] = txReceipt?.logs ?? [];
 		op.checkIndexBound(idx, logs, op.line);
 		return parseToStackElem(logs[idx], txField);
+	} else if (txField === "ApprovalProgramPages" && tx.apap) {
+		const pageCount = Math.ceil(tx.apap.length / maxByteArrayLength);
+		if (idx > pageCount) {
+			throw new Error("invalid ApprovalProgramPages page index");
+		}
+		const first = idx * maxByteArrayLength;
+		let last = first + maxByteArrayLength;
+		if (last > tx.apap.length) {
+			last = tx.apap.length;
+		}
+		const page = tx.apap.slice(first, last);
+		return parseToStackElem(page, txField);
+	} else if (txField === "NumApprovalProgramPages" && tx.apap) {
+		const pageCount = Math.ceil(tx.apap.length / maxByteArrayLength);
+		return parseToStackElem(pageCount, txField);
+	} else if (txField === "ClearStateProgramPages" && tx.apsu) {
+		const pageCount = Math.ceil(tx.apsu.length / maxByteArrayLength);
+		if (idx > pageCount) {
+			throw new Error("invalid ClearStateProgramPages page index");
+		}
+		const first = idx * maxByteArrayLength;
+		let last = first + maxByteArrayLength;
+		if (last > tx.apsu.length) {
+			last = tx.apsu.length;
+		}
+		const page = tx.apsu.slice(first, last);
+		return parseToStackElem(page, txField);
+	} else if (txField === "NumClearStateProgramPages" && tx.apsu) {
+		const pageCount = Math.ceil(tx.apsu.length / maxByteArrayLength);
+		return parseToStackElem(pageCount, txField);
 	}
 
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'

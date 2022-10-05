@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
-import { bobAcc } from "@algo-builder/algob/test/mocks/account";
 import { parsing, types } from "@algo-builder/web";
 import algosdk, {
 	decodeAddress,
@@ -117,6 +116,8 @@ import {
 	Itob,
 	ITxn,
 	ITxnas,
+	ITxnBegin,
+	ITxnField,
 	Json_ref,
 	Keccak256,
 	Label,
@@ -188,7 +189,7 @@ import {
 } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
-import { elonMuskAccount, johnAccount } from "../../mocks/account";
+import { elonMuskAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
@@ -7314,10 +7315,11 @@ describe("Teal Opcodes", function () {
 
 	describe("json_ref", () => {
 		const stack = new Stack<StackElem>();
-		const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10}}, \"key5\": 18446744073709551615 }";
+		const jsonByte =
+			'{"key0": 0,"key1": "algo","key2":{"key3": "teal", "key4": {"key40": 10}}, "key5": 18446744073709551615 }';
 
 		it("Should return correct JSONUint64", function () {
-			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes('{"maxUint64": 18446744073709551615}'));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONUint64"], 1);
 			op.execute(stack);
@@ -7327,7 +7329,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw when get wrong JSON type(expect byte but got uint64)", function () {
-			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes('{"maxUint64": 18446744073709551615}'));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONString"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
@@ -7354,12 +7356,12 @@ describe("Teal Opcodes", function () {
 			op2.execute(stack);
 
 			const top = stack.pop();
-			const expected = parsing.stringToBytes("{\"key40\":10}");
+			const expected = parsing.stringToBytes('{"key40":10}');
 			assert.deepEqual(top, expected);
 		});
 
 		it("Should throw error when parsing invalid JSON object(missing comma in JSON object)", function () {
-			const jsonByte = "{\"key0\": 0 \"key1\": 2}";
+			const jsonByte = '{"key0": 0 "key1": 2}';
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONObject"], 1);
@@ -7367,11 +7369,107 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw error when parsing invalid JSON object(duplicate key is not allowed in JSON object)", function () {
-			const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10, \"key40\": \"should fail!\"}}}";
+			const jsonByte =
+				'{"key0": 0,"key1": "algo","key2":{"key3": "teal", "key4": {"key40": 10, "key40": "should fail!"}}}';
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONObject"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
-		});		
+		});
+	});
+	describe("Approval/ClearState Program", function () {
+		const stack = new Stack<StackElem>();
+		let interpreter: Interpreter;
+		this.beforeEach(() => {
+			const elonAcc = new AccountStore(0, elonMuskAccount); // setup test account
+			setDummyAccInfo(elonAcc);
+			const appAccAddr = getApplicationAddress(TXN_OBJ.apid);
+			const applicationAccount = new AccountStore(1000000, {
+				addr: appAccAddr,
+				sk: new Uint8Array(0),
+			});
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([applicationAccount, elonAcc]);
+			interpreter.runtime.ctx.tx = {
+				...TXN_OBJ,
+				snd: Buffer.from(decodeAddress(elonAddr).publicKey),
+			};
+			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+			interpreter.runtime.ctx.state.txReceipts.set(TXN_OBJ.txID, {
+				txn: TXN_OBJ,
+				txID: TXN_OBJ.txID,
+			});
+		});
+		it("Should throw an error when the max byte array size is exceeded(4096 bytes)", function () {
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(4097).fill(0);
+			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
+		});
+		it("Should throw an error when the max program is exceeded(2048 bytes)", function () {
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2049).fill(0);
+			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED);
+		});
+		it("Should ApprovalProgram and ApprovalProgramPages return the same value If approvalProgram.length =< 2048 ", function () {
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2000).fill(0);
+			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
+			const op2 = new Txn(["ApprovalProgram"], 1, interpreter);
+			op1.execute(stack);
+			const op1Result = stack.pop();
+			op2.execute(stack);
+			const op2Result = stack.pop();
+			assert.deepEqual(op1Result, op2Result);
+			assert.deepEqual(op2Result, Buffer.alloc(2000).fill(0));
+		});
+		it("Should return enitre ApprovalProgram in two steps with ApprovalProgramPages", function () {
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
+			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
+			const op2 = new Txn(["ApprovalProgramPages", "1"], 1, interpreter);
+			op1.execute(stack);
+			const op1Result = stack.pop();
+			op2.execute(stack);
+			const op2Result = stack.pop();
+			assert.deepEqual((op1Result as Buffer).length, 4096);
+			assert.deepEqual((op2Result as Buffer).length, 5000 - 4096);
+		});
+		it("Should return entire ClearStateProgram in two steps", function () {
+			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
+			const op1 = new Txn(["ClearStateProgramPages", "0"], 1, interpreter);
+			const op2 = new Txn(["ClearStateProgramPages", "1"], 1, interpreter);
+			op1.execute(stack);
+			const op1Result = stack.pop();
+			op2.execute(stack);
+			const op2Result = stack.pop();
+			assert.deepEqual((op1Result as Buffer).length, 4096);
+			assert.deepEqual((op2Result as Buffer).length, 5000 - 4096);
+		});
+		it("Should return correct number of ApprovalProgramPages", function () {
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
+			const op = new Txn(["NumApprovalProgramPages"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(2n, stack.pop());
+		});
+		it("Should return correct number of ClearStateProgramPages", function () {
+			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
+			const op = new Txn(["ClearStateProgramPages"], 1, interpreter);
+			op.execute(stack);
+			assert.equal(2n, stack.pop());
+		});
+		it("Should set clearStateProgram", function () {
+			//we are setting ClearState program to ApprovalProgram using new field
+			//at the end we are popping the values from the stack and compare them
+			interpreter.runtime.ctx.tx.apap = Buffer.alloc(3000).fill(0);
+			const opArray = [new ITxnBegin([], 1, interpreter)];
+			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new ITxnField(["ClearStateProgramPages"], 1, interpreter));
+			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new ITxnField(["ClearStateProgramPages"], 2, interpreter));
+			opArray.push(new Txn(["ClearStateProgramPages", "1"], 1, interpreter));
+			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.forEach(function (op) {
+				op.execute(stack);
+			});
+			assert.deepEqual(stack.pop(), stack.pop());
+		});
 	});
 });

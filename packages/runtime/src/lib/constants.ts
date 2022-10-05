@@ -30,6 +30,7 @@ export const LOGIC_SIG_MAX_COST = 20000;
 export const MAX_APP_PROGRAM_COST = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 2048;
+export const MaxExtraAppProgramPages = 3;
 export const MaxTxnNoteBytes = 1024;
 export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
@@ -159,6 +160,10 @@ TxnFields[6] = {
 
 TxnFields[7] = {
 	...TxnFields[6],
+	ApprovalProgramPages: null,
+	ClearStateProgramPages: null,
+	NumApprovalProgramPages: null,
+	NumClearStateProgramPages: null,
 };
 
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
@@ -191,7 +196,7 @@ TxArrFields[3] = new Set([...TxArrFields[2], "Assets", "Applications"]);
 TxArrFields[4] = cloneDeep(TxArrFields[3]);
 TxArrFields[5] = new Set([...TxArrFields[4], "Logs"]);
 TxArrFields[6] = cloneDeep(TxArrFields[5]);
-TxArrFields[7] = cloneDeep(TxArrFields[6]);
+TxArrFields[7] = new Set([...TxArrFields[6], "ApprovalProgramPages", "ClearStateProgramPages"]);
 
 // itxn fields of type array
 export const ITxArrFields: { [key: number]: Set<string> } = {

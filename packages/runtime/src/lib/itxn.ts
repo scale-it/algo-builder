@@ -7,6 +7,8 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MaxAppProgramLen,
+	MaxExtraAppProgramPages,
 	MaxTxnNoteBytes,
 	TransactionTypeEnum,
 	TxnFields,
@@ -81,6 +83,9 @@ byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 	"ClearStateProgram",
 ].forEach((field) => byteTxnFields[6].add(field));
 byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
+["ApprovalProgramPages", "ClearStateProgramPages"].forEach((field) =>
+	byteTxnFields[7].add(field)
+);
 
 const strTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -189,7 +194,7 @@ export function setInnerTxField(
 		txValue = op.assertAlgorandAddress(val, line);
 	}
 
-	const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
+	let encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
 	// txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
 	if (txValue === undefined) {
@@ -280,6 +285,32 @@ export function setInnerTxField(
 			const note = txValue as Uint8Array;
 			if (note.length > MaxTxnNoteBytes) {
 				errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+			}
+			break;
+		}
+		case "ApprovalProgramPages": {
+			encodedField = "apap";
+			const approvalProgram = (subTxn as any)[encodedField];
+			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
+			if (approvalProgram !== undefined) {
+				//append
+				txValue = new Uint8Array([...approvalProgram, ...(txValue as Uint8Array)]);
+			}
+			if ((txValue as Uint8Array).length > maxPossible) {
+				errMsg = `Approval Program exceeded the maximum allowed length of ${maxPossible} bytes`;
+			}
+			break;
+		}
+		case "ClearStateProgramPages": {
+			encodedField = "apsu";
+			const clearStateProgram = (subTxn as any)[encodedField];
+			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
+			if (clearStateProgram !== undefined) {
+				//append
+				txValue = new Uint8Array([...clearStateProgram, ...(txValue as Uint8Array)]);
+			}
+			if ((txValue as Uint8Array).length > maxPossible) {
+				errMsg = `Clear State Program exceeded the maximum allowed length of ${maxPossible} bytes`;
 			}
 			break;
 		}
