@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { IClientMeta } from "@walletconnect/types";
-import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
+import algosdk, { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
 
 import { WalletMultisigMetadata, WalletTransaction } from "./algo-signer-types";
@@ -119,7 +119,7 @@ export type ExecParams =
 export enum SignType {
 	SecretKey,
 	LogicSignature,
-	MultiSignature
+	MultiSignature,
 }
 
 export enum TransactionType {
@@ -243,11 +243,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-		| TransactionType.CallApp
-		| TransactionType.ClearApp
-		| TransactionType.CloseApp
-		| TransactionType.DeleteApp
-		| TransactionType.OptInToApp;
+			| TransactionType.CallApp
+			| TransactionType.ClearApp
+			| TransactionType.CloseApp
+			| TransactionType.DeleteApp
+			| TransactionType.OptInToApp;
 		appID: number;
 	};
 
@@ -444,3 +444,17 @@ export interface HttpNetworkConfig {
 }
 
 export { WAIT_ROUNDS };
+
+export interface ConfirmedTxInfo {
+	"confirmed-round": number;
+	"asset-index": number;
+	"application-index": number;
+	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
+	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
+	"inner-txns"?: ConfirmedTxInfo;
+	txn: algosdk.EncodedSignedTransaction;
+}
+
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
+}
