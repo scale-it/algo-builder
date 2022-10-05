@@ -461,7 +461,7 @@ describe("Re-keying transactions", function () {
 	});
 	describe.only("Account to MultiSig", () => {
 		this.beforeEach(() => {
-			rekeyFromAccount(runtime, alice, alice, multSigAddr);
+			rekeyFromAccount(runtime, alice, alice, multisigAddr);
 			syncAccounts();
 		});
 
