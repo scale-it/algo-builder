@@ -1,19 +1,15 @@
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
-
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { Stack } from "../../../src/lib/stack";
 import {
 	AccountAddress,
 	AccountStoreI,
 	ExecutionMode,
-	StackElem,
 	TxOnComplete,
 } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
@@ -71,7 +67,7 @@ describe("Inner Transactions", function () {
 		// setup 2nd account
 		johnAcc = new AccountStore(0, johnAccount);
 
-		// setup 2nd account
+		// setup 3rd account
 		bobAccount = new AccountStore(1000000, bobAcc);
 
 		// setup application account
@@ -1474,6 +1470,248 @@ describe("Inner Transactions", function () {
 				const rcvArray = new Uint8Array(rcvBuffer);
 				const receiver = encodeAddress(rcvArray);
 				assert.equal(receiver, foreignAppAccAddr);
+			});
+		});
+
+		describe("Pooling fee tests in group txns", () => {
+			this.beforeEach(() => {
+				setUpInterpreter(7, 1e9);
+			});
+
+			it.only("Should succeed: when unfunded account opts-in in a group txn", () => {
+				const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
+				const appacc = interpreter.runtime.ctx.state.accounts.get(applicationAccount.address);
+
+				if (appacc && elonAcc) {
+					elonAcc.amount = 1000000n;
+					const assetID = interpreter.runtime.ctx.deployASADef(
+						"test-asa",
+						{ total: 10, decimals: 0, unitName: "TASA" },
+						elonAddr,
+						{ creator: { ...elonAcc.account, name: "elon" } }
+					).assetIndex;
+
+					appacc.amount = 0n; // set smart contract balance to 0
+					assert.equal(appacc.balance(), 0n);
+					// rekey bobAccount to application
+					bobAccount.account.rekeyTo(applicationAccount.address);
+
+					TXN_OBJ.apas = [assetID];
+
+					const prog = `
+					itxn_begin
+					int axfer
+					itxn_field TypeEnum
+					global CurrentApplicationAddress
+					itxn_field AssetReceiver
+					int ${assetID}
+					itxn_field XferAsset
+					int 0
+					itxn_field AssetAmount
+					int 0
+					itxn_field Fee
+					itxn_next
+					int pay
+					itxn_field TypeEnum
+					txn Applications 2
+					app_params_get AppAddress
+					assert
+					global CurrentApplicationAddress
+					itxn_field Receiver
+					addr ${bobAccount.account.addr}
+					itxn_field Sender
+					int 1000
+					itxn_field Amount
+					int 2000
+					itxn_field Fee
+					itxn_submit
+					int 1
+					return
+					`;
+
+					assert.doesNotThrow(() => executeTEAL(prog));
+				}
+
+			});
+
+			it.only("Should succeed: when funded account partially covers it's own fee", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				itxn_field Receiver
+				int 0
+				itxn_field Amount
+				//partially covering it's own fee
+				int 1
+				itxn_field Fee
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				//partially covering it's own fee
+				int 1999
+				itxn_field Fee
+				itxn_submit
+				int 1
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+			});
+
+			it.only("Should succeed: when txn fee is covered in group txns", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 1000
+				itxn_field Fee
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 1000
+				itxn_field Fee
+				itxn_submit
+				int 1
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+			});
+
+			it.only("Should fail: when txn fee is not covered in group txns", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 0
+				itxn_field Fee
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				// txn fee of 1000 is covered but 2000 is required
+				int 1000
+				itxn_field Fee
+				itxn_submit
+				int 1
+				return
+				`;
+
+				expectRuntimeError(
+					() => executeTEAL(prog),
+					RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+				);
+
+			});
+
+			it("Should fail: when unfunded account sends fund in group txn", () => {
+				const prog = `
+				itxn_begin
+				int pay
+				itxn_field TypeEnum
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 0
+				itxn_field Fee
+				itxn_next
+				int pay
+				itxn_field TypeEnum
+				txn Sender
+				itxn_field Receiver
+				int 1000
+				itxn_field Amount
+				int 2000
+				itxn_field Fee
+				int 1
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+
+
+			});
+
+			it.only("Should fail: when unfunded account covers it's own fee", () => {
+				let assetID = 0;
+				const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
+				const appacc = interpreter.runtime.ctx.state.accounts.get(applicationAccount.address);
+				if (elonAcc && appacc) {
+					elonAcc.amount = 1000000n;
+					const assetID = interpreter.runtime.ctx.deployASADef(
+						"test-asa",
+						{ total: 10, decimals: 0, unitName: "TASA" },
+						elonAddr,
+						{ creator: { ...elonAcc.account, name: "elon" } }
+					).assetIndex;
+					TXN_OBJ.apas = [assetID];
+
+					appacc.amount = 0n; // set smart contract balance to 0
+					assert.equal(appacc.balance(), 0n);
+					// rekey bobAccount to application
+					bobAccount.account.rekeyTo(applicationAccount.address);
+
+					const prog = `
+					itxn_begin
+					int axfer
+					itxn_field TypeEnum
+					txn Accounts 1
+					itxn_field AssetReceiver
+					int ${assetID}
+					itxn_field XferAsset
+					int 0
+					itxn_field AssetAmount
+					// unfunded account trying to cover it's own fee
+					int 1
+					itxn_field Fee
+					itxn_next
+					int pay
+					itxn_field TypeEnum
+					txn Applications 2
+					app_params_get AppAddress
+					assert
+					itxn_field Receiver
+					int 2000
+					itxn_field Amount
+					int 1999
+					itxn_field Fee
+					itxn_submit
+					int 1
+					return
+					`;
+
+					expectRuntimeError(
+						() => executeTEAL(prog),
+						RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+					);
+				}
 			});
 		});
 	});

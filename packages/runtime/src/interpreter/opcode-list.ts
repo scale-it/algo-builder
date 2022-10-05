@@ -4356,10 +4356,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-							sig: Buffer.alloc(5),
-							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					  }
+						sig: Buffer.alloc(5),
+						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					}
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
