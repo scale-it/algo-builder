@@ -141,7 +141,7 @@ export function txnSpecByField(
 	}
 
 	// handle other cases
-	switch (String(TxFieldEnum)) {
+	switch (txField) {
 		case TxFieldEnum.FirstValidTime: {
 			// Causes program to fail; reserved for future use
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
