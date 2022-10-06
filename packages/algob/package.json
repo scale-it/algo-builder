@@ -34,7 +34,8 @@
 		"build:watch": "tsc -w -p .",
 		"clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
 		"prepublish": "yarn build; sh ./prepublish.sh",
-		"algob:dev": "sh ./setup_dev_project.sh"
+		"algob:dev": "sh ./project-dev-script.sh create",
+		"algob:dev:cmd": "sh ./project-dev-script.sh exec"
 	},
 	"publishConfig": {
 		"access": "public"
