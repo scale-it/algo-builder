@@ -111,7 +111,7 @@ export function convertCapitalToHyphens(str: string): string {
  * @returns object keys from fooBar to foo-bar
  */
 export function convertKeysToHyphens(object: any) {
-	let newObject: any = {};
+	const newObject: any = {};
 	Object.keys(object).forEach((key) => {
 		// not parse txnID
 		if (key === "txID") {
