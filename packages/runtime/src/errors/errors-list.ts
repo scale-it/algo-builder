@@ -447,14 +447,14 @@ maximun uint128`,
 		number: 1065,
 		message: "Maximum byte array length exceeded",
 		title: "Maximum byte array length exceeded",
-		description: "Maximum byte array length is 4096",
+		description: "Maximum byte array length is %maxStringSize%",
 	},
 	PROGRAM_LENGTH_EXCEEDED: {
 		number: 1066,
 		message: "Maximum program length exceeded",
 		title: "Program length",
 		description:
-			"Maximum program length (2048 bytes) exceeded. Use `ApprovalProgramPages` instead",
+			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
 	},
 };
 

@@ -13,7 +13,8 @@ import { Op } from "../interpreter/opcode";
 import { ITxn, ITxna } from "../interpreter/opcode-list";
 import {
 	ALGORAND_MIN_TX_FEE,
-	maxByteArrayLength,
+	MaxAppProgramLen,
+	maxStringSize,
 	TransactionTypeEnum,
 	TxFieldDefaults,
 	TxnFields,
@@ -77,14 +78,18 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 	if (typeof a === "string") {
 		byteArray = parsing.stringToBytes(a);
 	}
-	if (byteArray.length > maxByteArrayLength) {
-		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
+	if (byteArray.length > maxStringSize) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED, {
+			maxStringSize: maxStringSize,
+		});
 	}
 	if (
 		(field === "ApprovalProgram" || field === "ClearStateProgram") &&
-		byteArray.length > 2048
+		byteArray.length > MaxAppProgramLen
 	) {
-		throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED);
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED, {
+			maxAppProgramLen: MaxAppProgramLen,
+		});
 	}
 	return byteArray;
 }
@@ -208,12 +213,12 @@ export function txnSpecByField(
 			break;
 		}
 		case "NumApprovalProgramPages": {
-			if (tx.apap) result = Math.ceil(tx.apap.length / maxByteArrayLength);
+			if (tx.apap) result = Math.ceil(tx.apap.length / maxStringSize);
 			else result = 0n;
 			break;
 		}
 		case "NumClearStateProgramPages": {
-			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxByteArrayLength);
+			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxStringSize);
 			else result = 0n;
 			break;
 		}
@@ -253,34 +258,28 @@ export function txAppArg(
 		op.checkIndexBound(idx, logs, op.line);
 		return parseToStackElem(logs[idx], txField);
 	} else if (txField === "ApprovalProgramPages" && tx.apap) {
-		const pageCount = Math.ceil(tx.apap.length / maxByteArrayLength);
+		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ApprovalProgramPages page index");
 		}
-		const first = idx * maxByteArrayLength;
-		let last = first + maxByteArrayLength;
-		if (last > tx.apap.length) {
-			last = tx.apap.length;
-		}
+		const first = idx * maxStringSize;
+		const last = Math.min(first + maxStringSize, tx.apap.length);
 		const page = tx.apap.slice(first, last);
 		return parseToStackElem(page, txField);
 	} else if (txField === "NumApprovalProgramPages" && tx.apap) {
-		const pageCount = Math.ceil(tx.apap.length / maxByteArrayLength);
+		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
 	} else if (txField === "ClearStateProgramPages" && tx.apsu) {
-		const pageCount = Math.ceil(tx.apsu.length / maxByteArrayLength);
+		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ClearStateProgramPages page index");
 		}
-		const first = idx * maxByteArrayLength;
-		let last = first + maxByteArrayLength;
-		if (last > tx.apsu.length) {
-			last = tx.apsu.length;
-		}
+		const first = idx * maxStringSize;
+		const last = Math.min(first + maxStringSize, tx.apsu.length);
 		const page = tx.apsu.slice(first, last);
 		return parseToStackElem(page, txField);
 	} else if (txField === "NumClearStateProgramPages" && tx.apsu) {
-		const pageCount = Math.ceil(tx.apsu.length / maxByteArrayLength);
+		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
 	}
 
