@@ -17,6 +17,7 @@ import {
 	maxStringSize,
 	TransactionTypeEnum,
 	TxFieldDefaults,
+	TxFieldEnum,
 	TxnFields,
 	ZERO_ADDRESS,
 	ZERO_ADDRESS_STR,
@@ -84,7 +85,7 @@ export function parseToStackElem(a: unknown, field: TxField): StackElem {
 		});
 	}
 	if (
-		(field === "ApprovalProgram" || field === "ClearStateProgram") &&
+		(field === TxFieldEnum.ApprovalProgram || field === TxFieldEnum.ClearStateProgram) &&
 		byteArray.length > MaxAppProgramLen
 	) {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED, {
@@ -140,60 +141,60 @@ export function txnSpecByField(
 	}
 
 	// handle other cases
-	switch (txField) {
-		case "FirstValidTime": {
+	switch (String(TxFieldEnum)) {
+		case TxFieldEnum.FirstValidTime: {
 			// Causes program to fail; reserved for future use
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
 		}
-		case "TypeEnum": {
+		case TxFieldEnum.TypeEnum: {
 			result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
 			break;
 		}
-		case "TxID": {
+		case TxFieldEnum.TxID: {
 			return parsing.stringToBytes(tx.txID);
 		}
-		case "GroupIndex": {
+		case TxFieldEnum.GroupIndex: {
 			result = gtxns.indexOf(tx);
 			break;
 		}
-		case "NumAppArgs": {
+		case TxFieldEnum.NumAppArgs: {
 			const appArg = TxnFields[tealVersion].ApplicationArgs as keyof EncTx;
 			const appArgs = tx[appArg] as Buffer[];
 			result = appArgs?.length;
 			break;
 		}
-		case "NumAccounts": {
+		case TxFieldEnum.NumAccounts: {
 			const appAcc = TxnFields[tealVersion].Accounts as keyof EncTx;
 			const appAccounts = tx[appAcc] as Buffer[];
 			result = appAccounts?.length;
 			break;
 		}
-		case "NumAssets": {
+		case TxFieldEnum.NumAssets: {
 			const encAppAsset = TxnFields[tealVersion].Assets as keyof EncTx; // 'apas'
 			const foreignAssetsArr = tx[encAppAsset] as Buffer[];
 			result = foreignAssetsArr?.length;
 			break;
 		}
-		case "NumApplications": {
+		case TxFieldEnum.NumApplications: {
 			const encApp = TxnFields[tealVersion].Applications as keyof EncTx; // 'apfa'
 			const foreignAppsArr = tx[encApp] as Buffer[];
 			result = foreignAppsArr?.length;
 			break;
 		}
-		case "AssetSender": {
+		case TxFieldEnum.AssetSender: {
 			// if tx.asns is undefined we return zero address;
 			if (tx.type === "axfer") {
 				result = tx.asnd ?? Buffer.from(ZERO_ADDRESS);
 			}
 			break;
 		}
-		case "CreatedAssetID": {
+		case TxFieldEnum.CreatedAssetID: {
 			const asaInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
 			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
 			else result = 0n;
 			break;
 		}
-		case "CreatedApplicationID": {
+		case TxFieldEnum.CreatedApplicationID: {
 			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
 			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
 			else if (isEncTxApplicationCreate(tx))
@@ -201,23 +202,23 @@ export function txnSpecByField(
 			else result = 0n;
 			break;
 		}
-		case "LastLog": {
+		case TxFieldEnum.LastLog: {
 			result = interpreter.runtime.ctx.lastLog;
 			break;
 		}
 
-		case "StateProofPK": {
+		case TxFieldEnum.StateProofPK: {
 			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
 			// so we set up 64 zero bytes as default value of StateProofPK
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
-		case "NumApprovalProgramPages": {
+		case TxFieldEnum.NumApprovalProgramPages: {
 			if (tx.apap) result = Math.ceil(tx.apap.length / maxStringSize);
 			else result = 0n;
 			break;
 		}
-		case "NumClearStateProgramPages": {
+		case TxFieldEnum.NumClearStateProgramPages: {
 			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxStringSize);
 			else result = 0n;
 			break;
@@ -252,12 +253,12 @@ export function txAppArg(
 ): StackElem {
 	const tealVersion: number = interpreter.tealVersion;
 
-	if (txField === "Logs") {
+	if (txField === TxFieldEnum.Logs) {
 		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 		const logs: Uint8Array[] = txReceipt?.logs ?? [];
 		op.checkIndexBound(idx, logs, op.line);
 		return parseToStackElem(logs[idx], txField);
-	} else if (txField === "ApprovalProgramPages" && tx.apap) {
+	} else if (txField === TxFieldEnum.ApprovalProgramPages && tx.apap) {
 		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ApprovalProgramPages page index");
@@ -266,10 +267,10 @@ export function txAppArg(
 		const last = Math.min(first + maxStringSize, tx.apap.length);
 		const page = tx.apap.slice(first, last);
 		return parseToStackElem(page, txField);
-	} else if (txField === "NumApprovalProgramPages" && tx.apap) {
+	} else if (txField === TxFieldEnum.NumApprovalProgramPages && tx.apap) {
 		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
-	} else if (txField === "ClearStateProgramPages" && tx.apsu) {
+	} else if (txField === TxFieldEnum.ClearStateProgramPages && tx.apsu) {
 		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ClearStateProgramPages page index");
@@ -278,7 +279,7 @@ export function txAppArg(
 		const last = Math.min(first + maxStringSize, tx.apsu.length);
 		const page = tx.apsu.slice(first, last);
 		return parseToStackElem(page, txField);
-	} else if (txField === "NumClearStateProgramPages" && tx.apsu) {
+	} else if (txField === TxFieldEnum.NumClearStateProgramPages && tx.apsu) {
 		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
 	}
