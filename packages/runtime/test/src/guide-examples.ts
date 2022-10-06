@@ -42,6 +42,7 @@ describe.only("Guide examples", function () {
 		assert.equal(alice.balance(), defaultBalance - BigInt(fee) - BigInt(amount));
 		assert.equal(bob.balance(), defaultBalance + BigInt(amount));
 	});
+	
 	it("Should send 5 algos from account rekeyed to multisig", function () {
 		// create multisignature parameters
 		const addrs = [bob.address, charlie.address];

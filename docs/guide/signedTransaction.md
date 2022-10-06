@@ -35,7 +35,7 @@ Check the example in our [tests](../../packages/runtime/test/src/guide-examples.
 
 # Multisignature
 
-Support of `SignedTransaction` objects in `Runtime` enables users to test their multisignatures. Again with the help of `algosdk` we can create multisignature address, rekey an existing runtime account to this address and then sign transactions using multisignature accounts. `Runtime` verifies the signature and if it's valid, it process the transaction.
+Support of `SignedTransaction` objects in `Runtime` enables users to test their multisignatures. Again with the help of `algosdk` we can create multisignature address, rekey an existing runtime account to this address and then sign transactions using multisignature accounts. `Runtime` verifies the signature and if it's valid, it executes the transaction.
 
 ## Example
 
