@@ -20,6 +20,7 @@ export function setDummyAccInfo(acc: AccountStoreI): void {
 
 describe("Pooling Inner Transactions", function () {
     const elonPk = decodeAddress(elonAddr).publicKey;
+    const balance = 1e9;
     let interpreter: Interpreter;
     let elonAcc: AccountStoreI;
     let johnAcc: AccountStoreI;
@@ -92,7 +93,7 @@ describe("Pooling Inner Transactions", function () {
 
     describe("Pooling fee tests in group txns", () => {
         this.beforeEach(() => {
-            setUpInterpreter(7, 1e9);
+            setUpInterpreter(7, balance);
         });
 
         it("Should succeed: when unfunded account opts-in in a group txn", () => {
@@ -189,7 +190,7 @@ describe("Pooling Inner Transactions", function () {
             // verify deducted fee
             assert.equal(interpreter.runtime.ctx.state.accounts
                 .get(appAccAddr)?.balance()
-                , BigInt(1e9) - 3000n);
+                , BigInt(balance) - 3000n);
         });
 
         it("Should succeed: when txn fee is covered in group txns", () => {
@@ -223,7 +224,7 @@ describe("Pooling Inner Transactions", function () {
             // verify deducted fee
             assert.equal(interpreter.runtime.ctx.state.accounts
                 .get(appAccAddr)?.balance()
-                , BigInt(1e9) - 4000n);
+                , BigInt(balance) - 4000n);
         });
 
         it("Should fail: when txn fee is not covered in group txns", () => {
