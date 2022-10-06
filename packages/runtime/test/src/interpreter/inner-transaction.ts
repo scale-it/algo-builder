@@ -239,8 +239,13 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should fail: "insufficient balance" because app account is charged fee`, function () {
-			// set application account balance to minimum
-			applicationAccount.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
+			// set application account balance to 0
+			const appAcc = interpreter.runtime.ctx.state.accounts.get(applicationAccount.account.addr);
+			if (appAcc) {
+				appAcc.amount = BigInt(0);
+			}
+
+			assert.equal(appAcc?.balance(), BigInt(0));
 
 			// (defaults make these 0 pay|axfer to zero address, from app account)
 			tealCode = `
