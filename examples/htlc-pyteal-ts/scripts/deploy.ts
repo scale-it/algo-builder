@@ -26,7 +26,7 @@ async function run(
 	// We need to copy, because the executeTx is async
 	const aliceFunding = Object.assign({}, bobFunding);
 	aliceFunding.toAccountAddr = alice.addr;
-	aliceFunding.amountMicroAlgos = 5e6; // 5 Algo
+	aliceFunding.amountMicroAlgos = 2e6; // 5 Algo
 	await Promise.all([tryExecuteTx(deployer, [bobFunding]), tryExecuteTx(deployer, [aliceFunding])]);
 
 	/** ** now bob creates and deploys the escrow account ****/
