@@ -1091,9 +1091,9 @@ export class Runtime {
 	/**
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
-	 * @returns TxReceipt
+	 * @returns TxnReceipt
 	 */
-	sendTxAndWait(transactions: SignedTransaction[]): TxReceipt[] {
+	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);
 	}
 }

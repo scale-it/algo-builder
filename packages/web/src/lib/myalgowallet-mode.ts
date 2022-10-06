@@ -161,17 +161,15 @@ export class MyAlgoWalletSession {
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
-		const txnReceipt = { txID: txId, ...pendingInfo }
-		return txnReceipt as TxnReceipt
+		const txnReceipt = { txID: txId, ...pendingInfo };
+		return txnReceipt as TxnReceipt;
 	}
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTx(
-		execParams: ExecParams[]
-	): Promise<TxnReceipt> {
+	async executeTx(execParams: ExecParams[]): Promise<TxnReceipt> {
 		let signedTxn: SignedTx[] | undefined;
 		let txns: Transaction[] = [];
 		if (execParams.length > 16) {
@@ -264,12 +262,9 @@ export class MyAlgoWalletSession {
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
 	 * @param rounds number of rounds to wait for response
-	 * @returns algosdk.modelsv2.PendingTransactionResponse
+	 * @returns TxnReceipt
 	 */
-	async sendTxAndWait(
-		transactions: SignedTransaction[],
-		rounds?: number
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		if (transactions.length < 1) {
 			throw Error("No transactions to process");
 		} else {

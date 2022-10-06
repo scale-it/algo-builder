@@ -16,7 +16,6 @@ import {
 	SignType,
 	TransactionAndSign,
 	TransactionInGroup,
-	Sign,
 	TxnReceipt,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
@@ -323,12 +322,9 @@ export class WallectConnectSession {
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
 	 * @param rounds number of rounds to wait for response
-	 * @returns algosdk.modelsv2.PendingTransactionResponse
+	 * @returns TxnReceipt
 	 */
-	async sendTxAndWait(
-		transactions: SignedTransaction[],
-		rounds?: number
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		if (transactions.length < 1) {
 			throw Error("No transactions to process");
 		} else {
