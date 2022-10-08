@@ -223,21 +223,21 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Pragma", () => {
+	describe("Pragma", function () {
 		const interpreter = new Interpreter();
 		const stack = new Stack<StackElem>();
-		it("should store pragma version", () => {
+		it("should store pragma version", function () {
 			const op = new Pragma(["version", "2"], 1, interpreter);
 			assert.equal(op.version, 2);
 		});
 
-		it("should store throw length error", () => {
+		it("should store throw length error", function () {
 			expectRuntimeError(
 				() => new Pragma(["version", "2", "some-value"], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			const op = new Pragma(["version", "3"], 1, interpreter);
 			assert.equal(0, op.execute(stack));
 		});
@@ -382,7 +382,7 @@ describe("Teal Opcodes", function () {
 		let interpreter: Interpreter;
 		const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(parsing.stringToBytes);
 
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = args;
@@ -616,7 +616,7 @@ describe("Teal Opcodes", function () {
 
 	describe("Store", function () {
 		let stack: Stack<StackElem>;
-		beforeEach(() => {
+		beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
@@ -814,7 +814,7 @@ describe("Teal Opcodes", function () {
 		interpreter.scratch = scratch;
 		let stack: Stack<StackElem>;
 
-		beforeEach(() => {
+		beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
@@ -848,7 +848,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(DEFAULT_STACK_ELEM, stack.pop());
 		});
 
-		it("should load uint64 from scratch space to stack using `loads`", () => {
+		it("should load uint64 from scratch space to stack using `loads`", function () {
 			stack.push(0n);
 			const op = new Loads([], 1, interpreter);
 
@@ -892,7 +892,7 @@ describe("Teal Opcodes", function () {
 		const stack = new Stack<StackElem>();
 		const interpreter = new Interpreter();
 
-		it("should return correct hash for Sha256", () => {
+		it("should return correct hash for Sha256", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			const op = new Sha256([], 1, interpreter);
 			op.execute(stack);
@@ -926,7 +926,7 @@ describe("Teal Opcodes", function () {
 			)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			interpreter.tealVersion = 1;
 			let op = new Sha256([], 1, interpreter);
@@ -976,7 +976,7 @@ describe("Teal Opcodes", function () {
 			)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			interpreter.tealVersion = 1;
 			let op = new Sha512_256([], 1, interpreter);
@@ -1027,7 +1027,7 @@ describe("Teal Opcodes", function () {
 			)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			interpreter.tealVersion = 1;
 			let op = new Keccak256([], 1, interpreter);
@@ -1057,12 +1057,12 @@ describe("Teal Opcodes", function () {
 				txID: TXN_OBJ.txID,
 			});
 		};
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			setUpInterpreter(6); //setup interpreter for execute
 		});
 
-		describe("Verification", () => {
-			this.beforeEach(() => {
+		describe("Verification", function () {
+			this.beforeEach(function () {
 				interpreter.instructionIndex = 0;
 			});
 
@@ -1079,14 +1079,14 @@ describe("Teal Opcodes", function () {
 			const toBeSigned = Buffer.from(concatArrays(programHash, msgUint8Array));
 			const signature = nacl.sign.detached(toBeSigned, account.sk);
 
-			it("Should not throw an exception when executing a correct teal file", () => {
+			it("Should not throw an exception when executing a correct teal file", function () {
 				interpreter.runtime.ctx.args = [msgUint8Array, signature];
 				assert.doesNotThrow(() =>
 					interpreter.execute(tealCode, ExecutionMode.SIGNATURE, interpreter.runtime)
 				);
 			});
 
-			it("Should throw an exeption when the message is different", () => {
+			it("Should throw an exeption when the message is different", function () {
 				// flip a bit in the message and the test does not pass
 				msg = "52fdfc072182654f163f5f0f9a621d729566c74d0aa413bf009c9800418c19cd";
 				msgUint8Array = new Uint8Array(Buffer.from(msg));
@@ -1097,7 +1097,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
-			it("Should throw an exeption when the program is different", () => {
+			it("Should throw an exeption when the program is different", function () {
 				//change the program code and the test does not pass
 				tealCode = `
 					int 1
@@ -1133,7 +1133,7 @@ describe("Teal Opcodes", function () {
 			)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			const account = generateAccount();
 			const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
 			const signed = signBytes(toSign, account.sk);
@@ -1150,7 +1150,7 @@ describe("Teal Opcodes", function () {
 	describe("LessThan", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1 to stack because 5 < 10", () => {
+		it("should push 1 to stack because 5 < 10", function () {
 			stack.push(5n);
 			stack.push(10n);
 
@@ -1161,7 +1161,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should push 0 to stack as 10 > 5", () => {
+		it("should push 0 to stack as 10 > 5", function () {
 			stack.push(10n);
 			stack.push(5n);
 
@@ -1196,7 +1196,7 @@ describe("Teal Opcodes", function () {
 	describe("GreaterThan", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1 to stack as 5 > 2", () => {
+		it("should push 1 to stack as 5 > 2", function () {
 			stack.push(5n);
 			stack.push(2n);
 
@@ -1207,7 +1207,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should push 0 to stack as 50 > 10", () => {
+		it("should push 0 to stack as 50 > 10", function () {
 			stack.push(10n);
 			stack.push(50n);
 
@@ -1242,7 +1242,7 @@ describe("Teal Opcodes", function () {
 	describe("LessThanEqualTo", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1 to stack", () => {
+		it("should push 1 to stack", function () {
 			const op = new LessThanEqualTo([], 1);
 			stack.push(20n);
 			stack.push(20n);
@@ -1253,7 +1253,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should push 0 to stack", () => {
+		it("should push 0 to stack", function () {
 			const op = new LessThanEqualTo([], 1);
 			stack.push(100n);
 			stack.push(50n);
@@ -1288,7 +1288,7 @@ describe("Teal Opcodes", function () {
 	describe("GreaterThanEqualTo", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1 to stack", () => {
+		it("should push 1 to stack", function () {
 			const op = new GreaterThanEqualTo([], 1);
 			stack.push(20n);
 			stack.push(20n);
@@ -1299,7 +1299,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should push 0 to stack", () => {
+		it("should push 0 to stack", function () {
 			const op = new GreaterThanEqualTo([], 1);
 			stack.push(100n);
 			stack.push(500n);
@@ -1331,10 +1331,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("And", () => {
+	describe("And", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push true to stack as both values are 1", () => {
+		it("should push true to stack as both values are 1", function () {
 			stack.push(1n);
 			stack.push(1n);
 
@@ -1345,7 +1345,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(1n, top);
 		});
 
-		it("should push false to stack as one value is 0", () => {
+		it("should push false to stack as one value is 0", function () {
 			stack.push(0n);
 			stack.push(1n);
 
@@ -1377,10 +1377,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("Or", () => {
+	describe("Or", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push true to stack as one value is 1", () => {
+		it("should push true to stack as one value is 1", function () {
 			stack.push(0n);
 			stack.push(1n);
 
@@ -1391,7 +1391,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(1n, top);
 		});
 
-		it("should push false to stack as both values are 0", () => {
+		it("should push false to stack as both values are 0", function () {
 			stack.push(0n);
 			stack.push(0n);
 
@@ -1423,10 +1423,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("EqualTo", () => {
+	describe("EqualTo", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push true to stack", () => {
+		it("should push true to stack", function () {
 			stack.push(22n);
 			stack.push(22n);
 
@@ -1444,7 +1444,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(1n, top);
 		});
 
-		it("should push false to stack", () => {
+		it("should push false to stack", function () {
 			stack.push(22n);
 			stack.push(1n);
 
@@ -1462,7 +1462,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(0n, top);
 		});
 
-		it("should throw error", () => {
+		it("should throw error", function () {
 			stack.push(12n);
 			stack.push(new Uint8Array([1, 2, 3]));
 			const op = new EqualTo([], 1);
@@ -1471,10 +1471,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("NotEqualTo", () => {
+	describe("NotEqualTo", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push true to stack", () => {
+		it("should push true to stack", function () {
 			stack.push(21n);
 			stack.push(22n);
 
@@ -1492,7 +1492,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(1n, top);
 		});
 
-		it("should push false to stack", () => {
+		it("should push false to stack", function () {
 			stack.push(22n);
 			stack.push(22n);
 
@@ -1510,7 +1510,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(0n, top);
 		});
 
-		it("should throw error", () => {
+		it("should throw error", function () {
 			stack.push(12n);
 			stack.push(new Uint8Array([1, 2, 3]));
 			const op = new EqualTo([], 1);
@@ -1519,10 +1519,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Not", () => {
+	describe("Not", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should push 1", () => {
+		it("should push 1", function () {
 			stack.push(0n);
 			const op = new Not([], 1);
 			op.execute(stack);
@@ -1531,7 +1531,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(1n, top);
 		});
 
-		it("should push 0", () => {
+		it("should push 0", function () {
 			stack.push(122n);
 			const op = new Not([], 1);
 			op.execute(stack);
@@ -1541,10 +1541,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("itob", () => {
+	describe("itob", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should convert int to bytes", () => {
+		it("should convert int to bytes", function () {
 			stack.push(4n);
 			const op = new Itob([], 1);
 			op.execute(stack);
@@ -1565,10 +1565,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("btoi", () => {
+	describe("btoi", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should convert bytes to int", () => {
+		it("should convert bytes to int", function () {
 			stack.push(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]));
 			const op = new Btoi([], 1);
 			op.execute(stack);
@@ -1577,7 +1577,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 1n);
 		});
 
-		it("should throw invalid type error", () => {
+		it("should throw invalid type error", function () {
 			stack.push(new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0]));
 			const op = new Btoi([], 1);
 			assert.throws(
@@ -1587,10 +1587,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Addw", () => {
+	describe("Addw", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should add carry", () => {
+		it("should add carry", function () {
 			stack.push(MAX_UINT64);
 			stack.push(3n);
 			const op = new Addw([], 1);
@@ -1602,7 +1602,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(valueCARRY, 1n);
 		});
 
-		it("should not add carry", () => {
+		it("should not add carry", function () {
 			stack.push(10n);
 			stack.push(3n);
 			const op = new Addw([], 1);
@@ -1615,10 +1615,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Mulw", () => {
+	describe("Mulw", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should return correct low and high value", () => {
+		it("should return correct low and high value", function () {
 			stack.push(4581298449n);
 			stack.push(9162596898n);
 			const op = new Mulw([], 1);
@@ -1630,7 +1630,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(high, 2n);
 		});
 
-		it("should return correct low and high value on big numbers", () => {
+		it("should return correct low and high value on big numbers", function () {
 			stack.push(MAX_UINT64 - 2n);
 			stack.push(9162596898n);
 			const op = new Mulw([], 1);
@@ -1642,7 +1642,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(high, 9162596897n);
 		});
 
-		it("high bits should be 0", () => {
+		it("high bits should be 0", function () {
 			stack.push(10n);
 			stack.push(3n);
 			const op = new Mulw([], 1);
@@ -1654,7 +1654,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(high, 0n);
 		});
 
-		it("low and high should be 0 on a*b if a or b is 0", () => {
+		it("low and high should be 0 on a*b if a or b is 0", function () {
 			stack.push(0n);
 			stack.push(3n);
 			const op = new Mulw([], 1);
@@ -1682,10 +1682,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("Dup", () => {
+	describe("Dup", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should duplicate value", () => {
+		it("should duplicate value", function () {
 			stack.push(2n);
 			const op = new Dup([], 1);
 			op.execute(stack);
@@ -1697,10 +1697,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Dup2", () => {
+	describe("Dup2", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should duplicate value(A, B -> A, B, A, B)", () => {
+		it("should duplicate value(A, B -> A, B, A, B)", function () {
 			stack.push(2n);
 			stack.push(3n);
 			const op = new Dup2([], 1);
@@ -1726,10 +1726,10 @@ describe("Teal Opcodes", function () {
 		);
 	});
 
-	describe("Concat", () => {
+	describe("Concat", function () {
 		const stack = new Stack<StackElem>();
 
-		it("should concat two byte strings", () => {
+		it("should concat two byte strings", function () {
 			stack.push(new Uint8Array([3, 2, 1]));
 			stack.push(new Uint8Array([1, 2, 3]));
 			let op = new Concat([], 1);
@@ -1747,7 +1747,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(top, parsing.stringToBytes("HelloFriend"));
 		});
 
-		it("should throw error as byte strings too long", () => {
+		it("should throw error as byte strings too long", function () {
 			stack.push(new Uint8Array(4000));
 			stack.push(new Uint8Array(1000));
 			const op = new Concat([], 1);
@@ -2011,7 +2011,7 @@ describe("Teal Opcodes", function () {
 	describe("Transaction opcodes", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
-		before(() => {
+		before(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.tx = TXN_OBJ;
@@ -2091,7 +2091,7 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(TXN_OBJ.rekey, stack.pop());
 			});
 
-			it("should throw error on FirstValidTime", () => {
+			it("should throw error on FirstValidTime", function () {
 				execExpectError(
 					stack,
 					[],
@@ -2525,19 +2525,19 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("Txn: teal v6", function () {
-			it("should return empty log if no log emit before", () => {
+			it("should return empty log if no log emit before", function () {
 				const op = new Txn(["LastLog"], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(0));
 			});
-			it("should return last log", () => {
+			it("should return last log", function () {
 				interpreter.runtime.ctx.lastLog = new Uint8Array([42, 32]);
 				const op = new Txn(["LastLog"], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
 			});
 
-			it("should return StateProofPK", () => {
+			it("should return StateProofPK", function () {
 				const op = new Txn(["StateProofPK"], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
@@ -2832,7 +2832,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("Gitxna", function () {
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				interpreter.tealVersion = 6;
 				const tx = interpreter.runtime.ctx.tx;
 				// a) 'apas' represents 'foreignAssets', b)
@@ -2927,7 +2927,7 @@ describe("Teal Opcodes", function () {
 		}); // setup test account
 		setDummyAccInfo(acc1);
 
-		before(() => {
+		before(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([acc1]);
 			interpreter.runtime.ctx.tx = TXN_OBJ;
@@ -3034,11 +3034,11 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("Tealv6 fields", function () {
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				interpreter.tealVersion = 6;
 				interpreter.runtime.ctx.innerTxAppIDCallStack = [1, 2];
 			});
-			it("Tealv6: CalllerApplicationAddress", () => {
+			it("Tealv6: CalllerApplicationAddress", function () {
 				// caller app id = 2
 				const op = new Global(["CallerApplicationAddress"], 1, interpreter);
 				op.execute(stack);
@@ -3050,7 +3050,7 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(ZERO_ADDRESS, stack.pop());
 			});
 
-			it("Tealv6: CallerApplicationID", () => {
+			it("Tealv6: CallerApplicationID", function () {
 				// caller app id = 2
 				const op = new Global(["CallerApplicationID"], 1, interpreter);
 				op.execute(stack);
@@ -3127,7 +3127,7 @@ describe("Teal Opcodes", function () {
 		setDummyAccInfo(acc2);
 
 		let interpreter: Interpreter;
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([acc1, acc2]);
 
@@ -3580,7 +3580,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("TEALv4: More Versatile Global and Local Storage", () => {
+		describe("TEALv4: More Versatile Global and Local Storage", function () {
 			before(function () {
 				interpreter.runtime.ctx.tx.apid = 1828;
 			});
@@ -3694,18 +3694,18 @@ describe("Teal Opcodes", function () {
 			assert.equal(5n, stack.pop());
 		});
 
-		it("Int: Should work with 2^64 - 1 (max supported number)", () => {
+		it("Int: Should work with 2^64 - 1 (max supported number)", function () {
 			const total = 2n ** 64n - 1n;
 			assert.doesNotThrow(() => new Int([total.toString()], 0));
 		});
-		it("Int: Should throw an overflow error on 2^64", () => {
+		it("Int: Should throw an overflow error on 2^64", function () {
 			const total = 2n ** 64n;
 			expectRuntimeError(
 				() => new Int([total.toString()], 0),
 				RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
 			);
 		});
-		it("Int: Should throw an overflow error on 2^64+1", () => {
+		it("Int: Should throw an overflow error on 2^64+1", function () {
 			const total = 2n ** 64n + 1n;
 			expectRuntimeError(
 				() => new Int([total.toString()], 0),
@@ -3815,7 +3815,7 @@ describe("Teal Opcodes", function () {
 		}); // setup test account
 		setDummyAccInfo(acc1);
 
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			interpreter = new Interpreter();
 			const runtime = new Runtime([acc1]);
 			interpreter.runtime = runtime; // setup runtime
@@ -3830,7 +3830,7 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.tx.apas = [3, 112];
 		});
 
-		it("should push correct account balance", () => {
+		it("should push correct account balance", function () {
 			const op = new Balance([], 1, interpreter);
 
 			stack.push(0n); // push sender id
@@ -3841,7 +3841,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, 123n);
 		});
 
-		it("should throw account doesn't exist error", () => {
+		it("should throw account doesn't exist error", function () {
 			const op = new Balance([], 1, interpreter);
 			stack.push(2n);
 
@@ -3851,14 +3851,14 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("should throw index out of bound error", () => {
+		it("should throw index out of bound error", function () {
 			const op = new Balance([], 1, interpreter);
 			stack.push(8n);
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("should push correct Asset Balance", () => {
+		it("should push correct Asset Balance", function () {
 			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
 
 			stack.push(1n); // account index
@@ -3872,7 +3872,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev.toString(), "2");
 		});
 
-		it("should push correct Asset Freeze status", () => {
+		it("should push correct Asset Freeze status", function () {
 			const op = new GetAssetHolding(["AssetFrozen"], 1, interpreter);
 
 			stack.push(1n); // account index
@@ -3886,7 +3886,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, 0n);
 		});
 
-		it("should push 0 if not defined", () => {
+		it("should push 0 if not defined", function () {
 			stack.push(1n); // account index
 			stack.push(4n); // asset id
 
@@ -3899,7 +3899,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(prev, 0n);
 		});
 
-		it("should throw index out of bound error", () => {
+		it("should throw index out of bound error", function () {
 			const op = new GetAssetHolding(["1"], 1, interpreter);
 
 			stack.push(10n); // account index
@@ -3908,7 +3908,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("should push correct Asset Total", () => {
+		it("should push correct Asset Total", function () {
 			const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3921,7 +3921,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev.toString(), "10000");
 		});
 
-		it("should push correct Asset Decimals", () => {
+		it("should push correct Asset Decimals", function () {
 			const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3934,7 +3934,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev.toString(), "10");
 		});
 
-		it("should push correct Asset Default Frozen", () => {
+		it("should push correct Asset Default Frozen", function () {
 			const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3947,7 +3947,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, 0n);
 		});
 
-		it("should push correct Asset Unit Name", () => {
+		it("should push correct Asset Unit Name", function () {
 			const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3960,7 +3960,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("AD"));
 		});
 
-		it("should push correct Asset Name", () => {
+		it("should push correct Asset Name", function () {
 			const op = new GetAssetDef(["AssetName"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3973,7 +3973,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("ASSETAD"));
 		});
 
-		it("should push correct Asset URL", () => {
+		it("should push correct Asset URL", function () {
 			const op = new GetAssetDef(["AssetURL"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3986,7 +3986,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("assetUrl"));
 		});
 
-		it("should push correct Asset MetaData Hash", () => {
+		it("should push correct Asset MetaData Hash", function () {
 			const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -3999,7 +3999,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("hash", EncodingType.BASE64));
 		});
 
-		it("should push correct Asset Manager", () => {
+		it("should push correct Asset Manager", function () {
 			const op = new GetAssetDef(["AssetManager"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -4012,7 +4012,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("addr-1"));
 		});
 
-		it("should push correct Asset Reserve", () => {
+		it("should push correct Asset Reserve", function () {
 			const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -4025,7 +4025,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("addr-2"));
 		});
 
-		it("should push correct Asset Freeze", () => {
+		it("should push correct Asset Freeze", function () {
 			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -4038,7 +4038,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("addr-3"));
 		});
 
-		it("should push correct Asset Clawback", () => {
+		it("should push correct Asset Clawback", function () {
 			const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
 
 			stack.push(0n); // asset index
@@ -4051,7 +4051,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(prev, convertToBuffer("addr-4"));
 		});
 
-		it("TEALv5: should push correct Asset Creator", () => {
+		it("TEALv5: should push correct Asset Creator", function () {
 			interpreter.tealVersion = 5;
 			const op = new GetAssetDef(["AssetCreator"], 1, interpreter);
 
@@ -4065,7 +4065,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(creator, convertToBuffer("addr-1"));
 		});
 
-		it("should push 0 if Asset not defined", () => {
+		it("should push 0 if Asset not defined", function () {
 			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
 			stack.push(1n); // account index
@@ -4078,7 +4078,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(prev, 0n);
 		});
 
-		it("should throw index out of bound error for Asset Param", () => {
+		it("should throw index out of bound error for Asset Param", function () {
 			interpreter.tealVersion = 1;
 			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
@@ -4090,7 +4090,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("tealv4: should push correct value accepting offset to foreignAssets", () => {
+		it("tealv4: should push correct value accepting offset to foreignAssets", function () {
 			interpreter.tealVersion = 4;
 			// interpreter.runtime.ctx.tx.apas = [1234, 3];
 			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
@@ -4108,7 +4108,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop().toString(), "2");
 		});
 
-		it("tealv4: should return value as treating ref as offset, if it represents an index", () => {
+		it("tealv4: should return value as treating ref as offset, if it represents an index", function () {
 			interpreter.tealVersion = 4;
 			interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
 			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
@@ -4127,13 +4127,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("PushInt", () => {
+	describe("PushInt", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should push uint64 to stack", () => {
+		it("should push uint64 to stack", function () {
 			const op = new PushInt([MAX_UINT64.toString()], 0);
 			op.execute(stack);
 
@@ -4142,13 +4142,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("PushBytes", () => {
+	describe("PushBytes", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should push bytes to stack", () => {
+		it("should push bytes to stack", function () {
 			const str = '"Algorand"';
 			const expectedBytes = new Uint8Array(Buffer.from("Algorand"));
 
@@ -4160,21 +4160,21 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Assert", () => {
+	describe("Assert", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should not panic if top of stack is non zero uint64", () => {
+		it("should not panic if top of stack is non zero uint64", function () {
 			const op = new Assert([], 0);
 			stack.push(55n);
-			assert.doesNotThrow(() => {
+			assert.doesNotThrow(function () {
 				op.execute(stack);
 			});
 		});
 
-		it("should panic if top of stack is zero or bytes", () => {
+		it("should panic if top of stack is zero or bytes", function () {
 			const op = new Assert([], 0);
 			stack.push(0n);
 
@@ -4184,20 +4184,20 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should throw error if stack is empty", () => {
+		it("should throw error if stack is empty", function () {
 			const op = new Assert([], 0);
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 	});
 
-	describe("Swap", () => {
+	describe("Swap", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should not panic if top of stack is non zero uint64", () => {
+		it("should not panic if top of stack is non zero uint64", function () {
 			let op = new Swap([], 0);
 			stack.push(5n);
 			stack.push(10n);
@@ -4226,7 +4226,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("a"));
 		});
 
-		it("should throw error if length of stack < 2", () => {
+		it("should throw error if length of stack < 2", function () {
 			const op = new Swap([], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 
@@ -4235,13 +4235,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("SetBit", () => {
+	describe("SetBit", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should set bit for uint64", () => {
+		it("should set bit for uint64", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n); // target
 			stack.push(4n); // index
@@ -4289,7 +4289,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), MAX_UINT64 - 2n);
 		});
 
-		it("should panic if index bit is not uint64", () => {
+		it("should panic if index bit is not uint64", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n); // target
 			stack.push(new Uint8Array([1, 2])); // index
@@ -4298,7 +4298,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if set bit is not uint64", () => {
+		it("should panic if set bit is not uint64", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n); // target
 			stack.push(4n); // index
@@ -4307,7 +4307,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if stack length is less than 3", () => {
+		it("should panic if stack length is less than 3", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n);
 			stack.push(4n);
@@ -4315,7 +4315,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("should panic if set bit is greater than 1", () => {
+		it("should panic if set bit is greater than 1", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n);
 			stack.push(4n);
@@ -4324,7 +4324,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR);
 		});
 
-		it("should panic if set bit index is greater than 63 and target is uint64", () => {
+		it("should panic if set bit index is greater than 63 and target is uint64", function () {
 			const op = new SetBit([], 0);
 			stack.push(0n);
 			stack.push(400n);
@@ -4333,7 +4333,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR);
 		});
 
-		it("should set bit in bytes array", () => {
+		it("should set bit in bytes array", function () {
 			const op = new SetBit([], 0);
 			stack.push(new Uint8Array([0, 0, 0])); // target
 			stack.push(8n); // index
@@ -4375,7 +4375,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), new Uint8Array([1, 2 ** 7, 0]));
 		});
 
-		it("should panic if index bit in out of bytes array", () => {
+		it("should panic if index bit in out of bytes array", function () {
 			const op = new SetBit([], 0);
 			stack.push(new Uint8Array([0, 0, 0])); // target
 			stack.push(80n); // index
@@ -4397,13 +4397,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("GetBit", () => {
+	describe("GetBit", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should push correct bit to stack(uint64)", () => {
+		it("should push correct bit to stack(uint64)", function () {
 			const op = new GetBit([], 0);
 			stack.push(8n); // target
 			stack.push(3n); // index
@@ -4418,7 +4418,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("should push correct bit to stack(bytes array)", () => {
+		it("should push correct bit to stack(bytes array)", function () {
 			const op = new GetBit([], 0);
 			stack.push(new Uint8Array([0, 128, 1])); // target
 			stack.push(8n); // index
@@ -4436,14 +4436,14 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("should panic if stack length is less than 2", () => {
+		it("should panic if stack length is less than 2", function () {
 			const op = new GetBit([], 0);
 			stack.push(0n);
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("should panic if index bit is not uint64", () => {
+		it("should panic if index bit is not uint64", function () {
 			const op = new GetBit([], 0);
 			stack.push(8n); // target
 			stack.push(new Uint8Array(0)); // index
@@ -4451,7 +4451,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if index bit in out of uint64 bits", () => {
+		it("should panic if index bit in out of uint64 bits", function () {
 			const op = new GetBit([], 0);
 			stack.push(8n); // target
 			stack.push(500n); // index
@@ -4459,7 +4459,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR);
 		});
 
-		it("should panic if index bit in out of bytes array", () => {
+		it("should panic if index bit in out of bytes array", function () {
 			const op = new GetBit([], 0);
 			stack.push(new Uint8Array(0)); // target
 			stack.push(500n); // index
@@ -4471,13 +4471,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("GetByte", () => {
+	describe("GetByte", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should get correct bytes from stack", () => {
+		it("should get correct bytes from stack", function () {
 			const op = new GetByte([], 0);
 			stack.push(new Uint8Array([8, 2, 1, 9])); // target
 			stack.push(0n); // index
@@ -4498,7 +4498,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 3n);
 		});
 
-		it("should panic if target is not bytes", () => {
+		it("should panic if target is not bytes", function () {
 			const op = new GetByte([], 0);
 			stack.push(10n); // target
 			stack.push(0n); // index
@@ -4506,7 +4506,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if index is not uint", () => {
+		it("should panic if index is not uint", function () {
 			const op = new GetByte([], 0);
 			stack.push(new Uint8Array(0)); // target
 			stack.push(new Uint8Array(0)); // index
@@ -4514,7 +4514,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if index bit is out of bytes array", () => {
+		it("should panic if index bit is out of bytes array", function () {
 			const op = new GetByte([], 0);
 			stack.push(new Uint8Array(0)); // target
 			stack.push(500n); // index
@@ -4534,13 +4534,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("SetByte", () => {
+	describe("SetByte", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should set correct bytes and push to stack", () => {
+		it("should set correct bytes and push to stack", function () {
 			const op = new SetByte([], 0);
 			stack.push(new Uint8Array([8, 2, 1, 9])); // target
 			stack.push(0n); // index
@@ -4557,7 +4557,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), new Uint8Array([8, 2, 1, 0]));
 		});
 
-		it("should panic if target is not bytes(Uint8Array)", () => {
+		it("should panic if target is not bytes(Uint8Array)", function () {
 			const op = new SetByte([], 0);
 			stack.push(1n); // target
 			stack.push(0n); // index
@@ -4566,7 +4566,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if index of small integer is not uint", () => {
+		it("should panic if index of small integer is not uint", function () {
 			const op = new SetByte([], 0);
 			stack.push(new Uint8Array(0)); // target
 			stack.push(new Uint8Array(0)); // index
@@ -4581,7 +4581,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
 		});
 
-		it("should panic if index bit is out of bytes array", () => {
+		it("should panic if index bit is out of bytes array", function () {
 			const op = new SetByte([], 0);
 			stack.push(new Uint8Array(0)); // target
 			stack.push(500n); // index
@@ -4603,13 +4603,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Dig", () => {
+	describe("Dig", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should duplicate nth slot from top of stack (with uint64 and bytes)", () => {
+		it("should duplicate nth slot from top of stack (with uint64 and bytes)", function () {
 			let op = new Dig(["1"], 0);
 			stack.push(5n);
 			stack.push(10n);
@@ -4629,7 +4629,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("hello"));
 		});
 
-		it("should duplicate nth slot from top of stack (mixed cases)", () => {
+		it("should duplicate nth slot from top of stack (mixed cases)", function () {
 			stack.push(5n);
 			stack.push(10n);
 			stack.push(parsing.stringToBytes("hello"));
@@ -4661,7 +4661,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Algorand"));
 		});
 
-		it("should panic if depth of stack is insufficient", () => {
+		it("should panic if depth of stack is insufficient", function () {
 			const op = new Dig(["4"], 0);
 			stack.push(5n);
 			stack.push(10n);
@@ -4670,13 +4670,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Select", () => {
+	describe("Select", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("should push '2nd element from top of stack' to stack if top is not zero", () => {
+		it("should push '2nd element from top of stack' to stack if top is not zero", function () {
 			let op = new Select([], 0);
 			stack.push(parsing.stringToBytes("lionel"));
 			stack.push(parsing.stringToBytes("messi"));
@@ -4696,7 +4696,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 100n);
 		});
 
-		it("should push '3rd element from top of stack' to stack if top is zero", () => {
+		it("should push '3rd element from top of stack' to stack if top is zero", function () {
 			let op = new Select([], 0);
 			stack.push(parsing.stringToBytes("lionel"));
 			stack.push(parsing.stringToBytes("messi"));
@@ -4716,7 +4716,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 100n);
 		});
 
-		it("should panic if length of stack is < 3", () => {
+		it("should panic if length of stack is < 3", function () {
 			const op = new Select([], 0);
 			stack.push(parsing.stringToBytes("lionel"));
 			stack.push(0n);
@@ -4724,7 +4724,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("should panic if top of stack is not uint64", () => {
+		it("should panic if top of stack is not uint64", function () {
 			const op = new Select([], 0);
 			stack.push(parsing.stringToBytes("lionel"));
 			stack.push(parsing.stringToBytes("andres"));
@@ -4734,12 +4734,12 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Gtxns and Gtxnsa", () => {
+	describe("Gtxns and Gtxnsa", function () {
 		let stack: Stack<StackElem>;
 		let interpreter: Interpreter;
 		let tx0: EncodedTx, tx1: EncodedTx;
 
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.tealVersion = MaxTEALVersion;
@@ -4748,11 +4748,11 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.gtxs = [tx0, tx1];
 		});
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("Gtxns: should push value of txfield from tx in group", () => {
+		it("Gtxns: should push value of txfield from tx in group", function () {
 			stack.push(0n); // tx to fetch "fee" of (set as first)
 			let op = new Gtxns(["Fee"], 1, interpreter);
 			op.execute(stack);
@@ -4785,18 +4785,18 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(parsing.stringToBytes("argC"), stack.pop());
 		});
 
-		it("Gtxns: should panic if length of stack is < 1", () => {
+		it("Gtxns: should panic if length of stack is < 1", function () {
 			const op = new Gtxns(["Fee"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("Gtxns: should panic if transaction index is out of bounds", () => {
+		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
 			const op = new Gtxns(["Fee"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("Gtxnsa: should push value of txfieldArr[index] from tx in group", () => {
+		it("Gtxnsa: should push value of txfieldArr[index] from tx in group", function () {
 			TXN_OBJ.apaa = [Buffer.from("arg1"), Buffer.from("arg2")];
 			stack.push(0n);
 			let op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
@@ -4811,7 +4811,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(parsing.stringToBytes("argA"), stack.pop()); // args from tx1
 		});
 
-		it("Gtxnsa: should panic if index is out of bounds for txFieldArr", () => {
+		it("Gtxnsa: should panic if index is out of bounds for txFieldArr", function () {
 			// should throw error as appArgs[10] is undefined
 			stack.push(0n);
 			let op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
@@ -4822,14 +4822,14 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("Gtxns: should panic if transaction index is out of bounds", () => {
+		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
 			const op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 	});
 
-	describe("min_balance", () => {
+	describe("min_balance", function () {
 		useFixture("asa-check");
 		const stack = new Stack<StackElem>();
 
@@ -4842,7 +4842,7 @@ describe("Teal Opcodes", function () {
 		setDummyAccInfo(john);
 
 		let interpreter: Interpreter;
-		before(() => {
+		before(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([elon, john]);
 			interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
@@ -4854,7 +4854,7 @@ describe("Teal Opcodes", function () {
 			].map(Buffer.from);
 		});
 
-		it("should push correct account minimum balance", () => {
+		it("should push correct account minimum balance", function () {
 			let op = new MinBalance([], 1, interpreter);
 			stack.push(0n); // push sender id
 
@@ -4870,7 +4870,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
 		});
 
-		it("should push raised min_balance to stack after creating asset", () => {
+		it("should push raised min_balance to stack after creating asset", function () {
 			interpreter.runtime.deployASA("gold", { creator: { ...elon.account, name: "elon" } }); // create asset
 			elon = interpreter.runtime.getAccount(elon.address); // sync
 
@@ -4882,7 +4882,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(top, BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + ASSET_CREATION_FEE));
 		});
 
-		it("should panic if account does not exist", () => {
+		it("should panic if account does not exist", function () {
 			interpreter.runtime.ctx.tx.apat = [
 				decodeAddress(johnAddr).publicKey,
 				decodeAddress(generateAccount().addr).publicKey, // random account
@@ -4897,7 +4897,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("should throw index out of bound error", () => {
+		it("should throw index out of bound error", function () {
 			const op = new Balance([], 1, interpreter);
 			stack.push(8n);
 
@@ -4905,11 +4905,11 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Shared data between contracts opcode(gload, gloads, gloadss)", () => {
+	describe("Shared data between contracts opcode(gload, gloads, gloadss)", function () {
 		let stack: Stack<StackElem>;
 		let interpreter: Interpreter;
 
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.tealVersion = MaxTEALVersion;
@@ -4919,12 +4919,12 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.sharedScratchSpace.set(2, [12n, 2n, 0n, 1n]);
 		});
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
 		describe("gload opcode", function () {
-			it("should push value from ith tx in shared scratch space(gload)", () => {
+			it("should push value from ith tx in shared scratch space(gload)", function () {
 				const op = new Gload(["0", "1"], 1, interpreter);
 
 				op.execute(stack);
@@ -4933,7 +4933,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(top, 2n);
 			});
 
-			it("should throw error if tx doesn't exist(gload)", () => {
+			it("should throw error if tx doesn't exist(gload)", function () {
 				let op = new Gload(["1", "1"], 1, interpreter);
 
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR);
@@ -4943,7 +4943,7 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR);
 			});
 
-			it("should throw error if value doesn't exist in stack elem array(gload)", () => {
+			it("should throw error if value doesn't exist in stack elem array(gload)", function () {
 				const op = new Gload(["2", "5"], 1, interpreter);
 
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
@@ -4951,7 +4951,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("gloads opcode", function () {
-			it("should push value from ith tx in shared scratch space(gloads)", () => {
+			it("should push value from ith tx in shared scratch space(gloads)", function () {
 				const op = new Gloads(["1"], 1, interpreter);
 				stack.push(0n);
 
@@ -4961,7 +4961,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(top, 2n);
 			});
 
-			it("should throw error if tx doesn't exist(gloads)", () => {
+			it("should throw error if tx doesn't exist(gloads)", function () {
 				let op = new Gloads(["1"], 1, interpreter);
 				stack.push(1n);
 
@@ -4973,7 +4973,7 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR);
 			});
 
-			it("should throw error if value doesn't exist in stack elem array(gloads)", () => {
+			it("should throw error if value doesn't exist in stack elem array(gloads)", function () {
 				const op = new Gloads(["5"], 1, interpreter);
 				stack.push(2n);
 
@@ -4982,7 +4982,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		describe("gloadss opcode(TEAL v6)", function () {
-			it("should push value from ith tx in shared scratch space(gloadss)", () => {
+			it("should push value from ith tx in shared scratch space(gloadss)", function () {
 				const op = new Gloadss([], 1, interpreter);
 				stack.push(0n); // transaction 0th
 				stack.push(1n); // scratch space 1st
@@ -4993,7 +4993,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(top, 2n);
 			});
 
-			it("should throw error if tx doesn't exist(gloadss)", () => {
+			it("should throw error if tx doesn't exist(gloadss)", function () {
 				let op = new Gloadss([], 1, interpreter);
 				stack.push(1n);
 				stack.push(1n);
@@ -5007,7 +5007,7 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR);
 			});
 
-			it("should throw error if value doesn't exist in stack elem array(gloadss)", () => {
+			it("should throw error if value doesn't exist in stack elem array(gloadss)", function () {
 				const op = new Gloadss([], 1, interpreter);
 				stack.push(2n); // transaction id
 				stack.push(5n); // scratch id
@@ -5017,13 +5017,13 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("TEALv4: Byteslice Arithmetic Ops", () => {
+	describe("TEALv4: Byteslice Arithmetic Ops", function () {
 		const hexToByte = (hex: string): Uint8Array => {
 			const [string, encoding] = getEncoding([hex], 0);
 			return Uint8Array.from(convertToBuffer(string, encoding));
 		};
 
-		describe("ByteAdd", () => {
+		describe("ByteAdd", function () {
 			const stack = new Stack<StackElem>();
 
 			// hex values are taken from go-algorand tests
@@ -5086,7 +5086,7 @@ describe("Teal Opcodes", function () {
 				assert.isAbove(top.length, 64); // output array is of 65 bytes (because o/p length is limited to 128 bytes)
 			});
 
-			it("should throw error with ByteAdd if input > 64 bytes", () => {
+			it("should throw error with ByteAdd if input > 64 bytes", function () {
 				let str = "";
 				for (let i = 0; i < 65; i++) {
 					str += "ff";
@@ -5113,7 +5113,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 			);
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteAdd([], 0);
@@ -5121,7 +5121,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteSub", () => {
+		describe("ByteSub", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should return correct subtraction of two byte arrays", function () {
@@ -5188,7 +5188,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(stack, [1n, 2n], new ByteSub([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
 			);
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteSub([], 0);
@@ -5196,7 +5196,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteMul", () => {
+		describe("ByteMul", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should return correct multiplication of two byte arrays", function () {
@@ -5239,7 +5239,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteMul([], 0);
@@ -5249,7 +5249,7 @@ describe("Teal Opcodes", function () {
 			// rest of tests for all opcodes are common, which should be covered by b+, b-
 		});
 
-		describe("ByteDiv", () => {
+		describe("ByteDiv", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should return correct division of two byte arrays", function () {
@@ -5288,7 +5288,7 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ZERO_DIV);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteDiv([], 0);
@@ -5296,7 +5296,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteMod", () => {
+		describe("ByteMod", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should return correct modulo of two byte arrays", function () {
@@ -5335,7 +5335,7 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ZERO_DIV);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteMod([], 0);
@@ -5343,7 +5343,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteLessThan", () => {
+		describe("ByteLessThan", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for bytelessthan", function () {
@@ -5370,7 +5370,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteGreaterThan", () => {
+		describe("ByteGreaterThan", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for ByteGreaterThan", function () {
@@ -5397,7 +5397,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteLessThanEqualTo", () => {
+		describe("ByteLessThanEqualTo", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for ByteLessThanEqualTo", function () {
@@ -5424,7 +5424,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteGreaterThanEqualTo", () => {
+		describe("ByteGreaterThanEqualTo", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for ByteGreaterThanEqualTo", function () {
@@ -5451,7 +5451,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteEqualTo", () => {
+		describe("ByteEqualTo", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for ByteEqualTo", function () {
@@ -5478,7 +5478,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteNotEqualTo", () => {
+		describe("ByteNotEqualTo", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push 0/1 depending on value of two byte arrays for ByteNotEqualTo", function () {
@@ -5505,7 +5505,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteBitwiseOr", () => {
+		describe("ByteBitwiseOr", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push OR of two byte arrays for ByteBitwiseOr", function () {
@@ -5534,7 +5534,7 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(stack.pop(), hexToByte("0x00f1"));
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteBitwiseOr([], 0);
@@ -5542,7 +5542,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteBitwiseAnd", () => {
+		describe("ByteBitwiseAnd", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push AND of two byte arrays for ByteBitwiseAnd", function () {
@@ -5587,7 +5587,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteBitwiseAnd([], 0);
@@ -5595,7 +5595,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteBitwiseXOR", () => {
+		describe("ByteBitwiseXOR", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push XOR of two byte arrays for ByteBitwiseXOR", function () {
@@ -5640,7 +5640,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteBitwiseXor([], 0);
@@ -5648,7 +5648,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteBitwiseInvert", () => {
+		describe("ByteBitwiseInvert", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push bitwise invert of byte array", function () {
@@ -5681,7 +5681,7 @@ describe("Teal Opcodes", function () {
 				);
 			});
 
-			it("Should calculate correct cost", () => {
+			it("Should calculate correct cost", function () {
 				stack.push(hexToByte("0x01"));
 				stack.push(hexToByte("0x01"));
 				const op = new ByteBitwiseInvert([], 0);
@@ -5689,7 +5689,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		describe("ByteZero", () => {
+		describe("ByteZero", function () {
 			const stack = new Stack<StackElem>();
 
 			it("should push zero byte array to stack", function () {
@@ -5719,10 +5719,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Tealv4: Additional mathematical opcodes", () => {
+	describe("Tealv4: Additional mathematical opcodes", function () {
 		const stack = new Stack<StackElem>();
 
-		it("divmodw", () => {
+		it("divmodw", function () {
 			stack.push(0n);
 			stack.push(500n);
 			stack.push(0n);
@@ -5761,7 +5761,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("exp", () => {
+		it("exp", function () {
 			stack.push(2n);
 			stack.push(5n);
 			const op = new Exp([], 1);
@@ -5803,7 +5803,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW);
 		});
 
-		it("expw", () => {
+		it("expw", function () {
 			stack.push(2n);
 			stack.push(66n);
 			const op = new Expw([], 1);
@@ -5833,7 +5833,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UINT128_OVERFLOW);
 		});
 
-		it("shl", () => {
+		it("shl", function () {
 			stack.push(0n);
 			stack.push(20n);
 
@@ -5852,7 +5852,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), exp);
 		});
 
-		it("shr", () => {
+		it("shr", function () {
 			stack.push(0n);
 			stack.push(20n);
 
@@ -5868,7 +5868,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), exp);
 		});
 
-		it("sqrt", () => {
+		it("sqrt", function () {
 			stack.push(5n);
 			const op = new Sqrt([], 1);
 			op.execute(stack);
@@ -5887,11 +5887,11 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Tealv5: Extract opcodes", () => {
+	describe("Tealv5: Extract opcodes", function () {
 		const stack = new Stack<StackElem>();
 		const longByte = parsing.stringToBytes("a".repeat(400));
 
-		it("extract", () => {
+		it("extract", function () {
 			stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
 			let op = new Extract(["1", "3"], 1);
 			op.execute(stack);
@@ -5923,7 +5923,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
-		it("extract3", () => {
+		it("extract3", function () {
 			const op = new Extract3([], 1);
 
 			stack.push(new Uint8Array([12, 23, 3, 2, 23, 43, 43, 12]));
@@ -5944,7 +5944,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
-		it("extract_uint16", () => {
+		it("extract_uint16", function () {
 			const op = new ExtractUint16([], 1);
 			let expected: bigint;
 
@@ -5967,7 +5967,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
-		it("extract_uint32", () => {
+		it("extract_uint32", function () {
 			const op = new ExtractUint32([], 1);
 			let expected: bigint;
 
@@ -5990,7 +5990,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.EXTRACT_RANGE_ERROR);
 		});
 
-		it("extract_uint64", () => {
+		it("extract_uint64", function () {
 			const op = new ExtractUint64([], 1);
 			let expected: bigint;
 
@@ -6012,7 +6012,7 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Tealv5: ECDSA", () => {
+	describe("Tealv5: ECDSA", function () {
 		const stack = new Stack<StackElem>();
 		const ec = new EC("secp256k1");
 		const key = ec.genKeyPair();
@@ -6021,7 +6021,7 @@ describe("Teal Opcodes", function () {
 		const msgHash = new Uint8Array([0, 1, 2, 3, 4, 5]);
 		const signature = key.sign(msgHash);
 
-		it("ecdsa_verify, should verify correct signature", () => {
+		it("ecdsa_verify, should verify correct signature", function () {
 			// push message
 			stack.push(msgHash);
 			// push signature
@@ -6059,7 +6059,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("ecdsa_verify, should not verify wrong signature", () => {
+		it("ecdsa_verify, should not verify wrong signature", function () {
 			// push message
 			stack.push(msgHash);
 			// push signature (signed by key)
@@ -6076,7 +6076,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("ecdsa_verify, should throw error if curve is not supported", () => {
+		it("ecdsa_verify, should throw error if curve is not supported", function () {
 			stack.push(msgHash);
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
@@ -6087,7 +6087,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
 		});
 
-		it("ecdsa_pk_decompress", () => {
+		it("ecdsa_pk_decompress", function () {
 			// https://bitcoin.stackexchange.com/questions/69315/how-are-compressed-pubkeys-generated
 			// example taken from above link
 			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
@@ -6111,7 +6111,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
 		});
 
-		it("ecdsa_pk_recover", () => {
+		it("ecdsa_pk_recover", function () {
 			// push message
 			stack.push(msgHash);
 			// push recovery id
@@ -6135,7 +6135,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
 		});
 
-		it("Should calculate correct cost", () => {
+		it("Should calculate correct cost", function () {
 			//EdcsaVerify
 			stack.push(msgHash);
 			stack.push(signature.r.toBuffer());
@@ -6160,9 +6160,9 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Tealv5: cover, uncover", () => {
+	describe("Tealv5: cover, uncover", function () {
 		let stack: Stack<StackElem>;
-		beforeEach(() => {
+		beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
@@ -6172,7 +6172,7 @@ describe("Teal Opcodes", function () {
 			}
 		};
 
-		it("cover: move top to below N elements", () => {
+		it("cover: move top to below N elements", function () {
 			push(stack, 4);
 
 			const op = new Cover(["2"], 1);
@@ -6184,7 +6184,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 4n);
 			assert.equal(stack.pop(), 1n);
 		});
-		it("cover: should throw error is length of stack is not enough", () => {
+		it("cover: should throw error is length of stack is not enough", function () {
 			push(stack, 4);
 
 			const op = new Cover(["5"], 1);
@@ -6192,7 +6192,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("cover: n == 0", () => {
+		it("cover: n == 0", function () {
 			push(stack, 4);
 
 			const op = new Cover(["0"], 1);
@@ -6204,7 +6204,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 1n);
 		});
 
-		it("cover: n == stack.length", () => {
+		it("cover: n == stack.length", function () {
 			push(stack, 4);
 
 			const op = new Cover(["4"], 1);
@@ -6212,7 +6212,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("uncover: n = 1", () => {
+		it("uncover: n = 1", function () {
 			push(stack, 4); // stack state = [1, 2, 3, 4]
 			const op = new Uncover(["1"], 1);
 
@@ -6228,7 +6228,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 1n);
 		});
 
-		it("uncover: n = 0 - stack state should not change", () => {
+		it("uncover: n = 0 - stack state should not change", function () {
 			push(stack, 4); // stack state = [1, 2, 3, 4]
 
 			const op = new Uncover(["0"], 1);
@@ -6243,7 +6243,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 1n);
 		});
 
-		it("uncover: push bytes and apply 'uncover 1'", () => {
+		it("uncover: push bytes and apply 'uncover 1'", function () {
 			push(stack, 3); // stack state = [1, 2, 3]
 			stack.push(parsing.stringToBytes("Hello world")); // stack state = [1, 2, 3, "Hello world"]
 
@@ -6261,7 +6261,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 1n);
 		});
 
-		it("uncover: move Nth value to top", () => {
+		it("uncover: move Nth value to top", function () {
 			push(stack, 4); // stack state = [1, 2, 3, 4]
 
 			const op = new Uncover(["3"], 1);
@@ -6277,7 +6277,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 2n);
 		});
 
-		it("uncover: should throw error is length of stack is not enough", () => {
+		it("uncover: should throw error is length of stack is not enough", function () {
 			push(stack, 4);
 
 			const op = new Uncover(["5"], 1);
@@ -6286,10 +6286,10 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("Tealv5: txnas, Gtxnas, gtxnsas, args, log", () => {
+	describe("Tealv5: txnas, Gtxnas, gtxnsas, args, log", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
-		before(() => {
+		before(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.tx = TXN_OBJ;
@@ -6437,7 +6437,7 @@ describe("Teal Opcodes", function () {
 
 		describe("Args[N]", function () {
 			const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(parsing.stringToBytes);
-			this.beforeAll(() => {
+			this.beforeAll(function () {
 				interpreter.runtime.ctx.args = args;
 			});
 
@@ -6486,7 +6486,7 @@ describe("Teal Opcodes", function () {
 
 		describe("Log", function () {
 			let txID: string;
-			this.beforeAll(() => {
+			this.beforeAll(function () {
 				txID = interpreter.runtime.ctx.tx.txID;
 				interpreter.runtime.ctx.state.txReceipts.set(txID, {
 					txn: interpreter.runtime.ctx.tx,
@@ -6525,11 +6525,11 @@ describe("Teal Opcodes", function () {
 
 	describe("BitLen opcode", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack();
 		});
 
-		it("should work with number", () => {
+		it("should work with number", function () {
 			const numbers = [0n, 1n, 2n, 4n, 5n, 8n];
 			const expecteds = [0n, 1n, 2n, 3n, 3n, 4n];
 			numbers.forEach((num, index) => {
@@ -6540,7 +6540,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("shoud work with any short byte array", () => {
+		it("shoud work with any short byte array", function () {
 			const bytes = "abcd";
 			const op = new BitLen([], 1);
 
@@ -6549,7 +6549,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 31n);
 		});
 
-		it("shoud work with a long byte array", () => {
+		it("shoud work with a long byte array", function () {
 			const bytes = "f".repeat(78);
 			const op = new BitLen([], 1);
 
@@ -6568,7 +6568,7 @@ describe("Teal Opcodes", function () {
 		let interpreter: Interpreter;
 		let stack: Stack<StackElem>;
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			alan = new AccountStore(1e9);
 			runtime = new Runtime([alan]);
 			appID = runtime.deployApp(
@@ -6596,7 +6596,7 @@ describe("Teal Opcodes", function () {
 			stack = new Stack();
 		});
 
-		it("should return AppApprovalProgram", () => {
+		it("should return AppApprovalProgram", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppApprovalProgram"], 1, interpreter);
 			op.execute(stack);
@@ -6604,7 +6604,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram("counter-approval.teal")));
 		});
 
-		it("should return AppClearStateProgram", () => {
+		it("should return AppClearStateProgram", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppClearStateProgram"], 1, interpreter);
 			op.execute(stack);
@@ -6612,7 +6612,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram("clear.teal")));
 		});
 
-		it("should return AppGlobalNumUint", () => {
+		it("should return AppGlobalNumUint", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppGlobalNumUint"], 1, interpreter);
 			op.execute(stack);
@@ -6620,7 +6620,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numUint));
 		});
 
-		it("should return AppGlobalNumByteSlice", () => {
+		it("should return AppGlobalNumByteSlice", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppGlobalNumByteSlice"], 1, interpreter);
 			op.execute(stack);
@@ -6628,7 +6628,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numByteSlice));
 		});
 
-		it("should return AppLocalNumUint", () => {
+		it("should return AppLocalNumUint", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppLocalNumUint"], 1, interpreter);
 			op.execute(stack);
@@ -6636,7 +6636,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numUint));
 		});
 
-		it("should return AppLocalNumByteSlice", () => {
+		it("should return AppLocalNumByteSlice", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppLocalNumByteSlice"], 1, interpreter);
 			op.execute(stack);
@@ -6644,7 +6644,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numByteSlice));
 		});
 
-		it("should return AppExtraProgramPages", () => {
+		it("should return AppExtraProgramPages", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppExtraProgramPages"], 1, interpreter);
 			op.execute(stack);
@@ -6652,7 +6652,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 1n);
 		});
 
-		it("should return AppCreator", () => {
+		it("should return AppCreator", function () {
 			stack.push(BigInt(appID));
 			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
 			op.execute(stack);
@@ -6660,7 +6660,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(encodeAddress(stack.pop() as Uint8Array), alan.address);
 		});
 
-		it("should return AppAddress", () => {
+		it("should return AppAddress", function () {
 			const op = new AppParamsGet(["AppAddress"], 1, interpreter);
 			stack.push(BigInt(appID));
 			op.execute(stack);
@@ -6668,7 +6668,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(encodeAddress(stack.pop() as Uint8Array), getApplicationAddress(appID));
 		});
 
-		it("return '0,0' when app is undefined", () => {
+		it("return '0,0' when app is undefined", function () {
 			stack.push(10n);
 			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
 			op.execute(stack);
@@ -6676,13 +6676,13 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("Should fail number element in stack less than 1", () => {
+		it("Should fail number element in stack less than 1", function () {
 			assert.equal(stack.length(), 0);
 			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("should fail when teal version is less than 5", () => {
+		it("should fail when teal version is less than 5", function () {
 			const versions = [1, 2, 3, 4];
 			versions.forEach((version) => {
 				interpreter.tealVersion = version;
@@ -6694,7 +6694,7 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("should fail when arguments invalid", () => {
+		it("should fail when arguments invalid", function () {
 			stack.push(BigInt(appID));
 			expectRuntimeError(
 				() => new AppParamsGet(["AppCreatorInvalid"], 1, interpreter),
@@ -6714,7 +6714,7 @@ describe("Teal Opcodes", function () {
 			return st;
 		};
 
-		it("Divw opcode happy cases", () => {
+		it("Divw opcode happy cases", function () {
 			const op = new Divw([], 0);
 
 			// 1/ 1
@@ -6731,7 +6731,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 9223372036854775808n);
 		});
 
-		it("Divw opcode unhappy cases", () => {
+		it("Divw opcode unhappy cases", function () {
 			const op = new Divw([], 0);
 
 			// div by Zero
@@ -6746,7 +6746,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW);
 		});
 
-		it("Bsqrt opcode happy cases", () => {
+		it("Bsqrt opcode happy cases", function () {
 			const op = new Bsqrt([], 0);
 			// should run success for case 64 bytes.
 			const inputs = [0n, 1n, 10n, 1n << 32n, BigInt("0x" + "ff".repeat(64))];
@@ -6759,14 +6759,14 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("Bsqrt opcode unhappy cases", () => {
+		it("Bsqrt opcode unhappy cases", function () {
 			const op = new Bsqrt([], 0);
 			// length of input more than 64
 			stack = initStack([bigintToBigEndianBytes(BigInt("0x" + "ff".repeat(100)))]);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED);
 		});
 
-		it("Should calculate correct cost", () => {
+		it("Should calculate correct cost", function () {
 			stack.push(bigintToBigEndianBytes(0n));
 			const op = new Bsqrt([], 0);
 			assert.equal(40, op.execute(stack));
@@ -6781,7 +6781,7 @@ describe("Teal Opcodes", function () {
 		let op: AcctParamsGet;
 		const zeroBalanceAddr = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			[alice, bob] = interpreter.runtime.defaultAccounts();
@@ -6799,28 +6799,28 @@ describe("Teal Opcodes", function () {
 			stack.push(decodeAddress(alice.address).publicKey);
 		});
 
-		it("Should return balance", () => {
+		it("Should return balance", function () {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.equal(stack.pop(), alice.balance());
 		});
 
-		it("Should return min balance", () => {
+		it("Should return min balance", function () {
 			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.equal(stack.pop(), BigInt(alice.minBalance));
 		});
 
-		it("Should return Auth Address", () => {
+		it("Should return Auth Address", function () {
 			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
 		});
 
-		it("Shoud return Auth Address - rekey case", () => {
+		it("Shoud return Auth Address - rekey case", function () {
 			// set spend key for alice is bob
 			alice.rekeyTo(bob.address);
 			interpreter.runtime.ctx.state.accounts.set(alice.address, alice);
@@ -6830,7 +6830,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), decodeAddress(bob.address).publicKey);
 		});
 
-		it("Should return balance with account own zero balance", () => {
+		it("Should return balance with account own zero balance", function () {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
@@ -6838,7 +6838,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), 0n);
 		});
 
-		it("Should return min balance with account own zero balance", () => {
+		it("Should return min balance with account own zero balance", function () {
 			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
@@ -6846,7 +6846,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(stack.pop(), BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
 		});
 
-		it("Should return Auth Address with account own zero balance", () => {
+		it("Should return Auth Address with account own zero balance", function () {
 			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
@@ -6854,14 +6854,14 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
 		});
 
-		it("Should throw error when query unknow field", () => {
+		it("Should throw error when query unknow field", function () {
 			expectRuntimeError(
 				() => new AcctParamsGet(["Miles"], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD
 			);
 		});
 
-		it("Should throw error if query account not in ref account list", () => {
+		it("Should throw error if query account not in ref account list", function () {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(decodeAddress(bob.address).publicKey);
 
@@ -6878,7 +6878,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("Should throw error if top element in stack is not an address", () => {
+		it("Should throw error if top element in stack is not an address", function () {
 			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
 			stack.push(parsing.stringToBytes("ABCDE"));
 
@@ -6889,14 +6889,14 @@ describe("Teal Opcodes", function () {
 	describe("Tealv6: itxnas opcode", function () {
 		let stack: Stack<StackElem>;
 		let interpreter: Interpreter;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 			interpreter = new Interpreter();
 			interpreter.tealVersion = 6;
 			interpreter.innerTxnGroups = [[TXN_OBJ, { ...TXN_OBJ, fee: 1000 }]];
 		});
 
-		it("Should succeed: query data use itxnas", () => {
+		it("Should succeed: query data use itxnas", function () {
 			const op = new ITxnas(["Accounts"], 1, interpreter);
 			stack.push(1n);
 			op.execute(stack);
@@ -6904,7 +6904,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), TXN_OBJ.apat[0]);
 		});
 
-		it("Should fail: not any inner tx submited", () => {
+		it("Should fail: not any inner tx submited", function () {
 			interpreter.innerTxnGroups = [];
 			const op = new ITxnas(["Accounts"], 1, interpreter);
 			stack.push(1n);
@@ -6914,7 +6914,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("Should fail: stack empty", () => {
+		it("Should fail: stack empty", function () {
 			const op = new ITxnas(["Accounts"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
@@ -6923,7 +6923,7 @@ describe("Teal Opcodes", function () {
 	describe("Tealv5: itxn opcode", function () {
 		let stack: Stack<StackElem>;
 		let interpreter: Interpreter;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
@@ -6937,13 +6937,13 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("Should put on top of the stack logs from innerTx", () => {
+		it("Should put on top of the stack logs from innerTx", function () {
 			const op = new ITxn(["Logs", "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
 
-		it("Should throw an error, no inner transaction", () => {
+		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
 			const op = new ITxn(["Logs", "0"], 1, interpreter);
 			expectRuntimeError(
@@ -6952,7 +6952,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("Should throw an error, no inner transaction", () => {
+		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
 			const op = new ITxn(["NumLogs"], 1, interpreter);
 			expectRuntimeError(
@@ -6961,7 +6961,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("Should put the number of logs on top of the stack", () => {
+		it("Should put the number of logs on top of the stack", function () {
 			const op = new ITxn(["NumLogs"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1n, stack.pop());
@@ -6971,7 +6971,7 @@ describe("Teal Opcodes", function () {
 	describe("Logs", function () {
 		let stack: Stack<StackElem>;
 		let interpreter: Interpreter;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
@@ -6985,18 +6985,18 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
-		it("Should put on top of the stack log from group transaction", () => {
+		it("Should put on top of the stack log from group transaction", function () {
 			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
 		});
 
-		it("Should throw an error index out of bound", () => {
+		it("Should throw an error index out of bound", function () {
 			const op = new Gitxna(["1", "Logs", "2"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
-		it("Should put on top of stack log from group transaction", () => {
+		it("Should put on top of stack log from group transaction", function () {
 			stack.push(1n);
 			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
 			op.execute(stack);
@@ -7013,11 +7013,11 @@ describe("Teal Opcodes", function () {
 		const toPushUrl = Buffer.from(encoded64BaseUrl, "utf-8");
 		const expectedBytes = new Uint8Array(Buffer.from(decoded64Base, "utf-8"));
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("Should decode base64 encoded data and push it to stack", () => {
+		it("Should decode base64 encoded data and push it to stack", function () {
 			stack.push(toPushUrl);
 			const opUrl = new Base64Decode(["URLEncoding"], 0);
 			opUrl.execute(stack);
@@ -7028,24 +7028,24 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(expectedBytes, stack.pop());
 		});
 
-		it("Should throw an error when last stack element is not base64 encoded", () => {
+		it("Should throw an error when last stack element is not base64 encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseUrl, "utf-8")));
 			const op = new Base64Decode(["StdEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
 		});
 
-		it("Should throw an error when last stack element is not base64Url encoded", () => {
+		it("Should throw an error when last stack element is not base64Url encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseStd, "utf-8")));
 			const op = new Base64Decode(["URLEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64URL);
 		});
 
-		it("Should throw an error when the stack is empty", () => {
+		it("Should throw an error when the stack is empty", function () {
 			const op = new Base64Decode(["StdEncoding"], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
-		it("Should throw an error when argument not in bound", () => {
+		it("Should throw an error when argument not in bound", function () {
 			stack.push(toPushStd);
 			expectRuntimeError(
 				() => new Base64Decode(["3"], 0),
@@ -7053,7 +7053,7 @@ describe("Teal Opcodes", function () {
 			);
 		});
 
-		it("Should calculate the correct cost", () => {
+		it("Should calculate the correct cost", function () {
 			let toPush = Buffer.from("", "utf-8");
 			stack.push(toPush);
 			let op = new Base64Decode(["URLEncoding"], 0);
@@ -7088,7 +7088,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(6, cost); // base64_decode cost = 6 (68 bytes -> 1 + ceil(68/16))
 		});
 
-		it("Should throw an error when argument not provided", () => {
+		it("Should throw an error when argument not provided", function () {
 			stack.push(toPushStd);
 			expectRuntimeError(() => new Base64Decode([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
@@ -7096,11 +7096,11 @@ describe("Teal Opcodes", function () {
 
 	describe("Tealv7: replace2 opcode", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("Should replace bytes correctly", () => {
+		it("Should replace bytes correctly", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			let hexStr = "0x22221111";
@@ -7136,11 +7136,11 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
 		});
 
-		it("Should throw an error when argument not provided", () => {
+		it("Should throw an error when argument not provided", function () {
 			expectRuntimeError(() => new Replace2([], 0), RUNTIME_ERRORS.TEAL.ASSERT_LENGTH);
 		});
 
-		it("Should throw error for wrong index replace", () => {
+		it("Should throw error for wrong index replace", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			stack.push(strHexToBytes(original));
@@ -7152,11 +7152,11 @@ describe("Teal Opcodes", function () {
 
 	describe("Tealv7: replace3 opcode", function () {
 		let stack: Stack<StackElem>;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		});
 
-		it("Should replace bytes correctly", () => {
+		it("Should replace bytes correctly", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			let hexStr = "0x22221111";
@@ -7195,7 +7195,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), expectedRemain); //check if the remaining data in the stack are stay the same
 		});
 
-		it("Should throw error for wrong index replace", () => {
+		it("Should throw error for wrong index replace", function () {
 			const original = "0x11111111";
 			const replace = "0x2222";
 			stack.push(strHexToBytes(original));
@@ -7234,7 +7234,7 @@ describe("Teal Opcodes", function () {
 			execExpectError(stack, [], new Sha3_256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			stack.push(parsing.stringToBytes("MESSAGE"));
 			const op = new Sha3_256([], 1);
 			assert.equal(130, op.execute(stack));
@@ -7298,7 +7298,7 @@ describe("Teal Opcodes", function () {
 			)
 		);
 
-		it("Should return correct cost", () => {
+		it("Should return correct cost", function () {
 			const account = generateAccount();
 			const data = new Uint8Array(Buffer.from([1, 9, 25, 49]));
 			const signature = signBytes(data, account.sk);
@@ -7312,7 +7312,7 @@ describe("Teal Opcodes", function () {
 		});
 	});
 
-	describe("json_ref", () => {
+	describe("json_ref", function () {
 		const stack = new Stack<StackElem>();
 		const jsonByte =
 			'{"key0": 0,"key1": "algo","key2":{"key3": "teal", "key4": {"key40": 10}}, "key5": 18446744073709551615 }';
