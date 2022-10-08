@@ -27,19 +27,19 @@ import {
 } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-describe("Note in TxParams", () => {
+describe("Note in TxParams", function () {
 	const encoder = new TextEncoder();
 	const note = "Hello Algob!";
 	const noteb64Src = "hello";
 	const noteb64 = Buffer.from(noteb64Src).toString("base64");
 
-	it("Both notes given", () => {
-		assert.throw(() => {
+	it("Both notes given", function () {
+		assert.throw(function () {
 			webTx.encodeNote(note, noteb64);
 		}, "both note and noteb64");
 	});
 
-	it("Only note given", () => {
+	it("Only note given", function () {
 		let result = webTx.encodeNote(note, undefined);
 		assert.deepEqual(result, encoder.encode(note), "note not encoded");
 
@@ -48,7 +48,7 @@ describe("Note in TxParams", () => {
 		assert.deepEqual(result, noteEncoded, "note not encoded");
 	});
 
-	it("Only noteb64 given", () => {
+	it("Only noteb64 given", function () {
 		const result = webTx.encodeNote(undefined, noteb64);
 		assert.isDefined(result);
 		assert.deepEqual(
@@ -77,14 +77,14 @@ function stubAlgodGenesisAndTxParams(algodClient: algosdk.Algodv2): void {
 	>);
 }
 
-describe("Opt-In to ASA", () => {
+describe("Opt-In to ASA", function () {
 	useFixtureProject("config-project");
 
 	let deployer: Deployer;
 	let execParams: wtypes.OptInASAParam;
 	let algod: AlgoOperatorDryRunImpl;
 	let expected: TxnReceipt[];
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -113,18 +113,18 @@ describe("Opt-In to ASA", () => {
 		];
 	});
 
-	afterEach(() => {
+	afterEach(function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("should opt-in to asa using asset id as number", async () => {
+	it("should opt-in to asa using asset id as number", async function () {
 		const res = await deployer.executeTx([execParams]);
 
 		assert.deepEqual(res, expected);
 	});
 
-	it("Should fail if asset name is passed but not found in checkpoints", async () => {
+	it("Should fail if asset name is passed but not found in checkpoints", async function () {
 		execParams.assetID = "unknown";
 
 		await expectBuilderErrorAsync(
@@ -134,7 +134,7 @@ describe("Opt-In to ASA", () => {
 		);
 	});
 
-	it("Should set asset id to asset id of asset name passed", async () => {
+	it("Should set asset id to asset id of asset name passed", async function () {
 		execParams.assetID = "silver";
 
 		const res = await deployer.executeTx([execParams]);
@@ -143,13 +143,13 @@ describe("Opt-In to ASA", () => {
 	});
 });
 
-describe("ASA modify fields", () => {
+describe("ASA modify fields", function () {
 	useFixtureProject("config-project");
 	let deployer: Deployer;
 	let execParams: wtypes.ModifyAssetParam;
 	let algod: AlgoOperatorDryRunImpl;
 	let assetFields: wtypes.AssetModFields;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -169,7 +169,7 @@ describe("ASA modify fields", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
@@ -193,7 +193,7 @@ describe("ASA modify fields", () => {
 		return algod.sendAndWait(rawTxns);
 	}
 
-	it("Should set fields, freeze is not sent, therefore it should be picked from assetInfo", async () => {
+	it("Should set fields, freeze is not sent, therefore it should be picked from assetInfo", async function () {
 		// Manager should be set to ""(sent as undefined to network)
 		// Clawback should be updated
 		stub(algod, "sendAndWait").callsFake(checkTx);
@@ -202,11 +202,11 @@ describe("ASA modify fields", () => {
 	});
 });
 
-describe("Delete ASA and SSC", () => {
+describe("Delete ASA and SSC", function () {
 	useFixtureProjectCopy("stateful");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -216,12 +216,12 @@ describe("Delete ASA and SSC", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("Should delete ASA, and set delete boolean in ASAInfo", async () => {
+	it("Should delete ASA, and set delete boolean in ASAInfo", async function () {
 		const execParams: wtypes.DestroyAssetParam = {
 			type: wtypes.TransactionType.DestroyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -235,7 +235,7 @@ describe("Delete ASA and SSC", () => {
 		assert.equal(res.deleted, true);
 	});
 
-	it("Should delete ASA If asset index is used, instead of asset name", async () => {
+	it("Should delete ASA If asset index is used, instead of asset name", async function () {
 		const execParams: wtypes.DestroyAssetParam = {
 			type: wtypes.TransactionType.DestroyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -249,7 +249,7 @@ describe("Delete ASA and SSC", () => {
 		assert.equal(res.deleted, true);
 	});
 
-	it("Should not fail if ASA is not in checkpoints", async () => {
+	it("Should not fail if ASA is not in checkpoints", async function () {
 		const execParams: wtypes.DestroyAssetParam = {
 			type: wtypes.TransactionType.DestroyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -260,7 +260,7 @@ describe("Delete ASA and SSC", () => {
 		await deployer.executeTx([execParams]);
 	});
 
-	it("Should delete SSC, set delete boolean in latest AppInfo", async () => {
+	it("Should delete SSC, set delete boolean in latest AppInfo", async function () {
 		const appDefinition: wtypes.AppDefinitionFromFile = {
 			appName: "app",
 			metaType: wtypes.MetaType.FILE,
@@ -287,7 +287,7 @@ describe("Delete ASA and SSC", () => {
 		if (res) assert.equal(res.deleted, true);
 	});
 
-	it("Should not fail if SSC is not in checkpoints", async () => {
+	it("Should not fail if SSC is not in checkpoints", async function () {
 		const execParams: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
@@ -299,14 +299,14 @@ describe("Delete ASA and SSC", () => {
 	});
 });
 
-describe("Delete ASA and SSC transaction flow(with functions and executeTx)", () => {
+describe("Delete ASA and SSC transaction flow(with functions and executeTx)", function () {
 	useFixtureProject("stateful");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
 	let appID: number;
 	let assetID: number;
 	const assetName = "silver";
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -349,12 +349,12 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParam]);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("should throw error with opt-in asa functions, if asa exist and deleted", async () => {
+	it("should throw error with opt-in asa functions, if asa exist and deleted", async function () {
 		await expectBuilderErrorAsync(
 			async () => await deployer.optInAccountToASA(assetName, "acc-name-1", {}),
 			ERRORS.GENERAL.ASSET_DELETED
@@ -366,13 +366,13 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should pass with opt-in asa functions, if asa doesn't exist in checkpoint", async () => {
+	it("should pass with opt-in asa functions, if asa doesn't exist in checkpoint", async function () {
 		await deployer.optInAccountToASA("23", "acc-name-1", {});
 
 		await deployer.optInLsigToASA("233212", mockLsig, {});
 	});
 
-	it("should throw error with opt-in app functions, if app exist and deleted", async () => {
+	it("should throw error with opt-in app functions, if app exist and deleted", async function () {
 		await expectBuilderErrorAsync(
 			async () => await deployer.optInAccountToApp(bobAcc, appID, {}, {}),
 			ERRORS.GENERAL.APP_DELETED
@@ -384,13 +384,13 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should pass with opt-in app functions, if app doesn't exist in checkpoint", async () => {
+	it("should pass with opt-in app functions, if app doesn't exist in checkpoint", async function () {
 		await deployer.optInAccountToApp(bobAcc, 122, {}, {});
 
 		await deployer.optInLsigToApp(12223, mockLsig, {}, {});
 	});
 
-	it("should throw error with update app function, if app exist and deleted", async () => {
+	it("should throw error with update app function, if app exist and deleted", async function () {
 		await expectBuilderErrorAsync(
 			async () =>
 				await deployer.updateApp(
@@ -409,7 +409,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should pass with update app functions, if app doesn't exist in checkpoint", async () => {
+	it("should pass with update app functions, if app doesn't exist in checkpoint", async function () {
 		await deployer.updateApp(
 			"app",
 			bobAcc,
@@ -424,7 +424,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to opt-in through execute tx", async () => {
+	it("should fail if user tries to opt-in through execute tx", async function () {
 		const execParam: wtypes.OptInASAParam = {
 			type: wtypes.TransactionType.OptInASA,
 			sign: wtypes.SignType.SecretKey,
@@ -438,7 +438,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to modify through execute tx", async () => {
+	it("should fail if user tries to modify through execute tx", async function () {
 		const execParam: wtypes.ModifyAssetParam = {
 			type: wtypes.TransactionType.ModifyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -453,7 +453,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to freeze through execute tx", async () => {
+	it("should fail if user tries to freeze through execute tx", async function () {
 		const execParam: wtypes.FreezeAssetParam = {
 			type: wtypes.TransactionType.FreezeAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -469,7 +469,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to revoke through execute tx", async () => {
+	it("should fail if user tries to revoke through execute tx", async function () {
 		const execParam: wtypes.RevokeAssetParam = {
 			type: wtypes.TransactionType.RevokeAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -486,7 +486,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to destroy through execute tx", async () => {
+	it("should fail if user tries to destroy through execute tx", async function () {
 		const execParam: wtypes.DestroyAssetParam = {
 			type: wtypes.TransactionType.DestroyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -500,7 +500,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should fail if user tries to transfer asa through execute tx", async () => {
+	it("should fail if user tries to transfer asa through execute tx", async function () {
 		const execParam: wtypes.AssetTransferParam = {
 			type: wtypes.TransactionType.TransferAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -516,7 +516,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should pass if user tries to opt-out through execute tx", async () => {
+	it("should pass if user tries to opt-out through execute tx", async function () {
 		const execParam: wtypes.AssetTransferParam = {
 			type: wtypes.TransactionType.TransferAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -529,7 +529,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParam]);
 	});
 
-	it("should throw error if user tries to delete deleted app", async () => {
+	it("should throw error if user tries to delete deleted app", async function () {
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.DeleteApp,
 			sign: wtypes.SignType.SecretKey,
@@ -543,7 +543,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should throw error if user tries to update deleted app", async () => {
+	it("should throw error if user tries to update deleted app", async function () {
 		const execParam: wtypes.UpdateAppParam = {
 			type: wtypes.TransactionType.UpdateApp,
 			sign: wtypes.SignType.SecretKey,
@@ -563,7 +563,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should throw error if user tries to call deleted app", async () => {
+	it("should throw error if user tries to call deleted app", async function () {
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.CallApp,
 			sign: wtypes.SignType.SecretKey,
@@ -577,7 +577,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should throw error if user tries to opt-in deleted app", async () => {
+	it("should throw error if user tries to opt-in deleted app", async function () {
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.OptInToApp,
 			sign: wtypes.SignType.SecretKey,
@@ -591,7 +591,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		);
 	});
 
-	it("should pass if user tries to opt-out deleted app", async () => {
+	it("should pass if user tries to opt-out deleted app", async function () {
 		const execParam: wtypes.AppCallsParam = {
 			type: wtypes.TransactionType.CloseApp,
 			sign: wtypes.SignType.SecretKey,
@@ -614,7 +614,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParams]);
 	});
 
-	it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
+	it("should pass if user tries delete app that doesn't exist in checkpoint", async function () {
 		const execParam: wtypes.DestroyAssetParam = {
 			type: wtypes.TransactionType.DestroyAsset,
 			sign: wtypes.SignType.SecretKey,
@@ -626,7 +626,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 		await deployer.executeTx([execParam]);
 	});
 
-	it("should pass if user tries delete (asset + app) that doesn't exist in checkpoint", async () => {
+	it("should pass if user tries delete (asset + app) that doesn't exist in checkpoint", async function () {
 		const txGroup: wtypes.ExecParams[] = [
 			{
 				type: wtypes.TransactionType.DestroyAsset,
@@ -648,12 +648,12 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTx)", ()
 	});
 });
 
-describe("Deploy, Delete transactions test in run mode", () => {
+describe("Deploy, Delete transactions test in run mode", function () {
 	useFixtureProject("stateful");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
 	let deployerCfg: DeployerConfig;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		deployerCfg = new DeployerConfig(env, algod);
@@ -662,12 +662,12 @@ describe("Deploy, Delete transactions test in run mode", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("should deploy asa in run mode", async () => {
+	it("should deploy asa in run mode", async function () {
 		const execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployASA,
 			sign: wtypes.SignType.SecretKey,
@@ -685,7 +685,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 		);
 	});
 
-	it("should deploy application in run mode", async () => {
+	it("should deploy application in run mode", async function () {
 		const execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
@@ -708,7 +708,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
-	it("should deploy application in deploy mode and save info by name", async () => {
+	it("should deploy application in deploy mode and save info by name", async function () {
 		deployer = new DeployerDeployMode(deployerCfg);
 		const execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
@@ -732,7 +732,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 		assert.isDefined(deployer.getApp("dao-app"));
 	});
 
-	it("should delete application in run mode", async () => {
+	it("should delete application in run mode", async function () {
 		deployer = new DeployerDeployMode(deployerCfg);
 		let execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
@@ -769,12 +769,12 @@ describe("Deploy, Delete transactions test in run mode", () => {
 	});
 });
 
-describe("Update transaction test in run mode", () => {
+describe("Update transaction test in run mode", function () {
 	useFixtureProject("stateful");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
 	let deployerCfg: DeployerConfig;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		deployerCfg = new DeployerConfig(env, algod);
@@ -782,12 +782,12 @@ describe("Update transaction test in run mode", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("should update in run mode", async () => {
+	it("should update in run mode", async function () {
 		let execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
@@ -828,7 +828,7 @@ describe("Update transaction test in run mode", () => {
 		expectBuilderError(() => deployer.getApp("app"), ERRORS.GENERAL.APP_NOT_FOUND_IN_CP);
 	});
 
-	it("deploy in deploy mode, update in run mode", async () => {
+	it("deploy in deploy mode, update in run mode", async function () {
 		deployer = new DeployerDeployMode(deployerCfg);
 		let execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
@@ -871,7 +871,7 @@ describe("Update transaction test in run mode", () => {
 		}
 	});
 
-	it("deploy in run mode, update in deploy mode", async () => {
+	it("deploy in run mode, update in deploy mode", async function () {
 		let execParams: wtypes.ExecParams = {
 			type: wtypes.TransactionType.DeployApp,
 			sign: wtypes.SignType.SecretKey,
@@ -912,12 +912,12 @@ describe("Update transaction test in run mode", () => {
 	});
 });
 
-describe("Deploy ASA without asa.yaml", () => {
+describe("Deploy ASA without asa.yaml", function () {
 	useFixtureProject("config-project");
 
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -926,12 +926,12 @@ describe("Deploy ASA without asa.yaml", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("should deploy asa without asa.yaml", async () => {
+	it("should deploy asa without asa.yaml", async function () {
 		const exp = {
 			total: 10000,
 			decimals: 0,
@@ -958,12 +958,12 @@ describe("Deploy ASA without asa.yaml", () => {
 	});
 });
 
-describe("SDK Transaction object", () => {
+describe("SDK Transaction object", function () {
 	useFixtureProject("config-project");
 
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -971,7 +971,7 @@ describe("SDK Transaction object", () => {
 		stubAlgodGenesisAndTxParams(algod.algodClient);
 	});
 
-	it("should sign and send transaction", async () => {
+	it("should sign and send transaction", async function () {
 		const tx = makeAssetCreateTxn(
 			bobAcc.addr,
 			mockSuggestedParam.fee,

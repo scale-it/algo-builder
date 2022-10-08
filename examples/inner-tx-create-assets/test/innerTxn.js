@@ -6,7 +6,7 @@ describe("Group txn", function () {
 	let runtime;
 	let creator;
 	let proxyAppInfo;
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[creator] = runtime.defaultAccounts();
 		proxyAppInfo = runtime.deployApp(
@@ -36,7 +36,7 @@ describe("Group txn", function () {
 		runtime.executeTx([paymentTxnParam]);
 	});
 
-	it("Should create new app and asset from inner txn", () => {
+	it("Should create new app and asset from inner txn", function () {
 		// create asset and log new asset id
 		const masterTxnParam = {
 			type: types.TransactionType.CallApp,

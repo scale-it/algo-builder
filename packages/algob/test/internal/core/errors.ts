@@ -11,13 +11,13 @@ const mockErrorDescriptor: ErrorDescriptor = {
 	description: "This is a mock error",
 };
 
-describe("BuilderError", () => {
-	describe("Type guard", () => {
-		it("Should return true for BuilderErrors", () => {
+describe("BuilderError", function () {
+	describe("Type guard", function () {
+		it("Should return true for BuilderErrors", function () {
 			assert.isTrue(BuilderError.isBuilderError(new BuilderError(mockErrorDescriptor)));
 		});
 
-		it("Should return false for everything else", () => {
+		it("Should return false for everything else", function () {
 			assert.isFalse(BuilderError.isBuilderError(new Error()));
 			assert.isFalse(BuilderError.isBuilderError(new BuilderPluginError("asd", "asd")));
 			assert.isFalse(BuilderError.isBuilderError(undefined));
@@ -28,13 +28,13 @@ describe("BuilderError", () => {
 		});
 	});
 
-	describe("Without parent error", () => {
-		it("should have the right error number", () => {
+	describe("Without parent error", function () {
+		it("should have the right error number", function () {
 			const error = new BuilderError(mockErrorDescriptor);
 			assert.equal(error.number, mockErrorDescriptor.number);
 		});
 
-		it("should format the error code to 4 digits", () => {
+		it("should format the error code to 4 digits", function () {
 			const error = new BuilderError(mockErrorDescriptor);
 			assert.equal(error.message.substr(0, 10), "ABLDR123: ");
 
@@ -49,12 +49,12 @@ describe("BuilderError", () => {
 			);
 		});
 
-		it("should have the right error message", () => {
+		it("should have the right error message", function () {
 			const error = new BuilderError(mockErrorDescriptor);
 			assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
 		});
 
-		it("should format the error message with the template params", () => {
+		it("should format the error message with the template params", function () {
 			const error = new BuilderError(
 				{
 					number: 12,
@@ -67,24 +67,24 @@ describe("BuilderError", () => {
 			assert.equal(error.message, "ABLDR12: a b 123");
 		});
 
-		it("shouldn't have a parent", () => {
+		it("shouldn't have a parent", function () {
 			assert.isUndefined(new BuilderError(mockErrorDescriptor).parent);
 		});
 
-		it("Should work with instanceof", () => {
+		it("Should work with instanceof", function () {
 			const error = new BuilderError(mockErrorDescriptor);
 			assert.instanceOf(error, BuilderError);
 		});
 	});
 
-	describe("With parent error", () => {
-		it("should have the right parent error", () => {
+	describe("With parent error", function () {
+		it("should have the right parent error", function () {
 			const parent = new Error();
 			const error = new BuilderError(mockErrorDescriptor, {}, parent);
 			assert.equal(error.parent, parent);
 		});
 
-		it("should format the error message with the template params", () => {
+		it("should format the error message with the template params", function () {
 			const error = new BuilderError(
 				{
 					number: 12,
@@ -98,7 +98,7 @@ describe("BuilderError", () => {
 			assert.equal(error.message, "ABLDR12: a b 123");
 		});
 
-		it("Should work with instanceof", () => {
+		it("Should work with instanceof", function () {
 			const parent = new Error();
 			const error = new BuilderError(mockErrorDescriptor, {}, parent);
 			assert.instanceOf(error, BuilderError);
@@ -106,19 +106,19 @@ describe("BuilderError", () => {
 	});
 });
 
-describe("Error ranges", () => {
+describe("Error ranges", function () {
 	function inRange(n: number, min: number, max: number): boolean {
 		return n >= min && n <= max;
 	}
 
-	it("Should have max > min", () => {
+	it("Should have max > min", function () {
 		for (const errorGroup of unsafeObjectKeys(ERROR_RANGES)) {
 			const range = ERROR_RANGES[errorGroup];
 			assert.isBelow(range.min, range.max, `Range of ${errorGroup} is invalid`);
 		}
 	});
 
-	it("Shouldn't overlap ranges", () => {
+	it("Shouldn't overlap ranges", function () {
 		for (const errorGroup of unsafeObjectKeys(ERROR_RANGES)) {
 			const range = ERROR_RANGES[errorGroup];
 
@@ -143,8 +143,8 @@ describe("Error ranges", () => {
 	});
 });
 
-describe("Error descriptors", () => {
-	it("Should have all errors inside their ranges", () => {
+describe("Error descriptors", function () {
+	it("Should have all errors inside their ranges", function () {
 		for (const errorGroup of unsafeObjectKeys(ERRORS)) {
 			const range = ERROR_RANGES[errorGroup];
 
@@ -165,7 +165,7 @@ describe("Error descriptors", () => {
 		}
 	});
 
-	it("Shouldn't repeat error numbers", () => {
+	it("Shouldn't repeat error numbers", function () {
 		for (const errorGroup of unsafeObjectKeys(ERRORS)) {
 			for (const [name, errorDescriptor] of Object.entries<ErrorDescriptor>(
 				ERRORS[errorGroup]
@@ -186,15 +186,15 @@ describe("Error descriptors", () => {
 	});
 });
 
-describe("BuilderPluginError", () => {
-	describe("Type guard", () => {
-		it("Should return true for BuilderPluginError", () => {
+describe("BuilderPluginError", function () {
+	describe("Type guard", function () {
+		it("Should return true for BuilderPluginError", function () {
 			assert.isTrue(
 				BuilderPluginError.isBuilderPluginError(new BuilderPluginError("asd", "asd"))
 			);
 		});
 
-		it("Should return false for everything else", () => {
+		it("Should return false for everything else", function () {
 			assert.isFalse(BuilderPluginError.isBuilderPluginError(new Error()));
 			assert.isFalse(
 				BuilderPluginError.isBuilderPluginError(
@@ -209,9 +209,9 @@ describe("BuilderPluginError", () => {
 		});
 	});
 
-	describe("constructors", () => {
-		describe("automatic plugin name", () => {
-			it("Should accept a parent error", () => {
+	describe("constructors", function () {
+		describe("automatic plugin name", function () {
+			it("Should accept a parent error", function () {
 				const message = "m";
 				const parent = new Error();
 
@@ -221,7 +221,7 @@ describe("BuilderPluginError", () => {
 				assert.equal(error.parent, parent);
 			});
 
-			it("Should work without a parent error", () => {
+			it("Should work without a parent error", function () {
 				const message = "m2";
 
 				const error = new BuilderPluginError(message);
@@ -230,7 +230,7 @@ describe("BuilderPluginError", () => {
 				assert.isUndefined(error.parent);
 			});
 
-			it("Should autodetect the plugin name", () => {
+			it("Should autodetect the plugin name", function () {
 				const message = "m";
 				const parent = new Error();
 
@@ -240,7 +240,7 @@ describe("BuilderPluginError", () => {
 				assert.equal(error.pluginName, "mocha");
 			});
 
-			it("Should work with instanceof", () => {
+			it("Should work with instanceof", function () {
 				const message = "m";
 				const parent = new Error();
 
@@ -250,8 +250,8 @@ describe("BuilderPluginError", () => {
 			});
 		});
 
-		describe("explicit plugin name", () => {
-			it("Should accept a parent error", () => {
+		describe("explicit plugin name", function () {
+			it("Should accept a parent error", function () {
 				const plugin = "p";
 				const message = "m";
 				const parent = new Error();
@@ -263,7 +263,7 @@ describe("BuilderPluginError", () => {
 				assert.equal(error.parent, parent);
 			});
 
-			it("Should work without a parent error", () => {
+			it("Should work without a parent error", function () {
 				const plugin = "p2";
 				const message = "m2";
 
@@ -274,7 +274,7 @@ describe("BuilderPluginError", () => {
 				assert.isUndefined(error.parent);
 			});
 
-			it("Should work with instanceof", () => {
+			it("Should work with instanceof", function () {
 				const plugin = "p";
 				const message = "m";
 				const parent = new Error();
@@ -287,9 +287,9 @@ describe("BuilderPluginError", () => {
 	});
 });
 
-// describe("applyErrorMessageTemplate", () => {
-//  describe("Variable names", () => {
-//    it("Should reject invalid variable names", () => {
+// describe("applyErrorMessageTemplate", function() {
+//  describe("Variable names", function() {
+//    it("Should reject invalid variable names", function() {
 //      expectBuilderError(
 //        () => applyErrorMessageTemplate("", { "1": 1 }),
 //        ERRORS.INTERNAL.TEMPLATE_INVALID_VARIABLE_NAME
@@ -307,8 +307,8 @@ describe("BuilderPluginError", () => {
 //    });
 //  });
 //
-//  describe("Values", () => {
-//    it("shouldn't contain valid variable tags", () => {
+//  describe("Values", function() {
+//    it("shouldn't contain valid variable tags", function() {
 //      expectBuilderError(
 //        () => applyErrorMessageTemplate("%asd%", { asd: "%as%" }),
 //        ERRORS.INTERNAL.TEMPLATE_VALUE_CONTAINS_VARIABLE_TAG
@@ -328,7 +328,7 @@ describe("BuilderPluginError", () => {
 //      );
 //    });
 //
-//    it("Shouldn't contain the %% tag", () => {
+//    it("Shouldn't contain the %% tag", function() {
 //      expectBuilderError(
 //        () => applyErrorMessageTemplate("%asd%", { asd: "%%" }),
 //        ERRORS.INTERNAL.TEMPLATE_VALUE_CONTAINS_VARIABLE_TAG
@@ -336,9 +336,9 @@ describe("BuilderPluginError", () => {
 //    });
 //  });
 //
-//  describe("Replacements", () => {
-//    describe("String values", () => {
-//      it("Should replace variable tags for the values", () => {
+//  describe("Replacements", function() {
+//    describe("String values", function() {
+//      it("Should replace variable tags for the values", function() {
 //        assert.equal(
 //          applyErrorMessageTemplate("asd %asd% 123 %asd%", { asd: "r" }),
 //          "asd r 123 r"
@@ -362,22 +362,22 @@ describe("BuilderPluginError", () => {
 //      });
 //    });
 //
-//    describe("Non-string values", () => {
-//      it("Should replace undefined values for undefined", () => {
+//    describe("Non-string values", function() {
+//      it("Should replace undefined values for undefined", function() {
 //        assert.equal(
 //          applyErrorMessageTemplate("asd %asd% 123 %asd%", { asd: undefined }),
 //          "asd undefined 123 undefined"
 //        );
 //      });
 //
-//      it("Should replace null values for null", () => {
+//      it("Should replace null values for null", function() {
 //        assert.equal(
 //          applyErrorMessageTemplate("asd %asd% 123 %asd%", { asd: null }),
 //          "asd null 123 null"
 //        );
 //      });
 //
-//      it("Should use their toString methods", () => {
+//      it("Should use their toString methods", function() {
 //        const toR = { toString: () => "r" };
 //        const toB = { toString: () => "b" };
 //        const toEmpty = { toString: () => "" };
@@ -414,8 +414,8 @@ describe("BuilderPluginError", () => {
 //      });
 //    });
 //
-//    describe("%% sign", () => {
-//      it("Should be replaced with %", () => {
+//    describe("%% sign", function() {
+//      it("Should be replaced with %", function() {
 //        assert.equal(applyErrorMessageTemplate("asd%%asd", {}), "asd%asd");
 //      });
 //        assert.equal(
@@ -425,8 +425,8 @@ describe("BuilderPluginError", () => {
 //      });
 //    });
 //
-//    describe("Missing variable tag", () => {
-//      it("Should fail if a viable tag is missing and its value is not", () => {
+//    describe("Missing variable tag", function() {
+//      it("Should fail if a viable tag is missing and its value is not", function() {
 //        expectBuilderError(
 //          () => applyErrorMessageTemplate("", { asd: "123" }),
 //          ERRORS.INTERNAL.TEMPLATE_VARIABLE_TAG_MISSING
@@ -434,8 +434,8 @@ describe("BuilderPluginError", () => {
 //      });
 //    });
 //
-//    describe("Missing variable", () => {
-//      it("Should work, leaving the variable tag", () => {
+//    describe("Missing variable", function() {
+//      it("Should work, leaving the variable tag", function() {
 //        assert.equal(
 //          applyErrorMessageTemplate("%asd% %fgh%", { asd: "123" }),
 //          "123 %fgh%"

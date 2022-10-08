@@ -91,7 +91,7 @@ describe("Test for transferring asset using custom logic", function () {
 		}
 	}
 
-	it("should transfer 1000 Assets from Alice to Bob according to custom logic", () => {
+	it("should transfer 1000 Assets from Alice to Bob according to custom logic", function () {
 		/**
 		 * This test demonstrates how to transfer assets from account A to B using custom logic
 		 * based on a smart contract. Asset is actually transferred by the clawback address (an escrow
@@ -230,7 +230,7 @@ describe("Test for transferring asset using custom logic", function () {
 		assert.equal(afterBobAssets, prevBobAssets + 1000n); // Bob received 1000 GLD
 	});
 
-	it("should fail on set level if sender is not creator", () => {
+	it("should fail on set level if sender is not creator", function () {
 		// opt in to app
 		runtime.optInToApp(alice.address, applicationId, {}, {});
 		runtime.optInToApp(bob.address, applicationId, {}, {});
@@ -263,7 +263,7 @@ describe("Test for transferring asset using custom logic", function () {
 		}
 	});
 
-	it("should reject transaction if minimum level is not set correctly", () => {
+	it("should reject transaction if minimum level is not set correctly", function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...alice.account, name: "alice" },
 		}).assetIndex;

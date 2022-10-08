@@ -35,14 +35,14 @@ describe("Transfer Algo Transaction", function () {
 		alan = runtime.getAccount(alan.address);
 	}
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		alice = new AccountStore(minBalance * 10n);
 		bob = new AccountStore(minBalance * 10n);
 		alan = new AccountStore(minBalance * 10n);
 		runtime = new Runtime([alice, bob, alan]);
 	});
 
-	it("Transfer ALGO from alice to bob", () => {
+	it("Transfer ALGO from alice to bob", function () {
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 
@@ -64,7 +64,7 @@ describe("Transfer Algo Transaction", function () {
 		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
 	});
 
-	it("close alice acount to bob", () => {
+	it("close alice acount to bob", function () {
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 
@@ -87,7 +87,7 @@ describe("Transfer Algo Transaction", function () {
 		assert.equal(initialAliceBalance + initialBobBalance - BigInt(fee), bob.balance());
 	});
 
-	it("should ignore rekey when use with closeRemainderTo", () => {
+	it("should ignore rekey when use with closeRemainderTo", function () {
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 
@@ -113,7 +113,7 @@ describe("Transfer Algo Transaction", function () {
 		assert.equal(alice.getSpendAddress(), alice.address);
 	});
 
-	it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+	it("should throw error if closeRemainderTo is fromAccountAddr", function () {
 		// throw error because closeReaminderTo invalid.
 		expectRuntimeError(
 			() =>
@@ -156,11 +156,11 @@ describe("Transfer Algo Transaction", function () {
 			externalRuntimeAccount = runtime.getAccount(externalAccount.addr);
 		});
 
-		it("Balance of toAccountAddr should updated", () => {
+		it("Balance of toAccountAddr should updated", function () {
 			assert.equal(externalRuntimeAccount.amount, amount);
 		});
 
-		it("Should transfer algo to an external account", () => {
+		it("Should transfer algo to an external account", function () {
 			const transferAlgoTx: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -200,7 +200,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 		};
 	});
 
-	it("should execute the lsig and verify john(delegated signature)", () => {
+	it("should execute the lsig and verify john(delegated signature)", function () {
 		lsig.sign(john.account.sk);
 		runtime.executeTx([txParam]);
 
@@ -209,7 +209,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 		assert.equal(bobAcc.balance(), minBalance + 1000n);
 	});
 
-	it("should not verify signature because alice sent it", () => {
+	it("should not verify signature because alice sent it", function () {
 		const invalidParams: types.ExecParams = {
 			...txParam,
 			sign: types.SignType.LogicSignature,
@@ -224,7 +224,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 		);
 	});
 
-	it("should verify signature but reject logic", async () => {
+	it("should verify signature but reject logic", async function () {
 		const logicSig = runtime.loadLogic("reject.teal");
 		const txParams: types.ExecParams = {
 			...txParam,
@@ -281,7 +281,7 @@ describe("Rounds Test", function () {
 		bob = runtime.getAccount(bob.address);
 	}
 
-	it("should succeed if current round is between first and last valid", () => {
+	it("should succeed if current round is between first and last valid", function () {
 		txParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
 		runtime.setRoundAndTimestamp(20, 20);
 
@@ -293,7 +293,7 @@ describe("Rounds Test", function () {
 		assert.equal(bob.balance(), minBalance + 100n);
 	});
 
-	it("should fail if current round is not between first and last valid", () => {
+	it("should fail if current round is not between first and last valid", function () {
 		runtime.setRoundAndTimestamp(3, 20);
 
 		expectRuntimeError(
@@ -302,7 +302,7 @@ describe("Rounds Test", function () {
 		);
 	});
 
-	it("should succeeded by default (no round requirement is passed)", () => {
+	it("should succeeded by default (no round requirement is passed)", function () {
 		txParams.payFlags = { totalFee: 1000 };
 
 		runtime.executeTx([txParams]);
@@ -324,7 +324,7 @@ describe("Send duplicate transaction", function () {
 	let runtime: Runtime;
 	let paymentTxn: types.AlgoTransferParam;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[alice, bob] = runtime.defaultAccounts();
 		paymentTxn = {
@@ -339,7 +339,7 @@ describe("Send duplicate transaction", function () {
 		};
 	});
 
-	it("Should throw an error when sending duplicate tx in a group", () => {
+	it("Should throw an error when sending duplicate tx in a group", function () {
 		const groupTx = [paymentTxn, { ...paymentTxn }];
 
 		expectRuntimeError(
@@ -348,7 +348,7 @@ describe("Send duplicate transaction", function () {
 		);
 	});
 
-	it("Should not throw an error when add different note filed", () => {
+	it("Should not throw an error when add different note filed", function () {
 		const groupTx = [paymentTxn, { ...paymentTxn, payFlags: { note: "salt" } }];
 
 		assert.doesNotThrow(() => runtime.executeTx(groupTx));
@@ -365,7 +365,7 @@ describe("Algorand Standard Assets", function () {
 	let modFields: types.AssetModFields;
 	let assetTransferParam: types.AssetTransferParam;
 	let assetId: number;
-	this.beforeAll(() => {
+	this.beforeAll(function () {
 		runtime = new Runtime([john, bob, alice, elon]);
 		modFields = {
 			manager: bob.address,
@@ -384,7 +384,7 @@ describe("Algorand Standard Assets", function () {
 		};
 	});
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
 		}).assetIndex;
@@ -397,7 +397,7 @@ describe("Algorand Standard Assets", function () {
 		alice = runtime.getAccount(alice.address);
 	};
 
-	it("should create asset using asa.yaml file and raise account minimum balance", () => {
+	it("should create asset using asa.yaml file and raise account minimum balance", function () {
 		const initialMinBalance = john.minBalance;
 		assetId = runtime.deployASA("gold", {
 			creator: { ...john.account, name: "john" },
@@ -421,7 +421,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
 	});
 
-	it("should create asset without using asa.yaml file", () => {
+	it("should create asset without using asa.yaml file", function () {
 		const expected = {
 			name: "gold-1221",
 			asaDef: {
@@ -452,7 +452,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res.url, "url");
 	});
 
-	it("Should create asset with total = 2^64-1 (max value possible)", () => {
+	it("Should create asset with total = 2^64-1 (max value possible)", function () {
 		const maxUint64 = 2n ** 64n - 1n;
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.DeployASA,
@@ -478,7 +478,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res?.assetDef.total, maxUint64);
 	});
 
-	it("should create asset without using asa.yaml (execute transaction)", () => {
+	it("should create asset without using asa.yaml (execute transaction)", function () {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.DeployASA,
 			sign: types.SignType.SecretKey,
@@ -511,7 +511,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res?.assetDef.url, "url");
 	});
 
-	it("should opt-in to asset", () => {
+	it("should opt-in to asset", function () {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
 
@@ -526,7 +526,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(aliceAssetHolding?.amount, 0n);
 	});
 
-	it("should opt-in to asset using asset transfer transaction", () => {
+	it("should opt-in to asset using asset transfer transaction", function () {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
 		const prevAliceMinBal = alice.minBalance;
@@ -550,14 +550,14 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
 	});
 
-	it("should throw error on opt-in if asset does not exist", () => {
+	it("should throw error on opt-in if asset does not exist", function () {
 		expectRuntimeError(
 			() => runtime.optInToASA(1234, john.address, {}),
 			RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
 		);
 	});
 
-	it("should warn if account already is already opted-into asset", () => {
+	it("should warn if account already is already opted-into asset", function () {
 		// console is mocked in package.json mocha options
 		const stub = console.warn as sinon.SinonStub;
 		stub.reset();
@@ -570,7 +570,7 @@ describe("Algorand Standard Assets", function () {
 		assert(stub.calledWith(`${john.address} is already opted in to asset ${assetId}`));
 	});
 
-	it("should transfer asset between two accounts", () => {
+	it("should transfer asset between two accounts", function () {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
 		runtime.optInToASA(assetId, alice.address, {});
@@ -590,7 +590,7 @@ describe("Algorand Standard Assets", function () {
 		}
 	});
 
-	it("should throw error on transfer asset if asset is frozen and amount > 0", () => {
+	it("should throw error on transfer asset if asset is frozen and amount > 0", function () {
 		const freezeParam: types.FreezeAssetParam = {
 			type: types.TransactionType.FreezeAsset,
 			sign: types.SignType.SecretKey,
@@ -619,7 +619,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should close alice account for transfer asset if close remainder to is specified", () => {
+	it("should close alice account for transfer asset if close remainder to is specified", function () {
 		const initialAliceMinBalance = alice.minBalance;
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
@@ -662,7 +662,7 @@ describe("Algorand Standard Assets", function () {
 		}
 	});
 
-	it("should throw error if closeRemainderTo is fromAccountAddr", () => {
+	it("should throw error if closeRemainderTo is fromAccountAddr", function () {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
 		runtime.optInToASA(assetId, alice.address, {});
@@ -692,7 +692,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should throw error if trying to close asset holding of asset creator account", () => {
+	it("should throw error if trying to close asset holding of asset creator account", function () {
 		const res = runtime.getAssetDef(assetId);
 		assert.isDefined(res);
 		runtime.optInToASA(assetId, alice.address, {});
@@ -709,7 +709,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should throw error if asset is not found while modifying", () => {
+	it("should throw error if asset is not found while modifying", function () {
 		const modifyParam: types.ModifyAssetParam = {
 			type: types.TransactionType.ModifyAsset,
 			sign: types.SignType.SecretKey,
@@ -724,7 +724,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should modify asset", () => {
+	it("should modify asset", function () {
 		const modifyParam: types.ModifyAssetParam = {
 			type: types.TransactionType.ModifyAsset,
 			sign: types.SignType.SecretKey,
@@ -742,7 +742,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(res.freeze, john.address);
 	});
 
-	it("Blank field test, should not modify asset because field is set to blank", () => {
+	it("Blank field test, should not modify asset because field is set to blank", function () {
 		const assetId = runtime.deployASA("silver", {
 			creator: { ...john.account, name: "john" },
 		}).assetIndex;
@@ -768,7 +768,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should fail because only manager account can modify asset", () => {
+	it("should fail because only manager account can modify asset", function () {
 		const modifyParam: types.ModifyAssetParam = {
 			type: types.TransactionType.ModifyAsset,
 			sign: types.SignType.SecretKey,
@@ -783,7 +783,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should fail because only freeze account can freeze asset", () => {
+	it("should fail because only freeze account can freeze asset", function () {
 		const freezeParam: types.FreezeAssetParam = {
 			type: types.TransactionType.FreezeAsset,
 			sign: types.SignType.SecretKey,
@@ -797,7 +797,7 @@ describe("Algorand Standard Assets", function () {
 		expectRuntimeError(() => runtime.executeTx([freezeParam]), RUNTIME_ERRORS.ASA.FREEZE_ERROR);
 	});
 
-	it("should freeze asset", () => {
+	it("should freeze asset", function () {
 		const freezeParam: types.FreezeAssetParam = {
 			type: types.TransactionType.FreezeAsset,
 			sign: types.SignType.SecretKey,
@@ -813,7 +813,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(johnAssetHolding["is-frozen"], true);
 	});
 
-	it("should fail because only clawback account can revoke assets", () => {
+	it("should fail because only clawback account can revoke assets", function () {
 		const revokeParam: types.RevokeAssetParam = {
 			type: types.TransactionType.RevokeAsset,
 			sign: types.SignType.SecretKey,
@@ -830,7 +830,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should revoke assets", () => {
+	it("should revoke assets", function () {
 		const revokeParam: types.RevokeAssetParam = {
 			type: types.TransactionType.RevokeAsset,
 			sign: types.SignType.SecretKey,
@@ -861,7 +861,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(bobHolding.amount, 5n);
 	});
 
-	it("should fail because only clawback account can revoke assets", () => {
+	it("should fail because only clawback account can revoke assets", function () {
 		const revokeParam: types.RevokeAssetParam = {
 			type: types.TransactionType.RevokeAsset,
 			sign: types.SignType.SecretKey,
@@ -878,7 +878,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should throw error if trying to close asset holding by clawback", () => {
+	it("should throw error if trying to close asset holding by clawback", function () {
 		/* eslint sonarjs/no-identical-functions: "off" */
 		const closebyClawbackParam: types.RevokeAssetParam = {
 			type: types.TransactionType.RevokeAsset,
@@ -899,7 +899,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("should revoke if asset is frozen", () => {
+	it("should revoke if asset is frozen", function () {
 		const freezeParam: types.FreezeAssetParam = {
 			type: types.TransactionType.FreezeAsset,
 			sign: types.SignType.SecretKey,
@@ -938,7 +938,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(bobHolding.amount, 5n);
 	});
 
-	it("Should fail because only manager can destroy assets", () => {
+	it("Should fail because only manager can destroy assets", function () {
 		const destroyParam: types.DestroyAssetParam = {
 			type: types.TransactionType.DestroyAsset,
 			sign: types.SignType.SecretKey,
@@ -952,7 +952,7 @@ describe("Algorand Standard Assets", function () {
 		);
 	});
 
-	it("Should destroy asset", () => {
+	it("Should destroy asset", function () {
 		const initialCreatorMinBalance = john.minBalance;
 		const destroyParam: types.DestroyAssetParam = {
 			type: types.TransactionType.DestroyAsset,
@@ -970,7 +970,7 @@ describe("Algorand Standard Assets", function () {
 		assert.equal(john.minBalance, initialCreatorMinBalance - ASSET_CREATION_FEE);
 	});
 
-	it("Should not destroy asset if total assets are not in creator's account", () => {
+	it("Should not destroy asset if total assets are not in creator's account", function () {
 		const destroyParam: types.DestroyAssetParam = {
 			type: types.TransactionType.DestroyAsset,
 			sign: types.SignType.SecretKey,
@@ -999,7 +999,7 @@ describe("Stateful Smart Contracts", function () {
 	let approvalProgramFilename: string;
 	let clearProgramFilename: string;
 	let appDefinition: types.AppDefinitionFromFile;
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([john]);
 		approvalProgramFilename = "counter-approval.teal";
 		clearProgramFilename = "clear.teal";
@@ -1016,7 +1016,7 @@ describe("Stateful Smart Contracts", function () {
 		};
 	});
 
-	it("Should not create application if approval program is empty", () => {
+	it("Should not create application if approval program is empty", function () {
 		appDefinition.approvalProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
@@ -1025,7 +1025,7 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should not create application if clear program is empty", () => {
+	it("Should not create application if clear program is empty", function () {
 		appDefinition.clearProgramFilename = "empty-app.teal";
 
 		expectRuntimeError(
@@ -1034,14 +1034,14 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should create application", () => {
+	it("Should create application", function () {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		const app = runtime.getApp(appID);
 		assert.isDefined(app);
 	});
 
-	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", () => {
+	it("Should throw error when deploy application if approval teal version and clear state teal version not match ", function () {
 		appDefinition.clearProgramFilename = "clearv6.teal";
 		expectRuntimeError(
 			() => runtime.deployApp(john.account, appDefinition, {}),
@@ -1049,7 +1049,7 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should not update application if approval or clear program is empty", () => {
+	it("Should not update application if approval or clear program is empty", function () {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		expectRuntimeError(
@@ -1087,7 +1087,7 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should not update application if approval and clear program not match", () => {
+	it("Should not update application if approval and clear program not match", function () {
 		const appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 
 		clearProgramFilename = "clearv6.teal";
@@ -1109,7 +1109,7 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should throw and error when local schema entries exceeds the limit (AppDefinition)", () => {
+	it("Should throw and error when local schema entries exceeds the limit (AppDefinition)", function () {
 		const incorrectCreationFlags = {
 			globalBytes: 10,
 			globalInts: 10,
@@ -1133,7 +1133,7 @@ describe("Stateful Smart Contracts", function () {
 		);
 	});
 
-	it("Should throw and error when global schema entries exceeds the limit (AppDefinition)", () => {
+	it("Should throw and error when global schema entries exceeds the limit (AppDefinition)", function () {
 		const incorrectCreationFlags = {
 			globalBytes: 36,
 			globalInts: 32,
@@ -1170,12 +1170,12 @@ describe("Deafult Accounts", function () {
 		[alice, bob] = runtime.defaultAccounts();
 		charlie = runtime.getAccount(charlie.address);
 	}
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([charlie]);
 		[alice, bob] = runtime.defaultAccounts();
 	});
 
-	it("Should be properly initialized", () => {
+	it("Should be properly initialized", function () {
 		assert.exists(alice.address);
 		assert.equal(
 			alice.balance(),
@@ -1184,7 +1184,7 @@ describe("Deafult Accounts", function () {
 		);
 	});
 
-	it("Should update the state of the default accounts", () => {
+	it("Should update the state of the default accounts", function () {
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 
@@ -1207,7 +1207,7 @@ describe("Deafult Accounts", function () {
 		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
 	});
 
-	it("Should reset the state of the default accounts", () => {
+	it("Should reset the state of the default accounts", function () {
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
 
@@ -1230,7 +1230,7 @@ describe("Deafult Accounts", function () {
 		assert.equal(initialBobBalance, bob.balance());
 	});
 
-	it("Should not reset the state of the other accounts stored in runtime", () => {
+	it("Should not reset the state of the other accounts stored in runtime", function () {
 		const initialCharlieBalance = charlie.balance();
 		const algoTransferTxParam: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
@@ -1257,12 +1257,12 @@ describe("Algo transfer using sendSignedTransaction", function () {
 	const amount = 1e6;
 	const fee = 1000;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[alice, bob] = runtime.defaultAccounts();
 	});
 
-	it("Should send signedTransacion from one account to another", () => {
+	it("Should send signedTransacion from one account to another", function () {
 		//Create transaction
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
@@ -1282,7 +1282,7 @@ describe("Algo transfer using sendSignedTransaction", function () {
 		assert.equal(initialBobBalance + BigInt(amount), bob.balance()); //(got, expected)
 	});
 
-	it("Should close alice account and send all the balance to bob the account", () => {
+	it("Should close alice account and send all the balance to bob the account", function () {
 		// Create transaction
 		const initialAliceBalance = alice.balance();
 		const initialBobBalance = bob.balance();
@@ -1324,7 +1324,7 @@ describe.skip("Logic Signature Transaction in Runtime using sendSignedTransactio
 		lsig.sign(john.account.sk);
 	});
 
-	it("should execute the lsig and verify john(delegated signature)", () => {
+	it("should execute the lsig and verify john(delegated signature)", function () {
 		const initialJohnBalance = john.balance();
 		const initialBobBalance = bob.balance();
 		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
@@ -1345,7 +1345,7 @@ describe.skip("Logic Signature Transaction in Runtime using sendSignedTransactio
 		assert.equal(initialBobBalance + BigInt(amount), bob.balance());
 	});
 
-	it("should not verify signature because alice sent it", () => {
+	it("should not verify signature because alice sent it", function () {
 		const suggestedParams = mockSuggestedParams({ totalFee: fee }, runtime.getRound());
 		const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
 			from: john.address,

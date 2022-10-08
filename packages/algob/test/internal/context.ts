@@ -8,7 +8,7 @@ import { expectBuilderError } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 
 describe("Builder context", function () {
-	describe("no context", () => {
+	describe("no context", function () {
 		it("context is not defined", async function () {
 			assert.isFalse(BuilderContext.isCreated());
 		});
