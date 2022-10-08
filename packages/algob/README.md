@@ -48,7 +48,7 @@ Also, it my be helpful to link the binary:
 
     yarn link
 
-You can run another alogb cli on dev project follow pattern `yarn algob:dev:cmd <sub command>`. e.g:
+You can run another alogb cli on dev project by following pattern `yarn algob:dev:cmd <sub command>`. e.g:
 
     yarn algob:dev:cmd test
     yarn algob:dev:cmd deploy
