@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4edf66d32309e9495613320767d32d167b39a96a18068bf68f34bc142fb1aa31"
+            "sha256": "bea530230c097c60369137254ac78b5823a7482caf44d3a83f456023add7a42e"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.10"
+            "python_version": "3.10."
         },
         "sources": [
             {
@@ -340,11 +340,11 @@
         },
         "pyteal": {
             "hashes": [
-                "sha256:0546915cb1d74e710a76d81f583251847a7163a0c4ee6b70a46ad32e837ebe3e",
-                "sha256:274b149859867e5cff40e267adb264c04184ad949794884903324536ffaafa97"
+                "sha256:7304a2ad5104fce6d6b7ab6495f62a8d9d95a7d19a7cd08f76c1f5e2f27e7112",
+                "sha256:d6aa6056bce0e7466c4cd478c882cc8a096e1baeafe58657ae68ddc84dd7bac6"
             ],
             "index": "pypi",
-            "version": "==0.13.0"
+            "version": "==0.15.0"
         },
         "pyteal-utils": {
             "editable": true,
@@ -427,6 +427,14 @@
             ],
             "index": "pypi",
             "version": "==6.0"
+        },
+        "semantic-version": {
+            "hashes": [
+                "sha256:bdabb6d336998cbb378d4b9db3a4b56a1e3235701dc05ea2690d9a997ed5041c",
+                "sha256:de78a3b8e0feda74cabc54aab2da702113e33ac9d9eb9d2389bcf1f58b7d9177"
+            ],
+            "markers": "python_version >= '2.7'",
+            "version": "==2.10.0"
         },
         "tealer": {
             "editable": true,

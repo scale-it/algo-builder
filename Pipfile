@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyteal = "~=0.13.0"
+pyteal = "~=0.15.0"
 pyyaml = "*"
 pyteal_utils ={editable = true, ref = "main", git = "https://github.com/algorand/pyteal-utils.git"}
 tealer = {editable = true, ref = "dev", git = "https://github.com/crytic/tealer.git"}
@@ -12,4 +12,4 @@ tealer = {editable = true, ref = "dev", git = "https://github.com/crytic/tealer.
 [dev-packages]
 
 [requires]
-python_version = "3.10"
+python_version = "3.10."
