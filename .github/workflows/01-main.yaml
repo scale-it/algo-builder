@@ -45,7 +45,7 @@ jobs:
       - name: create pipfile.lock
         run: pipenv lock
       - name: Install python dependencies
-        run: pipenv sync
+        run: pipenv install -r requirements.txt
 
       - name: Execute all tests
         run: pipenv run yarn test
