@@ -76,15 +76,19 @@ describe("Interpreter", function () {
 			addr: foreignAppAccAddr,
 			sk: new Uint8Array(0),
 		});
-		
+
 		//setup foreign application to optin application
 		foreignApplicationAccount.appsTotalSchema = accInfo[0].appsTotalSchema;
 		foreignApplicationAccount.appsLocalState = accInfo[0].appsLocalState;
 
-
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, 
-			applicationAccount, foreignApplicationAccount]);
+		interpreter.runtime = new Runtime([
+			elonAcc,
+			johnAcc,
+			bobAccount,
+			applicationAccount,
+			foreignApplicationAccount,
+		]);
 		interpreter.tealVersion = tealVersion;
 		resetInterpreterState();
 	};
@@ -95,12 +99,18 @@ describe("Interpreter", function () {
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
-	const executeTEALWithTxArrayChange = (tealCode: string, onComplete = TxOnComplete.NoOp): void => {
+	const executeTEALWithTxArrayChange = (
+		tealCode: string,
+		onComplete = TxOnComplete.NoOp
+	): void => {
 		// reset interpreter
 		resetInterpreterState();
 		interpreter.runtime.ctx.tx.apan = Number(onComplete);
-		interpreter.runtime.ctx.tx.apat?.splice(0, 1, 
-			Buffer.from(decodeAddress(foreignAppAccAddr).publicKey));
+		interpreter.runtime.ctx.tx.apat?.splice(
+			0,
+			1,
+			Buffer.from(decodeAddress(foreignAppAccAddr).publicKey)
+		);
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
@@ -111,7 +121,7 @@ describe("Interpreter", function () {
 	describe("Teal cost", () => {
 		useFixture("teal-files");
 		beforeEach(() => {
-			resetInterpreterState(); 
+			resetInterpreterState();
 			interpreter.cost = 0;
 			interpreter.tealVersion = 1;
 		});
@@ -171,12 +181,12 @@ describe("Interpreter", function () {
 				byte "ABC"
 				app_local_put
 				`;
-				 expectRuntimeError(
+				expectRuntimeError(
 					() => executeTEAL(prog),
 					RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
 				);
-			})
-		})
+			});
+		});
 
 		describe("Foreign application account can be accessed by opcode that modify local storage in specific case", () => {
 			this.beforeEach(() => {
@@ -192,9 +202,9 @@ describe("Interpreter", function () {
 				app_local_put
 				int 1
 				`;
-				
-				 assert.doesNotThrow(() => executeTEALWithTxArrayChange(prog));
-			})
-		})
+
+				assert.doesNotThrow(() => executeTEALWithTxArrayChange(prog));
+			});
+		});
 	});
 });

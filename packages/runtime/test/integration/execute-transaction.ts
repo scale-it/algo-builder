@@ -1,14 +1,15 @@
 import { types } from "@algo-builder/web";
-import { assert } from "chai";
 import algosdk from "algosdk";
+import { assert } from "chai";
+
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
+import { mockSuggestedParams } from "../../src/mock/tx";
+import { BaseTxReceipt } from "../../src/types";
+import * as testdata from "../helpers/data";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
-import * as testdata from "../helpers/data";
-import { BaseTxReceipt } from "../../src/types";
-import { mockSuggestedParams } from "../../src/mock/tx";
 
 describe("Algorand Smart Contracts - Execute transaction", function () {
 	useFixture("stateful");
@@ -66,14 +67,16 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 	}
 
 	it("should fund account (Transfer txn only), throught execute transaction", function () {
-		const txn: types.ExecParams[] = [{
-			type: types.TransactionType.TransferAlgo,
-			sign: types.SignType.SecretKey,
-			fromAccount: john.account,
-			toAccountAddr: alice.address,
-			amountMicroAlgos: 100,
-			payFlags: { totalFee: 1000 },
-		}];
+		const txn: types.ExecParams[] = [
+			{
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				toAccountAddr: alice.address,
+				amountMicroAlgos: 100,
+				payFlags: { totalFee: 1000 },
+			},
+		];
 
 		runtime.executeTx(txn);
 
@@ -140,7 +143,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
 	it("Should opt-in to asset, through execute transaction", () => {
 		setupAsset();
-		let tx: types.ExecParams[] = [
+		const tx: types.ExecParams[] = [
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
@@ -248,15 +251,14 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 			runtime.executeTx(tx);
 			syncAccounts();
 			// verify
-			assert.exists(alice.getAppFromLocal(appInfo?.appID))
+			assert.exists(alice.getAppFromLocal(appInfo?.appID));
 		}
 	});
 
 	it("Should opt-in ASA and transfer asset, through execute transaction", () => {
 		setupAsset();
 
-		let tx: types.ExecParams[];
-		tx = [
+		const tx: types.ExecParams[] = [
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
@@ -303,7 +305,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
 	it("Should modify asset, through execute transaction", () => {
 		setupAsset();
-		let modFields: types.AssetModFields = {
+		const modFields: types.AssetModFields = {
 			manager: elonMusk.address,
 			reserve: elonMusk.address,
 			clawback: alice.address,
@@ -488,11 +490,10 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 		});
 		// Sign the transaction
 		const signedTransaction = algosdk.decodeSignedTransaction(txn.signTxn(john.account.sk));
-		runtime.executeTx([signedTransaction])
+		runtime.executeTx([signedTransaction]);
 
 		syncAccounts();
 		assert.equal(john.balance(), initialBalance - BigInt(amount) - BigInt(fee));
 		assert.equal(alice.balance(), initialBalance + BigInt(amount));
 	});
-
 });

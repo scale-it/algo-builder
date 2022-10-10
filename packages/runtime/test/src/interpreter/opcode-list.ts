@@ -7314,10 +7314,11 @@ describe("Teal Opcodes", function () {
 
 	describe("json_ref", () => {
 		const stack = new Stack<StackElem>();
-		const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10}}, \"key5\": 18446744073709551615 }";
+		const jsonByte =
+			'{"key0": 0,"key1": "algo","key2":{"key3": "teal", "key4": {"key40": 10}}, "key5": 18446744073709551615 }';
 
 		it("Should return correct JSONUint64", function () {
-			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes('{"maxUint64": 18446744073709551615}'));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONUint64"], 1);
 			op.execute(stack);
@@ -7327,7 +7328,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw when get wrong JSON type(expect byte but got uint64)", function () {
-			stack.push(parsing.stringToBytes("{\"maxUint64\": 18446744073709551615}"));
+			stack.push(parsing.stringToBytes('{"maxUint64": 18446744073709551615}'));
 			stack.push(parsing.stringToBytes("maxUint64"));
 			const op = new Json_ref(["JSONString"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_TYPE);
@@ -7354,12 +7355,12 @@ describe("Teal Opcodes", function () {
 			op2.execute(stack);
 
 			const top = stack.pop();
-			const expected = parsing.stringToBytes("{\"key40\":10}");
+			const expected = parsing.stringToBytes('{"key40":10}');
 			assert.deepEqual(top, expected);
 		});
 
 		it("Should throw error when parsing invalid JSON object(missing comma in JSON object)", function () {
-			const jsonByte = "{\"key0\": 0 \"key1\": 2}";
+			const jsonByte = '{"key0": 0 "key1": 2}';
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONObject"], 1);
@@ -7367,11 +7368,12 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw error when parsing invalid JSON object(duplicate key is not allowed in JSON object)", function () {
-			const jsonByte = "{\"key0\": 0,\"key1\": \"algo\",\"key2\":{\"key3\": \"teal\", \"key4\": {\"key40\": 10, \"key40\": \"should fail!\"}}}";
+			const jsonByte =
+				'{"key0": 0,"key1": "algo","key2":{"key3": "teal", "key4": {"key40": 10, "key40": "should fail!"}}}';
 			stack.push(parsing.stringToBytes(jsonByte));
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONObject"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
-		});		
+		});
 	});
 });

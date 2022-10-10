@@ -143,7 +143,7 @@ export class Interpreter {
 		accountPk: Uint8Array,
 		line: number,
 		create: boolean,
-		immutable: boolean,
+		immutable: boolean
 	): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
 		const foreignAppIdArr = this.runtime.ctx.tx.apfa;
@@ -175,9 +175,11 @@ export class Interpreter {
 			// since tealv5, currentApplicationAddress is also allowed (directly)
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey) ||
 			// since tealv7, foreign application account is allowed
-			(this.tealVersion >= 7 && immutable && foreignAppIdArr?.find((foreignAppID) => 
-				compareArray(accountPk, 
-					decodeAddress(getApplicationAddress(foreignAppID)).publicKey)) !== undefined)
+			(this.tealVersion >= 7 &&
+				immutable &&
+				foreignAppIdArr?.find((foreignAppID) =>
+					compareArray(accountPk, decodeAddress(getApplicationAddress(foreignAppID)).publicKey)
+				) !== undefined)
 		) {
 			const address = encodeAddress(pkBuffer);
 			const account = create
@@ -204,7 +206,12 @@ export class Interpreter {
 	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * NOTE: index 0 represents txn sender account
 	 */
-	getAccount(accountRef: StackElem, line: number, create = false, immutable = true): AccountStoreI {
+	getAccount(
+		accountRef: StackElem,
+		line: number,
+		create = false,
+		immutable = true
+	): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
 		if (typeof accountRef === "bigint") {
