@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pyteal = "~=0.13.0"
 pyyaml = "*"
+poetry = "*"
 pyteal_utils ={git = "https://github.com/algorand/pyteal-utils.git"}
 tealer = {git = "https://github.com/crytic/tealer.git"}
 
