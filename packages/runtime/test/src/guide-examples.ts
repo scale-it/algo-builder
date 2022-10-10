@@ -91,7 +91,7 @@ describe("Guide examples", function () {
 		const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);
 		// submit the transaction
 		const confirmedTxn = runtime.executeTx([signedTxn]);
-		[alice, elon] = runtime.defaultAccounts();
+		[alice, bob, charlie, elon] = runtime.defaultAccounts();
 		//assert the balances are correct
 		assert.equal(alice.balance(), defaultBalance - 2n * BigInt(fee) - BigInt(amount));
 		assert.equal(elon.balance(), defaultBalance + BigInt(amount));
