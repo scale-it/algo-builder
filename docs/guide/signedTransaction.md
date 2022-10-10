@@ -19,12 +19,11 @@ const [alice, bob] = runtime.defaultAccounts();
 const suggestedParams = mockSuggestedParams({ totalFee: 1000 }, runtime.getRound());
 // create transaction using algosdk
 const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-            from: alice.address, 
-            to: bob.address, 
-            amount: 5e6, //5 algo 
-            note: undefined,
-            suggestedParams: suggestedParams,
-        });
+        from: alice.address, 
+        to: bob.address, 
+        amount: 5e6, //5 algo 
+        note: undefined,
+        suggestedParams: suggestedParams});
 // sign it and decode it to signedTransaction object
 const signedTransacion = algosdk.decodeSignedTransaction(transaction.signTxn(alice.account.sk));
 // submit the transaction
@@ -45,16 +44,15 @@ This example shows how to create a multisignature address using `algosdk`, rekey
 // create runtime
 const runtime = new Runtime([]);
 // get two funded accounts
-const [alice, bob, charlie, elon] = runtime.defaultAccounts();
+let [alice, bob, charlie, elon] = runtime.defaultAccounts();
 // mock suggested params
 const suggestedParams = mockSuggestedParams({ totalFee: 1000 }, runtime.getRound());
 // create multisignature parameters
 const addrs = [bob.address, charlie.address];
- 		multiSigParams = {
- 			version: 1,
- 			threshold: 2,
- 			addrs: addrs,
- 		};
+const multiSigParams = {
+    version: 1,
+    threshold: 2,
+    addrs: addrs};
 // create multisignature address
 const multSigAddr = algosdk.multisigAddress(multiSigParams);
 // rekey alice to multisignature account
@@ -72,13 +70,12 @@ runtime.executeTx([txParam]);
 [alice, bob, charlie, elon] = runtime.defaultAccounts();
 // create transaction using algosdk
 const txn = algosdk.makePaymentTxnWithSuggestedParams(
- 				alice.account.addr, // from
- 				elon.account.addr, // to
- 				5e6, // 5 algo
- 				undefined,
- 				undefined,
- 				suggestedParams
- 			);
+    alice.account.addr, // from
+    elon.account.addr, // to
+    5e6, // 5 algo
+    undefined,
+    undefined,
+    suggestedParams);
 // Sign with first account
 const rawSignedTxn = algosdk.signMultisigTransaction(
     txn,
