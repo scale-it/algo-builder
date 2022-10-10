@@ -33,6 +33,7 @@ jobs:
           cache: "pipenv"
       - name: Install pipenv
         run: python -m pip install pipenv
+      - run: pipenv install -e git+https://github.com/algorand/pyteal-utils.git@c4976887ddd959d285894cf7d3e0feddef3821ba#egg=pyteal-utils
       - run: pipenv sync
 
       - name: Install Algorand
