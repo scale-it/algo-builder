@@ -552,7 +552,7 @@ class DeployerBasicMode {
 	): SignedTransaction[] {
 		const signedTxns: SignedTransaction[] = [];
 		const txns: Transaction[] = this.makeTx(execParams, txParams);
-		txns.forEach(async (txn) => signedTxns.push(this.signTx(txn, signer)));
+		txns.forEach((txn) => signedTxns.push(this.signTx(txn, signer)));
 		return signedTxns;
 	}
 

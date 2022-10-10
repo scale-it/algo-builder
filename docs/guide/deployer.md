@@ -308,7 +308,7 @@ const signature: wtypes.Sign = {
   sign: SignType.SecretKey,
   fromAccount: alice,
 };
-const txnParams = mockSuggestedParam;
+const txnParams = await getSuggestedParams(deployer.algodClient);
 const signedTx = await deployer.makeAndSignTx([execParams], txnParams, signature);
 //second parameter below coresponds to number of rounds
 //the method will wait for the response (10)

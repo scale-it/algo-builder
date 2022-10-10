@@ -1,9 +1,7 @@
-import algosdk, { Account, SignedTransaction, Transaction } from "algosdk";
+import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
-import { exec } from "child_process";
 
-import { getSuggestedParams, types, WebMode } from "../../../src";
-import { ExecParams } from "../../../src/types";
+import { types, WebMode } from "../../../src";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
 
 describe("Webmode - Algosigner test cases ", function () {
@@ -11,13 +9,13 @@ describe("Webmode - Algosigner test cases ", function () {
 	let sender: Account;
 	let receiver: Account;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		sender = algosdk.generateAccount();
 		receiver = algosdk.generateAccount();
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
 	});
 
-	it("Should executeTx without throwing an error", async () => {
+	it("Should executeTx without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -31,7 +29,7 @@ describe("Webmode - Algosigner test cases ", function () {
 		});
 	});
 	describe("Helper functions", () => {
-		it("Should return a transaction object based on provided execParams", async () => {
+		it("Should return a transaction object based on provided execParams", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -48,7 +46,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			assert.deepEqual(transactions[0].amount, 10000n);
 		});
 
-		it("Should sign a transaction and return a SignedTransaction object", async () => {
+		it("Should sign a transaction and return a SignedTransaction object", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -64,7 +62,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			});
 		});
 
-		it("Should return a SignedTransaction object based on ExecParams", async () => {
+		it("Should return a SignedTransaction object based on ExecParams", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -79,7 +77,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			});
 		});
 
-		it("Should send a signed transaction and wait specified rounds for confirmation", async () => {
+		it("Should send a signed transaction and wait specified rounds for confirmation", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,

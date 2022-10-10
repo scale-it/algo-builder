@@ -1,7 +1,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, getSuggestedParams, types as wtypes } from "@algo-builder/web";
 import { AlgoTransferParam, SignType, TransactionType } from "@algo-builder/web/build/types";
-import algosdk, { generateAccount, LogicSigAccount, Transaction, Account } from "algosdk";
+import algosdk, { Account, generateAccount, LogicSigAccount, Transaction } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -678,20 +678,20 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(res.assetDef, asaDef);
 	});
 });
-describe("Helper functions", () => {
+describe("Helper functions", function () {
 	const env = mkEnv("network1");
 	const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 	let deployer: DeployerDeployMode;
 	let alice: algosdk.Account;
 	let bob: algosdk.Account;
 
-	beforeEach(() => {
+	beforeEach(function () {
 		deployer = new DeployerDeployMode(deployerCfg);
 		alice = generateAccount();
 		bob = generateAccount();
 	});
 
-	it("Should return a transaction object based on provided execParams", () => {
+	it("Should return a transaction object based on provided execParams", function () {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -708,7 +708,7 @@ describe("Helper functions", () => {
 		assert.deepEqual(transactions[0].amount, 10000n);
 	});
 
-	it("Should sign a transaction and return a SignedTransaction object", () => {
+	it("Should sign a transaction and return a SignedTransaction object", function () {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -723,12 +723,12 @@ describe("Helper functions", () => {
 		};
 		const txnParams = mockSuggestedParam;
 		const transactions: Transaction[] = deployer.makeTx([execParams], txnParams);
-		assert.doesNotThrow(async () => {
-			await deployer.signTx(transactions[0], signature);
+		assert.doesNotThrow(() => {
+			deployer.signTx(transactions[0], signature);
 		});
 	});
 
-	it("Should return a SignedTransaction object based on ExecParams", () => {
+	it("Should return a SignedTransaction object based on ExecParams", function () {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -742,12 +742,12 @@ describe("Helper functions", () => {
 			fromAccount: alice,
 		};
 		const txnParams = mockSuggestedParam;
-		assert.doesNotThrow(async () => {
-			await deployer.makeAndSignTx([execParams], txnParams, signature);
+		assert.doesNotThrow(() => {
+			deployer.makeAndSignTx([execParams], txnParams, signature);
 		});
 	});
 
-	it("Should send a signed transaction and wait specified rounds for confirmation", async () => {
+	it("Should send a signed transaction and wait specified rounds for confirmation", function () {
 		const execParams: AlgoTransferParam = {
 			type: TransactionType.TransferAlgo,
 			sign: SignType.SecretKey,
@@ -761,7 +761,7 @@ describe("Helper functions", () => {
 			fromAccount: alice,
 		};
 		const txnParams = mockSuggestedParam;
-		const signedTx = await deployer.makeAndSignTx([execParams], txnParams, signature);
+		const signedTx = deployer.makeAndSignTx([execParams], txnParams, signature);
 		assert.doesNotThrow(async () => {
 			await deployer.sendTxAndWait(signedTx, 10);
 		});

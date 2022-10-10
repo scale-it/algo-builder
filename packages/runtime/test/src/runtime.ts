@@ -1364,7 +1364,7 @@ describe.skip("Logic Signature Transaction in Runtime using sendSignedTransactio
 		);
 	});
 });
-describe("Helper functions", () => {
+describe("Helper functions", function () {
 	let alice: AccountStoreI;
 	let bob: AccountStoreI;
 	let runtime: Runtime;
@@ -1373,12 +1373,12 @@ describe("Helper functions", () => {
 		[alice, bob] = runtime.defaultAccounts();
 	}
 
-	beforeEach(() => {
+	beforeEach(function () {
 		runtime = new Runtime([]);
 		syncAccounts();
 	});
 
-	it("Should return a transaction object based on provided execParams", () => {
+	it("Should return a transaction object based on provided execParams", function () {
 		const execParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -1395,7 +1395,7 @@ describe("Helper functions", () => {
 		assert.deepEqual(transactions[0].amount, 10000n);
 	});
 
-	it("Should sign a transaction and return a SignedTransaction object", () => {
+	it("Should sign a transaction and return a SignedTransaction object", function () {
 		const execParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -1411,7 +1411,7 @@ describe("Helper functions", () => {
 		});
 	});
 
-	it("Should return a SignedTransaction object based on ExecParams", () => {
+	it("Should return a SignedTransaction object based on ExecParams", function () {
 		const execParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -1426,7 +1426,7 @@ describe("Helper functions", () => {
 		});
 	});
 
-	it("Should send a signed transaction and wait specified rounds for confirmation", () => {
+	it("Should send a signed transaction and wait specified rounds for confirmation", function () {
 		const execParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
