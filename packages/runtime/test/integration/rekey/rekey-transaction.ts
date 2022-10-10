@@ -240,7 +240,7 @@ describe("Re-keying transactions", function () {
 		assert.equal(from.getSpendAddress(), from.address);
 	}
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		// accounts
 		master = new AccountStore(baseBalance);
 		alice = new AccountStore(baseBalance);
@@ -269,7 +269,7 @@ describe("Re-keying transactions", function () {
 		syncAccounts();
 	});
 
-	it("Validate account state before apply rekey transaciton", () => {
+	it("Validate account state before apply rekey transaciton", function () {
 		assert.equal(alice.getSpendAddress(), alice.address);
 		assert.equal(bob.getSpendAddress(), bob.address);
 		assert.equal(lsigAccount.getSpendAddress(), lsigAccount.address);
@@ -277,7 +277,7 @@ describe("Re-keying transactions", function () {
 	});
 
 	describe("Account to account", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			rekeyFromAccount(runtime, alice, alice, bob.address);
 		});
 
@@ -302,40 +302,40 @@ describe("Re-keying transactions", function () {
 			);
 		});
 
-		it("Can rekey account again", () => {
+		it("Can rekey account again", function () {
 			rekeyFromAccount(runtime, bob, alice, lsigAccount.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), lsigAccount.address);
 		});
 
-		it("Can Rekey again back to orginal account", () => {
+		it("Can Rekey again back to orginal account", function () {
 			rekeyFromAccount(runtime, bob, alice, alice.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), alice.address);
 		});
 
-		it("close account should remove spend/auth address", () => {
+		it("close account should remove spend/auth address", function () {
 			// close account alice to bob
 			verifyCloseByAccount(runtime, bob, alice, bob);
 		});
 	});
 
 	describe("Account to Lsig", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			// create rekey transaction
 			rekeyFromAccount(runtime, alice, alice, lsigAccount.address);
 		});
 
-		it("spend address of alice account should be lsig address", () => {
+		it("spend address of alice account should be lsig address", function () {
 			assert.isNotNull(alice.account.spend);
 			assert.equal(alice.getSpendAddress(), lsigAccount.address);
 		});
 
-		it("Transfer ALGO by valid spend account", () => {
+		it("Transfer ALGO by valid spend account", function () {
 			verifyTransferAlgoAuthByLsig(runtime, lsig, alice, bob, DEFAULT_AMOUNT);
 		});
 
-		it("Should failed because cloneLsig is invalid spend address of alice account", () => {
+		it("Should failed because cloneLsig is invalid spend address of alice account", function () {
 			expectRuntimeError(
 				() =>
 					mkTxAlgoTransferFromLsig(runtime, cloneLsig, alice, bob, DEFAULT_AMOUNT, {
@@ -346,7 +346,7 @@ describe("Re-keying transactions", function () {
 			);
 		});
 
-		it("Should failed: when use another account", () => {
+		it("Should failed: when use another account", function () {
 			expectRuntimeError(
 				() =>
 					mkTxAlgoTransferFromAccount(runtime, john, alice, bob, DEFAULT_AMOUNT, {
@@ -357,26 +357,26 @@ describe("Re-keying transactions", function () {
 			);
 		});
 
-		it("close account should remove spend/auth address", () => {
+		it("close account should remove spend/auth address", function () {
 			verifyCloseByLsig(runtime, lsig, alice, bob);
 		});
 	});
 
 	describe("Lsig to Lsig", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			rekeyFromLsig(runtime, lsig, lsigAccount, cloneLsigAccount);
 		});
 
-		it("Spend address of lsig should be cloneLsig address", () => {
+		it("Spend address of lsig should be cloneLsig address", function () {
 			assert.isNotNull(lsigAccount.account.spend);
 			assert.equal(lsigAccount.getSpendAddress(), cloneLsigAccount.address);
 		});
 
-		it("Transfer ALGO by valid spend account", () => {
+		it("Transfer ALGO by valid spend account", function () {
 			verifyTransferAlgoAuthByLsig(runtime, cloneLsig, lsigAccount, alice, DEFAULT_AMOUNT);
 		});
 
-		it("Should failed if signer is invalid spend account", () => {
+		it("Should failed if signer is invalid spend account", function () {
 			expectRuntimeError(
 				() =>
 					mkTxAlgoTransferFromLsig(runtime, lsig, lsigAccount, alice, DEFAULT_AMOUNT, {
@@ -387,27 +387,27 @@ describe("Re-keying transactions", function () {
 			);
 		});
 
-		it("close account should remove spend/auth address", () => {
+		it("close account should remove spend/auth address", function () {
 			verifyCloseByLsig(runtime, cloneLsig, lsigAccount, alice);
 		});
 	});
 
 	describe("Lsig to account", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			// create rekey transaction
 			rekeyFromLsig(runtime, lsig, lsigAccount, bob);
 		});
 
-		it("Spend address of lsig should change to bob", () => {
+		it("Spend address of lsig should change to bob", function () {
 			assert.isNotNull(lsigAccount.account.spend);
 			assert.equal(lsigAccount.getSpendAddress(), bob.address);
 		});
 
-		it("Transfer ALGO by spend account", () => {
+		it("Transfer ALGO by spend account", function () {
 			verifyTransferAlgoAuthByAccount(runtime, bob, lsigAccount, alice, DEFAULT_AMOUNT);
 		});
 
-		it("Should failed if alice is invalid spend address of lsig address", () => {
+		it("Should failed if alice is invalid spend address of lsig address", function () {
 			expectRuntimeError(
 				() =>
 					mkTxAlgoTransferFromAccount(runtime, alice, lsigAccount, alice, DEFAULT_AMOUNT, {
@@ -420,13 +420,13 @@ describe("Re-keying transactions", function () {
 			assert.equal(lsigAccount.getSpendAddress(), bob.address);
 		});
 
-		it("close account should remove auth/spend address", () => {
+		it("close account should remove auth/spend address", function () {
 			verifyCloseByAccount(runtime, bob, lsigAccount, alice);
 		});
 	});
 
 	describe("Rekey by another Tx type", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			const ASAReceipt = runtime.deployASADef(
 				"gold",
 				{
@@ -455,22 +455,22 @@ describe("Re-keying transactions", function () {
 			syncAccounts();
 		});
 
-		it("Check spend address", () => {
+		it("Check spend address", function () {
 			assert.equal(alice.getSpendAddress(), bob.address);
 		});
 	});
-	describe.only("Account to MultiSig", () => {
-		this.beforeEach(() => {
+	describe("Account to MultiSig", function () {
+		this.beforeEach(function () {
 			rekeyFromAccount(runtime, alice, alice, multisigAddr);
 			syncAccounts();
 		});
 
-		it("Spend address of alice account should change to multisignature address", () => {
+		it("Spend address of alice account should change to multisignature address", function () {
 			assert.isNotNull(alice.account.spend);
 			assert.equal(alice.getSpendAddress(), multisigAddr);
 		});
 
-		it("Should transfer ALGO if correct multisig provided", () => {
+		it("Should transfer ALGO if correct multisig provided", function () {
 			const alicePreTxnBalance = alice.balance();
 			const bobPreTxnBalance = bob.balance();
 			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
@@ -500,7 +500,7 @@ describe("Re-keying transactions", function () {
 			assert.deepEqual(alice.balance(), alicePreTxnBalance - 10n - BigInt(FEE));
 			assert.deepEqual(bob.balance(), bobPreTxnBalance + 10n);
 		});
-		it("Should throw an error when threshold not met", () => {
+		it("Should throw an error when threshold not met", function () {
 			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
 			const txn = algosdk.makePaymentTxnWithSuggestedParams(
 				alice.account.addr,

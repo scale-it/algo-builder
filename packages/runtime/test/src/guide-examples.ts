@@ -6,7 +6,7 @@ import { Runtime } from "../../src";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { AccountStoreI } from "../../src/types";
 
-describe.only("Guide examples", function () {
+describe("Guide examples", function () {
 	let runtime: Runtime;
 	let alice: AccountStoreI;
 	let bob: AccountStoreI;
@@ -42,7 +42,7 @@ describe.only("Guide examples", function () {
 		assert.equal(alice.balance(), defaultBalance - BigInt(fee) - BigInt(amount));
 		assert.equal(bob.balance(), defaultBalance + BigInt(amount));
 	});
-	
+
 	it("Should send 5 algos from account rekeyed to multisig", function () {
 		// create multisignature parameters
 		const addrs = [bob.address, charlie.address];
@@ -61,7 +61,7 @@ describe.only("Guide examples", function () {
 			fromAccountAddr: alice.address,
 			toAccountAddr: alice.address,
 			amountMicroAlgos: 0,
-			payFlags: { totalFee: 1000, rekeyTo: multSigAddr },
+			payFlags: { totalFee: fee, rekeyTo: multSigAddr },
 		};
 		runtime.executeTx([txParam]);
 		// sync accounts
@@ -93,7 +93,7 @@ describe.only("Guide examples", function () {
 		const confirmedTxn = runtime.executeTx([signedTxn]);
 		[alice, elon] = runtime.defaultAccounts();
 		//assert the balances are correct
-		assert.equal(alice.balance(), defaultBalance - BigInt(fee) - BigInt(amount));
+		assert.equal(alice.balance(), defaultBalance - 2n * BigInt(fee) - BigInt(amount));
 		assert.equal(elon.balance(), defaultBalance + BigInt(amount));
 	});
 });
