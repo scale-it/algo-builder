@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bea530230c097c60369137254ac78b5823a7482caf44d3a83f456023add7a42e"
+            "sha256": "ef97b066755c197cb5628d7ca9a68f732e54866e33145b0dde4aafaf2c96eda7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -439,7 +439,7 @@
         "tealer": {
             "editable": true,
             "git": "https://github.com/crytic/tealer.git",
-            "ref": "1e68d1ed61e18780ac7eebc1828cf30deba0c932"
+            "ref": "8a7fe218a4e07b5c73f08f44516acbc0d46819ca"
         },
         "tomli": {
             "hashes": [
