@@ -42,8 +42,6 @@ jobs:
           cache: "pipenv"
       - name: Install pipenv
         run: python -m pip install pipenv
-      - name: Install pipenv
-        run: pipenv install
       - name: create pipfile.lock
         run: pipenv lock
       - name: Install python dependencies
