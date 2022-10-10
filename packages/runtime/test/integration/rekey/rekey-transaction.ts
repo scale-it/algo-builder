@@ -1,10 +1,17 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { types } from "@algo-builder/web";
-import { LogicSigAccount } from "algosdk";
+import { AccountAddress } from "@algo-builder/web/build/types";
+import algosdk, {
+	LogicSigAccount,
+	multisigAddress,
+	MultisigMetadata,
+	SignedTransaction,
+} from "algosdk";
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
+import { RUNTIME_ERROR_RANGES, RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../../src/index";
+import { mockSuggestedParams } from "../../../src/mock/tx";
 import { AccountStoreI } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
@@ -37,6 +44,9 @@ describe("Re-keying transactions", function () {
 	let runtime: Runtime;
 
 	let txParams: types.ExecParams;
+
+	let multisigParams: MultisigMetadata;
+	let multisigAddr: string;
 
 	// fetch basic account informaton
 	function syncAccounts(): void {
@@ -91,17 +101,15 @@ describe("Re-keying transactions", function () {
 		runtime.executeTx([txParam]);
 		syncAccounts();
 	}
-
-	// rekey normal account
 	function rekeyFromAccount(
 		runtime: Runtime,
 		signer: AccountStoreI,
 		from: AccountStoreI,
-		to: AccountStoreI
+		to: AccountAddress
 	): void {
 		mkTxAlgoTransferFromAccount(runtime, signer, from, from, 0n, {
 			totalFee: FEE,
-			rekeyTo: to.address,
+			rekeyTo: to,
 		});
 	}
 
@@ -249,6 +257,15 @@ describe("Re-keying transactions", function () {
 		runtime.fundLsig(master.account, lsig.address(), 10e8);
 		runtime.fundLsig(master.account, cloneLsig.address(), 10e8);
 
+		//create multiSig account address
+		const addrs = [john.address, bob.address];
+		multisigParams = {
+			version: 1,
+			threshold: 2,
+			addrs: addrs,
+		};
+		multisigAddr = multisigAddress(multisigParams);
+
 		syncAccounts();
 	});
 
@@ -261,7 +278,7 @@ describe("Re-keying transactions", function () {
 
 	describe("Account to account", function () {
 		this.beforeEach(() => {
-			rekeyFromAccount(runtime, alice, alice, bob);
+			rekeyFromAccount(runtime, alice, alice, bob.address);
 		});
 
 		it("Spend address of alice account should changed to bob account", function () {
@@ -286,13 +303,13 @@ describe("Re-keying transactions", function () {
 		});
 
 		it("Can rekey account again", () => {
-			rekeyFromAccount(runtime, bob, alice, lsigAccount);
+			rekeyFromAccount(runtime, bob, alice, lsigAccount.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), lsigAccount.address);
 		});
 
 		it("Can Rekey again back to orginal account", () => {
-			rekeyFromAccount(runtime, bob, alice, alice);
+			rekeyFromAccount(runtime, bob, alice, alice.address);
 			// check spend address
 			assert.equal(alice.getSpendAddress(), alice.address);
 		});
@@ -306,7 +323,7 @@ describe("Re-keying transactions", function () {
 	describe("Account to Lsig", function () {
 		this.beforeEach(() => {
 			// create rekey transaction
-			rekeyFromAccount(runtime, alice, alice, lsigAccount);
+			rekeyFromAccount(runtime, alice, alice, lsigAccount.address);
 		});
 
 		it("spend address of alice account should be lsig address", () => {
@@ -440,6 +457,70 @@ describe("Re-keying transactions", function () {
 
 		it("Check spend address", () => {
 			assert.equal(alice.getSpendAddress(), bob.address);
+		});
+	});
+	describe.only("Account to MultiSig", () => {
+		this.beforeEach(() => {
+			rekeyFromAccount(runtime, alice, alice, multisigAddr);
+			syncAccounts();
+		});
+
+		it("Spend address of alice account should change to multisignature address", () => {
+			assert.isNotNull(alice.account.spend);
+			assert.equal(alice.getSpendAddress(), multisigAddr);
+		});
+
+		it("Should transfer ALGO if correct multisig provided", () => {
+			const alicePreTxnBalance = alice.balance();
+			const bobPreTxnBalance = bob.balance();
+			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
+			const txn = algosdk.makePaymentTxnWithSuggestedParams(
+				alice.account.addr,
+				bob.account.addr,
+				10,
+				undefined,
+				undefined,
+				suggestedParams
+			);
+			// Sign with first account
+			const rawSignedTxn = algosdk.signMultisigTransaction(
+				txn,
+				multisigParams,
+				john.account.sk
+			).blob;
+			// Sign with second account
+			const twosigs = algosdk.appendSignMultisigTransaction(
+				rawSignedTxn,
+				multisigParams,
+				bob.account.sk
+			).blob;
+			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);
+			runtime.executeTx([signedTxn]);
+			syncAccounts();
+			assert.deepEqual(alice.balance(), alicePreTxnBalance - 10n - BigInt(FEE));
+			assert.deepEqual(bob.balance(), bobPreTxnBalance + 10n);
+		});
+		it("Should throw an error when threshold not met", () => {
+			const suggestedParams = mockSuggestedParams({ totalFee: FEE }, runtime.getRound());
+			const txn = algosdk.makePaymentTxnWithSuggestedParams(
+				alice.account.addr,
+				bob.account.addr,
+				10,
+				undefined,
+				undefined,
+				suggestedParams
+			);
+			// Sign with first acount only
+			const rawSignedTxn = algosdk.signMultisigTransaction(
+				txn,
+				multisigParams,
+				john.account.sk
+			).blob;
+			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(rawSignedTxn);
+			expectRuntimeError(
+				() => runtime.executeTx([signedTxn]),
+				RUNTIME_ERRORS.GENERAL.INVALID_MULTISIG
+			);
 		});
 	});
 });

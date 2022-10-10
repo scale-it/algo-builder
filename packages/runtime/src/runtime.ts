@@ -5,14 +5,18 @@ import algosdk, {
 	decodeSignedTransaction,
 	modelsv2,
 	SignedTransaction,
+	Transaction,
 } from "algosdk";
+import { exec } from "child_process";
 import cloneDeep from "lodash.clonedeep";
+import nacl from "tweetnacl";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { getProgram, Interpreter, loadASAFile } from "./index";
+import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
@@ -42,7 +46,6 @@ import {
 	TxnReceipt,
 	TxReceipt,
 } from "./types";
-// const nacl = require('algosdk/dist/cjs/src/nacl/naclWrappers');
 
 export class Runtime {
 	/**
@@ -1040,5 +1043,123 @@ export class Runtime {
 			// throw error if your don't provide account `signature`.
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY);
 		}
+	}
+
+	/**
+	 * Verifies multi-signature and throws an error if signatures are not valid
+	 * @param signedTransaction signedTransaction object
+	 */
+	validateMultisignature(signedTransaction: algosdk.SignedTransaction) {
+		this.verifyMultisig(signedTransaction);
+		if (!this.verifyMultisig(signedTransaction)) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_MULTISIG);
+		}
+	}
+
+	/**
+	 * Verify multi-signature
+	 * @param signedTxn signedTransaction object
+	 */
+	/* eslint-disable sonarjs/cognitive-complexity */
+	verifyMultisig(signedTxn: SignedTransaction): boolean {
+		if (signedTxn.msig === undefined) {
+			return false;
+		} else {
+			const version = signedTxn.msig.v;
+			const threshold = signedTxn.msig.thr;
+			const subsigs = signedTxn.msig.subsig;
+			const addrs = subsigs.map((subsig) => algosdk.encodeAddress(subsig.pk));
+			if (signedTxn.msig.subsig.length < threshold) {
+				return false;
+			}
+			let multisigAddr;
+			try {
+				const mparams = {
+					version: version,
+					threshold: threshold,
+					addrs: addrs,
+				};
+				multisigAddr = algosdk.multisigAddress(mparams);
+			} catch (e) {
+				return false;
+			}
+			const fromAccountAddr = webTx.getTxFromAddress(signedTxn.txn);
+			const fromAccount = this.getAccount(fromAccountAddr);
+			const accountSpendAddr = fromAccount.getSpendAddress();
+			if (accountSpendAddr !== multisigAddr) {
+				return false;
+			}
+			let counter = 0;
+			for (const subsig of subsigs) {
+				if (!compareArray(subsig.s, new Uint8Array(0))) {
+					counter += 1;
+				}
+			}
+			if (counter < threshold) {
+				return false;
+			}
+			let verifiedCounter = 0;
+			for (const subsig of subsigs) {
+				if (
+					subsig.s &&
+					nacl.sign.detached.verify(signedTxn.txn.bytesToSign(), subsig.s, subsig.pk)
+				) {
+					verifiedCounter += 1;
+				}
+			}
+			return verifiedCounter >= threshold;
+		}
+	}
+
+	/** Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: types.ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(webTx.mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signes a Transaction object with the provided account
+	 * @param transaction transaction object.
+	 * @param signer account object that signes the transaction
+	 * @returns SignedTransaction
+	 */
+	signTx(transaction: algosdk.Transaction, signer: AccountSDK): SignedTransaction {
+		const encodedSignedTx = transaction.signTxn(signer.sk);
+		return algosdk.decodeSignedTransaction(encodedSignedTx);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it using provided signer account
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @param signer account object that signes the transaction
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	makeAndSignTx(
+		execParams: types.ExecParams[],
+		txParams: algosdk.SuggestedParams,
+		signer: AccountSDK
+	): SignedTransaction[] {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach((txn) => signedTxns.push(this.signTx(txn, signer)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @returns TxnReceipt
+	 */
+	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
+		return this.executeTx(transactions);
 	}
 }
