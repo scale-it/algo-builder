@@ -6,12 +6,13 @@ fee = 10000
 hash_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 2000
 
+
 def htlc(ARG_RCV,
-        ARG_OWN,
-        ARG_FEE,
-        ARG_HASHIMG,
-        ARG_HASHFN,
-        ARG_TIMEOUT):
+         ARG_OWN,
+         ARG_FEE,
+         ARG_HASHIMG,
+         ARG_HASHFN,
+         ARG_TIMEOUT):
     """This contract implements a "hash time lock".
     The contract will approve transactions spending algos from itself under two circumstances:
 
@@ -41,16 +42,16 @@ def htlc(ARG_RCV,
     # Next, check that the Receiver field for this transaction is empty
     # Because this contract can approve transactions that close out its entire balance,
     # it should never have a receiver.
-    rec_field_check = Txn.receiver() == Global.zero_address()
+    rec_field_check = Txn.receiver() == ARG_RCV
 
     # Next, check that the Amount of algos transferred is 0. This is for the same reason as
     # above: we only allow transactions that close out this account completely, which
     # having a non-zero-address CloseRemainderTo will handle for us.
     amount_check = Txn.amount() == Int(0)
 
-    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
+    # Always verify that the RekeyTo property of any transaction is set to the receiver addr
     # unless the contract is specifically involved ina rekeying operation.
-    rekey_check = Txn.rekey_to() == Global.zero_address()
+    rekey_check = Txn.rekey_to() == Txn.receiver()
 
     # fold all the above checks into a single boolean.
     common_checks = And(
@@ -73,9 +74,8 @@ def htlc(ARG_RCV,
     # Next, we will check that arg_0 is the correct preimage for ARG_HASHIMG under ARG_HASHFN.
     preimage_check = ARG_HASHFN(Arg(0)) == Bytes("base64", ARG_HASHIMG)
 
-    #Fold the "Scenario 1" checks into a single boolean.
+    # Fold the "Scenario 1" checks into a single boolean.
     scenario_1 = And(recv_field_check, preimage_check)
-
 
     # Scenario 2: Contract has timed out
     # First, check that the CloseRemainderTo field is set to be the ARG_OWN address
@@ -85,7 +85,7 @@ def htlc(ARG_RCV,
     # Next, check that this transaction has only occurred after the ARG_TIMEOUT round.
     timeout_check = Txn.first_valid() > Int(ARG_TIMEOUT)
 
-    #Fold the "Scenario 2" checks into a single boolean.
+    # Fold the "Scenario 2" checks into a single boolean.
     scenario_2 = And(owner_field_check, timeout_check)
 
     # At this point in the program's execution, the stack has three values. At the base of the
@@ -99,6 +99,8 @@ def htlc(ARG_RCV,
     # whether or not it has been approved by this contract.
     return And(Or(scenario_1, scenario_2), common_checks)
 
+
 optimize_options = OptimizeOptions(scratch_slots=True)
 if __name__ == "__main__":
-    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature, version = 5, optimize=optimize_options))
+    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout),
+          Mode.Signature, version=5, optimize=optimize_options))

@@ -39,7 +39,7 @@ async function run(runtimeEnv, deployer) {
 	txnParams.fromAccountAddr = contractAddress;
 	txnParams.sign = types.SignType.LogicSignature;
 	txnParams.args = [convert.stringToBytes(wrongSecret)];
-	txnParams.toAccountAddr = globalZeroAddress;
+	txnParams.toAccountAddr = john.addr;
 	txnParams.amountMicroAlgos = 0;
 	txnParams.lsig = contract;
 	txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
