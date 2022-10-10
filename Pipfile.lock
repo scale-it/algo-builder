@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0f4a1119efa389cd95d7096496f1d93e17411aa86a47acbbf2b6f308207aa45b"
+            "sha256": "4edf66d32309e9495613320767d32d167b39a96a18068bf68f34bc142fb1aa31"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -347,6 +347,7 @@
             "version": "==0.13.0"
         },
         "pyteal-utils": {
+            "editable": true,
             "git": "https://github.com/algorand/pyteal-utils.git",
             "ref": "c4976887ddd959d285894cf7d3e0feddef3821ba"
         },
@@ -428,8 +429,9 @@
             "version": "==6.0"
         },
         "tealer": {
+            "editable": true,
             "git": "https://github.com/crytic/tealer.git",
-            "ref": "8a7fe218a4e07b5c73f08f44516acbc0d46819ca"
+            "ref": "1e68d1ed61e18780ac7eebc1828cf30deba0c932"
         },
         "tomli": {
             "hashes": [

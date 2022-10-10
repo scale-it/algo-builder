@@ -6,9 +6,8 @@ name = "pypi"
 [packages]
 pyteal = "~=0.13.0"
 pyyaml = "*"
-poetry = "*"
-pyteal_utils ={git = "https://github.com/algorand/pyteal-utils.git"}
-tealer = {git = "https://github.com/crytic/tealer.git"}
+pyteal_utils ={editable = true, ref = "main", git = "https://github.com/algorand/pyteal-utils.git"}
+tealer = {editable = true, ref = "dev", git = "https://github.com/crytic/tealer.git"}
 
 [dev-packages]
 
