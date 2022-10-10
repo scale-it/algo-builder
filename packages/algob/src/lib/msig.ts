@@ -15,6 +15,7 @@ import {
 } from "algosdk";
 import fs from "fs";
 
+
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { LogicSig } from "../types";
 import { isSignedTx } from "./tx";
