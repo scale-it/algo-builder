@@ -1,12 +1,13 @@
+import { convert } from "@algo-builder/algob";
+import { types } from "@algo-builder/web";
 import { decodeAddress, multisigAddress, MultisigMetadata } from "algosdk";
 import { assert } from "chai";
-import { convert } from "@algo-builder/algob";
+
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
-import { types } from "@algo-builder/web";
 
 const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
@@ -25,9 +26,9 @@ describe("Logic Signature", () => {
 	let beginDate: Date;
 	let endDate: Date;
 	let fundCloseDate: Date;
-	let creationArgs: Array<{}>;
+	let creationArgs: any;
 	let appDefinition: any;
-	let applicationId: any
+	let applicationId: any;
 
 	before(() => {
 		john = new AccountStore(10);
@@ -38,7 +39,7 @@ describe("Logic Signature", () => {
 		crowdfundApprovalFileName = "crowdFundApproval.teal";
 		crowdFundClearFileName = "crowdFundClear.teal";
 		now = new Date();
-		beginDate = endDate = fundCloseDate = now
+		beginDate = endDate = fundCloseDate = now;
 		beginDate.setSeconds(now.getSeconds() + 2);
 		endDate.setSeconds(now.getSeconds() + 12000);
 		fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
@@ -143,7 +144,7 @@ describe("Multi-Signature Test", () => {
 	let runtime: Runtime;
 	let bobPk: Uint8Array;
 	let mparams: MultisigMetadata;
-	let multsigaddr: string;
+	let multisigAddr: string;
 
 	// note: it's better to do intializations in before, beforeAll.. hooks
 	// because cwd path (after loading env in fixture-project) is correctly
@@ -165,7 +166,7 @@ describe("Multi-Signature Test", () => {
 			threshold: 2,
 			addrs: addrs,
 		};
-		multsigaddr = multisigAddress(mparams);
+		multisigAddr = multisigAddress(mparams);
 	});
 
 	it("should verify if threshold is verified and sender is multisigAddr", () => {
@@ -175,7 +176,7 @@ describe("Multi-Signature Test", () => {
 		// lsig signed again (threshold = 2) by john
 		lsig.appendToMultisig(john.account.sk);
 
-		const result = lsig.lsig.verify(decodeAddress(multsigaddr).publicKey);
+		const result = lsig.lsig.verify(decodeAddress(multisigAddr).publicKey);
 		assert.equal(result, true);
 	});
 
@@ -195,7 +196,7 @@ describe("Multi-Signature Test", () => {
 		// lsig signed by alice
 		lsig.signMultisig(mparams, alice.account.sk);
 
-		const result = lsig.lsig.verify(decodeAddress(multsigaddr).publicKey);
+		const result = lsig.lsig.verify(decodeAddress(multisigAddr).publicKey);
 		assert.equal(result, false);
 	});
 });

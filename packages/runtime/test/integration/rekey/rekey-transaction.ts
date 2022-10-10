@@ -45,8 +45,8 @@ describe("Re-keying transactions", function () {
 
 	let txParams: types.ExecParams;
 
-	let multiSigParams: MultisigMetadata;
-	let multSigAddr: string;
+	let multisigParams: MultisigMetadata;
+	let multisigAddr: string;
 
 	// fetch basic account informaton
 	function syncAccounts(): void {
@@ -264,7 +264,7 @@ describe("Re-keying transactions", function () {
 			threshold: 2,
 			addrs: addrs,
 		};
-		multisigAddr = multisigAddress(multiSigParams);
+		multisigAddr = multisigAddress(multisigParams);
 
 		syncAccounts();
 	});
@@ -467,7 +467,7 @@ describe("Re-keying transactions", function () {
 
 		it("Spend address of alice account should change to multisignature address", () => {
 			assert.isNotNull(alice.account.spend);
-			assert.equal(alice.getSpendAddress(), multSigAddr);
+			assert.equal(alice.getSpendAddress(), multisigAddr);
 		});
 
 		it("Should transfer ALGO if correct multisig provided", () => {
@@ -485,13 +485,13 @@ describe("Re-keying transactions", function () {
 			// Sign with first account
 			const rawSignedTxn = algosdk.signMultisigTransaction(
 				txn,
-				multiSigParams,
+				multisigParams,
 				john.account.sk
 			).blob;
 			// Sign with second account
 			const twosigs = algosdk.appendSignMultisigTransaction(
 				rawSignedTxn,
-				multiSigParams,
+				multisigParams,
 				bob.account.sk
 			).blob;
 			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);
@@ -513,7 +513,7 @@ describe("Re-keying transactions", function () {
 			// Sign with first acount only
 			const rawSignedTxn = algosdk.signMultisigTransaction(
 				txn,
-				multiSigParams,
+				multisigParams,
 				john.account.sk
 			).blob;
 			const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(rawSignedTxn);

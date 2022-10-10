@@ -64,10 +64,10 @@ User can also override the fields in `assets/asa.yaml` when deploying ASA. Eg. I
 const { createMsigAddress } = require('@algo-builder/algob');
 
 const addrs = [alice.addr, bob.addr, john.addr];
-const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // version = 1, threshold = 2
+const [mparams, multisigAddr] = createMsigAddress(1, 2, addrs); // version = 1, threshold = 2
 
 // while deploying ASA pass custom asa param
-await deployer.deployASA("ASA-2", {...}, { reserve: multsigaddr }); // this will overwrite reserve field from assets/asa.yaml
+await deployer.deployASA("ASA-2", {...}, { reserve: multisigAddr }); // this will overwrite reserve field from assets/asa.yaml
 ```
 
 #### OptIn to ASA
