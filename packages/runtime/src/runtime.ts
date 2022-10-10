@@ -1078,14 +1078,14 @@ export class Runtime {
 					threshold: threshold,
 					addrs: addrs,
 				};
-				multiSigaddr = algosdk.multisigAddress(mparams);
+				multisigAddr = algosdk.multisigAddress(mparams);
 			} catch (e) {
 				return false;
 			}
 			const fromAccountAddr = webTx.getTxFromAddress(signedTxn.txn);
 			const fromAccount = this.getAccount(fromAccountAddr);
 			const accountSpendAddr = fromAccount.getSpendAddress();
-			if (accountSpendAddr !== multiSigaddr) {
+			if (accountSpendAddr !== multisigAddr) {
 				return false;
 			}
 			let counter = 0;
