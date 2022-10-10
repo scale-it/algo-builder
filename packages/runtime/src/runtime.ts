@@ -7,6 +7,7 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
+import { exec } from "child_process";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -1108,5 +1109,56 @@ export class Runtime {
 			}
 			return verifiedCounter >= threshold;
 		}
+
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: types.ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(webTx.mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signes a Transaction object with the provided account
+	 * @param transaction transaction object.
+	 * @param signer account object that signes the transaction
+	 * @returns SignedTransaction
+	 */
+	signTx(transaction: algosdk.Transaction, signer: AccountSDK): SignedTransaction {
+		const encodedSignedTx = transaction.signTxn(signer.sk);
+		return algosdk.decodeSignedTransaction(encodedSignedTx);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it using provided signer account
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @param signer account object that signes the transaction
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	makeAndSignTx(
+		execParams: types.ExecParams[],
+		txParams: algosdk.SuggestedParams,
+		signer: AccountSDK
+	): SignedTransaction[] {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach((txn) => signedTxns.push(this.signTx(txn, signer)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @returns TxnReceipt
+	 */
+	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
+		return this.executeTx(transactions);
 	}
 }

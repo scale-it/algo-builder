@@ -509,4 +509,4 @@ export const json_refTypes = {
 	JSONString: "JSONString",
 	JSONUint64: "JSONUint64",
 	JSONObject: "JSONObject",
-}
+};

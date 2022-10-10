@@ -1,6 +1,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { ERRORS, types as wtypes } from "@algo-builder/web";
-import { generateAccount, LogicSigAccount } from "algosdk";
+import { ERRORS, getSuggestedParams, types as wtypes } from "@algo-builder/web";
+import { AlgoTransferParam, SignType, TransactionType } from "@algo-builder/web/build/types";
+import algosdk, { Account, generateAccount, LogicSigAccount, Transaction } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -13,7 +14,7 @@ import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
-import { MOCK_APPLICATION_ADDRESS } from "../mocks/tx";
+import { MOCK_APPLICATION_ADDRESS, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 function mkASA(): wtypes.ASADef {
@@ -675,5 +676,94 @@ describe("DeployerDeployMode", () => {
 		const res = deployer.getASAInfo("silver-122");
 		assert.isDefined(res);
 		assert.deepEqual(res.assetDef, asaDef);
+	});
+});
+describe("Helper functions", function () {
+	const env = mkEnv("network1");
+	const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+	let deployer: DeployerDeployMode;
+	let alice: algosdk.Account;
+	let bob: algosdk.Account;
+
+	beforeEach(function () {
+		deployer = new DeployerDeployMode(deployerCfg);
+		alice = generateAccount();
+		bob = generateAccount();
+	});
+
+	it("Should return a transaction object based on provided execParams", function () {
+		const execParams: AlgoTransferParam = {
+			type: TransactionType.TransferAlgo,
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const txnParams = mockSuggestedParam;
+		const transactions: Transaction[] = deployer.makeTx([execParams], txnParams);
+		assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
+		assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), alice.addr);
+		assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), bob.addr);
+		assert.deepEqual(transactions[0].amount, 10000n);
+	});
+
+	it("Should sign a transaction and return a SignedTransaction object", function () {
+		const execParams: AlgoTransferParam = {
+			type: TransactionType.TransferAlgo,
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const signature: wtypes.Sign = {
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+		};
+		const txnParams = mockSuggestedParam;
+		const transactions: Transaction[] = deployer.makeTx([execParams], txnParams);
+		assert.doesNotThrow(() => {
+			deployer.signTx(transactions[0], signature);
+		});
+	});
+
+	it("Should return a SignedTransaction object based on ExecParams", function () {
+		const execParams: AlgoTransferParam = {
+			type: TransactionType.TransferAlgo,
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const signature: wtypes.Sign = {
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+		};
+		const txnParams = mockSuggestedParam;
+		assert.doesNotThrow(() => {
+			deployer.makeAndSignTx([execParams], txnParams, signature);
+		});
+	});
+
+	it("Should send a signed transaction and wait specified rounds for confirmation", function () {
+		const execParams: AlgoTransferParam = {
+			type: TransactionType.TransferAlgo,
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+		const signature: wtypes.Sign = {
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+		};
+		const txnParams = mockSuggestedParam;
+		const signedTx = deployer.makeAndSignTx([execParams], txnParams, signature);
+		assert.doesNotThrow(async () => {
+			await deployer.sendTxAndWait(signedTx, 10);
+		});
 	});
 });
