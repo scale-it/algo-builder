@@ -8,6 +8,7 @@ pyteal = "~=0.15.0"
 pyyaml = "*"
 pyteal_utils ={editable = true, git = "https://github.com/algorand/pyteal-utils.git"}
 tealer = {editable = true, git = "https://github.com/crytic/tealer.git"}
+requests = {git = "https://github.com/requests/requests.git", editable = true}
 
 [dev-packages]
 
