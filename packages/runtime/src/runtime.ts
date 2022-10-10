@@ -1109,8 +1109,9 @@ export class Runtime {
 			}
 			return verifiedCounter >= threshold;
 		}
+	}
 
-	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	/** Creates an algosdk.Transaction object based on execParams and suggestedParams
 	 * @param execParams execParams containing all txn info
 	 * @param txParams suggestedParams object
 	 * @returns array of algosdk.Transaction objects
