@@ -11,7 +11,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 	let bob: AccountStore;
 	let alice: AccountStore;
 
-	it("Should not load runtime, because while loading asa.yaml, account doesn't exist", () => {
+	it("Should not load runtime, because while loading asa.yaml, account doesn't exist", function () {
 		john = new AccountStore(minBalance, "john");
 		bob = new AccountStore(minBalance, "bob");
 		alice = new AccountStore(minBalance, "alice");
@@ -21,7 +21,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 		);
 	});
 
-	it("Should load runtime if all accounts exist", () => {
+	it("Should load runtime if all accounts exist", function () {
 		const elon = new AccountStore(minBalance, "elon");
 		bob = new AccountStore(minBalance, "bob");
 		alice = new AccountStore(minBalance, "alice");

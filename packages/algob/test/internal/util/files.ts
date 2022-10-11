@@ -6,7 +6,7 @@ import { loadFilenames } from "../../../src/internal/util/files";
 import { expectBuilderError } from "../../helpers/errors";
 import { useCleanFixtureProject } from "../../helpers/project";
 
-describe("loadFilenames", () => {
+describe("loadFilenames", function () {
 	useCleanFixtureProject("typescript-project");
 	it("Should load ts and js files from test folder", function () {
 		const ls = loadFilenames("test");

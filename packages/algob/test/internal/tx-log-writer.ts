@@ -10,15 +10,15 @@ class TxWriterMock extends TxWriterImpl {
 	}
 }
 
-describe("Log Writer", () => {
+describe("Log Writer", function () {
 	const writer = new TxWriterMock("");
 
-	it("change script name", () => {
+	it("change script name", function () {
 		writer.setScriptName("sc-1.js");
 		assert.equal("sc-1.js", writer.scriptName);
 	});
 
-	it("Write files", () => {
+	it("Write files", function () {
 		writer.writtenContent.pop();
 		writer.push("WriteFile", { file: "file1" });
 		assert.deepEqual(writer.writtenContent, [

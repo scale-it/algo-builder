@@ -6,7 +6,7 @@ describe("Group txn", function () {
 	let runtime;
 	let creator;
 	let proxyAppInfo;
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[creator] = runtime.defaultAccounts();
 		proxyAppInfo = runtime.deployApp(
@@ -26,7 +26,7 @@ describe("Group txn", function () {
 		);
 	});
 
-	it("Should create new app and asset from group id", () => {
+	it("Should create new app and asset from group id", function () {
 		// first tx in group: deploy new app
 		// the same code is used for coordinator contract
 		const createAppTxnParam = {

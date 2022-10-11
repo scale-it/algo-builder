@@ -85,7 +85,7 @@ describe("Crowdfunding Tests", function () {
 		convert.uint64ToBigEndian(fundCloseDate.getTime()),
 	];
 
-	it("crowdfunding application", () => {
+	it("crowdfunding application", function () {
 		/**
 		 * This test demonstrates how to create a Crowdfunding Stateful Smart Contract Application
 		 * and interact with it. there are following operations that are performed:
@@ -309,7 +309,7 @@ describe("Crowdfunding Tests", function () {
 		}
 	});
 
-	it("should be rejected by logic when claiming funds if goal is not met", () => {
+	it("should be rejected by logic when claiming funds if goal is not met", function () {
 		const applicationId = runtime.deployApp(
 			creator.account,
 			{ ...appDefinition, appArgs: creationArgs },

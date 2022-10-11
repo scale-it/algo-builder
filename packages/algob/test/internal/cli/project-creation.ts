@@ -6,10 +6,10 @@ import { createProject } from "../../../src/internal/cli/project-creation";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
-describe("Init project", () => {
+describe("Init project", function () {
 	useFixtureProject("init-task");
 
-	afterEach(() => {
+	afterEach(function () {
 		const paths = fs.readdirSync("./");
 		for (const path of paths) {
 			if (path !== "README.md") {
@@ -33,37 +33,37 @@ describe("Init project", () => {
 		assert.equal(withInfrastructure, fs.existsSync(`./${location}/infrastructure`));
 	}
 
-	it("should init npm project in an empty folder(javascript) with infrastructure folder", async () => {
+	it("should init npm project in an empty folder(javascript) with infrastructure folder", async function () {
 		const location = "test-project";
 		await createProject(location, false, true, true);
 		checkPaths(location, false, true, true);
 	});
 
-	it("should init npm project in an empty folder(javascript) without infrastructure folder", async () => {
+	it("should init npm project in an empty folder(javascript) without infrastructure folder", async function () {
 		const location = "test-project";
 		await createProject(location, false, false, true);
 		checkPaths(location, false, false, true);
 	});
 
-	it("should init npm project in a empty folder(typescript) with infrastructure folder", async () => {
+	it("should init npm project in a empty folder(typescript) with infrastructure folder", async function () {
 		const location = "test-project";
 		await createProject(location, true, true, true);
 		checkPaths(location, true, true, true);
 	});
 
-	it("should init npm project in a empty folder(typescript) without infrastructure folder", async () => {
+	it("should init npm project in a empty folder(typescript) without infrastructure folder", async function () {
 		const location = "test-project";
 		await createProject(location, true, false, true);
 		checkPaths(location, true, false, true);
 	});
 
-	it("should init yarn project in a empty folder(typescript) without infrastructure folder", async () => {
+	it("should init yarn project in a empty folder(typescript) without infrastructure folder", async function () {
 		const location = "test-project";
 		await createProject(location, true, false, false);
 		checkPaths(location, true, false, true);
 	});
 
-	it("should not create an npm project if folder already exist", async () => {
+	it("should not create an npm project if folder already exist", async function () {
 		await createProject("location", false, false, true);
 
 		await expectBuilderErrorAsync(
@@ -72,13 +72,13 @@ describe("Init project", () => {
 		);
 	});
 
-	it("should init npm project in an empty folder(typescript) with `.`", async () => {
+	it("should init npm project in an empty folder(typescript) with `.`", async function () {
 		const location = ".";
 		await createProject(location, true, false, true);
 		checkPaths(location, true, false, true);
 	});
 
-	it("should not init npm project if it already exists with `.`", async () => {
+	it("should not init npm project if it already exists with `.`", async function () {
 		await createProject(".", false, false, true);
 
 		await expectBuilderErrorAsync(

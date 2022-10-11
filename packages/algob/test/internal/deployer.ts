@@ -30,7 +30,7 @@ function mkASA(): wtypes.ASADef {
 	};
 }
 
-describe("DeployerDeployMode", () => {
+describe("DeployerDeployMode", function () {
 	useFixtureProject("config-project");
 	let deployerCfg: DeployerConfig, env;
 	const mp = new Map<number, rtypes.AppInfo>();
@@ -43,7 +43,7 @@ describe("DeployerDeployMode", () => {
 		deployerCfg.cpData = new CheckpointRepoImpl();
 	});
 
-	it("Should ensure metadata existence for network", async () => {
+	it("Should ensure metadata existence for network", async function () {
 		const cpData = new CheckpointRepoImpl().putMetadata("network 123", "k", "v");
 		assert.deepEqual(cleanupMutableData(cpData.precedingCP["network 123"], 12345), {
 			timestamp: 12345,
@@ -54,14 +54,14 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should hold metadata of a network", async () => {
+	it("Should hold metadata of a network", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		deployer.addCheckpointKV("existent", "existent value");
 		assert.isUndefined(deployer.getCheckpointKV("nonexistent"));
 		assert.equal(deployer.getCheckpointKV("existent"), "existent value");
 	});
 
-	it("Should set given data into checkpoint with timestamp", async () => {
+	it("Should set given data into checkpoint with timestamp", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		deployer.addCheckpointKV("key 1", "val 1");
 		deployer.addCheckpointKV("key 2", "val 2");
@@ -78,7 +78,7 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should append freshly loaded checkpoint values", async () => {
+	it("Should append freshly loaded checkpoint values", async function () {
 		const cp1: Checkpoints = {
 			network1: {
 				timestamp: 1,
@@ -118,7 +118,7 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should save info to checkpoint after asset deployment", async () => {
+	it("Should save info to checkpoint after asset deployment", async function () {
 		const env = mkEnv("network1");
 		const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 		deployerCfg.asaDefs = { MY_ASA: mkASA() };
@@ -158,7 +158,7 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should save info to checkpoint after SSC deployment", async () => {
+	it("Should save info to checkpoint after SSC deployment", async function () {
 		const env = mkEnv("network1");
 		const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 		const deployer = new DeployerDeployMode(deployerCfg);
@@ -260,7 +260,7 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should save info by app name to checkpoint after App deployment if app name is passed", async () => {
+	it("Should save info by app name to checkpoint after App deployment if app name is passed", async function () {
 		const env = mkEnv("network1");
 		const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 		const deployer = new DeployerDeployMode(deployerCfg);
@@ -361,7 +361,7 @@ describe("DeployerDeployMode", () => {
 		});
 	});
 
-	it("Should save overriden asaDef to checkpoint after asset deployment if custom ASA params are passed", async () => {
+	it("Should save overriden asaDef to checkpoint after asset deployment if custom ASA params are passed", async function () {
 		const env = mkEnv("network1");
 		const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 		const accounts = genAccounts(4);
@@ -434,7 +434,7 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(newDeployer.asa.get("MY_ASA")?.assetDef, expectedASADef);
 	});
 
-	it("Should load delegated logic signature", async () => {
+	it("Should load delegated logic signature", async function () {
 		const env = mkEnv("network1");
 		const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 		deployerCfg.asaDefs = { MY_ASA: mkASA() };
@@ -466,7 +466,7 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(logicSig, result);
 	});
 
-	it("Should use getCheckpointKV and isDefined from CheckpointData", async () => {
+	it("Should use getCheckpointKV and isDefined from CheckpointData", async function () {
 		const networkName = "network1";
 		const env = mkEnv(networkName);
 		const cpData = new CheckpointRepoImpl()
@@ -503,14 +503,14 @@ describe("DeployerDeployMode", () => {
 		assert.equal(deployer.getCheckpointKV("k"), "v");
 	});
 
-	it("Should ignore same metadata of the same network", async () => {
+	it("Should ignore same metadata of the same network", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		deployer.addCheckpointKV("existent", "existent value");
 		deployer.addCheckpointKV("existent", "existent value");
 		assert.equal(deployer.getCheckpointKV("existent"), "existent value");
 	});
 
-	it("Should crash when same metadata key is set second time & different value", async () => {
+	it("Should crash when same metadata key is set second time & different value", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		deployer.addCheckpointKV("metadata_key", "orig_value");
 		expectBuilderError(
@@ -520,7 +520,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should crash when same ASA name is tried to deploy to second time", async () => {
+	it("Should crash when same ASA name is tried to deploy to second time", async function () {
 		deployerCfg.asaDefs = { ASA_key: mkASA() };
 		const deployer = new DeployerDeployMode(deployerCfg);
 		await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
@@ -531,7 +531,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should crash when ASA for given name doesn't exist", async () => {
+	it("Should crash when ASA for given name doesn't exist", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		await expectBuilderErrorAsync(
 			async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] }),
@@ -540,7 +540,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
+	it("Should not crash when same ASC Contract Mode name is tried to fund second time", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		await deployer.fundLsigByFile(
 			"Lsig",
@@ -549,7 +549,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should crash on fundLsig if lsig is not present in checkpoint", async () => {
+	it("Should crash on fundLsig if lsig is not present in checkpoint", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		await expectBuilderErrorAsync(
 			async () =>
@@ -563,7 +563,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should not crash on fundLsig if lsig is present in checkpoint", async () => {
+	it("Should not crash on fundLsig if lsig is present in checkpoint", async function () {
 		const networkName = "network1";
 		const env = mkEnv(networkName);
 		const cpData = new CheckpointRepoImpl()
@@ -584,7 +584,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should crash if lsig/app name is already present in checkpoint", async () => {
+	it("Should crash if lsig/app name is already present in checkpoint", async function () {
 		const networkName = "network1";
 		const env = mkEnv(networkName);
 		const cpData = new CheckpointRepoImpl()
@@ -620,12 +620,12 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should return empty ASA map on no CP", async () => {
+	it("Should return empty ASA map on no CP", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		assert.deepEqual(deployer.asa, new Map());
 	});
 
-	it("Should return empty ASA map on no CP; with ASA in other net", async () => {
+	it("Should return empty ASA map on no CP; with ASA in other net", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		deployerCfg.cpData.registerASA("hi", "hi123", {
 			creator: "",
@@ -638,7 +638,7 @@ describe("DeployerDeployMode", () => {
 		assert.deepEqual(deployer.asa, new Map());
 	});
 
-	it("Should return correct ASA in ASA map", async () => {
+	it("Should return correct ASA in ASA map", async function () {
 		deployerCfg.asaDefs = { ASA_key: mkASA() };
 		const deployer = new DeployerDeployMode(deployerCfg);
 		await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
@@ -660,7 +660,7 @@ describe("DeployerDeployMode", () => {
 		);
 	});
 
-	it("Should deploy asa without using asa.yaml", async () => {
+	it("Should deploy asa without using asa.yaml", async function () {
 		const deployer = new DeployerDeployMode(deployerCfg);
 		const asaDef = {
 			total: 10000,

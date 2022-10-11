@@ -24,7 +24,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			amountMicroAlgos: 10000n,
 			payFlags: {},
 		};
-		assert.doesNotThrow(async () => {
+		assert.doesNotThrow(async function () {
 			await webMode.executeTx([txnParams]);
 		});
 	});

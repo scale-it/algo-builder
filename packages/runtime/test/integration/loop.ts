@@ -72,7 +72,7 @@ describe("TEALv4: Loops", function () {
 		);
 	});
 
-	it("should skip b1 & b2 (continuous labels)", () => {
+	it("should skip b1 & b2 (continuous labels)", function () {
 		approvalProgramPassFileName = "continuous-labels.teal";
 		// this code will pass, because at the end we check if counter is incremented 10 times
 		assert.doesNotThrow(() =>

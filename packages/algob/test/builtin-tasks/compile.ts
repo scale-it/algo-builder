@@ -55,7 +55,7 @@ class CompileOpMock extends CompileOp {
 	}
 }
 
-describe("Compile task", () => {
+describe("Compile task", function () {
 	useFixtureProjectCopy("config-project");
 	const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
 	const op = new CompileOpMock(fakeAlgod);
@@ -83,7 +83,7 @@ describe("Compile task", () => {
 		}
 	});
 
-	it("on first run it should compile all .teal sources", async () => {
+	it("on first run it should compile all .teal sources", async function () {
 		await op.resetAndCompile(false);
 
 		assert.equal(op.timestamp, 4);
@@ -103,7 +103,7 @@ describe("Compile task", () => {
 		assert.deepEqual(op.writtenFiles, writtenFiles);
 	});
 
-	it("shouldn't recompile when files didn't change", async () => {
+	it("shouldn't recompile when files didn't change", async function () {
 		await op.resetAndCompile(false);
 
 		assert.equal(op.timestamp, 4);
@@ -111,7 +111,7 @@ describe("Compile task", () => {
 		assert.lengthOf(op.writtenFiles, 0);
 	});
 
-	it("should recompile only changed files", async () => {
+	it("should recompile only changed files", async function () {
 		const content = "// comment";
 		fs.writeFileSync(path.join(ASSETS_DIR, f2), content);
 		await op.resetAndCompile(false);
@@ -121,7 +121,7 @@ describe("Compile task", () => {
 		assert.deepEqual(op.writtenFiles, [path.join(cacheDir, f2 + ".yaml")]);
 	});
 
-	it("should recompile all files when --force is used", async () => {
+	it("should recompile all files when --force is used", async function () {
 		await op.resetAndCompile(true);
 
 		assert.equal(op.timestamp, 9);
@@ -129,14 +129,14 @@ describe("Compile task", () => {
 		assert.lengthOf(op.writtenFiles, 4);
 	});
 
-	it("should return TEAL code", async () => {
+	it("should return TEAL code", async function () {
 		const pyOp = new PyCompileOp();
 		const content = fs.readFileSync(path.join(ASSETS_DIR, f4), "utf8");
 		const res = pyOp.compilePyTeal(f3PY) + "\n"; // eslint-disable-line @typescript-eslint/restrict-plus-operands
 		assert.deepEqual(content.toString(), res);
 	});
 
-	it("should return correct ASCCache from CompileOp", async () => {
+	it("should return correct ASCCache from CompileOp", async function () {
 		const result = await op.ensureCompiled(f3PY, "", true, scTmplParam);
 		const expected = fs.readFileSync(path.join(ASSETS_DIR, "gold-asa-py-check.yaml"), "utf8");
 		assert.isDefined(result.scParams);
@@ -144,7 +144,7 @@ describe("Compile task", () => {
 	});
 });
 
-describe("Support External Parameters in PyTEAL program", () => {
+describe("Support External Parameters in PyTEAL program", function () {
 	useFixtureProjectCopy("support-external-parameters");
 	const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
 	const op = new CompileOpMock(fakeAlgod);
@@ -160,7 +160,7 @@ describe("Support External Parameters in PyTEAL program", () => {
 		ASSET_AMOUNT: 1000n,
 	};
 
-	it("PyTEAL code test", async () => {
+	it("PyTEAL code test", async function () {
 		// On first run, should compile pyTEAL code
 		let result = await op.ensureCompiled(stateless);
 		statelessHash = result.srcHash;
@@ -210,7 +210,7 @@ describe("Support External Parameters in PyTEAL program", () => {
 	});
 });
 
-describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
+describe("Support TMPL Placeholder Parameters in PyTEAL program", function () {
 	useFixtureProjectCopy("support-tmpl-parameters");
 	const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
 	const op = new CompileOpMock(fakeAlgod);
@@ -218,7 +218,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
 	const stateless = "stateless.py";
 	const stateful = "stateful.py";
 
-	it("Should replace TMPL_ placeholders in TEAL file", async () => {
+	it("Should replace TMPL_ placeholders in TEAL file", async function () {
 		const scTmplParam = {
 			TMPL_SENDER: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
 			TMPL_AMOUNT: 1000n,
@@ -230,7 +230,7 @@ describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
 		assert.equal(result.tealCode, expected);
 	});
 
-	it("PyTEAL TMPL + External parameters test", async () => {
+	it("PyTEAL TMPL + External parameters test", async function () {
 		const scTmplParam = {
 			ARG_SENDER: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
 			TMPL_AMOUNT: 100n,

@@ -19,6 +19,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Fix `txn AssetSender` should return zero address by default.
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
+- Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
 
 #### Examples
 

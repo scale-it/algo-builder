@@ -4,7 +4,7 @@ import { resetBuilderContext } from "../../src/internal/reset";
 import { defaultNetCfg, useEnvironment } from "./environment";
 import { useFixtureProject } from "./project";
 
-describe("Builder lib", () => {
+describe("Builder lib", function () {
 	useFixtureProject("config-project");
 	useEnvironment();
 

@@ -8,10 +8,10 @@ import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProjectCopy } from "../helpers/project";
 
-describe("Gen-accounts task", () => {
+describe("Gen-accounts task", function () {
 	useFixtureProjectCopy("default-config-project");
 
-	it("genAccounts should generate n accounts", () => {
+	it("genAccounts should generate n accounts", function () {
 		const n = 4;
 		const as = genAccounts(n);
 		assert.lengthOf(as, n);
@@ -22,20 +22,20 @@ describe("Gen-accounts task", () => {
 		}
 	});
 
-	describe("accounts_generated.yaml flow", () => {
-		it("Should fail when n is negative or 0", async () => {
+	describe("accounts_generated.yaml flow", function () {
+		it("Should fail when n is negative or 0", async function () {
 			try {
 				await mkAccounts({ n: 0 }, mkEnv());
 				assert.fail("should fail when n==0");
-			} catch {} // eslint-disable-line no-empty
+			} catch { } // eslint-disable-line no-empty
 
 			try {
 				await mkAccounts({ n: -1 }, mkEnv());
 				assert.fail("should fail when n==0");
-			} catch {} // eslint-disable-line no-empty
+			} catch { } // eslint-disable-line no-empty
 		});
 
-		it("Should ensure test preconditions", () => {
+		it("Should ensure test preconditions", function () {
 			assert.isFalse(
 				fs.existsSync(ASSETS_DIR),
 				"assets directory shouldn't be created when task params are invalid"
@@ -45,7 +45,7 @@ describe("Gen-accounts task", () => {
 		let accounts: Account[] = [];
 		const filename = getFilename();
 
-		it("should create a directory and a file", async () => {
+		it("should create a directory and a file", async function () {
 			const n = 2;
 			await mkAccounts({ n }, mkEnv());
 
@@ -54,7 +54,7 @@ describe("Gen-accounts task", () => {
 			assert.lengthOf(accounts, n);
 		});
 
-		it("should overwrite the accounts file only with --force flag", async () => {
+		it("should overwrite the accounts file only with --force flag", async function () {
 			const n = 1;
 
 			await mkAccounts({ n }, mkEnv());
