@@ -6,6 +6,8 @@ layout: splash
 
 - Use [boilerplate-stateful-smart-contract](https://developer.algorand.org/docs/features/asc1/stateful/#boilerplate-stateful-smart-contract) as a template for new smart-contracts.
 - Use [zero address](https://developer.algorand.org/docs/features/accounts/#special-accounts) to prevent future updates or deletion of a smart-contract.
+- Use javascript normal functions instead of arrow function while writing unit tests. Please read more
+about it [here](https://mochajs.org/#arrow-functions).
 
 ### Entry points
 
