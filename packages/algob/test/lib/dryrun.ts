@@ -42,14 +42,14 @@ class TealDbgMock extends Tealdbg {
 	}
 }
 
-describe("Debugging TEAL code using tealdbg", () => {
+describe("Debugging TEAL code using tealdbg", function () {
 	useFixtureProject("config-project");
 	let deployer: Deployer;
 	let algod: AlgoOperatorDryRunImpl;
 	let txParam: ExecParams;
 	let tealDebugger: TealDbgMock;
 
-	beforeEach(async () => {
+	beforeEach(async function () {
 		const env = mkEnv("network1");
 		algod = new AlgoOperatorDryRunImpl();
 		const deployerCfg = new DeployerConfig(env, algod);
@@ -86,7 +86,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		tealDebugger = new TealDbgMock(deployer, txParam);
 	});
 
-	afterEach(async () => {
+	afterEach(async function () {
 		(algod.algodClient.getTransactionParams as SinonStub).restore();
 		(algod.algodClient.dryrun as SinonStub).restore();
 		(algod.algodClient.accountInformation as SinonStub).restore();
@@ -94,7 +94,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		(algod.algodClient.genesis as SinonStub).restore();
 	});
 
-	it("dump dryrunResponse in assets/<file>", async () => {
+	it("dump dryrunResponse in assets/<file>", async function () {
 		const resp = await tealDebugger.dryRunResponse();
 
 		// assert recieved response
@@ -112,7 +112,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		fs.rmSync(outPath);
 	});
 
-	it("should warn or overwrite existing dryRunResponse based on --force flag", async () => {
+	it("should warn or overwrite existing dryRunResponse based on --force flag", async function () {
 		const stub = console.error as SinonStub;
 		stub.reset();
 
@@ -132,7 +132,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		fs.rmSync(path.join(process.cwd(), ASSETS_DIR, "response.json"));
 	});
 
-	it("should write --dryrun-dump in `cache/dryrun` and run debugger with provided args", async () => {
+	it("should write --dryrun-dump in `cache/dryrun` and run debugger with provided args", async function () {
 		assert.equal(tealDebugger.writtenFiles.length, 0);
 		await tealDebugger.run();
 
@@ -158,7 +158,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		assert.include(tealDebugger.debugArgs, "0");
 	});
 
-	it("should throw error if groupIndex is greator than txGroup length", async () => {
+	it("should throw error if groupIndex is greator than txGroup length", async function () {
 		tealDebugger.execParams = [txParam, { ...txParam, payFlags: { note: "Algrand" } }];
 
 		try {
@@ -171,7 +171,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		}
 	});
 
-	it("should run debugger using pyteal files as well", async () => {
+	it("should run debugger using pyteal files as well", async function () {
 		const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;
 		await tealDebugger.run({ tealFile: "gold-asa.py" });
 
@@ -179,7 +179,7 @@ describe("Debugging TEAL code using tealdbg", () => {
 		assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
 	});
 
-	it("should run debugger from cached TEAL code", async () => {
+	it("should run debugger from cached TEAL code", async function () {
 		const stub = console.info as SinonStub;
 		stub.reset();
 		const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;

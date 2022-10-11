@@ -1,4 +1,10 @@
-import algosdk, { EncodedSignedTransaction, SuggestedParams, Transaction } from "algosdk";
+import algosdk, {
+	EncodedSignedTransaction,
+	SignedTransaction,
+	SuggestedParams,
+	Transaction,
+} from "algosdk";
+import { exec } from "child_process";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
@@ -7,10 +13,10 @@ import {
 	isSDKTransactionAndSign,
 	Sign,
 	SignType,
-	TransactionAndSign,
-	TxParams,
 	SignWithMultisig,
+	TransactionAndSign,
 	TxnReceipt,
+	TxParams,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
 import { log } from "./logger";
@@ -283,5 +289,73 @@ export class WebMode {
 			return await this.waitForConfirmation(txInfo.txId);
 		}
 		throw new Error("Transaction Error");
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signs a Transaction object
+	 * @param transaction transaction object.
+	 * @returns SignedTransaction
+	 */
+	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
+		const binaryTx = transaction.toByte();
+		const base64Tx = this.algoSigner.encoding.msgpackToBase64(binaryTx);
+		const signedTx = await this.signTransaction([
+			{
+				txn: base64Tx,
+			},
+		]);
+		const blob = signedTx.blob as string;
+		const blobArray = this.algoSigner.encoding.base64ToMsgpack(blob);
+		return algosdk.decodeSignedTransaction(blobArray);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	async makeAndSignTx(
+		execParams: ExecParams[],
+		txParams: algosdk.SuggestedParams
+	): Promise<SignedTransaction[]> {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @param rounds number of rounds to wait for response
+	 * @returns TxnReceipt
+	 */
+	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
+		if (transactions.length < 1) {
+			throw Error("No transactions to process");
+		} else {
+			const txInfo = await this.sendGroupTransaction(transactions);
+
+			if (txInfo && typeof txInfo.txId === "string") {
+				return await this.waitForConfirmation(txInfo.txId, rounds);
+			}
+			throw new Error("Transaction Incorrect");
+		}
 	}
 }

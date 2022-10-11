@@ -6,7 +6,6 @@ import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
-
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
@@ -77,15 +76,19 @@ describe("Interpreter", function () {
 			addr: foreignAppAccAddr,
 			sk: new Uint8Array(0),
 		});
-		
+
 		//setup foreign application to optin application
 		foreignApplicationAccount.appsTotalSchema = accInfo[0].appsTotalSchema;
 		foreignApplicationAccount.appsLocalState = accInfo[0].appsLocalState;
 
-
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, 
-			applicationAccount, foreignApplicationAccount]);
+		interpreter.runtime = new Runtime([
+			elonAcc,
+			johnAcc,
+			bobAccount,
+			applicationAccount,
+			foreignApplicationAccount,
+		]);
 		interpreter.tealVersion = tealVersion;
 		resetInterpreterState();
 	};
@@ -96,58 +99,64 @@ describe("Interpreter", function () {
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
-	const executeTEALWithTxArrayChange = (tealCode: string, onComplete = TxOnComplete.NoOp): void => {
+	const executeTEALWithTxArrayChange = (
+		tealCode: string,
+		onComplete = TxOnComplete.NoOp
+	): void => {
 		// reset interpreter
 		resetInterpreterState();
 		interpreter.runtime.ctx.tx.apan = Number(onComplete);
-		interpreter.runtime.ctx.tx.apat?.splice(0, 1, 
-			Buffer.from(decodeAddress(foreignAppAccAddr).publicKey));
+		interpreter.runtime.ctx.tx.apat?.splice(
+			0,
+			1,
+			Buffer.from(decodeAddress(foreignAppAccAddr).publicKey)
+		);
 		interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
 	};
 
-	this.beforeAll(() => {
+	this.beforeAll(function () {
 		setUpInterpreter(6); //setup interpreter for execute
 	});
 
-	describe("Teal cost", () => {
+	describe("Teal cost", function () {
 		useFixture("teal-files");
-		beforeEach(() => {
-			resetInterpreterState(); 
+		beforeEach(function () {
+			resetInterpreterState();
 			interpreter.cost = 0;
 			interpreter.tealVersion = 1;
 		});
 
-		it("Should return correct cost for a simple .teal program ", () => {
+		it("Should return correct cost for a simple .teal program ", function () {
 			const file = "test-file-1.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
 		});
 
-		it("Should return correct cost for a simple .teal program ", () => {
+		it("Should return correct cost for a simple .teal program ", function () {
 			const file = "test-file-3.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 3);
 		});
 
-		it("Should return correct cost for a .teal program(if-else)", () => {
+		it("Should return correct cost for a .teal program(if-else)", function () {
 			const file = "test-if-else.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 9);
 		});
 
-		it("Should return correct cost for a .teal program with different version(v1)", () => {
+		it("Should return correct cost for a .teal program with different version(v1)", function () {
 			const file = "test-sha256-v1.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.SIGNATURE, interpreter.runtime);
 			assert.equal(interpreter.cost, 14);
 		});
 
-		it("Should return correct cost for a .teal program for different version(v2)", () => {
+		it("Should return correct cost for a .teal program for different version(v2)", function () {
 			const file = "test-sha256-v2.teal";
 			interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
 			assert.equal(interpreter.cost, 42);
 		});
 
-		it("Should fail when executing wrong logic teal", () => {
+		it("Should fail when executing wrong logic teal", function () {
 			// logic of teal file failed
 			const file = "test-label.teal";
 			expectRuntimeError(
@@ -158,12 +167,12 @@ describe("Interpreter", function () {
 		});
 	});
 
-	describe("Foreign application access", () => {
-		describe("foreign application account can not be access by opcode that modify local storage", () => {
-			this.beforeEach(() => {
+	describe("Foreign application access", function () {
+		describe("foreign application account can not be access by opcode that modify local storage", function () {
+			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
-			it("Should throw an error when accessing account that are not in transaction's account field", () => {
+			it("Should throw an error when accessing account that are not in transaction's account field", function () {
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress
@@ -172,18 +181,18 @@ describe("Interpreter", function () {
 				byte "ABC"
 				app_local_put
 				`;
-				 expectRuntimeError(
+				expectRuntimeError(
 					() => executeTEAL(prog),
 					RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
 				);
-			})
-		})
+			});
+		});
 
-		describe("Foreign application account can be accessed by opcode that modify local storage in specific case", () => {
-			this.beforeEach(() => {
+		describe("Foreign application account can be accessed by opcode that modify local storage in specific case", function () {
+			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
-			it("Should not throw an error when accessing account that are in transaction's account field", () => {
+			it("Should not throw an error when accessing account that are in transaction's account field", function () {
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress
@@ -193,9 +202,9 @@ describe("Interpreter", function () {
 				app_local_put
 				int 1
 				`;
-				
-				 assert.doesNotThrow(() => executeTEALWithTxArrayChange(prog));
-			})
-		})
+
+				assert.doesNotThrow(() => executeTEALWithTxArrayChange(prog));
+			});
+		});
 	});
 });

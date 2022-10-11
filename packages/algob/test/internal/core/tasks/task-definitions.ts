@@ -40,32 +40,32 @@ function assertParamDefinition(
 const runSuperNop: any = () => Promise.resolve();
 runSuperNop.isDefined = false;
 
-describe("SimpleTaskDefinition", () => {
-	describe("construction", () => {
+describe("SimpleTaskDefinition", function () {
+	describe("construction", function () {
 		let taskDefinition: SimpleTaskDefinition;
 
-		before("init taskDefinition", () => {
+		before("init taskDefinition", function () {
 			taskDefinition = new SimpleTaskDefinition("name", true);
 		});
 
-		it("gets the right name", () => {
+		it("gets the right name", function () {
 			assert.equal(taskDefinition.name, "name");
 		});
 
-		it("gets the right isInternal flag", () => {
+		it("gets the right isInternal flag", function () {
 			assert.isTrue(taskDefinition.isInternal);
 		});
 
-		it("starts without any param defined", () => {
+		it("starts without any param defined", function () {
 			assert.deepEqual(taskDefinition.paramDefinitions, {});
 			assert.isEmpty(taskDefinition.positionalParamDefinitions);
 		});
 
-		it("starts without any description", () => {
+		it("starts without any description", function () {
 			assert.isUndefined(taskDefinition.description);
 		});
 
-		it("starts with an action that throws", async () => {
+		it("starts with an action that throws", async function () {
 			await expectBuilderErrorAsync(
 				async () => await taskDefinition.action({}, {} as any, runSuperNop),
 				ERRORS.TASK_DEFINITIONS.ACTION_NOT_SET
@@ -73,8 +73,8 @@ describe("SimpleTaskDefinition", () => {
 		});
 	});
 
-	describe("setDescription", () => {
-		it("Should change the description", () => {
+	describe("setDescription", function () {
+		it("Should change the description", function () {
 			const taskDefinition = new SimpleTaskDefinition("name");
 			assert.isUndefined(taskDefinition.description);
 
@@ -86,8 +86,8 @@ describe("SimpleTaskDefinition", () => {
 		});
 	});
 
-	describe("setAction", () => {
-		it("Should change the action", async () => {
+	describe("setAction", function () {
+		it("Should change the action", async function () {
 			const taskDefinition = new SimpleTaskDefinition("name");
 
 			taskDefinition.setAction(async () => 1);
@@ -101,62 +101,62 @@ describe("SimpleTaskDefinition", () => {
 		});
 	});
 
-	describe("param definition rules", () => {
+	describe("param definition rules", function () {
 		let taskDefinition: SimpleTaskDefinition;
 
-		beforeEach("init taskDefinition", () => {
+		beforeEach("init taskDefinition", function () {
 			taskDefinition = new SimpleTaskDefinition("name", true);
 		});
 
-		describe("param name repetitions", () => {
-			beforeEach("set param with name 'name'", () => {
+		describe("param name repetitions", function () {
+			beforeEach("set param with name 'name'", function () {
 				taskDefinition.addParam("name", "a description", "asd");
 			});
 
-			it("should throw if addParam repeats a param name", () => {
+			it("should throw if addParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addParam("name", "another desc")
 				);
 			});
 
-			it("should throw if addOptionalParam repeats a param name", () => {
+			it("should throw if addOptionalParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addOptionalParam("name", "another desc")
 				);
 			});
 
-			it("should throw if addFlag repeats a param name", () => {
+			it("should throw if addFlag repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addFlag("name", "another desc")
 				);
 			});
 
-			it("should throw if addPositionalParam repeats a param name", () => {
+			it("should throw if addPositionalParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addPositionalParam("name", "another desc")
 				);
 			});
 
-			it("should throw if addOptionalPositionalParam repeats a param name", () => {
+			it("should throw if addOptionalPositionalParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addOptionalPositionalParam("name", "another desc")
 				);
 			});
 
-			it("should throw if addVariadicPositionalParam repeats a param name", () => {
+			it("should throw if addVariadicPositionalParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addVariadicPositionalParam("name", "another desc")
 				);
 			});
 
-			it("should throw if addOptionalVariadicPositionalParam repeats a param name", () => {
+			it("should throw if addOptionalVariadicPositionalParam repeats a param name", function () {
 				expectThrowParamAlreadyDefinedError(() =>
 					taskDefinition.addOptionalVariadicPositionalParam("name", "another desc")
 				);
 			});
 		});
 
-		describe("param name clashes with Builder's ones", () => {
+		describe("param name clashes with Builder's ones", function () {
 			function testClashWith(name: string): void {
 				expectBuilderError(
 					() => taskDefinition.addParam(name),
@@ -188,7 +188,7 @@ describe("SimpleTaskDefinition", () => {
 				);
 			}
 
-			it("Should throw if a param clashes", () => {
+			it("Should throw if a param clashes", function () {
 				// This is constructed to force a type error here if a Builder arg is
 				// added and not tested.
 				const algobArgs: RuntimeArgs = {
@@ -203,57 +203,57 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("positional param rules", () => {
-			describe("no mandatory positional param after an optional one", () => {
-				beforeEach("add optional positional", () => {
+		describe("positional param rules", function () {
+			describe("no mandatory positional param after an optional one", function () {
+				beforeEach("add optional positional", function () {
 					taskDefinition.addOptionalPositionalParam("asd");
 				});
 
-				it("throws when trying to add a new positional param", () => {
+				it("throws when trying to add a new positional param", function () {
 					expectBuilderError(
 						() => taskDefinition.addPositionalParam("asd2"),
 						ERRORS.TASK_DEFINITIONS.MANDATORY_PARAM_AFTER_OPTIONAL
 					);
 				});
 
-				it("throws when trying to add a new variadic positional param", () => {
+				it("throws when trying to add a new variadic positional param", function () {
 					expectBuilderError(
 						() => taskDefinition.addVariadicPositionalParam("asd2"),
 						ERRORS.TASK_DEFINITIONS.MANDATORY_PARAM_AFTER_OPTIONAL
 					);
 				});
 
-				describe("should still accept non-positional ones", () => {
-					it("should accept a common param", () => {
+				describe("should still accept non-positional ones", function () {
+					it("should accept a common param", function () {
 						taskDefinition.addParam("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
 
-					it("should accept an optional param", () => {
+					it("should accept an optional param", function () {
 						taskDefinition.addOptionalParam("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
 
-					it("should accept a flag", () => {
+					it("should accept a flag", function () {
 						taskDefinition.addFlag("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
 				});
 			});
 
-			describe("accepts multiple optional params", () => {
-				beforeEach("add optional positional", () => {
+			describe("accepts multiple optional params", function () {
+				beforeEach("add optional positional", function () {
 					taskDefinition.addOptionalPositionalParam("asd");
 				});
 
-				it("should accept an optional positional param", () => {
+				it("should accept an optional positional param", function () {
 					taskDefinition.addOptionalPositionalParam("asd2");
 					const last = getLastPositionalParam(taskDefinition);
 					assert.equal(last.name, "asd2");
 					assert.isTrue(last.isOptional);
 				});
 
-				it("should accept an optional variadic positional param", () => {
+				it("should accept an optional variadic positional param", function () {
 					taskDefinition.addOptionalVariadicPositionalParam("asd2");
 					const last = getLastPositionalParam(taskDefinition);
 					assert.equal(last.name, "asd2");
@@ -262,33 +262,33 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			describe("no positional params after a variadic positional param", () => {
-				beforeEach("add variadic param", () => {
+			describe("no positional params after a variadic positional param", function () {
+				beforeEach("add variadic param", function () {
 					taskDefinition.addVariadicPositionalParam("asd");
 				});
 
-				it("should throw on adding a positional param", () => {
+				it("should throw on adding a positional param", function () {
 					expectBuilderError(
 						() => taskDefinition.addPositionalParam("p"),
 						ERRORS.TASK_DEFINITIONS.PARAM_AFTER_VARIADIC
 					);
 				});
 
-				it("should throw on adding an optional positional param", () => {
+				it("should throw on adding an optional positional param", function () {
 					expectBuilderError(
 						() => taskDefinition.addOptionalPositionalParam("p"),
 						ERRORS.TASK_DEFINITIONS.PARAM_AFTER_VARIADIC
 					);
 				});
 
-				it("should throw on adding another variadic param", () => {
+				it("should throw on adding another variadic param", function () {
 					expectBuilderError(
 						() => taskDefinition.addVariadicPositionalParam("p"),
 						ERRORS.TASK_DEFINITIONS.PARAM_AFTER_VARIADIC
 					);
 				});
 
-				it("should throw on adding an optional variadic param", () => {
+				it("should throw on adding an optional variadic param", function () {
 					expectBuilderError(
 						() => taskDefinition.addOptionalVariadicPositionalParam("p"),
 						ERRORS.TASK_DEFINITIONS.PARAM_AFTER_VARIADIC
@@ -296,18 +296,18 @@ describe("SimpleTaskDefinition", () => {
 				});
 
 				// eslint-disable-next-line sonarjs/no-identical-functions
-				describe("should still accept non-positional ones", () => {
-					it("should accept a common param", () => {
+				describe("should still accept non-positional ones", function () {
+					it("should accept a common param", function () {
 						taskDefinition.addParam("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
 
-					it("should accept an optional param", () => {
+					it("should accept an optional param", function () {
 						taskDefinition.addOptionalParam("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
 
-					it("should accept a flag", () => {
+					it("should accept a flag", function () {
 						taskDefinition.addFlag("p");
 						assert.notEqual(taskDefinition.paramDefinitions.p, undefined);
 					});
@@ -316,14 +316,14 @@ describe("SimpleTaskDefinition", () => {
 		});
 	});
 
-	describe("Setting params", () => {
+	describe("Setting params", function () {
 		let taskDefinition: SimpleTaskDefinition;
 
-		beforeEach("init taskDefinition", () => {
+		beforeEach("init taskDefinition", function () {
 			taskDefinition = new SimpleTaskDefinition("name", true);
 		});
 
-		describe("addParam", () => {
+		describe("addParam", function () {
 			it("Should fail if the param name isn't camelCase", function () {
 				expectBuilderError(
 					() => taskDefinition.addParam("A"),
@@ -366,7 +366,7 @@ describe("SimpleTaskDefinition", () => {
 				);
 			});
 
-			it("should add the param correctly", () => {
+			it("should add the param correctly", function () {
 				taskDefinition.addParam("p", "desc", 123, types.int, true);
 				assertParamDefinition(taskDefinition.paramDefinitions.p, {
 					name: "p",
@@ -379,7 +379,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should set isOptional if a default value is provided", () => {
+			it("should set isOptional if a default value is provided", function () {
 				taskDefinition.addParam("p", "desc", 123, types.int);
 				assertParamDefinition(taskDefinition.paramDefinitions.p, {
 					defaultValue: 123,
@@ -387,7 +387,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should accept an optional parm with undefined as default vlaue", () => {
+			it("should accept an optional parm with undefined as default vlaue", function () {
 				taskDefinition.addParam("p", "desc", undefined, types.int, true);
 				assertParamDefinition(taskDefinition.paramDefinitions.p, {
 					defaultValue: undefined,
@@ -395,19 +395,19 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addParam("p");
 				assert.equal(taskDefinition.paramDefinitions.p.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
 				);
 			});
 
-			it("should throw if a default value is set to a mandatory param", () => {
+			it("should throw if a default value is set to a mandatory param", function () {
 				expectBuilderError(
 					() => taskDefinition.addParam("p", "desc", 123, types.int, false),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_IN_MANDATORY_PARAM
@@ -415,8 +415,8 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addOptionalParam", () => {
-			it("should set the param correctly", () => {
+		describe("addOptionalParam", function () {
+			it("should set the param correctly", function () {
 				taskDefinition.addOptionalParam("p", "desc", 123, types.int);
 				assertParamDefinition(taskDefinition.paramDefinitions.p, {
 					name: "p",
@@ -429,7 +429,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should work with undefined as default value", () => {
+			it("should work with undefined as default value", function () {
 				taskDefinition.addOptionalParam("p", "desc", undefined);
 				assertParamDefinition(taskDefinition.paramDefinitions.p, {
 					defaultValue: undefined,
@@ -437,12 +437,12 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addOptionalParam("p");
 				assert.equal(taskDefinition.paramDefinitions.p.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addOptionalParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
@@ -450,8 +450,8 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addFlag", () => {
-			it("should set an optional boolean param", () => {
+		describe("addFlag", function () {
+			it("should set an optional boolean param", function () {
 				taskDefinition.addFlag("f", "d");
 
 				assertParamDefinition(taskDefinition.paramDefinitions.f, {
@@ -466,13 +466,13 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addPositionalParam", () => {
-			it("shouldn't add the param definition to paramDefinitions", () => {
+		describe("addPositionalParam", function () {
+			it("shouldn't add the param definition to paramDefinitions", function () {
 				taskDefinition.addPositionalParam("p", "desc");
 				assert.isUndefined(taskDefinition.paramDefinitions.p);
 			});
 
-			it("should add the param definition to positionalParamDefinitions", () => {
+			it("should add the param definition to positionalParamDefinitions", function () {
 				taskDefinition.addPositionalParam("p", "desc", 123, types.int, true);
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
 					name: "p",
@@ -485,7 +485,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should work with undefined as default value", () => {
+			it("should work with undefined as default value", function () {
 				taskDefinition.addPositionalParam("p", "desc", undefined, types.int, true);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -494,27 +494,27 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addPositionalParam("p", "desc");
 				const last = getLastPositionalParam(taskDefinition);
 				assert.equal(last.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addPositionalParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
 				);
 			});
 
-			it("should throw if a default value is set to a mandatory param", () => {
+			it("should throw if a default value is set to a mandatory param", function () {
 				expectBuilderError(
 					() => taskDefinition.addPositionalParam("p", "desc", 123, types.int, false),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_IN_MANDATORY_PARAM
 				);
 			});
 
-			it("should set isOptional if default value is provided", () => {
+			it("should set isOptional if default value is provided", function () {
 				taskDefinition.addPositionalParam("p", "desc", "A");
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -524,13 +524,13 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addOptionalPositionalParam", () => {
-			it("shouldn't add the param definition to paramDefinitions", () => {
+		describe("addOptionalPositionalParam", function () {
+			it("shouldn't add the param definition to paramDefinitions", function () {
 				taskDefinition.addOptionalPositionalParam("p", "desc");
 				assert.isUndefined(taskDefinition.paramDefinitions.p);
 			});
 
-			it("should add the param definition to positionalParamDefinitions", () => {
+			it("should add the param definition to positionalParamDefinitions", function () {
 				taskDefinition.addOptionalPositionalParam("p", "desc", 123, types.int);
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
 					name: "p",
@@ -543,7 +543,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should work with undefined as default value", () => {
+			it("should work with undefined as default value", function () {
 				taskDefinition.addOptionalPositionalParam("p", "desc", undefined, types.int);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -552,13 +552,13 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addOptionalPositionalParam("p", "desc");
 				const last = getLastPositionalParam(taskDefinition);
 				assert.equal(last.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addOptionalPositionalParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
@@ -566,13 +566,13 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addVariadicPositionalParam", () => {
-			it("shouldn't add the param definition to paramDefinitions", () => {
+		describe("addVariadicPositionalParam", function () {
+			it("shouldn't add the param definition to paramDefinitions", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc");
 				assert.isUndefined(taskDefinition.paramDefinitions.p);
 			});
 
-			it("should add the param definition to positionalParamDefinitions", () => {
+			it("should add the param definition to positionalParamDefinitions", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc", [123], types.int, true);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -586,7 +586,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should convert the default value into an array if necessary", () => {
+			it("should convert the default value into an array if necessary", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc", 123, types.int, true);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -595,7 +595,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should work with undefined as default value", () => {
+			it("should work with undefined as default value", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc", undefined, types.int, true);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -605,13 +605,13 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc");
 				const last = getLastPositionalParam(taskDefinition);
 				assert.equal(last.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addVariadicPositionalParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
@@ -623,7 +623,7 @@ describe("SimpleTaskDefinition", () => {
 				);
 			});
 
-			it("should throw if a default value is set to a mandatory param", () => {
+			it("should throw if a default value is set to a mandatory param", function () {
 				expectBuilderError(
 					() => taskDefinition.addVariadicPositionalParam("p", "desc", 123, types.int, false),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_IN_MANDATORY_PARAM
@@ -635,7 +635,7 @@ describe("SimpleTaskDefinition", () => {
 				);
 			});
 
-			it("should set isOptional if default value is provided", () => {
+			it("should set isOptional if default value is provided", function () {
 				taskDefinition.addVariadicPositionalParam("p", "desc", "A");
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -646,13 +646,13 @@ describe("SimpleTaskDefinition", () => {
 			});
 		});
 
-		describe("addOptionalVariadicPositionalParam", () => {
-			it("shouldn't add the param definition to paramDefinitions", () => {
+		describe("addOptionalVariadicPositionalParam", function () {
+			it("shouldn't add the param definition to paramDefinitions", function () {
 				taskDefinition.addOptionalVariadicPositionalParam("p", "desc");
 				assert.isUndefined(taskDefinition.paramDefinitions.p);
 			});
 
-			it("should add the param definition to positionalParamDefinitions", () => {
+			it("should add the param definition to positionalParamDefinitions", function () {
 				taskDefinition.addOptionalVariadicPositionalParam("p", "desc", [123], types.int);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -666,7 +666,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should convert the default value into an array if necessary", () => {
+			it("should convert the default value into an array if necessary", function () {
 				taskDefinition.addOptionalVariadicPositionalParam("p", "desc", 123, types.int);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -675,7 +675,7 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should work with undefined as default value", () => {
+			it("should work with undefined as default value", function () {
 				taskDefinition.addOptionalVariadicPositionalParam("p", "desc", undefined, types.int);
 
 				assertParamDefinition(getLastPositionalParam(taskDefinition), {
@@ -685,13 +685,13 @@ describe("SimpleTaskDefinition", () => {
 				});
 			});
 
-			it("should use types.string as if non type is given", () => {
+			it("should use types.string as if non type is given", function () {
 				taskDefinition.addOptionalVariadicPositionalParam("p", "desc");
 				const last = getLastPositionalParam(taskDefinition);
 				assert.equal(last.type, types.string);
 			});
 
-			it("should throw if a non-string default value is given but its type isn't set", () => {
+			it("should throw if a non-string default value is given but its type isn't set", function () {
 				expectBuilderError(
 					() => taskDefinition.addOptionalVariadicPositionalParam("p", "desc", 123),
 					ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
@@ -706,11 +706,11 @@ describe("SimpleTaskDefinition", () => {
 	});
 });
 
-describe("OverriddenTaskDefinition", () => {
+describe("OverriddenTaskDefinition", function () {
 	let parentTask: SimpleTaskDefinition;
 	let overriddenTask: OverriddenTaskDefinition;
 
-	beforeEach("init tasks", () => {
+	beforeEach("init tasks", function () {
 		parentTask = new SimpleTaskDefinition("t")
 			.addParam("p", "desc")
 			.addFlag("f")
@@ -719,48 +719,48 @@ describe("OverriddenTaskDefinition", () => {
 		overriddenTask = new OverriddenTaskDefinition(parentTask, true);
 	});
 
-	describe("construction", () => {
-		it("should have the right name", () => {
+	describe("construction", function () {
+		it("should have the right name", function () {
 			assert.equal(overriddenTask.name, "t");
 		});
 
-		it("should set isInternal", () => {
+		it("should set isInternal", function () {
 			assert.isTrue(overriddenTask.isInternal);
 		});
 
-		it("should set the parent task", () => {
+		it("should set the parent task", function () {
 			assert.equal(overriddenTask.parentTaskDefinition, parentTask);
 		});
 	});
 
-	describe("inherited properties", () => {
-		it("should return the parent's name", () => {
+	describe("inherited properties", function () {
+		it("should return the parent's name", function () {
 			assert.equal(overriddenTask.name, parentTask.name);
 		});
 
-		it("should return the parent's action", () => {
+		it("should return the parent's action", function () {
 			assert.equal(overriddenTask.action, parentTask.action);
 		});
 
-		it("should return the parent's description", () => {
+		it("should return the parent's description", function () {
 			assert.equal(
 				overriddenTask.description,
 				parentTask.description === undefined ? "" : parentTask.description
 			);
 		});
 
-		it("should return the parent's param definitions", () => {
+		it("should return the parent's param definitions", function () {
 			assert.equal(overriddenTask.paramDefinitions, parentTask.paramDefinitions);
 		});
 
-		it("should return the parent's positional param definitions", () => {
+		it("should return the parent's positional param definitions", function () {
 			assert.equal(
 				overriddenTask.positionalParamDefinitions,
 				parentTask.positionalParamDefinitions
 			);
 		});
 
-		it("should work with more than one level of chaining", () => {
+		it("should work with more than one level of chaining", function () {
 			const overriddenAgain = new OverriddenTaskDefinition(overriddenTask, false);
 			assert.equal(overriddenAgain.isInternal, false);
 			assert.equal(overriddenAgain.name, parentTask.name);
@@ -776,7 +776,7 @@ describe("OverriddenTaskDefinition", () => {
 			);
 		});
 
-		it("should return overridden actions", () => {
+		it("should return overridden actions", function () {
 			assert.equal(overriddenTask.action, parentTask.action);
 
 			const action2 = async (): Promise<any> => 1;
@@ -799,7 +799,7 @@ describe("OverriddenTaskDefinition", () => {
 			assert.equal(overriddenAgain.action, action4);
 		});
 
-		it("should return overridden descriptions", () => {
+		it("should return overridden descriptions", function () {
 			assert.equal(
 				overriddenTask.description,
 				parentTask.description === undefined ? "" : parentTask.description
@@ -820,8 +820,8 @@ describe("OverriddenTaskDefinition", () => {
 		});
 	});
 
-	describe("Param definitions can be added only in compatible cases", () => {
-		it("should add a flag param if addFlag is called", () => {
+	describe("Param definitions can be added only in compatible cases", function () {
+		it("should add a flag param if addFlag is called", function () {
 			overriddenTask.addFlag("flagParam", "flag in overriden task");
 			assertParamDefinition(overriddenTask.paramDefinitions.flagParam, {
 				name: "flagParam",
@@ -834,7 +834,7 @@ describe("OverriddenTaskDefinition", () => {
 			});
 		});
 
-		it("should throw if adding a param of same name that was already defined in parent task", () => {
+		it("should throw if adding a param of same name that was already defined in parent task", function () {
 			const definedParamName = "f";
 			// a param definition in an overridenTask is present in the parentTask ref as well
 			assert.isDefined(overriddenTask.paramDefinitions[definedParamName]);
@@ -860,14 +860,14 @@ describe("OverriddenTaskDefinition", () => {
 			);
 		});
 
-		it("should throw if addParam is called with isOptional = false", () => {
+		it("should throw if addParam is called with isOptional = false", function () {
 			expectBuilderError(
 				() => overriddenTask.addParam("p"),
 				ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_MANDATORY_PARAMS
 			);
 		});
 
-		it("should add an optional param if addParam is called with isOptional = true", () => {
+		it("should add an optional param if addParam is called with isOptional = true", function () {
 			const optParamName = "optParam";
 			assert.isUndefined(overriddenTask.paramDefinitions[optParamName], "");
 
@@ -876,35 +876,35 @@ describe("OverriddenTaskDefinition", () => {
 			assert.isDefined(overriddenTask.paramDefinitions[optParamName]);
 		});
 
-		it("should add an optional param if addOptionalParam is called", () => {
+		it("should add an optional param if addOptionalParam is called", function () {
 			const optParamName = "optParam";
 			assert.isUndefined(overriddenTask.paramDefinitions[optParamName], "");
 			overriddenTask.addOptionalParam(optParamName);
 			assert.isDefined(overriddenTask.paramDefinitions[optParamName]);
 		});
 
-		it("should throw if addPositionalParam is called", () => {
+		it("should throw if addPositionalParam is called", function () {
 			expectBuilderError(
 				() => overriddenTask.addPositionalParam("p"),
 				ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_POSITIONAL_PARAMS
 			);
 		});
 
-		it("should throw if addOptionalPositionalParam is called", () => {
+		it("should throw if addOptionalPositionalParam is called", function () {
 			expectBuilderError(
 				() => overriddenTask.addOptionalPositionalParam("p"),
 				ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_POSITIONAL_PARAMS
 			);
 		});
 
-		it("should throw if addVariadicPositionalParam is called", () => {
+		it("should throw if addVariadicPositionalParam is called", function () {
 			expectBuilderError(
 				() => overriddenTask.addVariadicPositionalParam("p"),
 				ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_VARIADIC_PARAMS
 			);
 		});
 
-		it("should throw if addOptionalVariadicPositionalParam is called", () => {
+		it("should throw if addOptionalVariadicPositionalParam is called", function () {
 			expectBuilderError(
 				() => overriddenTask.addOptionalVariadicPositionalParam("p"),
 				ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_VARIADIC_PARAMS

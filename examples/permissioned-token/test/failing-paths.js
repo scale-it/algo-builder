@@ -26,14 +26,14 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 	describe("Token Issuance", function () {
 		this.beforeAll(setUpCtx);
 
-		it("should not issue token if receiver is not opted in", () => {
+		it("should not issue token if receiver is not opted in", function () {
 			assert.throws(
 				() => ctx.issue(asaReserve.account, elon, 20),
 				`RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${ctx.assetIndex}`
 			);
 		});
 
-		it("should not issue if token is killed", () => {
+		it("should not issue if token is killed", function () {
 			// Opt-in to ASA by receiver
 			ctx.optInToASA(elon.address);
 
@@ -41,13 +41,13 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.issue(asaReserve.account, elon, 20), RUNTIME_ERR1009);
 		});
 
-		it("should reject issuance tx if sender is not token reserve", () => {
+		it("should reject issuance tx if sender is not token reserve", function () {
 			// Opt-in to ASA by receiver
 			ctx.optInToASA(elon.address);
 			assert.throws(() => ctx.issue(bob.account, elon, 20), RUNTIME_ERR1009);
 		});
 
-		it("should reject issuance tx if trying to send asset using secret key instead of clawback", () => {
+		it("should reject issuance tx if trying to send asset using secret key instead of clawback", function () {
 			// Opt-in to ASA by receiver
 			ctx.optInToASA(elon.address);
 
@@ -74,7 +74,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 	describe("Kill Token", function () {
 		this.beforeAll(setUpCtx);
 
-		it("should reject tx to kill token if sender is not token manager", () => {
+		it("should reject tx to kill token if sender is not token manager", function () {
 			// verify bob is not token manager
 			assert.notEqual(asaManager.address, bob.address);
 			// fails: bob trying to kill token
@@ -86,7 +86,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let permManagerAddr, permManager, whitelistParams;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			permManagerAddr = encodeAddress(
 				ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 			);
@@ -103,7 +103,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			};
 		});
 
-		it("should reject account whitelist if the account doesn't opt-in to permissions app", () => {
+		it("should reject account whitelist if the account doesn't opt-in to permissions app", function () {
 			// verify account not opted in
 			assert.isUndefined(ctx.elon.getAppFromLocal(ctx.permissionsappID));
 
@@ -114,7 +114,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("should not whitelist account if sender is not current permissions manager", () => {
+		it("should not whitelist account if sender is not current permissions manager", function () {
 			// opt-in to permissions by elon
 			ctx.optInToPermissionsSSC(elon.address);
 			ctx.syncAccounts();
@@ -136,7 +136,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 	});
 
 	describe("Opt Out", function () {
-		it("should reject tx if user not opted-in", () => {
+		it("should reject tx if user not opted-in", function () {
 			const asaCreator = ctx.getAccount(asaDef.creator);
 			assert.throws(
 				() => ctx.optOut(asaCreator.address, elon.account),
@@ -148,7 +148,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 	describe("Change Permissions Manager", function () {
 		this.beforeAll(setUpCtx);
 
-		it("should fail if sender is not current permissions manager", () => {
+		it("should fail if sender is not current permissions manager", function () {
 			const permManagerAddr = encodeAddress(
 				ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 			);
@@ -177,7 +177,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let permManagerAddr, permManager, forceTransferGroup;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			permManagerAddr = encodeAddress(
 				ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 			);
@@ -230,7 +230,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			];
 		});
 
-		it("Should fail on force transfer if transaction group is not valid", () => {
+		it("Should fail on force transfer if transaction group is not valid", function () {
 			const forceTxGroup = [...forceTransferGroup];
 
 			// fails as permissions is not called
@@ -255,14 +255,14 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("should reject transfer if transaction group is valid but controller.sender is not equal to asset.sender", () => {
+		it("should reject transfer if transaction group is valid but controller.sender is not equal to asset.sender", function () {
 			const forceTxGroup = [...forceTransferGroup];
 			forceTxGroup[0].fromAccount = elon.account;
 
 			assert.throws(() => ctx.runtime.executeTx(forceTxGroup), RUNTIME_ERR1009);
 		});
 
-		it("Should reject force transfer if accounts are not whitelisted", () => {
+		it("Should reject force transfer if accounts are not whitelisted", function () {
 			// Issue some tokens to sender
 			ctx.issue(asaReserve.account, bob, 150);
 			ctx.syncAccounts();
@@ -287,7 +287,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			ctx.forceTransfer(asaManager.account, bob, elon, 20);
 		});
 
-		it("Should reject transfer if sender is not token manager", () => {
+		it("Should reject transfer if sender is not token manager", function () {
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, elon.address);
 			ctx.whitelist(permManager.account, bob.address);
@@ -302,7 +302,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.forceTransfer(bob.account, bob, elon, 20), RUNTIME_ERR1009);
 		});
 
-		it("Should reject force transfer if accounts are whitelisted but receiver balance becomes > 100", () => {
+		it("Should reject force transfer if accounts are whitelisted but receiver balance becomes > 100", function () {
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, elon.address);
 			ctx.whitelist(permManager.account, bob.address);
@@ -319,7 +319,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("Should reject force transfer if token is killed", () => {
+		it("Should reject force transfer if token is killed", function () {
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, elon.address);
 			ctx.whitelist(permManager.account, bob.address);
@@ -342,7 +342,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let permManagerAddr, permManager, tokenTransferGroup;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			permManagerAddr = encodeAddress(
 				ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 			);
@@ -394,7 +394,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			];
 		});
 
-		it("Should fail if transaction group is not valid", () => {
+		it("Should fail if transaction group is not valid", function () {
 			const txGroup = [...tokenTransferGroup];
 
 			// fails as permissions is not called
@@ -419,14 +419,14 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("should reject transfer if transaction group is valid but controller.sender is not equal to asset.sender", () => {
+		it("should reject transfer if transaction group is valid but controller.sender is not equal to asset.sender", function () {
 			const txGroup = [...tokenTransferGroup];
 			txGroup[0].fromAccount = elon.account;
 
 			assert.throws(() => ctx.runtime.executeTx(txGroup), RUNTIME_ERR1009);
 		});
 
-		it("should reject transfer if sender trying to transfer token using secret key instead of clawback", () => {
+		it("should reject transfer if sender trying to transfer token using secret key instead of clawback", function () {
 			const assetTransferParams = {
 				type: types.TransactionType.TransferAsset,
 				sign: types.SignType.SecretKey,
@@ -444,7 +444,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("Should reject transfer if accounts are not whitelisted", () => {
+		it("Should reject transfer if accounts are not whitelisted", function () {
 			// Issue some tokens to sender
 			ctx.issue(asaReserve.account, bob, 150);
 			ctx.syncAccounts();
@@ -463,7 +463,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			ctx.transfer(bob, elon, 20);
 		});
 
-		it("Should reject force transfer if accounts are whitelisted but receiver balance becomes > 100", () => {
+		it("Should reject force transfer if accounts are whitelisted but receiver balance becomes > 100", function () {
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, elon.address);
 			ctx.whitelist(permManager.account, bob.address);
@@ -477,7 +477,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.transfer(bob, elon, 105), RUNTIME_ERR1009);
 		});
 
-		it("should reject transfer if rules are followed, but token is killed", () => {
+		it("should reject transfer if rules are followed, but token is killed", function () {
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, elon.address);
 			ctx.whitelist(permManager.account, bob.address);
@@ -497,7 +497,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let updateReserveParams;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			const oldReserveAssetHolding = ctx.getAssetHolding(asaReserve.address);
 			const newReserveAddr = elon.address;
 			ctx.optInToASA(newReserveAddr);
@@ -548,7 +548,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			];
 		});
 
-		it("Should fail if transaction group is not valid", () => {
+		it("Should fail if transaction group is not valid", function () {
 			const txGroup = [...updateReserveParams];
 
 			// fails as paying fees of clawback-lsig is skipped
@@ -564,7 +564,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("should reject update if controller.sender is not asset manager", () => {
+		it("should reject update if controller.sender is not asset manager", function () {
 			const txGroup = [...updateReserveParams];
 			txGroup[0].fromAccount = bob.account;
 
@@ -573,7 +573,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.runtime.executeTx(txGroup), RUNTIME_ERR1009);
 		});
 
-		it("should reject update if sender of asset config tx is not asset manager", () => {
+		it("should reject update if sender of asset config tx is not asset manager", function () {
 			const txGroup = [...updateReserveParams];
 			txGroup[3].fromAccount = bob.account;
 
@@ -590,7 +590,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let permManagerAddr, permManager, ceaseTxGroup;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			permManagerAddr = encodeAddress(
 				ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 			);
@@ -630,7 +630,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			];
 		});
 
-		it("Should fail if transaction group is invalid", () => {
+		it("Should fail if transaction group is invalid", function () {
 			const txGroup = [...ceaseTxGroup];
 
 			// fails because paying fees of clawback-lsig is skipped
@@ -640,7 +640,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.runtime.executeTx([txGroup[1], txGroup[2]]), REJECTED_BY_LOGIC);
 		});
 
-		it("should reject cease if call to controller is not signed by asset manager", () => {
+		it("should reject cease if call to controller is not signed by asset manager", function () {
 			const txGroup = [...ceaseTxGroup];
 			txGroup[0].fromAccount = bob.account;
 
@@ -649,7 +649,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.runtime.executeTx(txGroup), RUNTIME_ERR1009);
 		});
 
-		it("Should fail if trying to cease more tokens than issued", () => {
+		it("Should fail if trying to cease more tokens than issued", function () {
 			const txGroup = [...ceaseTxGroup];
 			// Opt-In to permissions SSC & Whitelist
 			ctx.whitelist(permManager.account, bob.address);
@@ -669,21 +669,21 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			);
 		});
 
-		it("Should fail token index is not valid", () => {
+		it("Should fail token index is not valid", function () {
 			const txGroup = [...ceaseTxGroup];
 
 			txGroup[0].foreignAssets = [99];
 			assert.throws(() => ctx.runtime.executeTx(txGroup), RUNTIME_ERR1009);
 		});
 
-		it("Should fail if sufficient fees is not covered in fee payment tx", () => {
+		it("Should fail if sufficient fees is not covered in fee payment tx", function () {
 			const txGroup = [...ceaseTxGroup];
 
 			txGroup[2].amountMicroAlgos = txGroup[1].payFlags.totalFee - 100;
 			assert.throws(() => ctx.runtime.executeTx(txGroup), REJECTED_BY_LOGIC);
 		});
 
-		it("should reject cease if token is killed", () => {
+		it("should reject cease if token is killed", function () {
 			const txGroup = [...ceaseTxGroup];
 			ctx.whitelist(permManager.account, bob.address);
 			ctx.issue(asaReserve.account, bob, 200);
@@ -699,7 +699,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		this.beforeAll(setUpCtx);
 
 		let setPermissionsParams;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			const appArgs = ["str:set_permission", `int:${ctx.permissionsappID}`];
 			setPermissionsParams = {
 				type: types.TransactionType.CallApp,
@@ -713,7 +713,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		});
 
 		// note: in current version controller.manager == asa.manager
-		it("should reject if sender of controller is not asa.manager", () => {
+		it("should reject if sender of controller is not asa.manager", function () {
 			// verify first elon is not asset manager
 			assert.notEqual(asaManager.address, ctx.elon.address);
 
@@ -721,7 +721,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 			assert.throws(() => ctx.runtime.executeTx([setPermissionsParams]), RUNTIME_ERR1009);
 		});
 
-		it("should reject if application args are incorrect", () => {
+		it("should reject if application args are incorrect", function () {
 			setPermissionsParams.appArgs = ["str:set_Permission", `int:${ctx.permissionsappID}`];
 			assert.throws(() => ctx.runtime.executeTx([setPermissionsParams]), RUNTIME_ERR1009);
 		});
@@ -730,7 +730,7 @@ describe("Permissioned Token Tests - Failing Paths", function () {
 		 * Important test: here we deploy a new asset(with same manager as the original one),
 		 * but since token index will be different, tx is rejected. Means that we cannot bypass
 		 * the contract even if manager (OR other asset params) are same as the original. */
-		it("should reject if asset index is incorrect even if manager is same", () => {
+		it("should reject if asset index is incorrect even if manager is same", function () {
 			// deploy new asset with same manager(alice) as original one
 			const newAssetId = ctx.runtime.deployASA("tesla", {
 				creator: { ...ctx.alice.account, name: "alice" },

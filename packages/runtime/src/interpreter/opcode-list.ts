@@ -5148,7 +5148,7 @@ export class Json_ref extends Op {
 	computeCost(): number {
 		return 25 + 2 * Math.ceil(this.length / 7); // cost = 25 + ceil(bytes / 7)
 	}
-	
+
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 2, this.line);
 		const key = this.assertBytes(stack.pop(), this.line);
@@ -5168,11 +5168,11 @@ export class Json_ref extends Op {
 		}
 		switch (this.jsonType) {
 			case "byte": {
-				if (typeof jsonObject[keyString] === 'string') {
+				if (typeof jsonObject[keyString] === "string") {
 					stack.push(stringToBytes(jsonObject[keyString]));
 				} else {
 					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
-						expected: 'byte',
+						expected: "byte",
 						actual: typeof jsonObject[keyString],
 						line: this.line,
 					});
@@ -5180,14 +5180,16 @@ export class Json_ref extends Op {
 				break;
 			}
 			case "int": {
-				if (typeof jsonObject[keyString] === 'number' || 
-					typeof jsonObject[keyString] === 'bigint') {
+				if (
+					typeof jsonObject[keyString] === "number" ||
+					typeof jsonObject[keyString] === "bigint"
+				) {
 					const result = BigInt(jsonObject[keyString]);
 					this.checkOverflow(result, this.line, MAX_UINT64);
 					stack.push(result);
 				} else {
 					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
-						expected: 'Uint64',
+						expected: "Uint64",
 						actual: typeof jsonObject[keyString],
 						line: this.line,
 					});
@@ -5195,15 +5197,15 @@ export class Json_ref extends Op {
 				break;
 			}
 			case "object": {
-				if (typeof jsonObject[keyString] === 'object') {
+				if (typeof jsonObject[keyString] === "object") {
 					stack.push(stringToBytes(nativeBigJSON.stringify(jsonObject[keyString])));
 				} else {
 					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
-						expected: 'object',
+						expected: "object",
 						actual: typeof jsonObject[keyString],
 						line: this.line,
 					});
-				} 
+				}
 				break;
 			}
 		}

@@ -18,7 +18,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 	let assetId: number;
 	let appID: number;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		john = new AccountStore(initialBalance, elonMuskAccount);
 		alice = new AccountStore(initialBalance);
 		runtime = new Runtime([john, alice]); // setup test
@@ -58,7 +58,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
 	const key = "counter";
 
-	it("should execute group of (payment + asset transaction) successfully", () => {
+	it("should execute group of (payment + asset transaction) successfully", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.TransferAlgo,
@@ -94,7 +94,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		}
 	});
 
-	it("should not execute payment transaction (in group) if asset transaction fails", () => {
+	it("should not execute payment transaction (in group) if asset transaction fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.TransferAlgo,
@@ -132,7 +132,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(alice.balance(), initialBalance);
 	});
 
-	it("should execute payment and ssc call", () => {
+	it("should execute payment and ssc call", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.CallApp,
@@ -165,7 +165,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(alice.balance(), initialBalance + 100n);
 	});
 
-	it("should fail if payment transaction in group fails", () => {
+	it("should fail if payment transaction in group fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.CallApp,
@@ -199,7 +199,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(alice.balance(), initialBalance);
 	});
 
-	it("should not freeze asset if payment fails", () => {
+	it("should not freeze asset if payment fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.FreezeAsset,
@@ -229,7 +229,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(alice.getAssetHolding(assetId)?.["is-frozen"], false);
 	});
 
-	it("should not modify asset if payment fails", () => {
+	it("should not modify asset if payment fails", function () {
 		const modFields = {
 			manager: john.address,
 			reserve: john.address,
@@ -265,7 +265,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(runtime.getAssetDef(assetId).manager, assetManagerOrig);
 	});
 
-	it("should not revoke asset if payment fails", () => {
+	it("should not revoke asset if payment fails", function () {
 		// transfer asset to alice
 		runtime.executeTx([
 			{
@@ -310,7 +310,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets);
 	});
 
-	it("should not destroy asset if payment fails", () => {
+	it("should not destroy asset if payment fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.DestroyAsset,
@@ -338,7 +338,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.equal(runtime.getAssetDef(assetId).creator, john.address);
 	});
 
-	it("should fail close app if payment transaction fails", () => {
+	it("should fail close app if payment transaction fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.CloseApp,
@@ -366,7 +366,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.isDefined(john.getLocalState(appID, key));
 	});
 
-	it("should fail clear app if payment transaction fails", () => {
+	it("should fail clear app if payment transaction fails", function () {
 		const txGroup: types.ExecParams[] = [
 			{
 				type: types.TransactionType.ClearApp,
@@ -394,7 +394,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 		assert.isDefined(john.getLocalState(appID, key));
 	});
 
-	it("should fail asset payment, and algo payment if ssc call fails", () => {
+	it("should fail asset payment, and algo payment if ssc call fails", function () {
 		// close out from app
 		runtime.executeTx([
 			{

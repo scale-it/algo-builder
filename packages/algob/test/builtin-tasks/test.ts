@@ -12,7 +12,7 @@ describe("Test task", function () {
 
 		// should be 'fixture-projects/typescript-project/tsconfig.json'
 		const expectedTsConfigPath = path.join(process.cwd(), "tsconfig.json");
-		await this.env.run(TASK_TEST).then(() => {
+		await this.env.run(TASK_TEST).then(function () {
 			assert.deepEqual(process.env.TS_NODE_PROJECT, expectedTsConfigPath);
 		});
 	});

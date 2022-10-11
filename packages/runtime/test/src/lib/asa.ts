@@ -13,8 +13,8 @@ const namedAccount: Account = {
 	sk: new Uint8Array(1),
 };
 
-describe("ASA parser", () => {
-	it("Should validate correct obj", async () => {
+describe("ASA parser", function () {
+	it("Should validate correct obj", async function () {
 		const asaUrl = "u".repeat(96);
 		const valid: types.ASADefs = {
 			A1: {
@@ -44,7 +44,7 @@ describe("ASA parser", () => {
 		});
 	});
 
-	it("Should validate all parameters", async () => {
+	it("Should validate all parameters", async function () {
 		const valid = {
 			A1: {
 				total: 213,
@@ -81,7 +81,7 @@ describe("ASA parser", () => {
 		});
 	});
 
-	it("Should check total to be a number", async () => {
+	it("Should check total to be a number", async function () {
 		const obj = {
 			A1: {
 				total: "hi",
@@ -97,7 +97,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should accept ASA with total == 0", async () => {
+	it("Should accept ASA with total == 0", async function () {
 		const obj = {
 			A1: {
 				total: 0,
@@ -109,7 +109,7 @@ describe("ASA parser", () => {
 		assert.doesNotThrow(() => validateASADefs(obj, new Map<string, Account>(), ""));
 	});
 
-	it("Should check total to be a positive number <= 2^64 - 1", async () => {
+	it("Should check total to be a positive number <= 2^64 - 1", async function () {
 		let obj = {
 			A1: {
 				total: 0xffffffffffffffffn + 5n,
@@ -137,7 +137,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should include filename", async () => {
+	it("Should include filename", async function () {
 		const obj = {
 			A1: {
 				total: "hi",
@@ -153,7 +153,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should validate decimals", async () => {
+	it("Should validate decimals", async function () {
 		const obj = {
 			A1: {
 				total: 1,
@@ -169,7 +169,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should validate unitName; too long", async () => {
+	it("Should validate unitName; too long", async function () {
 		const obj = {
 			A1: {
 				total: 1,
@@ -185,7 +185,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should validate url; too long", async () => {
+	it("Should validate url; too long", async function () {
 		const obj = {
 			A1: {
 				total: 1,
@@ -203,7 +203,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should validate metadataHash", async () => {
+	it("Should validate metadataHash", async function () {
 		/** negative paths **/
 
 		// check utf-8 strings
@@ -282,7 +282,7 @@ describe("ASA parser", () => {
 		);
 	});
 
-	it("Should check existence of opt-in account name accounts; green path", async () => {
+	it("Should check existence of opt-in account name accounts; green path", async function () {
 		const obj = {
 			A1: {
 				total: 1,
@@ -295,7 +295,7 @@ describe("ASA parser", () => {
 		validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
 	});
 
-	it("Should check existence of opt-in account name accounts; empty", async () => {
+	it("Should check existence of opt-in account name accounts; empty", async function () {
 		const obj = {
 			A1: {
 				total: 1,
@@ -308,7 +308,7 @@ describe("ASA parser", () => {
 		validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
 	});
 
-	it("Should fail if opt-in account doesn't exist", async () => {
+	it("Should fail if opt-in account doesn't exist", async function () {
 		const obj = {
 			A1: {
 				total: 1,

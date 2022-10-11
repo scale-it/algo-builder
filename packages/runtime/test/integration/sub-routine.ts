@@ -59,7 +59,7 @@ describe("TEALv4: Sub routine", function () {
 		);
 	});
 
-	it("should calculate correct fibonacci number", () => {
+	it("should calculate correct fibonacci number", function () {
 		appDefinition.approvalProgramFilename = "fibonacci.teal";
 		appDefinition.appName = "Fibo5";
 		let appID = runtime.deployApp(
@@ -99,7 +99,7 @@ describe("TEALv4: Sub routine", function () {
 		assert.equal(result, 1n);
 	});
 
-	it("should throw cost exceed error", () => {
+	it("should throw cost exceed error", function () {
 		appDefinition.appArgs = ["int:9"];
 		appDefinition.approvalProgramFilename = "fibonacci.teal";
 		expectRuntimeError(

@@ -64,10 +64,10 @@ User can also override the fields in `assets/asa.yaml` when deploying ASA. Eg. I
 const { createMsigAddress } = require('@algo-builder/algob');
 
 const addrs = [alice.addr, bob.addr, john.addr];
-const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // version = 1, threshold = 2
+const [mparams, multisigAddr] = createMsigAddress(1, 2, addrs); // version = 1, threshold = 2
 
 // while deploying ASA pass custom asa param
-await deployer.deployASA("ASA-2", {...}, { reserve: multsigaddr }); // this will overwrite reserve field from assets/asa.yaml
+await deployer.deployASA("ASA-2", {...}, { reserve: multisigAddr }); // this will overwrite reserve field from assets/asa.yaml
 ```
 
 #### OptIn to ASA
@@ -283,4 +283,34 @@ const info = await deployer.getDeployedASC("MyApp");
 const [approvalInfo, clearInfo] = [info.approval, info.clear];
 
 const lsigInfo = await deployer.getDeployedASC("MyLsig");
+```
+
+## Helper methods
+
+`Deployer` class expose helper methods to improve developer's experience with the framewok. These methods can be also found under the same name and for most of the time with the same interfaces in `myalgowallet-mode`, `web-mode`, `wallectconnect-mode` and `Runtime`. These methods enable users to use `algosdk` types like `Transaction` and `SignedTransaction`. 
+List of the methods:
+- `makeTx` - creates`Transaction` object from `execParams`
+- `signTx` - signes `Transaction` and returns `SignedTransaction` object.
+- `makeAndSignTx` - combines funcnionality of the two methods listed above
+- `sendTxAndWait` - sends `SignedTransaction` and waits for the response that is returned to the user.
+
+### Practical example:
+```ts
+const execParams: AlgoTransferParam = {
+			type: TransactionType.TransferAlgo,
+			sign: SignType.SecretKey,
+			fromAccount: alice,
+			toAccountAddr: bob.addr,
+			amountMicroAlgos: 10000n,
+			payFlags: {},
+		};
+const signature: wtypes.Sign = {
+  sign: SignType.SecretKey,
+  fromAccount: alice,
+};
+const txnParams = await getSuggestedParams(deployer.algodClient);
+const signedTx = await deployer.makeAndSignTx([execParams], txnParams, signature);
+//second parameter below coresponds to number of rounds
+//the method will wait for the response (10)
+const txReceipt = await deployer.sendTxAndWait(signedTx,10);
 ```

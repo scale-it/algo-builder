@@ -4,18 +4,18 @@ import { assert } from "chai";
 import { assertDirChildren, assertDirectDirChildren } from "../../src/lib/files";
 import { expectBuilderError } from "../helpers/errors";
 
-describe("assertDirChildren", () => {
-	it("Should pass for children inputs", async () => {
+describe("assertDirChildren", function () {
+	it("Should pass for children inputs", async function () {
 		const out = assertDirChildren("a", ["a/a/a/b", "a/b", "a/b/c", "./a/e"]);
 		assert.deepEqual(out, ["a/a/a/b", "a/b", "a/b/c", "a/e"]);
 	});
 
-	it("Should normalize paths", async () => {
+	it("Should normalize paths", async function () {
 		const out = assertDirChildren("a", ["a/q/q/../../a/a/b", "a/q/q/../../b"]);
 		assert.deepEqual(out, ["a/a/a/b", "a/b"]);
 	});
 
-	it("Should crash on outside path", async () => {
+	it("Should crash on outside path", async function () {
 		expectBuilderError(
 			() => assertDirChildren("a", ["../../q/q/a/c"]),
 			ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
@@ -24,8 +24,8 @@ describe("assertDirChildren", () => {
 	});
 });
 
-describe("assertDirectDirChildren", () => {
-	it("Should pass for children inputs", async () => {
+describe("assertDirectDirChildren", function () {
+	it("Should pass for children inputs", async function () {
 		const out = assertDirectDirChildren("a", [
 			"a/b",
 			"a/c",
@@ -37,7 +37,7 @@ describe("assertDirectDirChildren", () => {
 		assert.deepEqual(out, ["a/b", "a/c", "a/d", "a/e", "a/f", "a/g"]);
 	});
 
-	it("Should crash on deep path", async () => {
+	it("Should crash on deep path", async function () {
 		expectBuilderError(
 			() => assertDirectDirChildren("a", ["a/b/c"]),
 			ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,
@@ -45,7 +45,7 @@ describe("assertDirectDirChildren", () => {
 		);
 	});
 
-	it("Should crash on outside path", async () => {
+	it("Should crash on outside path", async function () {
 		expectBuilderError(
 			() => assertDirectDirChildren("a", ["a/../b/1"]),
 			ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,

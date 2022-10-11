@@ -61,7 +61,7 @@ describe("Current Transaction Tests", function () {
 		).appID;
 	}
 
-	it("Group Index Check", () => {
+	it("Group Index Check", function () {
 		setupApps();
 
 		const txGroup: types.ExecParams[] = [
@@ -84,7 +84,7 @@ describe("Current Transaction Tests", function () {
 		runtime.executeTx(txGroup);
 	});
 
-	it("Failure test for group index", () => {
+	it("Failure test for group index", function () {
 		setupApps();
 
 		const txGroup: types.ExecParams[] = [

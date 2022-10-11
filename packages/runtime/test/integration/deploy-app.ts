@@ -98,7 +98,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		assert.isDefined(res?.applicationAccount);
 	});
 
-	it("Should failed if deploy duplicate app name", () => {
+	it("Should failed if deploy duplicate app name", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(

@@ -84,7 +84,7 @@ describe("TEALv4: shared space between contracts", function () {
 		expectRuntimeError(() => runtime.executeTx(groupTx), RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
 	});
 
-	it("should fail if scratch doesn't have values for first application tx", () => {
+	it("should fail if scratch doesn't have values for first application tx", function () {
 		groupTx[0].appDefinition = {
 			...firstAppDefinition,
 			approvalProgramCode: approvalProgramFail1,
@@ -99,7 +99,7 @@ describe("TEALv4: shared space between contracts", function () {
 		expectRuntimeError(() => runtime.executeTx(groupTx), RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
 	});
 
-	it("should fail if given transaction is not application tx", () => {
+	it("should fail if given transaction is not application tx", function () {
 		const tx: types.ExecParams[] = [
 			{
 				type: types.TransactionType.TransferAlgo,
