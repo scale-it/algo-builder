@@ -91,12 +91,12 @@ describe("Pooling Inner Transactions", function () {
         interpreter.execute(tealCode, ExecutionMode.APPLICATION, interpreter.runtime, 0);
     };
 
-    describe("Pooling fee tests in group txns", () => {
-        this.beforeEach(() => {
+    describe("Pooling fee tests in group txns", function () {
+        this.beforeEach(function () {
             setUpInterpreter(7, balance);
         });
 
-        it("Should succeed: when unfunded account opts-in in a group txn", () => {
+        it("Should succeed: when unfunded account opts-in in a group txn", function () {
             setUpInterpreter(7, 0);
             const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
             TXN_OBJ.apat.push(Buffer.from(decodeAddress(applicationAccount.address).publicKey));
@@ -158,7 +158,7 @@ describe("Pooling Inner Transactions", function () {
 
         });
 
-        it("Should succeed: when funded account partially covers it's own fee", () => {
+        it("Should succeed: when funded account partially covers it's own fee", function () {
             const prog = `
 				itxn_begin
 				int pay
@@ -193,7 +193,7 @@ describe("Pooling Inner Transactions", function () {
                 , BigInt(balance) - 3000n);
         });
 
-        it("Should succeed: when txn fee is covered in group txns", () => {
+        it("Should succeed: when txn fee is covered in group txns", function () {
             const prog = `
 				itxn_begin
 				int pay
@@ -227,7 +227,7 @@ describe("Pooling Inner Transactions", function () {
                 , BigInt(balance) - 4000n);
         });
 
-        it("Should fail: when txn fee is not covered in group txns", () => {
+        it("Should fail: when txn fee is not covered in group txns", function () {
             const prog = `
 				itxn_begin
 				int pay
@@ -262,7 +262,7 @@ describe("Pooling Inner Transactions", function () {
 
         });
 
-        it("Should fail: when unfunded account sends fund in group txn", () => {
+        it("Should fail: when unfunded account sends fund in group txn", function () {
             const prog = `
 				itxn_begin
 				int pay
@@ -292,7 +292,7 @@ describe("Pooling Inner Transactions", function () {
 
         });
 
-        it("Should fail: when unfunded account covers it's own fee", () => {
+        it("Should fail: when unfunded account covers it's own fee", function () {
             setUpInterpreter(7, 0);
             const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
             if (elonAcc) {

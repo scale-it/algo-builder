@@ -15,7 +15,7 @@ describe("Pooled Transaction Fees Test", function () {
 	let assetId: number;
 	let runtime: Runtime;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
@@ -38,7 +38,7 @@ describe("Pooled Transaction Fees Test", function () {
 		elon = runtime.getAccount(elon.address);
 	}
 
-	it("Should pass if second account doesn't pay fees and first account is covering fees", () => {
+	it("Should pass if second account doesn't pay fees and first account is covering fees", function () {
 		const amount = 1e4 + 122;
 		const initialBalance = john.balance();
 		// group with fee distribution
@@ -69,7 +69,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.equal(john.balance(), initialBalance - BigInt(amount) - 2000n);
 	});
 
-	it("Should fail if fees is not enough", () => {
+	it("Should fail if fees is not enough", function () {
 		const amount = 1e4 + 122;
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
@@ -98,7 +98,7 @@ describe("Pooled Transaction Fees Test", function () {
 		);
 	});
 
-	it("Should pass if two out of three doesn't pay the txn fee in a group txn of size three", () => {
+	it("Should pass if two out of three doesn't pay the txn fee in a group txn of size three", function () {
 		const amount = 4000;
 		const fee = 3000;
 		// group with fee distribution. Pooled transaction fee
@@ -137,7 +137,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.equal(bob.balance(), BigInt(initialBalance));
 	});
 
-	it("Should unfunded accounts be able to issue transactions and opt-in", () => {
+	it("Should unfunded accounts be able to issue transactions and opt-in", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
@@ -179,7 +179,7 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.isDefined(elon.getAssetHolding(assetId));
 	});
 
-	it("Should not fail when account in first txn of group txn is unfunded account and trying to opt-in", () => {
+	it("Should not fail when account in first txn of group txn is unfunded account and trying to opt-in", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
@@ -227,7 +227,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 	let clearProgramFilename: string;
 	let runtime: Runtime;
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
@@ -271,7 +271,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		elon = runtime.getAccount(elon.address);
 	}
 
-	it("Should not fail when tried to optin to unfunded account in group txn", () => {
+	it("Should not fail when tried to optin to unfunded account in group txn", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
@@ -304,7 +304,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		runtime.executeTx(groupTx)
 	});
 
-	it("Should not fail when a funded account in txn group is trying cover the partial fee", () => {
+	it("Should not fail when a funded account in txn group is trying cover the partial fee", function () {
 		setupApp();
 		const amount = 200000;
 		const fee = 1999;
@@ -348,7 +348,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		}
 	});
 
-	it("Should fail when unfunded account is trying to cover it's own fee", () => {
+	it("Should fail when unfunded account is trying to cover it's own fee", function () {
 		setupApp();
 		const amount = 200000;
 		const fee = 1999;
