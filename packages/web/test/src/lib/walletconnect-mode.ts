@@ -43,6 +43,23 @@ describe("Webmode - Wallet Connect test cases ", function () {
     });
 
     describe("Helper functions", () => {
+        it("Should return a transaction object based on provided execParams", async function () {
+            const execParams: types.AlgoTransferParam = {
+                type: types.TransactionType.TransferAlgo,
+                sign: types.SignType.SecretKey,
+                fromAccount: sender,
+                toAccountAddr: receiver.addr,
+                amountMicroAlgos: 10000n,
+                payFlags: {},
+            };
+            const txnParams = await getSuggestedParams(algodClient);
+            const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
+            assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
+            assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), sender.addr);
+            assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), receiver.addr);
+            assert.deepEqual(transactions[0].amount, 10000n);
+        });
+
         it("Should sign a transaction and return a SignedTransaction object", async function () {
             const execParams: types.AlgoTransferParam = {
                 type: types.TransactionType.TransferAlgo,
