@@ -261,7 +261,10 @@ export class WebMode {
 					return { txn: txn, msig: msig.mparams }; // multi singature
 				}
 				default:
-					return { txn: txn, authAddr: execParams[txnId].fromAccount?.addr }; // set signer
+					return {
+						txn: txn,
+						authAddr: execParams[txnId].fromAccount?.addr || execParams[txnId].fromAccountAddr
+					}; // set signer
 			}
 		});
 		// checks if any sign txn exists else it throws error of empty signers array

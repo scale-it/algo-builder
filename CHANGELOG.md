@@ -54,6 +54,7 @@ from `algosdk` and sends it to the network.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
+- Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 
 ### Bug Fixes
 

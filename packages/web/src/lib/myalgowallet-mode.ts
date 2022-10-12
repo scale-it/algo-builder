@@ -92,7 +92,7 @@ export class MyAlgoWalletSession {
 	async connectToMyAlgo(): Promise<void> {
 		try {
 			this.accounts = await this.connector.connect({
-				shouldSelectOneAccount: true,
+				shouldSelectOneAccount: false, // for multisig we need to allow multiple accounts login
 				openManager: true,
 			});
 			this.addresses = this.accounts.map((account) => account.address);
