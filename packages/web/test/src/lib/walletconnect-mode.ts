@@ -2,7 +2,7 @@ import WalletConnect from "@walletconnect/client";
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import { types, WallectConnectSession } from "../../../src";
+import { testnetURL, types, WallectConnectSession } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
 
@@ -13,9 +13,9 @@ describe("Webmode - Wallet Connect test cases ", function () {
 
     let algodClient: algosdk.Algodv2;
     const walletURL: HttpNetworkConfig = {
-        token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        server: "http://localhost",
-        port: 4001,
+        token: "",
+        server: testnetURL,
+        port: "",
     }
     algodClient = algoexplorerAlgod(walletURL);
 
@@ -34,7 +34,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
             sign: types.SignType.SecretKey,
             fromAccount: sender,
             toAccountAddr: receiver.addr,
-            amountMicroAlgos: 10000n,
+            amountMicroAlgos: 1e6,
             payFlags: {},
         };
         assert.doesNotThrow(async () => {
@@ -49,7 +49,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
                 sign: types.SignType.SecretKey,
                 fromAccount: sender,
                 toAccountAddr: receiver.addr,
-                amountMicroAlgos: 10000n,
+                amountMicroAlgos: 1e6,
                 payFlags: {},
             };
             const txnParams = await getSuggestedParams(algodClient);
@@ -57,7 +57,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
             assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
             assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), sender.addr);
             assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), receiver.addr);
-            assert.deepEqual(transactions[0].amount, 10000n);
+            assert.deepEqual(transactions[0].amount, 1e6);
         });
 
         it("Should sign a transaction and return a SignedTransaction object", async function () {
@@ -66,7 +66,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
                 sign: types.SignType.SecretKey,
                 fromAccount: sender,
                 toAccountAddr: receiver.addr,
-                amountMicroAlgos: 10000n,
+                amountMicroAlgos: 1e6,
                 payFlags: {},
             };
 
@@ -83,7 +83,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
                 sign: types.SignType.SecretKey,
                 fromAccount: sender,
                 toAccountAddr: receiver.addr,
-                amountMicroAlgos: 10000n,
+                amountMicroAlgos: 1e6,
                 payFlags: {},
             };
             const txnParams = await getSuggestedParams(algodClient)
@@ -98,7 +98,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
                 sign: types.SignType.SecretKey,
                 fromAccount: sender,
                 toAccountAddr: receiver.addr,
-                amountMicroAlgos: 10000n,
+                amountMicroAlgos: 1e6,
                 payFlags: {},
             };
             const txnParams = await getSuggestedParams(algodClient)
