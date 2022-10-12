@@ -28,7 +28,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
         }));
     });
 
-    it("Should executeTx without throwing an error", function () {
+    it("Should run executeTx function without throwing an error", function () {
         const txnParams: types.AlgoTransferParam = {
             type: types.TransactionType.TransferAlgo,
             sign: types.SignType.SecretKey,
