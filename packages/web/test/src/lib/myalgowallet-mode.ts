@@ -25,7 +25,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 
 	});
 
-	it("Should executeTx without throwing an error", async () => {
+	it("Should executeTx without throwing an error", async function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -40,7 +40,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 		});
 	});
 
-	describe("Helper functions", () => {
+	describe("Helper functions", function () {
 		it("Should return a transaction object based on provided execParams", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
