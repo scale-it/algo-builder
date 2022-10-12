@@ -1,7 +1,7 @@
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
 
-import { MyAlgoWalletSession, types } from "../../../src";
+import { MyAlgoWalletSession, testnetURL, types } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
 import MyAlgoConnectMock from "../../mocks/myalgowallet-mock";
@@ -12,9 +12,9 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	let receiver: Account;
 	let algodClient: algosdk.Algodv2;
 	const walletURL: HttpNetworkConfig = {
-		token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		server: "http://localhost",
-		port: 4001,
+		token: "",
+		server: testnetURL,
+		port: "",
 	}
 	algodClient = algoexplorerAlgod(walletURL);
 
