@@ -62,7 +62,7 @@ from `algosdk` and sends it to the network.
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 - Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
-- Fix `global CallerApplicationID` opcode. Previously the opcode get the wrong caller application ID. 
+- Fix `global CallerApplicationID` opcode. Previously the opcode get the wrong caller application ID[798](https://github.com/scale-it/algo-builder/pull/798). 
 
 ### Breaking Changes
 
