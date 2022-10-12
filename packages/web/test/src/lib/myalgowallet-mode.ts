@@ -1,4 +1,3 @@
-import MyAlgoConnect from "@randlabs/myalgo-connect";
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
 
@@ -20,7 +19,6 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	algodClient = algoexplorerAlgod(walletURL);
 
 	beforeEach(() => {
-		MyAlgoConnect
 		sender = algosdk.generateAccount();
 		receiver = algosdk.generateAccount();
 		connector = new MyAlgoWalletSession(walletURL, new MyAlgoConnectMock());
@@ -33,7 +31,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			sign: types.SignType.SecretKey,
 			fromAccount: sender,
 			toAccountAddr: receiver.addr,
-			amountMicroAlgos: 10000n,
+			amountMicroAlgos: 1e6,
 			payFlags: {},
 		};
 
@@ -49,7 +47,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1e6,
 				payFlags: {},
 			};
 			const txnParams = await getSuggestedParams(algodClient);
@@ -57,7 +55,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			assert.deepEqual(transactions[0].type, algosdk.TransactionType.pay);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].from.publicKey), sender.addr);
 			assert.deepEqual(algosdk.encodeAddress(transactions[0].to.publicKey), receiver.addr);
-			assert.deepEqual(transactions[0].amount, 10000n);
+			assert.deepEqual(transactions[0].amount, 1e6);
 		});
 
 		it("Should sign a transaction and return a SignedTransaction object", async function () {
@@ -66,7 +64,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1e6,
 				payFlags: {},
 			};
 			const txnParams = await getSuggestedParams(algodClient);
@@ -82,7 +80,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1e6,
 				payFlags: {},
 			};
 			const txnParams = await getSuggestedParams(algodClient);
@@ -97,7 +95,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 				sign: types.SignType.SecretKey,
 				fromAccount: sender,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1e6,
 				payFlags: {},
 			};
 			const txnParams = await getSuggestedParams(algodClient);
