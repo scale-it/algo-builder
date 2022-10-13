@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
-import { bobAcc } from "@algo-builder/algob/test/mocks/account";
 import { parsing, types } from "@algo-builder/web";
 import algosdk, {
 	decodeAddress,
@@ -158,6 +157,7 @@ import {
 	Txna,
 	Txnas,
 	Uncover,
+	Bn254_add,
 } from "../../../src/interpreter/opcode-list";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
@@ -191,6 +191,8 @@ import { execExpectError, expectRuntimeError } from "../../helpers/runtime-error
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
+// @ts-ignore
+import { getCurveFromName } from "ffjavascript";
 
 function setDummyAccInfo(acc: AccountStoreI): void {
 	acc.assets = accInfo[0].assets;
@@ -7374,6 +7376,24 @@ describe("Teal Opcodes", function () {
 			stack.push(parsing.stringToBytes("key1"));
 			const op = new Json_ref(["JSONObject"], 1);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING);
+		});
+	});
+	describe.only("Bn254", function () {
+		const stack = new Stack<StackElem>();
+
+		it("Should add two points on curve", async function () {
+			const bn254 = await getCurveFromName("BN254");
+			const s = "0ebc9fc712b13340c800793386a88385e40912a21bacad2cc7db17d36e54c802238449426931975cced7200f08681ab9a86a2e5c2336cf625451cf2413318e32";
+			const pointA = Buffer.from(s, "hex");
+			const pointB = Buffer.from(s, "hex");
+			const sum = bn254.G1.add(pointA,pointB);
+			const affineSum = bn254.G1.toAffine(sum);
+
+			const op = new Bn254_add([], 1);
+			stack.push(pointA);
+			stack.push(pointB);
+			op.execute(stack);
+			assert.equal(affineSum, stack.pop());;
 		});
 	});
 });

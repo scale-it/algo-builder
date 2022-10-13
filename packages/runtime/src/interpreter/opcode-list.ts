@@ -65,6 +65,7 @@ import {
 	convertToString,
 	getEncoding,
 	parseBinaryStrToBigInt,
+	fn,
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import {
@@ -87,6 +88,8 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+// @ts-ignore
+import { getCurveFromName } from "ffjavascript";
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -5209,6 +5212,34 @@ export class Json_ref extends Op {
 				break;
 			}
 		}
+		return this.computeCost();
+	}
+}
+export class Bn254_add extends Op {
+	readonly line: number;
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {JSONString, JSONUint64 and JSONObject}.
+	 * @param line line number in TEAL file
+	 */
+	 constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+
+	 }
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const aBytes = this.assertBytes(stack.pop(), this.line);
+		const bBytes = this.assertBytes(stack.pop(), this.line);
+		if(aBytes.length !== 64 || bBytes.length !== 64){
+			throw new Error("expect G1 in 64 bytes");
+		}
+		//get cruve from name is async function and we need to wait here 
+	    const bn254 = getCurveFromName("BN254");
+	    const sumJacobian = (bn254 as any).G1.add(aBytes,bBytes);
+		const sumAffine = (bn254 as any).G1.toAffine(sumJacobian);
+		stack.push(sumAffine);
+
 		return this.computeCost();
 	}
 }
