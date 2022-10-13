@@ -178,7 +178,7 @@ describe("ASA modify fields", function () {
 	 * Verifies correct asset fields are sent to network
 	 * @param rawTxns rawTxns Signed transactions in Uint8Array
 	 */
-	function checkTx(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	function checkTx(rawTxns: Uint8Array | Uint8Array[]): Promise<TxnReceipt> {
 		if (Array.isArray(rawTxns)) {
 			// verify here if group tx
 		} else {

@@ -67,7 +67,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<TxnReceipt> {
 		throw new Error("Not implemented");
 	}
 
@@ -119,7 +119,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	addCheckpointKV(key: string, value: string): void {} // eslint-disable-line @typescript-eslint/no-empty-function
+	addCheckpointKV(key: string, value: string): void { } // eslint-disable-line @typescript-eslint/no-empty-function
 
 	getCheckpointKV(key: string): string | undefined {
 		return "metadata";
@@ -237,7 +237,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
+	waitForConfirmation(txId: string): Promise<TxnReceipt> {
 		throw new Error("Not implemented");
 	}
 

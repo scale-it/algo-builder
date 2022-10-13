@@ -6,7 +6,7 @@ import algosdk, {
 	SuggestedParams,
 } from "algosdk";
 
-import { ConfirmedTxInfo } from "../../src/types";
+import { ConfirmedTxInfo, TxnReceipt } from "../../src/types";
 import { bobAcc } from "./account";
 
 export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080);
@@ -112,6 +112,11 @@ export const mockConfirmedTx: ConfirmedTxInfo = {
 		txn: TXN_OBJ,
 	},
 };
+
+export const mockTxnReceipt: TxnReceipt = {
+	txID: "1",
+	...mockConfirmedTx
+}
 
 export const mockAssetInfo: modelsv2.Asset = {
 	index: 1,
