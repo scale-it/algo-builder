@@ -73,7 +73,7 @@ export interface AlgoOperator {
 		txWriter: txWriter,
 		scTmplParams?: SCParams
 	) => Promise<rtypes.AppInfo>;
-	waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>;
+	waitForConfirmation: (txId: string) => Promise<TxnReceipt>;
 	getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>;
 	optInAccountToASA: (
 		asaName: string,
@@ -120,7 +120,7 @@ export interface AlgoOperator {
 	sendAndWait: (
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds: number
-	) => Promise<ConfirmedTxInfo>;
+	) => Promise<TxnReceipt>;
 	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 }
 
@@ -140,7 +140,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds = wtypes.WAIT_ROUNDS
-	): Promise<ConfirmedTxInfo> {
+	): Promise<TxnReceipt> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
@@ -151,13 +151,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	async waitForConfirmation(
 		txId: string,
 		waitRounds = wtypes.WAIT_ROUNDS
-	): Promise<ConfirmedTxInfo> {
+	): Promise<TxnReceipt> {
 		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
 		if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-			return pendingInfo as ConfirmedTxInfo;
+			const data: TxnReceipt = { txID: txId, ...pendingInfo as ConfirmedTxInfo }
+			return data
 		}
 		throw new Error("timeout");
 	}

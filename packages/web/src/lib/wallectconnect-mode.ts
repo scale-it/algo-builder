@@ -197,7 +197,7 @@ export class WallectConnectSession {
 	}
 
 	// Function used to wait for a tx confirmation
-	private async waitForConfirmation(
+	async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
 	): Promise<TxnReceipt> {

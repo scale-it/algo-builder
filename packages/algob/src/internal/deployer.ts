@@ -127,7 +127,7 @@ class DeployerBasicMode {
 		return this.algoOp.algodClient;
 	}
 
-	async waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
+	async waitForConfirmation(txId: string): Promise<TxnReceipt> {
 		return await this.algoOp.waitForConfirmation(txId);
 	}
 
@@ -274,7 +274,7 @@ class DeployerBasicMode {
 	sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
 		waitRounds = wtypes.WAIT_ROUNDS
-	): Promise<ConfirmedTxInfo> {
+	): Promise<TxnReceipt> {
 		return this.algoOp.sendAndWait(rawTxns, waitRounds);
 	}
 

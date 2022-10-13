@@ -335,7 +335,7 @@ export async function executeTx(
 export async function executeSignedTxnFromFile(
 	deployer: Deployer,
 	fileName: string
-): Promise<ConfirmedTxInfo> {
+): Promise<TxnReceipt> {
 	const signedTxn = loadEncodedTxFromFile(fileName);
 	if (signedTxn === undefined) {
 		throw new Error(`File ${fileName} does not exist`);

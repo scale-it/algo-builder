@@ -492,7 +492,7 @@ export interface Deployer {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 */
-	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<TxnReceipt>;
 
 	/**
 	 * Return receipts for each transaction in group txn
@@ -605,7 +605,7 @@ export interface Deployer {
 
 	/**
 	 * Queries blockchain for a given transaction and waits until it will be processed. */
-	waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>;
+	waitForConfirmation: (txId: string) => Promise<TxnReceipt>;
 
 	/**
 	 * Queries blockchain using algodv2 for asset information by index  */
