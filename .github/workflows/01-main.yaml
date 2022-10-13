@@ -8,6 +8,7 @@ on:
     branches:
       - master
       - develop
+      - test-workflow
   pull_request:
     branches:
       - master
