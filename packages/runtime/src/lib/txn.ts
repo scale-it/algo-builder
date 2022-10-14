@@ -214,13 +214,11 @@ export function txnSpecByField(
 			break;
 		}
 		case TxFieldEnum.NumApprovalProgramPages: {
-			if (tx.apap) result = Math.ceil(tx.apap.length / maxStringSize);
-			else result = 0n;
+			tx.apap ? (result = Math.ceil(tx.apap.length / maxStringSize)) : (result = 0n);
 			break;
 		}
 		case TxFieldEnum.NumClearStateProgramPages: {
-			if (tx.apsu) result = Math.ceil(tx.apsu.length / maxStringSize);
-			else result = 0n;
+			tx.apsu ? (result = Math.ceil(tx.apsu.length / maxStringSize)) : (result = 0n);
 			break;
 		}
 		default: {
