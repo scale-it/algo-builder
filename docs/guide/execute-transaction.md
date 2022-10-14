@@ -302,6 +302,7 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 `deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has following properties:
 
+
 - `type`: type of transaction.
 - `sign`: signature [`types`](https://github.com/scale-it/algo-builder/blob/2bcef8f611b349dfb8dc3542ed2f0a129a0c405c/packages/web/src/types.ts#L117).
 

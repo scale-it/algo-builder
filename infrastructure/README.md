@@ -42,7 +42,7 @@ This is a guide to quickly start a local node using `algod` and make scripts.
 
 1.  Check the access token and network address. You will need them in your config file to correctly connect to a node. When using `make create-private-net` the script will set the network configuration (PrimaryNode/config.json) and token for you to match the `algob.config` used in all our examples. Don't expose the node externally - otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
 
-        cat node_data/PrimaryNode/algod.net
+        cat node_data/PrimaryNode/algod-listen.net
         cat node_data/PrimaryNode/algod.token
 
 1.  To start and stop the the chain use the following commands:
@@ -96,7 +96,7 @@ _NOTE:_ Please make sure to have [Docker Compose](https://docs.docker.com/compos
 
 6. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
 
-7. `sanbox-reset` - Reset the containers to their initial state.
+7. `sandbox-reset` - Reset the containers to their initial state.
 
 **To be noted :**
 
