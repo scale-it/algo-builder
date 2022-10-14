@@ -1,3 +1,4 @@
+#pragma version 1
 int 1
 itob
 sha256

@@ -34,7 +34,8 @@
 		"build:watch": "tsc -w -p .",
 		"clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
 		"prepublish": "yarn build; sh ./prepublish.sh",
-		"algob:dev": "sh ./setup_dev_project.sh"
+		"algob:dev": "sh ./project-dev-script.sh create",
+		"algob:dev:cmd": "sh ./project-dev-script.sh exec"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -75,7 +76,7 @@
 	"dependencies": {
 		"@algo-builder/runtime": "workspace:*",
 		"@algo-builder/web": "workspace:*",
-		"algosdk": "^1.18.1",
+		"algosdk": "^1.19.0",
 		"chalk": "^4.1.2",
 		"debug": "^4.3.4",
 		"deep-equal": "^2.0.5",

@@ -6,7 +6,7 @@ import { encodeBase64 } from "tweetnacl-ts";
 import { AccountStore } from "../../../src";
 import { encTxToExecParams } from "../../../src/lib/txn";
 import { Runtime } from "../../../src/runtime";
-import { AccountStoreI } from "../../../src/types";
+import { AccountStoreI, EncTx } from "../../../src/types";
 import * as testdata from "../../helpers/data";
 import { useFixture } from "../../helpers/integration";
 
@@ -16,7 +16,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 
 	let runtime: Runtime;
 	let execParams: types.ExecParams;
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		john = new AccountStore(1e9);
 		smith = new AccountStore(1e9);
 
@@ -46,7 +46,9 @@ describe("Convert encoded Txn to ExecParams", function () {
 		}
 		// add approvalProgram and clearProgram to encTx
 		// TODO: recheck it
-		const [encTx] = runtime.createTxnContext(cloneExecParams);
+		const [transaction] = runtime.createTxnContext([cloneExecParams]);
+		const encTx = transaction.txn.get_obj_for_encoding() as EncTx;
+		encTx.txID = transaction.txn.txID();
 
 		if (execParams.type === types.TransactionType.DeployApp) {
 			encTx.metaType = execParams.appDefinition.metaType;
@@ -64,7 +66,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 	}
 
 	describe("Case pay transaction types", function () {
-		it("Should convert SDK Payment Txn(pay) to ExecParams(TransferAlgo)", () => {
+		it("Should convert SDK Payment Txn(pay) to ExecParams(TransferAlgo)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -85,7 +87,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 
 	describe("Case acfg,axfer,afrz transaction types", function () {
 		useFixture("asa-check");
-		it("Should convert SDK Deploy ASA Txn to ExecParams(DeployASA)", () => {
+		it("Should convert SDK Deploy ASA Txn to ExecParams(DeployASA)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -99,7 +101,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
 
-		it("Should convert SDK FreezeAsset ASA Txn to ExecParams(FreezeAsset)", () => {
+		it("Should convert SDK FreezeAsset ASA Txn to ExecParams(FreezeAsset)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -114,13 +116,13 @@ describe("Convert encoded Txn to ExecParams", function () {
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
 
-		it("Should convert SDK Transfer ASA Txn to ExecParams(TransferAsset)", () => {
+		it("Should convert SDK Transfer ASA Txn to ExecParams(TransferAsset)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
 				type: types.TransactionType.TransferAsset,
 				toAccountAddr: smith.address,
-				amount: 10,
+				amount: 10n,
 				assetID: 10,
 				payFlags: {
 					totalFee: 1000,
@@ -130,7 +132,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
 
-		it("Should convert SDK Destroy ASA Txn to ExecParams(DestroyAsset)", () => {
+		it("Should convert SDK Destroy ASA Txn to ExecParams(DestroyAsset)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -144,7 +146,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
 
-		it("Should convert SDK Modify ASA Txn to ExecParams(ModifyAsset)", () => {
+		it("Should convert SDK Modify ASA Txn to ExecParams(ModifyAsset)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -166,7 +168,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 	});
 
 	describe("Case keyreg transaction type", function () {
-		it("should convert SDK Keyreg Txn to ExecParams(KeyRegistration)", () => {
+		it("should convert SDK Keyreg Txn to ExecParams(KeyRegistration)", function () {
 			execParams = {
 				type: types.TransactionType.KeyRegistration, // payment
 				sign: types.SignType.SecretKey,
@@ -185,7 +187,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 
 	describe("Case appl transaction type", function () {
 		useFixture("stateful");
-		it("should convert SDK Deploy Application Txn to ExecParams(DeployApp)", () => {
+		it("should convert SDK Deploy Application Txn to ExecParams(DeployApp)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -208,7 +210,7 @@ describe("Convert encoded Txn to ExecParams", function () {
 			assertEncTxConvertedToExecParam(runtime, execParams);
 		});
 
-		it("should convert SDK NoOpt Txn to ExecParams(CallApp)", () => {
+		it("should convert SDK NoOpt Txn to ExecParams(CallApp)", function () {
 			execParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,

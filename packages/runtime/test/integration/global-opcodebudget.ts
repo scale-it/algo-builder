@@ -74,8 +74,8 @@ describe("TEALv6: Global Opcode Budget", function () {
 		assert.doesNotThrow(() => runtime.executeTx([txnParam]));
 	});
 
-	describe("Test on application", () => {
-		it("call application with single tx", () => {
+	describe("Test on application", function () {
+		it("call application with single tx", function () {
 			txnParam = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -92,7 +92,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 692n);
 		});
 
-		it("call application with group tx", () => {
+		it("call application with group tx", function () {
 			txnParam = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -116,7 +116,7 @@ describe("TEALv6: Global Opcode Budget", function () {
 			assert.deepEqual(algosdk.bytesToBigInt(logs[0]), 1392n);
 		});
 
-		it("call application with inside inner tx", () => {
+		it("call application with inside inner tx", function () {
 			txnParam = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,

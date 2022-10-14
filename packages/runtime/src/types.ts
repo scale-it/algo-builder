@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 
 import { types } from "@algo-builder/web";
-import { Account as AccountSDK, EncodedTransaction, modelsv2 } from "algosdk";
+import algosdk, {
+	Account as AccountSDK,
+	EncodedTransaction,
+	modelsv2,
+	Transaction,
+} from "algosdk";
 
 import {
 	Add,
@@ -157,10 +162,10 @@ export interface Context {
 	getApp: (appID: number, line?: number) => SSCAttributesM;
 	getCallerApplicationID: () => number;
 	getCallerApplicationAddress: () => AccountAddress;
-	transferAlgo: (txnParam: types.AlgoTransferParam) => void;
+	transferAlgo: (transaction: Transaction) => void;
 	verifyMinimumFees: () => void;
 	deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void;
-	transferAsset: (txnParam: types.AssetTransferParam) => void;
+	transferAsset: (transaction: Transaction) => void;
 	modifyAsset: (assetId: number, fields: types.AssetModFields) => void;
 	freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void;
 	revokeAsset: (
@@ -172,7 +177,11 @@ export interface Context {
 	destroyAsset: (assetId: number) => void;
 	deleteApp: (appID: number) => void;
 	closeApp: (sender: AccountAddress, appID: number) => void;
-	processTransactions: (txnParams: types.ExecParams[]) => TxReceipt[];
+	processTransactions: (
+		signedTransactions: algosdk.SignedTransaction[],
+		appDefMap?: Map<number, types.AppDefinition | types.SmartContract>,
+		lsigMap?: Map<number, types.Lsig>
+	) => TxReceipt[];
 	deployASA: (
 		name: string,
 		fromAccountAddr: AccountAddress,
@@ -397,4 +406,29 @@ export interface ReplaceParams {
 export enum Base64Encoding {
 	URL = 0,
 	STD = 1,
+}
+
+export declare type TxnReceipt = BaseTxReceipt | AppInfoReceipt | ASAInfoReceipt;
+
+export interface DeployedAssetInfoReceipt {
+	creator: AccountAddress;
+	txID: string;
+	"confirmed-round": number;
+	deleted: boolean;
+}
+
+export interface ASAInfoReceipt extends DeployedAssetInfoReceipt {
+	"asset-index": number;
+	"asset-def": types.ASADef;
+	logs?: Uint8Array[];
+}
+
+export interface AppInfoReceipt extends DeployedAssetInfoReceipt {
+	"application-id": number;
+	"application-account": string;
+	timestamp: number;
+	"approval-file": string;
+	"clear-file": string;
+	logs?: Uint8Array[];
+	gas?: number;
 }

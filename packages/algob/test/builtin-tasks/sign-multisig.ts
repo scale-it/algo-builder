@@ -31,7 +31,7 @@ const [aliceAddr, johnAddr, bobAddr] = [
 	"2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ",
 ];
 
-describe("Sign-Multisig task", () => {
+describe("Sign-Multisig task", function () {
 	useFixtureProject("config-project");
 
 	const inputFile = "multisig-signed.txn"; // present in config-project/assets

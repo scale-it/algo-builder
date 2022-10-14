@@ -1,7 +1,7 @@
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import algosdk, { Transaction } from "algosdk";
+import algosdk, { SignedTransaction, Transaction } from "algosdk";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
@@ -11,9 +11,12 @@ import {
 	SessionConnectResponse,
 	SessionDisconnectResponse,
 	SessionUpdateResponse,
+	Sign,
 	SignTxnParams,
+	SignType,
 	TransactionAndSign,
 	TransactionInGroup,
+	TxnReceipt,
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
@@ -183,23 +186,27 @@ export class WallectConnectSession {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(
-		rawTxns: Uint8Array | Uint8Array[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = WAIT_ROUNDS
+	): Promise<TxnReceipt> {
 		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
-		return await this.waitForConfirmation(txInfo.txId);
+		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
 	// Function used to wait for a tx confirmation
 	private async waitForConfirmation(
-		txId: string
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
+		txId: string,
+		waitRounds = WAIT_ROUNDS
+	): Promise<TxnReceipt> {
+		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 		if (pendingInfo["pool-error"]) {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
-		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		const txnReceipt = { txID: txId, ...pendingInfo };
+		return txnReceipt as TxnReceipt;
 	}
 
 	/**
@@ -207,33 +214,122 @@ export class WallectConnectSession {
 	 * @param transactions transaction parameters,  atomic transaction parameters
 	 *  or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
-	async executeTx(
-		transactions: ExecParams[] | TransactionAndSign[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		let signedTxn;
+	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
+		let signedTxn: (Uint8Array | null)[] | undefined;
 		let txns: Transaction[] = [];
 		if (transactions.length > 16) {
 			throw new Error("Maximum size of an atomic transfer group is 16");
 		}
-		if (!isSDKTransactionAndSign(transactions[0])) {
-			const execParams = transactions as ExecParams[];
-			for (const [_, txn] of execParams.entries()) {
-				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		if (isSDKTransactionAndSign(transactions[0])) {
+			throw new Error("We don't support this case now");
+		}
+
+		const execParams = transactions as ExecParams[];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		}
+
+		txns = algosdk.assignGroupID(txns);
+
+		// with logic signature we set shouldSign to false
+		const toBeSignedTxns: TransactionInGroup[] = execParams.map(
+			(txn: ExecParams, index: number) => {
+				return txn.sign === SignType.LogicSignature
+					? { txn: txns[index], shouldSign: false } // logic signature
+					: { txn: txns[index], shouldSign: true }; // to be signed
+			}
+		);
+		// only shouldSign txn are to be signed
+		const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
+		if (nonLsigTxn.length > 0) {
+			signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+		}
+		// sign smart signature transaction
+		for (const [index, txn] of txns.entries()) {
+			const signer: Sign = execParams[index];
+			if (signer.sign === SignType.LogicSignature) {
+				signer.lsig.lsig.args = signer.args ? signer.args : [];
+				if (!Array.isArray(signedTxn)) signedTxn = [];
+				signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig).blob);
 			}
 		}
-		txns = algosdk.assignGroupID(txns);
-		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-			return { txn: txn, shouldSign: true };
-		});
 
-		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
 		// remove null values from signed txns array
 		// TODO: replace null values with "externally" signed txns, otherwise
 		// signedtxns with nulls will always fail!
-		signedTxn = signedTxn.filter((stxn) => stxn);
+		signedTxn = signedTxn?.filter((stxn) => stxn);
 		const confirmedTx = await this.sendAndWait(signedTxn as Uint8Array[]);
 
 		log("confirmedTx: ", confirmedTx);
 		return confirmedTx;
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signes a Transaction object using walletconnect
+	 * @param transaction transaction object.
+	 * @returns SignedTransaction
+	 */
+	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
+		const txns = [transaction];
+		const txnsToSign = txns.map((txn) => {
+			const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString("base64");
+			return { txn: encodedTxn };
+		});
+		const requestParams = [txnsToSign];
+		const request = formatJsonRpcRequest(ALGORAND_SIGN_TRANSACTION_REQUEST, requestParams);
+		const result: Array<string | null> = await this.connector.sendCustomRequest(request);
+		const decodedResult = result.map((element) => {
+			return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
+		});
+		if (decodedResult[0] === null) {
+			throw new Error("Transaction was returned unsigned");
+		}
+		return algosdk.decodeSignedTransaction(decodedResult[0]);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it using walletconnect
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	async makeAndSignTx(
+		execParams: ExecParams[],
+		txParams: algosdk.SuggestedParams
+	): Promise<SignedTransaction[]> {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @param rounds number of rounds to wait for response
+	 * @returns TxnReceipt
+	 */
+	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
+		if (transactions.length < 1) {
+			throw Error("No transactions to process");
+		} else {
+			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
+			return await this.sendAndWait(Uint8ArraySignedTx, rounds);
+		}
 	}
 }

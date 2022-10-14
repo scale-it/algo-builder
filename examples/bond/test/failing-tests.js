@@ -170,7 +170,7 @@ describe("Bond token failing tests", function () {
 		syncAccounts();
 	}
 
-	it("Random user should not be able to update issuer's address", () => {
+	it("Random user should not be able to update issuer's address", function () {
 		// update application with correct issuer account address
 		const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)]; // converts algorand address to Uint8Array
 
@@ -186,7 +186,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx([appCallParams]), RUNTIME_ERR1009);
 	});
 
-	it("Issuer should not be able to send asa without calling bond-dapp", () => {
+	it("Issuer should not be able to send asa without calling bond-dapp", function () {
 		const params = {
 			type: types.TransactionType.TransferAsset,
 			sign: types.SignType.LogicSignature,
@@ -201,7 +201,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx([params]), REJECTED_BY_LOGIC);
 	});
 
-	it("Opt-In to issuer lsig with single transaction should fail", () => {
+	it("Opt-In to issuer lsig with single transaction should fail", function () {
 		const optInTx = {
 			type: types.TransactionType.OptInASA,
 			sign: types.SignType.LogicSignature,
@@ -215,7 +215,7 @@ describe("Bond token failing tests", function () {
 	});
 
 	// Avoid spamming of asset id's in bond-dapp
-	it("Opt-In to issuer lsig without store manager signature should fail", () => {
+	it("Opt-In to issuer lsig without store manager signature should fail", function () {
 		const optInTx = [
 			{
 				type: types.TransactionType.TransferAlgo,
@@ -238,7 +238,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx(optInTx), REJECTED_BY_LOGIC);
 	});
 
-	it("Random user should not be able to update issue price", () => {
+	it("Random user should not be able to update issue price", function () {
 		const appArgs = ["str:update_issue_price", "int:0"];
 
 		const appCallParams = {
@@ -253,7 +253,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx([appCallParams]), RUNTIME_ERR1009);
 	});
 
-	it("should not issue shares to address other than issuer's address", () => {
+	it("should not issue shares to address other than issuer's address", function () {
 		const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)];
 
 		const appCallParams = {
@@ -274,7 +274,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
 	});
 
-	it("User should not be able to buy for less amount than specified", () => {
+	it("User should not be able to buy for less amount than specified", function () {
 		issue();
 
 		// Buy tokens from issuer
@@ -287,7 +287,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
 	});
 
-	it("Only store manager can create dex", () => {
+	it("Only store manager can create dex", function () {
 		issue();
 		buy();
 
@@ -297,7 +297,7 @@ describe("Bond token failing tests", function () {
 		);
 	});
 
-	it("Buyer cannot redeem more than they have", () => {
+	it("Buyer cannot redeem more than they have", function () {
 		issue();
 		buy();
 		// manager starts epoch 1 (create dex)
@@ -309,7 +309,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => redeem(runtime, elon, 1, 20, dexLsig1), RUNTIME_ERR1402);
 	});
 
-	it("Buyer tries to buy bonds without paying fees", () => {
+	it("Buyer tries to buy bonds without paying fees", function () {
 		issue();
 		// Buy tokens from issuer
 		runtime.optInToASA(initialBond, elon.address, {});
@@ -332,7 +332,7 @@ describe("Bond token failing tests", function () {
 		assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1506);
 	});
 
-	it("Buyer tries to exchange bonds without paying fees", () => {
+	it("Buyer tries to exchange bonds without paying fees", function () {
 		issue();
 		buy();
 		// manager starts epoch 1 (create dex)

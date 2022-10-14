@@ -137,7 +137,7 @@ import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
-	describe("Extract words from line", () => {
+	describe("Extract words from line", function () {
 		it("should return correct words for addr", function () {
 			let res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB");
 			const expected = ["addr", "KAGKGFFKGKGFGLFFBSLFBJKSFB"];
@@ -157,7 +157,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct words for byte base64", () => {
+		it("should return correct words for byte base64", function () {
 			let res = wordsFromLine("byte base64 BKBDKSKDK");
 			let expected = ["byte", "base64", "BKBDKSKDK"];
 
@@ -185,7 +185,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct words for byte base32", () => {
+		it("should return correct words for byte base32", function () {
 			let res = wordsFromLine("byte     base32       BKBDKSKDK//commenthere");
 			let expected = ["byte", "base32", "BKBDKSKDK"];
 
@@ -207,7 +207,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct words for byte string literal", () => {
+		it("should return correct words for byte string literal", function () {
 			let res = wordsFromLine('byte "STRING LITERAL"');
 			let expected = ["byte", '"STRING LITERAL"'];
 
@@ -219,7 +219,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct words for int", () => {
+		it("should return correct words for int", function () {
 			let res = wordsFromLine("int 123");
 			const expected = ["int", "123"];
 
@@ -235,7 +235,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct words for operators", () => {
+		it("should return correct words for operators", function () {
 			let res = wordsFromLine("+");
 			let expected = ["+"];
 
@@ -269,7 +269,7 @@ describe("Parser", function () {
 		// more edge cases
 		// space before parentheses,
 		// space after base64: base64 (xxx ), base64( xxx) ..
-		it("should extract correct words from line", () => {
+		it("should extract correct words from line", function () {
 			let res = wordsFromLine("base64 (abcd)");
 			let expected = ["base64", "(abcd)"];
 
@@ -296,7 +296,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should extract correct words from line", () => {
+		it("should extract correct words from line", function () {
 			let res = wordsFromLine("arg 1//comment here");
 			let expected = ["arg", "1"];
 
@@ -353,7 +353,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should extract correct stateful words", () => {
+		it("should extract correct stateful words", function () {
 			let res = wordsFromLine("app_opted_in//comment here");
 			let expected = ["app_opted_in"];
 
@@ -376,7 +376,7 @@ describe("Parser", function () {
 		});
 	});
 
-	describe("Opcode Objects from words", () => {
+	describe("Opcode Objects from words", function () {
 		let interpreter: Interpreter;
 		beforeEach(function () {
 			interpreter = new Interpreter();
@@ -384,63 +384,63 @@ describe("Parser", function () {
 			interpreter.runtime = new Runtime([]);
 		});
 
-		it("should return correct opcode object for '+'", () => {
+		it("should return correct opcode object for '+'", function () {
 			const res = opcodeFromSentence(["+"], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Add([], 1);
 
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for '+'", () => {
+		it("should throw error for wrong field length for '+'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["+", "+"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should return correct opcode object for '-'", () => {
+		it("should return correct opcode object for '-'", function () {
 			const res = opcodeFromSentence(["-"], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Sub([], 1);
 
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for '-'", () => {
+		it("should throw error for wrong field length for '-'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["-", "-"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should return correct opcode object for '/'", () => {
+		it("should return correct opcode object for '/'", function () {
 			const res = opcodeFromSentence(["/"], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Div([], 1);
 
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for '/'", () => {
+		it("should throw error for wrong field length for '/'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["/", "/"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should return correct opcode object for '*'", () => {
+		it("should return correct opcode object for '*'", function () {
 			const res = opcodeFromSentence(["*"], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Mul([], 1);
 
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for '*'", () => {
+		it("should throw error for wrong field length for '*'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["*", "*"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should return correct opcode object for 'addr'", () => {
+		it("should return correct opcode object for 'addr'", function () {
 			const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
 			const res = opcodeFromSentence(
 				["addr", address],
@@ -453,21 +453,21 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for 'addr'", () => {
+		it("should throw error for wrong field length for 'addr'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["addr"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should throw error for invalid address for 'addr'", () => {
+		it("should throw error for invalid address for 'addr'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["addr", "AKGH12"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_ADDR
 			);
 		});
 
-		it("can use prefix 0x(hex) with 'int'", () => {
+		it("can use prefix 0x(hex) with 'int'", function () {
 			const valueInHex = "0x02";
 			const res = opcodeFromSentence(
 				["int", valueInHex],
@@ -479,7 +479,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("can use prefix 0(oct) with 'int'", () => {
+		it("can use prefix 0(oct) with 'int'", function () {
 			const valueInHex = "010";
 			const res = opcodeFromSentence(
 				["int", valueInHex],
@@ -491,7 +491,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode object for 'int'", () => {
+		it("should return correct opcode object for 'int'", function () {
 			const value = "812546821";
 			const res = opcodeFromSentence(["int", value], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Int([value], 1);
@@ -499,7 +499,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should work when int arg is zero", () => {
+		it("should work when int arg is zero", function () {
 			const value = "0";
 			const res = opcodeFromSentence(["int", value], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Int([value], 1);
@@ -507,14 +507,14 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error for wrong field length for 'int'", () => {
+		it("should throw error for wrong field length for 'int'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["int"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 		});
 
-		it("should throw error for invalid number for 'int'", () => {
+		it("should throw error for invalid number for 'int'", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["int", "123A12"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
@@ -568,21 +568,21 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct label", () => {
+		it("should return correct label", function () {
 			const res = opcodeFromSentence(["label:"], 1, interpreter, ExecutionMode.SIGNATURE);
 			const expected = new Label(["label:"], 1);
 
 			assert.deepEqual(res, expected);
 		});
 
-		it("should throw error if wrong label is used", () => {
+		it("should throw error if wrong label is used", function () {
 			expectRuntimeError(
 				() => opcodeFromSentence(["substring:"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_LABEL
 			);
 		});
 
-		it("should return correct objects for `txn`", () => {
+		it("should return correct objects for `txn`", function () {
 			let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE);
 			let expected = new Txn(["Fee"], 1, interpreter);
 			assert.deepEqual(res, expected);
@@ -617,7 +617,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct object for `gtxn`", () => {
+		it("should return correct object for `gtxn`", function () {
 			let res = opcodeFromSentence(
 				["gtxn", "0", "Fee"],
 				1,
@@ -648,7 +648,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct object for `txna`", () => {
+		it("should return correct object for `txna`", function () {
 			let res = opcodeFromSentence(
 				["txna", "Accounts", "0"],
 				1,
@@ -683,7 +683,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct object for `gtxna`", () => {
+		it("should return correct object for `gtxna`", function () {
 			let res = opcodeFromSentence(
 				["gtxna", "1", "Accounts", "1"],
 				1,
@@ -736,7 +736,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct objects for `global`", () => {
+		it("should return correct objects for `global`", function () {
 			let res = opcodeFromSentence(
 				["global", "MinTxnFee"],
 				1,
@@ -856,7 +856,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct opcodes for `Balance` and `Asset` opcodes", () => {
+		it("should return correct opcodes for `Balance` and `Asset` opcodes", function () {
 			let res = opcodeFromSentence(["balance"], 1, interpreter, ExecutionMode.APPLICATION);
 			let expected = new Balance([], 1, interpreter);
 			assert.deepEqual(res, expected);
@@ -918,7 +918,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", () => {
+		it("TEALv5: should throw error for Asset Creator if LogicSigVersion < 5", function () {
 			interpreter.tealVersion = 4;
 			expectRuntimeError(
 				() =>
@@ -932,7 +932,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("should return correct opcodes for Stateful opcodes", () => {
+		it("should return correct opcodes for Stateful opcodes", function () {
 			let res = opcodeFromSentence(["app_opted_in"], 1, interpreter, ExecutionMode.APPLICATION);
 			let expected = new AppOptedIn([], 1, interpreter);
 			assert.deepEqual(res, expected);
@@ -1069,8 +1069,8 @@ describe("Parser", function () {
 			);
 		});
 
-		describe("should return correct opcodes for tealv3 ops", () => {
-			it("assert", () => {
+		describe("should return correct opcodes for tealv3 ops", function () {
+			it("assert", function () {
 				const res = opcodeFromSentence(["assert"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Assert([], 1);
 				assert.deepEqual(res, expected);
@@ -1082,7 +1082,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("pushint", () => {
+			it("pushint", function () {
 				const res = opcodeFromSentence(
 					["pushint", "345"],
 					1,
@@ -1122,7 +1122,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("pushbytes", () => {
+			it("pushbytes", function () {
 				const res = opcodeFromSentence(
 					["pushbytes", `"Algorand"`],
 					1,
@@ -1155,7 +1155,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("swap", () => {
+			it("swap", function () {
 				const res = opcodeFromSentence(["swap"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Swap([], 1);
 				assert.deepEqual(res, expected);
@@ -1166,7 +1166,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("txn fields", () => {
+			it("txn fields", function () {
 				let res = opcodeFromSentence(
 					["txn", "Assets", "1"],
 					1,
@@ -1270,7 +1270,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("getbit", () => {
+			it("getbit", function () {
 				const res = opcodeFromSentence(["getbit"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new GetBit([], 1);
 				assert.deepEqual(res, expected);
@@ -1282,7 +1282,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("setbit", () => {
+			it("setbit", function () {
 				const res = opcodeFromSentence(["setbit"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new SetBit([], 1);
 				assert.deepEqual(res, expected);
@@ -1294,7 +1294,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("getbyte", () => {
+			it("getbyte", function () {
 				const res = opcodeFromSentence(["getbyte"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new GetByte([], 1);
 				assert.deepEqual(res, expected);
@@ -1306,7 +1306,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("setbyte", () => {
+			it("setbyte", function () {
 				const res = opcodeFromSentence(["setbyte"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new SetByte([], 1);
 				assert.deepEqual(res, expected);
@@ -1318,7 +1318,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("dig", () => {
+			it("dig", function () {
 				const res = opcodeFromSentence(["dig", "2"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Dig(["2"], 1);
 				assert.deepEqual(res, expected);
@@ -1335,7 +1335,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("select", () => {
+			it("select", function () {
 				const res = opcodeFromSentence(["select"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Select([], 1);
 				assert.deepEqual(res, expected);
@@ -1347,7 +1347,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("gtxns", () => {
+			it("gtxns", function () {
 				const res = opcodeFromSentence(
 					["gtxns", "Amount"],
 					1,
@@ -1376,7 +1376,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("gtxnsa", () => {
+			it("gtxnsa", function () {
 				const res = opcodeFromSentence(
 					["gtxnsa", "ApplicationArgs", "0"],
 					1,
@@ -1410,7 +1410,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("min_balance", () => {
+			it("min_balance", function () {
 				const res = opcodeFromSentence(
 					["min_balance"],
 					1,
@@ -1433,8 +1433,8 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("should return correct opcodes for tealv4 ops", () => {
-			it("gload", () => {
+		describe("should return correct opcodes for tealv4 ops", function () {
+			it("gload", function () {
 				const res = opcodeFromSentence(
 					["gload", "0", "1"],
 					1,
@@ -1461,7 +1461,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("gloads", () => {
+			it("gloads", function () {
 				const res = opcodeFromSentence(
 					["gloads", "0"],
 					1,
@@ -1484,7 +1484,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("callsub", () => {
+			it("callsub", function () {
 				const res = opcodeFromSentence(
 					["callsub", "label"],
 					1,
@@ -1507,7 +1507,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("retsub", () => {
+			it("retsub", function () {
 				const res = opcodeFromSentence(["retsub"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Retsub([], 1, interpreter);
 
@@ -1519,7 +1519,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("gaid", () => {
+			it("gaid", function () {
 				const res = opcodeFromSentence(
 					["gaid", "2"],
 					1,
@@ -1537,7 +1537,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("gaids", () => {
+			it("gaids", function () {
 				const res = opcodeFromSentence(["gaids"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Gaids([], 1, interpreter);
 
@@ -1550,7 +1550,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("divmodw", () => {
+			it("divmodw", function () {
 				const res = opcodeFromSentence(["divmodw"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new DivModw([], 1);
 
@@ -1562,7 +1562,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("exp", () => {
+			it("exp", function () {
 				const res = opcodeFromSentence(["exp"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Exp([], 1);
 
@@ -1574,7 +1574,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("expw", () => {
+			it("expw", function () {
 				const res = opcodeFromSentence(["expw"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Expw([], 1);
 
@@ -1586,7 +1586,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("shl", () => {
+			it("shl", function () {
 				const res = opcodeFromSentence(["shl"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Shl([], 1);
 
@@ -1598,7 +1598,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("shr", () => {
+			it("shr", function () {
 				const res = opcodeFromSentence(["shr"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Shr([], 1);
 
@@ -1610,7 +1610,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("sqrt", () => {
+			it("sqrt", function () {
 				const res = opcodeFromSentence(["sqrt"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Sqrt([], 1);
 
@@ -1622,7 +1622,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("bitlen", () => {
+			it("bitlen", function () {
 				const res = opcodeFromSentence(["bitlen"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new BitLen([], 1);
 				assert.deepEqual(res, expected);
@@ -1633,7 +1633,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("bsqrt", () => {
+			it("bsqrt", function () {
 				const res = opcodeFromSentence(["bsqrt"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Sqrt([], 1);
 
@@ -1646,8 +1646,8 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("should return correct opcodes for tealv5 ops", () => {
-			it("extract", () => {
+		describe("should return correct opcodes for tealv5 ops", function () {
+			it("extract", function () {
 				const res = opcodeFromSentence(
 					["extract", "1", "2"],
 					1,
@@ -1664,7 +1664,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("extract3", () => {
+			it("extract3", function () {
 				const res = opcodeFromSentence(["extract3"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Extract3([], 1);
 
@@ -1677,7 +1677,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("extract_uint16", () => {
+			it("extract_uint16", function () {
 				const res = opcodeFromSentence(
 					["extract_uint16"],
 					1,
@@ -1700,7 +1700,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("extract_uint32", () => {
+			it("extract_uint32", function () {
 				const res = opcodeFromSentence(
 					["extract_uint32"],
 					1,
@@ -1723,7 +1723,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("extract_uint64", () => {
+			it("extract_uint64", function () {
 				const res = opcodeFromSentence(
 					["extract_uint64"],
 					1,
@@ -1747,8 +1747,8 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("Tealv5: ECDSA opcodes", () => {
-			it("ecdsa_verify", () => {
+		describe("Tealv5: ECDSA opcodes", function () {
+			it("ecdsa_verify", function () {
 				const res = opcodeFromSentence(
 					["ecdsa_verify", "0"],
 					1,
@@ -1765,7 +1765,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("ecdsa_pk_decompress", () => {
+			it("ecdsa_pk_decompress", function () {
 				const res = opcodeFromSentence(
 					["ecdsa_pk_decompress", "0"],
 					1,
@@ -1788,7 +1788,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("ecdsa_pk_recover", () => {
+			it("ecdsa_pk_recover", function () {
 				const res = opcodeFromSentence(
 					["ecdsa_pk_recover", "0"],
 					1,
@@ -1807,8 +1807,8 @@ describe("Parser", function () {
 			});
 		});
 
-		describe("should return correct opcodes for tealv5 ops", () => {
-			it("loads", () => {
+		describe("should return correct opcodes for tealv5 ops", function () {
+			it("loads", function () {
 				const res = opcodeFromSentence(["loads"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Loads([], 1, interpreter);
 
@@ -1820,7 +1820,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("stores", () => {
+			it("stores", function () {
 				const res = opcodeFromSentence(["stores"], 1, interpreter, ExecutionMode.APPLICATION);
 				const expected = new Stores([], 1, interpreter);
 
@@ -1832,7 +1832,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("cover", () => {
+			it("cover", function () {
 				const res = opcodeFromSentence(
 					["cover", "1"],
 					1,
@@ -1850,7 +1850,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("uncover", () => {
+			it("uncover", function () {
 				const res = opcodeFromSentence(
 					["uncover", "1"],
 					1,
@@ -1873,7 +1873,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("itxn_begin", () => {
+			it("itxn_begin", function () {
 				const res = opcodeFromSentence(
 					["itxn_begin"],
 					1,
@@ -1896,7 +1896,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("itxn_field f", () => {
+			it("itxn_field f", function () {
 				let res = opcodeFromSentence(
 					["itxn_field", "Sender"],
 					1,
@@ -1936,7 +1936,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("itxn_submit", () => {
+			it("itxn_submit", function () {
 				const res = opcodeFromSentence(
 					["itxn_submit"],
 					1,
@@ -1958,7 +1958,7 @@ describe("Parser", function () {
 				);
 			});
 
-			it("app_get_params i", () => {
+			it("app_get_params i", function () {
 				const appParams = AppParamDefined[interpreter.tealVersion];
 				appParams.forEach((appParam: string) => {
 					const res = opcodeFromSentence(
@@ -1984,12 +1984,12 @@ describe("Parser", function () {
 		});
 
 		describe("opcodes for tealv6 ops", function () {
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				interpreter.tealVersion = 6;
 			});
 
 			describe("gloadss opcode", function () {
-				it("should succeed create gloadss", () => {
+				it("should succeed create gloadss", function () {
 					const res = opcodeFromSentence(
 						["gloadss"],
 						1,
@@ -2000,7 +2000,7 @@ describe("Parser", function () {
 
 					assert.deepEqual(res, expected);
 				});
-				it("Should fail: create opcode with invalid parameters", () => {
+				it("Should fail: create opcode with invalid parameters", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(["gloadss", "1"], 1, interpreter, ExecutionMode.APPLICATION),
@@ -2015,7 +2015,7 @@ describe("Parser", function () {
 			});
 
 			describe("acct_params_get Opcode", function () {
-				it("Should succeed: create new acct_params_get opcode", () => {
+				it("Should succeed: create new acct_params_get opcode", function () {
 					Object.keys(AcctParamQueryFields).forEach((appParam: string) => {
 						const res = opcodeFromSentence(
 							["acct_params_get", appParam],
@@ -2027,7 +2027,7 @@ describe("Parser", function () {
 						assert.deepEqual(res, expected);
 					});
 				});
-				it("Should fail: create acct_params_get opcode with invalid parameter", () => {
+				it("Should fail: create acct_params_get opcode with invalid parameter", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
@@ -2041,8 +2041,8 @@ describe("Parser", function () {
 				});
 			});
 
-			describe("itxn_next opcode", () => {
-				it("Should succeed: create new itxn_next opcode", () => {
+			describe("itxn_next opcode", function () {
+				it("Should succeed: create new itxn_next opcode", function () {
 					// can parse opcode
 					const res = opcodeFromSentence(
 						["itxn_next"],
@@ -2053,7 +2053,7 @@ describe("Parser", function () {
 					const expected = new ITxnNext([], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
-				it("Should fail: Create itxn_next with invalid parameters", () => {
+				it("Should fail: Create itxn_next with invalid parameters", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
@@ -2067,8 +2067,8 @@ describe("Parser", function () {
 				});
 			});
 
-			describe("gitxn Opcode", () => {
-				it("Should succeed: create new gitxn opcode", () => {
+			describe("gitxn Opcode", function () {
+				it("Should succeed: create new gitxn opcode", function () {
 					let res = opcodeFromSentence(
 						["gitxn", "0", "Fee"],
 						1,
@@ -2087,7 +2087,7 @@ describe("Parser", function () {
 					expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
-				it("Should fail: create gitxn opcode with invalid parameters", () => {
+				it("Should fail: create gitxn opcode with invalid parameters", function () {
 					expectRuntimeError(
 						() => opcodeFromSentence(["gitxn", "1"], 1, interpreter, ExecutionMode.APPLICATION),
 						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -2106,8 +2106,8 @@ describe("Parser", function () {
 				});
 			});
 
-			describe("gitxna Opcode", () => {
-				it("Should succeed: create new gitxna opcode", () => {
+			describe("gitxna Opcode", function () {
+				it("Should succeed: create new gitxna opcode", function () {
 					let res = opcodeFromSentence(
 						["gitxna", "1", "Accounts", "1"],
 						1,
@@ -2127,7 +2127,7 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 				});
 
-				it("Should fail: create gitxna with invalid parameters", () => {
+				it("Should fail: create gitxna with invalid parameters", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
@@ -2163,8 +2163,8 @@ describe("Parser", function () {
 				});
 			});
 
-			describe("gitxnas Opcode", () => {
-				it("Should succeed: create new gitxnas opcode", () => {
+			describe("gitxnas Opcode", function () {
+				it("Should succeed: create new gitxnas opcode", function () {
 					let res = opcodeFromSentence(
 						["gitxnas", "1", "Accounts"],
 						1,
@@ -2184,7 +2184,7 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 				});
 
-				it("Should fail: create gitxnas with invalid parameters", () => {
+				it("Should fail: create gitxnas with invalid parameters", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
@@ -2220,8 +2220,8 @@ describe("Parser", function () {
 				});
 			});
 
-			describe("itxnas opcode", () => {
-				it("Should succeed: create new itxnas opcode", () => {
+			describe("itxnas opcode", function () {
+				it("Should succeed: create new itxnas opcode", function () {
 					// can parse opcode
 					const res = opcodeFromSentence(
 						["itxnas", "Accounts"],
@@ -2233,7 +2233,7 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 				});
 
-				it("Should fail: create opcode with invalid parameters", () => {
+				it("Should fail: create opcode with invalid parameters", function () {
 					expectRuntimeError(
 						() => opcodeFromSentence(["itxnas"], 1, interpreter, ExecutionMode.APPLICATION),
 						RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -2250,7 +2250,7 @@ describe("Parser", function () {
 	});
 
 	const cryptoFile = "test-crypto.teal";
-	describe("Opcodes list from TEAL file", () => {
+	describe("Opcodes list from TEAL file", function () {
 		useFixture("teal-files");
 
 		let interpreter: Interpreter;
@@ -2260,21 +2260,21 @@ describe("Parser", function () {
 			interpreter.tealVersion = 2;
 		});
 
-		it("Supported pragma version 6", () => {
+		it("Supported pragma version 6", function () {
 			const fileWithPragmav6 = "test-pragma-v6.teal";
 			assert.doesNotThrow(() =>
 				parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
 			);
 		});
 
-		it("Supported pragma version 7", () => {
+		it("Supported pragma version 7", function () {
 			const fileWithPragmav7 = "test-pragma-v7.teal";
 			assert.doesNotThrow(() =>
 				parser(getProgram(fileWithPragmav7), ExecutionMode.SIGNATURE, interpreter)
 			);
 		});
 
-		it("Should fail if declare pragma greater than 7", () => {
+		it("Should fail if declare pragma greater than 7", function () {
 			const fileWithPragmaInvalid = "test-pragma-invalid.teal";
 			expectRuntimeError(
 				() => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
@@ -2282,7 +2282,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("Should return correct opcode list for '+'", async () => {
+		it("Should return correct opcode list for '+'", async function () {
 			const file1 = "test-file-1.teal";
 			let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
@@ -2300,7 +2300,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expect);
 		});
 
-		it("Should throw error if #pragma is not on 1st line", async () => {
+		it("Should throw error if #pragma is not on 1st line", async function () {
 			let file = "test-pragma-1.teal";
 			expectRuntimeError(
 				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
@@ -2314,7 +2314,7 @@ describe("Parser", function () {
 			);
 		});
 
-		it("Should return correct opcode list for '-'", async () => {
+		it("Should return correct opcode list for '-'", async function () {
 			const file = "test-file-3.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
@@ -2327,7 +2327,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for '/'", async () => {
+		it("Should return correct opcode list for '/'", async function () {
 			const file = "test-file-4.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
@@ -2340,7 +2340,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for '*'", async () => {
+		it("Should return correct opcode list for '*'", async function () {
 			const file = "test-file-5.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
@@ -2353,7 +2353,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'addr'", async () => {
+		it("Should return correct opcode list for 'addr'", async function () {
 			const file = "test-addr.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
@@ -2364,7 +2364,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'byte'", async () => {
+		it("Should return correct opcode list for 'byte'", async function () {
 			const file = "test-byte.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
@@ -2384,7 +2384,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Len and Err'", async () => {
+		it("Should return correct opcode list for 'Len and Err'", async function () {
 			const file = "test-len-err.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [new Len([], 1), new Err([], 2)];
@@ -2392,7 +2392,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Bitwise'", async () => {
+		it("Should return correct opcode list for 'Bitwise'", async function () {
 			const file = "test-bitwise.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
@@ -2405,7 +2405,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Mod'", async () => {
+		it("Should return correct opcode list for 'Mod'", async function () {
 			const file = "test-mod.teal";
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
@@ -2413,7 +2413,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Arg'", async () => {
+		it("Should return correct opcode list for 'Arg'", async function () {
 			const file = "test-arg.teal";
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(0)];
@@ -2424,7 +2424,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Intc and Bytec'", async () => {
+		it("Should return correct opcode list for 'Intc and Bytec'", async function () {
 			const file = "test-int-bytec.teal";
 			interpreter.intcblock = [1n];
 			interpreter.bytecblock = [new Uint8Array(0)];
@@ -2435,7 +2435,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Store and Load'", async () => {
+		it("Should return correct opcode list for 'Store and Load'", async function () {
 			const file = "test-store-load.teal";
 			interpreter.scratch = [1n];
 
@@ -2445,18 +2445,18 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'Crypto opcodes'", async () => {
+		it("Should return correct opcode list for 'Crypto opcodes'", async function () {
 			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
 			const expected = [
 				new Sha256([], 1, interpreter),
 				new Keccak256([], 2, interpreter),
 				new Sha512_256([], 3, interpreter),
-				new Ed25519verify([], 4),
+				new Ed25519verify([], 4, interpreter),
 			];
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'comparsions'", async () => {
+		it("Should return correct opcode list for 'comparsions'", async function () {
 			const file = "test-compare.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2475,7 +2475,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("Should return correct opcode list for 'all others'", async () => {
+		it("Should return correct opcode list for 'all others'", async function () {
 			const file = "test-others.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2497,7 +2497,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for 'b, bz, bnz'", async () => {
+		it("should return correct opcode list for 'b, bz, bnz'", async function () {
 			const file = "test-branch.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2510,7 +2510,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for 'return'", async () => {
+		it("should return correct opcode list for 'return'", async function () {
 			const file = "test-return.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2519,7 +2519,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for 'Label'", async () => {
+		it("should return correct opcode list for 'Label'", async function () {
 			const file = "test-label.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2528,7 +2528,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for 'global'", async () => {
+		it("should return correct opcode list for 'global'", async function () {
 			const file = "test-global.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
@@ -2547,7 +2547,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for `Stateful`", async () => {
+		it("should return correct opcode list for `Stateful`", async function () {
 			const file = "test-stateful.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
@@ -2572,7 +2572,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for `teal v6`", async () => {
+		it("should return correct opcode list for `teal v6`", async function () {
 			const file = "teal-v6.teal";
 
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
@@ -2592,7 +2592,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 		});
 
-		it("should return correct opcode list for `teal v7`", async () => {
+		it("should return correct opcode list for `teal v7`", async function () {
 			const file = "teal-v7.teal";
 			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
 			const expected = [
@@ -2604,7 +2604,7 @@ describe("Parser", function () {
 		});
 	});
 
-	describe("Gas cost of Opcodes from TEAL file", () => {
+	describe("Gas cost of Opcodes from TEAL file", function () {
 		useFixture("teal-files");
 
 		let interpreter: Interpreter;
@@ -2612,7 +2612,7 @@ describe("Parser", function () {
 			interpreter = new Interpreter();
 		});
 
-		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async function () {
 			interpreter.tealVersion = 1; // by default the version is also 1
 
 			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
@@ -2636,7 +2636,7 @@ describe("Parser", function () {
 			assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
 		});
 
-		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async function () {
 			interpreter.tealVersion = 2;
 
 			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
@@ -2661,7 +2661,7 @@ describe("Parser", function () {
 		});
 
 		// note: cost for cryto ops for teal version 2, 3 are same
-		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async () => {
+		it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async function () {
 			interpreter.tealVersion = 3;
 
 			let op = opcodeFromSentence(["sha256"], 1, interpreter, ExecutionMode.APPLICATION);
@@ -2685,7 +2685,7 @@ describe("Parser", function () {
 			assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
 		});
 
-		it("Should return correct gas cost for mix opcodes from teal files", async () => {
+		it("Should return correct gas cost for mix opcodes from teal files", async function () {
 			let file = "test-file-1.teal";
 			const mode = ExecutionMode.SIGNATURE;
 			parser(getProgram(file), mode, interpreter);
@@ -2717,7 +2717,7 @@ describe("Parser", function () {
 			assert.equal(interpreter.gas, 14);
 		});
 
-		it("Should throw error if total cost exceeds 20000", async () => {
+		it("Should throw error if total cost exceeds 20000", async function () {
 			const file = "test-max-opcost.teal"; // has cost 22800
 			expectRuntimeError(
 				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),

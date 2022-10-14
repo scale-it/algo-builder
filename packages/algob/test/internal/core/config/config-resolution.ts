@@ -11,20 +11,20 @@ import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import { useFixtureProject } from "../../../helpers/project";
 import { account1 } from "../../../mocks/account";
 
-describe("Config resolution", () => {
-	beforeEach(() => {
+describe("Config resolution", function () {
+	beforeEach(function () {
 		BuilderContext.createBuilderContext();
 	});
 
-	afterEach(() => {
+	afterEach(function () {
 		resetBuilderContext();
 	});
 
-	describe("Default config merging", () => {
-		describe("With default config", () => {
+	describe("Default config merging", function () {
+		describe("With default config", function () {
 			useFixtureProject("default-config-project");
 
-			it("should return the default config", async () => {
+			it("should return the default config", async function () {
 				const config = await loadConfigAndTasks();
 				assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
@@ -34,16 +34,16 @@ describe("Config resolution", () => {
 			});
 		});
 
-		describe("With custom config", () => {
+		describe("With custom config", function () {
 			useFixtureProject("config-project");
 
-			it("should return the config merged ", async () => {
+			it("should return the config merged ", async function () {
 				const config = await loadConfigAndTasks();
 
 				assert.containsAllKeys(config.networks, ["localhost", "custom"]);
 			});
 
-			it("should return the config merged ", async () => {
+			it("should return the config merged ", async function () {
 				const config = await loadConfigAndTasks();
 				assert.containsAllKeys(config.networks, ["localhost", "custom"]);
 				const ncfg = config.networks.localhost as HttpNetworkConfig;
@@ -52,22 +52,22 @@ describe("Config resolution", () => {
 				assertAccountsEqual(config.networks.localhost.accounts, [account1]);
 			});
 
-			it("should keep any unknown field", async () => {
+			it("should keep any unknown field", async function () {
 				const config = (await loadConfigAndTasks()) as any;
 				assert.deepEqual(config.unknown, { asd: 123 });
 			});
 		});
 	});
 
-	describe("Paths resolution", () => {
+	describe("Paths resolution", function () {
 		const cfg: UserPaths = {};
-		it("Should return absolute paths", () => {
+		it("Should return absolute paths", function () {
 			const paths = resolveProjectPaths(__filename, cfg);
 			const pathVals: string[] = Object.values(paths);
 			pathVals.forEach((p) => assert.isTrue(path.isAbsolute(p)));
 		});
 
-		it("Should use absolute paths 'as is'", () => {
+		it("Should use absolute paths 'as is'", function () {
 			const paths = resolveProjectPaths(__filename, {
 				root: "/root",
 				sources: "/c",
@@ -83,7 +83,7 @@ describe("Config resolution", () => {
 			assert.equal(paths.tests, "/t");
 		});
 
-		it("Should resolve the root relative to the configFile", () => {
+		it("Should resolve the root relative to the configFile", function () {
 			const paths = resolveProjectPaths(__filename, {
 				root: "blah",
 			});
@@ -91,7 +91,7 @@ describe("Config resolution", () => {
 			assert.equal(paths.root, path.join(__dirname, "blah"));
 		});
 
-		it("Should resolve the rest relative to the root", () => {
+		it("Should resolve the rest relative to the root", function () {
 			const paths = resolveProjectPaths(__filename, {
 				root: "blah",
 				sources: "c",
@@ -108,7 +108,7 @@ describe("Config resolution", () => {
 			assert.equal(paths.tests, path.join(root, "t"));
 		});
 
-		it("Should have the right default values", () => {
+		it("Should have the right default values", function () {
 			const paths = resolveProjectPaths(__filename);
 			assert.equal(paths.root, __dirname);
 			assert.equal(paths.sources, path.join(__dirname, "contracts"));

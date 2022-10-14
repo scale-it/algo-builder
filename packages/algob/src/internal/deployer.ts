@@ -5,7 +5,15 @@ import {
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { Account, EncodedMultisig, LogicSigAccount, modelsv2, Transaction } from "algosdk";
+import { mkTransaction } from "@algo-builder/web/build/lib/txn";
+import type {
+	Account,
+	EncodedMultisig,
+	LogicSigAccount,
+	modelsv2,
+	SignedTransaction,
+	Transaction,
+} from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -261,9 +269,13 @@ class DeployerBasicMode {
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
-	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-		return this.algoOp.sendAndWait(rawTxns);
+	sendAndWait(
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = wtypes.WAIT_ROUNDS
+	): Promise<ConfirmedTxInfo> {
+		return this.algoOp.sendAndWait(rawTxns, waitRounds);
 	}
 
 	/**
@@ -485,7 +497,81 @@ class DeployerBasicMode {
 	async getReceiptTxns(txns: Transaction[]): Promise<TxnReceipt[]> {
 		return await this.algoOp.getReceiptTxns(txns);
 	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: wtypes.ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		const txns: Transaction[] = [];
+		for (const [_, txn] of execParams.entries()) {
+			txns.push(mkTransaction(txn, txParams));
+		}
+		return txns;
+	}
+
+	/**
+	 * Signes a Transaction object with the signer
+	 * @param transaction transaction object.
+	 * @param signer object that signes the transaction
+	 * @returns SignedTransaction
+	 */
+	signTx(transaction: algosdk.Transaction, signer: wtypes.Sign): SignedTransaction {
+		let decodedResult: Uint8Array;
+		switch (signer.sign) {
+			case wtypes.SignType.SecretKey: {
+				decodedResult = transaction.signTxn(signer.fromAccount.sk);
+				break;
+			}
+			case wtypes.SignType.LogicSignature: {
+				signer.lsig.lsig.args = signer.args ?? [];
+				decodedResult = algosdk.signLogicSigTransactionObject(transaction, signer.lsig).blob;
+				break;
+			}
+			default: {
+				throw new Error("Unknown type of signature");
+			}
+		}
+		return algosdk.decodeSignedTransaction(decodedResult);
+	}
+
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs it using provided signer
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @param signer object that signes the transaction
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	makeAndSignTx(
+		execParams: wtypes.ExecParams[],
+		txParams: algosdk.SuggestedParams,
+		signer: wtypes.Sign
+	): SignedTransaction[] {
+		const signedTxns: SignedTransaction[] = [];
+		const txns: Transaction[] = this.makeTx(execParams, txParams);
+		txns.forEach((txn) => signedTxns.push(this.signTx(txn, signer)));
+		return signedTxns;
+	}
+
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @param rounds number of rounds to wait for response
+	 * @returns ConfirmedTxInfo
+	 */
+	sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<ConfirmedTxInfo> {
+		if (transactions.length < 1) {
+			throw Error("No transactions to process");
+		} else {
+			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
+			return this.sendAndWait(Uint8ArraySignedTx, rounds);
+		}
+	}
 }
+
 /**
  * This class is what user interacts with in deploy task
  */

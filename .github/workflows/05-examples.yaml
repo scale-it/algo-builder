@@ -27,10 +27,12 @@ jobs:
         run: yarn build
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
           cache: "pipenv"
+      - name: Install poetry
+        run: pip install -U poetry
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync
@@ -53,12 +55,20 @@ jobs:
           cd ./project-dev && npx tsc -b . && cd ..
           pipenv run ./project-dev-script.sh exec deploy
 
-      - name: Create algo-builder js project
+      - name: Create algo-builder js project with npm
+        working-directory: ./packages/algob
+        run: |
+          rm -rf ./project-dev
+          ./project-dev-script.sh create --npm
+          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec deploy
+
+      - name: Create algo-builder js project with yarn
         working-directory: ./packages/algob
         run: |
           rm -rf ./project-dev
           ./project-dev-script.sh create
-          pipenv run ./project-dev-script.sh exec test 
+          pipenv run ./project-dev-script.sh exec test
           pipenv run ./project-dev-script.sh exec deploy
 
       - name: Example ASA
@@ -127,10 +137,12 @@ jobs:
         run: yarn build
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
           cache: "pipenv"
+      - name: Install poetry
+        run: pip install -U poetry
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync
@@ -193,10 +205,12 @@ jobs:
         run: yarn build
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
           cache: "pipenv"
+      - name: Install poetry
+        run: pip install -U poetry
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync

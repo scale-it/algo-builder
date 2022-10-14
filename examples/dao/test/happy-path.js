@@ -2,7 +2,7 @@ const { AccountStore } = require("@algo-builder/runtime");
 const { types, parsing } = require("@algo-builder/web");
 const { assert } = require("chai");
 const { Context, initialBalance, minSupport, deposit } = require("./common");
-const { ProposalType, Vote, DAOActions } = require("../scripts/run/common/common");
+const { ProposalType, Vote } = require("../scripts/run/common/common");
 const {
 	mkProposalTx,
 	mkDepositVoteTokenTx,
@@ -73,7 +73,7 @@ describe("DAO - Happy Paths", function () {
 
 	describe("Add proposal", function () {
 		let proposalParams, addProposalTx;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			setUpCtx();
 
 			proposalParams = [
@@ -99,12 +99,12 @@ describe("DAO - Happy Paths", function () {
 				ctx.daoFundLsig
 			);
 			// update transfer amount of proposal deposit tx
-			addProposalTx[1].amount = 15;
+			addProposalTx[1].amount = deposit;
 
 			ctx.optInToDAOApp(ctx.proposalLsig.address()); // opt-in
 		});
 
-		it("should save proposal config in proposalLsig for ALGO transfer (type == 1)", () => {
+		it("should save proposal config in proposalLsig for ALGO transfer (type == 1)", function () {
 			ctx.executeTx(addProposalTx);
 			ctx.syncAccounts();
 
@@ -153,7 +153,7 @@ describe("DAO - Happy Paths", function () {
 			assert.deepEqual(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "amount"), BigInt(2e6));
 		});
 
-		it("should save proposal config in proposalLsig for ASA transfer (type == 2)", () => {
+		it("should save proposal config in proposalLsig for ASA transfer (type == 2)", function () {
 			addProposalTx[0].appArgs = [
 				...proposalParams.splice(0, 8),
 				`int:${ProposalType.ASA_TRANSFER}`, // type
@@ -185,7 +185,7 @@ describe("DAO - Happy Paths", function () {
 			assert.deepEqual(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "amount"), 10n);
 		});
 
-		it("should save proposal config in proposalLsig for message (type == 3)", () => {
+		it("should save proposal config in proposalLsig for message (type == 3)", function () {
 			addProposalTx[0].appArgs = [
 				...proposalParams.splice(0, 8),
 				`int:${ProposalType.MESSAGE}`, // type
@@ -202,7 +202,7 @@ describe("DAO - Happy Paths", function () {
 	});
 
 	describe("Deposit Vote Token", function () {
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			setUpCtx();
 			ctx.optInToDAOApp(ctx.proposalLsig.address()); // opt-in
 			ctx.addProposal();
@@ -224,7 +224,7 @@ describe("DAO - Happy Paths", function () {
 			ctx.syncAccounts();
 		};
 
-		it("should accept token deposit", () => {
+		it("should accept token deposit", function () {
 			const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
 
 			_depositVoteToken(ctx.voterA.account, 6);
@@ -236,7 +236,7 @@ describe("DAO - Happy Paths", function () {
 			assert.deepEqual(ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount, beforeBal + 6n);
 		});
 
-		it("should accept multiple token deposit by same & different accounts", () => {
+		it("should accept multiple token deposit by same & different accounts", function () {
 			const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
 			const initialADeposit = ctx.voterA.getLocalState(ctx.daoAppID, "deposit");
 
@@ -271,7 +271,7 @@ describe("DAO - Happy Paths", function () {
 			);
 		});
 
-		it('should allow token deposit by any "from" account', () => {
+		it('should allow token deposit by any "from" account', function () {
 			const beforeBal = ctx.depositAcc.getAssetHolding(ctx.govTokenID).amount;
 			const initialADeposit = ctx.voterA.getLocalState(ctx.daoAppID, "deposit");
 
@@ -296,7 +296,7 @@ describe("DAO - Happy Paths", function () {
 
 	describe("Vote", function () {
 		let registerVoteParam;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			registerVoteParam = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -328,7 +328,7 @@ describe("DAO - Happy Paths", function () {
 			);
 		});
 
-		it("should allow voterA to register deposited tokens as votes", () => {
+		it("should allow voterA to register deposited tokens as votes", function () {
 			ctx.executeTx(registerVoteParam);
 			ctx.syncAccounts();
 
@@ -344,7 +344,7 @@ describe("DAO - Happy Paths", function () {
 			assert.equal(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "yes"), 6n);
 		});
 
-		it("should allow voterB to register gov tokens as votes after voterA", () => {
+		it("should allow voterB to register gov tokens as votes after voterA", function () {
 			const yesVotes = ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "yes");
 			const key = new Uint8Array([
 				...parsing.stringToBytes("p_"),
@@ -373,7 +373,7 @@ describe("DAO - Happy Paths", function () {
 			assert.equal(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "yes"), yesVotes + 6n + 4n);
 		});
 
-		it("should allow voting if already set proposal_id is different", () => {
+		it("should allow voting if already set proposal_id is different", function () {
 			// vote by A
 			ctx.executeTx(registerVoteParam);
 			ctx.syncAccounts();
@@ -392,7 +392,7 @@ describe("DAO - Happy Paths", function () {
 
 	describe("Execute", function () {
 		let executeProposalTx;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			ctx.syncAccounts();
 			executeProposalTx = [
 				{
@@ -442,7 +442,7 @@ describe("DAO - Happy Paths", function () {
 			ctx.runtime.setRoundAndTimestamp(10, votingEnd + 10);
 		});
 
-		it("should execute proposal for type == 1 (ALGO TRANSFER)", () => {
+		it("should execute proposal for type == 1 (ALGO TRANSFER)", function () {
 			const beforeProposerBal = ctx.proposer.balance();
 			ctx.executeTx(executeProposalTx);
 			ctx.syncAccounts();
@@ -454,7 +454,7 @@ describe("DAO - Happy Paths", function () {
 			assert.equal(ctx.proposer.balance(), beforeProposerBal + BigInt(2e6) - 2000n);
 		});
 
-		it("should execute proposal for type == 2 (ASA TRANSFER)", () => {
+		it("should execute proposal for type == 2 (ASA TRANSFER)", function () {
 			const config = {
 				type: BigInt(ProposalType.ASA_TRANSFER),
 				from: parsing.addressToPk(ctx.daoFundLsig.address()),
@@ -492,7 +492,7 @@ describe("DAO - Happy Paths", function () {
 			);
 		});
 
-		it("should execute proposal for type == 3 (MESSAGE)", () => {
+		it("should execute proposal for type == 3 (MESSAGE)", function () {
 			const config = {
 				type: BigInt(ProposalType.MESSAGE),
 				msg: parsing.stringToBytes("my-message"),
@@ -514,7 +514,7 @@ describe("DAO - Happy Paths", function () {
 			assert.equal(ctx.proposalLsigAcc.getLocalState(ctx.daoAppID, "executed"), 1n);
 		});
 
-		it("should allow anyone to execute proposal", () => {
+		it("should allow anyone to execute proposal", function () {
 			executeProposalTx[0].fromAccount = ctx.voterA.account;
 
 			assert.doesNotThrow(() => ctx.executeTx(executeProposalTx));
@@ -529,7 +529,7 @@ describe("DAO - Happy Paths", function () {
 		this.beforeAll(resetCtx);
 
 		let withdrawVoteDepositTx;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			withdrawVoteDepositTx = mkWithdrawVoteDepositTx(
 				ctx.daoAppID,
 				ctx.govTokenID,
@@ -538,7 +538,7 @@ describe("DAO - Happy Paths", function () {
 			);
 		});
 
-		it("should allow withdrawal after voting is over", () => {
+		it("should allow withdrawal after voting is over", function () {
 			// set current time after voting over
 			ctx.runtime.setRoundAndTimestamp(10, votingEnd + 10);
 			ctx.syncAccounts();
@@ -581,7 +581,7 @@ describe("DAO - Happy Paths", function () {
 	describe("Clear Vote Record", function () {
 		this.beforeAll(resetCtx);
 
-		it("should clear voting record if proposal is not active", () => {
+		it("should clear voting record if proposal is not active", function () {
 			// set current time after voting over
 			ctx.runtime.setRoundAndTimestamp(10, votingEnd + 10);
 
@@ -619,7 +619,7 @@ describe("DAO - Happy Paths", function () {
 	});
 
 	describe("Close Proposal", function () {
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			// set up context
 			setUpCtx();
 
@@ -632,7 +632,7 @@ describe("DAO - Happy Paths", function () {
 			ctx.addProposal();
 		});
 
-		it("should close proposal if proposal is recorded & voting is not active", () => {
+		it("should close proposal if proposal is recorded & voting is not active", function () {
 			// set current time after executeBefore
 			ctx.runtime.setRoundAndTimestamp(10, executeBefore + 10);
 
@@ -649,6 +649,7 @@ describe("DAO - Happy Paths", function () {
 
 			// verify proposal config is deleted from localstate
 			for (const key of [
+				"id",
 				"name",
 				"url",
 				"url_hash",

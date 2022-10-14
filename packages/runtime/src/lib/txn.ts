@@ -13,8 +13,11 @@ import { Op } from "../interpreter/opcode";
 import { ITxn, ITxna } from "../interpreter/opcode-list";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MaxAppProgramLen,
+	maxStringSize,
 	TransactionTypeEnum,
 	TxFieldDefaults,
+	TxFieldEnum,
 	TxnFields,
 	ZERO_ADDRESS,
 	ZERO_ADDRESS_STR,
@@ -54,24 +57,42 @@ const globalAndLocalNumTxnFields = new Set([
 
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
+// checks if byte array size is inbound
 export function parseToStackElem(a: unknown, field: TxField): StackElem {
-	if (a instanceof Uint8Array) {
-		return a;
-	}
-
-	if (Buffer.isBuffer(a)) {
-		return new Uint8Array(a);
-	}
-
 	if (typeof a === "number" || typeof a === "bigint" || typeof a === "boolean") {
 		return BigInt(a);
 	}
-
-	if (typeof a === "string") {
-		return parsing.stringToBytes(a);
+	let byteArray: Uint8Array = new Uint8Array();
+	if (a === undefined) {
+		const result = TxFieldDefaults[field];
+		if (result !== Uint8Array) {
+			return result;
+		}
+		byteArray = result;
 	}
-
-	return TxFieldDefaults[field];
+	if (a instanceof Uint8Array) {
+		byteArray = a;
+	}
+	if (Buffer.isBuffer(a)) {
+		byteArray = new Uint8Array(a);
+	}
+	if (typeof a === "string") {
+		byteArray = parsing.stringToBytes(a);
+	}
+	if (byteArray.length > maxStringSize) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED, {
+			maxStringSize: maxStringSize,
+		});
+	}
+	if (
+		(field === TxFieldEnum.ApprovalProgram || field === TxFieldEnum.ClearStateProgram) &&
+		byteArray.length > MaxAppProgramLen
+	) {
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED, {
+			maxAppProgramLen: MaxAppProgramLen,
+		});
+	}
+	return byteArray;
 }
 
 /**
@@ -96,6 +117,7 @@ export function checkIfAssetDeletionTx(txn: Transaction): boolean {
  * @param gtxns Transaction group
  * @param interpreter interpreter object
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export function txnSpecByField(
 	txField: string,
 	tx: EncTx,
@@ -120,59 +142,59 @@ export function txnSpecByField(
 
 	// handle other cases
 	switch (txField) {
-		case "FirstValidTime": {
+		case TxFieldEnum.FirstValidTime: {
 			// Causes program to fail; reserved for future use
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
 		}
-		case "TypeEnum": {
+		case TxFieldEnum.TypeEnum: {
 			result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
 			break;
 		}
-		case "TxID": {
+		case TxFieldEnum.TxID: {
 			return parsing.stringToBytes(tx.txID);
 		}
-		case "GroupIndex": {
+		case TxFieldEnum.GroupIndex: {
 			result = gtxns.indexOf(tx);
 			break;
 		}
-		case "NumAppArgs": {
+		case TxFieldEnum.NumAppArgs: {
 			const appArg = TxnFields[tealVersion].ApplicationArgs as keyof EncTx;
 			const appArgs = tx[appArg] as Buffer[];
 			result = appArgs?.length;
 			break;
 		}
-		case "NumAccounts": {
+		case TxFieldEnum.NumAccounts: {
 			const appAcc = TxnFields[tealVersion].Accounts as keyof EncTx;
 			const appAccounts = tx[appAcc] as Buffer[];
 			result = appAccounts?.length;
 			break;
 		}
-		case "NumAssets": {
+		case TxFieldEnum.NumAssets: {
 			const encAppAsset = TxnFields[tealVersion].Assets as keyof EncTx; // 'apas'
 			const foreignAssetsArr = tx[encAppAsset] as Buffer[];
 			result = foreignAssetsArr?.length;
 			break;
 		}
-		case "NumApplications": {
+		case TxFieldEnum.NumApplications: {
 			const encApp = TxnFields[tealVersion].Applications as keyof EncTx; // 'apfa'
 			const foreignAppsArr = tx[encApp] as Buffer[];
 			result = foreignAppsArr?.length;
 			break;
 		}
-		case "AssetSender": {
+		case TxFieldEnum.AssetSender: {
 			// if tx.asns is undefined we return zero address;
 			if (tx.type === "axfer") {
 				result = tx.asnd ?? Buffer.from(ZERO_ADDRESS);
 			}
 			break;
 		}
-		case "CreatedAssetID": {
+		case TxFieldEnum.CreatedAssetID: {
 			const asaInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
 			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
 			else result = 0n;
 			break;
 		}
-		case "CreatedApplicationID": {
+		case TxFieldEnum.CreatedApplicationID: {
 			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
 			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
 			else if (isEncTxApplicationCreate(tx))
@@ -180,18 +202,25 @@ export function txnSpecByField(
 			else result = 0n;
 			break;
 		}
-		case "LastLog": {
+		case TxFieldEnum.LastLog: {
 			result = interpreter.runtime.ctx.lastLog;
 			break;
 		}
 
-		case "StateProofPK": {
+		case TxFieldEnum.StateProofPK: {
 			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
 			// so we set up 64 zero bytes as default value of StateProofPK
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
-
+		case TxFieldEnum.NumApprovalProgramPages: {
+			tx.apap ? (result = Math.ceil(tx.apap.length / maxStringSize)) : (result = 0n);
+			break;
+		}
+		case TxFieldEnum.NumClearStateProgramPages: {
+			tx.apsu ? (result = Math.ceil(tx.apsu.length / maxStringSize)) : (result = 0n);
+			break;
+		}
 		default: {
 			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
@@ -211,6 +240,7 @@ export function txnSpecByField(
  * @param interpreter interpreter object
  * @param line line number in TEAL file
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export function txAppArg(
 	txField: TxField,
 	tx: EncTx,
@@ -221,9 +251,39 @@ export function txAppArg(
 ): StackElem {
 	const tealVersion: number = interpreter.tealVersion;
 
+	if (txField === TxFieldEnum.Logs) {
+		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
+		const logs: Uint8Array[] = txReceipt?.logs ?? [];
+		op.checkIndexBound(idx, logs, op.line);
+		return parseToStackElem(logs[idx], txField);
+	} else if (txField === TxFieldEnum.ApprovalProgramPages && tx.apap) {
+		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
+		if (idx > pageCount) {
+			throw new Error("invalid ApprovalProgramPages page index");
+		}
+		const first = idx * maxStringSize;
+		const last = Math.min(first + maxStringSize, tx.apap.length);
+		const page = tx.apap.slice(first, last);
+		return parseToStackElem(page, txField);
+	} else if (txField === TxFieldEnum.NumApprovalProgramPages && tx.apap) {
+		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
+		return parseToStackElem(pageCount, txField);
+	} else if (txField === TxFieldEnum.ClearStateProgramPages && tx.apsu) {
+		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
+		if (idx > pageCount) {
+			throw new Error("invalid ClearStateProgramPages page index");
+		}
+		const first = idx * maxStringSize;
+		const last = Math.min(first + maxStringSize, tx.apsu.length);
+		const page = tx.apsu.slice(first, last);
+		return parseToStackElem(page, txField);
+	} else if (txField === TxFieldEnum.NumClearStateProgramPages && tx.apsu) {
+		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
+		return parseToStackElem(pageCount, txField);
+	}
+
 	const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
 	const result = tx[s as keyof EncTx] as Buffer[]; // array of pk buffers (accounts or appArgs)
-
 	if (!result) {
 		// handle defaults
 		return TxFieldDefaults[txField];
@@ -281,6 +341,64 @@ export function isEncTxAssetConfig(txn: EncTx): boolean {
 }
 
 /**
+ * Check if given encoded transaction obj is asset creation
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetCreate(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid === undefined && // assetIndex should be undefined
+		txn.apar !== undefined // assetParameters should not be undefined
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset reconfiguration
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetReconfigure(txn: EncTx): boolean {
+	return (
+		txn.type === TransactionTypeEnum.ASSET_CONFIG && // type should be asset config
+		txn.caid !== undefined && // assetIndex should be undefined
+		txn.apar !== undefined && // assetParameters should not be undefined
+		(txn.apar.m !== undefined || // manager
+			txn.apar.f !== undefined || // freeze
+			txn.apar.c !== undefined || // clawback
+			txn.apar.r !== undefined) // reserve
+	);
+}
+/**
+ * Checks if given encoded transaction obj is asset revoke
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetRevoke(txn: EncTx): boolean {
+	return txn.asnd !== undefined;
+}
+/**
+ * Checks if given encoded transaction obj is asset freeze
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetFreeze(txn: EncTx): boolean {
+	return txn.afrz !== undefined && txn.fadd !== undefined;
+}
+/**
+ * Checks if given encoded transaction obj is asset opt in
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetOptIn(txn: EncTx): boolean {
+	if (txn.arcv !== undefined) {
+		return !txn.arcv.compare(txn.snd) as boolean;
+	} else {
+		return false;
+	}
+}
+/**
+ * Checks if given encoded transaction obj is asset opt in
+ * @param txn Encoded EncTx Object
+ */
+export function isEncTxAssetTransfer(txn: EncTx): boolean {
+	return txn.arcv !== undefined && txn.snd !== undefined && txn.asnd === undefined;
+}
+/**
  * Check if given encoded transaction object is app creation
  * @param txn Encoded EncTx Object
  */
@@ -333,7 +451,9 @@ export function encTxToExecParams(
 	};
 
 	execParams.payFlags.totalFee = encTx.fee;
-
+	if (ArrayBuffer.isView(encTx.type)) {
+		encTx.type = Buffer.from(encTx.type).toString("utf-8");
+	}
 	switch (encTx.type) {
 		case TransactionTypeEnum.APPLICATION_CALL: {
 			if (isEncTxApplicationCreate(encTx)) {
@@ -362,7 +482,7 @@ export function encTxToExecParams(
 			execParams.fromAccountAddr = _getAddress(encTx.snd);
 			execParams.toAccountAddr =
 				getRuntimeAccountAddr(encTx.rcv, ctx, line) ?? ZERO_ADDRESS_STR;
-			execParams.amountMicroAlgos = encTx.amt ?? 0n;
+			execParams.amountMicroAlgos = encTx.amt ? BigInt(encTx.amt) : 0n;
 			if (encTx.close) {
 				execParams.payFlags.closeRemainderTo = getRuntimeAccountAddr(encTx.close, ctx, line);
 			}
@@ -393,7 +513,7 @@ export function encTxToExecParams(
 				execParams.toAccountAddr = getRuntimeAccountAddr(encTx.arcv, ctx) ?? ZERO_ADDRESS_STR;
 			}
 			// set common fields (asset amount, index, closeRemainderTo)
-			execParams.amount = encTx.aamt ?? 0n;
+			execParams.amount = encTx.aamt ? BigInt(encTx.aamt) : 0n;
 			execParams.assetID = encTx.xaid ?? 0;
 			// option fields
 			if (encTx.aclose) {
@@ -443,8 +563,14 @@ export function encTxToExecParams(
 
 		case TransactionTypeEnum.KEY_REGISTRATION: {
 			execParams.type = types.TransactionType.KeyRegistration;
-			execParams.voteKey = encTx.votekey?.toString("base64");
-			execParams.selectionKey = encTx.selkey?.toString("base64");
+			// execParams.voteKey = encTx.votekey?.toString("base64");
+			if (encTx.votekey !== undefined) {
+				execParams.voteKey = Buffer.from(encTx.votekey).toString("base64");
+			}
+			// execParams.selectionKey = encTx.selkey?.toString("base64");
+			if (encTx.selkey !== undefined) {
+				execParams.selectionKey = Buffer.from(encTx.selkey).toString("base64");
+			}
 			execParams.voteFirst = encTx.votefst;
 			execParams.voteLast = encTx.votelst;
 			execParams.voteKeyDilution = encTx.votekd;

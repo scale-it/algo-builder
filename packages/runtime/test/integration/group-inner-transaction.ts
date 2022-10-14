@@ -58,14 +58,14 @@ describe("Group inner transaction", function () {
 		return appInfo;
 	}
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
 
 		firstAppInfo = deployAppAndFund("group.py", "clear.teal");
 	});
 
-	it("Can use itxn_next for create group inner tx transaction", () => {
+	it("Can use itxn_next for create group inner tx transaction", function () {
 		const contractBalance = contractAcc.balance();
 		const aliceBalance = alice.balance();
 
@@ -90,11 +90,11 @@ describe("Group inner transaction", function () {
 	});
 
 	describe("inner transaction limit tealv6", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			secondAppInfo = deployAppAndFund("limit-number-txn.py", "clear.teal");
 		});
 
-		it("Should fail when issue more than 256 inner txn", () => {
+		it("Should fail when issue more than 256 inner txn", function () {
 			const firstTxn: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,

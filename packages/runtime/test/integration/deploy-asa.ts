@@ -28,7 +28,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 		alice = runtime.getAccount(alice.address);
 	}
 
-	it("Should opt-in to multiple accounts mentioned in asa.yaml", () => {
+	it("Should opt-in to multiple accounts mentioned in asa.yaml", function () {
 		const asset = runtime.deployASA("asa", {
 			creator: { ...john.account, name: "john" },
 		}).assetIndex;
@@ -38,7 +38,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 		assert.isDefined(alice.getAssetHolding(asset));
 	});
 
-	it("Should throw an error when ASA definition not found in asa.yaml", () => {
+	it("Should throw an error when ASA definition not found in asa.yaml", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployASA("asa-invalid", {
@@ -50,7 +50,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
 
 	describe("ASA file is undefinded", function () {
 		useFixture("loop"); // project does not have an asa-file
-		it("Should throw an error when we tried to get asa from asa file for deploy", () => {
+		it("Should throw an error when we tried to get asa from asa file for deploy", function () {
 			expectRuntimeError(
 				() =>
 					runtime.deployASA("asa", {

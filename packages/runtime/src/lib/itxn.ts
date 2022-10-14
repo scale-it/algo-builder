@@ -1,5 +1,4 @@
 import algosdk, { decodeAddress, getApplicationAddress } from "algosdk";
-import { has } from "lodash";
 import cloneDeep from "lodash.clonedeep";
 
 import { Interpreter } from "..";
@@ -8,8 +7,11 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import {
 	ALGORAND_MIN_TX_FEE,
+	MaxAppProgramLen,
+	MaxExtraAppProgramPages,
 	MaxTxnNoteBytes,
 	TransactionTypeEnum,
+	TxFieldEnum,
 	TxnFields,
 } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
@@ -39,6 +41,7 @@ numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 ["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
 	(field) => numberTxnFields[6].add(field)
 );
+numberTxnFields[7] = cloneDeep(numberTxnFields[6]);
 
 const uintTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -48,6 +51,7 @@ const uintTxnFields: { [key: number]: Set<string> } = {
 	5: new Set(["Amount", "AssetAmount", "TypeEnum", "ConfigAssetTotal"]),
 };
 uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
+uintTxnFields[7] = cloneDeep(uintTxnFields[6]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
@@ -60,6 +64,7 @@ const assetIDFields: { [key: number]: Set<string> } = {
 };
 
 assetIDFields[6] = cloneDeep(assetIDFields[5]);
+assetIDFields[7] = cloneDeep(assetIDFields[6]);
 
 const byteTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -78,6 +83,10 @@ byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 	"ApprovalProgram",
 	"ClearStateProgram",
 ].forEach((field) => byteTxnFields[6].add(field));
+byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
+["ApprovalProgramPages", "ClearStateProgramPages"].forEach((field) =>
+	byteTxnFields[7].add(field)
+);
 
 const strTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -88,6 +97,7 @@ const strTxnFields: { [key: number]: Set<string> } = {
 };
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
+strTxnFields[7] = cloneDeep(strTxnFields[6]);
 
 const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -103,6 +113,7 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 };
 
 acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
+acfgAddrTxnFields[7] = cloneDeep(acfgAddrTxnFields[6]);
 
 const otherAddrTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([
@@ -119,6 +130,7 @@ const otherAddrTxnFields: { [key: number]: Set<string> } = {
 otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
 ["RekeyTo"].forEach((field) => otherAddrTxnFields[6].add(field));
+otherAddrTxnFields[7] = cloneDeep(otherAddrTxnFields[6]);
 
 const txTypes: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -132,6 +144,7 @@ const txTypes: { [key: number]: Set<string> } = {
 txTypes[6] = cloneDeep(txTypes[5]);
 txTypes[6].add("keyreg");
 txTypes[6].add("appl");
+txTypes[7] = cloneDeep(txTypes[6]);
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -182,7 +195,7 @@ export function setInnerTxField(
 		txValue = op.assertAlgorandAddress(val, line);
 	}
 
-	const encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
+	let encodedField = TxnFields[tealVersion][field]; // eg 'rcv'
 
 	// txValue can be undefined for a field with not having TEALv5 support (eg. type 'appl')
 	if (txValue === undefined) {
@@ -197,7 +210,7 @@ export function setInnerTxField(
 	// handle individual cases
 	let errMsg = "";
 	switch (field) {
-		case "Type": {
+		case TxFieldEnum.Type: {
 			const txType = txValue as string;
 			// check if txType is supported in current teal version
 			if (!txTypes[tealVersion].has(txType)) {
@@ -205,7 +218,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case "TypeEnum": {
+		case TxFieldEnum.TypeEnum: {
 			const txType = op.assertBigInt(val, line);
 			if (
 				TxnTypeMap[Number(txType)] === undefined ||
@@ -217,35 +230,35 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case "ConfigAssetDecimals": {
+		case TxFieldEnum.ConfigAssetDecimals: {
 			const assetDecimals = txValue as bigint;
 			if (assetDecimals > 19n || assetDecimals < 0n) {
 				errMsg = "Decimals must be between 0 (non divisible) and 19";
 			}
 			break;
 		}
-		case "ConfigAssetMetadataHash": {
+		case TxFieldEnum.ConfigAssetMetadataHash: {
 			const assetMetadataHash = txValue as Uint8Array;
 			if (assetMetadataHash.length !== 32) {
 				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
 			}
 			break;
 		}
-		case "ConfigAssetUnitName": {
+		case TxFieldEnum.ConfigAssetUnitName: {
 			const assetUnitName = txValue as string;
 			if (assetUnitName.length > 8) {
 				errMsg = "Unit name must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case "ConfigAssetName": {
+		case TxFieldEnum.ConfigAssetName: {
 			const assetName = txValue as string;
 			if (assetName.length > 32) {
 				errMsg = "AssetName must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case "ConfigAssetURL": {
+		case TxFieldEnum.ConfigAssetURL: {
 			const assetURL = txValue as string;
 			if (assetURL.length > 96) {
 				errMsg = "URL must not be longer than 96 bytes";
@@ -253,7 +266,7 @@ export function setInnerTxField(
 			break;
 		}
 
-		case "VotePK": {
+		case TxFieldEnum.VotePK: {
 			const votePk = txValue as Uint8Array;
 			if (votePk.length !== 32) {
 				errMsg = "VoteKey must be 32 bytes";
@@ -261,7 +274,7 @@ export function setInnerTxField(
 			break;
 		}
 
-		case "SelectionPK": {
+		case TxFieldEnum.SelectionPK: {
 			const selectionPK = txValue as Uint8Array;
 			if (selectionPK.length !== 32) {
 				errMsg = "SelectionPK must be 32 bytes";
@@ -269,10 +282,36 @@ export function setInnerTxField(
 			break;
 		}
 
-		case "Note": {
+		case TxFieldEnum.Note: {
 			const note = txValue as Uint8Array;
 			if (note.length > MaxTxnNoteBytes) {
 				errMsg = `Note must not be longer than ${MaxTxnNoteBytes} bytes`;
+			}
+			break;
+		}
+		case TxFieldEnum.ApprovalProgramPages: {
+			encodedField = "apap";
+			const approvalProgram = (subTxn as any)[encodedField];
+			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
+			if (approvalProgram !== undefined) {
+				//append
+				txValue = new Uint8Array([...approvalProgram, ...(txValue as Uint8Array)]);
+			}
+			if ((txValue as Uint8Array).length > maxPossible) {
+				errMsg = `Approval Program exceeded the maximum allowed length of ${maxPossible} bytes`;
+			}
+			break;
+		}
+		case TxFieldEnum.ClearStateProgramPages: {
+			encodedField = "apsu";
+			const clearStateProgram = (subTxn as any)[encodedField];
+			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
+			if (clearStateProgram !== undefined) {
+				//append
+				txValue = new Uint8Array([...clearStateProgram, ...(txValue as Uint8Array)]);
+			}
+			if ((txValue as Uint8Array).length > maxPossible) {
+				errMsg = `Clear State Program exceeded the maximum allowed length of ${maxPossible} bytes`;
 			}
 			break;
 		}
@@ -297,7 +336,7 @@ export function setInnerTxField(
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
 	} else {
-		if (field === "ApplicationArgs") {
+		if (field === TxFieldEnum.ApplicationArgs) {
 			if ((subTxn as any)[encodedField] === undefined) {
 				(subTxn as any)[encodedField] = [];
 			}

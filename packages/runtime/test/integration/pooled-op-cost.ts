@@ -145,11 +145,11 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 			};
 		});
 
-		it("Should succeed because enough budget when group 2 appl call transaction(1400)", () => {
+		it("Should succeed because enough budget when group 2 appl call transaction(1400)", function () {
 			assert.doesNotThrow(() => runtime.executeTx([increaseBudgetTx, callAppTx]));
 		});
 
-		it("Should failed because budget only from call appl(700)", () => {
+		it("Should failed because budget only from call appl(700)", function () {
 			expectRuntimeError(
 				() => runtime.executeTx([callAppTx, transferTx]),
 				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED

@@ -417,6 +417,45 @@ maximun uint128`,
 		title: "Clear state programs cannot issue inner transactions.",
 		description: "Clear state programs cannot issue inner transactions",
 	},
+	BYTES_REPLACE_ERROR: {
+		number: 1061,
+		message:
+			"Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
+		title: "replace opcode error",
+		description: "Can not replace bytes due to invalid start or end index",
+	},
+	UNKNOWN_JSON_TYPE: {
+		number: 1062,
+		message:
+			"JSON TYPE must be {JSONString, JSONUint64 or JSONObject}, got :%jsonType%, at line %line%",
+		title: "Unknown JSON type",
+		description: "Unknown JSON type",
+	},
+	INVALID_JSON_PARSING: {
+		number: 1063,
+		message: "Invalid JSON parsing at line %line%",
+		title: "Invalid JSON parsing",
+		description: "Invalid JSON parsing",
+	},
+	UNKNOWN_KEY_JSON: {
+		number: 1064,
+		message: "Unkown key %key% in JSON object at line %line%",
+		title: "Unknown key JSON",
+		description: "Unknown key JSON",
+	},
+	MAX_BYTE_ARRAY_EXCEEDED: {
+		number: 1065,
+		message: "Maximum byte array length exceeded",
+		title: "Maximum byte array length exceeded",
+		description: "Maximum byte array length is %maxStringSize%",
+	},
+	PROGRAM_LENGTH_EXCEEDED: {
+		number: 1066,
+		message: "Maximum program length exceeded",
+		title: "Program length",
+		description:
+			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -549,6 +588,13 @@ const runtimeGeneralErrors = {
 		message: "Too many inner transaction.",
 		title: "Too many inner transaction.",
 		description: "Too many inner transaction in one call, maximum is 256.",
+	},
+	INVALID_MULTISIG: {
+		number: 1321,
+		message: "Invalid multisignature",
+		title: "Invalid multisignature",
+		description:
+			"Provided multisignature is invalid and was not able to authenticate the transaction",
 	},
 };
 

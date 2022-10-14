@@ -52,7 +52,7 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 		// if appArg already bytes, then we don't need to parse
 		// just push to array and continue
 		if (appArg instanceof Uint8Array) {
-			args.push(appArg);
+			args.push(new Uint8Array(appArg)); //in case its a Buffer object
 			continue;
 		}
 
@@ -94,4 +94,31 @@ export function parseAppArgs(appArgs?: Array<Uint8Array | string>): Uint8Array[]
 		args.push(arg);
 	}
 	return args as Uint8Array[];
+}
+
+/**
+ * Converts camelCase to hypenCase
+ * @param str string to convert
+ * @returns fooBar to foo-bar
+ */
+export function convertCapitalToHyphens(str: string): string {
+	return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+}
+
+/**
+ * Converts object keys from camelCase to hypenCase
+ * @param object
+ * @returns object keys from fooBar to foo-bar
+ */
+export function convertKeysToHyphens(object: any) {
+	const newObject: any = {};
+	Object.keys(object).forEach((key) => {
+		// not parse txnID
+		if (key === "txID") {
+			newObject[key] = object[key];
+		} else {
+			newObject[convertCapitalToHyphens(key)] = object[key];
+		}
+	});
+	return newObject;
 }

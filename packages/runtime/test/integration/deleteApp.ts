@@ -44,7 +44,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 		};
 	});
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([john, alice]); // setup test
 	});
 

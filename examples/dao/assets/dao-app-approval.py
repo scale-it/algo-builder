@@ -1,3 +1,4 @@
+from ast import Global
 from pyteal import *
 
 
@@ -28,7 +29,8 @@ def approval_program():
     # * receiver (receiver of gov_token)
     def verify_deposit(tx_index: Int, receiver: Addr):
         return Assert(And(
-            Global.group_size() >= tx_index,
+            Global.group_size() > tx_index,
+            Gtxn[tx_index].rekey_to() == Global.zero_address(),
             Gtxn[tx_index].type_enum() == TxnType.AssetTransfer,
             Gtxn[tx_index].xfer_asset() == App.globalGet(gov_token_id),
             Gtxn[tx_index].asset_receiver() == receiver,

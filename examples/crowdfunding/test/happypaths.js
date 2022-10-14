@@ -101,7 +101,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		runtime.fundLsig(master.account, escrowAddress, minBalance);
 	}
 
-	it("should create crowdfunding stateful application", () => {
+	it("should create crowdfunding stateful application", function () {
 		const beginTs = 1n; // fund begin timestamp
 		const endTs = 10n; // fund end timestamp
 		const fundCloseTs = 20n; // fund close timestamp
@@ -134,7 +134,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.deepEqual(getGlobal("FundCloseDate"), 20n);
 	});
 
-	it("should setup escrow account and update application with escrow address", () => {
+	it("should setup escrow account and update application with escrow address", function () {
 		setupAppAndEscrow();
 
 		const escrowPk = convert.addressToPk(escrow.address);
@@ -158,7 +158,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.deepEqual(getGlobal("Escrow"), escrowPk);
 	});
 
-	it("should opt-in to app successfully after setting up escrow", () => {
+	it("should opt-in to app successfully after setting up escrow", function () {
 		setupAppAndEscrow();
 
 		// update global storage to add escrow address
@@ -174,7 +174,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.isDefined(donor.getAppFromLocal(applicationId));
 	});
 
-	it("should be able to donate funds to escrow before end date", () => {
+	it("should be able to donate funds to escrow before end date", function () {
 		setupAppAndEscrow();
 		runtime.setRoundAndTimestamp(2, 5); // StartTs=1, EndTs=10
 
@@ -217,7 +217,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.equal(donor.balance(), donorBal - BigInt(7e6) - 2000n); // 2000 is also deducted because of tx fee
 	});
 
-	it("Receiver should be able to withdraw funds if Goal is met", () => {
+	it("Receiver should be able to withdraw funds if Goal is met", function () {
 		setupAppAndEscrow();
 		// fund end date should be passed
 		runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
@@ -266,7 +266,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.equal(fundReceiver.balance(), fundReceiverBal + escrowFunds - 1000n); // funds transferred to receiver from escrow
 	});
 
-	it("Donor should be able reclaim funds if Goal is not met", () => {
+	it("Donor should be able reclaim funds if Goal is not met", function () {
 		setupAppAndEscrow();
 		// fund end date should be passed
 		runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
@@ -319,7 +319,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		assert.equal(donor.balance(), donorBalance + 300000n - 1000n);
 	});
 
-	it("Creator should be able to delete the application after the fund close date (using single tx)", () => {
+	it("Creator should be able to delete the application after the fund close date (using single tx)", function () {
 		setupAppAndEscrow();
 		// fund close date should be passed
 		runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
@@ -333,16 +333,10 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		syncAccounts();
 
 		// let's close escrow account first
-		runtime.executeTx([
-			{
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: escrow.account,
-				toAccountAddr: fundReceiver.address,
-				amountMicroAlgos: 0,
-				payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address },
-			},
-		]);
+		//This walkaround was needed since the previous version
+		//was not able sign the transaction and escrowLsig
+		//always expects a group transaction
+		runtime.getAccount(escrow.address).amount = 0;
 		syncAccounts();
 
 		// escrow is already empty so we don't need a tx group
@@ -370,7 +364,7 @@ describe("Crowdfunding Tests - Happy Paths", function () {
 		}
 	});
 
-	it("Creator should be able to delete the application after the fund close date (using group tx)", () => {
+	it("Creator should be able to delete the application after the fund close date (using group tx)", function () {
 		setupAppAndEscrow();
 		// fund close date should be passed
 		runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
