@@ -20,6 +20,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
+- Unfunded account should be able to issue transactios in pool transaction.
 
 #### Examples
 
