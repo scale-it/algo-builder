@@ -154,7 +154,7 @@ describe("Bond token failing tests", function () {
 		try {
 			runtime.optInToApp(elon.address, applicationId, {}, {});
 			// eslint-disable-next-line no-empty
-		} catch (e) { } // can be already opted-in
+		} catch (e) {} // can be already opted-in
 		const amount = 10;
 		const algoAmount = amount * 1000;
 

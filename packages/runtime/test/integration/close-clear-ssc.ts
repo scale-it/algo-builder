@@ -72,7 +72,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		assert.equal(
 			john.minBalance,
 			initialJohnMinBalance +
-			(APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + SSC_VALUE_BYTES * 3)) // optInToApp increase
+				(APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + SSC_VALUE_BYTES * 3)) // optInToApp increase
 		); // verify minimum balance raised after optIn
 
 		runtime.executeTx([{ ...closeOutParams, appID: appID }]);
@@ -118,7 +118,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		assert.equal(
 			minBalanceAfterOptIn,
 			initialJohnMinBalance +
-			(APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + SSC_VALUE_BYTES * 3)) // optInToApp increase
+				(APPLICATION_BASE_FEE + (SSC_VALUE_UINT * 3 + SSC_VALUE_BYTES * 3)) // optInToApp increase
 		); // verify minimum balance raised after optIn
 
 		const invalidParams: types.AppCallsParam = {

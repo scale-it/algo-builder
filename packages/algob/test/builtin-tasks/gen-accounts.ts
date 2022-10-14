@@ -27,12 +27,12 @@ describe("Gen-accounts task", function () {
 			try {
 				await mkAccounts({ n: 0 }, mkEnv());
 				assert.fail("should fail when n==0");
-			} catch { } // eslint-disable-line no-empty
+			} catch {} // eslint-disable-line no-empty
 
 			try {
 				await mkAccounts({ n: -1 }, mkEnv());
 				assert.fail("should fail when n==0");
-			} catch { } // eslint-disable-line no-empty
+			} catch {} // eslint-disable-line no-empty
 		});
 
 		it("Should ensure test preconditions", function () {

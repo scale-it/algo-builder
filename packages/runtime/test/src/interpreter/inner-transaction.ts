@@ -9,7 +9,13 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
-import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
+import {
+	AccountAddress,
+	AccountStoreI,
+	ExecutionMode,
+	StackElem,
+	TxOnComplete,
+} from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
@@ -83,8 +89,13 @@ describe("Inner Transactions", function () {
 		});
 
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount,
-			applicationAccount, foreignApplicationAccount]);
+		interpreter.runtime = new Runtime([
+			elonAcc,
+			johnAcc,
+			bobAccount,
+			applicationAccount,
+			foreignApplicationAccount,
+		]);
 		interpreter.tealVersion = tealVersion;
 		reset();
 	};
@@ -1409,7 +1420,6 @@ describe("Inner Transactions", function () {
 				);
 			});
 		});
-
 	});
 
 	describe("Teal v7", function () {
@@ -1425,7 +1435,7 @@ describe("Inner Transactions", function () {
 				assert.deepEqual(interpreter.currentInnerTxnGroup.length, 2);
 				assert.deepEqual(interpreter.tealVersion, 7);
 			});
-		})
+		});
 
 		describe("Foreign application account access", function () {
 			this.beforeEach(function () {

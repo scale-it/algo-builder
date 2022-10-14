@@ -443,6 +443,19 @@ maximun uint128`,
 		title: "Unknown key JSON",
 		description: "Unknown key JSON",
 	},
+	MAX_BYTE_ARRAY_EXCEEDED: {
+		number: 1065,
+		message: "Maximum byte array length exceeded",
+		title: "Maximum byte array length exceeded",
+		description: "Maximum byte array length is %maxStringSize%",
+	},
+	PROGRAM_LENGTH_EXCEEDED: {
+		number: 1066,
+		message: "Maximum program length exceeded",
+		title: "Program length",
+		description:
+			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
+	},
 };
 
 const runtimeGeneralErrors = {
