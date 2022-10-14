@@ -15,7 +15,10 @@ def approval_program():
                 TxnField.type_enum: TxnType.Payment,
                 TxnField.receiver: Txn.sender(),
                 TxnField.amount: Int(1000000),
-            }
+                TxnField.assets: [
+                    Int(1)
+                ],
+            },
         ),
         InnerTxnBuilder.Submit(),
 
@@ -26,6 +29,12 @@ def approval_program():
                 TxnField.type_enum: TxnType.Payment,
                 TxnField.receiver: Txn.accounts[1],
                 TxnField.amount: Int(2000000),
+                TxnField.applications: [
+                    Int(1)
+                ],
+                TxnField.accounts: [
+                    Global.current_application_address()
+                ],
             }
         ),
         InnerTxnBuilder.Submit(),
