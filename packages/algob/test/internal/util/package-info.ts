@@ -4,15 +4,15 @@ import path from "path";
 
 import { getPackageJson, getPackageRoot } from "../../../src/internal/util/package-info";
 
-describe("package-info", () => {
-	it("Should give the right package.json", async () => {
+describe("package-info", function () {
+	it("Should give the right package.json", async function () {
 		const packageJson = await getPackageJson();
 		assert.equal(packageJson.name, "@algo-builder/algob");
 		// We don't test the version number because that would be hard to maintain
 		assert.isString(packageJson.version);
 	});
 
-	it("should give the right package root", async () => {
+	it("should give the right package root", async function () {
 		const root = await fsExtra.realpath(path.join(__dirname, "..", "..", ".."));
 		assert.equal(await getPackageRoot(), root);
 	});

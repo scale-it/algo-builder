@@ -18,7 +18,7 @@ import {
 import { expectBuilderError, expectBuilderErrorAsync } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
-describe("Environment", () => {
+describe("Environment", function () {
 	const config: ResolvedConfig = {
 		networks: {
 			localNet: {
@@ -48,7 +48,7 @@ describe("Environment", () => {
 	let env: RuntimeEnv;
 	let dsl: TasksDSL;
 
-	beforeEach(() => {
+	beforeEach(function () {
 		const ctx = BuilderContext.createBuilderContext();
 		dsl = ctx.tasksDSL;
 		dsl.task("example", async (_ret) => {
@@ -95,20 +95,20 @@ describe("Environment", () => {
 
 	afterEach(() => resetBuilderContext());
 
-	describe("Environment", () => {
-		it("should create an environment", () => {
+	describe("Environment", function () {
+		it("should create an environment", function () {
 			assert.deepEqual(env.config, config);
 			assert.isDefined(env.tasks);
 			assert.isDefined(env.network);
 		});
 
-		it("should run a task correctly", async () => {
+		it("should run a task correctly", async function () {
 			const ret = await env.run("example");
 			assert.equal(ret, 27);
 		});
 
-		describe("run task arguments validation", () => {
-			it("should throw on missing required argument", async () => {
+		describe("run task arguments validation", function () {
+			it("should throw on missing required argument", async function () {
 				const taskName = "complexExampleTask";
 				const requiredParamName = "positionalRequiredStringParam";
 				const task = env.tasks[taskName];
@@ -124,12 +124,12 @@ describe("Environment", () => {
 				assert.isDefined(taskResult);
 
 				// same task throws with required param missing
-				await expectBuilderErrorAsync(async () => {
+				await expectBuilderErrorAsync(async function () {
 					await env.run("complexExampleTask", {});
 				}, ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT);
 			});
 
-			it("should use default value on missing optional argument with default param", async () => {
+			it("should use default value on missing optional argument with default param", async function () {
 				const taskName = "complexExampleTask";
 				const optParamName = "posOptJsonParamWithDefault";
 				const task = env.tasks[taskName];
@@ -178,7 +178,7 @@ describe("Environment", () => {
 				);
 			});
 
-			it("should validate argument type matches the param type", async () => {
+			it("should validate argument type matches the param type", async function () {
 				const taskName = "taskWithMultipleTypesParams";
 
 				const typesValidationTestCases = {
@@ -215,7 +215,7 @@ describe("Environment", () => {
 					taskNameToRun: string,
 					taskArguments: any
 				): Promise<void> => {
-					await expectBuilderErrorAsync(async () => {
+					await expectBuilderErrorAsync(async function () {
 						await env.run(taskNameToRun, taskArguments);
 						console.error(
 							`should have thrown task run: '${taskNameToRun}' with arguments: `,
@@ -238,20 +238,20 @@ describe("Environment", () => {
 			});
 		});
 
-		it("should fail trying to run a non existent task", () => {
+		it("should fail trying to run a non existent task", function () {
 			env.run("invalid").catch((err) => {
 				assert.equal(err.number, ERRORS.ARGUMENTS.UNRECOGNIZED_TASK.number);
 			});
 		});
 
-		it("should clean global state after task execution", async () => {
+		it("should clean global state after task execution", async function () {
 			assert.equal(await env.run("example"), 27);
 			const globalAsAny = global as any;
 			assert.isUndefined(globalAsAny.runSuper);
 			assert.isUndefined(globalAsAny.env);
 		});
 
-		it("should run overridden task correctly", async () => {
+		it("should run overridden task correctly", async function () {
 			dsl.task("example", "description", async (_ret) => {
 				return 28;
 			});
@@ -260,7 +260,7 @@ describe("Environment", () => {
 			assert.equal(await localEnv.run("example"), 28);
 		});
 
-		it("Should preserve the injected env after running a sub-task", async () => {
+		it("Should preserve the injected env after running a sub-task", async function () {
 			dsl.task(
 				"with-subtask",
 				"description",
@@ -282,14 +282,14 @@ describe("Environment", () => {
 			await env.run("with-subtask");
 		});
 
-		it("Should define the network field correctly", () => {
+		it("Should define the network field correctly", function () {
 			assert.isDefined(env.network);
 			assert.equal(env.network.name, "localNet");
 			assert.equal(env.network.config, config.networks.localNet);
 		});
 
-		it("Should throw if the chosen network doesn't exist", () => {
-			expectBuilderError(() => {
+		it("Should throw if the chosen network doesn't exist", function () {
+			expectBuilderError(function () {
 				const ctx = BuilderContext.getBuilderContext();
 				env = new Environment(
 					config,
@@ -302,10 +302,10 @@ describe("Environment", () => {
 		});
 	});
 
-	describe("Plugin system", () => {
+	describe("Plugin system", function () {
 		useFixtureProject("plugin-project");
 
-		it("environment should contain plugin extensions", async () => {
+		it("environment should contain plugin extensions", async function () {
 			require(path.join(process.cwd(), "plugins", "example"));
 			const ctx = BuilderContext.getBuilderContext();
 			env = new Environment(config, args, tasks, ctx.extendersManager.getExtenders(), true);

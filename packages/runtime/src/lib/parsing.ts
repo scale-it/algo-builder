@@ -307,13 +307,13 @@ export function concatArrays(...arrs: ArrayLike<number>[]) {
  * assert if given string is a valid JSON object
  * @param jsonString
  */
- export function assertJSON(jsonString: string, line: number): void {
+export function assertJSON(jsonString: string, line: number): void {
 	const strictBigJSON = JSONbig({ strict: true });
 	try {
 		strictBigJSON.parse(jsonString);
 	} catch (e) {
 		throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_JSON_PARSING, {
-			line: line
+			line: line,
 		});
 	}
 }

@@ -20,7 +20,7 @@ export const netCfg: HttpNetworkConfig = {
 	token: "some-fake-token",
 };
 
-describe("Sign-lsig task", () => {
+describe("Sign-lsig task", function () {
 	useFixtureProject("config-project");
 
 	const outFile = "lsig_out.blsig";

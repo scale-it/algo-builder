@@ -157,19 +157,19 @@ export class LogicSig {
 			return false;
 		}
 
-		let multiSigaddr;
+		let multisigAddr;
 		try {
 			const mparams = {
 				version: version,
 				threshold: threshold,
 				addrs: addrs,
 			};
-			multiSigaddr = multisigAddress(mparams);
+			multisigAddr = multisigAddress(mparams);
 		} catch (e) {
 			return false;
 		}
 
-		if (accAddr !== multiSigaddr) {
+		if (accAddr !== multisigAddr) {
 			return false;
 		}
 

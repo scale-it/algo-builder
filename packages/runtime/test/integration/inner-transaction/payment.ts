@@ -41,7 +41,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[ALGO Payment]", 
 		};
 	});
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([master, john, elon, bob]); // setup test
 		appID = runtime.deployApp(john.account, appDefinition, {}).appID;
 		appAccount = runtime.getAccount(getApplicationAddress(appID)); // update app account

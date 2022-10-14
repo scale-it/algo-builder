@@ -2,9 +2,9 @@ import { assert } from "chai";
 
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
 
-describe("Type unsafe helpers functions", () => {
-	describe("unsafeObjectKeys", () => {
-		it("Should return the right type", () => {
+describe("Type unsafe helpers functions", function () {
+	describe("unsafeObjectKeys", function () {
+		it("Should return the right type", function () {
 			interface T {
 				a: string;
 				b: number;
@@ -18,7 +18,7 @@ describe("Type unsafe helpers functions", () => {
 			assert.deepEqual([...new Set(keys)], [...new Set(["a", "b"])]);
 		});
 
-		it("Should work with extended types, but that's unsafe", () => {
+		it("Should work with extended types, but that's unsafe", function () {
 			interface T {
 				a: string;
 				b: number;

@@ -22,7 +22,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 
 	this.beforeAll(setUpCtx);
 
-	it("should issue token if sender is token reserve", () => {
+	it("should issue token if sender is token reserve", function () {
 		// Can issue after opting-in
 		ctx.optInToASA(elon.address);
 
@@ -35,7 +35,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.getAssetHolding(elon.address).amount, prevElonAssetHolding.amount + 20n);
 	});
 
-	it("should kill token if sender is token manager", () => {
+	it("should kill token if sender is token manager", function () {
 		assert.equal(ctx.runtime.getGlobalState(ctx.controllerappID, "killed"), 0n); // token not killed
 
 		// kill token
@@ -50,7 +50,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		);
 	});
 
-	it("should whitelist account if sender is permissions manager", () => {
+	it("should whitelist account if sender is permissions manager", function () {
 		// opt-in to permissions app by elon
 		ctx.optInToPermissionsSSC(elon.address);
 		ctx.syncAccounts();
@@ -65,7 +65,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.elon.getLocalState(ctx.permissionsappID, "whitelisted"), 1n);
 	});
 
-	it("should opt-out of token successfully (using closeRemainderTo)", () => {
+	it("should opt-out of token successfully (using closeRemainderTo)", function () {
 		setUpCtx();
 
 		// Opt-In
@@ -89,7 +89,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		);
 	});
 
-	it("should change Permissions SSC Manager if sender is current_permissions_manager", () => {
+	it("should change Permissions SSC Manager if sender is current_permissions_manager", function () {
 		// throws error as elon is not permissions manager
 		assert.throws(
 			() => ctx.whitelist(elon.account, bob.address),
@@ -127,7 +127,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.bob.getLocalState(ctx.permissionsappID, "whitelisted"), 1n);
 	});
 
-	it("should force transfer tokens between non reserve accounts successfully if sender is token manager", () => {
+	it("should force transfer tokens between non reserve accounts successfully if sender is token manager", function () {
 		const permManagerAddr = encodeAddress(
 			ctx.runtime.getGlobalState(ctx.permissionsappID, "manager")
 		);
@@ -153,7 +153,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.getAssetHolding(elon.address).amount, initialElonBalance + 20n);
 	});
 
-	it("should force transfer tokens without permission checks if receiver is asset reserve", () => {
+	it("should force transfer tokens without permission checks if receiver is asset reserve", function () {
 		// Opt-In to ASA
 		ctx.optInToASA(bob.address);
 		ctx.optInToASA(elon.address);
@@ -202,7 +202,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.getAssetHolding(asaReserve.address).amount, initialReserveBalance + 20n);
 	});
 
-	it("should transfer tokens between non reserve accounts successfully", () => {
+	it("should transfer tokens between non reserve accounts successfully", function () {
 		ctx.syncAccounts();
 		const amount = 20n;
 
@@ -234,7 +234,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		assert.equal(ctx.getAssetHolding(elon.address).amount, initialElonBalance + amount);
 	});
 
-	it("should update asset reserve account to another address if sender is asset manager", () => {
+	it("should update asset reserve account to another address if sender is asset manager", function () {
 		const oldReserveAssetHolding = ctx.getAssetHolding(asaReserve.address);
 		const newReserveAddr = elon.address;
 		assert.notEqual(asaReserve.address, newReserveAddr); // verify old reserve is not elon.addr
@@ -299,7 +299,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		);
 	});
 
-	it("should cease tokens from bob", () => {
+	it("should cease tokens from bob", function () {
 		setUpCtx();
 		// Opt-In to ASA
 		ctx.optInToASA(bob.address);
@@ -353,7 +353,7 @@ describe("Permissioned Token Tests - Happy Paths", function () {
 		);
 	});
 
-	it("should set new permissions appID in controller", () => {
+	it("should set new permissions appID in controller", function () {
 		// perm_app_id from controller's global state
 		const currentPermAppID = ctx.runtime.getGlobalState(ctx.controllerappID, "perm_app");
 		const newPermAppID = 99; // some random value for test

@@ -589,6 +589,13 @@ const runtimeGeneralErrors = {
 		title: "Too many inner transaction.",
 		description: "Too many inner transaction in one call, maximum is 256.",
 	},
+	INVALID_MULTISIG: {
+		number: 1321,
+		message: "Invalid multisignature",
+		title: "Invalid multisignature",
+		description:
+			"Provided multisignature is invalid and was not able to authenticate the transaction",
+	},
 };
 
 const transactionErrors = {

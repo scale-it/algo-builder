@@ -5,13 +5,13 @@ import { assert } from "chai";
 import { loadAccountsFromEnv, mkAccounts } from "../../src/lib/account";
 import { AccountDef } from "../../src/types";
 
-describe("Loading accounts", () => {
+describe("Loading accounts", function () {
 	const genAccount = generateAccount();
 	const gen = { name: "gen_1", addr: genAccount.addr, sk: genAccount.sk };
 	const skArray = Array.from({ length: 64 }, (_, i) => i + 1);
 	const account1 = { name: "a1", addr: "a1", sk: new Uint8Array(skArray) };
 
-	it("mkAccounts works when input is a list of Account objects", () => {
+	it("mkAccounts works when input is a list of Account objects", function () {
 		let a = mkAccounts([]);
 		assert.deepEqual(a, [], "should return empty list on empty input");
 
@@ -23,7 +23,7 @@ describe("Loading accounts", () => {
 		assert.deepEqual(a, expected, "Account instances should be just copied");
 	});
 
-	it("mkAccounts handles mnemonic accounts and handles address check", () => {
+	it("mkAccounts handles mnemonic accounts and handles address check", function () {
 		// we don't check empty addreses
 		const expected = [gen];
 		let input = [{ name: "gen_1", addr: "", mnemonic: secretKeyToMnemonic(gen.sk) }];
@@ -57,7 +57,7 @@ describe("Loading accounts", () => {
 		);
 	});
 
-	it("Handles mixture of accounts", () => {
+	it("Handles mixture of accounts", function () {
 		// fails on HD account
 		let input: AccountDef[] = [{ path: "0/1", mnemonic: "" }];
 		const errmsg = "ABLDR402: HD accounts is not yet supported";
@@ -72,7 +72,7 @@ describe("Loading accounts", () => {
 		assert.deepEqual(mkAccounts(input), [account1, gen]);
 	});
 
-	it("From ENV variable (ALGOB_ACCOUNTS) ", () => {
+	it("From ENV variable (ALGOB_ACCOUNTS) ", function () {
 		const goodMnemonic =
 			"call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide";
 		process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: goodMnemonic }]);
@@ -86,7 +86,7 @@ describe("Loading accounts", () => {
 		assert.deepEqual(algobAccounts, [], "Loaded accounts mismatch");
 	});
 
-	it("ENV variables validate ALGOB_ACCOUNTS ", () => {
+	it("ENV variables validate ALGOB_ACCOUNTS ", function () {
 		const goodMnemonic =
 			"call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide";
 		const emptyMnemonic = "";

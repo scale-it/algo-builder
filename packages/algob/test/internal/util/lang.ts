@@ -2,12 +2,12 @@ import { assert } from "chai";
 
 import { fromEntries } from "../../../src/internal/util/lang";
 
-describe("From entries", () => {
-	it("Should return an empty object if entries is an empty array", () => {
+describe("From entries", function () {
+	it("Should return an empty object if entries is an empty array", function () {
 		assert.deepEqual(fromEntries([]), {});
 	});
 
-	it("Should construct an object", () => {
+	it("Should construct an object", function () {
 		const o = {};
 		assert.deepEqual(
 			fromEntries([
@@ -23,7 +23,7 @@ describe("From entries", () => {
 		);
 	});
 
-	it("Should keep the last entry if there are multiple ones with the same key", () => {
+	it("Should keep the last entry if there are multiple ones with the same key", function () {
 		assert.deepEqual(
 			fromEntries([
 				["a", 1],

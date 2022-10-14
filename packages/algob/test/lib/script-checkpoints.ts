@@ -34,8 +34,8 @@ function createNetwork(timestamp: number): Checkpoint {
 	};
 }
 
-describe("Checkpoint", () => {
-	it("Should create a network checkpoint", async () => {
+describe("Checkpoint", function () {
+	it("Should create a network checkpoint", async function () {
 		const beforeTimestamp = +new Date();
 		const netCheckpoint: Checkpoint = new CheckpointImpl();
 		const afterTimestamp = +new Date();
@@ -45,7 +45,7 @@ describe("Checkpoint", () => {
 		assert.deepEqual(netCheckpoint, createNetwork(12345));
 	});
 
-	it("Should append to a checkpoint map", async () => {
+	it("Should append to a checkpoint map", async function () {
 		let checkpoints: Checkpoints = {};
 		const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
 		const checkpoint = appendToCheckpoint(checkpoints, "network213", netCheckpoint);
@@ -58,7 +58,7 @@ describe("Checkpoint", () => {
 		});
 	});
 
-	it("Should replace in checkpoint map", async () => {
+	it("Should replace in checkpoint map", async function () {
 		let checkpoints: Checkpoints = {};
 		const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
 		checkpoints = appendToCheckpoint(checkpoints, "network525", netCheckpoint);
@@ -72,7 +72,7 @@ describe("Checkpoint", () => {
 		});
 	});
 
-	it("Should merge metadata maps", async () => {
+	it("Should merge metadata maps", async function () {
 		let checkpoints: Checkpoints = {};
 		const netCheckpoint: Checkpoint = cleanupMutableData(
 			new CheckpointImpl(
@@ -208,7 +208,7 @@ describe("Checkpoint", () => {
 		});
 	});
 
-	it("Should crash if duplicate asa or SSC name is detected", async () => {
+	it("Should crash if duplicate asa or SSC name is detected", async function () {
 		const checkpoints: Checkpoints = {};
 		const cp1: Checkpoint = cleanupMutableData(
 			new CheckpointImpl(
@@ -244,7 +244,7 @@ describe("Checkpoint", () => {
 		);
 	});
 	// add test
-	it("Should crash if duplicate SSC name is detected", async () => {
+	it("Should crash if duplicate SSC name is detected", async function () {
 		const checkpoints: Checkpoints = {};
 		const cp1: Checkpoint = cleanupMutableData(
 			new CheckpointImpl(
@@ -290,22 +290,22 @@ describe("Checkpoint", () => {
 		);
 	});
 
-	it("Should produce a checkpoint file name from script name", async () => {
+	it("Should produce a checkpoint file name from script name", async function () {
 		const checkpointFileName = toCheckpointFileName("script-1.js");
 		assert.equal(checkpointFileName, "artifacts/script-1.js.cp.yaml");
 	});
 
-	it("Should produce a script file name from checkpoint name", async () => {
+	it("Should produce a script file name from checkpoint name", async function () {
 		const checkpointFileName = toScriptFileName("artifacts/script-1.js.cp.yaml.hi.cp.yaml");
 		assert.equal(checkpointFileName, "script-1.js.cp.yaml.hi");
 	});
 
-	it("Should default to empty cp if loading nonexistent file", async () => {
+	it("Should default to empty cp if loading nonexistent file", async function () {
 		const loadedCP = loadCheckpoint("nonexistent");
 		assert.deepEqual(loadedCP, {});
 	});
 
-	it("Should allow registration of an asset", async () => {
+	it("Should allow registration of an asset", async function () {
 		const cp: CheckpointImpl = new CheckpointImpl();
 		cp.timestamp = 12345;
 		assert.deepEqual(cp, createNetwork(12345));
@@ -352,8 +352,8 @@ describe("Checkpoint", () => {
 	});
 });
 
-describe("Checkpoint with cleanup", () => {
-	afterEach(() => {
+describe("Checkpoint with cleanup", function () {
+	afterEach(function () {
 		try {
 			fs.rmdirSync("artifacts", { recursive: true });
 		} catch (err) {
@@ -361,7 +361,7 @@ describe("Checkpoint with cleanup", () => {
 		}
 	});
 
-	it("Should persist and load the checkpoint", async () => {
+	it("Should persist and load the checkpoint", async function () {
 		const origCP = appendToCheckpoint(
 			{
 				hi: createNetwork(123),
@@ -374,16 +374,16 @@ describe("Checkpoint with cleanup", () => {
 		assert.deepEqual(loadedCP, origCP);
 	});
 
-	it("Should persist empty checkpoint as empty file", async () => {
+	it("Should persist empty checkpoint as empty file", async function () {
 		persistCheckpoint("script-1.js", {});
 		const loadedCP = loadCheckpoint("script-1.js");
 		assert.deepEqual(loadedCP, {});
 	});
 });
 
-describe("CheckpointRepoImpl", () => {
+describe("CheckpointRepoImpl", function () {
 	const nestedMap = new Map<number, rtypes.AppInfo>();
-	it("Should crash if duplication is detected between scripts", async () => {
+	it("Should crash if duplication is detected between scripts", async function () {
 		const cp1: Checkpoints = {
 			network1: {
 				timestamp: 1,
@@ -434,7 +434,7 @@ describe("CheckpointRepoImpl", () => {
 		);
 	});
 
-	it("Should allow to set metadata", async () => {
+	it("Should allow to set metadata", async function () {
 		const cp = new CheckpointRepoImpl().putMetadata("myNetworkName", "key", "data").precedingCP;
 		assert.isNotNull(cp.myNetworkName);
 		cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 951);
@@ -449,7 +449,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should allow to set metadata two networks", async () => {
+	it("Should allow to set metadata two networks", async function () {
 		const cp = new CheckpointRepoImpl()
 			.putMetadata("myNetworkName", "key", "data")
 			.putMetadata("myNetworkName2", "key2", "data2").precedingCP;
@@ -474,7 +474,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should allow placing state; one network", () => {
+	it("Should allow placing state; one network", function () {
 		const cpData = new CheckpointRepoImpl()
 			.registerASA("network1", "ASA name", {
 				creator: "ASA creator 123",
@@ -509,7 +509,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should allow placing state; two networks", () => {
+	it("Should allow placing state; two networks", function () {
 		const nestedMap = new Map<number, rtypes.AppInfo>();
 		nestedMap.set(1, {
 			creator: "SSC creator 951",
@@ -555,7 +555,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should merge checkpoints", async () => {
+	it("Should merge checkpoints", async function () {
 		const cp1: Checkpoints = {
 			network1: {
 				timestamp: 1,
@@ -593,7 +593,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should deeply merge the checkpoints", async () => {
+	it("Should deeply merge the checkpoints", async function () {
 		const cp1: Checkpoints = {
 			network1: {
 				timestamp: 1,
@@ -693,7 +693,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	it("Should deeply merge global checkpoints", async () => {
+	it("Should deeply merge global checkpoints", async function () {
 		const nestedMap = new Map<number, rtypes.AppInfo>();
 		const nestedMap1 = new Map<number, rtypes.AppInfo>();
 		nestedMap.set(1, {
@@ -777,7 +777,7 @@ describe("CheckpointRepoImpl", () => {
 		});
 	});
 
-	describe("CheckpointRepoImpl with sample data", () => {
+	describe("CheckpointRepoImpl with sample data", function () {
 		const cp1: Checkpoints = {
 			network1: {
 				timestamp: 1,
@@ -832,7 +832,7 @@ describe("CheckpointRepoImpl", () => {
 		assert.isUndefined(cpData.strippedCP.network4);
 		cpData.strippedCP["net 0195"].timestamp = 195;
 
-		it("Should contain factory methods for ASA anc SSC asset registration", () => {
+		it("Should contain factory methods for ASA anc SSC asset registration", function () {
 			const nestedMap = new Map<number, rtypes.AppInfo>();
 			nestedMap.set(1, {
 				creator: "SSC creator 951",
@@ -948,14 +948,14 @@ describe("CheckpointRepoImpl", () => {
 			});
 		});
 
-		it("Should return metadata for specified network", () => {
+		it("Should return metadata for specified network", function () {
 			assert.equal(cpData.getMetadata("network1", "hi"), undefined);
 			assert.equal(cpData.getMetadata("network1", "metadata key"), "metadata value");
 			assert.equal(cpData.getMetadata("network4", "metadata key"), undefined);
 		});
 	});
 
-	it("isDefined should return true regardless of the asset type", () => {
+	it("isDefined should return true regardless of the asset type", function () {
 		const cpData = new CheckpointRepoImpl();
 		assert.isFalse(cpData.isDefined("network1", "ASA name"));
 		assert.isFalse(cpData.isDefined("network1", "SSC name"));

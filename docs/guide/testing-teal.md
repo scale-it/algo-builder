@@ -60,16 +60,16 @@ describe("use-case", function() {
   let variable1;
   // ...
 
-  this.beforeAll(() => { ... });
-  this.afterAll(() => { ... });
+  this.beforeAll(function() { ... });
+  this.afterAll(function() { ... });
 
-  it("test case 1", () => {
+  it("test case 1", function() {
     // preparation
     // execution
     // checks
   });
 
-  it("test case 2", () => { ... });
+  it("test case 2", function() { ... });
 });
 ```
 

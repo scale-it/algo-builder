@@ -253,7 +253,7 @@ export class Ctx implements Context {
 	 * @param flags asa deployment flags
 	 */
 	deployASA(name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): ASAInfo {
-		if (this.runtime.loadedAssetsDefs === {}) {
+		if (this.runtime.loadedAssetsDefs === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.ASA.ASA_FILE_IS_UNDEFINED);
 		}
 		if (this.runtime.loadedAssetsDefs[name] === undefined) {
@@ -804,9 +804,10 @@ export class Ctx implements Context {
 				this.tx = this.gtxs[idx]; // update current tx to index of stateless
 				r = this.runtime.validateLsigAndRun(lsig as types.Lsig, this.debugStack);
 				this.tx = this.gtxs[0];
-			} //
-			//after executing stateless tx updating current tx to default (index 0)
-			else if (signedTransaction.sgnr || signedTransaction.sig) {
+				//after executing stateless tx updating current tx to default (index 0)
+			} else if (signedTransaction.msig) {
+				this.runtime.validateMultisignature(signedTransaction);
+			} else if (signedTransaction.sgnr || signedTransaction.sig) {
 				this.runtime.validateSecretKeySignature(signedTransaction);
 			}
 			//verify and reduce number remain Txn

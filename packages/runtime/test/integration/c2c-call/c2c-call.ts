@@ -33,7 +33,7 @@ describe("C2C call", function () {
 		runtime.executeTx([fundTx]);
 	}
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
 		appDefinition = {
@@ -62,7 +62,7 @@ describe("C2C call", function () {
 		appCallArgs = ["str:call_method", "int:1"];
 	});
 
-	it("should succeed: call another application", () => {
+	it("should succeed: call another application", function () {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
@@ -79,7 +79,7 @@ describe("C2C call", function () {
 		assert.deepEqual(new TextDecoder().decode(logs[0]).substring(6), "Call from applicatiton");
 	});
 
-	it("should fail: call another application when not enough fee", () => {
+	it("should fail: call another application when not enough fee", function () {
 		const execParams: types.ExecParams = {
 			type: types.TransactionType.CallApp,
 			sign: types.SignType.SecretKey,
@@ -99,7 +99,7 @@ describe("C2C call", function () {
 	});
 
 	describe("Inner transaction in group", function () {
-		it("should succeed: enough fee for 4 transaction call(4000 micro algo)", () => {
+		it("should succeed: enough fee for 4 transaction call(4000 micro algo)", function () {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -123,7 +123,7 @@ describe("C2C call", function () {
 			]);
 		});
 
-		it("should fail because not enough fee (4 transaction call but only 3000 micro algo)", () => {
+		it("should fail because not enough fee (4 transaction call but only 3000 micro algo)", function () {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -154,7 +154,7 @@ describe("C2C call", function () {
 
 	describe("c2c call unhappy case", function () {
 		let thirdApp: AppInfo;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			thirdApp = runtime.deployApp(
 				alice.account,
 				{
@@ -168,7 +168,7 @@ describe("C2C call", function () {
 			fundToApp(alice, thirdApp);
 		});
 
-		it("should fail: inner call to app implemented in older teal", () => {
+		it("should fail: inner call to app implemented in older teal", function () {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -188,7 +188,7 @@ describe("C2C call", function () {
 			);
 		});
 
-		it("should fail: inner tx app self-call", () => {
+		it("should fail: inner tx app self-call", function () {
 			const execParams: types.ExecParams = {
 				type: types.TransactionType.CallApp,
 				sign: types.SignType.SecretKey,
@@ -212,7 +212,7 @@ describe("C2C call", function () {
 			let apps: AppInfo[];
 			let baseApp: AppInfo;
 			let bob: AccountStoreI;
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				apps = [];
 				bob = runtime.defaultAccounts()[1];
 				baseApp = runtime.deployApp(
@@ -240,7 +240,7 @@ describe("C2C call", function () {
 				}
 			});
 
-			it("Should succeed: inner call with maximum depth = 8", () => {
+			it("Should succeed: inner call with maximum depth = 8", function () {
 				const execParams: types.ExecParams = {
 					type: types.TransactionType.CallApp,
 					sign: types.SignType.SecretKey,
@@ -256,7 +256,7 @@ describe("C2C call", function () {
 				assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			});
 
-			it("Should fail: inner call with depth > 8", () => {
+			it("Should fail: inner call with depth > 8", function () {
 				const execParams: types.ExecParams = {
 					type: types.TransactionType.CallApp,
 					sign: types.SignType.SecretKey,
@@ -281,7 +281,7 @@ describe("C2C call", function () {
 
 	describe("Only support application call for now", function () {
 		let execParams: types.ExecParams;
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			const appInfo = runtime.deployApp(
 				alice.account,
 				{
@@ -303,7 +303,7 @@ describe("C2C call", function () {
 			};
 		});
 
-		it("Should not support other inner tx appl(not include appcall)", () => {
+		it("Should not support other inner tx appl(not include appcall)", function () {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 			assert.isTrue(
 				(console["log"] as any).calledWith(

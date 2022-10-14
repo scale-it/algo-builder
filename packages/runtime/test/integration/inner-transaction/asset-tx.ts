@@ -43,7 +43,7 @@ describe("Algorand Smart Contracts(TEALv5) - Inner Transactions[Asset Transfer, 
 		};
 	});
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		// reset app (delete + create)
 		john.createdApps.delete(appID);
 		appDefinition.appName = "app" + Date.now();

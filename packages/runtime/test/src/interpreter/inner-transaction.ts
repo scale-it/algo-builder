@@ -4,12 +4,19 @@ import { assert } from "chai";
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { Runtime } from "../../../src/index";
+import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
-import { AccountAddress, AccountStoreI, ExecutionMode, StackElem, TxOnComplete } from "../../../src/types";
+import {
+	AccountAddress,
+	AccountStoreI,
+	ExecutionMode,
+	StackElem,
+	TxOnComplete,
+} from "../../../src/types";
+import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
 import { accInfo } from "../../mocks/stateful";
@@ -82,8 +89,13 @@ describe("Inner Transactions", function () {
 		});
 
 		interpreter = new Interpreter();
-		interpreter.runtime = new Runtime([elonAcc, johnAcc, bobAccount, 
-			applicationAccount, foreignApplicationAccount]);
+		interpreter.runtime = new Runtime([
+			elonAcc,
+			johnAcc,
+			bobAccount,
+			applicationAccount,
+			foreignApplicationAccount,
+		]);
 		interpreter.tealVersion = tealVersion;
 		reset();
 	};
@@ -413,7 +425,7 @@ describe("Inner Transactions", function () {
 			"ConfigAssetClawback",
 		];
 
-		it("should pass: teal understand 32 bytes value is address with acfg address", () => {
+		it("should pass: teal understand 32 bytes value is address with acfg address", function () {
 			ConfigAddresses.forEach((configAddr) => {
 				tealCode = `
         itxn_begin
@@ -426,7 +438,7 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		it("should pass: use random address with asa config transaction with acfg address", () => {
+		it("should pass: use random address with asa config transaction with acfg address", function () {
 			ConfigAddresses.forEach((configAddress) => {
 				tealCode = `
           itxn_begin
@@ -529,7 +541,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAppPay", function () {
 		let pay: string;
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			pay = `
         itxn_begin
         itxn_field Amount
@@ -662,7 +674,7 @@ describe("Inner Transactions", function () {
 
 	describe("TestAppAssetOptIn", function () {
 		let axfer: string;
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			axfer = `
         itxn_begin
         int axfer
@@ -807,7 +819,7 @@ describe("Inner Transactions", function () {
 		let axfer: string;
 		let assetID1: number;
 		let assetID2: number;
-		this.beforeAll(() => {
+		this.beforeAll(function () {
 			const elonAcc = interpreter.runtime.ctx.state.accounts.get(elonAddr);
 			if (elonAcc) {
 				// in foreign-assets
@@ -1005,7 +1017,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("TestBadField", () => {
+	describe("TestBadField", function () {
 		it(`should fail if fields are invalid`, function () {
 			const pay = `
         global CurrentApplicationAddress
@@ -1029,7 +1041,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("TestNumInner", () => {
+	describe("TestNumInner", function () {
 		it(`should fail number of inner transactions > 16`, function () {
 			const pay = `
         itxn_begin
@@ -1059,7 +1071,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("TestAssetCreate", () => {
+	describe("TestAssetCreate", function () {
 		it(`should test asset creation inner transaction`, function () {
 			const create = `
         itxn_begin
@@ -1085,7 +1097,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("TestAssetFreeze", () => {
+	describe("TestAssetFreeze", function () {
 		it(`should test asset freeze inner transaction (flow test)`, function () {
 			const lastAssetID = interpreter.runtime.ctx.state.assetCounter;
 
@@ -1155,7 +1167,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("Log", () => {
+	describe("Log", function () {
 		it(`should log bytes to current transaction receipt`, function () {
 			const txnInfo = interpreter.runtime.getTxReceipt(TXN_OBJ.txID);
 			assert.isUndefined(txnInfo?.logs); // no logs before
@@ -1243,13 +1255,13 @@ describe("Inner Transactions", function () {
 	});
 
 	describe("Teal v6 update", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
 		describe("keyreg transaction", function () {
 			let program: string;
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				// init more balance for application to test inner transaction
 				setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
 			});
@@ -1280,7 +1292,7 @@ describe("Inner Transactions", function () {
 				assert.doesNotThrow(() => executeTEAL(program));
 			});
 
-			it("should fail on invalid field keyreg transaction", () => {
+			it("should fail on invalid field keyreg transaction", function () {
 				["VotePK", "SelectionPK"].forEach((field) => {
 					program = `
             itxn_begin
@@ -1294,9 +1306,9 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe("RekeyTo", () => {
+		describe("RekeyTo", function () {
 			let rekeyProgram: string;
-			this.beforeEach(() => {
+			this.beforeEach(function () {
 				setUpInterpreter(6);
 				rekeyProgram = `
           itxn_begin
@@ -1312,8 +1324,8 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe("Note", () => {
-			this.beforeEach(() => {
+		describe("Note", function () {
+			this.beforeEach(function () {
 				setUpInterpreter(6);
 			});
 
@@ -1364,12 +1376,12 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe("itxn_next", () => {
-			this.beforeEach(() => {
+		describe("itxn_next", function () {
+			this.beforeEach(function () {
 				setUpInterpreter(6, 1e9);
 			});
 
-			it("Should succeed: create inner group transactions", () => {
+			it("Should succeed: create inner group transactions", function () {
 				const prog = `
 				itxn_begin
 				int pay
@@ -1396,7 +1408,7 @@ describe("Inner Transactions", function () {
 				assert.equal(interpreter.currentInnerTxnGroup.length, 2);
 			});
 
-			it("Should fail: use itxn_next without start with itxn_begin", () => {
+			it("Should fail: use itxn_next without start with itxn_begin", function () {
 				const prog = `
 					itxn_next
 					int 1
@@ -1408,13 +1420,29 @@ describe("Inner Transactions", function () {
 				);
 			});
 		});
+	});
 
-		describe("Foreign application account access in teal v7 ", () => {
-			this.beforeEach(() => {
+	describe("Teal v7", function () {
+		describe("Inner transaction", function () {
+			useFixture("teal-files");
+			this.beforeEach(function () {
+				setUpInterpreter(1, ALGORAND_ACCOUNT_MIN_BALANCE);
+			});
+			it("Should execute a teal file successfully", function () {
+				const file = "test-innerTxn-v7.teal";
+				interpreter.execute(getProgram(file), ExecutionMode.APPLICATION, interpreter.runtime);
+				assert.deepEqual(interpreter.innerTxnGroups.length, 0);
+				assert.deepEqual(interpreter.currentInnerTxnGroup.length, 2);
+				assert.deepEqual(interpreter.tealVersion, 7);
+			});
+		});
+
+		describe("Foreign application account access", function () {
+			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
 
-			it("Should not throw error when accessing foreign application in create inner transaction", () => {
+			it("Should not throw error when accessing foreign application in create inner transaction", function () {
 				const prog = `
 				itxn_begin
 				int pay
