@@ -331,6 +331,7 @@ export async function executeTx(
  * current network's blockchain block height.
  * @param deployer Deployer
  * @param fileName raw(encoded) signed txn file
+ * @returns TxnReceipt which includes confirmed txn response along with txID
  */
 export async function executeSignedTxnFromFile(
 	deployer: Deployer,

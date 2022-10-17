@@ -136,6 +136,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
@@ -145,9 +146,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
-	// Source:
-	// https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
-	// Function used to wait for a tx confirmation
+	/**
+	 * Source: https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
+	 * Function used to wait for a tx confirmation
+	 * @param txId txn ID for which confirmation is required 
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
+	 */
 	async waitForConfirmation(
 		txId: string,
 		waitRounds = wtypes.WAIT_ROUNDS

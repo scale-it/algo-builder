@@ -197,7 +197,12 @@ export class WallectConnectSession {
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
-	// Function used to wait for a tx confirmation
+	/**
+	* Function used to wait for a tx confirmation
+	* @param txId txn ID for which confirmation is required 
+	* @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	* @returns TxnReceipt which includes confirmed txn response along with txID
+	*/
 	async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
