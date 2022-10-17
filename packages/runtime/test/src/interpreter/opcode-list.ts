@@ -7452,7 +7452,7 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 			assert.equal(2n, stack.pop());
 		});
-		it.only("Should return correct number of ClearStateProgramPages", function () {
+		it("Should return correct number of ClearStateProgramPages", function () {
 			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
 			const op = new Txn(["NumClearStateProgramPages"], 1, interpreter);
 			op.execute(stack);
@@ -7475,7 +7475,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(stack.pop(), stack.pop());
 		});
 	});
-	describe.only("Bn254", function () {
+	describe("Bn254", function () {
 		const stack = new Stack<StackElem>();
 
 		it("Should add two points on curve", function () {

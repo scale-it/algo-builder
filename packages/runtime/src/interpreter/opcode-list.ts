@@ -84,8 +84,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-/* tslint:disable no-var-requires */
-require("rustbn.js");
+// @ts-ignore
 import * as bn254 from "rustbn.js";
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
