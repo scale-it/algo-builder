@@ -84,8 +84,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-// @ts-ignore
-import * as bn254 from "rustbn.js";
+import bn254 = require("rustbn.js");
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
