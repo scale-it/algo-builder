@@ -28,6 +28,9 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Bn254Add,
+	Bn254Pairing,
+	Bn254ScalarMul,
 	Branch,
 	BranchIfNotZero,
 	BranchIfNotZerov4,
@@ -406,6 +409,16 @@ opCodeMap[7] = {
 	sha3_256: Sha3_256,
 	ed25519verify_bare: Ed25519verify_bare,
 	json_ref: Json_ref,
+};
+/**
+ * TEALv8
+ * //TODO: check if the bn254 opcodes has been realased with v8 or v9
+ */
+opCodeMap[8] = {
+	...opCodeMap[7],
+	bn254_add: Bn254Add,
+	bn254_scalar_mul: Bn254ScalarMul,
+	bn254_pairing: Bn254Pairing,
 };
 
 // list of opcodes with exactly one parameter.

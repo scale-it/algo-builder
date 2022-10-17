@@ -50,5 +50,8 @@
 			"eslint --format stylish --fix",
 			"prettier --write"
 		]
+	},
+	"dependencies": {
+		"rustbn.js": "^0.2.0"
 	}
 }

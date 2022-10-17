@@ -1264,6 +1264,7 @@ __metadata:
     lint-staged: ^12.3.5
     mocha: ^9.2.1
     prettier: ^2.5.1
+    rustbn.js: ^0.2.0
     typescript: ^4.6.2
   languageName: unknown
   linkType: soft
@@ -5746,6 +5747,13 @@ __metadata:
   dependencies:
     queue-microtask: ^1.2.2
   checksum: cb4f97ad25a75ebc11a8ef4e33bb962f8af8516bb2001082ceabd8902e15b98f4b84b4f8a9b222e5d57fc3bd1379c483886ed4619367a7680dad65316993021d
+  languageName: node
+  linkType: hard
+
+"rustbn.js@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "rustbn.js@npm:0.2.0"
+  checksum: 2148e7ba34e70682907ee29df4784639e6eb025481b2c91249403b7ec57181980161868d9aa24822a5075dd1bb5a180dfedc77309e5f0d27b6301f9b563af99a
   languageName: node
   linkType: hard
 
