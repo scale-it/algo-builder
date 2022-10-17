@@ -25,7 +25,7 @@ async function run(runtimeEnv, deployer) {
 		fromAccount: masterAccount,
 		toAccountAddr: multisigAddr,
 		amountMicroAlgos: 10000000,
-		payFlags: { note: "Funding multisig account", totalFee: 500 }, // totalFee will be converted to 1000 as it is minimum required transaction fee
+		payFlags: { note: "Funding multisig account", totalFee: 1000 },
 	};
 
 	// Funding multisignature account
@@ -56,9 +56,9 @@ async function run(runtimeEnv, deployer) {
 	// Transaction PASSES
 	await tryExecuteTx(deployer, txnParams);
 
-	// Transaction FAIL - according to teal logic, amount should be <= 100
-	txnParams.amountMicroAlgos = 200;
-	await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
+	// // Transaction FAIL - according to teal logic, amount should be <= 100
+	// txnParams.amountMicroAlgos = 200;
+	// await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
 }
 
 module.exports = { default: run };

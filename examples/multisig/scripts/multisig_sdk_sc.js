@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 	};
 	// Funding multisignature account
 	await tryExecuteTx(deployer, txnParams);
-	txnParams = bob.addr;
+	txnParams.fromAccount = bob;
 	await tryExecuteTx(deployer, txnParams); // fund bob
 
 	await deployer.addCheckpointKV("User Checkpoint", "Fund Multisignature Account");
