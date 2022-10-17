@@ -51,7 +51,7 @@ def htlc(ARG_RCV,
 
     # Always verify that the RekeyTo property of any transaction is set to the receiver addr
     # unless the contract is specifically involved ina rekeying operation.
-    rekey_check = Txn.rekey_to() == Txn.receiver()
+    rekey_check = Txn.rekey_to() == Global.zero_address()
 
     # fold all the above checks into a single boolean.
     common_checks = And(

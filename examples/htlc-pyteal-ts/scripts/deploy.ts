@@ -37,7 +37,7 @@ async function run(
 		throw error;
 	});
 
-	deployer.fundLsig("HTLC_Lsig", { funder: bob, fundingMicroAlgo: 5e6 }, {})
+	await deployer.fundLsig("HTLC_Lsig", { funder: bob, fundingMicroAlgo: 5e6 }, {})
 
 	// Add user checkpoint
 	deployer.addCheckpointKV("User Checkpoint", "Fund Contract Account");
