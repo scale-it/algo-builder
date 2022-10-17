@@ -486,11 +486,12 @@ export interface Deployer {
 
 	registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void;
 
-	logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void;
+	logTx: (message: string, txConfirmation: TxnReceipt) => void;
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<TxnReceipt>;
 

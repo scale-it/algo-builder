@@ -157,8 +157,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
 		if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-			const data: TxnReceipt = { txID: txId, ...pendingInfo as ConfirmedTxInfo }
-			return data
+			return { txID: txId, ...pendingInfo as ConfirmedTxInfo } as TxnReceipt
 		}
 		throw new Error("timeout");
 	}

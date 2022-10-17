@@ -12,7 +12,7 @@ import { TextEncoder } from "util";
 
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../../src/types";
+import { Deployer, TxnReceipt } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";

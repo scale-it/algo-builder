@@ -38,6 +38,7 @@ export class WebMode {
 	 * wait for confirmation for transaction using transaction id
 	 * @param txId Transaction id
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async waitForConfirmation(
 		txId: string,
@@ -77,6 +78,7 @@ export class WebMode {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param signedTxn Signed Transaction blob encoded in base64
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendAndWait(signedTxn: string, waitRounds: number = WAIT_ROUNDS): Promise<TxnReceipt> {
 		const txInfo = await this.algoSigner.send({
@@ -347,7 +349,7 @@ export class WebMode {
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
 	 * @param rounds number of rounds to wait for response
-	 * @returns TxnReceipt
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		if (transactions.length < 1) {

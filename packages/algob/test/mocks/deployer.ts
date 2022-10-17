@@ -4,7 +4,6 @@ import algosdk, { Account, LogicSigAccount, modelsv2 } from "algosdk";
 
 import type {
 	ASCCache,
-	ConfirmedTxInfo,
 	Deployer,
 	FundASCFlags,
 	LogicSig,
@@ -63,7 +62,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
+	logTx(message: string, txConfirmation: TxnReceipt): void {
 		throw new Error("Not implemented");
 	}
 

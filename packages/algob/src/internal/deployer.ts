@@ -32,7 +32,6 @@ import type {
 	ASCCache,
 	CheckpointFunctions,
 	CheckpointRepo,
-	ConfirmedTxInfo,
 	Deployer,
 	FundASCFlags,
 	LogicSig,
@@ -270,6 +269,7 @@ class DeployerBasicMode {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
@@ -560,9 +560,9 @@ class DeployerBasicMode {
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
 	 * @param rounds number of rounds to wait for response
-	 * @returns ConfirmedTxInfo
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
-	sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<ConfirmedTxInfo> {
+	sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		if (transactions.length < 1) {
 			throw Error("No transactions to process");
 		} else {
@@ -656,7 +656,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 	/**
 	 * Log transaction with message using txwriter
 	 */
-	logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
+	logTx(message: string, txConfirmation: TxnReceipt): void {
 		this.txWriter.push(message, txConfirmation);
 	}
 
@@ -1013,7 +1013,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
 		});
 	}
 
-	logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
+	logTx(message: string, txConfirmation: TxnReceipt): void {
 		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
 			methodName: "logTx",
 		});
