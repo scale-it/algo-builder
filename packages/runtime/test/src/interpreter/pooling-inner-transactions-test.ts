@@ -308,6 +308,7 @@ describe("Pooling Inner Transactions", function () {
 				itxn_field TypeEnum
 				txn Sender
 				itxn_field Receiver
+                // unfunded account trying to spend
 				addr ${johnAcc.address}
 				itxn_field Sender
 				int 1000
