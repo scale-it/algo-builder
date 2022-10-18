@@ -19,13 +19,15 @@ describe("Webmode - Wallet Connect test cases ", function () {
     }
     algodClient = algoexplorerAlgod(walletURL);
 
-    this.beforeEach(function () {
+    this.beforeEach(async function () {
         sender = algosdk.generateAccount();
         receiver = algosdk.generateAccount();
         connector = new WallectConnectSession(walletURL, new WalletConnect({
             bridge: "https://bridge.walletconnect.org",
             qrcodeModal: QRCodeModal,
         }));
+        await connector.create();
+        connector.onConnect((error, response) => { console.log(error, response) });
     });
 
     it("Should run executeTx function without throwing an error", function () {
