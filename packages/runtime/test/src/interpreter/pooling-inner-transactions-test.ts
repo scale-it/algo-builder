@@ -183,7 +183,7 @@ describe("Pooling Inner Transactions", function () {
 				//partially covering it's own fee
 				int 1
 				itxn_field Fee
-                itxn_next
+				itxn_next
 				int pay
 				itxn_field TypeEnum
 				txn Sender
