@@ -56,6 +56,7 @@ from `algosdk` and sends it to the network.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
+- Added support for unfunded accounts in `Runtime`.
 
 ### Bug Fixes
 

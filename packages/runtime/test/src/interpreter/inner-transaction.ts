@@ -1,19 +1,15 @@
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
-
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { AppParamsGet, Txn } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import { Stack } from "../../../src/lib/stack";
 import {
 	AccountAddress,
 	AccountStoreI,
 	ExecutionMode,
-	StackElem,
 	TxOnComplete,
 } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
@@ -71,7 +67,7 @@ describe("Inner Transactions", function () {
 		// setup 2nd account
 		johnAcc = new AccountStore(0, johnAccount);
 
-		// setup 2nd account
+		// setup 3rd account
 		bobAccount = new AccountStore(1000000, bobAcc);
 
 		// setup application account
@@ -243,8 +239,13 @@ describe("Inner Transactions", function () {
 		});
 
 		it(`should fail: "insufficient balance" because app account is charged fee`, function () {
-			// set application account balance to minimum
-			applicationAccount.amount = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE);
+			// set application account balance to 0
+			const appAcc = interpreter.runtime.ctx.state.accounts.get(applicationAccount.account.addr);
+			if (appAcc) {
+				appAcc.amount = BigInt(0);
+			}
+
+			assert.equal(appAcc?.balance(), BigInt(0));
 
 			// (defaults make these 0 pay|axfer to zero address, from app account)
 			tealCode = `
@@ -1476,5 +1477,6 @@ describe("Inner Transactions", function () {
 				assert.equal(receiver, foreignAppAccAddr);
 			});
 		});
+
 	});
 });

@@ -70,6 +70,8 @@ export class Ctx implements Context {
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;
+	txnType: TransactionType | undefined; // Determines the transaction type. It is required to
+	// know the transaction type of current transaction in execution.
 	constructor(
 		state: State,
 		tx: EncTx,
@@ -97,6 +99,7 @@ export class Ctx implements Context {
 		this.remainingFee = 0;
 		this.remainingTxns = 256;
 		this.budget = MAX_APP_PROGRAM_COST;
+		this.txnType = undefined;
 	}
 
 	private setAndGetTxReceipt(): TxReceipt {
@@ -108,7 +111,7 @@ export class Ctx implements Context {
 	// verify account's balance is above minimum required balance
 	assertAccBalAboveMin(address: string): void {
 		const account = this.getAccount(address);
-		if (account.balance() < account.minBalance) {
+		if (account.balance() < account.minBalance && this.txnType == TransactionType.pay) {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
 				accBalance: account.balance(),
 				address: address,
@@ -551,6 +554,13 @@ export class Ctx implements Context {
 			fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
 		}
 		const fromAccount = this.getAccount(sender);
+		if (fromAccount.balance() < fee) {
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
+				accBalance: fromAccount.balance(),
+				address: fromAccount.address,
+				minbalance: fee,
+			});
+		}
 		fromAccount.amount -= fee; // remove tx fee from Sender's account
 		this.assertAccBalAboveMin(fromAccount.address);
 	}
@@ -798,6 +808,7 @@ export class Ctx implements Context {
 			const fromAccountAddr = webTx.getTxFromAddress(signedTransaction.txn);
 			let payFlags: types.TxParams = {};
 			payFlags = webTx.getTxFlags(signedTransaction.txn);
+			this.txnType = signedTransaction.txn.type;
 			this.deductFee(fromAccountAddr, idx, payFlags);
 			if (lsigMap !== undefined && lsigMap.get(idx) !== undefined) {
 				let lsig = lsigMap.get(idx);

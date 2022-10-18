@@ -15,7 +15,7 @@ export const johnAddr = johnAccount.addr;
  * reference for these fields: https://developer.algorand.org/docs/reference/transactions/
  * Or check TxnFields map in ../lib/constants
  */
-export const TXN_OBJ = {
+const txn_obj = {
 	snd: Buffer.from(addr.publicKey),
 	rcv: Buffer.from(decodeAddress(johnAddr).publicKey),
 	arcv: Buffer.from(addr.publicKey),
@@ -79,3 +79,6 @@ export const TXN_OBJ = {
 	apep: 1,
 	nonpart: true,
 };
+
+// export copy of object
+export const TXN_OBJ = Object.assign({}, txn_obj);
