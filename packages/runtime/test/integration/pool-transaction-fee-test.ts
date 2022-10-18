@@ -322,16 +322,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		const appInfo = runtime.getAppInfoFromName(approvalProgramFilename, clearProgramFilename);
 		assert.isDefined(appInfo);
 		if (appInfo !== undefined) {
-			const tx: types.ExecParams[] = [
-				{
-					type: types.TransactionType.OptInToApp,
-					sign: types.SignType.SecretKey,
-					fromAccount: alice.account, // funded account
-					appID: appInfo.appID,
-					payFlags: { totalFee: 1000 } // partially covering it's fee
-				},
-			];
-			assert.doesNotThrow(() => runtime.executeTx(tx));
+			runtime.optInToApp(alice.address, appInfo.appID, {}, {});
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
 
 			const groupTx: types.ExecParams[] = [
@@ -354,7 +345,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 
 			assert.doesNotThrow(() => runtime.executeTx(groupTx));
 			syncAccounts();
-			assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(1001));
+			assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(1));
 			assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount) - BigInt(fee));
 			assert.equal(elonUnfunded.balance(), BigInt(amount));
 		}
