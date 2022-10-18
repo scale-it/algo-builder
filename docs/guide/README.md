@@ -191,7 +191,7 @@ algob -h deploy
 You can write your scripts and tests in TS. To initialize a new typescript project add `--typescript` to the init flag. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
 
 ```shell
-yarn run algob init --typescript
+yarn run algob init <path-where-to-create> --typescript
 ```
 
 You can also copy our [htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) example project.
