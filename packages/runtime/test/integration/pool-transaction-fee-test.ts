@@ -10,7 +10,7 @@ describe("Pooled Transaction Fees Test", function () {
 	const initialBalance = 1e30;
 	let john: AccountStore;
 	let bob: AccountStore;
-	let elon: AccountStore;
+	let elonUnfunded: AccountStore;
 	let alice: AccountStore;
 	let assetId: number;
 	let runtime: Runtime;
@@ -19,8 +19,8 @@ describe("Pooled Transaction Fees Test", function () {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
-		elon = new AccountStore(0, "elon");
-		runtime = new Runtime([john, bob, alice, elon]); // setup test
+		elonUnfunded = new AccountStore(0, "elon");
+		runtime = new Runtime([john, bob, alice, elonUnfunded]); // setup test
 	});
 
 	function setupAsset(): void {
@@ -35,7 +35,7 @@ describe("Pooled Transaction Fees Test", function () {
 		john = runtime.getAccount(john.address);
 		bob = runtime.getAccount(bob.address);
 		alice = runtime.getAccount(alice.address);
-		elon = runtime.getAccount(elon.address);
+		elonUnfunded = runtime.getAccount(elonUnfunded.address);
 	}
 
 	it("Should pass if second account doesn't pay fees and first account is covering fees", function () {
@@ -155,14 +155,14 @@ describe("Pooled Transaction Fees Test", function () {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				toAccountAddr: elon.address,
+				toAccountAddr: elonUnfunded.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: fee }, // this covers fee of entire group txns
 			},
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
-				fromAccount: elon.account, // unfunded account
+				fromAccount: elonUnfunded.account, // unfunded account
 				assetID: assetId,
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
@@ -171,12 +171,12 @@ describe("Pooled Transaction Fees Test", function () {
 		runtime.executeTx(groupTx);
 
 		syncAccounts();
-		assert(elon.balance() !== BigInt(0));
+		assert(elonUnfunded.balance() !== BigInt(0));
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
-		assert.equal(elon.balance(), BigInt(amount)); // unfunded account
+		assert.equal(elonUnfunded.balance(), BigInt(amount)); // unfunded account
 		// verify holding
-		assert.isDefined(elon.getAssetHolding(assetId));
+		assert.isDefined(elonUnfunded.getAssetHolding(assetId));
 	});
 
 	it("Should not fail when account in first txn of group txn is unfunded account and trying to opt-in", function () {
@@ -188,7 +188,7 @@ describe("Pooled Transaction Fees Test", function () {
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
-				fromAccount: elon.account, // unfunded account
+				fromAccount: elonUnfunded.account, // unfunded account
 				assetID: assetId,
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
@@ -204,7 +204,7 @@ describe("Pooled Transaction Fees Test", function () {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
 				fromAccount: alice.account,
-				toAccountAddr: elon.address,
+				toAccountAddr: elonUnfunded.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: fee }, // this covers fee of entire group txns
 			}
@@ -220,7 +220,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 	const initialBalance = 1e30;
 	let john: AccountStore;
 	let bob: AccountStore;
-	let elon: AccountStore;
+	let elonUnfunded: AccountStore;
 	let alice: AccountStore;
 	let assetId: number;
 	let approvalProgramFilename: string;
@@ -231,8 +231,8 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		john = new AccountStore(initialBalance, "john");
 		bob = new AccountStore(initialBalance, "bob");
 		alice = new AccountStore(initialBalance, "alice");
-		elon = new AccountStore(0, "elon");
-		runtime = new Runtime([john, bob, alice, elon]); // setup test
+		elonUnfunded = new AccountStore(0, "elonUnfunded");
+		runtime = new Runtime([john, bob, alice, elonUnfunded]); // setup test
 
 		approvalProgramFilename = "counter-approval.teal";
 		clearProgramFilename = "clear.teal";
@@ -268,7 +268,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		john = runtime.getAccount(john.address);
 		bob = runtime.getAccount(bob.address);
 		alice = runtime.getAccount(alice.address);
-		elon = runtime.getAccount(elon.address);
+		elonUnfunded = runtime.getAccount(elonUnfunded.address);
 	}
 
 	it("Should not fail when tried to optin to unfunded account in group txn", function () {
@@ -296,7 +296,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			{
 				type: types.TransactionType.OptInASA,
 				sign: types.SignType.SecretKey,
-				fromAccount: elon.account, // unfunded account and no fund is sent to this account
+				fromAccount: elonUnfunded.account, // unfunded account and no fund is sent to this account
 				assetID: assetId,
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
@@ -334,7 +334,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 					type: types.TransactionType.TransferAlgo,
 					sign: types.SignType.SecretKey,
 					fromAccount: john.account,
-					toAccountAddr: elon.address,
+					toAccountAddr: elonUnfunded.address,
 					amountMicroAlgos: amount,
 					payFlags: { totalFee: fee }
 				},
@@ -344,7 +344,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			syncAccounts();
 			assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(1001));
 			assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount) - BigInt(fee));
-			assert.equal(elon.balance(), BigInt(amount));
+			assert.equal(elonUnfunded.balance(), BigInt(amount));
 		}
 	});
 
@@ -371,7 +371,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 					type: types.TransactionType.TransferAlgo,
 					sign: types.SignType.SecretKey,
 					fromAccount: john.account,
-					toAccountAddr: elon.address,
+					toAccountAddr: elonUnfunded.address,
 					amountMicroAlgos: amount,
 					payFlags: { totalFee: fee },
 				},
