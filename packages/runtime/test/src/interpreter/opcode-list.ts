@@ -162,6 +162,7 @@ import {
 	Txna,
 	Txnas,
 	Uncover,
+	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
@@ -7561,6 +7562,32 @@ describe("Teal Opcodes", function () {
 			stack.push(pointG2Bytes);
 			op.execute(stack);
 			assert.equal(expectedResult, stack.pop());
+		});
+	});
+
+	describe.only("vrf_verify", function () {
+		const stack = new Stack<StackElem>();
+
+		it("Should return 1 for valid proof and verification key", function () {
+			const publicKey = Buffer.from(
+				"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+				"hex"
+			);
+			const proof = Buffer.from(
+				"b6b4699f87d56126c9117a7da55bd0085246f4c56dbc95d20172612e9d38e8d7ca65e573a126ed88d4e30a46f80a666854d675cf3ba81de0de043c3774f061560f55edc256a787afe701677c0f602900",
+				"hex"
+			);
+			const message = Buffer.from("");
+			const expectedResult = Buffer.from(
+				"5b49b554d05c0cd5a5325376b3387de59d924fd1e13ded44648ab33c21349a603f25b84ec5ed887995b33da5e3bfcb87cd2f64521c4c62cf825cffabbe5d31cc",
+				"hex"
+			);
+			const op = new VrfVerify(["VrfAlgorand"], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			op.execute(stack);
+			assert.deepEqual(expectedResult, stack.pop());
 		});
 	});
 });

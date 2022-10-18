@@ -8,6 +8,7 @@ import algosdk, {
 	encodeUint64,
 	getApplicationAddress,
 	isValidAddress,
+	makeApplicationCallTxnFromObject,
 	modelsv2,
 	verifyBytes,
 } from "algosdk";
@@ -84,7 +85,8 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-const bn254 = require("rustbn.js");// eslint-disable-line @typescript-eslint/no-var-requires
+const { ProofHoHash } = require("@idena/vrf-js"); // eslint-disable-line @typescript-eslint/no-var-requires
+const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -4354,10 +4356,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-						sig: Buffer.alloc(5),
-						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					}
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -5277,6 +5279,57 @@ export class Bn254Pairing extends Op {
 		const boolResult = result.slice(-1)[0];
 		stack.push(boolResult);
 		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+
+export class VrfVerify extends Op {
+	readonly line: number;
+	readonly vrfStandard: string;
+
+	constructor(args: string[], line: number) {
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		super();
+		this.line = line;
+		switch (argument) {
+			case "VrfAlgorand": {
+				this.vrfStandard = argument;
+				break;
+			}
+			case "VrfStandard": {
+				this.vrfStandard = argument;
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_STANDARD, {
+					vrfStandard: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const message = this.assertBytes(stack.pop(), this.line);
+		const proof = this.assertBytes(stack.pop(), this.line);
+		const publicKey = this.assertBytes(stack.pop(), this.line);
+
+		if (proof.length !== 80) {
+			//vrf proof wrong size
+		}
+		if (publicKey.length !== 32) {
+			//vrf pubkey wrong size
+		}
+
+		if (this.vrfStandard === "VrfAlgorand") {
+			//TODO: figure out how to use the algorand vrf here since this package uses different implementation
+			const hash = ProofHoHash(publicKey, message, proof);
+			stack.push(hash);
+			stack.push(1n);
+		} else {
+			//unsupported vrf_verify standard
+		}
 		return this.computeCost();
 	}
 }

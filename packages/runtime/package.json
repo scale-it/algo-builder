@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"@algo-builder/web": "workspace:*",
+		"@idena/vrf-js": "^1.0.1",
 		"@nodelib/fs.walk": "^1.2.8",
 		"@types/json-bigint": "^1.0.1",
 		"algosdk": "^1.19.0",
