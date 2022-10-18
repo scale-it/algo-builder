@@ -20,7 +20,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
-- Added support for unfunded accounts in `Runtime`.
 
 #### Examples
 
@@ -57,6 +56,7 @@ from `algosdk` and sends it to the network.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
 - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
+- Added support for unfunded accounts in `Runtime`.
 
 ### Bug Fixes
 
