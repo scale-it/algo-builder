@@ -147,7 +147,7 @@ describe("Pooling Inner Transactions", function () {
                     return
                     `;
 
-                executeTEAL(prog);
+                assert.doesNotThrow(() => executeTEAL(prog));
 
                 assert.equal(interpreter.runtime.ctx.state.accounts
                     .get(bobAccount.address)?.balance()
