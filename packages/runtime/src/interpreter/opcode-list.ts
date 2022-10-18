@@ -9,8 +9,6 @@ import algosdk, {
 	getApplicationAddress,
 	isValidAddress,
 	modelsv2,
-	SignedTransaction,
-	Transaction,
 	verifyBytes,
 } from "algosdk";
 import chalk from "chalk";
@@ -20,7 +18,6 @@ import { sha512_256 } from "js-sha512";
 import JSONbig from "json-bigint";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
-import { buffer } from "stream/consumers";
 import nacl from "tweetnacl";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -87,6 +84,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+const bn254 = require("rustbn.js");// eslint-disable-line @typescript-eslint/no-var-requires
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -5209,6 +5207,76 @@ export class Json_ref extends Op {
 				break;
 			}
 		}
+		return this.computeCost();
+	}
+}
+export class Bn254Add extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const aBytes = this.assertBytes(stack.pop(), this.line);
+		const bBytes = this.assertBytes(stack.pop(), this.line);
+		if (aBytes.length !== 64 || bBytes.length !== 64) {
+			throw new Error("expect G1 in 64 bytes");
+		}
+		const result = bn254.add(Buffer.concat([aBytes, bBytes]));
+		stack.push(result);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+export class Bn254ScalarMul extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const aBytes = this.assertBytes(stack.pop(), this.line);
+		const kBytes = this.assertBytes(stack.pop(), this.line);
+		if (aBytes.length !== 64) {
+			throw new Error("expect G1 in 64 bytes");
+		}
+		const result = bn254.mul(Buffer.concat([aBytes, kBytes]));
+		stack.push(result);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+export class Bn254Pairing extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const G2Bytes = this.assertBytes(stack.pop(), this.line);
+		const G1Bytes = this.assertBytes(stack.pop(), this.line);
+		if (G1Bytes.length !== 64 || G2Bytes.length !== 128) {
+			throw new Error("expect G1 in 64 bytes or/and G2 bytes in 128 bytes");
+		}
+		const result = bn254.pairing(Buffer.concat([G1Bytes, G2Bytes]));
+		const boolResult = result.slice(-1)[0];
+		stack.push(boolResult);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
 		return this.computeCost();
 	}
 }

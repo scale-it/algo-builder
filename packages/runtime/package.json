@@ -44,6 +44,7 @@
 		"js-sha512": "^0.8.0",
 		"lodash.clonedeep": "^4.5.0",
 		"murmurhash": "^2.0.0",
+		"rustbn.js": "^0.2.0",
 		"sha3": "^2.1.4",
 		"source-map-support": "^0.5.21",
 		"tweetnacl-ts": "^1.0.3",
