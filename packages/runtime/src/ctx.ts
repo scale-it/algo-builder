@@ -110,14 +110,12 @@ export class Ctx implements Context {
 	// verify account's balance is above minimum required balance
 	assertAccBalAboveMin(address: string): void {
 		const account = this.getAccount(address);
-		if (account.balance() < account.minBalance) {
-			if (this.txnType == TransactionType.pay) {
-				throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
-					accBalance: account.balance(),
-					address: address,
-					minbalance: account.minBalance,
-				});
-			}
+		if (account.balance() < account.minBalance && this.txnType == TransactionType.pay) {
+			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
+				accBalance: account.balance(),
+				address: address,
+				minbalance: account.minBalance,
+			});
 		}
 	}
 
