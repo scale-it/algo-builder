@@ -143,6 +143,7 @@ export class MyAlgoWalletSession {
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendAndWait(
 		rawTxns: Uint8Array | Uint8Array[],
@@ -152,8 +153,13 @@ export class MyAlgoWalletSession {
 		return await this.waitForConfirmation(txInfo.txId, waitRounds);
 	}
 
-	// Function used to wait for a tx confirmation
-	private async waitForConfirmation(
+	/**
+	* Function used to wait for a tx confirmation
+	* @param txId txn ID for which confirmation is required 
+	* @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	* @returns TxnReceipt which includes confirmed txn response along with txID
+	*/
+	async waitForConfirmation(
 		txId: string,
 		waitRounds = WAIT_ROUNDS
 	): Promise<TxnReceipt> {
@@ -262,7 +268,7 @@ export class MyAlgoWalletSession {
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
 	 * @param rounds number of rounds to wait for response
-	 * @returns TxnReceipt
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		if (transactions.length < 1) {

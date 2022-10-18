@@ -12,7 +12,7 @@ import { TextEncoder } from "util";
 
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../../src/types";
+import { Deployer, TxnReceipt } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
@@ -178,7 +178,7 @@ describe("ASA modify fields", function () {
 	 * Verifies correct asset fields are sent to network
 	 * @param rawTxns rawTxns Signed transactions in Uint8Array
 	 */
-	function checkTx(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	function checkTx(rawTxns: Uint8Array | Uint8Array[]): Promise<TxnReceipt> {
 		if (Array.isArray(rawTxns)) {
 			// verify here if group tx
 		} else {

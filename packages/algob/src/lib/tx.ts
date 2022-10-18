@@ -9,7 +9,7 @@ import {
 } from "@algo-builder/web";
 import algosdk, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
-import { ConfirmedTxInfo, Deployer, TxnReceipt } from "../types";
+import { Deployer, TxnReceipt } from "../types";
 import { loadEncodedTxFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
@@ -331,11 +331,12 @@ export async function executeTx(
  * current network's blockchain block height.
  * @param deployer Deployer
  * @param fileName raw(encoded) signed txn file
+ * @returns TxnReceipt which includes confirmed txn response along with txID
  */
 export async function executeSignedTxnFromFile(
 	deployer: Deployer,
 	fileName: string
-): Promise<ConfirmedTxInfo> {
+): Promise<TxnReceipt> {
 	const signedTxn = loadEncodedTxFromFile(fileName);
 	if (signedTxn === undefined) {
 		throw new Error(`File ${fileName} does not exist`);

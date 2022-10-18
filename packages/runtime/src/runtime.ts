@@ -1157,7 +1157,7 @@ export class Runtime {
 	/**
 	 * Sends signedTransaction and waits for the response
 	 * @param transactions array of signedTransaction objects.
-	 * @returns TxnReceipt
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);

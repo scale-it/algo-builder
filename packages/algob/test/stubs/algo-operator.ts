@@ -6,7 +6,6 @@ import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
 	ASCCache,
-	ConfirmedTxInfo,
 	FundASCFlags,
 	LsigInfo,
 	SCParams,
@@ -16,8 +15,8 @@ import {
 	MOCK_APPLICATION_ADDRESS,
 	mockAlgod,
 	mockAssetInfo,
-	mockConfirmedTx,
 	mockPendingTransactionInformation,
+	mockTxnReceipt,
 } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -31,13 +30,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 		});
 	}
 
-	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<TxnReceipt> {
 		return new Promise((resolve, _reject) => {
-			resolve(mockConfirmedTx);
+			resolve(mockTxnReceipt);
 		});
 	}
 
-	waitForConfirmation(_txID: string): Promise<ConfirmedTxInfo> {
+	waitForConfirmation(_txID: string): Promise<TxnReceipt> {
 		return this.sendAndWait([]);
 	}
 

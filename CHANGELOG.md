@@ -76,7 +76,11 @@ from `algosdk` and sends it to the network.
 
 #### @algo-builder/web
 
-- `executeTx` promise now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts#L458) instead of `algosdk.modelsv2.PendingTransactionResponse`.
+- `executeTx`, `sendAndWait`, `waitForConfirmation`, `sendTxAndWait` promise now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts#L458) instead of `algosdk.modelsv2.PendingTransactionResponse`.
+
+#### @algo-builder/algob
+- `sendAndWait`, `waitForConfirmation`, `executeSignedTxnFromFile`, `sendTxAndWait` promise now returns `TxnReceipt` instead of `ConfirmedTxInfo`.
+- `logTx` second argument of `txConfirmation` now expects type of `TxnReceipt` instead of `ConfirmedTxInfo`.
 
 ### Examples
 

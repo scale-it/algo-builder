@@ -4,7 +4,6 @@ import algosdk, { Account, LogicSigAccount, modelsv2 } from "algosdk";
 
 import type {
 	ASCCache,
-	ConfirmedTxInfo,
 	Deployer,
 	FundASCFlags,
 	LogicSig,
@@ -63,11 +62,11 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	logTx(message: string, txConfirmation: ConfirmedTxInfo): void {
+	logTx(message: string, txConfirmation: TxnReceipt): void {
 		throw new Error("Not implemented");
 	}
 
-	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+	sendAndWait(rawTxns: Uint8Array | Uint8Array[]): Promise<TxnReceipt> {
 		throw new Error("Not implemented");
 	}
 
@@ -119,7 +118,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	addCheckpointKV(key: string, value: string): void {} // eslint-disable-line @typescript-eslint/no-empty-function
+	addCheckpointKV(key: string, value: string): void { } // eslint-disable-line @typescript-eslint/no-empty-function
 
 	getCheckpointKV(key: string): string | undefined {
 		return "metadata";
@@ -237,7 +236,7 @@ export class FakeDeployer implements Deployer {
 		throw new Error("Not implemented");
 	}
 
-	waitForConfirmation(txId: string): Promise<ConfirmedTxInfo> {
+	waitForConfirmation(txId: string): Promise<TxnReceipt> {
 		throw new Error("Not implemented");
 	}
 
