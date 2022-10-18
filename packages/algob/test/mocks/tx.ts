@@ -112,7 +112,7 @@ export const mockTxnReceipt: TxnReceipt = {
 	txn: {
 		txn: TXN_OBJ,
 	},
-}
+};
 
 export const mockAssetInfo: modelsv2.Asset = {
 	index: 1,
