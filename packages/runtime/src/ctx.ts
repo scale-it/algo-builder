@@ -70,7 +70,8 @@ export class Ctx implements Context {
 	remainingFee: number;
 	budget: number;
 	lastLog: Uint8Array;
-	txnType: TransactionType | undefined;
+	txnType: TransactionType | undefined; // Determines the transaction type. It is required to
+	// know the transaction type of current transaction in execution.
 	constructor(
 		state: State,
 		tx: EncTx,
