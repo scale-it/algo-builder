@@ -115,6 +115,10 @@ describe("Pooling Inner Transactions", function () {
 
                 TXN_OBJ.apas = [assetID];
 
+                assert.equal(interpreter.runtime.ctx.state.accounts
+                    .get(johnAcc.address)?.balance()
+                    , 0n);
+
                 const prog = `
                 itxn_begin
                 int axfer
@@ -149,6 +153,9 @@ describe("Pooling Inner Transactions", function () {
                     .get(bobAccount.address)?.balance()
                     , 1000000n - 3000n);
                 assert.equal(interpreter.runtime.ctx.state.accounts
+                    .get(johnAcc.address)?.balance()
+                    , 0n);
+                assert.equal(interpreter.runtime.ctx.state.accounts
                     .get(appAccAddr)?.balance()
                     , 1000n);
                 assert.isDefined(interpreter.runtime.ctx.state.accounts
@@ -159,6 +166,10 @@ describe("Pooling Inner Transactions", function () {
         });
 
         it("Should succeed: when funded account partially covers it's own fee", function () {
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
+
             const prog = `
 				itxn_begin
 				int pay
@@ -191,9 +202,16 @@ describe("Pooling Inner Transactions", function () {
             assert.equal(interpreter.runtime.ctx.state.accounts
                 .get(appAccAddr)?.balance()
                 , BigInt(balance) - 3000n);
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
         });
 
         it("Should succeed: when txn fee is covered in group txns", function () {
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
+
             const prog = `
 				itxn_begin
 				int pay
@@ -225,9 +243,16 @@ describe("Pooling Inner Transactions", function () {
             assert.equal(interpreter.runtime.ctx.state.accounts
                 .get(appAccAddr)?.balance()
                 , BigInt(balance) - 4000n);
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
         });
 
         it("Should fail: when txn fee is not covered in group txns", function () {
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
+
             const prog = `
 				itxn_begin
 				int pay
@@ -259,10 +284,13 @@ describe("Pooling Inner Transactions", function () {
                 () => executeTEAL(prog),
                 RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
             );
-
         });
 
         it("Should fail: when unfunded account sends fund in group txn", function () {
+            assert.equal(interpreter.runtime.ctx.state.accounts
+                .get(johnAcc.address)?.balance()
+                , 0n);
+
             const prog = `
 				itxn_begin
 				int pay
@@ -288,8 +316,6 @@ describe("Pooling Inner Transactions", function () {
 				return
 				`;
             assert.doesNotThrow(() => executeTEAL(prog));
-
-
         });
 
         it("Should fail: when unfunded account covers it's own fee", function () {
@@ -307,6 +333,9 @@ describe("Pooling Inner Transactions", function () {
 
                 // rekey bobAccount to application
                 bobAccount.account.rekeyTo(applicationAccount.address);
+                assert.equal(interpreter.runtime.ctx.state.accounts
+                    .get(johnAcc.address)?.balance()
+                    , 0n);
 
                 const prog = `
                     itxn_begin
