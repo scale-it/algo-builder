@@ -21,6 +21,7 @@ describe("Pooled Transaction Fees Test", function () {
 		alice = new AccountStore(initialBalance, "alice");
 		elonUnfunded = new AccountStore(0, "elon");
 		runtime = new Runtime([john, bob, alice, elonUnfunded]); // setup test
+		assert.equal(elonUnfunded.balance(), BigInt(0));
 	});
 
 	function setupAsset(): void {
@@ -183,7 +184,6 @@ describe("Pooled Transaction Fees Test", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
-		assert.equal(elonUnfunded.balance(), BigInt(0));
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
 			{
@@ -281,7 +281,6 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
-		assert.equal(elonUnfunded.balance(), BigInt(0));
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
 			{
@@ -334,7 +333,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			];
 			assert.doesNotThrow(() => runtime.executeTx(tx));
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
-			assert.equal(elonUnfunded.balance(), BigInt(0));
+
 			const groupTx: types.ExecParams[] = [
 				{
 					type: types.TransactionType.CallApp,
@@ -371,7 +370,6 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			runtime.optInToApp(alice.address, appInfo.appID, {}, {});
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
 			runtime.getAccount(alice.address).amount = BigInt(0); // set balance 0
-			assert.equal(elonUnfunded.balance(), BigInt(0));
 			const groupTx: types.ExecParams[] = [
 				{
 					type: types.TransactionType.CallApp,
