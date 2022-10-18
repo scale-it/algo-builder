@@ -4,18 +4,18 @@ import { join } from "path";
 const fsp = fs.promises;
 
 export const JS_CONFIG_FILENAME = "algob.config.js";
-// export const TS_CONFIG_FILENAME = "algob.config.ts";
+export const TS_CONFIG_FILENAME = "algob.config.ts";
 
 export const ASSETS_DIR = "assets";
 export const ARTIFACTS_DIR = "artifacts";
 export const CACHE_DIR = join(ARTIFACTS_DIR, "cache");
 
 export function isCwdInsideProject(): boolean {
-	return Boolean(findupSync(JS_CONFIG_FILENAME));
+	return Boolean(findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]));
 }
 
 export function getUserConfigPath(): string | undefined {
-	return findupSync(JS_CONFIG_FILENAME) ?? undefined;
+	return findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]) ?? undefined;
 }
 
 export async function assertAllDirs(): Promise<void> {
