@@ -332,7 +332,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 					payFlags: { totalFee: 1000 } // partially covering it's fee
 				},
 			];
-			runtime.executeTx(tx);
+			assert.doesNotThrow(() => runtime.executeTx(tx));
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
 			assert.equal(elonUnfunded.balance(), BigInt(0));
 			const groupTx: types.ExecParams[] = [
