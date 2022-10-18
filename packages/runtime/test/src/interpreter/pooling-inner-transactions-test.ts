@@ -120,32 +120,32 @@ describe("Pooling Inner Transactions", function () {
                     , 0n);
 
                 const prog = `
-                itxn_begin
-                int axfer
-                itxn_field TypeEnum
-                global CurrentApplicationAddress
-                itxn_field AssetReceiver
-                int ${assetID}
-                itxn_field XferAsset
-                int 0
-                itxn_field AssetAmount
-                int 0
-                itxn_field Fee
-                itxn_next
-                int pay
-                itxn_field TypeEnum
-                global CurrentApplicationAddress
-                itxn_field Receiver
-                addr ${bobAccount.address}
-                itxn_field Sender
-                int 1000
-                itxn_field Amount
-                int 2000
-                itxn_field Fee
-                itxn_submit
-                int 1
-                return
-                `;
+                    itxn_begin
+                    int axfer
+                    itxn_field TypeEnum
+                    global CurrentApplicationAddress
+                    itxn_field AssetReceiver
+                    int ${assetID}
+                    itxn_field XferAsset
+                    int 0
+                    itxn_field AssetAmount
+                    int 0
+                    itxn_field Fee
+                    itxn_next
+                    int pay
+                    itxn_field TypeEnum
+                    global CurrentApplicationAddress
+                    itxn_field Receiver
+                    addr ${bobAccount.address}
+                    itxn_field Sender
+                    int 1000
+                    itxn_field Amount
+                    int 2000
+                    itxn_field Fee
+                    itxn_submit
+                    int 1
+                    return
+                    `;
 
                 executeTEAL(prog);
 
