@@ -3043,10 +3043,10 @@ describe("Teal Opcodes", function () {
 				interpreter.runtime.ctx.innerTxAppIDCallStack = [1, 2];
 			});
 			it("Tealv6: CalllerApplicationAddress", function () {
-				// caller app id = 2
+				// caller app id = 1
 				const op = new Global(["CallerApplicationAddress"], 1, interpreter);
 				op.execute(stack);
-				assert.deepEqual(decodeAddress(getApplicationAddress(2n)).publicKey, stack.pop());
+				assert.deepEqual(decodeAddress(getApplicationAddress(1n)).publicKey, stack.pop());
 
 				// no caller
 				interpreter.runtime.ctx.innerTxAppIDCallStack = [];
@@ -3055,10 +3055,10 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Tealv6: CallerApplicationID", function () {
-				// caller app id = 2
+				// caller app id = 1
 				const op = new Global(["CallerApplicationID"], 1, interpreter);
 				op.execute(stack);
-				assert.equal(2n, stack.pop());
+				assert.equal(1n, stack.pop());
 
 				// no caller
 				interpreter.runtime.ctx.innerTxAppIDCallStack = [];

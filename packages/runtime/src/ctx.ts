@@ -218,8 +218,10 @@ export class Ctx implements Context {
 
 	getCallerApplicationID(): number {
 		let callerApplicationID = 0;
-		if (this.innerTxAppIDCallStack.length > 0) {
-			callerApplicationID = this.innerTxAppIDCallStack[this.innerTxAppIDCallStack.length - 1];
+		// when the top value in the `innerTxAppIDCallStack` is the own appID
+		// not the caller appID(we need to get the second top one)
+		if (this.innerTxAppIDCallStack.length > 1) {
+			callerApplicationID = this.innerTxAppIDCallStack[this.innerTxAppIDCallStack.length - 2];
 		}
 		return callerApplicationID;
 	}
