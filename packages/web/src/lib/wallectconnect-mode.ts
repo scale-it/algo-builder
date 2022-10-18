@@ -181,7 +181,7 @@ export class WallectConnectSession {
 						signers = undefined;
 					}
 				} else {
-					signers = [];
+					signers = undefined;
 				}
 
 				return {
