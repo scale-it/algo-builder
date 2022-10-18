@@ -334,6 +334,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			];
 			runtime.executeTx(tx);
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
+			assert.equal(elonUnfunded.balance(), BigInt(0));
 			const groupTx: types.ExecParams[] = [
 				{
 					type: types.TransactionType.CallApp,
@@ -370,7 +371,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			runtime.optInToApp(alice.address, appInfo.appID, {}, {});
 			assert(runtime.getAccount(alice.address).getApp(appInfo.appID) === undefined);
 			runtime.getAccount(alice.address).amount = BigInt(0); // set balance 0
-
+			assert.equal(elonUnfunded.balance(), BigInt(0));
 			const groupTx: types.ExecParams[] = [
 				{
 					type: types.TransactionType.CallApp,
