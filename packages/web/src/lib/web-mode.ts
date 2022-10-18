@@ -4,7 +4,6 @@ import algosdk, {
 	SuggestedParams,
 	Transaction,
 } from "algosdk";
-import { exec } from "child_process";
 
 import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
@@ -43,34 +42,39 @@ export class WebMode {
 		txId: string,
 		waitRounds: number = WAIT_ROUNDS
 	): Promise<TxnReceipt> {
-		const response = await this.algoSigner.algod({
-			ledger: this.chainName,
-			path: "/v2/status",
-		});
-		log(response);
-		const startRound = response[LAST_ROUND] as number;
-		let currentRound = startRound;
-		// eslint-disable-next-line no-constant-condition
-		while (currentRound < startRound + waitRounds) {
-			const pendingInfo = await this.algoSigner.algod({
+		try {
+			const response = await this.algoSigner.algod({
 				ledger: this.chainName,
-				path: `/v2/transactions/pending/${txId}`,
+				path: "/v2/status",
 			});
-			if (
-				pendingInfo[CONFIRMED_ROUND] !== null &&
-				(pendingInfo[CONFIRMED_ROUND] as number) > 0
-			) {
-				const txnReceipt = { txID: txId, ...pendingInfo };
-				return txnReceipt as TxnReceipt;
+			log(response);
+			const startRound = response[LAST_ROUND] as number;
+			let currentRound = startRound;
+			// eslint-disable-next-line no-constant-condition
+			while (currentRound < startRound + waitRounds) {
+				const pendingInfo = await this.algoSigner.algod({
+					ledger: this.chainName,
+					path: `/v2/transactions/pending/${txId}`,
+				});
+				if (
+					pendingInfo[CONFIRMED_ROUND] !== null &&
+					(pendingInfo[CONFIRMED_ROUND] as number) > 0
+				) {
+					const txnReceipt = { txID: txId, ...pendingInfo };
+					return txnReceipt as TxnReceipt;
+				}
+				// TODO: maybe we should use "sleep" instead of pinging a node again?
+				currentRound += 1;
+				await this.algoSigner.algod({
+					ledger: this.chainName,
+					path: `/v2/status/wait-for-block-after/${currentRound}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
+				});
 			}
-			// TODO: maybe we should use "sleep" instead of pinging a node again?
-			currentRound += 1;
-			await this.algoSigner.algod({
-				ledger: this.chainName,
-				path: `/v2/status/wait-for-block-after/${currentRound}`, // eslint-disable-line @typescript-eslint/restrict-template-expressions
-			});
+			throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
 		}
-		throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -79,14 +83,19 @@ export class WebMode {
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 */
 	async sendAndWait(signedTxn: string, waitRounds: number = WAIT_ROUNDS): Promise<TxnReceipt> {
-		const txInfo = await this.algoSigner.send({
-			ledger: this.chainName,
-			tx: signedTxn,
-		});
-		if (txInfo && typeof txInfo.txId === "string") {
-			return await this.waitForConfirmation(txInfo.txId, waitRounds);
+		try {
+			const txInfo = await this.algoSigner.send({
+				ledger: this.chainName,
+				tx: signedTxn,
+			});
+			if (txInfo && typeof txInfo.txId === "string") {
+				return await this.waitForConfirmation(txInfo.txId, waitRounds);
+			}
+			throw new Error("Transaction Error");
 		}
-		throw new Error("Transaction Error");
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -94,27 +103,32 @@ export class WebMode {
 	 * @param signedTxs signed transaction group
 	 */
 	async sendGroupTransaction(signedTxs: any): Promise<JsonPayload> {
-		// The AlgoSigner.signTxn() response would look like '[{ txID, blob }, null]'
-		// Convert first transaction to binary from the response
-		const signedTxBinary: Uint8Array[] = signedTxs.map(
-			(txn: { txID: string; blob: string }) => {
-				return this.algoSigner.encoding.base64ToMsgpack(txn.blob);
-			}
-		);
+		try {
+			// The AlgoSigner.signTxn() response would look like '[{ txID, blob }, null]'
+			// Convert first transaction to binary from the response
+			const signedTxBinary: Uint8Array[] = signedTxs.map(
+				(txn: { txID: string; blob: string }) => {
+					return this.algoSigner.encoding.base64ToMsgpack(txn.blob);
+				}
+			);
 
-		// Merge transaction binaries into a single Uint8Array
-		const flatNumberArray = signedTxBinary.reduce((acc: number[], curr) => {
-			acc.push(...curr);
-			return acc;
-		}, []);
-		const combinedBinaryTxns = new Uint8Array(flatNumberArray);
+			// Merge transaction binaries into a single Uint8Array
+			const flatNumberArray = signedTxBinary.reduce((acc: number[], curr) => {
+				acc.push(...curr);
+				return acc;
+			}, []);
+			const combinedBinaryTxns = new Uint8Array(flatNumberArray);
 
-		// Convert the combined array values back to base64
-		const combinedBase64Txns = this.algoSigner.encoding.msgpackToBase64(combinedBinaryTxns);
-		return await this.algoSigner.send({
-			ledger: this.chainName,
-			tx: combinedBase64Txns,
-		});
+			// Convert the combined array values back to base64
+			const combinedBase64Txns = this.algoSigner.encoding.msgpackToBase64(combinedBinaryTxns);
+			return await this.algoSigner.send({
+				ledger: this.chainName,
+				tx: combinedBase64Txns,
+			});
+		}
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -122,7 +136,12 @@ export class WebMode {
 	 * @param txns Array of transactions in base64
 	 */
 	async signTransaction(txns: WalletTransaction[]): Promise<JsonPayload> {
-		return await this.algoSigner.signTxn(txns);
+		try {
+			return await this.algoSigner.signTxn(txns);
+		}
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -130,30 +149,35 @@ export class WebMode {
 	 * @param userParams Transaction parameters
 	 */
 	async getSuggestedParams(userParams: TxParams): Promise<SuggestedParams> {
-		const txParams = await this.algoSigner.algod({
-			ledger: this.chainName,
-			path: "/v2/transactions/params",
-		});
-		const s: SuggestedParams = {
-			fee: txParams.fee as number,
-			genesisHash: txParams["genesis-hash"] as string,
-			genesisID: txParams["genesis-id"] as string,
-			firstRound: txParams[LAST_ROUND] as number,
-			lastRound: Number(txParams[LAST_ROUND]) + 1000,
-			flatFee: false,
-		};
+		try {
+			const txParams = await this.algoSigner.algod({
+				ledger: this.chainName,
+				path: "/v2/transactions/params",
+			});
+			const s: SuggestedParams = {
+				fee: txParams.fee as number,
+				genesisHash: txParams["genesis-hash"] as string,
+				genesisID: txParams["genesis-id"] as string,
+				firstRound: txParams[LAST_ROUND] as number,
+				lastRound: Number(txParams[LAST_ROUND]) + 1000,
+				flatFee: false,
+			};
 
-		s.flatFee = userParams.totalFee !== undefined;
-		s.fee = userParams.totalFee || userParams.feePerByte || (txParams["min-fee"] as number); // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-		if (s.flatFee) s.fee = Math.max(Number(s.fee), Number(txParams["min-fee"]));
+			s.flatFee = userParams.totalFee !== undefined;
+			s.fee = userParams.totalFee || userParams.feePerByte || (txParams["min-fee"] as number); // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+			if (s.flatFee) s.fee = Math.max(Number(s.fee), Number(txParams["min-fee"]));
 
-		s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-		s.lastRound =
-			userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-				? s.lastRound
-				: Number(userParams.firstValid) + Number(userParams.validRounds);
+			s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+			s.lastRound =
+				userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+					? s.lastRound
+					: Number(userParams.firstValid) + Number(userParams.validRounds);
 
-		return s;
+			return s;
+		}
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -166,53 +190,58 @@ export class WebMode {
 		txns: WalletTransaction[],
 		signers: string[]
 	): Promise<JsonPayload> {
-		const result: JsonPayload = {};
-		for (let i = 0; i < txns.length; ++i) {
-			const txn = txns[i];
-			const partialTxn = algosdk.decodeObj(
-				this.algoSigner.encoding.base64ToMsgpack(txn.txn)
-			) as EncodedSignedTransaction;
-			if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
-				throw new Error(
-					"Input transaction must be multisigature transaction signed with at least 1 signature"
-				);
+		try {
+			const result: JsonPayload = {};
+			for (let i = 0; i < txns.length; ++i) {
+				const txn = txns[i];
+				const partialTxn = algosdk.decodeObj(
+					this.algoSigner.encoding.base64ToMsgpack(txn.txn)
+				) as EncodedSignedTransaction;
+				if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
+					throw new Error(
+						"Input transaction must be multisigature transaction signed with at least 1 signature"
+					);
+				}
+				const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
+				const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
+				const txnToBeSign_Base64 =
+					this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
+
+				const mparams = partialTxn.msig as algosdk.EncodedMultisig;
+				const addrs = mparams.subsig.map((signData) => {
+					return algosdk.encodeAddress(signData.pk);
+				});
+
+				const multisigParams = {
+					version: mparams.v,
+					threshold: mparams.thr,
+					addrs: addrs,
+				};
+
+				const signedTxn = await this.signTransaction([
+					{
+						txn: txnToBeSign_Base64,
+						msig: multisigParams,
+						signers: signers,
+					},
+				]);
+
+				const signedTxnJson = signedTxn[0] as JsonPayload;
+				const blob = signedTxnJson.blob as string;
+
+				const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
+				const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
+				const combineBlob = algosdk.mergeMultisigTransactions([blob1, blob2]);
+				const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
+				result[i] = {
+					blob: outputBase64,
+				};
 			}
-			const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
-			const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
-			const txnToBeSign_Base64 =
-				this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
-
-			const mparams = partialTxn.msig as algosdk.EncodedMultisig;
-			const addrs = mparams.subsig.map((signData) => {
-				return algosdk.encodeAddress(signData.pk);
-			});
-
-			const multisigParams = {
-				version: mparams.v,
-				threshold: mparams.thr,
-				addrs: addrs,
-			};
-
-			const signedTxn = await this.signTransaction([
-				{
-					txn: txnToBeSign_Base64,
-					msig: multisigParams,
-					signers: signers,
-				},
-			]);
-
-			const signedTxnJson = signedTxn[0] as JsonPayload;
-			const blob = signedTxnJson.blob as string;
-
-			const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
-			const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
-			const combineBlob = algosdk.mergeMultisigTransactions([blob1, blob2]);
-			const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
-			result[i] = {
-				blob: outputBase64,
-			};
+			return result;
 		}
-		return result;
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -225,73 +254,78 @@ export class WebMode {
 	 */
 	/* eslint-disable sonarjs/cognitive-complexity */
 	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
-		let signedTxn: any;
-		let txns: Transaction[] = [];
-		if (transactions.length > 16 || transactions.length == 0) {
-			throw new BuilderError(ERRORS.GENERAL.TRANSACTION_LENGTH_ERROR, {
-				length: transactions.length,
-			});
-		}
-
-		if (isSDKTransactionAndSign(transactions[0]))
-			throw new Error("We don't support this case now");
-
-		const execParams = transactions as ExecParams[];
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
-		}
-
-		txns = algosdk.assignGroupID(txns);
-
-		const binaryTxs = txns.map((txn: Transaction) => {
-			return txn.toByte();
-		});
-
-		const base64Txs = binaryTxs.map((txn: Uint8Array) => {
-			return this.algoSigner.encoding.msgpackToBase64(txn);
-		});
-
-		// with logic signature we don't need signers.
-		const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
-			switch (execParams[txnId].sign) {
-				case SignType.LogicSignature:
-					return { txn: txn, signers: [] }; // logic signature
-				case SignType.MultiSignature: {
-					const msig: SignWithMultisig = execParams[txnId] as SignWithMultisig;
-					return { txn: txn, msig: msig.mparams }; // multi singature
-				}
-				default:
-					return {
-						txn: txn,
-						authAddr: execParams[txnId].fromAccount?.addr || execParams[txnId].fromAccountAddr
-					}; // set signer
-			}
-		});
-		// checks if any sign txn exists else it throws error of empty signers array
-		if (toBeSignedTxns.find((txn) => txn.authAddr)) {
-			signedTxn = await this.signTransaction(toBeSignedTxns);
-		}
-
-		// sign smart signature transaction
-		for (const [index, txn] of txns.entries()) {
-			const signer: Sign = execParams[index];
-			if (signer.sign === SignType.LogicSignature) {
-				signer.lsig.lsig.args = signer.args ? signer.args : [];
-				const lsigTxn = algosdk.signLogicSigTransaction(txn, signer.lsig);
-				if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
-				signedTxn.splice(index, 0, {
-					blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
-					txID: lsigTxn.txID,
+		try {
+			let signedTxn: any;
+			let txns: Transaction[] = [];
+			if (transactions.length > 16 || transactions.length == 0) {
+				throw new BuilderError(ERRORS.GENERAL.TRANSACTION_LENGTH_ERROR, {
+					length: transactions.length,
 				});
 			}
-		}
-		signedTxn = signedTxn?.filter((stxn: any) => stxn);
-		const txInfo = await this.sendGroupTransaction(signedTxn);
 
-		if (txInfo && typeof txInfo.txId === "string") {
-			return await this.waitForConfirmation(txInfo.txId);
+			if (isSDKTransactionAndSign(transactions[0]))
+				throw new Error("We don't support this case now");
+
+			const execParams = transactions as ExecParams[];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
+			}
+
+			txns = algosdk.assignGroupID(txns);
+
+			const binaryTxs = txns.map((txn: Transaction) => {
+				return txn.toByte();
+			});
+
+			const base64Txs = binaryTxs.map((txn: Uint8Array) => {
+				return this.algoSigner.encoding.msgpackToBase64(txn);
+			});
+
+			// with logic signature we don't need signers.
+			const toBeSignedTxns = base64Txs.map((txn: string, txnId: number) => {
+				switch (execParams[txnId].sign) {
+					case SignType.LogicSignature:
+						return { txn: txn, signers: [] }; // logic signature
+					case SignType.MultiSignature: {
+						const msig: SignWithMultisig = execParams[txnId] as SignWithMultisig;
+						return { txn: txn, msig: msig.mparams }; // multi singature
+					}
+					default:
+						return {
+							txn: txn,
+							authAddr: execParams[txnId].fromAccount?.addr || execParams[txnId].fromAccountAddr
+						}; // set signer
+				}
+			});
+			// checks if any sign txn exists else it throws error of empty signers array
+			if (toBeSignedTxns.find((txn) => txn.authAddr)) {
+				signedTxn = await this.signTransaction(toBeSignedTxns);
+			}
+
+			// sign smart signature transaction
+			for (const [index, txn] of txns.entries()) {
+				const signer: Sign = execParams[index];
+				if (signer.sign === SignType.LogicSignature) {
+					signer.lsig.lsig.args = signer.args ? signer.args : [];
+					const lsigTxn = algosdk.signLogicSigTransaction(txn, signer.lsig);
+					if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
+					signedTxn.splice(index, 0, {
+						blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
+						txID: lsigTxn.txID,
+					});
+				}
+			}
+			signedTxn = signedTxn?.filter((stxn: any) => stxn);
+			const txInfo = await this.sendGroupTransaction(signedTxn);
+
+			if (txInfo && typeof txInfo.txId === "string") {
+				return await this.waitForConfirmation(txInfo.txId);
+			}
+			throw new Error("Transaction Error");
 		}
-		throw new Error("Transaction Error");
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -301,11 +335,16 @@ export class WebMode {
 	 * @returns array of algosdk.Transaction objects
 	 */
 	makeTx(execParams: ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
-		const txns: Transaction[] = [];
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, txParams));
+		try {
+			const txns: Transaction[] = [];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, txParams));
+			}
+			return txns;
 		}
-		return txns;
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -314,16 +353,21 @@ export class WebMode {
 	 * @returns SignedTransaction
 	 */
 	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
-		const binaryTx = transaction.toByte();
-		const base64Tx = this.algoSigner.encoding.msgpackToBase64(binaryTx);
-		const signedTx = await this.signTransaction([
-			{
-				txn: base64Tx,
-			},
-		]);
-		const blob = signedTx.blob as string;
-		const blobArray = this.algoSigner.encoding.base64ToMsgpack(blob);
-		return algosdk.decodeSignedTransaction(blobArray);
+		try {
+			const binaryTx = transaction.toByte();
+			const base64Tx = this.algoSigner.encoding.msgpackToBase64(binaryTx);
+			const signedTx = await this.signTransaction([
+				{
+					txn: base64Tx,
+				},
+			]);
+			const blob = signedTx.blob as string;
+			const blobArray = this.algoSigner.encoding.base64ToMsgpack(blob);
+			return algosdk.decodeSignedTransaction(blobArray);
+		}
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -337,10 +381,15 @@ export class WebMode {
 		execParams: ExecParams[],
 		txParams: algosdk.SuggestedParams
 	): Promise<SignedTransaction[]> {
-		const signedTxns: SignedTransaction[] = [];
-		const txns: Transaction[] = this.makeTx(execParams, txParams);
-		txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
-		return signedTxns;
+		try {
+			const signedTxns: SignedTransaction[] = [];
+			const txns: Transaction[] = this.makeTx(execParams, txParams);
+			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+			return signedTxns;
+		}
+		catch (error) {
+			throw error
+		}
 	}
 
 	/**
@@ -350,15 +399,20 @@ export class WebMode {
 	 * @returns TxnReceipt
 	 */
 	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
-		if (transactions.length < 1) {
-			throw Error("No transactions to process");
-		} else {
-			const txInfo = await this.sendGroupTransaction(transactions);
+		try {
+			if (transactions.length < 1) {
+				throw Error("No transactions to process");
+			} else {
+				const txInfo = await this.sendGroupTransaction(transactions);
 
-			if (txInfo && typeof txInfo.txId === "string") {
-				return await this.waitForConfirmation(txInfo.txId, rounds);
+				if (txInfo && typeof txInfo.txId === "string") {
+					return await this.waitForConfirmation(txInfo.txId, rounds);
+				}
+				throw new Error("Transaction Incorrect");
 			}
-			throw new Error("Transaction Incorrect");
+		}
+		catch (error) {
+			throw error
 		}
 	}
 }
