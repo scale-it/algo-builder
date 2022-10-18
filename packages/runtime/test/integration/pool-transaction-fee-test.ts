@@ -183,6 +183,7 @@ describe("Pooled Transaction Fees Test", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
+		assert.equal(elonUnfunded.balance(), BigInt(0));
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
 			{
@@ -211,6 +212,11 @@ describe("Pooled Transaction Fees Test", function () {
 		];
 
 		runtime.executeTx(groupTx)
+		syncAccounts();
+		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
+		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
+		assert.equal(elonUnfunded.balance(), BigInt(amount));
+		assert.isDefined(elonUnfunded.getAssetHolding(assetId));
 	});
 
 });
@@ -301,7 +307,12 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
 		];
-		runtime.executeTx(groupTx)
+		runtime.executeTx(groupTx);
+		syncAccounts();
+		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
+		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
+		assert.equal(elonUnfunded.balance(), BigInt(0));
+		assert.isDefined(elonUnfunded.getAssetHolding(assetId));
 	});
 
 	it("Should not fail when a funded account in txn group is trying cover the partial fee", function () {
