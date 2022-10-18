@@ -7497,7 +7497,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(Buffer.from(expectedResult, "hex"), stack.pop());
 		});
 
-		it("Should throw an error when the points not in G1 (64 bytes lenght", function () {
+		it("Should throw an error when the points not in G1 (64 bytes length)", function () {
 			const pointA = "0000000000000000000000000000000";
 			const pointB = "0000000000000000000000000111111";
 			const pointABytes = Buffer.from(pointA, "hex");

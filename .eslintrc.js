@@ -49,7 +49,7 @@ module.exports = {
 		"@typescript-eslint/no-dynamic-delete": "off",
 		"sonarjs/cognitive-complexity": ["error", 16],
 		"import/no-named-as-default-member": "off",
-		"@typescript-eslint/no-var-requires": "off",
+		// "@typescript-eslint/no-var-requires": "off",
 
 		// TODO: remove this rule
 		"@typescript-eslint/no-explicit-any": "off",

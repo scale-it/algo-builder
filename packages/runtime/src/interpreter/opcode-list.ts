@@ -84,6 +84,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+/* eslint-disable-line */
 const bn254 = require("rustbn.js");
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
