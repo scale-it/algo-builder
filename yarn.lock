@@ -83,6 +83,7 @@ __metadata:
     mocha: ^9.2.1
     murmurhash: ^2.0.0
     nyc: ^15.1.0
+    rustbn.js: ^0.2.0
     sha3: ^2.1.4
     sinon: ^13.0.1
     source-map-support: ^0.5.21
@@ -1264,7 +1265,6 @@ __metadata:
     lint-staged: ^12.3.5
     mocha: ^9.2.1
     prettier: ^2.5.1
-    rustbn.js: ^0.2.0
     typescript: ^4.6.2
   languageName: unknown
   linkType: soft
