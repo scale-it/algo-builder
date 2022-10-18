@@ -308,14 +308,21 @@ describe("Pooling Inner Transactions", function () {
 				itxn_field TypeEnum
 				txn Sender
 				itxn_field Receiver
+				addr ${johnAcc.address}
+				itxn_field Sender
 				int 1000
 				itxn_field Amount
 				int 2000
 				itxn_field Fee
+				itxn_submit
 				int 1
 				return
 				`;
-            assert.doesNotThrow(() => executeTEAL(prog));
+
+            expectRuntimeError(
+                () => executeTEAL(prog),
+                RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+            );
         });
 
         it("Should fail: when unfunded account covers it's own fee", function () {
