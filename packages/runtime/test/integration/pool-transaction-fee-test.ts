@@ -61,7 +61,7 @@ describe("Pooled Transaction Fees Test", function () {
 			},
 		];
 
-		runtime.executeTx(groupTx);
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 
 		syncAccounts();
 		assert.equal(bob.balance(), BigInt(initialBalance) + BigInt(amount));
@@ -129,7 +129,7 @@ describe("Pooled Transaction Fees Test", function () {
 			},
 		];
 
-		runtime.executeTx(groupTx);
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 
 		syncAccounts();
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(fee));
@@ -168,7 +168,7 @@ describe("Pooled Transaction Fees Test", function () {
 			},
 		];
 
-		runtime.executeTx(groupTx);
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 
 		syncAccounts();
 		assert(elonUnfunded.balance() !== BigInt(0));
@@ -211,7 +211,7 @@ describe("Pooled Transaction Fees Test", function () {
 			}
 		];
 
-		runtime.executeTx(groupTx)
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 		syncAccounts();
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
@@ -281,6 +281,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 		setupAsset();
 		const amount = 200000;
 		const fee = 3000;
+		assert.equal(elonUnfunded.balance(), BigInt(0));
 		// group with fee distribution
 		const groupTx: types.ExecParams[] = [
 			{
@@ -307,7 +308,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 				payFlags: { totalFee: 0 }, // with 0 txn fee
 			},
 		];
-		runtime.executeTx(groupTx);
+		assert.doesNotThrow(() => runtime.executeTx(groupTx));
 		syncAccounts();
 		assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(fee));
 		assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount));
@@ -351,7 +352,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 				},
 			];
 
-			runtime.executeTx(groupTx);
+			assert.doesNotThrow(() => runtime.executeTx(groupTx));
 			syncAccounts();
 			assert.equal(alice.balance(), BigInt(initialBalance) - BigInt(1001));
 			assert.equal(john.balance(), BigInt(initialBalance) - BigInt(amount) - BigInt(fee));
