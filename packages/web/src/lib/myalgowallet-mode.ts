@@ -85,7 +85,7 @@ export class MyAlgoWalletSession {
 			}
 		} catch (err) {
 			error(err);
-			throw error
+			throw err
 		}
 	}
 
@@ -98,7 +98,8 @@ export class MyAlgoWalletSession {
 			});
 			this.addresses = this.accounts.map((account) => account.address);
 		} catch (err) {
-			throw new Error("Error while connecting to MyAlgo Wallet");
+			error(err);
+			throw new Error("Error while connecting to MyAlgo Wallet" + err);
 		}
 	}
 
@@ -115,8 +116,9 @@ export class MyAlgoWalletSession {
 		try {
 			return await this.connector.signTransaction(txn.toByte(), signOptions);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -145,8 +147,9 @@ export class MyAlgoWalletSession {
 				signOptions
 			);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -163,8 +166,9 @@ export class MyAlgoWalletSession {
 			const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 			return await this.waitForConfirmation(txInfo.txId, waitRounds);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -181,8 +185,9 @@ export class MyAlgoWalletSession {
 			const txnReceipt = { txID: txId, ...pendingInfo };
 			return txnReceipt as TxnReceipt;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -237,8 +242,9 @@ export class MyAlgoWalletSession {
 			log("confirmedTx: ", confirmedTx);
 			return confirmedTx;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -256,8 +262,9 @@ export class MyAlgoWalletSession {
 			}
 			return txns;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -272,8 +279,9 @@ export class MyAlgoWalletSession {
 			const blob = signedTx.blob;
 			return algosdk.decodeSignedTransaction(blob);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -294,8 +302,9 @@ export class MyAlgoWalletSession {
 			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
 			return signedTxns;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -308,14 +317,15 @@ export class MyAlgoWalletSession {
 	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		try {
 			if (transactions.length < 1) {
-				throw Error("No transactions to process");
+				throw new Error("No transactions to process");
 			} else {
 				const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
 				return await this.sendAndWait(Uint8ArraySignedTx, rounds);
 			}
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 }

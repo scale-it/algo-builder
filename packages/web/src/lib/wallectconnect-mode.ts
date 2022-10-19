@@ -59,6 +59,7 @@ export class WallectConnectSession {
 					await this.close();
 				} catch (e) {
 					error("Can't close walletconnect connection", e);
+					throw e
 				}
 			} else {
 				warn(`A session is already active`);
@@ -74,8 +75,9 @@ export class WallectConnectSession {
 	async close(): Promise<void> {
 		try {
 			await this.connector.killSession();
-		} catch (error) {
-			throw error
+		} catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -91,6 +93,7 @@ export class WallectConnectSession {
 				handler(err, { peerId, peerMeta, accounts });
 			});
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -107,6 +110,7 @@ export class WallectConnectSession {
 				handler(err, { accounts });
 			});
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -124,6 +128,7 @@ export class WallectConnectSession {
 				handler(err, { message });
 			});
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -150,6 +155,7 @@ export class WallectConnectSession {
 			}
 			return response[0];
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -205,6 +211,7 @@ export class WallectConnectSession {
 				return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
 			});
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -222,6 +229,7 @@ export class WallectConnectSession {
 			const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 			return await this.waitForConfirmation(txInfo.txId, waitRounds);
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -239,6 +247,7 @@ export class WallectConnectSession {
 			const txnReceipt = { txID: txId, ...pendingInfo };
 			return txnReceipt as TxnReceipt;
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -298,6 +307,7 @@ export class WallectConnectSession {
 			log("confirmedTx: ", confirmedTx);
 			return confirmedTx;
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -316,6 +326,7 @@ export class WallectConnectSession {
 			}
 			return txns;
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -343,6 +354,7 @@ export class WallectConnectSession {
 			}
 			return algosdk.decodeSignedTransaction(decodedResult[0]);
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -364,6 +376,7 @@ export class WallectConnectSession {
 			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
 			return signedTxns;
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
@@ -383,6 +396,7 @@ export class WallectConnectSession {
 				return await this.sendAndWait(Uint8ArraySignedTx, rounds);
 			}
 		} catch (err) {
+			error(err);
 			throw err
 		}
 	}

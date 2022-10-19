@@ -18,7 +18,7 @@ import {
 	TxParams,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
-import { log } from "./logger";
+import { error,log } from "./logger";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -72,8 +72,9 @@ export class WebMode {
 			}
 			throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -93,8 +94,9 @@ export class WebMode {
 			}
 			throw new Error("Transaction Error");
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -126,8 +128,9 @@ export class WebMode {
 				tx: combinedBase64Txns,
 			});
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -139,8 +142,9 @@ export class WebMode {
 		try {
 			return await this.algoSigner.signTxn(txns);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -175,8 +179,9 @@ export class WebMode {
 
 			return s;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -239,8 +244,9 @@ export class WebMode {
 			}
 			return result;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -323,8 +329,9 @@ export class WebMode {
 			}
 			throw new Error("Transaction Error");
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -342,8 +349,9 @@ export class WebMode {
 			}
 			return txns;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -365,8 +373,9 @@ export class WebMode {
 			const blobArray = this.algoSigner.encoding.base64ToMsgpack(blob);
 			return algosdk.decodeSignedTransaction(blobArray);
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -387,8 +396,9 @@ export class WebMode {
 			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
 			return signedTxns;
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 
@@ -401,7 +411,7 @@ export class WebMode {
 	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
 		try {
 			if (transactions.length < 1) {
-				throw Error("No transactions to process");
+				throw new Error("No transactions to process");
 			} else {
 				const txInfo = await this.sendGroupTransaction(transactions);
 
@@ -411,8 +421,9 @@ export class WebMode {
 				throw new Error("Transaction Incorrect");
 			}
 		}
-		catch (error) {
-			throw error
+		catch (err) {
+			error(err);
+			throw err
 		}
 	}
 }
