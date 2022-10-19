@@ -45,6 +45,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -7561,6 +7562,27 @@ describe("Teal Opcodes", function () {
 			stack.push(pointG2Bytes);
 			op.execute(stack);
 			assert.equal(expectedResult, stack.pop());
+		});
+	});
+	describe.only("block op", function () {
+		const stack = new Stack<StackElem>();
+		let interpreter: Interpreter;
+		this.beforeEach(function () {
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.tx = TXN_OBJ;
+			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+		});
+
+		it("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
+			stack.push(BigInt(TXN_OBJ.fv - 2));
+			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+		it("Should allow to acces two behind FirstValid", function () {
+			stack.push(BigInt(TXN_OBJ.fv - 1));
+			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			assert.doesNotThrow(() => op.execute(stack));
 		});
 	});
 });

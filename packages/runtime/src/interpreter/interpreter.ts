@@ -17,6 +17,7 @@ import {
 	DEFAULT_STACK_ELEM,
 	LOGIC_SIG_MAX_COST,
 	MaxTEALVersion,
+	MaxTxnLife,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
 } from "../lib/constants";
@@ -594,5 +595,24 @@ export class Interpreter {
 			result = this.stack.pop();
 		}
 		return result;
+	}
+
+	//TODO:add description
+	assertRoundIsAvailable(round: number): void {
+		let firstAvail = this.runtime.ctx.tx.lv - MaxTxnLife - 1;
+		if (firstAvail > this.runtime.ctx.tx.lv || firstAvail === 0) {
+			// early in chain's life
+			firstAvail = 1;
+		}
+		//TODO: what happends if FirstValid is undefined?
+		let lastAvail = this.runtime.ctx.tx.fv === undefined ? 0 : this.runtime.ctx.tx.fv - 1;
+		if (this.runtime.ctx.tx.fv === undefined || lastAvail > this.runtime.ctx.tx.fv) {
+			// txn had a 0 in FirstValid
+			lastAvail = 0; // So nothing will be available
+		}
+		if (firstAvail > round || round > lastAvail) {
+			throw new Error();
+			// throw error ("round %d is not available. It's outside [%d-%d]", r, firstAvail, lastAvail)
+		}
 	}
 }

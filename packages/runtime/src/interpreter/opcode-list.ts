@@ -84,7 +84,8 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-const bn254 = require("rustbn.js");// eslint-disable-line @typescript-eslint/no-var-requires
+const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
+import { randomBytes } from "crypto";
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -4354,10 +4355,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-						sig: Buffer.alloc(5),
-						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					}
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -5210,6 +5211,7 @@ export class Json_ref extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254Add extends Op {
 	readonly line: number;
 	/**
@@ -5233,6 +5235,7 @@ export class Bn254Add extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254ScalarMul extends Op {
 	readonly line: number;
 	/**
@@ -5256,6 +5259,7 @@ export class Bn254ScalarMul extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254Pairing extends Op {
 	readonly line: number;
 	/**
@@ -5277,6 +5281,46 @@ export class Bn254Pairing extends Op {
 		const boolResult = result.slice(-1)[0];
 		stack.push(boolResult);
 		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+//TODO:add description
+export class Block extends Op {
+	readonly line: number;
+	readonly field: string;
+	readonly interpreter: Interpreter;
+	//TODO:add description
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		if (argument === "BlkSeed" || argument === "BlkTimestamp") {
+			this.field = argument;
+		} else {
+			throw new Error();
+			//throw an error, unknown field
+		}
+		this.line = line;
+		this.interpreter = interpreter;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const round = this.assertBigInt(stack.pop(), this.line);
+		this.interpreter.assertRoundIsAvailable(Number(round));
+		let result: StackElem;
+		if (this.field === "BlkSeed") {
+			//mock the seed by generating a 32 bytes long psuedo-random
+			result = randomBytes(20);
+		} else {
+			//"BlkTimestamp"
+			//seconds since epoch
+			result = BigInt(Math.round(new Date().getTime() / 1000));
+		}
+		stack.push(result);
 		return this.computeCost();
 	}
 }
