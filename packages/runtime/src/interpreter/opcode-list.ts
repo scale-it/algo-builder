@@ -29,6 +29,7 @@ import {
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
 	AssetParamMap,
+	BlockFinalizationTime,
 	GlobalFields,
 	ITxArrFields,
 	json_refTypes,
@@ -86,6 +87,7 @@ import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
 import { randomBytes } from "crypto";
+import * as base32 from "hi-base32";
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -5314,11 +5316,12 @@ export class Block extends Op {
 		let result: StackElem;
 		if (this.field === "BlkSeed") {
 			//mock the seed by generating a 32 bytes long psuedo-random
-			result = randomBytes(20);
+			result = randomBytes(32);
 		} else {
 			//"BlkTimestamp"
-			//seconds since epoch
-			result = BigInt(Math.round(new Date().getTime() / 1000));
+			//seconds since epoch - rounds, assuming one round(block) = 2.5s truncated to 2s (BigInt)
+			result =
+				BigInt(Math.round(new Date().getTime() / 1000)) - round * BigInt(BlockFinalizationTime);
 		}
 		stack.push(result);
 		return this.computeCost();
