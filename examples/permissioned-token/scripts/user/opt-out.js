@@ -43,7 +43,9 @@ async function run(runtimeEnv, deployer) {
 	// opt in elon to tesla first
 	await deployer.optInAccountToASA("tesla", elon.name, {});
 
-	// first issue few tokens to elon (in scripts flow we already kill the tesla token before running opt-out, so uncomment if running it in another sequence)
+	// in scripts flow we kill the tesla token before executing opt-out,
+	// uncomment if running it in another sequence
+	// first issue few tokens to elon
 	// await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
 
 	/*
