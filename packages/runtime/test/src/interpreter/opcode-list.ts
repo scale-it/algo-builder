@@ -7567,6 +7567,7 @@ describe("Teal Opcodes", function () {
 	describe.only("block op", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
+		const LAST_VALID = 259820n;
 		this.beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
@@ -7583,6 +7584,18 @@ describe("Teal Opcodes", function () {
 			stack.push(BigInt(TXN_OBJ.fv - 1));
 			const op = new Block(["BlkTimestamp"], 1, interpreter);
 			assert.doesNotThrow(() => op.execute(stack));
+		});
+		it("Should return two different seeds for to different rounds", function () {
+			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			//first round
+			stack.push(LAST_VALID - 2n);
+			op.execute(stack);
+			const seedRound1 = stack.pop();
+			//second round
+			stack.push(LAST_VALID - 3n);
+			op.execute(stack);
+			const seedRound2 = stack.pop();
+			assert.notEqual(seedRound1, seedRound2);
 		});
 	});
 });

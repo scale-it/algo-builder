@@ -5320,8 +5320,7 @@ export class Block extends Op {
 		} else {
 			//"BlkTimestamp"
 			//seconds since epoch - rounds, assuming one round(block) = 2.5s truncated to 2s (BigInt)
-			result =
-				BigInt(Math.round(new Date().getTime() / 1000)) - round * BigInt(BlockFinalizationTime);
+			result = BigInt(Math.round(new Date().getTime() / 1000)) - round * BlockFinalizationTime;
 		}
 		stack.push(result);
 		return this.computeCost();
