@@ -100,7 +100,12 @@ function signTransaction(txn: Transaction, signer: wtypes.Sign): Uint8Array {
 			return txn.signTxn(signer.fromAccount.sk);
 		}
 		case wtypes.SignType.LogicSignature: {
-			signer.lsig.lsig.args = signer.args ?? [];
+			if (signer?.lsig?.lsig?.args) {
+				signer.lsig.lsig.args = signer.args ?? [];
+			} else {
+				(signer.lsig as any).args = signer.args ?? []; // args property didn't exist in earlier version of API (for reference: see the multisig example)
+			}
+
 			return algosdk.signLogicSigTransactionObject(txn, signer.lsig).blob;
 		}
 		default: {

@@ -56,9 +56,9 @@ async function run(runtimeEnv, deployer) {
 	// Transaction PASSES
 	await tryExecuteTx(deployer, txnParams);
 
-	// // Transaction FAIL - according to teal logic, amount should be <= 100
-	// txnParams.amountMicroAlgos = 200;
-	// await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
+	// Transaction FAIL - according to teal logic, amount should be <= 100
+	txnParams.amountMicroAlgos = 200;
+	await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
 }
 
 module.exports = { default: run };
