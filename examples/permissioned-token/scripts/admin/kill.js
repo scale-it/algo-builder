@@ -35,9 +35,10 @@ async function run(runtimeEnv, deployer) {
 	const elon = deployer.accountsByName.get("elon-musk");
 	await fundAccount(deployer, elon); // fund elon
 
+	// (in scripts flow we already issue the tokens before kill, so uncomment if another sequence is followed)
 	// transaction pass (issue 15 tokens to elon)
-	await deployer.optInAccountToASA("tesla", elon.name, {});
-	await issue(deployer, elon.addr, 15);
+	// await deployer.optInAccountToASA("tesla", elon.name, {});
+	// await issue(deployer, elon.addr, 15);
 
 	await kill(deployer); // kill token 'tesla'
 
