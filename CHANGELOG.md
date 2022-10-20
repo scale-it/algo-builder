@@ -59,6 +59,7 @@ from `algosdk` and sends it to the network.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 - Added support for unfunded accounts in `Runtime`.
 - Added `waitRounds` as second param to `sendAndWait` method. It is optional and has a default value of 10.
+- Added support for to generate the `algob.config.ts` file generation via algob (`yarn run algob . --typescript`) and read the algob.config.ts` file, if present in root directory.
 
 ### Bug Fixes
 
