@@ -257,6 +257,7 @@ export class WallectConnectSession {
 	 * @param transactions transaction parameters,  atomic transaction parameters
 	 *  or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */
+	/* eslint-disable sonarjs/cognitive-complexity */
 	async executeTx(transactions: ExecParams[] | TransactionAndSign[]): Promise<TxnReceipt> {
 		try {
 			let signedTxn: (Uint8Array | null)[] | undefined;
@@ -280,7 +281,10 @@ export class WallectConnectSession {
 				(txn: ExecParams, index: number) => {
 					return txn.sign === SignType.LogicSignature
 						? { txn: txns[index], shouldSign: false } // logic signature
-						: { txn: txns[index], shouldSign: true, signers: execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr }; // to be signed
+						: {
+							txn: txns[index], shouldSign: true,
+							signers: execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr
+						}; // to be signed
 				}
 			);
 			// only shouldSign txn are to be signed
