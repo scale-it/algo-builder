@@ -1,13 +1,12 @@
-import WalletConnect from "@walletconnect/client";
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
-import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import { testnetURL, types, WallectConnectSession } from "../../../src";
+import { testnetURL, types } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
+import WallectConnectSessionMock from "../../mocks/walletconnect-mode";
 
 describe("Webmode - Wallet Connect test cases ", function () {
-    let connector: WallectConnectSession;
+    let connector: WallectConnectSessionMock;
     let sender: Account;
     let receiver: Account;
 
@@ -22,15 +21,10 @@ describe("Webmode - Wallet Connect test cases ", function () {
     this.beforeEach(async function () {
         sender = algosdk.generateAccount();
         receiver = algosdk.generateAccount();
-        connector = new WallectConnectSession(walletURL, new WalletConnect({
-            bridge: "https://bridge.walletconnect.org",
-            qrcodeModal: QRCodeModal,
-        }));
-        await connector.create();
-        connector.onConnect((error, response) => { console.log(error, response) });
+        connector = new WallectConnectSessionMock(walletURL);
     });
 
-    it("Should run executeTx function without throwing an error", function () {
+    it("Should run executeTx function without throwing an error", async function () {
         const txnParams: types.AlgoTransferParam = {
             type: types.TransactionType.TransferAlgo,
             sign: types.SignType.SecretKey,
