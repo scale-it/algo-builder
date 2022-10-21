@@ -222,7 +222,7 @@ export class MyAlgoWalletSession {
 			);
 			// only shouldSign txn are to be signed, algowallet doesn't accept lsig ones
 			const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
-			if (nonLsigTxn.length > 0) {
+			if (nonLsigTxn.length) {
 				signedTxn = await this.signTransactionGroup(nonLsigTxn);
 			}
 			// sign smart signature transaction
