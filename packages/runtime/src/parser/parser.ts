@@ -162,9 +162,9 @@ import {
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
-	LogicSigMaxSize,
 	MAX_APP_PROGRAM_COST,
 	OpGasCost,
+	LogicSigMaxSize
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode } from "../types";
