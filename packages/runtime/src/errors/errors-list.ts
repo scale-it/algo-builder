@@ -210,7 +210,7 @@ by an index that does not exist.`,
 	MAX_LEN_EXCEEDED: {
 		number: 1030,
 		message:
-			"Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
+			"Length of provided TEAL code = %length% bytes exceeds max length of %maxlen% bytes, Mode: %mode%",
 		title: "MaxLength Error",
 		description: `MaxLength Error`,
 	},
@@ -475,12 +475,18 @@ maximun uint128`,
 		description: "Wrong proof size. Got: %length%, expected 80",
 	},
 	UNKNOWN_VRF_TYPE: {
-		number: 1070 ,
+		number: 1070,
 		message: "Unknown field",
 		title: "Unknown field",
 		description: "Unknow field for vrf_verify opcode",
 	},
-
+	EXTRA_PAGES_EXCEEDED: {
+		number: 1071,
+		message: "Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+		title: "Extra pages",
+		description:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+	},
 };
 
 const runtimeGeneralErrors = {
