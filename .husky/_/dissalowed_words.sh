@@ -12,4 +12,4 @@ git diff --cached --name-status | while read x file; do
         status=1;
     fi
 done
-exit ${status}
+exit $status
