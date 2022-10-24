@@ -1258,7 +1258,7 @@ describe("Inner Transactions", function () {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
 
-		describe("keyreg transaction", function () {
+		describe.only("keyreg transaction", function () {
 			let program: string;
 			this.beforeEach(function () {
 				// init more balance for application to test inner transaction
