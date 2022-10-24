@@ -21,7 +21,7 @@ describe("Guide examples", function () {
 		defaultBalance = alice.balance();
 	});
 
-	it("Should send 5 algos from alice to bob", function () {
+	it.only("Should send 5 algos from alice to bob", function () {
 		//create the transaction
 		const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
 			from: alice.address,

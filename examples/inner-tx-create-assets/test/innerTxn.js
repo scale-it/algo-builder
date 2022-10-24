@@ -36,7 +36,7 @@ describe("Group txn", function () {
 		runtime.executeTx([paymentTxnParam]);
 	});
 
-	it("Should create new app and asset from inner txn", function () {
+	it.only("Should create new app and asset from inner txn", function () {
 		// create asset and log new asset id
 		const masterTxnParam = {
 			type: types.TransactionType.CallApp,
