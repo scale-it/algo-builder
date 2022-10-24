@@ -1,10 +1,7 @@
-disallowed="\.only\("
-
-
 git diff --cached --name-status | while read x file; do
         if [ "$x" == 'D' ]; then continue; fi
-            if egrep $dissalowed $file ; then
-                echo "ERROR: Disallowed expression \"${dissalowed}\" in file: ${file}"
+        if grep -rq --include $file  it.only ; then
+                echo 'ERROR: Dissalowed it.only() in your tests in file: ${file}'
                 exit 1
-            fi
+        fi
 done || exit $?
