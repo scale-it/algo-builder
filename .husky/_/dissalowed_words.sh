@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/bin/sh
 COLOR_REST="$(tput sgr0)"
 COLOR_MAGENTA="$(tput setaf 4)"
 COLOR_RED="$(tput setaf 1)"
