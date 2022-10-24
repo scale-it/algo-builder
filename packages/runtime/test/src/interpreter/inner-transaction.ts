@@ -1265,7 +1265,7 @@ describe("Inner Transactions", function () {
 				setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
 			});
 			const showcase =
-				"lfjksdafjsdal;kfjdasflkjsdf;lkjsdalfkjsadlfkjasdl;fjsda;lfjsdal;fkjsdalkfjasd;lkfjsdalkfjasdl;fjksad;lkfjsdlkjfls;adkjfals;dfjasldkfjasdklfasdfsdfsdaf";
+				"lfjksdsadasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdafjsdal;kfjdasflkjsdf;lkjsdalfkjsadlfkjasdl;fjsda;lfjsdal;fkjsdalkfjasd;lkfjsdalkfjasdl;fjksad;lkfjsdlkjfls;adkjfals;dfjasldkfjasdklfasdfsdfsdaf	";
 			it("Should support keyreg transaction", function () {
 				program = `
         itxn_begin
