@@ -7,7 +7,7 @@ status=0
 set +o posix
 while read x file; do
     if [ "$x" == 'D' ]; then continue; fi
-    if ! [[ "${file: -3}" == ".ts" ]] || ! [[ "${file: -3}" == ".js" ]]; then continue; fi
+    if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
     if grep -E -q "\.only\(" "$file" ; then
         printf "%40s\n" "${COLOR_RED}ERROR:${COLOR_REST} Disallowed expression${COLOR_YELLOW} .only()${COLOR_REST} in file: $COLOR_MAGENTA${file}$COLOR_REST"
         status=1 
