@@ -10,4 +10,5 @@ git diff --cached --name-status | while read x file; do
             echo "${RED}ERROR:${NC} Disallowed expression ${YELLOW}it.only()${NC} in file: ${PURPLE}${file}${NC}"
             status=1
         fi
-done || exit ${status}
+done
+exit ${status}
