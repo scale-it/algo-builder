@@ -1264,8 +1264,6 @@ describe("Inner Transactions", function () {
 				// init more balance for application to test inner transaction
 				setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
 			});
-			const showcase =
-				"lfjksdsadasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdafjsdal;kfjdasflkjsdf;lkjsdalfkjsadlfkjasdl;fjsda;lfjsdal;fkjsdalkfjasd;lkfjsdalkfjasdl;fjksad;lkfjsdlkjfls;adkjfals;dfjasldkfjasdklfasdfsdfsdaf	";
 			it("Should support keyreg transaction", function () {
 				program = `
         itxn_begin
