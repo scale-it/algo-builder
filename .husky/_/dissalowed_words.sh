@@ -1,4 +1,4 @@
-disallowed=".only(s"
+disallowed=".only/("
 
 git diff --cached --name-status | while read x file; do
         if [ "$x" == 'D' ]; then continue; fi
