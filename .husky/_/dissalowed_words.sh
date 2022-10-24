@@ -6,7 +6,7 @@ failing=0;
 
 git diff --cached --name-status | while read x file; do
     if [ "$x" == 'D' ]; then continue; fi
-    if ! [[ ${file: -3} == ".ts" ]]; then echo "przeszło"; fi
+    if ! [[ ${file: -3} == ".ts" ]]; then continue; fi
     if egrep -q "\.only\(" $file ; then
         echo "${RED}ERROR:${NC} Disallowed expression ${YELLOW}.only()${NC} in file: ${PURPLE}${file}${NC}"
         ((failing+=1));
