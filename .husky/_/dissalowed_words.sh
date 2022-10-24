@@ -8,7 +8,7 @@ git diff --cached --name-status | while read x file; do
     if [ "$x" == 'D' ]; then continue; fi
         if egrep -q "\.only\(" $file ; then
             echo "${RED}ERROR:${NC} Disallowed expression ${YELLOW}.only()${NC} in file: ${PURPLE}${file}${NC}"
-            status=1
+            status=1;
         fi
 done
 echo "value of status ${status}"
