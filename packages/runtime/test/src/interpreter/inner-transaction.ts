@@ -1253,7 +1253,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("Teal v6 update", function () {
+	describe.only("Teal v6 update", function () {
 		this.beforeEach(function () {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
