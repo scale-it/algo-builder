@@ -1,5 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
-. "$(dirname "$0")/_/dissalowed_words.sh"
+# . "$(dirname "$0")/_/dissalowed_words.sh"
 
 yarn run lint-staged

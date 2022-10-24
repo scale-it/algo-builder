@@ -1,17 +1,13 @@
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
+
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
-import {
-	AccountAddress,
-	AccountStoreI,
-	ExecutionMode,
-	TxOnComplete,
-} from "../../../src/types";
+import { AccountAddress, AccountStoreI, ExecutionMode, TxOnComplete } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 import { elonMuskAccount, johnAccount } from "../../mocks/account";
@@ -240,7 +236,9 @@ describe("Inner Transactions", function () {
 
 		it(`should fail: "insufficient balance" because app account is charged fee`, function () {
 			// set application account balance to 0
-			const appAcc = interpreter.runtime.ctx.state.accounts.get(applicationAccount.account.addr);
+			const appAcc = interpreter.runtime.ctx.state.accounts.get(
+				applicationAccount.account.addr
+			);
 			if (appAcc) {
 				appAcc.amount = BigInt(0);
 			}
@@ -1255,7 +1253,7 @@ describe("Inner Transactions", function () {
 		});
 	});
 
-	describe("Teal v6 update", function () {
+	describe.only("Teal v6 update", function () {
 		this.beforeEach(function () {
 			setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE);
 		});
@@ -1266,7 +1264,8 @@ describe("Inner Transactions", function () {
 				// init more balance for application to test inner transaction
 				setUpInterpreter(6, ALGORAND_ACCOUNT_MIN_BALANCE * 10);
 			});
-
+			const showcase =
+				"lfjksdafjsdal;kfjdasflkjsdf;lkjsdalfkjsadlfkjasdl;fjsda;lfjsdal;fkjsdalkfjasd;lkfjsdalkfjasdl;fjksad;lkfjsdlkjfls;adkjfals;dfjasldkfjasdklfasdfsdfsdaf";
 			it("Should support keyreg transaction", function () {
 				program = `
         itxn_begin
@@ -1477,6 +1476,5 @@ describe("Inner Transactions", function () {
 				assert.equal(receiver, foreignAppAccAddr);
 			});
 		});
-
 	});
 });
