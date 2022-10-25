@@ -51,6 +51,7 @@ class DeployerBasicMode {
 	protected readonly txWriter: txWriter;
 	readonly accounts: rtypes.Account[];
 	readonly accountsByName: rtypes.AccountMap;
+	readonly assetPath: string;
 	readonly indexerClient: algosdk.Indexer | undefined;
 	checkpoint: CheckpointFunctions;
 
@@ -61,6 +62,7 @@ class DeployerBasicMode {
 		this.algoOp = deployerCfg.algoOp;
 		this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
 		this.accountsByName = deployerCfg.accounts;
+		this.assetPath = deployerCfg.assetPath;
 		this.txWriter = deployerCfg.txWriter;
 		this.checkpoint = new CheckpointFunctionsImpl(
 			deployerCfg.cpData,
@@ -116,6 +118,10 @@ class DeployerBasicMode {
 
 	isDefined(name: string): boolean {
 		return this.cpData.isDefined(this.networkName, name);
+	}
+
+	getAssetPath(): string {
+		return this.assetPath;
 	}
 
 	get asa(): Map<string, rtypes.ASAInfo> {

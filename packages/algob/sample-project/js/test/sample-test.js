@@ -1,4 +1,4 @@
-const { getProgram } = require("@algo-builder/runtime");
+const { getProgram, getProgramFromPath } = require("@algo-builder/runtime");
 const { Runtime, AccountStore } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
 const { assert } = require("chai");
@@ -14,6 +14,8 @@ describe("Sample Test", function () {
 	let runtime;
 	let lsig;
 	const feeCheckProgram = getProgram("fee-check.teal");
+	//Use getProgramFromPath to getProgram from another path instead of assets
+	//const feeCheckProgram = getProgramFromPath("fee-check.teal", "../assets");
 
 	this.beforeEach(async function () {
 		master = new AccountStore(masterBalance);

@@ -20,6 +20,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
+- Add support `getProgramFromPath` can get program string from `assetPath`(relative or absolute path) path.
+- Add `paths` to `algob.config.js` to specify list of paths
 
 #### Examples
 
