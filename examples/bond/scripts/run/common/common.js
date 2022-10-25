@@ -21,6 +21,12 @@ const asaDef = {
 
 const tokenMap = new Map();
 
+/**
+ * Execute single transaction or group of transactions (atomic transaction)
+ * @param deployer deployer instance
+ * @param transactions transaction parameters,  atomic transaction parameters
+ * @returns TxnReceipt which includes confirmed txn response along with txID
+ */
 async function tryExecuteTx(deployer, txnParams) {
 	try {
 		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
