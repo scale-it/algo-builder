@@ -20,9 +20,9 @@ import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	MAX_APP_PROGRAM_COST,
+	MaxExtraAppProgramPages,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR,
-	MaxExtraAppProgramPages
+	ZERO_ADDRESS_STR
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
@@ -906,13 +906,13 @@ export class Runtime {
 					}
 				}
 
-				if (appDef !== undefined) appDefMap.set(index, appDef);
+				if (appDef !== undefined) {
+					appDefMap.set(index, appDef);
+					const appDefinition = appDef as types.AppDefinition;
+					this.validateExtraPages(appDefinition?.extraPages);
+				};
 				return txn;
 			});
-			if (appDef) {
-				const appDefinition = appDef as types.AppDefinition;
-				this.validateExtraPages(appDefinition?.extraPages);
-			};
 
 			// get current txn and txn group (as encoded obj)
 			[, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
@@ -1065,7 +1065,7 @@ export class Runtime {
 	 * Verifies extra pages doesn't overflows
 	 * @param extraPages extra pages for program. Default value is 0
 	 */
-	validateExtraPages(extraPages: number = 0): void {
+	validateExtraPages(extraPages = 0): void {
 		if (extraPages > MaxExtraAppProgramPages) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED, {
 				extraPages: extraPages,
