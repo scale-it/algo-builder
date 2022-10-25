@@ -5,7 +5,7 @@ COLOR_RED="$(tput setaf 1)"
 COLOR_YELLOW="$(tput setaf 3)"
 status=0
 
-for file in $(git diff --cached --name-only --diff-filter=ACMT);
+for file in $(git diff --name-only --diff-filter=ACMT);
 do
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
     for line in $(grep -in -E "\.only\("  "$file" | cut -f1 -d:);
