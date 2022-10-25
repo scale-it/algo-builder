@@ -1,5 +1,6 @@
 import { decodeAddress, encodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
+
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
@@ -1477,6 +1478,5 @@ describe("Inner Transactions", function () {
 				assert.equal(receiver, foreignAppAccAddr);
 			});
 		});
-
 	});
 });

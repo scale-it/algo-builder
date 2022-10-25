@@ -30,7 +30,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
-- Add `waitRounds` params to `sendAndWait` method. `waitRounds` is option argument and have dlsefault value is 10.
 - Add `Uint8Array` as a supported type for `TxParams.note`
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
 from `algosdk` and sends it to the network. 
@@ -51,6 +50,8 @@ from `algosdk` and sends it to the network.
 - Added support for new txn opcode fileds `ApprovalProgramPages`, `ClearProgramStatePages`, `NumApprovalProgramPages`, `NumClearProgramStatePages`.
 - Added additional checks for the `maxStackByteElementSize` and `maxProgramLength` in `Runtime`.
 - Added partial support for `bn254` opcodes. The full support delyed until the official release of `TEALv8/v9`.
+- Added a new pre-commit hook to check if there are any `.only`in tests . If there are any it will display error in which files/lines the problem was found.
+
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
@@ -58,6 +59,7 @@ from `algosdk` and sends it to the network.
 - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 - Added support for unfunded accounts in `Runtime`.
+- Added `waitRounds` as second param to `sendAndWait` method. It is optional and has a default value of 10.
 
 ### Bug Fixes
 

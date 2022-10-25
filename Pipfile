@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyteal = "~=0.13.0"
+pyteal = "~=0.18.1"
 pyyaml = "*"
 poetry = "*"
 pyteal_utils ={editable = true, ref = "main", git = "https://github.com/algorand/pyteal-utils.git"}
