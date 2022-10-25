@@ -8,7 +8,7 @@ status=0
 for file in $(git diff --cached --name-only --diff-filter=ACMT);
 do
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
-    grep -in -E "\.only\("  file | awk -F: '{print $2" - Line number : "$1}'
+    grep -in -E "\.only\("  "$file" | awk -F: '{print $2" - Line number : "$1}'
     # if grep -E -q "\.only\(" "$file" ; then
     #     printf "%40s\n" "${COLOR_RED}ERROR:${COLOR_REST} Disallowed expression${COLOR_YELLOW} .only()${COLOR_REST} in file: $COLOR_MAGENTA${file}$COLOR_REST"
     #     status=1 
