@@ -24,10 +24,9 @@ import {
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
-	seedLength,
+	MaxExtraAppProgramPages,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR,
-	MaxExtraAppProgramPages
+	ZERO_ADDRESS_STR
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
@@ -923,10 +922,6 @@ export class Runtime {
 				}
 				return txn;
 			});
-			if (appDef) {
-				const appDefinition = appDef as types.AppDefinition;
-				this.validateExtraPages(appDefinition?.extraPages);
-			};
 
 			// get current txn and txn group (as encoded obj)
 			[, signedTransactions] = this.createTxnContext(txns as types.ExecParams[]);
