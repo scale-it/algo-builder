@@ -14,7 +14,7 @@ const {
 	mkCloseProposalTx,
 } = require("../scripts/run/common/tx-params");
 
-describe.only("DAO - Happy Paths", function () {
+describe("DAO - Happy Paths", function () {
 	let master, creator, proposer, voterA, voterB;
 	let daoFundLsigAcc, proposalLsigAcc;
 	let ctx;

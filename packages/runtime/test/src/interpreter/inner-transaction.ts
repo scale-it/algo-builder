@@ -1439,7 +1439,7 @@ describe("Inner Transactions", function () {
 			});
 		});
 
-		describe.only("Foreign application account access", function () {
+		describe("Foreign application account access", function () {
 			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
