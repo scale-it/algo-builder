@@ -160,10 +160,10 @@ import {
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
-	MAX_APP_PROGRAM_COST,
-	OpGasCost,
 	LogicSigMaxSize,
+	MAX_APP_PROGRAM_COST,
 	MaxAppProgramLen,
+	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode } from "../types";
@@ -868,15 +868,13 @@ export function assertMaxCost(
  * @param mode Execution mode - Signature (stateless) OR Application (stateful)
  */
 function assertLogicMaxLen(lsigProgramArgsSize: number, mode: ExecutionMode): void {
-	if (mode === ExecutionMode.SIGNATURE) {
+	if (mode === ExecutionMode.SIGNATURE && lsigProgramArgsSize > LogicSigMaxSize) {
 		// check max program cost (for stateless)
-		if (lsigProgramArgsSize > LogicSigMaxSize) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
-				length: lsigProgramArgsSize,
-				maxlen: LogicSigMaxSize,
-				mode: "Stateless",
-			});
-		}
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+			length: lsigProgramArgsSize,
+			maxlen: LogicSigMaxSize,
+			mode: "Stateless",
+		});
 	}
 }
 
