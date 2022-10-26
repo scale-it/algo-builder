@@ -123,7 +123,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
 				appDefinition: {
-					appName: "Mock",
+					appName: "App1",
 					metaType: types.MetaType.FILE,
 					approvalProgramFilename: approvalProgramFilename, // not a large approval program
 					clearProgramFilename: clearProgramFilename,
@@ -147,7 +147,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
 				appDefinition: {
-					appName: "Mock",
+					appName: "App2",
 					metaType: types.MetaType.FILE,
 					approvalProgramFilename: "very-long-approval.teal", // very large teal program
 					clearProgramFilename: clearProgramFilename,
@@ -171,7 +171,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				fromAccount: john.account,
 				type: types.TransactionType.DeployApp,
 				appDefinition: {
-					appName: "Mock",
+					appName: "App3",
 					metaType: types.MetaType.FILE,
 					approvalProgramFilename: "very-long-approval.teal", // very large teal program
 					clearProgramFilename: clearProgramFilename,
