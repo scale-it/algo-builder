@@ -191,7 +191,7 @@ algob -h deploy
 You can write your scripts and tests in JavaScript. If you don't add any flag to `init`, then default is javascript. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
 
 ```shell
-yarn run algob init <path-where-to-create>
+yarn run algob init <path-where-to-create> --javascript
 ```
 #### Example on `algob init` with javascript
 
@@ -199,7 +199,7 @@ You can use below command to initialize the javascript project in `sample-projec
 If `sample-project` folder is not present then it will create one for you. 
 
 ```shell
-yarn run algob init ./sample-project
+yarn run algob init ./sample-project --javascript
 ```
 
 ### Using algob with a TypeScript project
@@ -209,6 +209,7 @@ You can write your scripts and tests in TS. To initialize a new typescript proje
 ```shell
 yarn run algob init <path-where-to-create> --typescript
 ```
+
 #### Example on `algob init` with typescript
 
 You can use below command to initialize the typescript project in `sample-project` folder.
