@@ -862,7 +862,6 @@ export function assertMaxCost(
 	}
 }
 
-
 /**
  * verify max size of lsig
  * @param lsigProgramArgsSize lsig program and arugments size
