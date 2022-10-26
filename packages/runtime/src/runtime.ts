@@ -616,6 +616,7 @@ export class Runtime {
 		this.addCtxAppCreateTxn(sender, appDefinition, payFlags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		this.validateExtraPages(appDefinition?.extraPages);
 		const txReceipt = this.ctx.deployApp(sender.addr, appDefinition, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;
@@ -722,6 +723,7 @@ export class Runtime {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		this.validateExtraPages(newAppCode?.extraPages);
 		const txReceipt = this.ctx.updateApp(appID, newAppCode, 0, scTmplParams);
 
 		// If successful, Update programs and state

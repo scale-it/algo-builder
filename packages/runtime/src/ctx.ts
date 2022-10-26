@@ -791,6 +791,10 @@ export class Ctx implements Context {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
 		}
 
+		const approvalProgramBytes = Buffer.from(approvalProgTEAL, "base64");
+		const clearProgramBytes = Buffer.from(clearProgTEAL, "base64");
+		this.assertProgramMaxLen(approvalProgramBytes, clearProgramBytes, appSourceCode.extraPages);
+
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 		const appParams = this.getApp(appID);
 		const txReceipt = this.runtime.run(
