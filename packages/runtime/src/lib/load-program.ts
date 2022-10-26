@@ -18,9 +18,7 @@ export function getProgram(
 	scInitParam?: SCParams,
 	logs = true
 ): string {
-	let assetpath = "";
-	if (assetPath == "") assetpath = "assets";
-	else assetpath = assetPath;
+	const assetpath = assetPath === "" ? "assets" : assetPath;
 	const filePath = getPathFromDirRecursive(assetpath, fileName) as string;
 	const program = fs.readFileSync(filePath, "utf8");
 
