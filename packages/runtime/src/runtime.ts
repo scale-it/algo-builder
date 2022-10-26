@@ -7,9 +7,10 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
-import { exec } from "child_process";
+import { randomBytes } from "crypto";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
+import { bigint, map } from "zod";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
@@ -20,6 +21,7 @@ import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	BlockFinalizationTime,
 	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
@@ -35,6 +37,7 @@ import {
 	ASADeploymentFlags,
 	ASAInfo,
 	AssetHoldingM,
+	Block,
 	Context,
 	EncTx,
 	ExecutionMode,
@@ -76,6 +79,7 @@ export class Runtime {
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
+			blocks: new Map<number, Block>(),
 		};
 
 		this._defaultAccounts = this._setupDefaultAccounts();
@@ -88,7 +92,8 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2;
+		this.round = 1;
+		this.produceBlock();
 		this.timestamp = 1;
 	}
 
@@ -1161,5 +1166,33 @@ export class Runtime {
 	 */
 	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);
+	}
+
+	produceBlock() {
+		let timestamp: bigint | undefined;
+		let seed: Uint8Array | undefined;
+		if (this.store.blocks.size === 0) { //create genesis block
+			seed = randomBytes(32);
+			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
+		} else { //add another block
+			const lastBlock = this.store.blocks.get(this.round);
+			if (lastBlock !== undefined) {
+				seed = randomBytes(32);
+				timestamp = lastBlock.timestamp + 4n;
+				this.round += 1;// we move to new a new round
+			}
+		}
+		if (timestamp !== undefined && seed !== undefined) {
+			this.store.blocks.set(this.round, { timestamp, seed });
+		}
+		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+	}
+
+	getBlock(round: number): Block {
+		const block = cloneDeep(this.store.blocks.get(round));
+		if (block !== undefined) {
+			return block;
+		}
+		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
 	}
 }

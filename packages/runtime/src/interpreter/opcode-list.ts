@@ -5311,16 +5311,16 @@ export class Block extends Op {
 	}
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
-		const round = this.assertBigInt(stack.pop(), this.line);
-		this.interpreter.assertRoundIsAvailable(Number(round));
+		const round = Number(this.assertBigInt(stack.pop(), this.line));
+		this.interpreter.assertRoundIsAvailable(round);
+		const block = this.interpreter.runtime.getBlock(round);
 		let result: StackElem;
 		if (this.field === "BlkSeed") {
-			//mock the seed by generating a 32 bytes long psuedo-random
-			result = randomBytes(32);
+			result = block.seed;
 		} else {
 			//"BlkTimestamp"
 			//seconds since epoch - rounds, assuming one round(block) = 2.5s truncated to 2s (BigInt)
-			result = BigInt(Math.round(new Date().getTime() / 1000)) - round * BlockFinalizationTime;
+			result = block.timestamp;
 		}
 		stack.push(result);
 		return this.computeCost();

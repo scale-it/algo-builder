@@ -102,6 +102,7 @@ export interface State {
 	appCounter: number;
 	assetCounter: number;
 	txReceipts: Map<string, TxReceipt>; // map of {txID: txReceipt}
+	blocks: Map<number, Block>, // map of{round, block}
 }
 
 export interface DeployedAssetInfo {
@@ -431,4 +432,9 @@ export interface AppInfoReceipt extends DeployedAssetInfoReceipt {
 	"clear-file": string;
 	logs?: Uint8Array[];
 	gas?: number;
+}
+
+export interface Block {
+	timestamp: bigint; //uint64
+	seed: Uint8Array; //[]byte
 }

@@ -596,6 +596,18 @@ const runtimeGeneralErrors = {
 		description:
 			"Provided multisignature is invalid and was not able to authenticate the transaction",
 	},
+	PRODUCE_BLOCK: {
+		number: 1322,
+		message: "Produce block",
+		title: "Produce block",
+		description: "Runtime failed while trying to produce new block",
+	},
+	INVALID_BLOCK: {
+		number: 1323,
+		message: "Invalid block",
+		title: "Invalid block",
+		description: "Provided round does not correspond to any existing block",
+	}
 };
 
 const transactionErrors = {
