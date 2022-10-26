@@ -164,7 +164,8 @@ import {
 	LOGIC_SIG_MAX_COST,
 	MAX_APP_PROGRAM_COST,
 	OpGasCost,
-	LogicSigMaxSize
+	LogicSigMaxSize,
+	MaxAppProgramLen,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { ExecutionMode } from "../types";
@@ -867,6 +868,31 @@ export function assertMaxCost(
 	}
 }
 
+// verify max length of TEAL code is within consensus parameters
+function _assertMaxLen(len: number, mode: ExecutionMode): void {
+	if (mode === ExecutionMode.SIGNATURE) {
+		// check max program cost (for stateless)
+		if (len > LogicSigMaxSize) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+				length: len,
+				maxlen: LogicSigMaxSize,
+				mode: "Stateless",
+			});
+		}
+	} else {
+		if (len > MaxAppProgramLen) {
+			// TODO: // When MaxExtraAppProgramPages > 0, this is the size of those pages.
+			// So two "extra pages" would mean 3*MaxAppProgramLen bytes are available.
+			// check max program length (for stateful)
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+				length: len,
+				maxlen: MaxAppProgramLen,
+				mode: "Stateful",
+			});
+		}
+	}
+}
+
 /**
  * verify max size of lsig
  * @param lsigProgramArgsSize lsig program and arugments size
@@ -920,6 +946,8 @@ export function parser(program: string, mode: ExecutionMode, interpreter: Interp
 		assertMaxCost(interpreter.gas, mode);
 	}
 
+	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
+	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
 }
 
