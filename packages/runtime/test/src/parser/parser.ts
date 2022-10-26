@@ -2724,5 +2724,23 @@ describe("Parser", function () {
 				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 			);
 		});
+
+		it("Should pass when (program size + args size) = LogicSigMaxSize", function () {
+			const file = "test-arg.teal"; // byte size 3
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(997)];
+
+			assert.doesNotThrow(() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter));
+		});
+
+		it("Should fail when (program size + args size) != LogicSigMaxSize", function () {
+			const file = "test-arg.teal"; // byte size 3
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(998)];
+
+			expectRuntimeError(
+				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+		});
 	});
 });
