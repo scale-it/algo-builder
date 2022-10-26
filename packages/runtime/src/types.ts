@@ -193,6 +193,11 @@ export interface Context {
 		idx: number,
 		scTmplParams?: SCParams
 	) => TxReceipt;
+	assertProgramMaxLen: (
+		approvalProgramBytes: Uint8Array,
+		clearProgramBytes: Uint8Array,
+		extraPages: number
+	) => void;
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)
