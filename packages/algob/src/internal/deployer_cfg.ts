@@ -34,7 +34,7 @@ export class DeployerConfig {
 		this.algoOp = algoOp;
 		this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts ?? []);
 		const assetpath = runtimeEnv.network.config.paths?.assets;
-		this.assetPath = assetpath == undefined ? "assets" : assetpath;
+		this.assetPath = assetpath ? assetpath : "assets";
 		this.txWriter = new TxWriterImpl("");
 		this.asaDefs = loadASAFile(this.accounts);
 		this.indexerClient = createIndexerClient(runtimeEnv.network.config.indexerCfg);

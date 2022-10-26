@@ -367,12 +367,12 @@ export class Ctx implements Context {
 
 		const approvalProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.approvalProgramFilename, scTmplParams)
+				? getProgram(appDefinition.approvalProgramFilename, "", scTmplParams)
 				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.clearProgramFilename, scTmplParams)
+				? getProgram(appDefinition.clearProgramFilename, "", scTmplParams)
 				: appDefinition.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
@@ -746,12 +746,12 @@ export class Ctx implements Context {
 
 		const approvalProgTEAL =
 			appSourceCode.metaType === types.MetaType.FILE
-				? getProgram(appSourceCode.approvalProgramFilename, scTmplParams)
+				? getProgram(appSourceCode.approvalProgramFilename, "", scTmplParams)
 				: appSourceCode.approvalProgramCode;
 
 		const clearProgTEAL =
 			appSourceCode.metaType === types.MetaType.FILE
-				? getProgram(appSourceCode.clearProgramFilename, scTmplParams)
+				? getProgram(appSourceCode.clearProgramFilename, "", scTmplParams)
 				: appSourceCode.clearProgramCode;
 
 		if (approvalProgTEAL === "") {

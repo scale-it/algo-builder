@@ -2,7 +2,7 @@ import { AccountStore } from "./account";
 import ERRORS from "./errors/errors-list";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
-import { getProgram, getProgramFromPath } from "./lib//load-program";
+import { getProgram } from "./lib//load-program";
 import {
 	loadASAFile,
 	overrideASADef,
@@ -43,6 +43,5 @@ export {
 	getPathFromDirRecursive,
 	PyCompileOp,
 	getProgram,
-	getProgramFromPath,
 	types,
 };
