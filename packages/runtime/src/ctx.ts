@@ -133,7 +133,7 @@ export class Ctx implements Context {
 	}
 
 	/**
-	 * Asserts program length
+	 * Asserts program length. maxPossible = MaxAppProgramLen * (1 + extraPages)
 	 * @param approvalProgramBytes Approval program bytes
 	 * @param clearProgramBytes Clear program bytes
 	 * @param extraPages Extra pages. Default extra page is 0.
