@@ -202,7 +202,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 1 // should pass because total 2 pages needed
+					extraPages: 1 // should pass because total 2 pages needed. total page = default page(1) + extra page
 				},
 				payFlags: {
 					totalFee: 1000,
