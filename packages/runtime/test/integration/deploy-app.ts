@@ -117,7 +117,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	});
 
 	describe('Extra Pages', function () {
-		it("Should pass: when program length doesn't exceeds total allowed program length", function () {
+		it("Should pass when program length doesn't exceeds total allowed program length", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -141,7 +141,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 		});
 
-		it("Should fail: when program exceeds total allowed program length", function () {
+		it("Should fail when program exceeds total allowed program length", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -165,7 +165,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED)
 		});
 
-		it("Should fail: when no extra pages was defined for large approval program", function () {
+		it("Should fail when no extra pages was defined for large approval program", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -188,7 +188,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
 		});
 
-		it("Should pass: when sufficient extra pages was defined", function () {
+		it("Should pass when sufficient extra pages was defined", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -211,7 +211,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]))
 		});
 
-		it("Should fail: when sufficient extra pages was not defined", function () {
+		it("Should fail when sufficient extra pages was not defined", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
@@ -235,7 +235,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
 		});
 
-		it("Should fail: when extra pages is not within the defined limit of extra pages [0,3]", function () {
+		it("Should fail when extra pages is not within the defined limit of extra pages [0,3]", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
