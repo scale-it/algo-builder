@@ -258,5 +258,21 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 
 			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED);
 		});
+
+		it("Should pass when program length = max possible program length", function () {
+			const approvalProgram = Buffer.alloc(4096).fill(0);
+			const clearProgram = Buffer.alloc(0).fill(0);
+
+			assert.doesNotThrow(() => runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1));
+		});
+
+		it("Should fail when program length = (max possible program length + 1)", function () {
+			const approvalProgram = Buffer.alloc(4097).fill(0);
+			const clearProgram = Buffer.alloc(0).fill(0);
+
+			expectRuntimeError(() =>
+				runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+		});
 	})
 });
