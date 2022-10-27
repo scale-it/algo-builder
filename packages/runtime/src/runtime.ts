@@ -1206,7 +1206,7 @@ export class Runtime {
 	 * Populates chain from first block to round number block (Produces N rounds) 
 	 * @param round current round number
 	 */
-	populateChain(round:number) {
+	private populateChain(round:number) {
 		this.round = 1
 		for(let blockN = 1; blockN<=round; blockN++){
 			this.produceBlock();
