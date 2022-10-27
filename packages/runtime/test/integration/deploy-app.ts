@@ -4,7 +4,8 @@ import { assert } from "chai";
 
 import { getProgram } from "../../src";
 import RUNTIME_ERRORS from "../../src/errors/errors-list";
-import { AccountStore, Runtime } from "../../src/index";
+import { Runtime } from "../../src/index";
+import { MaxAppProgramLen } from "../../src/lib/constants";
 import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -260,14 +261,14 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		});
 
 		it("Should pass when program length = max possible program length", function () {
-			const approvalProgram = Buffer.alloc(4096).fill(0);
+			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2).fill(0);
 			const clearProgram = Buffer.alloc(0).fill(0);
 
 			assert.doesNotThrow(() => runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1));
 		});
 
 		it("Should fail when program length = (max possible program length + 1)", function () {
-			const approvalProgram = Buffer.alloc(4097).fill(0);
+			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2 + 1).fill(0);
 			const clearProgram = Buffer.alloc(0).fill(0);
 
 			expectRuntimeError(() =>
