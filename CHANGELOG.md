@@ -52,6 +52,7 @@ from `algosdk` and sends it to the network.
 - Added support for new txn opcode fileds `ApprovalProgramPages`, `ClearProgramStatePages`, `NumApprovalProgramPages`, `NumClearProgramStatePages`.
 - Added additional checks for the `maxStackByteElementSize` and `maxProgramLength` in `Runtime`.
 - Added partial support for `bn254` opcodes. The full support delyed until the official release of `TEALv8/v9`.
+- Added a new pre-commit hook to check if there are any `.only`in tests . If there are any it will display error in which files/lines the problem was found.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
@@ -61,6 +62,7 @@ from `algosdk` and sends it to the network.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 - Added support for unfunded accounts in `Runtime`.
 - Added `waitRounds` as second param to `sendAndWait` method. It is optional and has a default value of 10.
+- Added support for to generate the `algob.config.ts` file generation via algob (`yarn run algob . --typescript`) and read the algob.config.ts` file, if present in root directory.
 
 ### Bug Fixes
 

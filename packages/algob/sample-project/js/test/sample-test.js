@@ -58,7 +58,7 @@ describe("Sample Test", function () {
 		const initialMasterBalance = master.balance();
 
 		try {
-			runtime.executeTx([
+			assert.throws(() => runtime.executeTx([
 				{
 					type: types.TransactionType.TransferAlgo,
 					sign: types.SignType.LogicSignature,
@@ -68,7 +68,7 @@ describe("Sample Test", function () {
 					amountMicroAlgos: amount,
 					payFlags: { totalFee: invalidTxFee },
 				},
-			]);
+			]));
 		} catch (error) {
 			console.log(error);
 		}

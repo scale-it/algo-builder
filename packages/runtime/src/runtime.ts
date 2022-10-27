@@ -7,7 +7,6 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
-import { exec } from "child_process";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
