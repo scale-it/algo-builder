@@ -1,10 +1,9 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { spawnSync, SpawnSyncReturns } from "child_process";
+import { spawnSync, SpawnSyncReturns, exec } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
 import { getPathFromDirRecursive } from "./files";
-import { exec } from "child_process";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
