@@ -24,8 +24,7 @@ async function run(runtimeEnv, deployer) {
 
 	await tryExecuteTx(deployer, algoTxnParams); // execute Create app transaction
 
-	await deployer
-		.deployApp(
+	await deployer.deployApp(
 			john,
 			{
 				appName: "proxy_trampoline",
