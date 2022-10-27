@@ -49,7 +49,7 @@ const placeholderParam = {
 const approvalProgramFilename = "bond-dapp-stateful.py";
 const clearProgramFilename = "bond-dapp-clear.py";
 
-const approvalProgram = getProgram(approvalProgramFilename, placeholderParam);
+const approvalProgram = getProgram(approvalProgramFilename, "", placeholderParam);
 const clearProgram = getProgram(clearProgramFilename);
 
 const minBalance = 10e6; // 10 ALGO's

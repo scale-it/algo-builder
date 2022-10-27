@@ -39,7 +39,7 @@ describe("Unique NFT ASA tests", function () {
 		nftAppID = runtime.deployApp(creator.account, appDef, {}).appID;
 
 		// setup stateless lsig
-		const statelessLsigProg = getProgram("stateless.py", {
+		const statelessLsigProg = getProgram("stateless.py", "", {
 			ARG_P: p,
 			ARG_NFT_APP_ID: nftAppID,
 		});

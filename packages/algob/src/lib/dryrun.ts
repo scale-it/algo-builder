@@ -150,7 +150,7 @@ export class Tealdbg {
 				if (tealFromPyTEAL !== undefined && debugCtxParams.scInitParam === undefined) {
 					console.info("\x1b[33m%s\x1b[0m", `Using cached TEAL code for ${file}`);
 				} else {
-					tealFromPyTEAL = getProgram(file, debugCtxParams.scInitParam);
+					tealFromPyTEAL = getProgram(file, "", debugCtxParams.scInitParam);
 				}
 				this.writeFile(pathToFile, tealFromPyTEAL);
 			} else {
