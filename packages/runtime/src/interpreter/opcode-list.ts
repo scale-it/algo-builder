@@ -764,7 +764,6 @@ export class Ed25519verify extends Op {
 		const addr = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
-		const bytes = Buffer.from(this.program);
 
 		const toBeHashed = "ProgData".concat(this.program);
 		const programHash = Buffer.from(sha512_256(toBeHashed));
