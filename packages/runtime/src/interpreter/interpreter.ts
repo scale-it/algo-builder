@@ -171,7 +171,7 @@ export class Interpreter {
 
 		if (
 			txAccounts?.find((buff) => compareArray(Uint8Array.from(buff), accountPk)) !==
-				undefined ||
+			undefined ||
 			compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
 			// since tealv5, currentApplicationAddress is also allowed (directly)
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey) ||
@@ -597,21 +597,26 @@ export class Interpreter {
 		return result;
 	}
 
-	//TODO:add description
+	/**
+	 * This functions checks if the requested round is avaiable to access. If it is
+	 * not throws an Error
+	 * @param round: round number
+	 * @returns void
+	 */
 	assertRoundIsAvailable(round: number): void {
 		let firstAvail = this.runtime.ctx.tx.lv - MaxTxnLife - 1;
 		if (firstAvail > this.runtime.ctx.tx.lv || firstAvail === 0) {
 			// early in chain's life
 			firstAvail = 1;
 		}
-		//TODO: what happends if FirstValid is undefined?
 		let lastAvail = this.runtime.ctx.tx.fv === undefined ? 0 : this.runtime.ctx.tx.fv - 1;
 		if (this.runtime.ctx.tx.fv === undefined || lastAvail > this.runtime.ctx.tx.fv) {
 			// txn had a 0 in FirstValid
 			lastAvail = 0; // So nothing will be available
 		}
 		if (firstAvail > round || round > lastAvail) {
-			throw new Error();
+			throw new Error("round is not available");
+			//todo: add better error
 			// throw error ("round %d is not available. It's outside [%d-%d]", r, firstAvail, lastAvail)
 		}
 	}

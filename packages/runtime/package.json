@@ -34,9 +34,11 @@
 	"dependencies": {
 		"@algo-builder/web": "workspace:*",
 		"@nodelib/fs.walk": "^1.2.8",
+		"@types/crypto-js": "^4.1.1",
 		"@types/json-bigint": "^1.0.1",
 		"algosdk": "^1.19.0",
 		"chalk": "^4.1.2",
+		"crypto-js": "^4.1.1",
 		"debug": "^4.3.4",
 		"elliptic": "^6.5.4",
 		"hi-base32": "^0.5.1",

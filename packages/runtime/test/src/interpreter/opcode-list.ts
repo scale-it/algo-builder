@@ -11,8 +11,10 @@ import algosdk, {
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
 import { sha512_256 } from "js-sha512";
+import cloneDeep from "lodash.clonedeep";
 import { describe } from "mocha";
 import nacl from "tweetnacl";
+import { isGeneratorFunction } from "util/types";
 
 import { ExecutionMode } from "../../../build/types";
 import { AccountStore } from "../../../src/account";
@@ -7564,38 +7566,65 @@ describe("Teal Opcodes", function () {
 			assert.equal(expectedResult, stack.pop());
 		});
 	});
-	describe.only("block op", function () {
+	describe("Block opcode", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
-		const LAST_VALID = 259820n;
+		const FIRST_VALID = 258820n;
 		this.beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
-			interpreter.runtime.ctx.tx = TXN_OBJ;
+			interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
 			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
 		});
 
-		it.only("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
-			stack.push(BigInt(TXN_OBJ.fv - 2));
+		it("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
+			stack.push(BigInt(FIRST_VALID - 2n));
 			const op = new Block(["BlkTimestamp"], 1, interpreter);
 			assert.throws(() => op.execute(stack));
 		});
-		it("Should allow to acces two behind FirstValid", function () {
-			stack.push(BigInt(TXN_OBJ.fv - 1));
+
+		it("Should allow to acces two behind FirstValid if LastValid is 100 after", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
+			stack.push(BigInt(FIRST_VALID - 2n));
 			const op = new Block(["BlkTimestamp"], 1, interpreter);
 			assert.doesNotThrow(() => op.execute(stack));
 		});
+
 		it("Should return two different seeds for to different rounds", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
 			const op = new Block(["BlkTimestamp"], 1, interpreter);
 			//first round
-			stack.push(LAST_VALID - 2n);
+			stack.push(FIRST_VALID - 1n);
 			op.execute(stack);
 			const seedRound1 = stack.pop();
 			//second round
-			stack.push(LAST_VALID - 3n);
+			stack.push(FIRST_VALID - 2n);
 			op.execute(stack);
 			const seedRound2 = stack.pop();
 			assert.notEqual(seedRound1, seedRound2);
+		});
+
+		it("Should fail when accesing block 0 even if last valid is low", function(){
+			interpreter.runtime.ctx.tx.lv = 100;
+			interpreter.runtime.ctx.tx.fv = 5;
+			stack.push(0n);
+			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+
+		it("Should return seed for a block that is within boundries and exist", function(){
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block(["BlkSeed"], 1, interpreter);
+			op.execute(stack);
+			const result = stack.pop();
+			assert.equal((result as Buffer).length, 32);
+		});
+
+		it("Should return correct cost", function(){
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block(["BlkSeed"], 1, interpreter);
+			const cost = op.execute(stack);
+			assert.equal(cost, 1);
 		});
 	});
 });

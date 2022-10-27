@@ -7,9 +7,11 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
-import { randomBytes } from "crypto";
+import MD5 from "crypto-js/md5";
+// import { randomBytes } from "crypto";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
+import { hash } from "tweetnacl-ts";
 import { bigint, map } from "zod";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
@@ -92,8 +94,8 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 1;
-		this.produceBlock();
+		this.round = 258820;
+		this.populateChain(this.round);
 		this.timestamp = 1;
 	}
 
@@ -1168,31 +1170,49 @@ export class Runtime {
 		return this.executeTx(transactions);
 	}
 
+	/**
+	 * Produces new block and adds it to a Map where the keys are block numbers
+	 */
 	produceBlock() {
 		let timestamp: bigint | undefined;
 		let seed: Uint8Array | undefined;
 		if (this.store.blocks.size === 0) { //create genesis block
-			seed = randomBytes(32);
+			seed = nacl.randomBytes(32);
 			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
 		} else { //add another block
 			const lastBlock = this.store.blocks.get(this.round);
 			if (lastBlock !== undefined) {
-				seed = randomBytes(32);
+				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
 				timestamp = lastBlock.timestamp + 4n;
 				this.round += 1;// we move to new a new round
 			}
 		}
 		if (timestamp !== undefined && seed !== undefined) {
 			this.store.blocks.set(this.round, { timestamp, seed });
-		}
+		} else {
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+		}
 	}
-
+	/**
+	 * Returns a requested Block object. If it does not exist on chain throws an error
+	 * @param round block number
+	 * @returns Block
+	 */
 	getBlock(round: number): Block {
 		const block = cloneDeep(this.store.blocks.get(round));
 		if (block !== undefined) {
 			return block;
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
+	}
+	/**
+	 * Populates chain from first block to round number block (Produces N rounds) 
+	 * @param round current round number
+	 */
+	populateChain(round:number) {
+		this.round = 1
+		for(let blockN = 1; blockN<=round; blockN++){
+			this.produceBlock();
+		}
 	}
 }

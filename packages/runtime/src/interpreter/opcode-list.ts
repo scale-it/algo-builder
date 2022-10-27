@@ -5286,15 +5286,20 @@ export class Bn254Pairing extends Op {
 		return this.computeCost();
 	}
 }
-//TODO:add description
+
+/**
+ * Opcode: 0xd1 {uint8 block field}
+ * Stack: ..., A: uint64 → ..., any
+ * field F of block A. Fail unless A falls between txn.LastValid-1002 and txn.FirstValid (exclusive)
+*/
 export class Block extends Op {
 	readonly line: number;
 	readonly field: string;
 	readonly interpreter: Interpreter;
-	//TODO:add description
 	/**
-	 * @param args
+	 * @param args Expected arguments: [BlkSeed || BlkTimestamp]
 	 * @param line line number in TEAL file
+	 * @param interpreter interpreter instance
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
@@ -5303,8 +5308,7 @@ export class Block extends Op {
 		if (argument === "BlkSeed" || argument === "BlkTimestamp") {
 			this.field = argument;
 		} else {
-			throw new Error();
-			//throw an error, unknown field
+			throw new Error("Unknown Block field");
 		}
 		this.line = line;
 		this.interpreter = interpreter;
