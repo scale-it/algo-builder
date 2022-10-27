@@ -7569,7 +7569,7 @@ describe("Teal Opcodes", function () {
 	describe("Block opcode", function () {
 		const stack = new Stack<StackElem>();
 		let interpreter: Interpreter;
-		const FIRST_VALID = 258820n;
+		const FIRST_VALID = 2000n;
 		this.beforeEach(function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);

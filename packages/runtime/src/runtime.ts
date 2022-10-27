@@ -11,8 +11,6 @@ import MD5 from "crypto-js/md5";
 // import { randomBytes } from "crypto";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
-import { hash } from "tweetnacl-ts";
-import { bigint, map } from "zod";
 
 import { AccountStore, defaultSDKAccounts, RuntimeAccount } from "./account";
 import { Ctx } from "./ctx";
@@ -23,7 +21,6 @@ import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
-	BlockFinalizationTime,
 	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
@@ -94,7 +91,7 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 258820;
+		this.round = 2000;
 		this.populateChain(this.round);
 		this.timestamp = 1;
 	}
