@@ -2733,7 +2733,7 @@ describe("Parser", function () {
 			assert.doesNotThrow(() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter));
 		});
 
-		it("Should fail when (program size + args size) != LogicSigMaxSize", function () {
+		it("Should fail when (program size + args size) > LogicSigMaxSize", function () {
 			const file = "test-arg.teal"; // byte size 3
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(998)];
