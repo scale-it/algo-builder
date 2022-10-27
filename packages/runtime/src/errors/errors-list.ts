@@ -456,6 +456,12 @@ maximun uint128`,
 		description:
 			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
 	},
+	UNKNOWN_BLOCK_FIELD: {
+		number: 1067,
+		message: "Unknown block opcode field",
+		title: "Unknown field",
+		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	}
 };
 
 const runtimeGeneralErrors = {

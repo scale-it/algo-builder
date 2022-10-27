@@ -7,7 +7,6 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
-
 import MD5 from "crypto-js/md5";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
@@ -21,6 +20,7 @@ import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
@@ -1180,7 +1180,7 @@ export class Runtime {
 			const lastBlock = this.store.blocks.get(this.round);
 			if (lastBlock !== undefined) {
 				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
-				timestamp = lastBlock.timestamp + 4n;
+				timestamp = lastBlock.timestamp + BlockFinalisationTime;
 				this.round += 1;// we move to new a new round
 			}
 		}

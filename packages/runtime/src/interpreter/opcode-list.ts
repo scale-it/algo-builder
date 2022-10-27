@@ -29,7 +29,6 @@ import {
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
 	AssetParamMap,
-	BlockFinalizationTime,
 	GlobalFields,
 	ITxArrFields,
 	json_refTypes,
@@ -46,6 +45,7 @@ import {
 	TransactionTypeEnum,
 	TxArrFields,
 	ZERO_ADDRESS,
+	blockFieldTypes,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -5304,10 +5304,10 @@ export class Block extends Op {
 		super();
 		assertLen(args.length, 1, line);
 		const argument = args[0];
-		if (argument === "BlkSeed" || argument === "BlkTimestamp") {
+		if (argument === blockFieldTypes.BlkSeed|| argument === blockFieldTypes.BlkTimestamp) {
 			this.field = argument;
 		} else {
-			throw new Error("Unknown Block field");
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, {field: argument});
 		}
 		this.line = line;
 		this.interpreter = interpreter;
@@ -5318,7 +5318,7 @@ export class Block extends Op {
 		this.interpreter.assertRoundIsAvailable(round);
 		const block = this.interpreter.runtime.getBlock(round);
 		let result: StackElem;
-		if (this.field === "BlkSeed") {
+		if (this.field === blockFieldTypes.BlkSeed) {
 			result = block.seed;
 		} else {
 			//"BlkTimestamp"

@@ -520,6 +520,11 @@ export const json_refTypes = {
 	JSONObject: "JSONObject",
 };
 
+export enum blockFieldTypes {
+	BlkTimestamp = "BlkTimestamp",
+	BlkSeed = "BlkSeed",
+};
+
 export enum TxFieldEnum {
 	FirstValidTime = "FirstValidTime",
 	TypeEnum = "TypeEnum",
