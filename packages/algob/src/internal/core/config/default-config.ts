@@ -3,6 +3,7 @@ import { ALGOB_CHAIN_NAME } from "../../constants";
 
 const cfg: ChainCfg = {
 	accounts: [],
+	paths: { assets: "assets" },
 	chainName: ALGOB_CHAIN_NAME,
 	throwOnTransactionFailures: true,
 	throwOnCallFailures: true,

@@ -78,6 +78,9 @@ let algodCred = algodCredentialsFromEnv();
 let envCfg = {
 	...algodCred,
 	accounts: accounts,
+	paths: {
+		assets: "assets"
+	}
 };
 
 module.exports = {

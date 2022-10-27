@@ -78,6 +78,10 @@ let algodCred = algodCredentialsFromEnv();
 let envCfg = {
 	...algodCred,
 	accounts: accounts,
+	// You can set the path for assets to be relative or absolute
+	paths: {
+		assets: "assets"
+	}
 };
 
 module.exports = {

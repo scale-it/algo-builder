@@ -14,6 +14,8 @@ describe("Sample Test", function () {
 	let runtime;
 	let lsig;
 	const feeCheckProgram = getProgram("fee-check.teal");
+	// Add a path to getProgram from another path instead of assets
+	// const feeCheckProgram = getProgram("fee-check.teal", "../assets");
 
 	this.beforeEach(async function () {
 		master = new AccountStore(masterBalance);
