@@ -1454,7 +1454,7 @@ describe.only("Funtions related to runtime chain", function(){
 		expect(currentBlock.timestamp).to.be.a('bigint');
 	})
 
-	it.only("Should produce a new block and move to next round", function(){
+	it("Should produce a new block and move to next round", function(){
 		const currentRound = runtime.getRound();
 		const currentBlock = runtime.getBlock(currentRound);
 		//produce new block and move to next round
