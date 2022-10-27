@@ -15,3 +15,4 @@ do
     done
 done
 exit $status
+exit 1
