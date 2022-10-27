@@ -10,6 +10,7 @@ The config is used to list available algorand networks, accounts and how to conn
 A network object specifs the following entries:
 
 - `accounts` - list of `algosdk.Account` objects (required)
+- `paths` - list of `string` (optional, default is `{assets:"assets"}`)
 - `host` (string, required, can be with http or https prefix)
 - `port` (number, required)
 - `token` (required, default `none`)
@@ -169,6 +170,38 @@ NOTE: don't use any of the accounts above. They are provided only as an example 
 
 You can merge accounts in the config file (eg by using `concat` method on an `Array`).
 You can also construct different accounts for different networks.
+
+## Paths
+You can add paths config in your network config `paths` to specify the path to which type of files you want. Currently we support `assets` path in `paths`
+
+Eg.
+```js
+let defaultCfg = {
+  host: "http://localhost",
+  port: 4001,
+  token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  accounts: accounts,
+  paths: {
+    assets: "assets"
+  }
+};
+
+module.exports = {
+ networks: {
+  default: defaultCfg
+  ..
+ }
+}
+```
+
+Now in the algob script, you can use `deployer.assetPath`. Eg.
+
+```js
+async function run (runtimeEnv, deployer) {
+  console.log('Script has started execution!');
+  const assetPath = deployer.assetPath;
+  
+```
 
 ## Indexer
 

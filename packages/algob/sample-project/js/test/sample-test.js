@@ -14,6 +14,8 @@ describe("Sample Test", function () {
 	let runtime;
 	let lsig;
 	const feeCheckProgram = getProgram("fee-check.teal");
+	// Add a path to getProgram from another path instead of assets
+	// const feeCheckProgram = getProgram("fee-check.teal", "../assets");
 
 	this.beforeEach(async function () {
 		master = new AccountStore(masterBalance);
@@ -56,7 +58,7 @@ describe("Sample Test", function () {
 		const initialMasterBalance = master.balance();
 
 		try {
-			runtime.executeTx([
+			assert.throws(() => runtime.executeTx([
 				{
 					type: types.TransactionType.TransferAlgo,
 					sign: types.SignType.LogicSignature,
@@ -66,7 +68,7 @@ describe("Sample Test", function () {
 					amountMicroAlgos: amount,
 					payFlags: { totalFee: invalidTxFee },
 				},
-			]);
+			]));
 		} catch (error) {
 			console.log(error);
 		}

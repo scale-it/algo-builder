@@ -33,11 +33,16 @@ interface CommonNetworkConfig {
 	accounts: rtypes.Account[];
 	// optional, when provided KMD accounts will be loaded by the config resolver
 	// and merged into the accounts variable (above)
+	paths?: assetPath;
 	kmdCfg?: KmdCfg;
 	indexerCfg?: IndexerCfg;
 	chainName?: string;
 	// from?: string;
 	// TODO: timeout?: number;
+}
+
+export interface assetPath {
+	assets: string;
 }
 
 export interface ChainCfg extends CommonNetworkConfig {
@@ -419,6 +424,7 @@ export interface Deployer {
 	isDeployMode: boolean;
 	accounts: rtypes.Account[];
 	accountsByName: rtypes.AccountMap;
+	assetPath: string;
 
 	/**
 	 * Mapping of ASA name to deployment log */

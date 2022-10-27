@@ -26,12 +26,15 @@ export class DeployerConfig {
 	indexerClient: Indexer | undefined;
 	txWriter: txWriter;
 	accounts: rtypes.AccountMap;
+	assetPath: string;
 
 	constructor(runtimeEnv: RuntimeEnv, algoOp: AlgoOperator) {
 		this.runtimeEnv = runtimeEnv;
 		this.cpData = loadCheckpointsRecursive();
 		this.algoOp = algoOp;
 		this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts ?? []);
+		const assetpath = runtimeEnv.network.config.paths?.assets;
+		this.assetPath = assetpath ? assetpath : "assets";
 		this.txWriter = new TxWriterImpl("");
 		this.asaDefs = loadASAFile(this.accounts);
 		this.indexerClient = createIndexerClient(runtimeEnv.network.config.indexerCfg);

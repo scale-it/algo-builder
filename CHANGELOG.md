@@ -20,6 +20,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
+- Added support of `getProgram` which can get program string from `assetPath`(relative or absolute path) path.
+- Add `paths` to `algob.config.js` to specify list of paths.
 
 #### Examples
 
@@ -60,6 +62,7 @@ from `algosdk` and sends it to the network.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 - Added support for unfunded accounts in `Runtime`.
 - Added `waitRounds` as second param to `sendAndWait` method. It is optional and has a default value of 10.
+- Added support for to generate the `algob.config.ts` file generation via algob (`yarn run algob . --typescript`) and read the algob.config.ts` file, if present in root directory.
 
 ### Bug Fixes
 

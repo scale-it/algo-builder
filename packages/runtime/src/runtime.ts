@@ -7,8 +7,8 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
+
 import MD5 from "crypto-js/md5";
-// import { randomBytes } from "crypto";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -769,7 +769,7 @@ export class Runtime {
 	 * @returns loaded logic signature from assets/<file_name>.teal
 	 */
 	loadLogic(fileName: string, scTmplParams?: SCParams, logs = true): LogicSigAccount {
-		const program = getProgram(fileName, scTmplParams, logs);
+		const program = getProgram(fileName, "", scTmplParams, logs);
 		return this.createLsigAccount(program, []); // args can be set during executeTx
 	}
 
