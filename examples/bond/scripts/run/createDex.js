@@ -55,9 +55,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 		TMPL_APPLICATION_ID: appInfo.appID,
 		TMPL_APP_MANAGER: managerAcc.addr,
 	};
-	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", lsigParams).catch((error) => {
-		throw error;
-	});
+	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", lsigParams);
 
 	await fundAccount(deployer, dexLsig.address());
 

@@ -17,11 +17,8 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
 		TMPL_APP_MANAGER: managerAcc.addr,
 		TMPL_BOND: bondToken,
 	};
-	const buybackLsig = await deployer
-		.loadLogicByFile("buyback-lsig.py", scInitParam)
-		.catch((error) => {
-			throw error;
-		});
+	const buybackLsig = await deployer.loadLogicByFile("buyback-lsig.py", scInitParam);
+
 	const exitAmount = Number(amount) * Number(nominalPrice);
 	const exitTx = [
 		//  Bond token transfer to buyback address

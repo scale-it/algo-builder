@@ -19,9 +19,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
 		TMPL_APPLICATION_ID: appInfo.appID,
 		TMPL_APP_MANAGER: managerAcc.addr,
 	};
-	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", scInitParam).catch((error) => {
-		throw error;
-	});
+	const dexLsig = await deployer.loadLogicByFile("dex-lsig.py", scInitParam);
 	await deployer.optInAccountToASA(newBond, buyerAccount.name, {}).catch((error) => {
 		throw error;
 	});
