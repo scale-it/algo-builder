@@ -4,7 +4,8 @@ import assert from "assert";
 import { MyAlgoWalletSession, testnetURL, types } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
-import MyAlgoConnectMock from "../../mocks/myalgowallet-mock";
+import { MyAlgoConnectMock } from "../../mocks/myalgowallet-mock";
+import { receiverAccount, senderAccount } from "../../mocks/tx";
 
 describe("Webmode - MyAlgo Wallet test cases ", () => {
 	let connector: MyAlgoWalletSession;
@@ -19,8 +20,8 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	algodClient = algoexplorerAlgod(walletURL);
 
 	beforeEach(() => {
-		sender = algosdk.generateAccount();
-		receiver = algosdk.generateAccount();
+		sender = senderAccount;
+		receiver = receiverAccount;
 		connector = new MyAlgoWalletSession(walletURL, new MyAlgoConnectMock());
 
 	});
@@ -86,22 +87,6 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			const txnParams = await getSuggestedParams(algodClient);
 			assert.doesNotThrow(async () => {
 				await connector.makeAndSignTx([execParams], txnParams);
-			});
-		});
-
-		it("Should send a signed transaction and wait specified rounds for confirmation", async function () {
-			const execParams: types.AlgoTransferParam = {
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: sender,
-				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 1e6,
-				payFlags: {},
-			};
-			const txnParams = await getSuggestedParams(algodClient);
-			const signedTx = await connector.makeAndSignTx([execParams], txnParams);
-			assert.doesNotThrow(async () => {
-				await connector.sendTxAndWait(signedTx);
 			});
 		});
 	});

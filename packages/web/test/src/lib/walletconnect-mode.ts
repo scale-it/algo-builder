@@ -1,12 +1,13 @@
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
-import { testnetURL, types } from "../../../src";
+import { testnetURL, types, WallectConnectSession } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
-import WallectConnectSessionMock from "../../mocks/walletconnect-mode";
+import { WalletConnectMock } from "../../mocks/walletconnect-mock";
+import { receiverAccount, senderAccount } from "../../mocks/tx";
 
 describe("Webmode - Wallet Connect test cases ", function () {
-    let connector: WallectConnectSessionMock;
+    let connector: WallectConnectSession;
     let sender: Account;
     let receiver: Account;
 
@@ -19,9 +20,24 @@ describe("Webmode - Wallet Connect test cases ", function () {
     algodClient = algoexplorerAlgod(walletURL);
 
     this.beforeEach(async function () {
-        sender = algosdk.generateAccount();
-        receiver = algosdk.generateAccount();
-        connector = new WallectConnectSessionMock(walletURL);
+        sender = senderAccount
+        receiver = receiverAccount
+
+        connector = new WallectConnectSession(walletURL, new WalletConnectMock({
+            bridge: "https://bridge.walletconnect.org", uri: "", session: {
+                connected: true,
+                accounts: [senderAccount.addr, receiverAccount.addr],
+                chainId: 0,
+                bridge: "https://bridge.walletconnect.org",
+                key: "key",
+                clientId: "id",
+                peerId: "peerid",
+                handshakeId: 1,
+                handshakeTopic: "",
+                clientMeta: null,
+                peerMeta: null
+            },
+        }));
     });
 
     it("Should run executeTx function without throwing an error", async function () {
@@ -85,22 +101,6 @@ describe("Webmode - Wallet Connect test cases ", function () {
             const txnParams = await getSuggestedParams(algodClient)
             assert.doesNotThrow(async () => {
                 await connector.makeAndSignTx([execParams], txnParams);
-            });
-        });
-
-        it("Should send a signed transaction and wait specified rounds for confirmation", async function () {
-            const execParams: types.AlgoTransferParam = {
-                type: types.TransactionType.TransferAlgo,
-                sign: types.SignType.SecretKey,
-                fromAccount: sender,
-                toAccountAddr: receiver.addr,
-                amountMicroAlgos: 1e6,
-                payFlags: {},
-            };
-            const txnParams = await getSuggestedParams(algodClient)
-            const signedTx = await connector.makeAndSignTx([execParams], txnParams);
-            assert.doesNotThrow(async () => {
-                await connector.sendTxAndWait(signedTx);
             });
         });
     });

@@ -3,6 +3,7 @@ import assert from "assert";
 
 import { types, WebMode } from "../../../src";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
+import { receiverAccount, senderAccount } from "../../mocks/tx";
 
 describe("Webmode - Algosigner test cases ", function () {
 	let webMode: WebMode;
@@ -10,8 +11,8 @@ describe("Webmode - Algosigner test cases ", function () {
 	let receiver: Account;
 
 	this.beforeEach(function () {
-		sender = algosdk.generateAccount();
-		receiver = algosdk.generateAccount();
+		sender = senderAccount;
+		receiver = receiverAccount
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
 	});
 
@@ -74,22 +75,6 @@ describe("Webmode - Algosigner test cases ", function () {
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			assert.doesNotThrow(async () => {
 				await webMode.makeAndSignTx([execParams], txnParams);
-			});
-		});
-
-		it("Should send a signed transaction and wait specified rounds for confirmation", async function () {
-			const execParams: types.AlgoTransferParam = {
-				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: sender,
-				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
-				payFlags: {},
-			};
-			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
-			const signedTx = await webMode.makeAndSignTx([execParams], txnParams);
-			assert.doesNotThrow(async () => {
-				await webMode.sendTxAndWait(signedTx);
 			});
 		});
 	});

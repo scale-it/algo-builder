@@ -27,8 +27,18 @@ export const txObject = {
 	group: undefined,
 };
 
-const account = algosdk.generateAccount();
-const addr = algosdk.decodeAddress(account.addr);
+const johnMne = "found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip"
+export const senderAccount = {
+	addr: "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+	sk: algosdk.mnemonicToSecretKey(johnMne).sk
+}
+const alicemne = "brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick"
+export const receiverAccount = {
+	addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
+	sk: algosdk.mnemonicToSecretKey(alicemne).sk,
+}
+
+const addr = algosdk.decodeAddress(senderAccount.addr);
 
 // MOCK Algorand Encoded Transaction
 export const encodedTxnObject: algosdk.EncodedTransaction = {
@@ -100,3 +110,13 @@ export const mockSuggestedParam: SuggestedParams = {
 	genesisID: "testnet-v1.0",
 	genesisHash: "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
 };
+
+export const txnReceiptMock = {
+	txID: "1",
+	"confirmed-round": 1,
+	"asset-index": 1,
+	"application-index": 1,
+	txn: {
+		txn: encodedTxnObject,
+	}
+}
