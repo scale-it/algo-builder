@@ -56,8 +56,8 @@ export const MAX_LOCAL_SCHEMA_ENTRIES = 16;
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
-export const MaxTxnLife = 1000; //TODO:add description
-export const BlockFinalizationTime = 2n; // block finalization time in seconds truncated down
+export const MaxTxnLife = 1000;
+export const BlockFinalisationTime = 4n; // block finalisation time in seconds truncated down
 
 export const ZERO_ADDRESS = new Uint8Array(32);
 export const ZERO_ADDRESS_STR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
