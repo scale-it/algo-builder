@@ -18,7 +18,7 @@
 
 // ## ACCOUNTS USING mnemonic ##
 const { mkAccounts, algodCredentialsFromEnv } = require("@algo-builder/algob");
-let accounts = mkAccounts([
+const accounts = mkAccounts([
 	{
 		// This account is created using `make setup-master-account` command from our
 		// `/infrastructure` directory. It already has many ALGOs
@@ -78,6 +78,9 @@ let algodCred = algodCredentialsFromEnv();
 let envCfg = {
 	...algodCred,
 	accounts: accounts,
+	paths: {
+		assets: "assets"
+	}
 };
 
 module.exports = {

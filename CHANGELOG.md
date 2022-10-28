@@ -20,6 +20,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add unit tests for all transaction types in runtime executeTx.
 - Add support loadLogic for *.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
+- Added support of `getProgram` which can get program string from `assetPath`(relative or absolute path) path.
+- Add `paths` to `algob.config.js` to specify list of paths.
 
 #### Examples
 
@@ -30,7 +32,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 - Add `--npm` flag to `algob init` and `algob unbox`. Note: by default we will use `yarn`.
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
-- Add `waitRounds` params to `sendAndWait` method. `waitRounds` is option argument and have dlsefault value is 10.
 - Add `Uint8Array` as a supported type for `TxParams.note`
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
 from `algosdk` and sends it to the network. 
@@ -51,6 +52,8 @@ from `algosdk` and sends it to the network.
 - Added support for new txn opcode fileds `ApprovalProgramPages`, `ClearProgramStatePages`, `NumApprovalProgramPages`, `NumClearProgramStatePages`.
 - Added additional checks for the `maxStackByteElementSize` and `maxProgramLength` in `Runtime`.
 - Added partial support for `bn254` opcodes. The full support delyed until the official release of `TEALv8/v9`.
+- Added a new pre-commit hook to check if there are any `.only`in tests . If there are any it will display error in which files/lines the problem was found.
+
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
@@ -58,6 +61,8 @@ from `algosdk` and sends it to the network.
 - Added `SignTx`, `makeTx`, `makeAndSignTx`, `sendTxAndWait` helper methods in all webmodes.
 - Added `MultiSignature` support for all methods `MyAlgo Wallet`.
 - Added support for unfunded accounts in `Runtime`.
+- Added `waitRounds` as second param to `sendAndWait` method. It is optional and has a default value of 10.
+- Added support for to generate the `algob.config.ts` file generation via algob (`yarn run algob . --typescript`) and read the algob.config.ts` file, if present in root directory.
 
 ### Bug Fixes
 
@@ -66,6 +71,7 @@ from `algosdk` and sends it to the network.
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
 - Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
+- Fix `global CallerApplicationID` opcode. Previously the opcode get the wrong caller application ID[798](https://github.com/scale-it/algo-builder/pull/798). 
 
 ### Breaking Changes
 

@@ -218,8 +218,10 @@ export class Ctx implements Context {
 
 	getCallerApplicationID(): number {
 		let callerApplicationID = 0;
-		if (this.innerTxAppIDCallStack.length > 0) {
-			callerApplicationID = this.innerTxAppIDCallStack[this.innerTxAppIDCallStack.length - 1];
+		// when the top value in the `innerTxAppIDCallStack` is the own appID
+		// not the caller appID(we need to get the second top one)
+		if (this.innerTxAppIDCallStack.length > 1) {
+			callerApplicationID = this.innerTxAppIDCallStack[this.innerTxAppIDCallStack.length - 2];
 		}
 		return callerApplicationID;
 	}
@@ -365,12 +367,12 @@ export class Ctx implements Context {
 
 		const approvalProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.approvalProgramFilename, scTmplParams)
+				? getProgram(appDefinition.approvalProgramFilename, "", scTmplParams)
 				: appDefinition.approvalProgramCode;
 
 		const clearProgTEAL =
 			appDefinition.metaType === types.MetaType.FILE
-				? getProgram(appDefinition.clearProgramFilename, scTmplParams)
+				? getProgram(appDefinition.clearProgramFilename, "", scTmplParams)
 				: appDefinition.clearProgramCode;
 
 		if (approvalProgTEAL === "") {
@@ -744,12 +746,12 @@ export class Ctx implements Context {
 
 		const approvalProgTEAL =
 			appSourceCode.metaType === types.MetaType.FILE
-				? getProgram(appSourceCode.approvalProgramFilename, scTmplParams)
+				? getProgram(appSourceCode.approvalProgramFilename, "", scTmplParams)
 				: appSourceCode.approvalProgramCode;
 
 		const clearProgTEAL =
 			appSourceCode.metaType === types.MetaType.FILE
-				? getProgram(appSourceCode.clearProgramFilename, scTmplParams)
+				? getProgram(appSourceCode.clearProgramFilename, "", scTmplParams)
 				: appSourceCode.clearProgramCode;
 
 		if (approvalProgTEAL === "") {

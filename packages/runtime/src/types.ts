@@ -8,20 +8,6 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 
-import {
-	Add,
-	Addr,
-	Arg,
-	Byte,
-	Bytec,
-	Bytecblock,
-	Div,
-	Int,
-	Len,
-	Mul,
-	Pragma,
-	Sub,
-} from "./interpreter/opcode-list";
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
 
