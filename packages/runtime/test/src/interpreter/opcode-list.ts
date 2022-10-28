@@ -7625,7 +7625,7 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		})
-		it("Should throw error when unknown field", function(){
+		it("Should throw error when field is unknown", function(){
 			expectRuntimeError(()=> new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
 		})
 	});
