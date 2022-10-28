@@ -118,7 +118,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 	});
 
 	describe('Extra Pages', function () {
-		it("Should pass when program length doesn't exceeds total allowed program length", function () {
+		it("Should pass when program length doesn't exceed total allowed program length", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
