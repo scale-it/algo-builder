@@ -128,6 +128,7 @@ import {
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
+	LogicSigMaxSize
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
@@ -2723,6 +2724,30 @@ describe("Parser", function () {
 				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
 				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 			);
+		});
+
+		it("Should pass when (program size + args size) = LogicSigMaxSize", function () {
+			const file = "test-arg.teal"; // byte size 3
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 3)];
+
+			assert.doesNotThrow(() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter));
+
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
+		});
+
+		it("Should fail when (program size + args size) > LogicSigMaxSize", function () {
+			const file = "test-arg.teal"; // byte size 3
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 2)];
+
+			expectRuntimeError(
+				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
 		});
 	});
 });
