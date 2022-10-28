@@ -1448,7 +1448,7 @@ describe("Funtions related to runtime chain", function () {
 		runtime = new Runtime([]);
 	});
 
-	it.only("Should return current block", function () {
+	it("Should return current block", function () {
 		const currentBlock = runtime.getBlock(runtime.getRound());
 		assert.equal(currentBlock.seed.length, 32);
 		expect(currentBlock.timestamp).to.be.a("bigint");
