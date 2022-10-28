@@ -1441,20 +1441,20 @@ describe("Helper functions", function () {
 		});
 	});
 });
-describe.only("Funtions related to runtime chain", function(){
+describe("Funtions related to runtime chain", function () {
 	let runtime: Runtime;
 
-	this.beforeEach(function(){
+	this.beforeEach(function () {
 		runtime = new Runtime([]);
-	})
+	});
 
-	it("Should return current block", function(){
+	it.only("Should return current block", function () {
 		const currentBlock = runtime.getBlock(runtime.getRound());
 		assert.equal(currentBlock.seed.length, 32);
-		expect(currentBlock.timestamp).to.be.a('bigint');
-	})
+		expect(currentBlock.timestamp).to.be.a("bigint");
+	});
 
-	it.only("Should produce a new block and move to next round", function(){
+	it("Should produce a new block and move to next round", function () {
 		const currentRound = runtime.getRound();
 		const currentBlock = runtime.getBlock(currentRound);
 		//produce new block and move to next round
@@ -1463,6 +1463,6 @@ describe.only("Funtions related to runtime chain", function(){
 		const newBlock = runtime.getBlock(newRound);
 		assert.equal(currentRound + 1, newRound);
 		assert.notDeepEqual(currentBlock, newBlock);
-		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp)
-	})
-})
+		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
+	});
+});
