@@ -14,7 +14,7 @@ import algosdk, {
 import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Hasher, Message, sha256 } from "js-sha256";
-import { sha512_256 } from "js-sha512";
+import { sha512, sha512_256 } from "js-sha512";
 import JSONbig from "json-bigint";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
@@ -84,7 +84,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-const bn254 = require("rustbn.js");// eslint-disable-line @typescript-eslint/no-var-requires
+const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -4353,10 +4353,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-						sig: Buffer.alloc(5),
-						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					}
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -5276,6 +5276,67 @@ export class Bn254Pairing extends Op {
 		const boolResult = result.slice(-1)[0];
 		stack.push(boolResult);
 		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+/**
+ * Opcode: 0xd0 {uint8 parameters index}
+ * Stack: ..., A: []byte, B: []byte, C: []byte → ..., X: []byte, Y: uint64
+ * Verify the proof B of message A against pubkey C. Returns vrf output and verification flag.
+ * IMPORTANT: our implementation always assumes that the proof is correct
+ * Cost: 5700
+ */
+export class VrfVerify extends Op {
+	readonly line: number;
+	readonly vrfType: string;
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [VrfAlgorand]
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		super();
+		this.line = line;
+		switch (argument) {
+			case "VrfAlgorand": {
+				this.vrfType = argument;
+				break;
+			}
+			case "VrfStandard": {
+				this.vrfType = argument;
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
+			}
+		}
+	}
+
+	computeCost(): number {
+		return 5700;
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const message = this.assertBytes(stack.pop(), this.line);
+		const proof = this.assertBytes(stack.pop(), this.line);
+		const publicKey = this.assertBytes(stack.pop(), this.line);
+
+		if (proof.length !== 80) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
+		}
+		if (publicKey.length !== 32) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
+		}
+		if (this.vrfType === "VrfAlgorand") {
+			const hash = sha512(proof);
+			stack.push(convertToBuffer(hash, EncodingType.HEX));
+			stack.push(1n);
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
+		}
 		return this.computeCost();
 	}
 }

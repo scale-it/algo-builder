@@ -162,6 +162,7 @@ import {
 	Txna,
 	Txnas,
 	Uncover,
+	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
@@ -7562,5 +7563,70 @@ describe("Teal Opcodes", function () {
 			op.execute(stack);
 			assert.equal(expectedResult, stack.pop());
 		});
+	});
+
+	describe("vrf_verify", function () {
+		let stack = new Stack<StackElem>();
+		const publicKey = Buffer.from(
+			"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+			"hex"
+		);
+		const proof = Buffer.from(
+			"b6b4699f87d56126c9117a7da55bd0085246f4c56dbc95d20172612e9d38e8d7ca65e573a126ed88d4e30a46f80a666854d675cf3ba81de0de043c3774f061560f55edc256a787afe701677c0f602900",
+			"hex"
+		);
+		const message = Buffer.from("");
+		const expectedResult = Buffer.from(
+			"5b8e2bf68c9d33ec1477cb3e9305135f96a796163fb63983587ae1e3a6bfd3b1b3cbdee0d0cd465c0de7d30522ee003a6757b3ff7a737cc4a8717919d8940038",
+			"hex"
+		);
+
+		this.beforeEach(function(){
+			stack = new Stack<StackElem>();
+		})
+
+		it("Should return 1 and hash of proof for valid proof and verification key", function () {
+			const op = new VrfVerify(["VrfAlgorand"], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			op.execute(stack);
+			assert.deepEqual(1n, stack.pop());
+			assert.deepEqual(expectedResult, stack.pop());
+		});
+		it("Should throw error if pubKey size not equal 32", function(){
+			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const wrongSizePubKey = Buffer.from("b6b4699f87d56126c9117");
+			stack.push(wrongSizePubKey);
+			stack.push(proof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
+		})
+		it("Should throw error if proof size not equal 80", function(){
+			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
+			stack.push(publicKey);
+			stack.push(wrongSizeProof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
+		})
+		it("Should return correct cost", function(){
+			const op = new VrfVerify(["VrfAlgorand"], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			const cost = op.execute(stack);
+			assert.equal(cost, 5700);
+		})
+		it("Should throw error when field = VrfStandard", function(){
+			const op = new VrfVerify(["VrfStandard"], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
+		})
+		it("Should throw error when field is unknown", function(){
+			expectRuntimeError(()=> new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
+		})
 	});
 });
