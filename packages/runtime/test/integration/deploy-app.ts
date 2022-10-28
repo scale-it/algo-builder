@@ -189,7 +189,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
 		});
 
-		it("Should pass when sufficient extra pages was defined", function () {
+		it("Should pass when sufficient extra pages were defined", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
 				fromAccount: john.account,
