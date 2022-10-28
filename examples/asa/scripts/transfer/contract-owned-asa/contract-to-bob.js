@@ -16,7 +16,7 @@ async function run(runtimeEnv, deployer) {
 	await tryExecuteTx(deployer, mkParam(masterAccount, bob.addr, 5e6, { note: "Funding" }));
 	// Get AppInfo and AssetID from checkpoints.
 	const appInfo = deployer.getApp("StatefulASA_App");
-	const lsig = deployer.getLsig("StateLessASALsig");
+	const lsig = deployer.getLsig("StatelessASALsig");
 
 	/* Transfer ASA 'gold' from contract account to user account */
 	const assetID = deployer.asa.get("platinum").assetIndex;
