@@ -1,5 +1,4 @@
 #!/bin/sh
-echo "test"
 . "$(dirname "$0")/_/husky.sh"
 . "$(dirname "$0")/_/dissalowed_words.sh"
 
