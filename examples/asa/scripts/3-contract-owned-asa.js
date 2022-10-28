@@ -44,7 +44,7 @@ async function run(runtimeEnv, deployer) {
 
 	// Get Statless Account Address
 	await deployer
-		.mkContractLsig("StateLessASALsig", "5-contract-asa-stateless.py", {
+		.mkContractLsig("StatelessASALsig", "5-contract-asa-stateless.py", {
 			APP_ID: appInfo.appID,
 		})
 		.catch((error) => {
