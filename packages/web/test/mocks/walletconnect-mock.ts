@@ -1,18 +1,20 @@
 import WalletConnect from "@walletconnect/client";
 import { IJsonRpcRequest, IRequestOptions } from "@walletconnect/types";
-import { decodeUnsignedTransaction } from "algosdk";
+import algosdk, { decodeUnsignedTransaction } from "algosdk";
+import { senderAccount } from "./tx";
 
 export class WalletConnectMock extends WalletConnect {
-
     sendCustomRequest(request: Partial<IJsonRpcRequest>, options?: IRequestOptions | undefined): Promise<any> {
-
         return new Promise((resolve, reject) => {
+            const signedTransactions = []
             if (request.params) {
-                console.log(" im called", decodeUnsignedTransaction(Uint8Array.from(Buffer.from(request.params as any as string, "base64"))));
+                for (const param of request.params) {
+                    const decodedtransaction = decodeUnsignedTransaction(Uint8Array.from(Buffer.from(param[0].txn as string, "base64")))
+                    const encodedSignedTxn = Buffer.from(algosdk.signTransaction(decodedtransaction, senderAccount.sk).blob).toString("base64");
+                    signedTransactions.push(encodedSignedTxn)
+                }
             }
-            // const decodedtransaction = decodeUnsignedTransaction(request.params as unknown as Uint8Array);
-            // return resolve(algosdk.signTransaction(decodedtransaction, senderAccount.sk))
-
+            return resolve(signedTransactions)
         });
 
     }
