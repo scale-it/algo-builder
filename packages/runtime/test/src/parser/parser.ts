@@ -2732,6 +2732,9 @@ describe("Parser", function () {
 			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 3)];
 
 			assert.doesNotThrow(() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter));
+
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
 		});
 
 		it("Should fail when (program size + args size) > LogicSigMaxSize", function () {
@@ -2741,7 +2744,10 @@ describe("Parser", function () {
 
 			expectRuntimeError(
 				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
-				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
 		});
 	});
 });
