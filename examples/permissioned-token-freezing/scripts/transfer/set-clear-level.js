@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const creator = deployer.accountsByName.get("alice");
@@ -20,8 +21,8 @@ async function run(runtimeEnv, deployer) {
 	};
 
 	console.log("* Setting level 2 for Alice and Bob *");
-	await deployer.executeTx([setLevelParams]);
-	await deployer.executeTx([
+	await tryExecuteTx(deployer, [setLevelParams]);
+	await tryExecuteTx(deployer, [
 		{
 			...setLevelParams,
 			accounts: [bob.addr],

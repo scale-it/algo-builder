@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
@@ -53,7 +54,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const receiptsTx = await deployer.executeTx([
+	const receiptsTx = await tryExecuteTx(deployer, [
 		createAppTxnParam,
 		createASATxnParam,
 		masterTxnParam,

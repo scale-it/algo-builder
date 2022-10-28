@@ -16,13 +16,3 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 To run hash time lock contract or dynamic Fee use the deploy command:
 
     yarn run algob deploy
-
-## Notes 
-
-Default we don't show error when transaction fail. You can change this config follow below command:
-
-```bash
-echo "IGNORE_TX_FAIL=false" > .env
-```
-
-You can change the IGNORE_TX_FAIL to `true`, script will not show any error when execute a transaction fail.

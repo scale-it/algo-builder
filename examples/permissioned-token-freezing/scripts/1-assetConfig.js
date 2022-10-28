@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const creator = deployer.accountsByName.get("alice");
@@ -12,7 +13,11 @@ async function run(runtimeEnv, deployer) {
 		ASSET_ID: assetInfo.assetIndex,
 		APP_ID: appInfo.appID,
 	};
-	await deployer.mkContractLsig("clawbackEscrow", "clawback-escrow.py", escrowParams);
+	await deployer
+		.mkContractLsig("clawbackEscrow", "clawback-escrow.py", escrowParams)
+		.catch((error) => {
+			throw error;
+		});
 
 	await deployer.fundLsig("clawbackEscrow", { funder: creator, fundingMicroAlgo: 1e6 }, {}); // sending 1 Algo
 
@@ -29,7 +34,7 @@ async function run(runtimeEnv, deployer) {
 		fields: { clawback: escrowAddress }, // only pass the field you want to update
 		payFlags: { totalFee: 1000 },
 	};
-	await deployer.executeTx([assetConfigParams]);
+	await tryExecuteTx(deployer, [assetConfigParams]);
 
 	/** now lock the asset by clearing the manager and freeze account **/
 	console.log("* Locking the manager and freeze address *");
@@ -37,7 +42,7 @@ async function run(runtimeEnv, deployer) {
 		...assetConfigParams,
 		fields: { manager: "", freeze: "" },
 	};
-	await deployer.executeTx([assetLockParams]);
+	await tryExecuteTx(deployer, [assetLockParams]);
 }
 
 module.exports = { default: run };

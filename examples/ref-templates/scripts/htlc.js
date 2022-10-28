@@ -18,14 +18,18 @@ async function run(runtimeEnv, deployer) {
 	const wrongSecret = "hero wisdom red split loop element vote belt";
 
 	// setup a contract account and send 1 ALGO from master
-	await deployer.fundLsigByFile(
-		"htlc.py",
-		{
-			funder: masterAccount,
-			fundingMicroAlgo: 1e6, // 1 Algo
-		},
-		{ closeRemainderTo: john.addr }
-	);
+	await deployer
+		.fundLsigByFile(
+			"htlc.py",
+			{
+				funder: masterAccount,
+				fundingMicroAlgo: 1e6, // 1 Algo
+			},
+			{ closeRemainderTo: john.addr }
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	await deployer.addCheckpointKV("User Checkpoint", "Fund Contract Account");
 
@@ -35,13 +39,15 @@ async function run(runtimeEnv, deployer) {
 	txnParams.fromAccountAddr = contractAddress;
 	txnParams.sign = types.SignType.LogicSignature;
 	txnParams.args = [convert.stringToBytes(wrongSecret)];
-	txnParams.toAccountAddr = globalZeroAddress;
+	txnParams.toAccountAddr = john.addr;
 	txnParams.amountMicroAlgos = 0;
 	txnParams.lsig = contract;
 	txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
 
 	// Fails because wrong secret is provided
-	await tryExecuteTx(deployer, txnParams);
+	await tryExecuteTx(deployer, txnParams).catch((error) => {
+		console.log(error);
+	});
 
 	// Passes because right secret is provided
 	txnParams.args = [convert.stringToBytes(secret)];

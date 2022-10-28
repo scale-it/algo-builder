@@ -1,27 +1,16 @@
 const { types } = require("@algo-builder/web");
-require("dotenv").config();
 
-const showError = () => {
-	// show error if IGNORE_TX_FAIL = false
-	if (process.env.IGNORE_TX_FAIL) {
-		return process.env.IGNORE_TX_FAIL === "false";
-	}
-	// default not show error
-	return true;
-};
-
-exports.tryExecuteTx = async function (deployer, txnParams) {
+async function tryExecuteTx(deployer, txnParams) {
 	try {
-		if (Array.isArray(txnParams)) await deployer.executeTx(txnParams);
-		else await deployer.executeTx([txnParams]);
+		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+		return await deployer.executeTx(txnParameters);
 	} catch (e) {
-		if (showError()) {
-			console.error("Transaction Failed", e.response ? e.response.error : e);
-		}
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+		throw e;
 	}
-};
+}
 
-exports.mkTxnParams = function (senderAccount, receiverAddr, amount, lsig, payFlags) {
+function mkTxnParams(senderAccount, receiverAddr, amount, lsig, payFlags) {
 	return {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.LogicSignature,
@@ -31,4 +20,9 @@ exports.mkTxnParams = function (senderAccount, receiverAddr, amount, lsig, payFl
 		lsig: lsig,
 		payFlags: payFlags,
 	};
+}
+
+module.exports = {
+	tryExecuteTx,
+	mkTxnParams,
 };

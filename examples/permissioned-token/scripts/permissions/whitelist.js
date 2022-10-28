@@ -1,4 +1,4 @@
-const { fundAccount, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp, tryExecuteTx } = require("../common/common");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
 
@@ -32,7 +32,7 @@ async function whitelist(deployer, permissionsManager, address) {
 		},
 	];
 	console.log(`* Adding [${address}] to whitelisted accounts *`);
-	await deployer.executeTx(whiteListParams);
+	await tryExecuteTx(deployer, whiteListParams);
 }
 
 /**

@@ -1,4 +1,4 @@
-const { fundAccount, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp, tryExecuteTx } = require("../common/common");
 const { whitelist } = require("./whitelist");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
@@ -24,7 +24,7 @@ async function changePermissionsManager(deployer, permissionsManager, address) {
 	];
 
 	console.log(`\n* Updating permissions manager to: ${address} *`);
-	await deployer.executeTx(changePerManagerParams);
+	await tryExecuteTx(deployer, changePerManagerParams);
 }
 
 async function run(runtimeEnv, deployer) {

@@ -1,5 +1,6 @@
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./vote/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -14,13 +15,17 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	};
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
 	algoTxnParams.toAccountAddr = alice.addr;
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
 	// Create ASA - Vote Token
-	const asaInfo = await deployer.deployASA("vote-token", { creator: votingAdminAccount });
+	const asaInfo = await deployer
+		.deployASA("vote-token", { creator: votingAdminAccount })
+		.catch((error) => {
+			throw error;
+		});
 	console.log(asaInfo);
 
 	// Transfer 1 vote token to alice.
@@ -33,7 +38,7 @@ async function run(runtimeEnv, deployer) {
 		assetID: asaInfo.assetIndex,
 		payFlags: { note: "Sending Vote Token" },
 	};
-	await deployer.executeTx(txnParam);
+	await tryExecuteTx(deployer, txnParam);
 
 	// Get last round and Initialize rounds
 	const status = await deployer.algodClient.status().do();
@@ -51,21 +56,25 @@ async function run(runtimeEnv, deployer) {
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
-	const res = await deployer.deployApp(
-		votingAdminAccount,
-		{
-			appName: "PermissionedVotingApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "permissioned-voting-approval.py",
-			clearProgramFilename: "permissioned-voting-clear.py",
-			localInts: 0,
-			localBytes: 1,
-			globalInts: 6,
-			globalBytes: 1,
-			appArgs: appArgs,
-		},
-		{}
-	);
+	const res = await deployer
+		.deployApp(
+			votingAdminAccount,
+			{
+				appName: "PermissionedVotingApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "permissioned-voting-approval.py",
+				clearProgramFilename: "permissioned-voting-clear.py",
+				localInts: 0,
+				localBytes: 1,
+				globalInts: 6,
+				globalBytes: 1,
+				appArgs: appArgs,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(res);
 

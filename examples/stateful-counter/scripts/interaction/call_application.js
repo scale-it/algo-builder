@@ -1,5 +1,6 @@
 const { readAppGlobalState } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const creatorAccount = deployer.accountsByName.get("alice");
@@ -21,7 +22,7 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 
-	await deployer.executeTx([tx]);
+	await tryExecuteTx(deployer, [tx]);
 
 	/* Uncomment below code to start debugger  */
 	// await new Tealdbg(deployer, tx)

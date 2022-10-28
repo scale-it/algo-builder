@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const creator = deployer.accountsByName.get("alice");
@@ -58,11 +59,8 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	console.log("* Transferring 1000 Assets from Alice to Bob *");
-	try {
-		await deployer.executeTx(txGroup);
-	} catch (error) {
-		console.log("Error Occurred: ", error.response.error);
-	}
+
+	await tryExecuteTx(deployer, txGroup);
 }
 
 module.exports = { default: run };

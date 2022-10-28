@@ -3,7 +3,7 @@ const { types } = require("@algo-builder/web");
 const { issue } = require("../admin/issue");
 const { whitelist } = require("../permissions/whitelist");
 
-const { fundAccount, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp, tryExecuteTx } = require("../common/common");
 
 /**
  * Transfer token between non-reserve accounts
@@ -77,7 +77,7 @@ async function transfer(deployer, from, toAddr, amount) {
 
 	console.log(`* Transferring ${amount} tokens from
     [${from.name}:${from.addr}] to [${toAddr}] *`);
-	await deployer.executeTx(txGroup);
+	await tryExecuteTx(deployer, txGroup);
 
 	console.log(`* ${toAddr}(receiver) asset holding: *`);
 	console.log("Balance: ", await balanceOf(deployer, toAddr, tesla.assetIndex));

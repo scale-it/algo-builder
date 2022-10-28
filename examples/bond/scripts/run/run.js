@@ -60,9 +60,10 @@ async function run(runtimeEnv, deployer) {
 
 	// exit buyer from bond, buyer can exit only if maturity period is over
 	// currently set to 240 seconds
-	await exitBuyer(deployer, account.manager, account.elon, 2, 12);
-
-	await exitBuyer(deployer, account.manager, account.bob, 2, 2);
+	setTimeout(async () => {
+		await exitBuyer(deployer, account.manager, account.elon, 2, 12);
+		await exitBuyer(deployer, account.manager, account.bob, 2, 2);
+	}, 240000);
 }
 
 module.exports = { default: run };
