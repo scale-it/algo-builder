@@ -1062,7 +1062,7 @@ export class Runtime {
 	}
 
 	/**
-	 * Verifies extra pages doesn't overflows
+	 * Verifies extra pages do not exceed the limit
 	 * @param extraPages extra pages for program. Default value is 0
 	 */
 	validateExtraPages(extraPages = 0): void {
