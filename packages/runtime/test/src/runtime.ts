@@ -1441,7 +1441,7 @@ describe("Helper functions", function () {
 		});
 	});
 });
-describe.only("Funtions related to runtime chain", function () {
+describe("Funtions related to runtime chain", function () {
 	let runtime: Runtime;
 
 	this.beforeEach(function () {
