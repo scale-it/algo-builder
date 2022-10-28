@@ -456,6 +456,31 @@ maximun uint128`,
 		description:
 			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
 	},
+	UNSUPPORTED_VRF_STANDARD: {
+		number: 1067,
+		message: "vtf_standard not supported",
+		title: "Unsupported by runtime",
+		description: "vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
+	},
+	INVALID_PUB_KEY_LENGTH: {
+		number: 1068,
+		message: "Wrong publicKey size",
+		title: "Wrong publicKey size",
+		description: "Wrong publicKey size. Got: %length%, expected 32",
+	},
+	INVALID_PROOF_LENGTH: {
+		number: 1069,
+		message: "Wrong proof size",
+		title: "Wrong proof size",
+		description: "Wrong proof size. Got: %length%, expected 80",
+	},
+	UNKNOWN_VRF_TYPE: {
+		number: 1070 ,
+		message: "Unknown field",
+		title: "Unknown field",
+		description: "Unknow field for vrf_verify opcode",
+	},
+
 };
 
 const runtimeGeneralErrors = {

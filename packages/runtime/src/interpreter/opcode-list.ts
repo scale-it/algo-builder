@@ -8,14 +8,13 @@ import algosdk, {
 	encodeUint64,
 	getApplicationAddress,
 	isValidAddress,
-	makeApplicationCallTxnFromObject,
 	modelsv2,
 	verifyBytes,
 } from "algosdk";
 import chalk from "chalk";
 import { ec as EC } from "elliptic";
 import { Hasher, Message, sha256 } from "js-sha256";
-import { sha512_256 } from "js-sha512";
+import { sha512, sha512_256 } from "js-sha512";
 import JSONbig from "json-bigint";
 import cloneDeep from "lodash.clonedeep";
 import { Keccak, SHA3 } from "sha3";
@@ -85,7 +84,6 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-const { ProofHoHash } = require("@idena/vrf-js"); // eslint-disable-line @typescript-eslint/no-var-requires
 const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
@@ -5281,11 +5279,21 @@ export class Bn254Pairing extends Op {
 		return this.computeCost();
 	}
 }
-
+/**
+ * Opcode: 0xd0 {uint8 parameters index}
+ * Stack: ..., A: []byte, B: []byte, C: []byte → ..., X: []byte, Y: uint64
+ * Verify the proof B of message A against pubkey C. Returns vrf output and verification flag.
+ * IMPORTANT: our implementation always assumes that the proof is correct
+ * Cost: 5700
+ */
 export class VrfVerify extends Op {
 	readonly line: number;
-	readonly vrfStandard: string;
-
+	readonly vrfType: string;
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [VrfAlgorand]
+	 * @param line line number in TEAL file
+	 */
 	constructor(args: string[], line: number) {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
@@ -5293,21 +5301,23 @@ export class VrfVerify extends Op {
 		this.line = line;
 		switch (argument) {
 			case "VrfAlgorand": {
-				this.vrfStandard = argument;
+				this.vrfType = argument;
 				break;
 			}
 			case "VrfStandard": {
-				this.vrfStandard = argument;
+				this.vrfType = argument;
 				break;
 			}
 			default: {
-				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_STANDARD, {
-					vrfStandard: argument,
-					line: this.line,
-				});
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
 			}
 		}
 	}
+
+	computeCost(): number {
+		return 5700;
+	}
+
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
 		const message = this.assertBytes(stack.pop(), this.line);
@@ -5315,19 +5325,17 @@ export class VrfVerify extends Op {
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
 		if (proof.length !== 80) {
-			//vrf proof wrong size
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
 		}
 		if (publicKey.length !== 32) {
-			//vrf pubkey wrong size
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
 		}
-
-		if (this.vrfStandard === "VrfAlgorand") {
-			//TODO: figure out how to use the algorand vrf here since this package uses different implementation
-			const hash = ProofHoHash(publicKey, message, proof);
-			stack.push(hash);
+		if (this.vrfType === "VrfAlgorand") {
+			const hash = sha512(proof);
+			stack.push(convertToBuffer(hash, EncodingType.HEX));
 			stack.push(1n);
 		} else {
-			//unsupported vrf_verify standard
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		}
 		return this.computeCost();
 	}
