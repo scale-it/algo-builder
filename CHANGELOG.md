@@ -53,7 +53,7 @@ from `algosdk` and sends it to the network.
 - Added additional checks for the `maxStackByteElementSize` and `maxProgramLength` in `Runtime`.
 - Added partial support for `bn254` opcodes. The full support delyed until the official release of `TEALv8/v9`.
 - Added a new pre-commit hook to check if there are any `.only`in tests . If there are any it will display error in which files/lines the problem was found.
-
+- Added support for `vrf_verify` opcode to `Runtime`. IMPORTANT: the opcode assumes the proof is always valid thus it will always return 1.
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
