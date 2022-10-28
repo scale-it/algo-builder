@@ -156,6 +156,7 @@ import {
 	Txna,
 	Txnas,
 	Uncover,
+	Block,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
@@ -409,6 +410,7 @@ opCodeMap[7] = {
 	sha3_256: Sha3_256,
 	ed25519verify_bare: Ed25519verify_bare,
 	json_ref: Json_ref,
+	block: Block,
 };
 /**
  * TEALv8
@@ -486,6 +488,7 @@ const interpreterReqList = new Set([
 	"keccak256",
 	"sha3_256",
 	"ed25519verify",
+	"block",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
