@@ -383,7 +383,10 @@ export class WallectConnectSession {
 		try {
 			const signedTxns: SignedTransaction[] = [];
 			const txns: Transaction[] = this.makeTx(execParams, txParams);
-			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+			for (const transaction of txns) {
+				const signedTransaction = await this.signTx(transaction)
+				signedTxns.push(signedTransaction)
+			}
 			return signedTxns;
 		} catch (err) {
 			error(err);
