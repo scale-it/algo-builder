@@ -7,6 +7,8 @@ import type {
     EncodedTransaction,
     SignedTx,
     SignTransactionOptions,
+    SignTxnsOpts,
+    WalletTransaction,
 } from "@randlabs/myalgo-connect";
 import MyAlgoConnect from "@randlabs/myalgo-connect";
 import algosdk, { decodeUnsignedTransaction } from "algosdk";
@@ -89,4 +91,16 @@ export class MyAlgoConnectMock implements MyAlgoConnect {
             return resolve(new Uint8Array());
         });
     };
+
+    signTxns(txns: WalletTransaction[], opts?: SignTxnsOpts | undefined): Promise<(string | null)[]> {
+        return new Promise((resolve, reject) => {
+            return resolve([null]);
+        });
+    }
+
+    signBytes(bytes: Uint8Array, address: string): Promise<Uint8Array> {
+        return new Promise((resolve, reject) => {
+            return resolve(new Uint8Array());
+        });
+    }
 }
