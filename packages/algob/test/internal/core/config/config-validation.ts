@@ -889,8 +889,7 @@ describe("Config validation", function () {
 	});
 });
 
-// eslint-disable-next-line no-use-before-define
-function expectConfigError(localhost: Object, cfg: unknown, val: string): void {
+function expectConfigError(localhost: any, cfg: unknown, val: string): void {
 	expectBuilderError(
 		() =>
 			validateConfig({
