@@ -51,12 +51,12 @@ export class MyAlgoConnectMock implements MyAlgoConnect {
             if (Array.isArray(transaction)) {
                 const signedTransaction = []
                 for (const txn of transaction) {
-                    const decodedtransaction = decodeUnsignedTransaction(txn as unknown as Uint8Array);
+                    const decodedtransaction = decodeUnsignedTransaction(txn as Uint8Array);
                     signedTransaction.push(algosdk.signTransaction(decodedtransaction, senderAccount.sk))
                 }
                 return resolve(signedTransaction)
             } else {
-                const decodedtransaction = decodeUnsignedTransaction(transaction as unknown as Uint8Array);
+                const decodedtransaction = decodeUnsignedTransaction(transaction as Uint8Array);
                 return resolve(algosdk.signTransaction(decodedtransaction, senderAccount.sk))
             }
         });
