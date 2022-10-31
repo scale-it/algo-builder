@@ -62,7 +62,7 @@
 		"@types/tmp": "^0.2.3",
 		"chai": "^4.3.6",
 		"cross-env": "^7.0.3",
-		"eslint": "^8.10.0",
+		"eslint": "^8.26.0",
 		"glob": "^8.0.3",
 		"human-signals": "^3.0.1",
 		"mocha": "^10.1.0",
