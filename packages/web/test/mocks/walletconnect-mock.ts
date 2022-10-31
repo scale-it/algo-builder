@@ -1,10 +1,10 @@
-import WalletConnect from "@walletconnect/client";
 import { IJsonRpcRequest, IRequestOptions } from "@walletconnect/types";
 import algosdk, { decodeUnsignedTransaction } from "algosdk";
 import { senderAccount } from "./tx";
+import Connector from "@walletconnect/core";
 
-export class WalletConnectMock extends WalletConnect {
-    sendCustomRequest(request: Partial<IJsonRpcRequest>, options?: IRequestOptions | undefined): Promise<any> {
+export class WalletConnectMock extends Connector {
+    async sendCustomRequest(request: Partial<IJsonRpcRequest>, options?: IRequestOptions | undefined): Promise<any> {
         return new Promise((resolve, reject) => {
             const signedTransactions = []
             if (request.params) {

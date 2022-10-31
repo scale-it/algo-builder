@@ -21,23 +21,42 @@ describe("Webmode - Wallet Connect test cases ", function () {
 
     this.beforeEach(async function () {
         sender = senderAccount
-        receiver = receiverAccount
-
+        receiver = receiverAccount;
         connector = new WallectConnectSession(walletURL, new WalletConnectMock({
-            bridge: "https://bridge.walletconnect.org", uri: "", session: {
-                connected: true,
-                accounts: [senderAccount.addr, receiverAccount.addr],
-                chainId: 0,
-                bridge: "https://bridge.walletconnect.org",
-                key: "key",
-                clientId: "id",
-                peerId: "peerid",
-                handshakeId: 1,
-                handshakeTopic: "",
-                clientMeta: null,
-                peerMeta: null
+            cryptoLib: {
+                generateKey: async () => new Promise((resolve, reject) => resolve(new Uint8Array(0))),
+                encrypt: async () => new Promise((resolve, reject) => resolve({
+                    data: "",
+                    hmac: "",
+                    iv: ""
+                })),
+                decrypt: async () => new Promise((resolve, reject) => resolve(null)),
             },
-        }));
+            connectorOpts: {
+                bridge: "https://bridge.walletconnect.org", uri: "",
+                session: {
+                    connected: true,
+                    accounts: [senderAccount.addr, receiverAccount.addr],
+                    chainId: 0,
+                    bridge: "https://bridge.walletconnect.org",
+                    key: "key",
+                    clientId: "id",
+                    peerId: "peerid",
+                    handshakeId: 1,
+                    handshakeTopic: "",
+                    clientMeta: null,
+                    peerMeta: null
+                }
+            },
+            transport: {
+                open: () => { },
+                close: () => { },
+                send: () => { },
+                subscribe: () => { },
+                on: () => { }
+            },
+        }
+        ));
     });
 
     it("Should run executeTx function without throwing an error", async function () {
