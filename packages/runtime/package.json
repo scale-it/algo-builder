@@ -35,8 +35,8 @@
 		"@algo-builder/web": "workspace:*",
 		"@nodelib/fs.walk": "^1.2.8",
 		"@types/json-bigint": "^1.0.1",
-		"algosdk": "^1.19.0",
-		"chalk": "^4.1.2",
+		"algosdk": "^1.22.0",
+		"chalk": "^5.1.2",
 		"debug": "^4.3.4",
 		"elliptic": "^6.5.4",
 		"hi-base32": "^0.5.1",
@@ -49,7 +49,7 @@
 		"source-map-support": "^0.5.21",
 		"tweetnacl-ts": "^1.0.3",
 		"yaml": "^1.10.2",
-		"zod": "^3.13.4"
+		"zod": "^3.19.1"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.3.0",
@@ -64,9 +64,9 @@
 		"mocha": "^9.2.1",
 		"nyc": "^15.1.0",
 		"sinon": "^13.0.1",
-		"ts-node": "^10.7.0",
-		"typedoc": "^0.22.13",
-		"typescript": "^4.6.2"
+		"ts-node": "^10.9.1",
+		"typedoc": "^0.23.17",
+		"typescript": "4.7.4"
 	},
 	"publishConfig": {
 		"access": "public",

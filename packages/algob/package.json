@@ -69,15 +69,15 @@
 		"nyc": "^15.1.0",
 		"sinon": "^13.0.1",
 		"ts-mocha": "^9.0.2",
-		"ts-node": "^10.7.0",
-		"typedoc": "^0.22.13",
-		"typescript": "^4.6.2"
+		"ts-node": "^10.9.1",
+		"typedoc": "^0.23.17",
+		"typescript": "4.7.4"
 	},
 	"dependencies": {
 		"@algo-builder/runtime": "workspace:*",
 		"@algo-builder/web": "workspace:*",
-		"algosdk": "^1.19.0",
-		"chalk": "^4.1.2",
+		"algosdk": "^1.22.0",
+		"chalk": "^5.1.2",
 		"debug": "^4.3.4",
 		"deep-equal": "^2.0.5",
 		"deepmerge": "^4.2.2",
@@ -93,7 +93,7 @@
 		"source-map-support": "^0.5.21",
 		"tmp": "^0.2.1",
 		"yaml": "^1.10.2",
-		"zod": "^3.13.4"
+		"zod": "^3.19.1"
 	},
 	"nyc": {
 		"extension": [
