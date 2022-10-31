@@ -889,7 +889,7 @@ describe("Config validation", function () {
 	});
 });
 
-function expectConfigError(localhost: Object, cfg: unknown, val: string): void {
+function expectConfigError(localhost: any, cfg: unknown, val: string): void {
 	expectBuilderError(
 		() =>
 			validateConfig({
