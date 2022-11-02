@@ -23,9 +23,9 @@ import {
 	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
+	seedLength,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR
-} from "./lib/constants";
+	ZERO_ADDRESS_STR} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -1193,7 +1193,7 @@ export class Runtime {
 		let timestamp: bigint | undefined;
 		let seed: Uint8Array | undefined;
 		if (this.store.blocks.size === 0) { //create genesis block
-			seed = nacl.randomBytes(32);
+			seed = nacl.randomBytes(seedLength);
 			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
 		} else { //add another block
 			const lastBlock = this.store.blocks.get(this.round);

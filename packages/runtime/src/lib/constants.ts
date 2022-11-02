@@ -40,6 +40,10 @@ export const MAX_INNER_TRANSACTIONS = 16;
 export const ALGORAND_MAX_LOGS_COUNT = 32;
 export const ALGORAND_MAX_LOGS_LENGTH = 1024;
 
+export const publicKeyLength = 32;
+export const proofLength = 80;
+export const seedLength = 32;
+
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
 
@@ -478,6 +482,7 @@ OpGasCost[7] = {
 	...OpGasCost[6],
 	sha3_256: 130,
 	ed25519verify_bare: 1900,
+	vrf_verify : 5700,
 };
 
 export const enum MathOp {
@@ -523,6 +528,11 @@ export const json_refTypes = {
 export enum blockFieldTypes {
 	BlkTimestamp = "BlkTimestamp",
 	BlkSeed = "BlkSeed",
+};
+
+export enum vrfVerifyFieldTypes {
+    VrfAlgorand = "VrfAlgorand",
+	VrfStandard = "VrfStandard",
 };
 
 export enum TxFieldEnum {

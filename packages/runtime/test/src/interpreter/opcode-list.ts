@@ -14,7 +14,6 @@ import { sha512_256 } from "js-sha512";
 import cloneDeep from "lodash.clonedeep";
 import { describe } from "mocha";
 import nacl from "tweetnacl";
-import { isGeneratorFunction } from "util/types";
 
 import { ExecutionMode } from "../../../build/types";
 import { AccountStore } from "../../../src/account";
@@ -170,13 +169,15 @@ import {
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ASSET_CREATION_FEE,
+	blockFieldTypes,
 	DEFAULT_STACK_ELEM,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	blockFieldTypes,
+	seedLength,
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -7619,7 +7620,7 @@ describe("Teal Opcodes", function () {
 			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			op.execute(stack);
 			const result = stack.pop();
-			assert.equal((result as Buffer).length, 32);
+			assert.equal((result as Buffer).length, seedLength);
 		});
 
 		it("Should return correct cost", function(){
@@ -7651,7 +7652,7 @@ describe("Teal Opcodes", function () {
 		})
 
 		it("Should return 1 and hash of proof for valid proof and verification key", function () {
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
@@ -7660,7 +7661,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(expectedResult, stack.pop());
 		});
 		it("Should throw error if pubKey size not equal 32", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizePubKey = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(wrongSizePubKey);
 			stack.push(proof);
@@ -7668,7 +7669,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
 		})
 		it("Should throw error if proof size not equal 80", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(publicKey);
 			stack.push(wrongSizeProof);
@@ -7676,7 +7677,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
 		})
 		it("Should return correct cost", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
@@ -7684,7 +7685,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(cost, 5700);
 		})
 		it("Should throw error when field = VrfStandard", function(){
-			const op = new VrfVerify(["VrfStandard"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);

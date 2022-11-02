@@ -43,8 +43,11 @@ import {
 	MAX_UINT128,
 	MaxTEALVersion,
 	OpGasCost,
+	proofLength,
+	publicKeyLength,
 	TransactionTypeEnum,
 	TxArrFields,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
@@ -5344,11 +5347,11 @@ export class VrfVerify extends Op {
 		super();
 		this.line = line;
 		switch (argument) {
-			case "VrfAlgorand": {
+			case vrfVerifyFieldTypes.VrfAlgorand: {
 				this.vrfType = argument;
 				break;
 			}
-			case "VrfStandard": {
+			case vrfVerifyFieldTypes.VrfStandard: {
 				this.vrfType = argument;
 				break;
 			}
@@ -5359,7 +5362,7 @@ export class VrfVerify extends Op {
 	}
 
 	computeCost(): number {
-		return 5700;
+		return OpGasCost[7]["vrf_verify"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -5368,13 +5371,13 @@ export class VrfVerify extends Op {
 		const proof = this.assertBytes(stack.pop(), this.line);
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
-		if (proof.length !== 80) {
+		if (proof.length !== proofLength) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
 		}
-		if (publicKey.length !== 32) {
+		if (publicKey.length !== publicKeyLength) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
 		}
-		if (this.vrfType === "VrfAlgorand") {
+		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
 			const hash = sha512(proof);
 			stack.push(convertToBuffer(hash, EncodingType.HEX));
 			stack.push(1n);
