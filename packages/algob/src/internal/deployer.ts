@@ -7,6 +7,9 @@ import {
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import { mkTransaction } from "@algo-builder/web/build/lib/txn";
 import type {
+	ABIContractNetworkInfo,
+	ABIContractNetworks,
+	ABIContractParams,
 	Account,
 	EncodedMultisig,
 	LogicSigAccount,
@@ -15,6 +18,7 @@ import type {
 	Transaction,
 } from "algosdk";
 import * as algosdk from "algosdk";
+import { readFileSync } from "fs";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -580,6 +584,27 @@ class DeployerBasicMode {
 			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
 			return this.sendAndWait(Uint8ArraySignedTx, rounds);
 		}
+	}
+
+	/**
+     * Parses the file and return the ABIContract where the networks property
+	 *  is set to the currently used netowrk in deployer
+	 * @param fileName string
+	 * @retun parsed file
+	 */
+	 parseABIContractFile(pathToFile: string):algosdk.ABIContract {
+		const buff = readFileSync(pathToFile);
+  		const contract = new algosdk.ABIContract(JSON.parse(buff.toString()));
+		const network: ABIContractNetworkInfo = contract.networks[this.networkName];
+		const networks: ABIContractNetworks = {"network": network};
+
+		const contractParams: ABIContractParams = {
+			desc:  contract.description,
+			name: contract.name,
+			methods: contract.methods.map(method => method.toJSON()),
+			networks: networks };
+
+		return new algosdk.ABIContract(contractParams);
 	}
 }
 
