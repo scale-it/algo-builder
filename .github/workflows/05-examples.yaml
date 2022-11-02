@@ -36,14 +36,12 @@ jobs:
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync
-      
+
       - name: Install Algorand
         run: |
           sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
           curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
-          sudo gpg --keyserver pgpkeys.mit.edu --recv-key  AEDBF5511697458E
-          sudo gpg -a --export AEDBF5511697458E | sudo apt-key add -
-          sudo apt-get update
+          curl -o - https://releases.algorand.com/key.pub | sudo tee /etc/apt/trusted.gpg.d/algorand.asc
           sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
           sudo apt-get update && sudo apt-get install -y algorand
       - name: Setup Network
