@@ -27,7 +27,8 @@ import {
 	MaxExtraAppProgramPages,
 	seedLength,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR} from "./lib/constants";
+	ZERO_ADDRESS_STR
+} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -1189,18 +1190,20 @@ export class Runtime {
 	}
 
 	/**
-   * Parses the file and return the ABIContract in case of network.runtime not defined throw exception
+	* Parses the file and return the ABIContract in case of network.runtime not defined throw exception
 	 * @param fileName string
 	 * @retun parsed file
 	 */
-	parseABIContractFile(pathToFile: string):ABIContract {
+	parseABIContractFile(pathToFile: string): ABIContract {
 		const buff = readFileSync(pathToFile);
-  		const contract = new algosdk.ABIContract(JSON.parse(buff.toString()))
-		if(contract.networks.runtime === undefined){
+		const contract = new algosdk.ABIContract(JSON.parse(buff.toString()))
+		if (contract.networks.runtime === undefined) {
 			throw new Error("ABI contract file is not valid");
 		}
 		return contract;
+	}
 
+	/**
 	 * Produces new block and adds it to a Map where the keys are block numbers
 	 */
 	produceBlock() {
@@ -1220,9 +1223,10 @@ export class Runtime {
 		if (timestamp && seed) {
 			this.store.blocks.set(this.round, { timestamp, seed });
 		} else {
-		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK);
 		}
 	}
+
 	/**
 	 * Returns a requested Block object. If it does not exist on chain throws an error
 	 * @param round block number
@@ -1235,13 +1239,14 @@ export class Runtime {
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
 	}
+	
 	/**
 	 * Populates chain from first block to round number block (Produces N rounds) 
 	 * @param round current round number
 	 */
-	private populateChain(round:number) {
+	private populateChain(round: number) {
 		this.round = 1
-		for(let blockN = 1; blockN<=round; blockN++){
+		for (let blockN = 1; blockN <= round; blockN++) {
 			this.produceBlock();
 		}
 	}
