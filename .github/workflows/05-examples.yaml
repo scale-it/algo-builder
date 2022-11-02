@@ -36,7 +36,7 @@ jobs:
       - name: Install pipenv
         run: python -m pip install pipenv
       - run: pipenv sync
-AEDBF5511697458E
+      
       - name: Install Algorand
         run: |
           sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
