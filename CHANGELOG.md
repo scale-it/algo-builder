@@ -22,6 +22,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
 - Added support of `getProgram` which can get program string from `assetPath`(relative or absolute path) path.
 - Add `paths` to `algob.config.js` to specify list of paths.
+- Error handling when a python module is not found and suggest solution to install the python module.
 
 #### Examples
 
