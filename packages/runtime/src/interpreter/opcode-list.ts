@@ -5318,14 +5318,8 @@ export class Block extends Op {
 		const round = Number(this.assertBigInt(stack.pop(), this.line));
 		this.interpreter.assertRoundIsAvailable(round);
 		const block = this.interpreter.runtime.getBlock(round);
-		let result: StackElem;
-		if (this.field === blockFieldTypes.BlkSeed) {
-			result = block.seed;
-		} else {
-			//"BlkTimestamp"
-			//seconds since epoch - rounds, assuming one round(block) = 4.5s truncated to 4s (BigInt)
-			result = block.timestamp;
-		}
+		//"BlkTimestamp" = seconds since epoch, assuming one round(block) = 4.5s truncated to 4s (BigInt)
+		const result = (this.field === blockFieldTypes.BlkSeed) ? block.seed : block.timestamp
 		stack.push(result);
 		return this.computeCost();
 	}

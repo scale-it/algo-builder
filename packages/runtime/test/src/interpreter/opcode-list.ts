@@ -175,6 +175,7 @@ import {
 	MaxTEALVersion,
 	MIN_UINT8,
 	ZERO_ADDRESS,
+	blockFieldTypes,
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -7579,20 +7580,20 @@ describe("Teal Opcodes", function () {
 
 		it("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
 			stack.push(BigInt(FIRST_VALID - 2n));
-			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
 			assert.throws(() => op.execute(stack));
 		});
 
 		it("Should allow to acces two behind FirstValid if LastValid is 100 after", function () {
 			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
 			stack.push(BigInt(FIRST_VALID - 2n));
-			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
 			assert.doesNotThrow(() => op.execute(stack));
 		});
 
 		it("Should return two different seeds for to different rounds", function () {
 			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
-			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			//first round
 			stack.push(FIRST_VALID - 1n);
 			op.execute(stack);
@@ -7608,13 +7609,13 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.tx.lv = 100;
 			interpreter.runtime.ctx.tx.fv = 5;
 			stack.push(0n);
-			const op = new Block(["BlkTimestamp"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
 			assert.throws(() => op.execute(stack));
 		});
 
 		it("Should return seed for a block that is within boundries and exist", function(){
 			stack.push(FIRST_VALID - 1n);
-			const op = new Block(["BlkSeed"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			op.execute(stack);
 			const result = stack.pop();
 			assert.equal((result as Buffer).length, 32);
@@ -7622,7 +7623,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should return correct cost", function(){
 			stack.push(FIRST_VALID - 1n);
-			const op = new Block(["BlkSeed"], 1, interpreter);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			const cost = op.execute(stack);
 			assert.equal(cost, 1);
 		});
