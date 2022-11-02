@@ -93,7 +93,7 @@ export class PyCompileOp {
 	}
 
 	/**
-	 * Description: Checks if given module is installed or not.
+	 * Description: This method checks if given module is installed or not.
 	 * @param module: Module to be checked if installed or not.
 	 */
 	private validatePythonModule(module: string) {
