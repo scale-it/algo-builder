@@ -1,7 +1,7 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const { issue } = require("../admin/issue");
-const { fundAccount } = require("../common/common");
+const { fundAccount, tryExecuteTx } = require("../common/common");
 
 /**
  * To opt-out of the token, do an asset transfer transaction with
@@ -30,7 +30,7 @@ async function optOut(deployer, account) {
 	];
 
 	console.log(`* Opting out [${account.name}:${account.addr}] from token 'tesla' *`);
-	await deployer.executeTx(optOutParams);
+	await tryExecuteTx(deployer, optOutParams);
 }
 
 async function run(runtimeEnv, deployer) {
@@ -43,8 +43,10 @@ async function run(runtimeEnv, deployer) {
 	// opt in elon to tesla first
 	await deployer.optInAccountToASA("tesla", elon.name, {});
 
+	// in scripts flow we kill the tesla token before executing opt-out,
+	// uncomment if running it in another sequence
 	// first issue few tokens to elon
-	await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
+	// await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
 
 	/*
 	 * Use below function to opt-out elon from token tesla

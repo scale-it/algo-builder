@@ -22,8 +22,9 @@ import {
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
+	MaxExtraAppProgramPages,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR,
+	ZERO_ADDRESS_STR
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
@@ -584,7 +585,8 @@ export class Runtime {
 			appDef.foreignAssets,
 			appDef.note,
 			appDef.lease,
-			payFlags.rekeyTo
+			payFlags.rekeyTo,
+			appDef.extraPages
 		);
 
 		const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
@@ -909,7 +911,11 @@ export class Runtime {
 					}
 				}
 
-				if (appDef !== undefined) appDefMap.set(index, appDef);
+				if (appDef !== undefined) {
+					appDefMap.set(index, appDef);
+					const appDefinition = appDef as types.AppDefinition;
+					this.validateExtraPages(appDefinition?.extraPages);
+				};
 				return txn;
 			});
 
@@ -1057,6 +1063,19 @@ export class Runtime {
 		this.verifyMultisig(signedTransaction);
 		if (!this.verifyMultisig(signedTransaction)) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_MULTISIG);
+		}
+	}
+
+	/**
+	 * Verifies extra pages do not exceed the limit
+	 * @param extraPages extra pages for program. Default value is 0
+	 */
+	validateExtraPages(extraPages = 0): void {
+		if (extraPages > MaxExtraAppProgramPages) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED, {
+				extraPages: extraPages,
+				maxExtraAppProgramPages: MaxExtraAppProgramPages,
+			});
 		}
 	}
 

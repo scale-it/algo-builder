@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const creatorAccount = deployer.accountsByName.get("alice");
@@ -17,7 +18,7 @@ async function run(runtimeEnv, deployer) {
 		appArgs: [],
 	};
 
-	await deployer.executeTx([tx]);
+	await tryExecuteTx(deployer, [tx]);
 	console.log("Application Deleted!!");
 }
 

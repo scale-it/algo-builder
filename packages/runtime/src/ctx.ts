@@ -19,6 +19,7 @@ import {
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
+	MaxAppProgramLen
 } from "./lib/constants";
 import {
 	calculateFeeCredit,
@@ -127,6 +128,27 @@ export class Ctx implements Context {
 			throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN, {
 				assetId: assetIndex,
 				address: address,
+			});
+		}
+	}
+
+	/**
+	 * Asserts program length. maxPossible = MaxAppProgramLen * (1 + extraPages)
+	 * @param approvalProgramBytes Approval program bytes
+	 * @param clearProgramBytes Clear program bytes
+	 * @param extraPages Extra pages. Default extra page is 0.
+	 */
+	assertProgramMaxLen(approvalProgramBytes: Uint8Array, clearProgramBytes: Uint8Array, extraPages: number = 0): void {
+		const approvalProgramLength = approvalProgramBytes.length;
+		const clearProgramLengthProgram = clearProgramBytes.length;
+		const approvalClearProgramLength = approvalProgramLength + clearProgramLengthProgram;
+		const maxPossible = MaxAppProgramLen * (1 + extraPages);
+
+		if (approvalClearProgramLength > maxPossible) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+				length: approvalClearProgramLength,
+				maxlen: maxPossible,
+				mode: "Stateful",
 			});
 		}
 	}
@@ -381,6 +403,10 @@ export class Ctx implements Context {
 		if (clearProgTEAL === "") {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
 		}
+
+		const approvalProgramBytes = Buffer.from(approvalProgTEAL, "base64");
+		const clearProgramBytes = Buffer.from(clearProgTEAL, "base64");
+		this.assertProgramMaxLen(approvalProgramBytes, clearProgramBytes, appDefinition.extraPages);
 
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 

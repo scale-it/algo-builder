@@ -1,5 +1,4 @@
 const { tryExecuteTx } = require("./common/common.js");
-const { types } = require("@algo-builder/web");
 const { accounts } = require("./common/accounts.js");
 const { mkWithdrawFromProposalTx } = require("./common/tx-params.js");
 
@@ -16,7 +15,9 @@ async function withdrawFromProposal(deployer, proposalLsig, proposer, voterA) {
 	console.log(
 		`* Withdrawing from proposalLsig ${proposalLsig.address()}  to non-owner account *`
 	); //Should fail
-	await tryExecuteTx(deployer, withdrawTxFail);
+	await tryExecuteTx(deployer, withdrawTxFail).catch((error) => {
+		console.log(error);
+	});
 }
 
 async function run(runtimeEnv, deployer) {

@@ -22,6 +22,22 @@ const asaDef = {
 const tokenMap = new Map();
 
 /**
+ * Execute single transaction or group of transactions (atomic transaction)
+ * @param deployer deployer instance
+ * @param transactions transaction parameters,  atomic transaction parameters
+ * @returns TxnReceipt which includes confirmed txn response along with txID
+ */
+async function tryExecuteTx(deployer, txnParams) {
+	try {
+		const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+		return await deployer.executeTx(txnParameters);
+	} catch (e) {
+		console.error("Transaction Failed", e.response ? e.response.error : e);
+		throw e;
+	}
+}
+
+/**
  * returns asset id for a given asset name
  * @param name asset name
  */
@@ -41,7 +57,7 @@ async function fundAccount(deployer, accountAddress) {
 		amountMicroAlgos: 200e6,
 		payFlags: {},
 	};
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 }
 
 /**
@@ -72,7 +88,7 @@ async function optInTx(deployer, managerAcc, lsig, assetIndex) {
 			payFlags: {},
 		},
 	];
-	await deployer.executeTx(optInTx);
+	await tryExecuteTx(deployer, optInTx);
 }
 
 /**
@@ -336,4 +352,5 @@ module.exports = {
 	redeemCouponTx,
 	buyTxNode,
 	buyTxRuntime,
+	tryExecuteTx,
 };

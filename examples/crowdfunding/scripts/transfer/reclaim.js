@@ -1,11 +1,12 @@
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const donorAccount = deployer.accountsByName.get("john");
 
-	await deployer.executeTx({
+	await tryExecuteTx(deployer, {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
@@ -46,7 +47,7 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	console.log("Reclaim transaction in process");
-	await deployer.executeTx(txGroup);
+	await tryExecuteTx(deployer, txGroup);
 	console.log("Reclaimed by ", donorAccount.addr);
 }
 

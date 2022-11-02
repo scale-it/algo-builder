@@ -12,20 +12,24 @@ async function setupNewPermissionsApp(runtimeEnv, deployer) {
 	await fundAccount(deployer, owner);
 
 	// deploy new permissions smart contract
-	const newPermissionsAppInfo = await deployer.deployApp(
-		owner,
-		{
-			appName: "PermissionNewApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "permissions_new.teal", // new permissions contract
-			clearProgramFilename: "clear_state_program.py",
-			localInts: 0,
-			localBytes: 0,
-			globalInts: 0,
-			globalBytes: 0,
-		},
-		{}
-	);
+	const newPermissionsAppInfo = await deployer
+		.deployApp(
+			owner,
+			{
+				appName: "PermissionNewApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "permissions_new.teal", // new permissions contract
+				clearProgramFilename: "clear_state_program.py",
+				localInts: 0,
+				localBytes: 0,
+				globalInts: 0,
+				globalBytes: 0,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 	console.log(newPermissionsAppInfo);
 }
 

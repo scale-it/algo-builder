@@ -1,5 +1,4 @@
 import type {
-    Options,
     Accounts,
     Address,
     AlgorandTxn,
@@ -8,23 +7,20 @@ import type {
     EncodedTransaction,
     SignedTx,
     SignTransactionOptions,
+    SignTxnsOpts,
+    WalletTransaction,
 } from "@randlabs/myalgo-connect";
+import MyAlgoConnect from "@randlabs/myalgo-connect";
+import algosdk, { decodeUnsignedTransaction } from "algosdk";
+import { senderAccount } from "./tx";
 
-export default class MyAlgoConnectMock {
-
+export class MyAlgoConnectMock implements MyAlgoConnect {
     /**
-     * @param {Options} options Override default popup options.
-     */
-    constructor(options?: Options) {
-
-    };
-
-    /**
-     * @async
-     * @description Receives user's accounts from MyAlgo.
-     * @param {ConnectionSettings} [settings] Connection settings
-     * @returns Returns an array of Algorand addresses.
-     */
+    * @async
+    * @description Receives user's accounts from MyAlgo.
+    * @param {ConnectionSettings} [settings] Connection settings
+    * @returns Returns an array of Algorand addresses.
+    */
     connect(settings?: ConnectionSettings): Promise<Accounts[]> {
         return new Promise((resolve, reject) => {
             return resolve([{
@@ -35,12 +31,12 @@ export default class MyAlgoConnectMock {
     };
 
     /**
-     * @async
-     * @description Sign an Algorand Transaction.
-     * @param transaction Expect a valid Algorand transaction
-     * @param signOptions Sign transactions options object.
-     * @returns Returns signed transaction
-     */
+    * @async
+    * @description Sign an Algorand Transaction.
+    * @param transaction Expect a valid Algorand transaction
+    * @param signOptions Sign transactions options object.
+    * @returns Returns signed transaction
+    */
     signTransaction(transaction: AlgorandTxn | EncodedTransaction, signOptions?: SignTransactionOptions): Promise<SignedTx>;
 
     /**
@@ -54,10 +50,17 @@ export default class MyAlgoConnectMock {
 
     signTransaction(transaction: AlgorandTxn | EncodedTransaction | (AlgorandTxn | EncodedTransaction)[], signOptions?: SignTransactionOptions): Promise<SignedTx | SignedTx[]> {
         return new Promise((resolve, reject) => {
-            return resolve([{
-                blob: new Uint8Array(),
-                txID: ""
-            }]);
+            if (Array.isArray(transaction)) {
+                const signedTransaction = []
+                for (const txn of transaction) {
+                    const decodedtransaction = decodeUnsignedTransaction(txn as Uint8Array);
+                    signedTransaction.push(algosdk.signTransaction(decodedtransaction, senderAccount.sk))
+                }
+                return resolve(signedTransaction)
+            } else {
+                const decodedtransaction = decodeUnsignedTransaction(transaction as Uint8Array);
+                return resolve(algosdk.signTransaction(decodedtransaction, senderAccount.sk))
+            }
         });
     }
 
@@ -88,4 +91,16 @@ export default class MyAlgoConnectMock {
             return resolve(new Uint8Array());
         });
     };
+
+    signTxns(txns: WalletTransaction[], opts?: SignTxnsOpts | undefined): Promise<(string | null)[]> {
+        return new Promise((resolve, reject) => {
+            return resolve([null]);
+        });
+    }
+
+    signBytes(bytes: Uint8Array, address: string): Promise<Uint8Array> {
+        return new Promise((resolve, reject) => {
+            return resolve(new Uint8Array());
+        });
+    }
 }

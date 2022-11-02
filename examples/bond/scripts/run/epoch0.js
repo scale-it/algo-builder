@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const { accounts } = require("./common/accounts.js");
-const { issuePrice, buyTxNode } = require("./common/common.js");
+const { issuePrice, buyTxNode, tryExecuteTx } = require("./common/common.js");
 
 /**
  * In this function: Elon buys 10 bonds and
@@ -12,8 +12,16 @@ exports.epoch0 = async function (deployer) {
 	const appInfo = deployer.getApp("BondApp");
 	const issuerLsig = deployer.getLsig("IssuerLsig");
 	const asaInfo = deployer.getASAInfo("bond-token-0");
-	await deployer.optInAccountToASA(asaInfo.assetIndex, "bob", { totalFee: 1000 });
-	await deployer.optInAccountToASA(asaInfo.assetIndex, "elon-musk", { totalFee: 1000 });
+	await deployer
+		.optInAccountToASA(asaInfo.assetIndex, "bob", { totalFee: 1000 })
+		.catch((error) => {
+			throw error;
+		});
+	await deployer
+		.optInAccountToASA(asaInfo.assetIndex, "elon-musk", { totalFee: 1000 })
+		.catch((error) => {
+			throw error;
+		});
 
 	// elon buys 10 bonds
 	const algoAmount = 10 * issuePrice;
@@ -28,7 +36,7 @@ exports.epoch0 = async function (deployer) {
 	);
 
 	console.log("Elon buying 10 bonds!");
-	await deployer.executeTx(groupTx);
+	await tryExecuteTx(deployer, groupTx);
 	console.log("Elon bought 10 bonds!");
 
 	// elon sells 2 bonds to bob for 2020 Algo
@@ -51,6 +59,6 @@ exports.epoch0 = async function (deployer) {
 			payFlags: { totalFee: 1000 },
 		},
 	];
-	await deployer.executeTx(sellTx);
+	await tryExecuteTx(deployer, sellTx);
 	console.log("2 bonds sold to bob from elon!");
 };

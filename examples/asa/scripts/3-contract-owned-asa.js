@@ -7,44 +7,54 @@
  * - Create contract account (with app_id embedded/passed as a template param)
  * - Deploy ASA using both contracts
  */
-const { mkParam } = require("./transfer/common");
+const { mkParam, tryExecuteTx } = require("./transfer/common");
 const { types } = require("@algo-builder/web");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const alice = deployer.accountsByName.get("alice");
 
-	await deployer.executeTx(
+	await tryExecuteTx(
+		deployer,
 		mkParam(masterAccount, alice.addr, 200e6, { note: "funding account" })
 	);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
-	const appInfo = await deployer.deployApp(
-		alice,
-		{
-			appName: "StatefulASA_App",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "5-contract-asa-stateful.py", // approval program
-			clearProgramFilename: "5-clear.py", // clear program
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
-		},
-		{}
-	);
+	const appInfo = await deployer
+		.deployApp(
+			alice,
+			{
+				appName: "StatefulASA_App",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "5-contract-asa-stateful.py", // approval program
+				clearProgramFilename: "5-clear.py", // clear program
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(appInfo);
 
 	// Get Statless Account Address
-	await deployer.mkContractLsig("StateLessASALsig", "5-contract-asa-stateless.py", {
-		APP_ID: appInfo.appID,
-	});
-	const statelessAccount = deployer.getLsig("StateLessASALsig");
+	await deployer
+		.mkContractLsig("StatelessASALsig", "5-contract-asa-stateless.py", {
+			APP_ID: appInfo.appID,
+		})
+		.catch((error) => {
+			throw error;
+		});
+	const statelessAccount = deployer.getLsig("StatelessASALsig");
 	console.log("stateless Account Address:", statelessAccount.address());
 
-	await deployer.executeTx(
+	await tryExecuteTx(
+		deployer,
 		mkParam(masterAccount, statelessAccount.address(), 200e6, { note: "funding account" })
 	);
 
@@ -77,12 +87,12 @@ async function run(runtimeEnv, deployer) {
 		},
 	];
 
-	await deployer.executeTx(txGroup);
+	await tryExecuteTx(deployer, txGroup);
 
 	// This should fail because maximum number of asa creation limit is set to 1
 	try {
 		txGroup[1].asaName = "alu";
-		await deployer.executeTx(txGroup);
+		await tryExecuteTx(deployer, txGroup);
 	} catch (e) {
 		console.log(e.response?.error);
 	}

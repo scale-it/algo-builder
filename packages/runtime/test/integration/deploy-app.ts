@@ -4,7 +4,8 @@ import { assert } from "chai";
 
 import { getProgram } from "../../src";
 import RUNTIME_ERRORS from "../../src/errors/errors-list";
-import { AccountStore, Runtime } from "../../src/index";
+import { Runtime } from "../../src/index";
+import { MaxAppProgramLen } from "../../src/lib/constants";
 import { AccountStoreI } from "../../src/types";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -98,7 +99,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		assert.isDefined(res?.applicationAccount);
 	});
 
-	it("Should failed if deploy duplicate app name", function () {
+	it("Should fail if deploy duplicate app name", function () {
 		expectRuntimeError(
 			() =>
 				runtime.deployApp(
@@ -115,4 +116,164 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			RUNTIME_ERRORS.GENERAL.APP_NAME_ALREADLY_USED
 		);
 	});
+
+	describe('Extra Pages', function () {
+		it("Should pass when program length doesn't exceed total allowed program length", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App1",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: approvalProgramFilename, // not a large approval program
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+					extraPages: 3
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			assert.doesNotThrow(() => runtime.executeTx([execParams]));
+		});
+
+		it("Should fail when program exceeds total allowed program length", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App2",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "very-long-approval.teal", // very large teal program
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+					extraPages: 3
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED)
+		});
+
+		it("Should fail when no extra pages was defined for large approval program", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App3",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "very-long-approval.teal", // very large teal program
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+		});
+
+		it("Should pass when sufficient extra pages were defined", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+					extraPages: 1 // should pass because total 2 pages needed. total page = default page(1) + extra page
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+			assert.doesNotThrow(() => runtime.executeTx([execParams]))
+		});
+
+		it("Should fail when sufficient extra pages was not defined", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+					extraPages: 0 // should fail because total 2 pages needed
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+		});
+
+		it("Should fail when extra pages is not within the defined limit of extra pages [0,3]", function () {
+			const execParams: types.ExecParams = {
+				sign: types.SignType.SecretKey,
+				fromAccount: john.account,
+				type: types.TransactionType.DeployApp,
+				appDefinition: {
+					appName: "App",
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					clearProgramFilename: clearProgramFilename,
+					globalBytes: 1,
+					globalInts: 1,
+					localBytes: 1,
+					localInts: 1,
+					extraPages: 4 // should fail because extra pages range is [0, 3]
+				},
+				payFlags: {
+					totalFee: 1000,
+				},
+			};
+
+			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED);
+		});
+
+		it("Should pass when program length = max possible program length", function () {
+			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2).fill(0);
+			const clearProgram = Buffer.alloc(0).fill(0);
+
+			assert.doesNotThrow(() => runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1));
+		});
+
+		it("Should fail when program length = (max possible program length + 1)", function () {
+			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2 + 1).fill(0);
+			const clearProgram = Buffer.alloc(0).fill(0);
+
+			expectRuntimeError(() =>
+				runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+		});
+	})
 });

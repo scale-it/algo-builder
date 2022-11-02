@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common/common");
 const { accounts } = require("./utils");
 
 const min_balance = 3000000;
@@ -8,20 +9,24 @@ async function run(runtimeEnv, deployer) {
 	const { creator } = accounts(deployer);
 
 	// Create Application
-	const appInfo = await deployer.deployApp(
-		creator,
-		{
-			appName: "coordinator",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "coordinator.py",
-			clearProgramFilename: "clear.teal",
-			localInts: 0,
-			localBytes: 0,
-			globalInts: 0,
-			globalBytes: 0,
-		},
-		{}
-	);
+	const appInfo = await deployer
+		.deployApp(
+			creator,
+			{
+				appName: "coordinator",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "coordinator.py",
+				clearProgramFilename: "clear.teal",
+				localInts: 0,
+				localBytes: 0,
+				globalInts: 0,
+				globalBytes: 0,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(appInfo);
 	console.log("Contracts deployed successfully!");
@@ -35,7 +40,7 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: min_balance,
 		payFlags: {},
 	};
-	await deployer.executeTx(paymentTxnParam);
+	await tryExecuteTx(deployer, [paymentTxnParam]);
 }
 
 module.exports = { default: run };

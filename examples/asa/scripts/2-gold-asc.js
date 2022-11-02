@@ -1,35 +1,41 @@
 const { balanceOf, signTransactions } = require("@algo-builder/algob");
 const { types, getSuggestedParams } = require("@algo-builder/web");
-const { mkParam } = require("./transfer/common");
+const { mkParam, tryExecuteTx } = require("./transfer/common");
 const { makeAssetTransferTxnWithSuggestedParams } = require("algosdk");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
 	const goldOwner = deployer.accountsByName.get("alice");
 
-	await deployer.executeTx(
+	await tryExecuteTx(
+		deployer,
 		mkParam(masterAccount, goldOwner.addr, 200e6, { note: "funding account" })
 	);
 
 	// save Smart Signature by name & fund the account
-	const ascInfoContract = await deployer.mkContractLsig(
-		"Gold_C_Lsig",
-		"2-gold-contract-asc.teal",
-		{}
-	);
+	const ascInfoContract = await deployer
+		.mkContractLsig("Gold_C_Lsig", "2-gold-contract-asc.teal", {})
+		.catch((error) => {
+			throw error;
+		});
 	console.log(ascInfoContract);
-	await deployer.fundLsig("Gold_C_Lsig", { funder: goldOwner, fundingMicroAlgo: 1e6 }, {}); // funding with 1 Algo
+	// funding with 1 Algo
+	await deployer
+		.fundLsig("Gold_C_Lsig", { funder: goldOwner, fundingMicroAlgo: 1e6 }, {})
+		.catch((error) => {
+			throw error;
+		});
 
-	const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig(
-		"Gold_D_Lsig",
-		"3-gold-delegated-asc.teal",
-		goldOwner
-	);
-	const ascInfoGoldDelegated = await deployer.mkDelegatedLsig(
-		"Gold_d_asa_lsig",
-		"4-gold-asa.teal",
-		goldOwner
-	);
+	const ascInfoAlgoDelegated = await deployer
+		.mkDelegatedLsig("Gold_D_Lsig", "3-gold-delegated-asc.teal", goldOwner)
+		.catch((error) => {
+			throw error;
+		});
+	const ascInfoGoldDelegated = await deployer
+		.mkDelegatedLsig("Gold_d_asa_lsig", "4-gold-asa.teal", goldOwner)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(ascInfoAlgoDelegated);
 	console.log(ascInfoGoldDelegated);
@@ -38,7 +44,9 @@ async function run(runtimeEnv, deployer) {
 	const lsig = await deployer.getLsig("Gold_C_Lsig");
 	const goldAsset = deployer.asa.get("gold");
 	const goldAssetID = goldAsset.assetIndex;
-	await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 });
+	await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 }).catch((error) => {
+		throw error;
+	});
 	console.log("Balance: ", await balanceOf(deployer, lsig.address(), goldAssetID));
 
 	console.log(`Funding contract ${lsig.address()} with ASA gold`);
@@ -57,7 +65,7 @@ async function run(runtimeEnv, deployer) {
 		fromAccount: goldOwner,
 	};
 
-	await deployer.executeTx([{ transaction: tx, sign: sign }]);
+	await tryExecuteTx(deployer, [{ transaction: tx, sign: sign }]);
 	await balanceOf(deployer, lsig.address(), goldAssetID);
 
 	// To get raw signed transaction you may use `signTransactions` function

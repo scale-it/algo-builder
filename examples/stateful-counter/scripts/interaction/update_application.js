@@ -8,18 +8,22 @@ async function run(runtimeEnv, deployer) {
 	const applicationID = appInfo.appID;
 	console.log("Application Id ", applicationID);
 
-	const updatedRes = await deployer.updateApp(
-		"CounterApp",
-		creatorAccount,
-		{}, // pay flags
-		applicationID,
-		{
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "new_approval.teal",
-			clearProgramFilename: "new_clear.teal",
-		},
-		{}
-	);
+	const updatedRes = await deployer
+		.updateApp(
+			"CounterApp",
+			creatorAccount,
+			{}, // pay flags
+			applicationID,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "new_approval.teal",
+				clearProgramFilename: "new_clear.teal",
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 	console.log("Application Updated: ", updatedRes);
 }
 

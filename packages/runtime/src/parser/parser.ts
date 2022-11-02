@@ -157,6 +157,7 @@ import {
 	Txnas,
 	Uncover,
 	Block,
+	VrfVerify,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
@@ -411,6 +412,7 @@ opCodeMap[7] = {
 	ed25519verify_bare: Ed25519verify_bare,
 	json_ref: Json_ref,
 	block: Block,
+	vrf_verify: VrfVerify,
 };
 /**
  * TEALv8
@@ -863,28 +865,19 @@ export function assertMaxCost(
 	}
 }
 
-// verify max length of TEAL code is within consensus parameters
-function _assertMaxLen(len: number, mode: ExecutionMode): void {
-	if (mode === ExecutionMode.SIGNATURE) {
+/**
+ * verify max size of lsig
+ * @param lsigProgramArgsSize lsig program and arugments size
+ * @param mode Execution mode - Signature (stateless) OR Application (stateful)
+ */
+function assertLogicMaxLen(lsigProgramArgsSize: number, mode: ExecutionMode): void {
+	if (mode === ExecutionMode.SIGNATURE && lsigProgramArgsSize > LogicSigMaxSize) {
 		// check max program cost (for stateless)
-		if (len > LogicSigMaxSize) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
-				length: len,
-				maxlen: LogicSigMaxSize,
-				mode: "Stateless",
-			});
-		}
-	} else {
-		if (len > MaxAppProgramLen) {
-			// TODO: // When MaxExtraAppProgramPages > 0, this is the size of those pages.
-			// So two "extra pages" would mean 3*MaxAppProgramLen bytes are available.
-			// check max program length (for stateful)
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
-				length: len,
-				maxlen: MaxAppProgramLen,
-				mode: "Stateful",
-			});
-		}
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+			length: lsigProgramArgsSize,
+			maxlen: LogicSigMaxSize,
+			mode: "Stateless",
+		});
 	}
 }
 
@@ -897,7 +890,14 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
 export function parser(program: string, mode: ExecutionMode, interpreter: Interpreter): Op[] {
 	const opCodeList: Op[] = [];
 	let counter = 0;
-
+	let lsigProgramArgsSize = Buffer.from(program, "base64").length;
+	if (interpreter.runtime.ctx?.args && interpreter.runtime.ctx.args.length) {
+		for (const arg of interpreter.runtime.ctx.args) {
+			lsigProgramArgsSize += arg.length;
+		}
+	}
+	//validate lsig program and arguments size
+	assertLogicMaxLen(lsigProgramArgsSize, mode);
 	const lines = program.split("\n");
 	for (const line of lines) {
 		counter++;
@@ -918,8 +918,6 @@ export function parser(program: string, mode: ExecutionMode, interpreter: Interp
 		assertMaxCost(interpreter.gas, mode);
 	}
 
-	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
-	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
 }
 

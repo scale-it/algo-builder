@@ -2,7 +2,7 @@ const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
 const accounts = require("../common/accounts");
-const { fundAccount, optInAccountToApp } = require("../common/common");
+const { fundAccount, optInAccountToApp, tryExecuteTx } = require("../common/common");
 const { issue } = require("./issue");
 const { whitelist } = require("../permissions/whitelist");
 
@@ -62,7 +62,7 @@ async function cease(deployer, address, amount) {
 	];
 
 	console.log(`* Ceasing ${amount} tokens from [${address}] *`);
-	await deployer.executeTx(ceaseTxGroup);
+	await tryExecuteTx(deployer, ceaseTxGroup);
 
 	console.log(`* ${address} asset holding after cease: *`);
 	console.log(await balanceOf(deployer, address, tesla.assetIndex));
