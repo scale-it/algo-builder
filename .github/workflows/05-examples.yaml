@@ -40,9 +40,8 @@ jobs:
       - name: Install Algorand
         run: |
           sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
-          curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
-          sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
-          sudo apt-get -allow-unauthenticated update && sudo apt-get install -y algorand
+          sudo add-apt-repository -allow-unauthenticated "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+          sudo apt-get -allow-unauthenticated update && sudo apt-get -allow-unauthenticated install -y algorand
       - name: Setup Network
         run: cd infrastructure && make setup-private-net
 
