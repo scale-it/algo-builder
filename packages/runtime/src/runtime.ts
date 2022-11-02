@@ -1178,13 +1178,13 @@ export class Runtime {
 			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
 		} else { //add another block
 			const lastBlock = this.store.blocks.get(this.round);
-			if (lastBlock !== undefined) {
+			if (lastBlock) {
 				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
 				timestamp = lastBlock.timestamp + BlockFinalisationTime;
 				this.round += 1;// we move to new a new round
 			}
 		}
-		if (timestamp !== undefined && seed !== undefined) {
+		if (timestamp && seed) {
 			this.store.blocks.set(this.round, { timestamp, seed });
 		} else {
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
@@ -1197,7 +1197,7 @@ export class Runtime {
 	 */
 	getBlock(round: number): Block {
 		const block = cloneDeep(this.store.blocks.get(round));
-		if (block !== undefined) {
+		if (block) {
 			return block;
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);

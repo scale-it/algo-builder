@@ -5312,6 +5312,7 @@ export class Block extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 	}
+	
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const round = Number(this.assertBigInt(stack.pop(), this.line));
@@ -5322,7 +5323,7 @@ export class Block extends Op {
 			result = block.seed;
 		} else {
 			//"BlkTimestamp"
-			//seconds since epoch - rounds, assuming one round(block) = 2.5s truncated to 2s (BigInt)
+			//seconds since epoch - rounds, assuming one round(block) = 4.5s truncated to 4s (BigInt)
 			result = block.timestamp;
 		}
 		stack.push(result);
