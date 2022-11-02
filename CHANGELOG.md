@@ -56,6 +56,8 @@ from `algosdk` and sends it to the network.
 - Added support for `vrf_verify` opcode to `Runtime`. IMPORTANT: the opcode assumes the proof is always valid thus it will always return 1.
 - Added program length check on app deploy on the basis of extra pages in `runtime`.
 - Added logic signature and arguments size check in `runtime`.
+- Added support for `block` opcode to `Runtime`.
+- Added blocks to `Runtime`. It simulates the block generation by using radnom bytes generator as the first seed. The following seeds are MD5 hash of the seed from the previous block.
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.

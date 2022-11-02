@@ -7,7 +7,7 @@ import sinon from "sinon";
 import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { ASSET_CREATION_FEE, BlockFinalisationTime } from "../../src/lib/constants";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
 import { AccountStoreI } from "../../src/types";
@@ -1442,6 +1442,7 @@ describe("Helper functions", function () {
 		});
 	});
 });
+
 describe("Atomic Transaction Composer",function () {
 	let runtime: Runtime;
 	const notABI = "not-ABI.json";
@@ -1453,27 +1454,59 @@ describe("Atomic Transaction Composer",function () {
 	this.beforeEach(function () {
 		runtime = new Runtime([]);
 	});
+
 	it("Should throw an error if file is not found", function () {
 		assert.throws(() => {
             runtime.parseABIContractFile("doesNotExist.json");
 		});
 	});
+  
 	it("Should throw an error if file is not ABI", function () {
 		assert.throws(() => {
 			runtime.parseABIContractFile(notABI);
 		})
 	});
+  
 	it("Should throw an error if file is not json", function () {
 		assert.throws(() => {
 			runtime.parseABIContractFile(notJSON);
 		});
 	});
+  
 	it("Shoult from an error if network.runtime is not defined", function () {
 		assert.throws(() => {
 			runtime.parseABIContractFile(networkRuntimeNotDefined)})
 		});
+  }); 
+  
 	it("Should return ABIContract", function () {
 		const abi = runtime.parseABIContractFile(correctABI);
 		expect(abi).to.be.instanceof(ABIContract);
+  });
+});
+
+describe("Funtions related to runtime chain", function () {
+	let runtime: Runtime;
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);  
+	});
+  
+	it("Should return current block", function () {
+		const currentBlock = runtime.getBlock(runtime.getRound());
+		assert.equal(currentBlock.seed.length, 32);
+		expect(currentBlock.timestamp).to.be.a("bigint");
+	});
+
+	it("Should produce a new block and move to next round", function () {
+		const currentRound = runtime.getRound();
+		const currentBlock = runtime.getBlock(currentRound);
+		//produce new block and move to next round
+		runtime.produceBlock();
+		const newRound = runtime.getRound();
+		const newBlock = runtime.getBlock(newRound);
+		assert.equal(currentRound + 1, newRound);
+		assert.notDeepEqual(currentBlock, newBlock);
+		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
 	});
 });

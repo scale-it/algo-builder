@@ -11,6 +11,7 @@ import algosdk, {
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
 import { sha512_256 } from "js-sha512";
+import cloneDeep from "lodash.clonedeep";
 import { describe } from "mocha";
 import nacl from "tweetnacl";
 
@@ -45,6 +46,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -167,12 +169,15 @@ import {
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ASSET_CREATION_FEE,
+	blockFieldTypes,
 	DEFAULT_STACK_ELEM,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
+	seedLength,
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -7564,6 +7569,67 @@ describe("Teal Opcodes", function () {
 			assert.equal(expectedResult, stack.pop());
 		});
 	});
+	describe("Block opcode", function () {
+		const stack = new Stack<StackElem>();
+		let interpreter: Interpreter;
+		const FIRST_VALID = 2000n;
+		this.beforeEach(function () {
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+		});
+
+		it("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
+			stack.push(BigInt(FIRST_VALID - 2n));
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+
+		it("Should allow to acces two behind FirstValid if LastValid is 100 after", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
+			stack.push(BigInt(FIRST_VALID - 2n));
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.doesNotThrow(() => op.execute(stack));
+		});
+
+		it("Should return two different seeds for to different rounds", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			//first round
+			stack.push(FIRST_VALID - 1n);
+			op.execute(stack);
+			const seedRound1 = stack.pop();
+			//second round
+			stack.push(FIRST_VALID - 2n);
+			op.execute(stack);
+			const seedRound2 = stack.pop();
+			assert.notEqual(seedRound1, seedRound2);
+		});
+
+		it("Should fail when accesing block 0 even if last valid is low", function(){
+			interpreter.runtime.ctx.tx.lv = 100;
+			interpreter.runtime.ctx.tx.fv = 5;
+			stack.push(0n);
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+
+		it("Should return seed for a block that is within boundries and exist", function(){
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			op.execute(stack);
+			const result = stack.pop();
+			assert.equal((result as Buffer).length, seedLength);
+		});
+
+		it("Should return correct cost", function(){
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			const cost = op.execute(stack);
+			assert.equal(cost, 1);
+		});
+	});
 
 	describe("vrf_verify", function () {
 		let stack = new Stack<StackElem>();
@@ -7586,7 +7652,7 @@ describe("Teal Opcodes", function () {
 		})
 
 		it("Should return 1 and hash of proof for valid proof and verification key", function () {
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
@@ -7595,7 +7661,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(expectedResult, stack.pop());
 		});
 		it("Should throw error if pubKey size not equal 32", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizePubKey = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(wrongSizePubKey);
 			stack.push(proof);
@@ -7603,7 +7669,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
 		})
 		it("Should throw error if proof size not equal 80", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(publicKey);
 			stack.push(wrongSizeProof);
@@ -7611,7 +7677,7 @@ describe("Teal Opcodes", function () {
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
 		})
 		it("Should return correct cost", function(){
-			const op = new VrfVerify(["VrfAlgorand"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
@@ -7619,7 +7685,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(cost, 5700);
 		})
 		it("Should throw error when field = VrfStandard", function(){
-			const op = new VrfVerify(["VrfStandard"], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
