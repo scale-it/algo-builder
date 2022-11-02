@@ -1,5 +1,6 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, {
+	ABIContract,
 	Account as AccountSDK,
 	decodeAddress,
 	decodeSignedTransaction,
@@ -7,6 +8,7 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
+import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -1179,5 +1181,19 @@ export class Runtime {
 	 */
 	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);
+	}
+
+	/**
+     * Parses the file and return the ABIContract in case of network.runtime not defined throw exception
+	 * @param fileName string
+	 * @retun parsed file
+	 */
+	parseABIContractFile(pathToFile: string):ABIContract {
+		const buff = readFileSync(pathToFile);
+  		const contract = new algosdk.ABIContract(JSON.parse(buff.toString()))
+		if(contract.networks.runtime === undefined){
+			throw new Error("ABI contract file is not valid");
+		}
+		return contract;
 	}
 }

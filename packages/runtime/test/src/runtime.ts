@@ -1,7 +1,7 @@
 import { types } from "@algo-builder/web";
 import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
-import algosdk, { LogicSigAccount, Transaction } from "algosdk";
-import { assert } from "chai";
+import algosdk, { ABIContract, LogicSigAccount, Transaction } from "algosdk";
+import { assert, expect } from "chai";
 import sinon from "sinon";
 
 import { getProgram } from "../../src";
@@ -1440,5 +1440,40 @@ describe("Helper functions", function () {
 		assert.doesNotThrow(() => {
 			runtime.sendTxAndWait(signedTx);
 		});
+	});
+});
+describe("Atomic Transaction Composer",function () {
+	let runtime: Runtime;
+	const notABI = "not-ABI.json";
+	const notJSON = "not-JSON.teal";
+	const networkRuntimeNotDefined = "network-runtime-undefined.json";
+	const correctABI = "correct-ABI.json";
+	useFixture("atomic-transaction-composer")
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+	});
+	it("Should throw an error if file is not found", function () {
+		assert.throws(() => {
+            runtime.parseABIContractFile("doesNotExist.json");
+		});
+	});
+	it("Should throw an error if file is not ABI", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notABI);
+		})
+	});
+	it("Should throw an error if file is not json", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notJSON);
+		});
+	});
+	it("Shoult from an error if network.runtime is not defined", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(networkRuntimeNotDefined)})
+		});
+	it("Should return ABIContract", function () {
+		const abi = runtime.parseABIContractFile(correctABI);
+		expect(abi).to.be.instanceof(ABIContract);
 	});
 });
