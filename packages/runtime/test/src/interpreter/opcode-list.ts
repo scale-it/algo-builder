@@ -7685,7 +7685,7 @@ describe("Teal Opcodes", function () {
 			assert.equal(cost, 5700);
 		})
 		it("Should throw error when field = VrfStandard", function(){
-			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
