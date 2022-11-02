@@ -7,6 +7,7 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
+import MD5 from "crypto-js/md5";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -19,11 +20,12 @@ import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
+	seedLength,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR
-} from "./lib/constants";
+	ZERO_ADDRESS_STR} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -35,6 +37,7 @@ import {
 	ASADeploymentFlags,
 	ASAInfo,
 	AssetHoldingM,
+	Block,
 	Context,
 	EncTx,
 	ExecutionMode,
@@ -76,6 +79,7 @@ export class Runtime {
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
+			blocks: new Map<number, Block>(),
 		};
 
 		this._defaultAccounts = this._setupDefaultAccounts();
@@ -88,7 +92,8 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2;
+		this.round = 2000;
+		this.populateChain(this.round);
 		this.timestamp = 1;
 	}
 
@@ -1179,5 +1184,51 @@ export class Runtime {
 	 */
 	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);
+	}
+
+	/**
+	 * Produces new block and adds it to a Map where the keys are block numbers
+	 */
+	produceBlock() {
+		let timestamp: bigint | undefined;
+		let seed: Uint8Array | undefined;
+		if (this.store.blocks.size === 0) { //create genesis block
+			seed = nacl.randomBytes(seedLength);
+			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
+		} else { //add another block
+			const lastBlock = this.store.blocks.get(this.round);
+			if (lastBlock) {
+				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
+				timestamp = lastBlock.timestamp + BlockFinalisationTime;
+				this.round += 1;// we move to new a new round
+			}
+		}
+		if (timestamp && seed) {
+			this.store.blocks.set(this.round, { timestamp, seed });
+		} else {
+		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+		}
+	}
+	/**
+	 * Returns a requested Block object. If it does not exist on chain throws an error
+	 * @param round block number
+	 * @returns Block
+	 */
+	getBlock(round: number): Block {
+		const block = cloneDeep(this.store.blocks.get(round));
+		if (block) {
+			return block;
+		}
+		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
+	}
+	/**
+	 * Populates chain from first block to round number block (Produces N rounds) 
+	 * @param round current round number
+	 */
+	private populateChain(round:number) {
+		this.round = 1
+		for(let blockN = 1; blockN<=round; blockN++){
+			this.produceBlock();
+		}
 	}
 }

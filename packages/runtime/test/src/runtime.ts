@@ -1,13 +1,12 @@
 import { types } from "@algo-builder/web";
-import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount, Transaction } from "algosdk";
-import { assert } from "chai";
+import { assert, expect } from "chai";
 import sinon from "sinon";
 
 import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { ASSET_CREATION_FEE, BlockFinalisationTime } from "../../src/lib/constants";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
 import { AccountStoreI } from "../../src/types";
@@ -1440,5 +1439,30 @@ describe("Helper functions", function () {
 		assert.doesNotThrow(() => {
 			runtime.sendTxAndWait(signedTx);
 		});
+	});
+});
+describe("Funtions related to runtime chain", function () {
+	let runtime: Runtime;
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+	});
+
+	it("Should return current block", function () {
+		const currentBlock = runtime.getBlock(runtime.getRound());
+		assert.equal(currentBlock.seed.length, 32);
+		expect(currentBlock.timestamp).to.be.a("bigint");
+	});
+
+	it("Should produce a new block and move to next round", function () {
+		const currentRound = runtime.getRound();
+		const currentBlock = runtime.getBlock(currentRound);
+		//produce new block and move to next round
+		runtime.produceBlock();
+		const newRound = runtime.getRound();
+		const newBlock = runtime.getBlock(newRound);
+		assert.equal(currentRound + 1, newRound);
+		assert.notDeepEqual(currentBlock, newBlock);
+		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
 	});
 });

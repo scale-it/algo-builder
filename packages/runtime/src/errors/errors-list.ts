@@ -476,7 +476,7 @@ maximun uint128`,
 	},
 	UNKNOWN_VRF_TYPE: {
 		number: 1070,
-		message: "Unknown field",
+		message: "Unknown vrf_verify field",
 		title: "Unknown field",
 		description: "Unknow field for vrf_verify opcode",
 	},
@@ -487,6 +487,12 @@ maximun uint128`,
 		description:
 			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
 	},
+	UNKNOWN_BLOCK_FIELD: {
+		number: 1072,
+		message: "Unknown block opcode field",
+		title: "Unknown field",
+		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	}
 };
 
 const runtimeGeneralErrors = {
@@ -627,6 +633,18 @@ const runtimeGeneralErrors = {
 		description:
 			"Provided multisignature is invalid and was not able to authenticate the transaction",
 	},
+	PRODUCE_BLOCK: {
+		number: 1322,
+		message: "Produce block",
+		title: "Produce block",
+		description: "Runtime failed while trying to produce new block",
+	},
+	INVALID_BLOCK: {
+		number: 1323,
+		message: "Invalid block",
+		title: "Invalid block",
+		description: "Provided round does not correspond to any existing block",
+	}
 };
 
 const transactionErrors = {
