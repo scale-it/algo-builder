@@ -40,7 +40,7 @@ jobs:
       - name: Install Algorand
         run: |
           sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
-          curl -o - https://releases.algorand.com/key.pub | sudo tee /etc/apt/trusted.gpg.d/algorand.asc
+          curl -O https://releases.algorand.com/key.pub | sudo tee /etc/apt/trusted.gpg.d/algorand.asc && sudo apt-key add key.pub
           sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
           sudo apt-get update && sudo apt-get install -y algorand
       - name: Setup Network
