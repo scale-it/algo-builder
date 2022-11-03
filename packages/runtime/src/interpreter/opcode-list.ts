@@ -29,6 +29,7 @@ import {
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
 	AssetParamMap,
+	blockFieldTypes,
 	GlobalFields,
 	ITxArrFields,
 	json_refTypes,
@@ -42,8 +43,11 @@ import {
 	MAX_UINT128,
 	MaxTEALVersion,
 	OpGasCost,
+	proofLength,
+	publicKeyLength,
 	TransactionTypeEnum,
 	TxArrFields,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 	CurveTypeEnum,
 } from "../lib/constants";
@@ -5216,6 +5220,7 @@ export class Json_ref extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254Add extends Op {
 	readonly line: number;
 	/**
@@ -5239,6 +5244,7 @@ export class Bn254Add extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254ScalarMul extends Op {
 	readonly line: number;
 	/**
@@ -5262,6 +5268,7 @@ export class Bn254ScalarMul extends Op {
 		return this.computeCost();
 	}
 }
+//TODO:add description
 export class Bn254Pairing extends Op {
 	readonly line: number;
 	/**
@@ -5286,6 +5293,46 @@ export class Bn254Pairing extends Op {
 		return this.computeCost();
 	}
 }
+
+/**
+ * Opcode: 0xd1 {uint8 block field}
+ * Stack: ..., A: uint64 → ..., any
+ * field F of block A. Fail unless A falls between txn.LastValid-1002 and txn.FirstValid (exclusive)
+*/
+export class Block extends Op {
+	readonly line: number;
+	readonly field: string;
+	readonly interpreter: Interpreter;
+	/**
+	 * @param args Expected arguments: [BlkSeed || BlkTimestamp]
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter instance
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		if (argument === blockFieldTypes.BlkSeed|| argument === blockFieldTypes.BlkTimestamp) {
+			this.field = argument;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, {field: argument});
+		}
+		this.line = line;
+		this.interpreter = interpreter;
+	}
+	
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const round = Number(this.assertBigInt(stack.pop(), this.line));
+		this.interpreter.assertRoundIsAvailable(round);
+		const block = this.interpreter.runtime.getBlock(round);
+		//"BlkTimestamp" = seconds since epoch, assuming one round(block) = 4.5s truncated to 4s (BigInt)
+		const result = (this.field === blockFieldTypes.BlkSeed) ? block.seed : block.timestamp
+		stack.push(result);
+		return this.computeCost();
+	}
+};
+
 /**
  * Opcode: 0xd0 {uint8 parameters index}
  * Stack: ..., A: []byte, B: []byte, C: []byte → ..., X: []byte, Y: uint64
@@ -5307,11 +5354,11 @@ export class VrfVerify extends Op {
 		super();
 		this.line = line;
 		switch (argument) {
-			case "VrfAlgorand": {
+			case vrfVerifyFieldTypes.VrfAlgorand: {
 				this.vrfType = argument;
 				break;
 			}
-			case "VrfStandard": {
+			case vrfVerifyFieldTypes.VrfStandard: {
 				this.vrfType = argument;
 				break;
 			}
@@ -5322,7 +5369,7 @@ export class VrfVerify extends Op {
 	}
 
 	computeCost(): number {
-		return 5700;
+		return OpGasCost[7]["vrf_verify"];
 	}
 
 	execute(stack: TEALStack): number {
@@ -5331,13 +5378,13 @@ export class VrfVerify extends Op {
 		const proof = this.assertBytes(stack.pop(), this.line);
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
-		if (proof.length !== 80) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, { length: proof.length });
+		if (proof.length !== proofLength) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
 		}
-		if (publicKey.length !== 32) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, { length: publicKey.length });
+		if (publicKey.length !== publicKeyLength) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
 		}
-		if (this.vrfType === "VrfAlgorand") {
+		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
 			const hash = sha512(proof);
 			stack.push(convertToBuffer(hash, EncodingType.HEX));
 			stack.push(1n);

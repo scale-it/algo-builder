@@ -1,5 +1,5 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { spawnSync, SpawnSyncReturns } from "child_process";
+import { spawnSync, SpawnSyncReturns, exec } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
@@ -22,6 +22,8 @@ export class PyCompileOp {
 		if (!filename.endsWith(pyExt)) {
 			throw new Error(`filename "${filename}" must end with "${pyExt}"`);
 		}
+		// check if pyteal module installed or not
+		this.validatePythonModule("pyteal");
 
 		const [replaceParams, param] = this.parseScTmplParam(scTmplParams, logs);
 		let content = this.compilePyTeal(filename, param);
@@ -88,6 +90,18 @@ export class PyCompileOp {
 		}
 
 		return spawnSync("python3", [filePath, scInitParam], { encoding: "utf8" });
+	}
+
+	/**
+	 * Description: This method checks if given module is installed or not. Otherwise throw an exception.
+	 * @param module: Module to be checked if installed or not.
+	 */
+	private validatePythonModule(module: string) {
+		exec(`pip list | grep ${module}`, (err: any) => {
+			if (err) {
+				throw new Error(`"${module}" module not found. Please try running "pip install ${module}"`);
+			}
+		});
 	}
 
 	/**
