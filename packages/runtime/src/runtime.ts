@@ -1191,7 +1191,7 @@ export class Runtime {
 
 	/**
 	* Parses the file and return the ABIContract in case of network.runtime not defined throw exception
-	 * @param fileName string
+	 * @param pathToFile string
 	 * @retun parsed file
 	 */
 	parseABIContractFile(pathToFile: string): ABIContract {

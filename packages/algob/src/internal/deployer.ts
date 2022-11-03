@@ -589,7 +589,7 @@ class DeployerBasicMode {
 	/**
      * Parses the file and return the ABIContract where the networks property
 	 *  is set to the currently used netowrk in deployer
-	 * @param fileName string
+	 * @param pathToFile string
 	 * @retun parsed file
 	 */
 	 parseABIContractFile(pathToFile: string):algosdk.ABIContract {
