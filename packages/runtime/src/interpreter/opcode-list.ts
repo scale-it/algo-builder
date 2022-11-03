@@ -30,6 +30,7 @@ import {
 	AppParamDefined,
 	AssetParamMap,
 	blockFieldTypes,
+	CurveTypeEnum,
 	GlobalFields,
 	ITxArrFields,
 	json_refTypes,
@@ -49,7 +50,6 @@ import {
 	TxArrFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	CurveTypeEnum,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -5312,15 +5312,15 @@ export class Block extends Op {
 		super();
 		assertLen(args.length, 1, line);
 		const argument = args[0];
-		if (argument === blockFieldTypes.BlkSeed|| argument === blockFieldTypes.BlkTimestamp) {
+		if (argument === blockFieldTypes.BlkSeed || argument === blockFieldTypes.BlkTimestamp) {
 			this.field = argument;
 		} else {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, {field: argument});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, { field: argument });
 		}
 		this.line = line;
 		this.interpreter = interpreter;
 	}
-	
+
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const round = Number(this.assertBigInt(stack.pop(), this.line));
@@ -5379,10 +5379,10 @@ export class VrfVerify extends Op {
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
 		if (proof.length !== proofLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, { length: proof.length });
 		}
 		if (publicKey.length !== publicKeyLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, { length: publicKey.length });
 		}
 		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
 			const hash = sha512(proof);
@@ -5391,6 +5391,47 @@ export class VrfVerify extends Op {
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		}
+		return this.computeCost();
+	}
+}
+
+/**
+* TEALv8
+*/
+
+/**
+* Opcode: 0x8d {uint8 branch count} [{int16 branch offset, big-endian}, ...]
+* Stack: ..., A: uint64 → ...
+* branch to the Ath label. Continue at following instruction if index A exceeds the number of labels.
+* Availability: v8
+*/
+export class Switch extends Op {
+	readonly line: number;
+	readonly labelsLength: number;
+	readonly labels: string[];
+	readonly interpreter: Interpreter
+
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		this.labels = args;
+		this.labelsLength = args.length;
+		this.interpreter = interpreter;
+		if(this.labelsLength < 1 || this.labelsLength > 255){
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID, {len: this.labelsLength});
+		}
+	}
+
+	execute(stack: TEALStack, ): number {
+		this.assertMinStackLen(stack, 1, this.line)
+		const index = Number(this.assertBigInt(stack.pop(), this.line));
+		if(index > this.labelsLength){
+			//the index exceeds the labels length thus do nothing and continue at the following instruction
+			return this.computeCost();
+		}
+		const label = this.labels[index];
+		this.interpreter.jumpToLabel(label, this.line);
+
 		return this.computeCost();
 	}
 }

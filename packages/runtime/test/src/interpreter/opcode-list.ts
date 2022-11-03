@@ -160,6 +160,7 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
@@ -7800,5 +7801,57 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(stack.pop(), publicKeyX);
 			});
 		});
+	});
+
+	describe("Tealv8", function () {
+		describe("switch", function() {
+			let stack: Stack<StackElem>;
+		    let interpreter: Interpreter;
+			const line = 1;
+			const tealV8 = 8;
+
+			this.beforeEach(function() {
+				stack = new Stack<StackElem>();
+				interpreter = new Interpreter();
+				interpreter.runtime = new Runtime([]);
+				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+				interpreter.tealVersion = tealV8;
+			});
+
+			it("Should create a new switch opcode", function (){
+				assert.doesNotThrow(()=>new Switch(["label"], line, interpreter));
+			});
+
+			it("Should throw an error if the stack length < 1", function(){
+				const op = new Switch(["label"], line, interpreter);
+				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+			})
+
+			it("Should thorw an error no labels provided", function(){
+				expectRuntimeError(
+					() => new Switch([], line, interpreter),
+					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID);
+			})
+
+			it("Should allow 255 labels", function () {
+				const upperLimit = 255;
+				const labels = [ ...Array(upperLimit).keys() ].map((i) => "label".concat(i.toString()))
+				assert.doesNotThrow(()=>new Switch(labels, line, interpreter));
+			});
+
+			it("Should throw an error if 256 labels provided", function () {
+				const upperLimit = 256;
+				const labels = [ ...Array(upperLimit).keys() ].map((i) => "label".concat(i.toString()))
+				expectRuntimeError(
+					() => new Switch(labels, line, interpreter),
+					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID);
+			});
+
+			it("Should not throw an error if index exceeds the lenght of labes provided", function(){
+				stack.push(5n);
+				const op = new Switch(["label"], line, interpreter);
+				assert.doesNotThrow(() => op.execute(stack));
+			})
+		})
 	});
 });

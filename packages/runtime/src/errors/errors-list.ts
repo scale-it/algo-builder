@@ -492,6 +492,12 @@ maximun uint128`,
 		message: "Unknown block opcode field",
 		title: "Unknown field",
 		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	},
+	LABELS_LENGTH_INVALID: {
+		number: 1073,
+        message: "Labels length invalid",
+		title: "Labels length invalid",
+		description: "Amount of provided labels is invalid, got: %len, expected: [1,255]",
 	}
 };
 
