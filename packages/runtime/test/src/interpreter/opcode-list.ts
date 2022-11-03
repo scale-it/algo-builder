@@ -169,6 +169,7 @@ import {
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ASSET_CREATION_FEE,
+	CurveTypeEnum,
 	blockFieldTypes,
 	DEFAULT_STACK_ELEM,
 	MAX_UINT8,
@@ -6087,14 +6088,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("ecdsa_verify, should throw error if curve is not supported", function () {
-			stack.push(msgHash);
-			stack.push(signature.r.toBuffer());
-			stack.push(signature.s.toBuffer());
-			stack.push(pkX);
-			stack.push(pkY);
-
-			const op = new EcdsaVerify(["2"], 1);
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(() => new EcdsaVerify(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
 		});
 
 		it("ecdsa_pk_decompress", function () {
@@ -6103,7 +6097,7 @@ describe("Teal Opcodes", function () {
 			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
 			stack.push(Buffer.from(compressed, "hex"));
 
-			let op = new EcdsaPkDecompress(["0"], 1);
+			const op = new EcdsaPkDecompress(["0"], 1);
 			op.execute(stack);
 
 			assert.deepEqual(
@@ -6114,11 +6108,7 @@ describe("Teal Opcodes", function () {
 				stack.pop(),
 				Buffer.from("50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352", "hex")
 			);
-
-			stack.push(Buffer.from(compressed, "hex"));
-			op = new EcdsaPkDecompress(["2"], 1);
-
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(() => new EcdsaPkDecompress(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
 		});
 
 		it("ecdsa_pk_recover", function () {
@@ -6154,6 +6144,7 @@ describe("Teal Opcodes", function () {
 			stack.push(pkY);
 			let op = new EcdsaVerify(["0"], 1);
 			assert.equal(1700, op.execute(stack));
+
 			//EcdsaPkDecompress
 			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
 			stack.push(Buffer.from(compressed, "hex"));
@@ -6165,8 +6156,8 @@ describe("Teal Opcodes", function () {
 			stack.push(BigInt(signature.recoveryParam ?? 0n));
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
-			op = new EcdsaPkRecover(["0"], 1);
-			assert.equal(2000, op.execute(stack));
+			const opRecover = new EcdsaPkRecover(["0"], 1);
+			assert.equal(2000, opRecover.execute(stack));
 		});
 	});
 
@@ -7647,7 +7638,7 @@ describe("Teal Opcodes", function () {
 			"hex"
 		);
 
-		this.beforeEach(function(){
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		})
 
@@ -7691,8 +7682,69 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		})
-		it("Should throw error when field is unknown", function(){
-			expectRuntimeError(()=> new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
+		it("Should throw error when field is unknown", function () {
+			expectRuntimeError(() => new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
 		})
+	});
+
+	describe("Ecdsa Secp256r1 curve", function () {
+		const curve = new EC(CurveTypeEnum.secp256r1);
+		const keyPair = curve.genKeyPair();
+		const compressedPublicKey = keyPair.getPublic().encodeCompressed("hex");
+		const publicKeyX = keyPair.getPublic().getX().toBuffer();
+		const publicKeyY = keyPair.getPublic().getY().toBuffer();
+		const message = new Uint8Array([0]);
+		const signature = keyPair.sign(message);
+
+		let stack: Stack<StackElem>;
+		this.beforeEach(function () {
+			stack = new Stack<StackElem>();
+		});
+
+		describe("verfiy", function () {
+			it("Should return correct cost", function () {
+				const op = new EcdsaVerify(["1"], 1);
+				assert.equal(op.computeCost(), 2500);
+			});
+
+			it("Should push 1 to stack if correct data provided", function () {
+				stack.push(message);
+				stack.push(signature.r.toBuffer());
+				stack.push(signature.s.toBuffer());
+				stack.push(publicKeyX);
+				stack.push(publicKeyY);
+				const op = new EcdsaVerify(["1"], 1);
+				op.execute(stack);
+				assert.equal(stack.pop(), 1n);
+			});
+
+			it("Should push 0 to stack if invalid signature provided", function () {
+				stack.push(message);
+				const wrongSignatureR = signature.r.toBuffer()
+				wrongSignatureR[0] = ~wrongSignatureR[0]; //flip the first bit
+				stack.push(wrongSignatureR);
+				stack.push(signature.s.toBuffer());
+				stack.push(publicKeyX);
+				stack.push(publicKeyY);
+				const op = new EcdsaVerify(["1"], 1);
+				op.execute(stack);
+				assert.equal(stack.pop(), 0n);
+			});
+		});
+
+		describe("PK decompress", function () {
+			it("Should return correct cost", function () {
+				const op = new EcdsaPkDecompress(["1"], 1);
+				assert.equal(op.computeCost(), 2400);
+			});
+
+			it("Should decompress the public Key", function () {
+				stack.push(Buffer.from(compressedPublicKey, "hex"));
+				const op = new EcdsaPkDecompress(["1"], 1);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), publicKeyY);
+				assert.deepEqual(stack.pop(), publicKeyX);
+			});
+		});
 	});
 });
