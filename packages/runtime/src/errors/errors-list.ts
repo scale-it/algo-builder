@@ -644,7 +644,13 @@ const runtimeGeneralErrors = {
 		message: "Invalid block",
 		title: "Invalid block",
 		description: "Provided round does not correspond to any existing block",
-	}
+	},
+	ROUND_NOT_AVAILABLE: {
+		number: 1324,
+        message: "Round is not available",
+        title: "Invalid round",
+        description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+	},
 };
 
 const transactionErrors = {
