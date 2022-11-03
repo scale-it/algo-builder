@@ -1475,14 +1475,14 @@ describe("Atomic Transaction Composer",function () {
   
 	it("Shoult from an error if network.runtime is not defined", function () {
 		assert.throws(() => {
-			runtime.parseABIContractFile(networkRuntimeNotDefined)})
-		});
-  }); 
+			runtime.parseABIContractFile(networkRuntimeNotDefined)
+		})
+	});
   
 	it("Should return ABIContract", function () {
 		const abi = runtime.parseABIContractFile(correctABI);
 		expect(abi).to.be.instanceof(ABIContract);
-  });
+    });
 });
 
 describe("Funtions related to runtime chain", function () {
