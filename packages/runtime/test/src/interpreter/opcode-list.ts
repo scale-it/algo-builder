@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
-import { int } from "@algo-builder/algob/build/internal/core/params/argument-types";
 import { parsing, types } from "@algo-builder/web";
 import algosdk, {
 	decodeAddress,
@@ -170,14 +169,15 @@ import {
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ASSET_CREATION_FEE,
-	CurveTypeEnum,
 	blockFieldTypes,
+	CurveTypeEnum,
 	DEFAULT_STACK_ELEM,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
 	seedLength,
+	TxFieldEnum,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 } from "../../../src/lib/constants";
@@ -2557,13 +2557,13 @@ describe("Teal Opcodes", function () {
 
 			it("Should throw exception if txn.lv - txn.fv > 1000 + 1", function () {
 				interpreter.runtime.ctx.tx.fv = 1999; //last valid = 3000, 3000 - (1999 - 1) > 1001
-				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
 			it("Should push txn correct timestamp to stack", function () {
 				interpreter.runtime.ctx.tx.lv = TXN_OBJ.fv + 500;
-				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
 				const expectedResult = interpreter.runtime.getBlock(TXN_OBJ.fv - 1).timestamp;
 				op.execute(stack);
 				assert.equal(expectedResult, stack.pop());
@@ -2571,19 +2571,21 @@ describe("Teal Opcodes", function () {
 
 			it("Should throw exception if teal version < 7", function () {
 				interpreter.tealVersion = 6;
-				expectRuntimeError(() => new Txn(["FirstValidTime"], 1, interpreter), RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD);
+				expectRuntimeError(() =>
+				 new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
+				 RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD);
 			});
 
 			it("Should throw exception if round number is negative", function () {
 				interpreter.runtime.ctx.tx.fv = 0;
-				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
 			it("Should throw exception if round number is 0 even if last valid is low", function () {
 				interpreter.runtime.ctx.tx.fv = 1;
 				interpreter.runtime.ctx.tx.lv = 100;
-				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
@@ -2591,7 +2593,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Txn(["FirstValidTime"], 1, interpreter),
+					new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 				);
 			});
@@ -2605,6 +2607,14 @@ describe("Teal Opcodes", function () {
 				// https://developer.algorand.org/docs/reference/transactions/
 				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
+			});
+
+			it("Should push to the stack correct block timestamp", function(){
+				const op = new Gtxn(["0",TxFieldEnum.FirstValidTime], 1, interpreter);
+				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv?? 0;
+				const expextedResult = interpreter.runtime.getBlock(firstTxFirstValid - 1).timestamp;
+				op.execute(stack);
+				assert.equal(expextedResult, stack.pop());
 			});
 
 			it("push fee from 2nd transaction in group", function () {
