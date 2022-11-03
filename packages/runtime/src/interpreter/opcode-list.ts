@@ -45,6 +45,7 @@ import {
 	TransactionTypeEnum,
 	TxArrFields,
 	ZERO_ADDRESS,
+	CurveTypeEnum,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -3881,6 +3882,7 @@ export class ExtractUint64 extends ExtractUintN {
 export class EcdsaVerify extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -3892,10 +3894,20 @@ export class EcdsaVerify extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.curveIndex = Number(args[0]);
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else if (this.curveIndex === 1) {
+			this.curveType = CurveTypeEnum.secp256r1;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				index: this.curveIndex,
+			});
+		}
 	}
 
 	computeCost(): number {
-		return OpGasCost[5]["ecdsa_verify"];
+		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_verify"] : OpGasCost[7]["ecdsa_verify"];
 	}
 
 	/**
@@ -3911,23 +3923,15 @@ export class EcdsaVerify extends Op {
 		const pubkeyD = this.assertBytes(stack.pop(), this.line);
 		const signatureC = this.assertBytes(stack.pop(), this.line);
 		const signatureB = this.assertBytes(stack.pop(), this.line);
-		const data = this.assertBytes(stack.pop(), this.line);
-
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
+		const dataA = this.assertBytes(stack.pop(), this.line);
+		const curve = new EC(this.curveType);
 		const pub = {
 			x: Buffer.from(pubkeyD).toString("hex"),
 			y: Buffer.from(pubkeyE).toString("hex"),
 		};
-		const key = ec.keyFromPublic(pub);
+		const key = curve.keyFromPublic(pub);
 		const signature = { r: signatureB, s: signatureC };
-		this.pushBooleanCheck(stack, key.verify(data, signature));
+		this.pushBooleanCheck(stack, key.verify(dataA, signature));
 		return this.computeCost();
 	}
 }
@@ -3938,6 +3942,7 @@ export class EcdsaVerify extends Op {
 export class EcdsaPkDecompress extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -3949,10 +3954,20 @@ export class EcdsaPkDecompress extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.curveIndex = Number(args[0]);
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else if (this.curveIndex === 1) {
+			this.curveType = CurveTypeEnum.secp256r1;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				index: this.curveIndex,
+			});
+		}
 	}
 
 	computeCost(): number {
-		return OpGasCost[6]["ecdsa_pk_decompress"];
+		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_pk_decompress"] : OpGasCost[7]["ecdsa_pk_decompress"];
 	}
 
 	/**
@@ -3962,16 +3977,8 @@ export class EcdsaPkDecompress extends Op {
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
-
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
-		const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, "hex").getPublic();
+		const curve = new EC(this.curveType);
+		const publicKeyUncompressed = curve.keyFromPublic(pubkeyCompressed, "hex").getPublic();
 		const x = publicKeyUncompressed.getX();
 		const y = publicKeyUncompressed.getY();
 		stack.push(x.toBuffer());
@@ -4000,7 +4007,7 @@ export class EcdsaPkRecover extends Op {
 	}
 
 	computeCost(): number {
-		return OpGasCost[6]["ecdsa_pk_recover"];
+		return OpGasCost[5]["ecdsa_pk_recover"];
 	}
 
 	/**
@@ -4353,10 +4360,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-							sig: Buffer.alloc(5),
-							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					  }
+						sig: Buffer.alloc(5),
+						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					}
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -5325,10 +5332,10 @@ export class VrfVerify extends Op {
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
 		if (proof.length !== 80) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, { length: proof.length });
 		}
 		if (publicKey.length !== 32) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, { length: publicKey.length });
 		}
 		if (this.vrfType === "VrfAlgorand") {
 			const hash = sha512(proof);

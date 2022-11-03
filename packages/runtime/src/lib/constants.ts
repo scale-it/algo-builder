@@ -475,6 +475,8 @@ OpGasCost[7] = {
 	...OpGasCost[6],
 	sha3_256: 130,
 	ed25519verify_bare: 1900,
+	ecdsa_verify: 2500,
+	ecdsa_pk_decompress: 2400,
 };
 
 export const enum MathOp {
@@ -548,4 +550,9 @@ export enum TxFieldEnum {
 	VotePK = "VotePK",
 	SelectionPK = "SelectionPK",
 	Note = "Note",
+}
+
+export enum CurveTypeEnum {
+	secp256k1 = "secp256k1",
+	secp256r1 = "p256", // alias used in the library for secp256r1
 }
