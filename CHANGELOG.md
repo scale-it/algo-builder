@@ -59,6 +59,7 @@ from `algosdk` and sends it to the network.
 - Added logic signature and arguments size check in `runtime`.
 - Added support for `block` opcode to `Runtime`.
 - Added blocks to `Runtime`. It simulates the block generation by using radnom bytes generator as the first seed. The following seeds are MD5 hash of the seed from the previous block.
+- Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes. 
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
