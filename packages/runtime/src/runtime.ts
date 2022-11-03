@@ -26,6 +26,7 @@ import {
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
 	TransactionTypeEnum,
+	seedLength,
 	ZERO_ADDRESS_STR
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
