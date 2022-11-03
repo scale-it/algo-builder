@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-duplicate-string */
+import { int } from "@algo-builder/algob/build/internal/core/params/argument-types";
 import { parsing, types } from "@algo-builder/web";
 import algosdk, {
 	decodeAddress,
@@ -175,9 +176,9 @@ import {
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
+	seedLength,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	seedLength,
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -2101,15 +2102,6 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(TXN_OBJ.rekey, stack.pop());
 			});
 
-			it("should throw error on FirstValidTime", function () {
-				execExpectError(
-					stack,
-					[],
-					new Txn(["FirstValidTime"], 1, interpreter),
-					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-				);
-			});
-
 			it("should push txn NumAppArgs to stack", function () {
 				const op = new Txn(["NumAppArgs"], 1, interpreter);
 				op.execute(stack);
@@ -2551,6 +2543,56 @@ describe("Teal Opcodes", function () {
 				const op = new Txn(["StateProofPK"], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
+			});
+		});
+
+		describe("FirstValidTime", function () {
+			this.beforeEach(function () {
+				interpreter = new Interpreter();
+				interpreter.runtime = new Runtime([]);
+				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+				interpreter.tealVersion = MaxTEALVersion;
+			})
+
+			it("Should throw exception if txn.lv - txn.fv > 1000 + 1", function () {
+				interpreter.runtime.ctx.tx.fv = 1999; //last valid = 3000, 3000 - (1999 - 1) > 1001
+				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should push txn correct timestamp to stack", function () {
+				interpreter.runtime.ctx.tx.lv = TXN_OBJ.fv + 500;
+				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				const expectedResult = interpreter.runtime.getBlock(TXN_OBJ.fv - 1).timestamp;
+				op.execute(stack);
+				assert.equal(expectedResult, stack.pop());
+			});
+
+			it("Should throw exception if teal version < 7", function () {
+				interpreter.tealVersion = 6;
+				expectRuntimeError(() => new Txn(["FirstValidTime"], 1, interpreter), RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD);
+			});
+
+			it("Should throw exception if round number is negative", function () {
+				interpreter.runtime.ctx.tx.fv = 0;
+				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should throw exception if round number is 0 even if last valid is low", function () {
+				interpreter.runtime.ctx.tx.fv = 1;
+				interpreter.runtime.ctx.tx.lv = 100;
+				const op = new Txn(["FirstValidTime"], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should not throw error on FirstValidTime", function () {
+				execExpectError(
+					stack,
+					[],
+					new Txn(["FirstValidTime"], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+				);
 			});
 		});
 
@@ -5069,8 +5111,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236, 2,
-						70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
+						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236,
+						2, 70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
 					])
 				);
 
@@ -5170,8 +5212,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35, 69, 119, 0, 0, 0, 0, 0, 0,
-						0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35,
+						69, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 					])
 				);
 			});
@@ -5243,8 +5285,8 @@ describe("Teal Opcodes", function () {
 					new Uint8Array([
 						151, 200, 103, 239, 94, 230, 133, 186, 92, 4, 163, 133, 89, 34, 193, 80, 86, 64,
 						223, 27, 83, 94, 252, 230, 80, 125, 26, 177, 77, 155, 56, 124, 72, 239, 162, 240,
-						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247, 89,
-						13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
+						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247,
+						89, 13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
 					])
 				);
 			});
@@ -5644,8 +5686,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19,
-						23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
+						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22,
+						19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
 					])
 				);
 			});
@@ -5685,8 +5727,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254,
-						220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
+						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
+						254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
 					])
 				);
 			});
@@ -6303,8 +6345,10 @@ describe("Teal Opcodes", function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.tx = TXN_OBJ;
-			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
-			// a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+			interpreter.tealVersion = MaxTEALVersion;
+			// set tealversion to latest (to support all tx fields)
+			// a) 'apas' represents 'foreignAssets',
+			// b) 'apfa' represents 'foreignApps' (id's of foreign apps)
 			// https://developer.algorand.org/docs/reference/transactions/
 			const tx2 = { ...TXN_OBJ, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 			interpreter.runtime.ctx.gtxs = [TXN_OBJ, tx2];
@@ -7607,7 +7651,7 @@ describe("Teal Opcodes", function () {
 			assert.notEqual(seedRound1, seedRound2);
 		});
 
-		it("Should fail when accesing block 0 even if last valid is low", function(){
+		it("Should fail when accesing block 0 even if last valid is low", function () {
 			interpreter.runtime.ctx.tx.lv = 100;
 			interpreter.runtime.ctx.tx.fv = 5;
 			stack.push(0n);
@@ -7615,7 +7659,7 @@ describe("Teal Opcodes", function () {
 			assert.throws(() => op.execute(stack));
 		});
 
-		it("Should return seed for a block that is within boundries and exist", function(){
+		it("Should return seed for a block that is within boundries and exist", function () {
 			stack.push(FIRST_VALID - 1n);
 			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			op.execute(stack);
@@ -7623,7 +7667,7 @@ describe("Teal Opcodes", function () {
 			assert.equal((result as Buffer).length, seedLength);
 		});
 
-		it("Should return correct cost", function(){
+		it("Should return correct cost", function () {
 			stack.push(FIRST_VALID - 1n);
 			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
 			const cost = op.execute(stack);
@@ -7647,7 +7691,7 @@ describe("Teal Opcodes", function () {
 			"hex"
 		);
 
-		this.beforeEach(function(){
+		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
 		})
 
@@ -7660,7 +7704,7 @@ describe("Teal Opcodes", function () {
 			assert.deepEqual(1n, stack.pop());
 			assert.deepEqual(expectedResult, stack.pop());
 		});
-		it("Should throw error if pubKey size not equal 32", function(){
+		it("Should throw error if pubKey size not equal 32", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizePubKey = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(wrongSizePubKey);
@@ -7668,7 +7712,7 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
 		})
-		it("Should throw error if proof size not equal 80", function(){
+		it("Should throw error if proof size not equal 80", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
 			stack.push(publicKey);
@@ -7676,7 +7720,7 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
 		})
-		it("Should return correct cost", function(){
+		it("Should return correct cost", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
 			stack.push(proof);
@@ -7684,15 +7728,15 @@ describe("Teal Opcodes", function () {
 			const cost = op.execute(stack);
 			assert.equal(cost, 5700);
 		})
-		it("Should throw error when field = VrfStandard", function(){
+		it("Should throw error when field = VrfStandard", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		})
-		it("Should throw error when field is unknown", function(){
-			expectRuntimeError(()=> new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
+		it("Should throw error when field is unknown", function () {
+			expectRuntimeError(() => new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
 		})
 	});
 });

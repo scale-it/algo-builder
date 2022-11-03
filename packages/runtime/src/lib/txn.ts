@@ -143,8 +143,10 @@ export function txnSpecByField(
 	// handle other cases
 	switch (txField) {
 		case TxFieldEnum.FirstValidTime: {
-			// Causes program to fail; reserved for future use
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
+			const oneBeforeFirstValid = (tx.fv === undefined ? 0 : tx.fv) - 1;
+			interpreter.assertRoundIsAvailable(oneBeforeFirstValid)
+			result = interpreter.runtime.getBlock(oneBeforeFirstValid).timestamp;
+			break;
 		}
 		case TxFieldEnum.TypeEnum: {
 			result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']

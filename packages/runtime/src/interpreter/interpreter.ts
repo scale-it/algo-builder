@@ -609,15 +609,17 @@ export class Interpreter {
 			// early in chain's life
 			firstAvail = 1;
 		}
+		//in AVM all undefined fields are treated as zero
 		let lastAvail = this.runtime.ctx.tx.fv === undefined ? 0 : this.runtime.ctx.tx.fv - 1;
 		if (this.runtime.ctx.tx.fv === undefined || lastAvail > this.runtime.ctx.tx.fv) {
 			// txn had a 0 in FirstValid
 			lastAvail = 0; // So nothing will be available
 		}
 		if (firstAvail > round || round > lastAvail) {
-			throw new Error("round is not available");
-			//todo: add better error
-			// throw error ("round %d is not available. It's outside [%d-%d]", r, firstAvail, lastAvail)
+			throw new RuntimeError(
+				RUNTIME_ERRORS.GENERAL.ROUND_NOT_AVAILABLE,
+				{ round: round, firstAvail: firstAvail, lastAvail: lastAvail }
+			);
 		}
 	}
 }

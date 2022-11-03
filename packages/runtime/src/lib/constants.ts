@@ -82,7 +82,6 @@ export const TxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } 
 		Sender: "snd",
 		Fee: "fee",
 		FirstValid: "fv",
-		FirstValidTime: null,
 		LastValid: "lv",
 		Note: "note",
 		Lease: "lx",
@@ -171,6 +170,7 @@ TxnFields[7] = {
 	ClearStateProgramPages: null,
 	NumApprovalProgramPages: null,
 	NumClearStateProgramPages: null,
+	FirstValidTime: null,
 };
 
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
