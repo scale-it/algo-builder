@@ -515,13 +515,6 @@ const runtimeGeneralErrors = {
 		title: "Round Error",
 		description: `Round Error`,
 	},
-	MAX_LIMIT_APPS: {
-		number: 1303,
-		message:
-			"Error while creating app for %address%. Maximum created apps for an account is %max%",
-		title: "App Creation Error",
-		description: `App Creation Error`,
-	},
 	INVALID_SECRET_KEY: {
 		number: 1304,
 		message: "invalid secret key: %secretkey%",
@@ -754,13 +747,6 @@ const runtimeAsaErrors = {
 		message: `Asset with Index %assetId% not found`,
 		title: "Asset Not Found",
 		description: "Asset Not Found",
-	},
-	MAX_LIMIT_ASSETS: {
-		number: 1503,
-		message:
-			"Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
-		title: "Asset Creation Error",
-		description: `Asset Creation Error`,
 	},
 	MANAGER_ERROR: {
 		number: 1504,
