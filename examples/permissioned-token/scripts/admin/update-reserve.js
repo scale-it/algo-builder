@@ -1,6 +1,7 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
+const { tryExecuteTx } = require("../common/common");
 
 // here instead of updating the asset reserve by modifyAsset tx,
 // we use rekey transaction for the reserve account.
@@ -100,7 +101,7 @@ async function updateReserveByAssetConfig(deployer, address) {
 	];
 
 	console.log(`* Updating reserve address to: ${address} *`);
-	await deployer.executeTx(updateReserveParams);
+	await tryExecuteTx(deployer, updateReserveParams);
 	console.log("* Update Successful *");
 
 	console.log(

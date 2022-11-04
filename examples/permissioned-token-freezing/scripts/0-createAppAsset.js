@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const master = deployer.accountsByName.get("master-account");
@@ -14,11 +15,13 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200e6,
 		payFlags: {},
 	};
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 	algoTxnParams.toAccountAddr = bob.addr;
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
-	const asaInfo = await deployer.deployASA("gold", { creator: creator });
+	const asaInfo = await deployer.deployASA("gold", { creator: creator }).catch((error) => {
+		throw error;
+	});
 	await deployer.optInAccountToASA("gold", "bob", {}); // asa optIn for bob
 	console.log(asaInfo);
 
@@ -29,21 +32,25 @@ async function run(runtimeEnv, deployer) {
 		"int:2", // set min user level(2) for asset transfer ("Accred-level")
 	];
 
-	const sscInfo = await deployer.deployApp(
-		creator,
-		{
-			appName: "PermissionedTokenApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "poi-approval.teal", // approval program
-			clearProgramFilename: "poi-clear.teal", // clear program
-			localInts: 1, // to store level of asset for account
-			localBytes: 0,
-			globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset
-			globalBytes: 1, // to store creator address
-			appArgs: appArgs,
-		},
-		{}
-	);
+	const sscInfo = await deployer
+		.deployApp(
+			creator,
+			{
+				appName: "PermissionedTokenApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "poi-approval.teal", // approval program
+				clearProgramFilename: "poi-clear.teal", // clear program
+				localInts: 1, // to store level of asset for account
+				localBytes: 0,
+				globalInts: 2, // 1 to store assetId, 1 for min asset level required to transfer asset
+				globalBytes: 1, // to store creator address
+				appArgs: appArgs,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(sscInfo);
 

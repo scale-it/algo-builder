@@ -10,6 +10,7 @@ export const MAX_UINT6 = 63n;
 export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
+export const maxStringSize = 4096;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
 export const MaxTEALVersion = 7;
@@ -28,7 +29,8 @@ export const MAX_KEY_VAL_BYTES = 128; // max combined length of key-value pair
 export const LOGIC_SIG_MAX_COST = 20000;
 export const MAX_APP_PROGRAM_COST = 700;
 export const LogicSigMaxSize = 1000;
-export const MaxAppProgramLen = 1024;
+export const MaxAppProgramLen = 2048;
+export const MaxExtraAppProgramPages = 3;
 export const MaxTxnNoteBytes = 1024;
 export const ALGORAND_MAX_APP_ARGS_LEN = 16;
 export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
@@ -37,6 +39,10 @@ export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
 export const MAX_INNER_TRANSACTIONS = 16;
 export const ALGORAND_MAX_LOGS_COUNT = 32;
 export const ALGORAND_MAX_LOGS_LENGTH = 1024;
+
+export const publicKeyLength = 32;
+export const proofLength = 80;
+export const seedLength = 32;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
@@ -53,6 +59,9 @@ export const MAX_LOCAL_SCHEMA_ENTRIES = 16;
 // https://github.com/algorand/go-algorand/blob/bd5a00092c8a63dba8314b97851e46ff247cf7c1/data/transactions/logic/eval.go#L1302
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
+
+export const MaxTxnLife = 1000;
+export const BlockFinalisationTime = 4n; // block finalisation time in seconds truncated down
 
 export const ZERO_ADDRESS = new Uint8Array(32);
 export const ZERO_ADDRESS_STR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
@@ -73,7 +82,6 @@ export const TxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } 
 		Sender: "snd",
 		Fee: "fee",
 		FirstValid: "fv",
-		FirstValidTime: null,
 		LastValid: "lv",
 		Note: "note",
 		Lease: "lx",
@@ -158,6 +166,11 @@ TxnFields[6] = {
 
 TxnFields[7] = {
 	...TxnFields[6],
+	ApprovalProgramPages: null,
+	ClearStateProgramPages: null,
+	NumApprovalProgramPages: null,
+	NumClearStateProgramPages: null,
+	FirstValidTime: null,
 };
 
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
@@ -188,9 +201,9 @@ export const TxArrFields: { [key: number]: Set<string> } = {
 };
 TxArrFields[3] = new Set([...TxArrFields[2], "Assets", "Applications"]);
 TxArrFields[4] = cloneDeep(TxArrFields[3]);
-TxArrFields[5] = cloneDeep(TxArrFields[4]);
+TxArrFields[5] = new Set([...TxArrFields[4], "Logs"]);
 TxArrFields[6] = cloneDeep(TxArrFields[5]);
-TxArrFields[7] = cloneDeep(TxArrFields[6]);
+TxArrFields[7] = new Set([...TxArrFields[6], "ApprovalProgramPages", "ClearStateProgramPages"]);
 
 // itxn fields of type array
 export const ITxArrFields: { [key: number]: Set<string> } = {
@@ -467,6 +480,11 @@ OpGasCost[6] = {
 };
 OpGasCost[7] = {
 	...OpGasCost[6],
+	sha3_256: 130,
+	ed25519verify_bare: 1900,
+	ecdsa_verify: 2500,
+	ecdsa_pk_decompress: 2400,
+	vrf_verify : 5700,
 };
 
 export const enum MathOp {
@@ -501,4 +519,58 @@ export enum TransactionTypeEnum {
 	ASSET_TRANSFER = "axfer",
 	ASSET_FREEZE = "afrz",
 	APPLICATION_CALL = "appl",
+}
+
+export const json_refTypes = {
+	JSONString: "JSONString",
+	JSONUint64: "JSONUint64",
+	JSONObject: "JSONObject",
+};
+
+export enum blockFieldTypes {
+	BlkTimestamp = "BlkTimestamp",
+	BlkSeed = "BlkSeed",
+};
+
+export enum vrfVerifyFieldTypes {
+    VrfAlgorand = "VrfAlgorand",
+	VrfStandard = "VrfStandard",
+};
+
+export enum TxFieldEnum {
+	FirstValidTime = "FirstValidTime",
+	TypeEnum = "TypeEnum",
+	TxID = "TxID",
+	GroupIndex = "GroupIndex",
+	NumAppArgs = "NumAppArgs",
+	NumAccounts = "NumAccounts",
+	NumAssets = "NumAssets",
+	NumApplications = "NumApplications",
+	AssetSender = "AssetSender",
+	CreatedAssetID = "CreatedAssetID",
+	CreatedApplicationID = "CreatedApplicationID",
+	LastLog = "LastLog",
+	StateProofPK = "StateProofPK",
+	NumApprovalProgramPages = "NumApprovalProgramPages",
+	ApprovalProgramPages = "ApprovalProgramPages",
+	NumClearStateProgramPages = "NumClearStateProgramPages",
+	ClearStateProgramPages = "ClearStateProgramPages",
+	Logs = "Logs",
+	ApprovalProgram = "ApprovalProgram",
+	ClearStateProgram = "ClearStateProgram",
+	ConfigAssetDecimals = "ConfigAssetDecimals",
+	Type = "Type",
+	ApplicationArgs = "ApplicationArgs",
+	ConfigAssetMetadataHash = "ConfigAssetMetadataHash",
+	ConfigAssetUnitName = "ConfigAssetUnitName",
+	ConfigAssetName = "ConfigAssetName",
+	ConfigAssetURL = "ConfigAssetURL",
+	VotePK = "VotePK",
+	SelectionPK = "SelectionPK",
+	Note = "Note",
+}
+
+export enum CurveTypeEnum {
+	secp256k1 = "secp256k1",
+	secp256r1 = "p256", // alias used in the library for secp256r1
 }

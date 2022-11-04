@@ -11,7 +11,7 @@ export const ASADefSchema = z.object({
 		.union([z.number(), z.bigint(), z.string()]) // 'string' to support bigint from yaml file
 		.refine(
 			(t) => totalRegex.test(String(t)) && BigInt(t) <= 0xffffffffffffffffn && BigInt(t) >= 0n,
-			{ message: "Total must be a positive number and smaller than 2^64-1" }
+			{ message: "Total must be a positive number <= 2^64-1" }
 		),
 	decimals: z
 		.union([z.number(), z.bigint()])

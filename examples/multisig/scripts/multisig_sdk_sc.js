@@ -15,7 +15,7 @@ async function run(runtimeEnv, deployer) {
 
 	// Generate multi signature account hash (note: order is important)
 	const addrs = [alice.addr, john.addr, bob.addr];
-	const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
+	const [mparams, multisigAddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
 
 	// Get logic Signature
 	const lsig = await deployer.loadLogicByFile("sample-asc.teal");
@@ -31,19 +31,19 @@ async function run(runtimeEnv, deployer) {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
-		toAccountAddr: multsigaddr,
+		toAccountAddr: multisigAddr,
 		amountMicroAlgos: 10000000,
 		lsig: lsig,
 		payFlags: { note: "Funding multisig account", totalFee: 1000 },
 	};
 	// Funding multisignature account
 	await tryExecuteTx(deployer, txnParams);
-	txnParams = bob.addr;
+	txnParams.fromAccount = bob;
 	await tryExecuteTx(deployer, txnParams); // fund bob
 
 	await deployer.addCheckpointKV("User Checkpoint", "Fund Multisignature Account");
 
-	txnParams.fromAccountAddr = multsigaddr;
+	txnParams.fromAccountAddr = multisigAddr;
 	txnParams.toAccountAddr = bob.addr;
 	txnParams.sign = types.SignType.LogicSignature;
 	txnParams.amountMicroAlgos = 58;
@@ -52,7 +52,7 @@ async function run(runtimeEnv, deployer) {
 
 	txnParams.amountMicroAlgos = 580;
 	// Transaction FAIL - according to sample-asc.teal logic, amount should be <= 100
-	await tryExecuteTx(deployer, txnParams);
+	await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
 }
 
 module.exports = { default: run };

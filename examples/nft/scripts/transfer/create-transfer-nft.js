@@ -2,7 +2,7 @@
  * Description:
  * This file creates a new NFT and transfers 1 NFT from A to B
  */
-const { printGlobalNFT, printLocalNFT } = require("./common");
+const { printGlobalNFT, printLocalNFT, tryExecuteTx } = require("./common");
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
 
@@ -31,7 +31,7 @@ async function run(runtimeEnv, deployer) {
 			appArgs,
 		},
 	];
-	await deployer.executeTx(txnParam); // creates new nft (with id = 1)
+	await tryExecuteTx(deployer, txnParam); // creates new nft (with id = 1)
 
 	// print Global Count after creation
 	await printGlobalNFT(deployer, masterAccount.addr, appID);
@@ -60,7 +60,7 @@ async function run(runtimeEnv, deployer) {
 			appArgs,
 		},
 	];
-	await deployer.executeTx(txnParam);
+	await tryExecuteTx(deployer, txnParam);
 
 	await printLocalNFT(deployer, masterAccount.addr, appID);
 	await printLocalNFT(deployer, john.addr, appID);

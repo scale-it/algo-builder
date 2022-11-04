@@ -6,10 +6,11 @@ import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToString,
 } from "../../../src/lib/parsing";
 
-describe("Convert integer to big endian", () => {
+describe("Convert integer to big endian", function () {
 	/**
 	 * Note: Expected results are derived from following go code
 	 * v := uint64(number)
@@ -17,7 +18,7 @@ describe("Convert integer to big endian", () => {
 	 * binary.BigEndian.PutUint64(buf, v)
 	 * fmt.Println(buf)
 	 */
-	it("should return correct big endian for 64 bit integer", () => {
+	it("should return correct big endian for 64 bit integer", function () {
 		let res = parsing.uint64ToBigEndian(0);
 		let expected = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]);
 		assert.deepEqual(res, expected);
@@ -61,7 +62,7 @@ describe("Convert integer to big endian", () => {
 	});
 
 	/* eslint-disable max-len */
-	it("should return correct big endian bytes from bigint", () => {
+	it("should return correct big endian bytes from bigint", function () {
 		let res = bigintToBigEndianBytes(MIN_UINT64);
 		let expected = new Uint8Array([0]); // this is not "strict" uintN byte conversion, so 0 is parsed as new Uint8array([0])
 		assert.deepEqual(res, expected);
@@ -102,7 +103,7 @@ describe("Convert integer to big endian", () => {
 		assert.deepEqual(res, expected);
 	});
 
-	it("should return correct bigint value from big endian bytes", () => {
+	it("should return correct bigint value from big endian bytes", function () {
 		let res = bigEndianBytesToBigInt(new Uint8Array([0]));
 		let expected = 0n;
 		assert.deepEqual(res, expected);
@@ -129,7 +130,7 @@ describe("Convert integer to big endian", () => {
 		assert.deepEqual(res, expected);
 	});
 
-	it("should throw error if value is not uint64", () => {
+	it("should throw error if value is not uint64", function () {
 		let errMsg = "Invalid uint64 -5";
 		assert.throws(() => parsing.uint64ToBigEndian(MIN_UINT64 - 5n), errMsg);
 
@@ -138,8 +139,8 @@ describe("Convert integer to big endian", () => {
 	});
 });
 
-describe("Parse string and integer, with bytes", () => {
-	it("string identity should be equal ", () => {
+describe("Parse string and integer, with bytes", function () {
+	it("string identity should be equal ", function () {
 		let initialString = "50";
 		let stringInBytes = parsing.stringToBytes(initialString);
 		let backToString = convertToString(stringInBytes);
@@ -154,19 +155,19 @@ describe("Parse string and integer, with bytes", () => {
 	});
 });
 
-describe("Parse appArgs to App to bytes", () => {
-	it("should return undefined if app Args are not defined", () => {
+describe("Parse appArgs to App to bytes", function () {
+	it("should return undefined if app Args are not defined", function () {
 		const res = parsing.parseAppArgs(undefined);
 		assert.isUndefined(res);
 	});
 
-	it("should return same bytes if all bytes are passed", () => {
+	it("should return same bytes if all bytes are passed", function () {
 		const res = parsing.parseAppArgs(["a", "b", "c"].map(parsing.stringToBytes));
 		const expected = [[97], [98], [99]].map((z) => new Uint8Array(z));
 		assert.deepEqual(res, expected);
 	});
 
-	it("should return correct bytes if args are passed similar to goal", () => {
+	it("should return correct bytes if args are passed similar to goal", function () {
 		let res = parsing.parseAppArgs(["int:700000000", "int:3", `int:${MAX_UINT64}`]);
 		let expected = [
 			[0, 0, 0, 0, 41, 185, 39, 0],
@@ -198,7 +199,7 @@ describe("Parse appArgs to App to bytes", () => {
 		assert.deepEqual(res, expected);
 	});
 
-	it("should throw error if passed args are invalid", () => {
+	it("should throw error if passed args are invalid", function () {
 		const errMsg = (str: string): string => {
 			return `Format of arguments passed to stateful smart is invalid for ${str}`;
 		};
@@ -214,5 +215,14 @@ describe("Parse appArgs to App to bytes", () => {
 
 		const errorMsg = "Invalid uint64 18446744073709551625";
 		assert.throws(() => parsing.parseAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
+	});
+});
+describe("utils", function () {
+	it("Should concat two arrays", function () {
+		const arr1 = new Uint8Array([1, 2]);
+		const arr2 = new Uint8Array([3, 4]);
+		const expectedResult = new Uint8Array([1, 2, 3, 4]);
+		const result = concatArrays(arr1, arr2);
+		assert.deepEqual(result, expectedResult);
 	});
 });

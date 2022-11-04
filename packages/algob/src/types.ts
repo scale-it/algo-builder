@@ -33,11 +33,16 @@ interface CommonNetworkConfig {
 	accounts: rtypes.Account[];
 	// optional, when provided KMD accounts will be loaded by the config resolver
 	// and merged into the accounts variable (above)
+	paths?: assetPath;
 	kmdCfg?: KmdCfg;
 	indexerCfg?: IndexerCfg;
 	chainName?: string;
 	// from?: string;
 	// TODO: timeout?: number;
+}
+
+export interface assetPath {
+	assets: string;
 }
 
 export interface ChainCfg extends CommonNetworkConfig {
@@ -419,6 +424,7 @@ export interface Deployer {
 	isDeployMode: boolean;
 	accounts: rtypes.Account[];
 	accountsByName: rtypes.AccountMap;
+	assetPath: string;
 
 	/**
 	 * Mapping of ASA name to deployment log */
@@ -486,13 +492,14 @@ export interface Deployer {
 
 	registerSSCInfo: (name: string, sscInfo: rtypes.AppInfo) => void;
 
-	logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void;
+	logTx: (message: string, txConfirmation: TxnReceipt) => void;
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
-	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>;
+	sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<TxnReceipt>;
 
 	/**
 	 * Return receipts for each transaction in group txn
@@ -605,7 +612,7 @@ export interface Deployer {
 
 	/**
 	 * Queries blockchain for a given transaction and waits until it will be processed. */
-	waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>;
+	waitForConfirmation: (txId: string) => Promise<TxnReceipt>;
 
 	/**
 	 * Queries blockchain using algodv2 for asset information by index  */
@@ -716,7 +723,9 @@ export interface Deployer {
 	 * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
 	 * will be signed and sent to network. User can use SDK functions to create transactions.
 	 * Note: If passing transaction object a signer/s must be provided.
-	 * @param transactionParam transaction parameters or atomic transaction parameters
+	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
+	 * for more info.
+	 * @param transactions transaction parameters or atomic transaction parameters
 	 * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
 	 * or TransactionAndSign object(SDK transaction object and signer parameters)
 	 */

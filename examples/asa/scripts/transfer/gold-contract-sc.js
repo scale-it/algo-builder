@@ -35,7 +35,11 @@ async function run(runtimeEnv, deployer) {
 	// Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
 	const invalidParams = Object.assign({}, algoTxParam);
 	invalidParams.amountMicroAlgos = 200;
-	await tryExecuteTx(deployer, invalidParams);
+	try {
+		await tryExecuteTx(deployer, invalidParams);
+	} catch (e) {
+		console.error(e);
+	}
 
 	/* Transfer ASA 'gold' from contract account to user account */
 	const assetID = deployer.asa.get("gold").assetIndex;
@@ -58,7 +62,11 @@ async function run(runtimeEnv, deployer) {
 	// Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
 	const invalidTxParams = Object.assign({}, assetTxParam);
 	invalidTxParams.amount = 500;
-	await tryExecuteTx(deployer, invalidTxParams);
+	try {
+		await tryExecuteTx(deployer, invalidTxParams);
+	} catch (e) {
+		console.error(e);
+	}
 }
 
 module.exports = { default: run };

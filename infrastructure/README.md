@@ -96,7 +96,7 @@ _NOTE:_ Please make sure to have [Docker Compose](https://docs.docker.com/compos
 
 6. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
 
-7. `sanbox-reset` - Reset the containers to their initial state.
+7. `sandbox-reset` - Reset the containers to their initial state.
 
 **To be noted :**
 

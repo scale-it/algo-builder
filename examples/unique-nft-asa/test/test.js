@@ -39,7 +39,7 @@ describe("Unique NFT ASA tests", function () {
 		nftAppID = runtime.deployApp(creator.account, appDef, {}).appID;
 
 		// setup stateless lsig
-		const statelessLsigProg = getProgram("stateless.py", {
+		const statelessLsigProg = getProgram("stateless.py", "", {
 			ARG_P: p,
 			ARG_NFT_APP_ID: nftAppID,
 		});
@@ -106,8 +106,8 @@ describe("Unique NFT ASA tests", function () {
 		statelessLsigAcc = runtime.getAccount(statelessLsig.address());
 	}
 
-	describe("Happy paths", () => {
-		it("should create NFT by C_p", () => {
+	describe("Happy paths", function () {
+		it("should create NFT by C_p", function () {
 			const beforeCreatorBal = creator.balance();
 
 			runtime.executeTx(createNftTxGroup);
@@ -132,13 +132,13 @@ describe("Unique NFT ASA tests", function () {
 			assert.deepEqual(assetInfo.assetDef.decimals, 0);
 		});
 
-		it("should allow creation of NFT, if payment is not done by creator", () => {
+		it("should allow creation of NFT, if payment is not done by creator", function () {
 			// payment of 1 ALGO by bob
 			createNftTxGroup[0].fromAccount = bob.account;
 			assert.doesNotThrow(() => runtime.executeTx(createNftTxGroup));
 		});
 
-		it("should transfer NFT from C_p => Creator", () => {
+		it("should transfer NFT from C_p => Creator", function () {
 			runtime.executeTx(createNftTxGroup);
 			syncAccounts();
 
@@ -166,9 +166,9 @@ describe("Unique NFT ASA tests", function () {
 		});
 	});
 
-	describe("failing paths", () => {
-		describe("Create NFT", () => {
-			it("should reject creation if deploying same NFT again (with same C_p)", () => {
+	describe("failing paths", function () {
+		describe("Create NFT", function () {
+			it("should reject creation if deploying same NFT again (with same C_p)", function () {
 				runtime.executeTx(createNftTxGroup);
 
 				assert.throws(
@@ -177,7 +177,7 @@ describe("Unique NFT ASA tests", function () {
 				);
 			});
 
-			it("should reject creation if payment amount is not 1 ALGO", () => {
+			it("should reject creation if payment amount is not 1 ALGO", function () {
 				createNftTxGroup[0].amountMicroAlgos = 0.9e6; // 0.9 ALGO
 				assert.throws(() => runtime.executeTx(createNftTxGroup), REJECTED_BY_LOGIC);
 
@@ -185,14 +185,14 @@ describe("Unique NFT ASA tests", function () {
 				assert.throws(() => runtime.executeTx(createNftTxGroup), REJECTED_BY_LOGIC);
 			});
 
-			it("should reject creation if prime(p) is not correct", () => {
+			it("should reject creation if prime(p) is not correct", function () {
 				// stateless_lsig is made of p=3 (hardcoded), but in appArgs we pass p=7
 				createNftTxGroup[1].appArgs = [`int:${7}`];
 
 				assert.throws(() => runtime.executeTx(createNftTxGroup), REJECTED_BY_LOGIC);
 			});
 
-			it("should reject creation if txGroup is invalid", () => {
+			it("should reject creation if txGroup is invalid", function () {
 				// ALGO payment missing
 				assert.throws(
 					() => runtime.executeTx([{ ...createNftTxGroup[1] }, { ...createNftTxGroup[2] }]),
@@ -213,8 +213,8 @@ describe("Unique NFT ASA tests", function () {
 			});
 		});
 
-		describe("Transfer NFT", () => {
-			const createNFT = () => {
+		describe("Transfer NFT", function () {
+			const createNFT = function () {
 				runtime.executeTx(createNftTxGroup);
 				const assetIndex = runtime.getAssetInfoFromName("nft-asa").assetIndex;
 				transferNftTxGroup[1].assetID = assetIndex;
@@ -222,7 +222,7 @@ describe("Unique NFT ASA tests", function () {
 				syncAccounts();
 			};
 
-			it("should reject transfer if creator not opted in to NFT(ASA)", () => {
+			it("should reject transfer if creator not opted in to NFT(ASA)", function () {
 				runtime.executeTx(createNftTxGroup);
 
 				assert.throws(
@@ -231,7 +231,7 @@ describe("Unique NFT ASA tests", function () {
 				);
 			});
 
-			it("should reject transfer if trying to transfer ASA with amount > 1", () => {
+			it("should reject transfer if trying to transfer ASA with amount > 1", function () {
 				createNFT();
 
 				transferNftTxGroup[1].amount = 2;
@@ -241,7 +241,7 @@ describe("Unique NFT ASA tests", function () {
 				);
 			});
 
-			it("should reject transfer if trying to transfer NFT to account other than creator", () => {
+			it("should reject transfer if trying to transfer NFT to account other than creator", function () {
 				createNFT();
 
 				// trying to transfer created NFT to bob
@@ -249,7 +249,7 @@ describe("Unique NFT ASA tests", function () {
 				assert.throws(() => runtime.executeTx(transferNftTxGroup), ENCOUNTERRED_ERR_OPCODE);
 			});
 
-			it("should reject transfer if txGroup is invalid", () => {
+			it("should reject transfer if txGroup is invalid", function () {
 				createNFT();
 
 				// transfer missing

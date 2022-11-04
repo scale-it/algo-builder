@@ -1,6 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { parsing, types } from "@algo-builder/web";
-import {
+import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { stringToBytes } from "@algo-builder/web/build/lib/parsing";
+import algosdk, {
 	decodeAddress,
 	decodeUint64,
 	encodeAddress,
@@ -12,10 +13,12 @@ import {
 } from "algosdk";
 import chalk from "chalk";
 import { ec as EC } from "elliptic";
-import { Message, sha256 } from "js-sha256";
-import { sha512_256 } from "js-sha512";
+import { Hasher, Message, sha256 } from "js-sha256";
+import { sha512, sha512_256 } from "js-sha512";
+import JSONbig from "json-bigint";
 import cloneDeep from "lodash.clonedeep";
-import { Keccak } from "sha3";
+import { Keccak, SHA3 } from "sha3";
+import nacl from "tweetnacl";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -26,8 +29,10 @@ import {
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
 	AssetParamMap,
+	blockFieldTypes,
 	GlobalFields,
 	ITxArrFields,
+	json_refTypes,
 	MathOp,
 	MAX_APP_PROGRAM_COST,
 	MAX_CONCAT_SIZE,
@@ -38,20 +43,26 @@ import {
 	MAX_UINT128,
 	MaxTEALVersion,
 	OpGasCost,
+	proofLength,
+	publicKeyLength,
 	TransactionTypeEnum,
 	TxArrFields,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
+	CurveTypeEnum,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
 import {
 	assertBase64,
 	assertBase64Url,
+	assertJSON,
 	assertLen,
 	assertNumber,
 	assertOnlyDigits,
 	bigEndianBytesToBigInt,
 	bigintToBigEndianBytes,
+	concatArrays,
 	convertToBuffer,
 	convertToString,
 	getEncoding,
@@ -65,6 +76,7 @@ import {
 	txAppArg,
 	txnSpecByField,
 } from "../lib/txn";
+import { mockSuggestedParams } from "../mock/tx";
 import {
 	DecodingMode,
 	EncodingType,
@@ -77,6 +89,7 @@ import {
 } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+const bn254 = require("rustbn.js"); // eslint-disable-line @typescript-eslint/no-var-requires
 
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
@@ -620,11 +633,10 @@ export class Err extends Op {
 	}
 }
 
-// SHA256 hash of value X, yields [32]byte
-// push to stack [...stack, bytes]
-export class Sha256 extends Op {
+abstract class HashOp extends Op {
 	readonly line: number;
 	readonly interpreter: Interpreter;
+
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
@@ -638,61 +650,66 @@ export class Sha256 extends Op {
 		assertLen(args.length, 0, line);
 	}
 
-	computeCost(): number {
-		return OpGasCost[this.interpreter.tealVersion]["sha256"];
-	}
-
-	execute(stack: TEALStack): number {
+	_execute(stack: TEALStack, hasher: Hasher): number {
 		this.assertMinStackLen(stack, 1, this.line);
-		const hash = sha256.create();
 		const val = this.assertBytes(stack.pop(), this.line) as Message;
-		hash.update(val);
-		const hashedOutput = Buffer.from(hash.hex(), "hex");
-		const arrByte = Uint8Array.from(hashedOutput);
+		hasher.update(val);
+		const arrByte = Uint8Array.from(hasher.digest());
 		stack.push(arrByte);
 		return this.computeCost();
 	}
 }
 
-// SHA512_256 hash of value X, yields [32]byte
-// push to stack [...stack, bytes]
-export class Sha512_256 extends Op {
+abstract class HashOpSHA3 extends Op {
 	readonly line: number;
-	readonly interpreter: Interpreter;
+
 	/**
 	 * Asserts 0 arguments are passed.
 	 * @param args Expected arguments: [] // none
 	 * @param line line number in TEAL file
-	 * @param interpreter interpreter object
 	 */
-	constructor(args: string[], line: number, interpreter: Interpreter) {
+	constructor(args: string[], line: number) {
 		super();
 		this.line = line;
-		this.interpreter = interpreter;
 		assertLen(args.length, 0, line);
 	}
 
+	_execute(stack: TEALStack, hasher: Keccak): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const top = this.assertBytes(stack.pop(), this.line);
+		hasher.update(convertToString(top));
+		const arrByte = Uint8Array.from(hasher.digest());
+		stack.push(arrByte);
+		return this.computeCost();
+	}
+}
+
+// SHA256 hash of value X, yields [32]byte
+// push to stack [...stack, bytes]
+export class Sha256 extends HashOp {
+	computeCost(): number {
+		return OpGasCost[this.interpreter.tealVersion]["sha256"];
+	}
+	execute(stack: TEALStack): number {
+		return super._execute(stack, sha256.create());
+	}
+}
+
+// SHA512_256 hash of value X, yields [32]byte
+// push to stack [...stack, bytes]
+export class Sha512_256 extends HashOp {
 	computeCost(): number {
 		return OpGasCost[this.interpreter.tealVersion]["sha512_256"];
 	}
-
 	execute(stack: TEALStack): number {
-		this.assertMinStackLen(stack, 1, this.line);
-		const hash = sha512_256.create();
-		const val = this.assertBytes(stack.pop(), this.line) as Message;
-		hash.update(val);
-		const hashedOutput = Buffer.from(hash.hex(), "hex");
-		const arrByte = Uint8Array.from(hashedOutput);
-		stack.push(arrByte);
-		return this.computeCost();
+		return super._execute(stack, sha512_256.create());
 	}
 }
 
 // Keccak256 hash of value X, yields [32]byte
 // https://github.com/phusion/node-sha3#example-2
 // push to stack [...stack, bytes]
-export class Keccak256 extends Op {
-	readonly line: number;
+export class Keccak256 extends HashOpSHA3 {
 	readonly interpreter: Interpreter;
 	/**
 	 * Asserts 0 arguments are passed.
@@ -701,25 +718,27 @@ export class Keccak256 extends Op {
 	 * @param interpreter interpreter object
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
-		super();
-		this.line = line;
+		super(args, line);
 		this.interpreter = interpreter;
-		assertLen(args.length, 0, line);
 	}
 
 	computeCost(): number {
 		return OpGasCost[this.interpreter.tealVersion]["keccak256"];
 	}
-
 	execute(stack: TEALStack): number {
-		this.assertMinStackLen(stack, 1, this.line);
-		const top = this.assertBytes(stack.pop(), this.line);
+		return super._execute(stack, new Keccak(256));
+	}
+}
 
-		const hash = new Keccak(256);
-		hash.update(convertToString(top));
-		const arrByte = Uint8Array.from(hash.digest());
-		stack.push(arrByte);
-		return this.computeCost();
+// SHA3_256 hash of value A, yields [32]byte
+// https://github.com/phusion/node-sha3#generating-a-sha3-512-hash
+// push to stack [...stack, bytes]
+export class Sha3_256 extends HashOpSHA3 {
+	computeCost(): number {
+		return OpGasCost[7]["sha3_256"];
+	}
+	execute(stack: TEALStack): number {
+		return super._execute(stack, new SHA3(256));
 	}
 }
 
@@ -727,6 +746,49 @@ export class Keccak256 extends Op {
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
 // push to stack [...stack, bigint]
 export class Ed25519verify extends Op {
+	readonly line: number;
+	readonly program;
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [] // none
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		assertLen(args.length, 0, line);
+		this.program = interpreter.program;
+	}
+
+	computeCost(): number {
+		return OpGasCost[1]["ed25519verify"];
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const addr = this.assertBytes(stack.pop(), this.line);
+		const signature = this.assertBytes(stack.pop(), this.line);
+		const data = this.assertBytes(stack.pop(), this.line);
+
+		const toBeHashed = "ProgData".concat(this.program);
+		const programHash = Buffer.from(sha512_256(toBeHashed));
+		const toBeVerified = Buffer.from(concatArrays(programHash, data));
+		const encodedAddr = encodeAddress(addr);
+		const pk = algosdk.decodeAddress(encodedAddr).publicKey;
+		const isValid = nacl.sign.detached.verify(toBeVerified, signature, pk);
+
+		if (isValid) {
+			stack.push(1n);
+		} else {
+			stack.push(0n);
+		}
+		return this.computeCost();
+	}
+}
+
+// for (data A, signature B, pubkey C) verify the signature of the data against the pubkey => {0 or 1}
+// push to stack [...stack, bigint]
+export class Ed25519verify_bare extends Op {
 	readonly line: number;
 	/**
 	 * Asserts 0 arguments are passed.
@@ -740,16 +802,16 @@ export class Ed25519verify extends Op {
 	}
 
 	computeCost(): number {
-		return OpGasCost[1]["ed25519verify"];
+		return OpGasCost[7]["ed25519verify_bare"];
 	}
 
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 3, this.line);
-		const pubkey = this.assertBytes(stack.pop(), this.line);
+		const pubKey = this.assertBytes(stack.pop(), this.line);
 		const signature = this.assertBytes(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		const addr = encodeAddress(pubkey);
+		const addr = encodeAddress(pubKey);
 		const isValid = verifyBytes(data, signature, addr);
 		if (isValid) {
 			stack.push(1n);
@@ -2077,7 +2139,7 @@ export class AppLocalPut extends Op {
 		const key = this.assertBytes(stack.pop(), this.line);
 		const accountRef: StackElem = stack.pop();
 
-		const account = this.interpreter.getAccount(accountRef, this.line);
+		const account = this.interpreter.getAccount(accountRef, this.line, false, false);
 		const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
 		// get updated local state for account
@@ -3824,6 +3886,7 @@ export class ExtractUint64 extends ExtractUintN {
 export class EcdsaVerify extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -3835,10 +3898,20 @@ export class EcdsaVerify extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.curveIndex = Number(args[0]);
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else if (this.curveIndex === 1) {
+			this.curveType = CurveTypeEnum.secp256r1;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				index: this.curveIndex,
+			});
+		}
 	}
 
 	computeCost(): number {
-		return OpGasCost[5]["ecdsa_verify"];
+		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_verify"] : OpGasCost[7]["ecdsa_verify"];
 	}
 
 	/**
@@ -3854,23 +3927,15 @@ export class EcdsaVerify extends Op {
 		const pubkeyD = this.assertBytes(stack.pop(), this.line);
 		const signatureC = this.assertBytes(stack.pop(), this.line);
 		const signatureB = this.assertBytes(stack.pop(), this.line);
-		const data = this.assertBytes(stack.pop(), this.line);
-
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
+		const dataA = this.assertBytes(stack.pop(), this.line);
+		const curve = new EC(this.curveType);
 		const pub = {
 			x: Buffer.from(pubkeyD).toString("hex"),
 			y: Buffer.from(pubkeyE).toString("hex"),
 		};
-		const key = ec.keyFromPublic(pub);
+		const key = curve.keyFromPublic(pub);
 		const signature = { r: signatureB, s: signatureC };
-		this.pushBooleanCheck(stack, key.verify(data, signature));
+		this.pushBooleanCheck(stack, key.verify(dataA, signature));
 		return this.computeCost();
 	}
 }
@@ -3881,6 +3946,7 @@ export class EcdsaVerify extends Op {
 export class EcdsaPkDecompress extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -3892,10 +3958,20 @@ export class EcdsaPkDecompress extends Op {
 		this.line = line;
 		assertLen(args.length, 1, line);
 		this.curveIndex = Number(args[0]);
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else if (this.curveIndex === 1) {
+			this.curveType = CurveTypeEnum.secp256r1;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				index: this.curveIndex,
+			});
+		}
 	}
 
 	computeCost(): number {
-		return OpGasCost[6]["ecdsa_pk_decompress"];
+		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_pk_decompress"] : OpGasCost[7]["ecdsa_pk_decompress"];
 	}
 
 	/**
@@ -3905,16 +3981,8 @@ export class EcdsaPkDecompress extends Op {
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const pubkeyCompressed = this.assertBytes(stack.pop(), this.line);
-
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
-		const publicKeyUncompressed = ec.keyFromPublic(pubkeyCompressed, "hex").getPublic();
+		const curve = new EC(this.curveType);
+		const publicKeyUncompressed = curve.keyFromPublic(pubkeyCompressed, "hex").getPublic();
 		const x = publicKeyUncompressed.getX();
 		const y = publicKeyUncompressed.getY();
 		stack.push(x.toBuffer());
@@ -3943,7 +4011,7 @@ export class EcdsaPkRecover extends Op {
 	}
 
 	computeCost(): number {
-		return OpGasCost[6]["ecdsa_pk_recover"];
+		return OpGasCost[5]["ecdsa_pk_recover"];
 	}
 
 	/**
@@ -4280,7 +4348,6 @@ export class ITxnSubmit extends Op {
 				this.line
 			)
 		);
-
 		try {
 			const baseCurrTx = cloneDeep(this.interpreter.runtime.ctx.tx);
 			const baseCurrTxGrp = cloneDeep(this.interpreter.runtime.ctx.gtxs);
@@ -4291,8 +4358,19 @@ export class ITxnSubmit extends Op {
 			this.interpreter.runtime.ctx.gtxs = this.interpreter.currentInnerTxnGroup;
 			this.interpreter.runtime.ctx.isInnerTx = true;
 
-			// execute innner transaction
-			this.interpreter.runtime.ctx.processTransactions(execParams);
+			// TODO check minimum fee
+			//this.interpreter.runtime.ctx.deductFee()
+
+			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
+				types.isExecParams(txnParam)
+					? {
+						sig: Buffer.alloc(5),
+						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					}
+					: txnParam
+			);
+			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
 
 			// update current txns to base (top-level) after innerTx execution
 			this.interpreter.runtime.ctx.tx = baseCurrTx;
@@ -4945,6 +5023,374 @@ export class Base64Decode extends Op {
 				break;
 		}
 		stack.push(new Uint8Array(Buffer.from(decoded.toString(), this.encoding)));
+		return this.computeCost();
+	}
+}
+
+export class Replace extends Op {
+	readonly line: number;
+	start: number;
+	original: Uint8Array;
+	replace: Uint8Array;
+
+	constructor(start: number, line: number) {
+		super();
+		this.line = line;
+		this.start = start;
+		this.original = new Uint8Array();
+		this.replace = new Uint8Array();
+	}
+
+	execute(stack: TEALStack): number {
+		if (this.start + this.replace.length > this.original.length) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.BYTES_REPLACE_ERROR, {
+				lenReplace: this.replace.length,
+				index: this.start,
+				lenOriginal: this.original.length,
+				line: this.line,
+			});
+		}
+		const result = new Uint8Array(this.original.length);
+		for (let i = 0, j = 0; i < this.original.length; ++i) {
+			if (i >= this.start && i < this.start + this.replace.length) {
+				result[i] = this.replace[j++];
+			} else {
+				result[i] = this.original[i];
+			}
+		}
+		stack.push(result);
+		return this.computeCost();
+	}
+}
+
+/**
+ * Opcode: replace2 s
+ * Stack: ..., A: []byte, B: []byte → ..., []byte
+ * Copy of A with the bytes starting at S replaced by the bytes of B. Fails if S+len(B) exceeds len(A)
+ */
+export class Replace2 extends Replace {
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param args Expected arguments: [start_index]
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		assertLen(args.length, 1, line);
+		super(Number(args[0]), line);
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		this.replace = this.assertBytes(stack.pop(), this.line);
+		this.original = this.assertBytes(stack.pop(), this.line);
+		return super.execute(stack);
+	}
+}
+
+/**
+ * Opcode: replace3
+ * Stack: ..., A: []byte, B: uint64, C: []byte → ..., []byte
+ * Copy of A with the bytes starting at B replaced by the bytes of C. Fails if B+len(C) exceeds len(A)
+ */
+export class Replace3 extends Replace {
+	/**
+	 * Asserts 0 arguments are passed.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		assertLen(args.length, 0, line);
+		super(0, line);
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		this.replace = this.assertBytes(stack.pop(), this.line);
+		this.start = Number(this.assertBigInt(stack.pop(), this.line));
+		this.original = this.assertBytes(stack.pop(), this.line);
+		return super.execute(stack);
+	}
+}
+
+/**
+ * Opcode: json_ref r
+ * Stack: ..., A: []byte, B: []byte → ..., any
+ * return key B's value from a valid utf-8 encoded json object A
+ */
+export class Json_ref extends Op {
+	readonly line: number;
+	readonly jsonType: string;
+	length = 1;
+
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [e], where e = {JSONString, JSONUint64 and JSONObject}.
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		switch (argument) {
+			case json_refTypes.JSONString: {
+				this.jsonType = "byte";
+				break;
+			}
+			case json_refTypes.JSONUint64: {
+				this.jsonType = "int";
+				break;
+			}
+			case json_refTypes.JSONObject: {
+				this.jsonType = "object";
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_JSON_TYPE, {
+					jsonType: argument,
+					line: this.line,
+				});
+			}
+		}
+	}
+
+	computeCost(): number {
+		return 25 + 2 * Math.ceil(this.length / 7); // cost = 25 + ceil(bytes / 7)
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const key = this.assertBytes(stack.pop(), this.line);
+		const object = this.assertBytes(stack.pop(), this.line);
+		this.length = object.length;
+		const utf8decoder = new TextDecoder("utf-8");
+		const decodedObj = utf8decoder.decode(object);
+		const keyString = utf8decoder.decode(key);
+		assertJSON(decodedObj, this.line);
+		const nativeBigJSON = JSONbig({ useNativeBigInt: true });
+		const jsonObject = nativeBigJSON.parse(decodedObj);
+		if (jsonObject[keyString] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_KEY_JSON, {
+				key: keyString,
+				line: this.line,
+			});
+		}
+		switch (this.jsonType) {
+			case "byte": {
+				if (typeof jsonObject[keyString] === "string") {
+					stack.push(stringToBytes(jsonObject[keyString]));
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: "byte",
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				}
+				break;
+			}
+			case "int": {
+				if (
+					typeof jsonObject[keyString] === "number" ||
+					typeof jsonObject[keyString] === "bigint"
+				) {
+					const result = BigInt(jsonObject[keyString]);
+					this.checkOverflow(result, this.line, MAX_UINT64);
+					stack.push(result);
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: "Uint64",
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				}
+				break;
+			}
+			case "object": {
+				if (typeof jsonObject[keyString] === "object") {
+					stack.push(stringToBytes(nativeBigJSON.stringify(jsonObject[keyString])));
+				} else {
+					throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+						expected: "object",
+						actual: typeof jsonObject[keyString],
+						line: this.line,
+					});
+				}
+				break;
+			}
+		}
+		return this.computeCost();
+	}
+}
+//TODO:add description
+export class Bn254Add extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const aBytes = this.assertBytes(stack.pop(), this.line);
+		const bBytes = this.assertBytes(stack.pop(), this.line);
+		if (aBytes.length !== 64 || bBytes.length !== 64) {
+			throw new Error("expect G1 in 64 bytes");
+		}
+		const result = bn254.add(Buffer.concat([aBytes, bBytes]));
+		stack.push(result);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+//TODO:add description
+export class Bn254ScalarMul extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const aBytes = this.assertBytes(stack.pop(), this.line);
+		const kBytes = this.assertBytes(stack.pop(), this.line);
+		if (aBytes.length !== 64) {
+			throw new Error("expect G1 in 64 bytes");
+		}
+		const result = bn254.mul(Buffer.concat([aBytes, kBytes]));
+		stack.push(result);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+//TODO:add description
+export class Bn254Pairing extends Op {
+	readonly line: number;
+	/**
+	 * @param args
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		super();
+		this.line = line;
+	}
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 2, this.line);
+		const G2Bytes = this.assertBytes(stack.pop(), this.line);
+		const G1Bytes = this.assertBytes(stack.pop(), this.line);
+		if (G1Bytes.length !== 64 || G2Bytes.length !== 128) {
+			throw new Error("expect G1 in 64 bytes or/and G2 bytes in 128 bytes");
+		}
+		const result = bn254.pairing(Buffer.concat([G1Bytes, G2Bytes]));
+		const boolResult = result.slice(-1)[0];
+		stack.push(boolResult);
+		//TODO: once the opcode is fully finished in go-algorand update the cost
+		return this.computeCost();
+	}
+}
+
+/**
+ * Opcode: 0xd1 {uint8 block field}
+ * Stack: ..., A: uint64 → ..., any
+ * field F of block A. Fail unless A falls between txn.LastValid-1002 and txn.FirstValid (exclusive)
+*/
+export class Block extends Op {
+	readonly line: number;
+	readonly field: string;
+	readonly interpreter: Interpreter;
+	/**
+	 * @param args Expected arguments: [BlkSeed || BlkTimestamp]
+	 * @param line line number in TEAL file
+	 * @param interpreter interpreter instance
+	 */
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		if (argument === blockFieldTypes.BlkSeed|| argument === blockFieldTypes.BlkTimestamp) {
+			this.field = argument;
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, {field: argument});
+		}
+		this.line = line;
+		this.interpreter = interpreter;
+	}
+	
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const round = Number(this.assertBigInt(stack.pop(), this.line));
+		this.interpreter.assertRoundIsAvailable(round);
+		const block = this.interpreter.runtime.getBlock(round);
+		//"BlkTimestamp" = seconds since epoch, assuming one round(block) = 4.5s truncated to 4s (BigInt)
+		const result = (this.field === blockFieldTypes.BlkSeed) ? block.seed : block.timestamp
+		stack.push(result);
+		return this.computeCost();
+	}
+};
+
+/**
+ * Opcode: 0xd0 {uint8 parameters index}
+ * Stack: ..., A: []byte, B: []byte, C: []byte → ..., X: []byte, Y: uint64
+ * Verify the proof B of message A against pubkey C. Returns vrf output and verification flag.
+ * IMPORTANT: our implementation always assumes that the proof is correct
+ * Cost: 5700
+ */
+export class VrfVerify extends Op {
+	readonly line: number;
+	readonly vrfType: string;
+	/**
+	 * Asserts 1 argument is passed.
+	 * @param args Expected arguments: [VrfAlgorand]
+	 * @param line line number in TEAL file
+	 */
+	constructor(args: string[], line: number) {
+		assertLen(args.length, 1, line);
+		const argument = args[0];
+		super();
+		this.line = line;
+		switch (argument) {
+			case vrfVerifyFieldTypes.VrfAlgorand: {
+				this.vrfType = argument;
+				break;
+			}
+			case vrfVerifyFieldTypes.VrfStandard: {
+				this.vrfType = argument;
+				break;
+			}
+			default: {
+				throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
+			}
+		}
+	}
+
+	computeCost(): number {
+		return OpGasCost[7]["vrf_verify"];
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 3, this.line);
+		const message = this.assertBytes(stack.pop(), this.line);
+		const proof = this.assertBytes(stack.pop(), this.line);
+		const publicKey = this.assertBytes(stack.pop(), this.line);
+
+		if (proof.length !== proofLength) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
+		}
+		if (publicKey.length !== publicKeyLength) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
+		}
+		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
+			const hash = sha512(proof);
+			stack.push(convertToBuffer(hash, EncodingType.HEX));
+			stack.push(1n);
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
+		}
 		return this.computeCost();
 	}
 }

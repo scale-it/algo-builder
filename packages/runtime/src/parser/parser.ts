@@ -28,6 +28,9 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Bn254Add,
+	Bn254Pairing,
+	Bn254ScalarMul,
 	Branch,
 	BranchIfNotZero,
 	BranchIfNotZerov4,
@@ -68,6 +71,7 @@ import {
 	EcdsaPkRecover,
 	EcdsaVerify,
 	Ed25519verify,
+	Ed25519verify_bare,
 	EqualTo,
 	Err,
 	Exp,
@@ -109,6 +113,7 @@ import {
 	ITxnField,
 	ITxnNext,
 	ITxnSubmit,
+	Json_ref,
 	Keccak256,
 	Label,
 	Len,
@@ -128,11 +133,14 @@ import {
 	Pragma,
 	PushBytes,
 	PushInt,
+	Replace2,
+	Replace3,
 	Retsub,
 	Return,
 	Select,
 	SetBit,
 	SetByte,
+	Sha3_256,
 	Sha256,
 	Sha512_256,
 	Shl,
@@ -148,6 +156,8 @@ import {
 	Txna,
 	Txnas,
 	Uncover,
+	Block,
+	VrfVerify,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
@@ -396,6 +406,23 @@ opCodeMap[6] = {
 opCodeMap[7] = {
 	...opCodeMap[6],
 	base64_decode: Base64Decode,
+	replace2: Replace2,
+	replace3: Replace3,
+	sha3_256: Sha3_256,
+	ed25519verify_bare: Ed25519verify_bare,
+	json_ref: Json_ref,
+	block: Block,
+	vrf_verify: VrfVerify,
+};
+/**
+ * TEALv8
+ * //TODO: check if the bn254 opcodes has been realased with v8 or v9
+ */
+opCodeMap[8] = {
+	...opCodeMap[7],
+	bn254_add: Bn254Add,
+	bn254_scalar_mul: Bn254ScalarMul,
+	bn254_pairing: Bn254Pairing,
 };
 
 // list of opcodes with exactly one parameter.
@@ -461,6 +488,9 @@ const interpreterReqList = new Set([
 	"sha256",
 	"sha512_256",
 	"keccak256",
+	"sha3_256",
+	"ed25519verify",
+	"block",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);
@@ -505,8 +535,10 @@ const commonModeOps = new Set([
 	"err",
 	"sha256",
 	"keccak256",
+	"sha3_256",
 	"sha512_256",
 	"ed25519verify",
+	"Ed25519verify_bare",
 	"ecdsa_verify",
 	"ecdsa_pk_decompress",
 	"+",
@@ -833,26 +865,19 @@ export function assertMaxCost(
 	}
 }
 
-// verify max length of TEAL code is within consensus parameters
-function _assertMaxLen(len: number, mode: ExecutionMode): void {
-	if (mode === ExecutionMode.SIGNATURE) {
+/**
+ * verify max size of lsig
+ * @param lsigProgramArgsSize lsig program and arugments size
+ * @param mode Execution mode - Signature (stateless) OR Application (stateful)
+ */
+function assertLogicMaxLen(lsigProgramArgsSize: number, mode: ExecutionMode): void {
+	if (mode === ExecutionMode.SIGNATURE && lsigProgramArgsSize > LogicSigMaxSize) {
 		// check max program cost (for stateless)
-		if (len > LogicSigMaxSize) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
-				length: len,
-				maxlen: LogicSigMaxSize,
-				mode: "Stateless",
-			});
-		}
-	} else {
-		if (len > MaxAppProgramLen) {
-			// check max program length (for stateful)
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
-				length: len,
-				maxlen: MaxAppProgramLen,
-				mode: "Stateful",
-			});
-		}
+		throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
+			length: lsigProgramArgsSize,
+			maxlen: LogicSigMaxSize,
+			mode: "Stateless",
+		});
 	}
 }
 
@@ -865,7 +890,14 @@ function _assertMaxLen(len: number, mode: ExecutionMode): void {
 export function parser(program: string, mode: ExecutionMode, interpreter: Interpreter): Op[] {
 	const opCodeList: Op[] = [];
 	let counter = 0;
-
+	let lsigProgramArgsSize = Buffer.from(program, "base64").length;
+	if (interpreter.runtime.ctx?.args && interpreter.runtime.ctx.args.length) {
+		for (const arg of interpreter.runtime.ctx.args) {
+			lsigProgramArgsSize += arg.length;
+		}
+	}
+	//validate lsig program and arguments size
+	assertLogicMaxLen(lsigProgramArgsSize, mode);
 	const lines = program.split("\n");
 	for (const line of lines) {
 		counter++;
@@ -886,8 +918,6 @@ export function parser(program: string, mode: ExecutionMode, interpreter: Interp
 		assertMaxCost(interpreter.gas, mode);
 	}
 
-	// TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
-	// assertMaxLen(interpreter.length, mode);
 	return opCodeList;
 }
 

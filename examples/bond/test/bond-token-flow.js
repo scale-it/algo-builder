@@ -37,7 +37,7 @@ describe("Bond token Tests", function () {
 	let issuerLsigAddress;
 	let lsig;
 
-	this.beforeAll(() => {
+	this.beforeAll(function () {
 		appStorageConfig = {
 			localInts: 1,
 			localBytes: 1,
@@ -61,7 +61,7 @@ describe("Bond token Tests", function () {
 	const maxIssuance = "int:1000000";
 	const bondCreator = convert.addressToPk(bondTokenCreator.address);
 
-	it("Bond token application", () => {
+	it("Bond token application", function () {
 		/**
 		 * Issue initial bond tokens to the issuer
 		 * In epoch_0 elon buys 10 bonds

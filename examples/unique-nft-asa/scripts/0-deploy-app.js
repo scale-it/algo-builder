@@ -9,26 +9,34 @@ async function run(runtimeEnv, deployer) {
 
 	// Create App
 	const nftAppInfo = await deployer.deployApp(
-		creator,
-		{
-			appName: "NftApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "nft-app-approval.py",
-			clearProgramFilename: "nft-app-clear.py",
-			localInts: 1, // p
-			localBytes: 1, // creator
-		},
-		{}
-	);
+			creator,
+			{
+				appName: "NftApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "nft-app-approval.py",
+				clearProgramFilename: "nft-app-clear.py",
+				localInts: 1, // p
+				localBytes: 1, // creator
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
+
 	console.log(nftAppInfo);
 
 	// fund C_p lsig
-	await deployer.fundLsigByFile(
-		"stateless.py",
-		{ funder: creator, fundingMicroAlgo: 1e6 },
-		{}, // 1 algo
-		{ ARG_P: p, ARG_NFT_APP_ID: nftAppInfo.appID }
-	);
+	await deployer
+		.fundLsigByFile(
+			"stateless.py",
+			{ funder: creator, fundingMicroAlgo: 1e6 },
+			{}, // 1 algo
+			{ ARG_P: p, ARG_NFT_APP_ID: nftAppInfo.appID }
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log("Contracts deployed successfully!");
 }

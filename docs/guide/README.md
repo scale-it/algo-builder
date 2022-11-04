@@ -12,14 +12,15 @@ layout: splash
 - [Private Net](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) creation
 - [Script execution](./user-script-execution.md)
 - [Deployer](./deployer.md)
+- [Execute Transaction](./execute-transaction.md)
 - [Script Checkpoints](./execution-checkpoints.md)
 - [Script Logging](./logs.md).
 - [Algob Console](./algob-console.md)
 - [PyTeal](./py-teal.md)
 - [Test TEAL](./testing-teal.md)
+- [Working with algosdk.SignedTransaction](./signedTransaction.md)
 - [Advanced Runtime Features](./runtime-advanced.md)
 - [Templates](./templates.md)
-- [Execute Transaction](./execute-transaction.md)
 - [Sign Multisig](./sign-multisig.md)
 - [Debugging TEAL](./debugging-teal.md)
 - [Using algob with WebApp](./algob-web.md)
@@ -185,12 +186,37 @@ or
 algob -h deploy
 ```
 
-### Using algob with a TypeScript project
+### Using algob with a JavaScript project
 
-You can write your scripts and tests in TS. To initialize a new typescript project add `--typescript` to the init flag. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
+You can write your scripts and tests in JavaScript. If you don't add any flag to `init`, then default is javascript. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
 
 ```shell
-yarn run algob init --typescript
+yarn run algob init <path-where-to-create> --javascript
+```
+#### Example on `algob init` with javascript
+
+You can use below command to initialize the javascript project in `sample-project` folder.
+If `sample-project` folder is not present then it will create one for you. 
+
+```shell
+yarn run algob init ./sample-project --javascript
+```
+
+### Using algob with a TypeScript project
+
+You can write your scripts and tests in TS. To initialize a new typescript project add `--typescript` to the `init` flag. If you don't add any flag to `init`, then default is javascript. Example, if you follow the [Create an algob project](#create-an-algob-project) section then:
+
+```shell
+yarn run algob init <path-where-to-create> --typescript
+```
+
+#### Example on `algob init` with typescript
+
+You can use below command to initialize the typescript project in `sample-project` folder.
+If `sample-project` folder is not present then it will create one for you. 
+
+```shell
+yarn run algob init ./sample-project --typescript
 ```
 
 You can also copy our [htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) example project.

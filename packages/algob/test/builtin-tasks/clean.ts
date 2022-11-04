@@ -14,7 +14,7 @@ function assertCleanBehavior(): void {
 	});
 }
 
-describe("Clean task", () => {
+describe("Clean task", function () {
 	useFixtureProject("default-config-project");
 	useEnvironment();
 
@@ -23,7 +23,7 @@ describe("Clean task", () => {
 	});
 
 	describe("When cache and artifact are empty dirs", function () {
-		beforeEach(() => {
+		beforeEach(function () {
 			fs.mkdirSync("./cache");
 			fs.mkdirSync("./artifacts");
 		});
@@ -32,7 +32,7 @@ describe("Clean task", () => {
 	});
 
 	describe("When cache and artifact dirs aren't empty", function () {
-		beforeEach(() => {
+		beforeEach(function () {
 			fs.mkdirSync("./cache");
 			fs.mkdirSync("./artifacts");
 			fs.writeFileSync("./cache/a", "");

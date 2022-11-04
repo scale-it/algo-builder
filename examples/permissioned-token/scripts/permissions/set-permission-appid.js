@@ -1,5 +1,6 @@
 const { types } = require("@algo-builder/web");
 const accounts = require("../common/accounts");
+const { tryExecuteTx } = require("../common/common");
 
 async function run(runtimeEnv, deployer) {
 	const controllerAppInfo = deployer.getApp("Controller");
@@ -13,25 +14,22 @@ async function run(runtimeEnv, deployer) {
 	console.log(
 		`\n** Setting new permissions smart contract(id = ${newPermissionsAppInfo.appID}) **`
 	);
-	try {
-		const appArgs = ["str:set_permission", `int:${newPermissionsAppInfo.appID}`];
 
-		// set new permissions app id in controller smart contract
-		// note: in current version, this replaces the previous appID in controller
-		await deployer.executeTx([
-			{
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: owner, // asa manager account
-				appID: controllerappID,
-				payFlags: { totalFee: 1000 },
-				appArgs: appArgs,
-				foreignAssets: [tesla.assetIndex], // controller smart contract verifies if correct token is being used + asa.manager is correct one
-			},
-		]);
-	} catch (e) {
-		console.log("Error occurred", e.response.error);
-	}
+	const appArgs = ["str:set_permission", `int:${newPermissionsAppInfo.appID}`];
+
+	// set new permissions app id in controller smart contract
+	// note: in current version, this replaces the previous appID in controller
+	await tryExecuteTx(deployer, [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner, // asa manager account
+			appID: controllerappID,
+			payFlags: { totalFee: 1000 },
+			appArgs: appArgs,
+			foreignAssets: [tesla.assetIndex], // controller smart contract verifies if correct token is being used + asa.manager is correct one
+		},
+	]);
 }
 
 module.exports = { default: run };

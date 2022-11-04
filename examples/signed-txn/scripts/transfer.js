@@ -17,6 +17,7 @@ async function run(runtimeEnv, deployer) {
 		await executeSignedTxnFromFile(deployer, "john-to-bob.txn");
 	} catch (e) {
 		console.log(e.response ? e.response.error : e);
+		throw e;
 	}
 }
 

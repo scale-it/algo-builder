@@ -16,16 +16,16 @@ async function run(runtimeEnv, deployer) {
 
 	// Generate multi signature account hash
 	const addrs = [alice.addr, john.addr, bob.addr]; // you can replace these addresses with your custom addrs for multisig account.
-	const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
-	console.log("mparams: %s multisigaddr: %s \n", mparams, multsigaddr);
+	const [mparams, multisigAddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
+	console.log("mparams: %s multisigAddr: %s \n", mparams, multisigAddr);
 
 	let txnParams = {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.SecretKey,
 		fromAccount: masterAccount,
-		toAccountAddr: multsigaddr,
+		toAccountAddr: multisigAddr,
 		amountMicroAlgos: 10000000,
-		payFlags: { note: "Funding multisig account", totalFee: 500 }, // totalFee will be converted to 1000 as it is minimum required transaction fee
+		payFlags: { note: "Funding multisig account", totalFee: 1000 },
 	};
 
 	// Funding multisignature account
@@ -47,7 +47,7 @@ async function run(runtimeEnv, deployer) {
 	txnParams = {
 		type: types.TransactionType.TransferAlgo,
 		sign: types.SignType.LogicSignature,
-		fromAccountAddr: multsigaddr,
+		fromAccountAddr: multisigAddr,
 		toAccountAddr: bob.addr,
 		amountMicroAlgos: 20,
 		lsig: lsig,
@@ -58,7 +58,7 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction FAIL - according to teal logic, amount should be <= 100
 	txnParams.amountMicroAlgos = 200;
-	await tryExecuteTx(deployer, txnParams);
+	await tryExecuteTx(deployer, txnParams).catch((error) => console.log(error));
 }
 
 module.exports = { default: run };

@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("../common/common");
 const { accounts, decodeValue } = require("../utils");
 
 // Deploy new application
@@ -19,7 +20,7 @@ async function run(runtimeEnv, deployer) {
 		},
 	};
 
-	const txReceipt = await deployer.executeTx([masterTxnParam]);
+	const txReceipt = await tryExecuteTx(deployer, [masterTxnParam]);
 
 	// get logs from transaction
 	const logs = txReceipt[0].logs;

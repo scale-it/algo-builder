@@ -1,14 +1,14 @@
-# Algo Builder Wallet Widget 
+# Algo Builder Wallet Widget
 
 The purpose of this tutorial is a demonstration of the Algo Builder Wallet Widget integrated with the [@algo-builder/web](https://github.com/scale-it/algo-builder/tree/master/packages/web) package, written in Vue JS. The widget connects to major Algorand wallets (Algo Signer, Wallet Connect, MyAlgoWallet), sign and send transactions constructed with Algo SDK or Algo Builder framework.
 
 ### Requirements
 
-- [Vue CLI](https://cli.vuejs.org/guide/installation.html)<br/>
-- [NodeJS](https://nodejs.org/en/download/) > v14.11.0<br/>
-- JavaScript package manager - either [YARN](https://classic.yarnpkg.com/en/docs/install) > v3.1.0 or NPM which comes with NodeJS.<br/>
-- IDE, e.g. [VSCode](https://code.visualstudio.com/download)<br/>
-- Other dependencies are listed in [package.json](https://github.com/scale-it/algo-builder-templates/blob/master/wallet/package.json). Install them with yarn install or npm install.<br/>
+- [Vue CLI](https://cli.vuejs.org/guide/installation.html)
+- [NodeJS](https://nodejs.org/en/download/) > v14.11.0
+- JavaScript package manager - either [YARN](https://classic.yarnpkg.com/en/docs/install) > v3.1.0 or NPM which comes with NodeJS.
+- IDE, e.g. [VSCode](https://code.visualstudio.com/download).
+- Other dependencies are listed in [package.json](https://github.com/scale-it/algo-builder-templates/blob/master/wallet/package.json). Install them with yarn install or npm install.
 
 ### Background
 
@@ -31,12 +31,12 @@ The source code for this tutorial can be found on GitHub. Start by cloning the r
     git clone https://github.com/scale-it/algo-builder-templates.git
     cd algo-builder-templates/wallet
 
-The repository contains the following templates:<br/>
-**htlc** : a descriptive example explaining how HTLC contracts work with Algo-Builder.<br/>
-**monitor-payments**: a nodejs app which monitors payment transactions to a particular address.<br/>
-**shop**: demonstrates a payment widget connected to different web wallets.<br/>
-**wallet**: (this tutorial) Algo Builder Wallet Wideget tutorial.<br/>
-**warcraft**: a descriptive example explaining how to create an escrow account with Algo Builder.<br/>
+The repository contains few interesting templates:
+**htlc** : a descriptive example explaining how HTLC contracts work with Algo-Builder.
+**monitor-payments**: a nodejs app which monitors payment transactions to a particular address.
+**shop**: demonstrates a payment widget connected to different web wallets.
+**wallet**: (this tutorial) Algo Builder Wallet Wideget tutorial.
+**warcraft**: a descriptive example explaining how to create an escrow account with Algo Builder.
 
 #### 2. Environment Setup
 
@@ -49,7 +49,7 @@ Now, run the app for local development. It will automatically rebuild the app wh
 App should pop up in your browser, it will look similar to this:
 <img src="./t-wallet/assets/homescreen.png" height="200" title="Home Page" />
 
-#### 3. Using the Wallet Widget
+#### 3. Wallet Widget Component
 
 Now you can select your preferred network and connect to a web wallet:
 <img src="./t-wallet/assets/address_selected.png" height="200" title="Account Selected" />
@@ -67,7 +67,7 @@ export const applicationId: number = 189;
 
 And finally you can disconnect your chosen wallet.
 
-#### 3. Style the Wallet Widget
+#### 4. Style the Wallet Widget
 
 You can also style your wallet widget using your own custom styles or using an external library by editing the `App.vue` file:
 
@@ -110,4 +110,4 @@ For eg: [Sigma Wallet](https://github.com/scale-it/algobuilder-msig) has a style
 <img src="./t-wallet/assets/select_network.png" height="100" title="Select Network" />
 <img src="./t-wallet/assets/styled_wallet.png" height="200" title="Styled Wallet Widget" />
 
-The wallet component above and the whole web page can easily be customized to fulfil your UX design requirements along with providing the required functionality.
+The wallet component above and the whole web page can easily be customized to realize your UX design requirements along with providing the required functionality.

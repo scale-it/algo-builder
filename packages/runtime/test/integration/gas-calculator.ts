@@ -42,7 +42,7 @@ describe("TEALv5: Pooled Opcode Cost calculation", function () {
 	});
 
 	it("Gas should be number", function () {
-		const receipt = runtime.executeTx([appCallParam])[0] as rtypes.AppInfo;
+		const receipt = runtime.executeTx([appCallParam])[0] as rtypes.AppInfoReceipt;
 		expect(receipt.gas).to.equal(99);
 	});
 });

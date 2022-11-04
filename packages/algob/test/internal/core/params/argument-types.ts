@@ -8,8 +8,8 @@ import * as path from "path";
 import * as types from "../../../../src/internal/core/params/argument-types";
 import { expectBuilderError } from "../../../helpers/errors";
 
-describe("argumentTypes", () => {
-	it("should set the right name to all the argument types", () => {
+describe("argumentTypes", function () {
+	it("should set the right name to all the argument types", function () {
 		for (const typeName of Object.keys(types)) {
 			const argumentTypesMap: {
 				[name: string]: types.ArgumentType<any>;
@@ -18,8 +18,8 @@ describe("argumentTypes", () => {
 		}
 	});
 
-	describe("string type", () => {
-		it("should work with valid values", () => {
+	describe("string type", function () {
+		it("should work with valid values", function () {
 			assert.equal(types.string.parse("arg", "asd"), "asd");
 			assert.equal(types.string.parse("arg", "asd1"), "asd1");
 			assert.equal(types.string.parse("arg", "asd 123"), "asd 123");
@@ -28,13 +28,13 @@ describe("argumentTypes", () => {
 		});
 	});
 
-	describe("boolean type", () => {
-		it("should work with valid values", () => {
+	describe("boolean type", function () {
+		it("should work with valid values", function () {
 			assert.equal(types.boolean.parse("arg", "true"), true);
 			assert.equal(types.boolean.parse("arg", "false"), false);
 		});
 
-		it("should throw the right error on invalid values", () => {
+		it("should throw the right error on invalid values", function () {
 			expectBuilderError(
 				() => types.boolean.parse("arg", "asd1"),
 				ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE
@@ -62,15 +62,15 @@ describe("argumentTypes", () => {
 		});
 	});
 
-	describe("int type", () => {
-		it("should work with decimal values", () => {
+	describe("int type", function () {
+		it("should work with decimal values", function () {
 			assert.equal(types.int.parse("arg", "0"), 0);
 			assert.equal(types.int.parse("arg", "1"), 1);
 			assert.equal(types.int.parse("arg", "1123"), 1123);
 			assert.equal(types.int.parse("arg", "05678"), 5678);
 		});
 
-		it("should work with hex values", () => {
+		it("should work with hex values", function () {
 			assert.equal(types.int.parse("arg", "0x0"), 0);
 			assert.equal(types.int.parse("arg", "0x1"), 1);
 			assert.equal(types.int.parse("arg", "0xA"), 0xa);
@@ -78,7 +78,7 @@ describe("argumentTypes", () => {
 			assert.equal(types.int.parse("arg", "0x0a"), 0x0a);
 		});
 
-		it("should work with decimal scientific notation", () => {
+		it("should work with decimal scientific notation", function () {
 			assert.equal(types.int.parse("arg", "1e0"), 1);
 			assert.equal(types.int.parse("arg", "1e123"), 1e123);
 			assert.equal(types.int.parse("arg", "12e0"), 12);
@@ -86,7 +86,7 @@ describe("argumentTypes", () => {
 			assert.equal(types.int.parse("arg", "0e12"), 0);
 		});
 
-		it("should fail with incorrect values", () => {
+		it("should fail with incorrect values", function () {
 			expectBuilderError(
 				() => types.int.parse("arg", ""),
 				ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE
@@ -126,22 +126,22 @@ describe("argumentTypes", () => {
 		});
 	});
 
-	describe("float type", () => {
-		it("should work with integer decimal values", () => {
+	describe("float type", function () {
+		it("should work with integer decimal values", function () {
 			assert.equal(types.float.parse("arg", "0"), 0);
 			assert.equal(types.float.parse("arg", "1"), 1);
 			assert.equal(types.float.parse("arg", "1123"), 1123);
 			assert.equal(types.float.parse("arg", "05678"), 5678);
 		});
 
-		it("should work with non-integer decimal values", () => {
+		it("should work with non-integer decimal values", function () {
 			assert.equal(types.float.parse("arg", "0.1"), 0.1);
 			assert.equal(types.float.parse("arg", "123.123"), 123.123);
 			assert.equal(types.float.parse("arg", ".123"), 0.123);
 			assert.equal(types.float.parse("arg", "0."), 0);
 		});
 
-		it("should work with integer hex values", () => {
+		it("should work with integer hex values", function () {
 			assert.equal(types.float.parse("arg", "0x0"), 0);
 			assert.equal(types.float.parse("arg", "0x1"), 1);
 			assert.equal(types.float.parse("arg", "0xA"), 0xa);
@@ -149,7 +149,7 @@ describe("argumentTypes", () => {
 			assert.equal(types.float.parse("arg", "0x0a"), 0x0a);
 		});
 
-		it("should work with decimal scientific notation", () => {
+		it("should work with decimal scientific notation", function () {
 			assert.equal(types.float.parse("arg", "1e0"), 1);
 			assert.equal(types.float.parse("arg", "1e123"), 1e123);
 			assert.equal(types.float.parse("arg", "12e0"), 12);
@@ -160,7 +160,7 @@ describe("argumentTypes", () => {
 			assert.equal(types.float.parse("arg", "1.0123e123"), 1.0123e123);
 		});
 
-		it("should fail with incorrect values", () => {
+		it("should fail with incorrect values", function () {
 			expectBuilderError(
 				() => types.float.parse("arg", ""),
 				ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE
@@ -208,25 +208,25 @@ describe("argumentTypes", () => {
 		});
 	});
 
-	describe("Input file type", () => {
-		it("Should return the file path if the file exists and is readable", () => {
+	describe("Input file type", function () {
+		it("Should return the file path if the file exists and is readable", function () {
 			const output = types.inputFile.parse("A file", __filename);
 			assert.equal(output, __filename);
 		});
 
-		it("Should work with a relative path", () => {
+		it("Should work with a relative path", function () {
 			const relative = path.relative(process.cwd(), __filename);
 			const output = types.inputFile.parse("A file", relative);
 			assert.equal(output, relative);
 		});
 
-		it("Should work with an absolute path", async () => {
+		it("Should work with an absolute path", async function () {
 			const absolute = await fsExtra.realpath(__filename);
 			const output = types.inputFile.parse("A file", absolute);
 			assert.equal(output, absolute);
 		});
 
-		it("Should throw if the file doesnt exist", () => {
+		it("Should throw if the file doesnt exist", function () {
 			expectBuilderError(
 				() => types.inputFile.parse("A file", "NON_EXISTENT_FILE"),
 				ERRORS.ARGUMENTS.INVALID_INPUT_FILE
@@ -265,7 +265,7 @@ describe("argumentTypes", () => {
 			fsExtra.unlinkSync("A");
 		});
 
-		it("Should throw if a directory is given", () => {
+		it("Should throw if a directory is given", function () {
 			expectBuilderError(
 				() => types.inputFile.parse("A file", __dirname),
 				ERRORS.ARGUMENTS.INVALID_INPUT_FILE
@@ -273,8 +273,8 @@ describe("argumentTypes", () => {
 		});
 	});
 
-	describe("JSON type", () => {
-		it("Should fail if the argument isn't JSON", () => {
+	describe("JSON type", function () {
+		it("Should fail if the argument isn't JSON", function () {
 			expectBuilderError(
 				() => types.json.parse("j", "a"),
 				ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT
@@ -291,23 +291,23 @@ describe("argumentTypes", () => {
 			);
 		});
 
-		it("Should parse an object successfully", () => {
+		it("Should parse an object successfully", function () {
 			assert.deepEqual(types.json.parse("j", '{"a":1}'), { a: 1 });
 		});
 
-		it("Should parse a number", () => {
+		it("Should parse a number", function () {
 			assert.deepEqual(types.json.parse("j", "123"), 123);
 		});
 
-		it("Should parse a list", () => {
+		it("Should parse a list", function () {
 			assert.deepEqual(types.json.parse("j", "[1,2]"), [1, 2]);
 		});
 
-		it("Should parse a string", () => {
+		it("Should parse a string", function () {
 			assert.deepEqual(types.json.parse("j", '"a"'), "a");
 		});
 
-		it("Should accept anything except undefined as valid", () => {
+		it("Should accept anything except undefined as valid", function () {
 			const validate = types.json.validate;
 			if (validate === undefined) {
 				assert.fail("types.json.validate must exist");

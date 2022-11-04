@@ -29,13 +29,21 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction FAIL - rejected by lsig because amount is not <= 1000
 	txnParam.amount = 1500;
-	await tryExecuteTx(deployer, txnParam);
+	try {
+		await tryExecuteTx(deployer, txnParam);
+	} catch (e) {
+		console.error(e);
+	}
 
 	// Transaction FAIL - rejected by lsig because sender must be the delegator i.e
 	// account which signed the lsig (goldOwner in this case)
 	txnParam.amount = 100;
 	txnParam.fromAccountAddr = bob.addr;
-	await tryExecuteTx(deployer, txnParam);
+	try {
+		await tryExecuteTx(deployer, txnParam);
+	} catch (e) {
+		console.error(e);
+	}
 
 	// Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
 	const logicSignature = deployer.getLsig("Gold_D_Lsig");
@@ -54,7 +62,11 @@ async function run(runtimeEnv, deployer) {
 
 	// Transaction FAIL - rejected by lsig because amount is not <= 100
 	txnParam.amountMicroAlgos = 580;
-	await tryExecuteTx(deployer, txnParam);
+	try {
+		await tryExecuteTx(deployer, txnParam);
+	} catch (e) {
+		console.error(e);
+	}
 }
 
 module.exports = { default: run };

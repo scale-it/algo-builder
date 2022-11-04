@@ -48,7 +48,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 		};
 	});
 
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([john, alice]); // setup test
 	});
 	const syncAccount = (): void => {

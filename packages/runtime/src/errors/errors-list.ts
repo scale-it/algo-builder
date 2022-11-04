@@ -210,7 +210,7 @@ by an index that does not exist.`,
 	MAX_LEN_EXCEEDED: {
 		number: 1030,
 		message:
-			"Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
+			"Length of provided TEAL code = %length% bytes exceeds max length of %maxlen% bytes, Mode: %mode%",
 		title: "MaxLength Error",
 		description: `MaxLength Error`,
 	},
@@ -417,6 +417,82 @@ maximun uint128`,
 		title: "Clear state programs cannot issue inner transactions.",
 		description: "Clear state programs cannot issue inner transactions",
 	},
+	BYTES_REPLACE_ERROR: {
+		number: 1061,
+		message:
+			"Can not replace bytes due to length of replacing bytes(%lenReplace%) + index replace(%index%) > length of original bytes(%lenOriginal%) at line %line%",
+		title: "replace opcode error",
+		description: "Can not replace bytes due to invalid start or end index",
+	},
+	UNKNOWN_JSON_TYPE: {
+		number: 1062,
+		message:
+			"JSON TYPE must be {JSONString, JSONUint64 or JSONObject}, got :%jsonType%, at line %line%",
+		title: "Unknown JSON type",
+		description: "Unknown JSON type",
+	},
+	INVALID_JSON_PARSING: {
+		number: 1063,
+		message: "Invalid JSON parsing at line %line%",
+		title: "Invalid JSON parsing",
+		description: "Invalid JSON parsing",
+	},
+	UNKNOWN_KEY_JSON: {
+		number: 1064,
+		message: "Unkown key %key% in JSON object at line %line%",
+		title: "Unknown key JSON",
+		description: "Unknown key JSON",
+	},
+	MAX_BYTE_ARRAY_EXCEEDED: {
+		number: 1065,
+		message: "Maximum byte array length exceeded",
+		title: "Maximum byte array length exceeded",
+		description: "Maximum byte array length is %maxStringSize%",
+	},
+	PROGRAM_LENGTH_EXCEEDED: {
+		number: 1066,
+		message: "Maximum program length exceeded",
+		title: "Program length",
+		description:
+			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
+	},
+	UNSUPPORTED_VRF_STANDARD: {
+		number: 1067,
+		message: "vtf_standard not supported",
+		title: "Unsupported by runtime",
+		description: "vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
+	},
+	INVALID_PUB_KEY_LENGTH: {
+		number: 1068,
+		message: "Wrong publicKey size",
+		title: "Wrong publicKey size",
+		description: "Wrong publicKey size. Got: %length%, expected 32",
+	},
+	INVALID_PROOF_LENGTH: {
+		number: 1069,
+		message: "Wrong proof size",
+		title: "Wrong proof size",
+		description: "Wrong proof size. Got: %length%, expected 80",
+	},
+	UNKNOWN_VRF_TYPE: {
+		number: 1070,
+		message: "Unknown vrf_verify field",
+		title: "Unknown field",
+		description: "Unknow field for vrf_verify opcode",
+	},
+	EXTRA_PAGES_EXCEEDED: {
+		number: 1071,
+		message: "Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+		title: "Extra pages",
+		description:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+	},
+	UNKNOWN_BLOCK_FIELD: {
+		number: 1072,
+		message: "Unknown block opcode field",
+		title: "Unknown field",
+		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	}
 };
 
 const runtimeGeneralErrors = {
@@ -549,6 +625,31 @@ const runtimeGeneralErrors = {
 		message: "Too many inner transaction.",
 		title: "Too many inner transaction.",
 		description: "Too many inner transaction in one call, maximum is 256.",
+	},
+	INVALID_MULTISIG: {
+		number: 1321,
+		message: "Invalid multisignature",
+		title: "Invalid multisignature",
+		description:
+			"Provided multisignature is invalid and was not able to authenticate the transaction",
+	},
+	PRODUCE_BLOCK: {
+		number: 1322,
+		message: "Produce block",
+		title: "Produce block",
+		description: "Runtime failed while trying to produce new block",
+	},
+	INVALID_BLOCK: {
+		number: 1323,
+		message: "Invalid block",
+		title: "Invalid block",
+		description: "Provided round does not correspond to any existing block",
+	},
+	ROUND_NOT_AVAILABLE: {
+		number: 1324,
+        message: "Round is not available",
+        title: "Invalid round",
+        description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
 	},
 };
 

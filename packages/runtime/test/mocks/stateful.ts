@@ -30,24 +30,43 @@ export const accInfo = [
 		address: "addr-1",
 		assets: assets,
 		amount: 123,
-		appsLocalState: appLocalState.set(1847, {
-			id: 1847,
-			"key-value": localStateMap,
-			schema: {
-				...base,
-				numByteSlice: 2,
-				numUint: 1,
-			},
-		}),
+		appsLocalState: appLocalState
+			.set(1847, {
+				id: 1847,
+				"key-value": localStateMap,
+				schema: {
+					...base,
+					numByteSlice: 2,
+					numUint: 1,
+				},
+			})
+			.set(1828, {
+				id: 1828,
+				"key-value": localStateMap,
+				schema: {
+					...base,
+					numByteSlice: 10,
+					numUint: 10,
+				},
+			}),
 		appsTotalSchema: { ...base, numByteSlice: 583, numUint: 105 },
-		createdApps: createdApps.set(1828, {
-			"approval-program": "",
-			"clear-state-program": "",
-			creator: elonAddr,
-			"global-state": globalStateMap,
-			"global-state-schema": { ...base, numByteSlice: 10, numUint: 10 },
-			"local-state-schema": { ...base, numByteSlice: 0, numUint: 16 },
-		}),
+		createdApps: createdApps
+			.set(1828, {
+				"approval-program": "",
+				"clear-state-program": "",
+				creator: elonAddr,
+				"global-state": globalStateMap,
+				"global-state-schema": { ...base, numByteSlice: 10, numUint: 10 },
+				"local-state-schema": { ...base, numByteSlice: 0, numUint: 16 },
+			})
+			.set(1002, {
+				"approval-program": "",
+				"clear-state-program": "",
+				creator: elonAddr,
+				"global-state": globalStateMap,
+				"global-state-schema": { ...base, numByteSlice: 10, numUint: 10 },
+				"local-state-schema": { ...base, numByteSlice: 0, numUint: 16 },
+			}),
 		createdAssets: createdAssets.set(3, {
 			creator: "addr-1",
 			total: 10000n,

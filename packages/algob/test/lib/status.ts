@@ -10,13 +10,13 @@ import { mkEnv } from "../helpers/params";
 import { mockAccountInformation } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-describe("Status package", () => {
+describe("Status package", function () {
 	let deployer: Deployer;
 	const algod = new AlgoOperatorDryRunImpl();
 	const env = mkEnv("network1");
 	const deployerCfg = new DeployerConfig(env, algod);
 
-	before(async () => {
+	before(async function () {
 		deployer = new DeployerRunMode(deployerCfg);
 
 		(sinon.stub(algod.algodClient, "accountInformation") as any).returns({
@@ -24,24 +24,24 @@ describe("Status package", () => {
 		}) as ReturnType<algosdk.Algodv2["accountInformation"]>;
 	});
 
-	after(async () => {
+	after(async function () {
 		(algod.algodClient.accountInformation as sinon.SinonStub).restore();
 	});
 
-	it("balanceOf should return corrent amount when account hold an asset", async () => {
+	it("balanceOf should return corrent amount when account hold an asset", async function () {
 		const assetID = mockAccountInformation.assets[0]["asset-id"];
 		const amount = mockAccountInformation.assets[0].amount;
 		expect(await balanceOf(deployer, mockAccountInformation.address, assetID)).to.equal(amount);
 	});
 
-	it("balanceOf should return 0 when account does hold an asset", async () => {
+	it("balanceOf should return 0 when account does hold an asset", async function () {
 		const otherAssetID = 0;
 		expect(await balanceOf(deployer, mockAccountInformation.address, otherAssetID)).to.equal(
 			0n
 		);
 	});
 
-	it("balaceOf should return account balance(in ALGO) when assetID undefined", async () => {
+	it("balaceOf should return account balance(in ALGO) when assetID undefined", async function () {
 		expect(await balanceOf(deployer, mockAccountInformation.address)).to.equal(
 			mockAccountInformation.amount
 		);

@@ -5,18 +5,24 @@ import { TASK_INIT } from "./task-names";
 export default function (): void {
 	task(TASK_INIT, "Initializes a new project(JS by default) in the given directory")
 		.addPositionalParam<string>("newProjectLocation", "Location of the new project")
+		.addFlag("javascript", "Initializes a new javascript project in the given directory")
 		.addFlag("typescript", "Initializes a new typescript project in the given directory")
 		.addFlag("infrastructure", "Initializes a new project without infrastructure folder")
+		.addFlag("npm", "Use npm instead for yarn")
 		.setAction(
 			async (
 				{
 					newProjectLocation,
 					typescript,
 					infrastructure,
-				}: { newProjectLocation: string; typescript: boolean; infrastructure: boolean },
+					npm,
+				}: {
+					newProjectLocation: string;
+					typescript: boolean;
+					infrastructure: boolean;
+					npm: boolean;
+				},
 				_
-			) => {
-				await createProject(newProjectLocation, typescript, infrastructure);
-			}
+			) => await createProject(newProjectLocation, typescript, infrastructure, npm)
 		);
 }

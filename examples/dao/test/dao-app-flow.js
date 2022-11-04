@@ -1,4 +1,4 @@
-const { Runtime, AccountStore } = require("@algo-builder/runtime");
+const { Runtime } = require("@algo-builder/runtime");
 const { types, parsing } = require("@algo-builder/web");
 const { assert } = require("chai");
 const {
@@ -21,7 +21,6 @@ const {
 const { getApplicationAddress } = require("algosdk");
 
 const minBalance = 10e6; // 10 ALGO's
-const initialBalance = 200e6;
 
 /**
  * Test for scripts flow. Steps:
@@ -240,7 +239,7 @@ describe("DAO test", function () {
 		assert.equal(voterB.getAssetHolding(govTokenID).amount, 1000);
 	}
 
-	it("DAO flow test", () => {
+	it("DAO flow test", function () {
 		/**
 		 * Flow:
 		 *
@@ -287,7 +286,7 @@ describe("DAO test", function () {
 		// set time (after now)
 		runtime.setRoundAndTimestamp(5, now + 10);
 
-		addProposalTx[1].amount = 15;
+		addProposalTx[1].amount = deposit;
 		runtime.executeTx(addProposalTx);
 		syncAccounts();
 
@@ -529,11 +528,12 @@ describe("DAO test", function () {
 		runtime.executeTx([closeProposalParam]);
 		syncAccounts();
 
-		// verify proposalALsig recieved back deposit of 15 tokens
-		assert.equal(proposalALsigAcc.getAssetHolding(govTokenID).amount, 15n);
+		// verify proposalALsig recieved back deposit
+		assert.equal(proposalALsigAcc.getAssetHolding(govTokenID).amount, deposit);
 
 		// verify proposal config is deleted from localstate
 		for (const key of [
+			"id",
 			"name",
 			"url",
 			"url_hash",
@@ -553,7 +553,7 @@ describe("DAO test", function () {
 		}
 	});
 
-	it("Should not allow to vote again with newly locked tokens", () => {
+	it("Should not allow to vote again with newly locked tokens", function () {
 		/**
 		 * Flow:
 		 * + Setup DAO
@@ -582,7 +582,7 @@ describe("DAO test", function () {
 		// set time (after now)
 		runtime.setRoundAndTimestamp(5, now + 10);
 
-		addProposalTx[1].amount = 15;
+		addProposalTx[1].amount = deposit;
 		runtime.executeTx(addProposalTx);
 		syncAccounts();
 
@@ -698,7 +698,7 @@ describe("DAO test", function () {
 		);
 	});
 
-	it("Should allow to vote again with newly locked tokens for different proposal", () => {
+	it("Should allow to vote again with newly locked tokens for different proposal", function () {
 		/**
 		 * Flow:
 		 * + Setup DAO
@@ -737,8 +737,8 @@ describe("DAO test", function () {
 		// set time (after now)
 		runtime.setRoundAndTimestamp(5, now + 10);
 
-		addProposalATx[1].amount = 15;
-		addProposalBTx[1].amount = 15;
+		addProposalATx[1].amount = deposit;
+		addProposalBTx[1].amount = deposit;
 		runtime.executeTx(addProposalATx);
 		runtime.executeTx(addProposalBTx);
 
@@ -830,7 +830,7 @@ describe("DAO test", function () {
 		assert.isUndefined(proposalBLsigAcc.getLocalState(appID, "no")); // we didn't vote for "no"
 	});
 
-	it("Should allow to close proposal if it is passsed execution", () => {
+	it("Should allow to close proposal if it is passsed execution", function () {
 		/**
 		 * Flow:
 		 * + Setup DAO
@@ -856,7 +856,7 @@ describe("DAO test", function () {
 		// set time (after now)
 		runtime.setRoundAndTimestamp(5, now + 10);
 
-		addProposalTx[1].amount = 15;
+		addProposalTx[1].amount = deposit;
 		runtime.executeTx(addProposalTx);
 		syncAccounts();
 
@@ -944,6 +944,7 @@ describe("DAO test", function () {
 
 		// verify proposal config is deleted from localstate
 		for (const key of [
+			"id",
 			"name",
 			"url",
 			"url_hash",

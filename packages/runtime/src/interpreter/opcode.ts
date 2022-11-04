@@ -193,13 +193,14 @@ export abstract class Op {
 	 * @param index Index
 	 * @param line line number in TEAL file
 	 */
-	assert64BitIndex(index: bigint, line: number): void {
+	assert64BitIndex(index: bigint, line: number): bigint {
 		if (index > MAX_UINT6) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, {
 				index: index,
 				line: line,
 			});
 		}
+		return index;
 	}
 
 	/**

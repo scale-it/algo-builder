@@ -29,7 +29,7 @@ describe("Sample Test", function () {
 		fundReceiver = runtime.getAccount(fundReceiver.address);
 	}
 
-	it("Should not fail because txn fees is equal to or greater than 10000 microAlgos", () => {
+	it("Should not fail because txn fees is equal to or greater than 10000 microAlgos", function () {
 		const validTxFee = 10000;
 		assert.equal(fundReceiver.balance(), minBalance);
 		assert.equal(master.balance(), masterBalance);
@@ -50,13 +50,13 @@ describe("Sample Test", function () {
 		assert.equal(master.balance(), masterBalance - amount - BigInt(validTxFee));
 	});
 
-	it("Should fail because txn fees is less than 10000 microAlgos", () => {
+	it("Should fail because txn fees is less than 10000 microAlgos", function () {
 		const invalidTxFee = 1000;
 		const initialFundRecBalance = fundReceiver.balance();
 		const initialMasterBalance = master.balance();
 
 		try {
-			runtime.executeTx([
+			assert.throws(() => runtime.executeTx([
 				{
 					type: types.TransactionType.TransferAlgo,
 					sign: types.SignType.LogicSignature,
@@ -66,7 +66,7 @@ describe("Sample Test", function () {
 					amountMicroAlgos: amount,
 					payFlags: { totalFee: invalidTxFee },
 				},
-			]);
+			]));
 		} catch (error) {
 			console.log(error);
 		}

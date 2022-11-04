@@ -6,11 +6,20 @@ import type {
 	ConnectionSettings,
 	EncodedTransaction,
 	SignedTx,
+	SignTransactionOptions,
 } from "@randlabs/myalgo-connect";
-import algosdk, { Transaction } from "algosdk";
+import algosdk, { SignedTransaction, Transaction } from "algosdk";
 
 import { mkTxParams } from "..";
-import { ExecParams, HttpNetworkConfig, TransactionInGroup } from "../types";
+import {
+	ExecParams,
+	HttpNetworkConfig,
+	isSDKTransactionAndSign,
+	Sign,
+	SignType,
+	TransactionInGroup,
+	TxnReceipt,
+} from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
 import { error, log } from "./logger";
@@ -29,17 +38,25 @@ interface MyAlgoConnect {
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed transaction
 	 */
-	signTransaction(transaction: AlgorandTxn | EncodedTransaction): Promise<SignedTx>;
+	signTransaction(
+		transaction: AlgorandTxn | EncodedTransaction,
+		signOptions?: SignTransactionOptions
+	): Promise<SignedTx>;
 
 	/**
 	 * @async
 	 * @description Sign an Algorand Transaction.
 	 * @param transaction Expect a valid Algorand transaction array.
+	 * @param signOptions Sign transactions options object.
 	 * @returns Returns signed an array of signed transactions.
 	 */
-	signTransaction(transaction: (AlgorandTxn | EncodedTransaction)[]): Promise<SignedTx[]>;
+	signTransaction(
+		transaction: (AlgorandTxn | EncodedTransaction)[],
+		signOptions?: SignTransactionOptions
+	): Promise<SignedTx[]>;
 
 	/**
 	 * @async
@@ -68,6 +85,7 @@ export class MyAlgoWalletSession {
 			}
 		} catch (err) {
 			error(err);
+			throw err
 		}
 	}
 
@@ -75,12 +93,13 @@ export class MyAlgoWalletSession {
 	async connectToMyAlgo(): Promise<void> {
 		try {
 			this.accounts = await this.connector.connect({
-				shouldSelectOneAccount: true,
+				shouldSelectOneAccount: false, // for multisig we need to allow multiple accounts login
 				openManager: true,
 			});
 			this.addresses = this.accounts.map((account) => account.address);
 		} catch (err) {
-			throw new Error("Error while connecting to MyAlgo Wallet");
+			error(err);
+			throw new Error("Error while connecting to MyAlgo Wallet" + err);
 		}
 	}
 
@@ -90,8 +109,17 @@ export class MyAlgoWalletSession {
 	 * @param txn { SDK transaction object, shouldSign, signers, msig } object
 	 * @returns raw signed txn
 	 */
-	async signTransaction(txn: algosdk.Transaction): Promise<SignedTx> {
-		return await this.connector.signTransaction(txn.toByte());
+	async signTransaction(
+		txn: algosdk.Transaction,
+		signOptions?: SignTransactionOptions
+	): Promise<SignedTx> {
+		try {
+			return await this.connector.signTransaction(txn.toByte(), signOptions);
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
 	}
 
 	/**
@@ -101,63 +129,212 @@ export class MyAlgoWalletSession {
 	 * @returns array of raw signed txns | null. null representes that the txn in array is NOT signed
 	 * by wallet user (i.e signable by someone else).
 	 */
-	async signTransactionGroup(txns: TransactionInGroup[]): Promise<SignedTx[]> {
-		const txnsGroup = txns.map((v) => v.txn);
-		const groupID = algosdk.computeGroupID(txnsGroup);
-		for (let i = 0; i < txns.length; i++) txnsGroup[i].group = groupID;
-		return await this.connector.signTransaction(txnsGroup.map((txn) => txn.toByte()));
+	async signTransactionGroup(
+		txns: TransactionInGroup[],
+		signOptions?: SignTransactionOptions
+	): Promise<SignedTx[]> {
+		try {
+			const txnsGroup = txns.map((v) => v.txn);
+			const groupID = algosdk.computeGroupID(txnsGroup);
+			for (let i = 0; i < txns.length; i++) {
+				// called from executeTx where groupID is already assigned
+				if (!txnsGroup[i].group) {
+					txnsGroup[i].group = groupID;
+				}
+			}
+			return await this.connector.signTransaction(
+				txnsGroup.map((txn) => txn.toByte()),
+				signOptions
+			);
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
 	}
 
 	/**
 	 * Send signed transaction to network and wait for confirmation
 	 * @param rawTxns Signed Transaction(s)
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
 	async sendAndWait(
-		rawTxns: Uint8Array | Uint8Array[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
-		return await this.waitForConfirmation(txInfo.txId);
+		rawTxns: Uint8Array | Uint8Array[],
+		waitRounds = WAIT_ROUNDS
+	): Promise<TxnReceipt> {
+		try {
+			const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
+			return await this.waitForConfirmation(txInfo.txId, waitRounds);
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
 	}
 
-	// Function used to wait for a tx confirmation
-	private async waitForConfirmation(
-		txId: string
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, WAIT_ROUNDS);
-		if (pendingInfo["pool-error"]) {
-			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+	/**
+	* Function used to wait for a tx confirmation
+	* @param txId txn ID for which confirmation is required 
+	* @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	* @returns TxnReceipt which includes confirmed txn response along with txID
+	*/
+	async waitForConfirmation(
+		txId: string,
+		waitRounds = WAIT_ROUNDS
+	): Promise<TxnReceipt> {
+		try {
+			const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
+			if (pendingInfo["pool-error"]) {
+				throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
+			}
+			const txnReceipt = { txID: txId, ...pendingInfo };
+			return txnReceipt as TxnReceipt;
 		}
-		return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
+		catch (err) {
+			error(err);
+			throw err
+		}
 	}
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * @param execParams transaction parameters or atomic transaction parameters
 	 */
-	async executeTx(
-		execParams: ExecParams[]
-	): Promise<algosdk.modelsv2.PendingTransactionResponse> {
-		let signedTxn;
-		let txns: Transaction[] = [];
-		if (execParams.length > 16) {
-			throw new Error("Maximum size of an atomic transfer group is 16");
+	async executeTx(execParams: ExecParams[]): Promise<TxnReceipt> {
+		try {
+			let signedTxn: SignedTx[] | undefined;
+			let txns: Transaction[] = [];
+			if (execParams.length > 16) {
+				throw new Error("Maximum size of an atomic transfer group is 16");
+			}
+
+			if (isSDKTransactionAndSign(execParams[0]))
+				throw new Error("We don't support this case now");
+
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+			}
+
+			txns = algosdk.assignGroupID(txns);
+
+			// with logic signature we set shouldSign to false
+			const toBeSignedTxns: TransactionInGroup[] = execParams.map(
+				(txn: ExecParams, index: number) => {
+					return txn.sign === SignType.LogicSignature
+						? { txn: txns[index], shouldSign: false } // logic signature
+						: { txn: txns[index], shouldSign: true }; // to be signed
+				}
+			);
+			// only shouldSign txn are to be signed, algowallet doesn't accept lsig ones
+			const nonLsigTxn = toBeSignedTxns.filter((txn) => txn.shouldSign);
+			if (nonLsigTxn.length) {
+				signedTxn = await this.signTransactionGroup(nonLsigTxn);
+			}
+			// sign smart signature transaction
+			for (const [index, txn] of txns.entries()) {
+				const signer: Sign = execParams[index];
+				if (signer.sign === SignType.LogicSignature) {
+					signer.lsig.lsig.args = signer.args ? signer.args : [];
+					if (!Array.isArray(signedTxn)) signedTxn = [];
+					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig));
+				}
+			}
+
+			signedTxn = signedTxn?.filter((stxn) => stxn);
+			const Uint8ArraySignedTx = signedTxn?.map((stxn) => stxn.blob);
+			const confirmedTx = await this.sendAndWait(Uint8ArraySignedTx as Uint8Array[]);
+
+			log("confirmedTx: ", confirmedTx);
+			return confirmedTx;
 		}
-		for (const [_, txn] of execParams.entries()) {
-			txns.push(mkTransaction(txn, await mkTxParams(this.algodClient, txn.payFlags)));
+		catch (err) {
+			error(err);
+			throw err
 		}
+	}
 
-		txns = algosdk.assignGroupID(txns);
-		const toBeSignedTxns: TransactionInGroup[] = txns.map((txn: Transaction) => {
-			return { txn: txn, shouldSign: true };
-		});
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.Transaction objects
+	 */
+	makeTx(execParams: ExecParams[], txParams: algosdk.SuggestedParams): Transaction[] {
+		try {
+			const txns: Transaction[] = [];
+			for (const [_, txn] of execParams.entries()) {
+				txns.push(mkTransaction(txn, txParams));
+			}
+			return txns;
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
+	}
 
-		signedTxn = await this.signTransactionGroup(toBeSignedTxns);
+	/**
+	 * Signs a Transaction object with with myAlgoWallet
+	 * @param transaction transaction object.
+	 * @returns SignedTransaction
+	 */
+	async signTx(transaction: algosdk.Transaction): Promise<SignedTransaction> {
+		try {
+			const signedTx = await this.connector.signTransaction(transaction.toByte());
+			const blob = signedTx.blob;
+			return algosdk.decodeSignedTransaction(blob);
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
+	}
 
-		signedTxn = signedTxn.filter((stxn) => stxn);
-		const Uint8ArraySignedTx = signedTxn.map((stxn) => stxn.blob);
-		const confirmedTx = await this.sendAndWait(Uint8ArraySignedTx);
+	/**
+	 * Creates an algosdk.Transaction object based on execParams and suggestedParams
+	 * and signs with myAlgoWallet
+	 * @param execParams execParams containing all txn info
+	 * @param txParams suggestedParams object
+	 * @returns array of algosdk.SignedTransaction objects
+	 */
+	async makeAndSignTx(
+		execParams: ExecParams[],
+		txParams: algosdk.SuggestedParams
+	): Promise<SignedTransaction[]> {
+		try {
+			const signedTxns: SignedTransaction[] = [];
+			const txns: Transaction[] = this.makeTx(execParams, txParams);
+			for (const transaction of txns) {
+				const signedTransaction = await this.signTx(transaction)
+				signedTxns.push(signedTransaction)
+			}
+			return signedTxns;
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
+	}
 
-		log("confirmedTx: ", confirmedTx);
-		return confirmedTx;
+	/**
+	 * Sends signedTransaction and waits for the response
+	 * @param transactions array of signedTransaction objects.
+	 * @param rounds number of rounds to wait for response
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
+	 */
+	async sendTxAndWait(transactions: SignedTransaction[], rounds?: number): Promise<TxnReceipt> {
+		try {
+			if (transactions.length < 1) {
+				throw new Error("No transactions to process");
+			} else {
+				const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
+				return await this.sendAndWait(Uint8ArraySignedTx, rounds);
+			}
+		}
+		catch (err) {
+			error(err);
+			throw err
+		}
 	}
 }

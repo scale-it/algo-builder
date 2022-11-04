@@ -51,7 +51,7 @@ describe("Rekey transaction and inner transaction ", function () {
 	});
 
 	describe("Apply Inner transaction when rekey application to account", function () {
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			// deploy application
 			const approvalProgramFilename = "approval-rekey.teal";
 			const clearProgramFilename = "clear-rekey.teal";
@@ -104,7 +104,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			assert.equal(appAccount.getSpendAddress(), alice.address);
 		});
 
-		it("account should have permission transfer asset of application(ALGO transfer)", () => {
+		it("account should have permission transfer asset of application(ALGO transfer)", function () {
 			const applBalanceBefore = appAccount.amount;
 			const aliceBalanceBefore = alice.amount;
 			const bobBalanceBefore = bob.amount;
@@ -135,7 +135,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
 		});
 
-		it("should failed: if auth/spend account invalid", () => {
+		it("should throw an error if auth/spend account invalid", function () {
 			const tranferAlgoTx: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.SecretKey,
@@ -159,7 +159,7 @@ describe("Rekey transaction and inner transaction ", function () {
 	describe("apply rekey account to application with rekey transaction", function () {
 		let txnParams: types.ExecParams;
 
-		this.beforeEach(() => {
+		this.beforeEach(function () {
 			// deploy app
 			const approvalProgramFilename = "rekey-approval-payment.py";
 			const clearProgramFilename = "clear.teal";
@@ -193,11 +193,11 @@ describe("Rekey transaction and inner transaction ", function () {
 			syncAccounts();
 		});
 
-		it("check account after rekey", () => {
+		it("check account after rekey", function () {
 			assert.equal(alice.getSpendAddress(), getApplicationAddress(appID));
 		});
 
-		it("transfer algob by inner transaction", () => {
+		it("Should transfer algo by inner transaction", function () {
 			const masterBalanceBefore = master.amount;
 			const aliceBalanceBefore = alice.amount;
 			const bobBalanceBefore = bob.amount;
@@ -229,7 +229,7 @@ describe("Rekey transaction and inner transaction ", function () {
 			assert.equal(bobBalanceBefore + amount, bobBalanceAfter);
 		});
 
-		it("Should failed: contract can't transfer asset if account not rekey to contract", () => {
+		it("Should failed: contract can't transfer asset if account not rekey to contract", function () {
 			// transfer ALGO from bob to alice by contract, but bob didn't rekey to contract.
 			txnParams = {
 				type: types.TransactionType.CallApp,

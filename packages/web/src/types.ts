@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 
 import { IClientMeta } from "@walletconnect/types";
-import { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
+import algosdk, { Account as AccountSDK, LogicSigAccount, Transaction } from "algosdk";
 import * as z from "zod";
 
 import { WalletMultisigMetadata, WalletTransaction } from "./algo-signer-types";
+import { WAIT_ROUNDS } from "./lib/constants";
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
@@ -44,7 +45,8 @@ export interface TxParams {
 	// A lease enforces mutual exclusion of transactions.
 	lease?: Uint8Array;
 	// Any data up to 1000 bytes.
-	note?: string;
+	note?: string | Uint8Array;
+	// base64 encoded string
 	noteb64?: string;
 	// When set, it indicates that the transaction is requesting
 	// that the Sender account should be closed, and all remaining
@@ -117,6 +119,7 @@ export type ExecParams =
 export enum SignType {
 	SecretKey,
 	LogicSignature,
+	MultiSignature,
 }
 
 export enum TransactionType {
@@ -156,7 +159,16 @@ interface SignWithLsig {
 	args?: Uint8Array[];
 }
 
-export type Sign = SignWithSk | SignWithLsig;
+export interface SignWithMultisig {
+	sign: SignType.MultiSignature;
+	mparams: WalletMultisigMetadata;
+	fromAccount?: AccountSDK;
+	fromAccountAddr: AccountAddress;
+}
+
+export type Lsig = SignWithLsig;
+
+export type Sign = SignWithSk | SignWithLsig | SignWithMultisig;
 
 export type BasicParams = Sign & {
 	payFlags: TxParams;
@@ -361,6 +373,18 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 	const res = isSDKTransaction((object as TransactionAndSign).transaction);
 	return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }
+// This function checks if given object implements `ExecParams` class
+export function isExecParams(object: unknown): object is ExecParams {
+	if (object === undefined || object === null) {
+		return false;
+	}
+	const props = ["payFlags", "sign"];
+	let res = Object.prototype.hasOwnProperty.call(object, "type");
+	for (const prop of props) {
+		res = res && Object.prototype.hasOwnProperty.call(object, prop);
+	}
+	return res;
+}
 
 /* Wallet Connect types */
 
@@ -417,4 +441,20 @@ export interface HttpNetworkConfig {
 	port: string | number;
 	token: string | AlgodTokenHeader | CustomTokenHeader;
 	httpHeaders?: { [name: string]: string };
+}
+
+export { WAIT_ROUNDS };
+
+export interface ConfirmedTxInfo {
+	"confirmed-round": number;
+	"asset-index": number;
+	"application-index": number;
+	"global-state-delta"?: algosdk.modelsv2.EvalDeltaKeyValue;
+	"local-state-delta"?: algosdk.modelsv2.AccountStateDelta;
+	"inner-txns"?: ConfirmedTxInfo;
+	txn: algosdk.EncodedSignedTransaction;
+}
+
+export interface TxnReceipt extends ConfirmedTxInfo {
+	txID: string;
 }

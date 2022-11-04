@@ -30,7 +30,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 	const approvalProgram = getProgram(approvalProgramFilename);
 	const clearProgram = getProgram(clearProgramFilename);
 	// Create new runtime and application before each test.
-	this.beforeEach(() => {
+	this.beforeEach(function () {
 		runtime = new Runtime([master, creator, donor]);
 
 		// Get begin date to pass in
@@ -133,7 +133,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		runtime = new Runtime([master, creator, escrow, donor]);
 	});
 
-	it("should fail donation if donor has insufficient balance", () => {
+	it("should fail donation if donor has insufficient balance", function () {
 		updateAndOptIn();
 		appArgs = [convert.stringToBytes("donate")];
 		const donationAmount = initialDonorBalance + 1000;
@@ -160,7 +160,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(txGroup), "RUNTIME_ERR1401");
 	});
 
-	it("should fail donation if timestamp is after endDate", () => {
+	it("should fail donation if timestamp is after endDate", function () {
 		updateAndOptIn();
 		// set timestamp to after of endDate
 		runtime.setRoundAndTimestamp(5, endDate.getSeconds() + 100);
@@ -168,7 +168,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(donateTxGroup), rejectMsg);
 	});
 
-	it("should fail donation if timestamp is before of beginDate", () => {
+	it("should fail donation if timestamp is before of beginDate", function () {
 		updateAndOptIn();
 		// set timestamp to out of endDate
 		runtime.setRoundAndTimestamp(5, beginDate.getSeconds() - 100);
@@ -176,7 +176,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(donateTxGroup), rejectMsg);
 	});
 
-	it("should fail if goal is met, and donor tries to reclaim funds", () => {
+	it("should fail if goal is met, and donor tries to reclaim funds", function () {
 		updateAndOptIn();
 		// set donation to greater than goal
 		donateTxGroup[1].amountMicroAlgos = goal + 1000;
@@ -209,7 +209,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
 	});
 
-	it("should fail if goal is not met, but donor tries to reclaim funds before fund close date", () => {
+	it("should fail if goal is not met, but donor tries to reclaim funds before fund close date", function () {
 		updateAndOptIn();
 		runtime.executeTx(donateTxGroup);
 
@@ -239,7 +239,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
 	});
 
-	it("should fail if creator tries to claim funds before fund end date", () => {
+	it("should fail if creator tries to claim funds before fund end date", function () {
 		updateAndOptIn();
 		// set donation to greater than goal
 		donateTxGroup[1].amountMicroAlgos = goal + 1000;
@@ -268,7 +268,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
 	});
 
-	it("should fail if a transaction is missing in group transaction while donating", () => {
+	it("should fail if a transaction is missing in group transaction while donating", function () {
 		updateAndOptIn();
 		appArgs = [convert.stringToBytes("donate")];
 		const txGroup = [
@@ -285,7 +285,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx(txGroup), "RUNTIME_ERR1008: Index out of bound");
 	});
 
-	it("should fail if transaction is signed by wrong lsig", () => {
+	it("should fail if transaction is signed by wrong lsig", function () {
 		updateAndOptIn();
 		// set donation to greater than goal
 		donateTxGroup[1].amountMicroAlgos = goal + 1000;
@@ -319,7 +319,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		);
 	});
 
-	it("should fail if escrow address is not updated in app", () => {
+	it("should fail if escrow address is not updated in app", function () {
 		// opt-in to app
 		runtime.optInToApp(creator.address, applicationId, {}, {});
 		runtime.optInToApp(donor.address, applicationId, {}, {});
@@ -332,7 +332,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		);
 	});
 
-	it("should fail transaction if logic signature is not passed", () => {
+	it("should fail transaction if logic signature is not passed", function () {
 		updateAndOptIn();
 		// set donation to greater than goal
 		donateTxGroup[1].amountMicroAlgos = goal + 1000;
@@ -364,7 +364,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		);
 	});
 
-	it("should fail to delete app because escrow account balance is not empty", () => {
+	it("should fail to delete app because escrow account balance is not empty", function () {
 		updateAndOptIn();
 		runtime.setRoundAndTimestamp(5, fundCloseDate.getTime() + 12);
 		const deleteTx = {
@@ -380,7 +380,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		assert.throws(() => runtime.executeTx([deleteTx]), "RUNTIME_ERR1008: Index out of bound");
 	});
 
-	it("should fail on trying to update application where sender is not creator", () => {
+	it("should fail on trying to update application where sender is not creator", function () {
 		appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
 		assert.throws(
@@ -401,7 +401,7 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 		);
 	});
 
-	it("should fail if closing the funds in escrow but closeRemainderTo is not fundReceiver", () => {
+	it("should fail if closing the funds in escrow but closeRemainderTo is not fundReceiver", function () {
 		updateAndOptIn();
 		// set donation to greater than goal
 		donateTxGroup[1].amountMicroAlgos = goal + 1000;
@@ -434,33 +434,33 @@ describe("Crowdfunding Test - Failing Scenarios", function () {
 	// uncomment when
 	// https://github.com/algorand/js-algorand-sdk/commit/b18e3beab8004d7e53a5370334b8e9f5c7699146#diff-75520b02c557ab3f0b89e5f03029db31af2f0dc79e5215d3e221ed9ea59fe441
 	// commit is released
-	/* it('should fail if ReKeyTo is not ZERO_ADDRESS in transaction', () => {
-    updateAndOptIn();
-    // set donation to greater than goal
-    donateTxGroup[1].amountMicroAlgos = goal + 1000;
-    runtime.executeTx(donateTxGroup);
-    runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
-    appArgs = [convert.stringToBytes('claim')];
-    const txGroup = [
-      {
-        type: types.TransactionType.CallApp,
-        sign: types.SignType.SecretKey,
-        fromAccount: creator.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000, ReKeyTo: donor.address },
-        appArgs: appArgs
-      },
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: escrow.account.addr,
-        toAccountAddr: creator.address,
-        amountMicroAlgos: 0,
-        lsig: lsig,
-        payFlags: { totalFee: 1000, closeRemainderTo: creator.address, ReKeyTo: donor.address }
-      }
-    ];
+	/* it('should fail if ReKeyTo is not ZERO_ADDRESS in transaction', function() {
+	updateAndOptIn();
+	// set donation to greater than goal
+	donateTxGroup[1].amountMicroAlgos = goal + 1000;
+	runtime.executeTx(donateTxGroup);
+	runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
+	appArgs = [convert.stringToBytes('claim')];
+	const txGroup = [
+	  {
+		type: types.TransactionType.CallApp,
+		sign: types.SignType.SecretKey,
+		fromAccount: creator.account,
+		appID: applicationId,
+		payFlags: { totalFee: 1000, ReKeyTo: donor.address },
+		appArgs: appArgs
+	  },
+	  {
+		type: types.TransactionType.TransferAlgo,
+		sign: types.SignType.LogicSignature,
+		fromAccountAddr: escrow.account.addr,
+		toAccountAddr: creator.address,
+		amountMicroAlgos: 0,
+		lsig: lsig,
+		payFlags: { totalFee: 1000, closeRemainderTo: creator.address, ReKeyTo: donor.address }
+	  }
+	];
 
-    assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
+	assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
   }); */
 });
