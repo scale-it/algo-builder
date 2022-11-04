@@ -22,7 +22,7 @@ jobs:
           node-version: "16"
           cache: "yarn"
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
       - name: Build packages
         run: yarn build
 
