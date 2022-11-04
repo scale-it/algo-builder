@@ -5417,7 +5417,7 @@ export class Switch extends Op {
 		this.labels = args;
 		this.labelsLength = args.length;
 		this.interpreter = interpreter;
-		if(this.labelsLength < 1 || this.labelsLength > 255){
+		if(this.labelsLength > 255){
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID, {len: this.labelsLength});
 		}
 	}
@@ -5425,7 +5425,7 @@ export class Switch extends Op {
 	execute(stack: TEALStack, ): number {
 		this.assertMinStackLen(stack, 1, this.line)
 		const index = Number(this.assertBigInt(stack.pop(), this.line));
-		if(index > this.labelsLength){
+		if(index > this.labelsLength || this.labelsLength === 0){
 			//the index exceeds the labels length thus do nothing and continue at the following instruction
 			return this.computeCost();
 		}
