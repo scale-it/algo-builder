@@ -73,7 +73,7 @@ describe("Integration Teal", function () {
             }));
 
 
-            it('Should continue at the following instruction (the index exceeds labels lenght', testTeal({
+            it('Should continue at the following instruction (the index exceeds labels length)', testTeal({
                 tealCode: ` int 5
                             switch label1 label2
                             err

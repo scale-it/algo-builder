@@ -5426,7 +5426,7 @@ export class Switch extends Op {
 		this.assertMinStackLen(stack, 1, this.line)
 		const index = Number(this.assertBigInt(stack.pop(), this.line));
 		if(index > this.labelsLength || this.labelsLength === 0){
-			//the index exceeds the labels length thus do nothing and continue at the following instruction
+			//the index exceeds the labels length does nothing and continue at the following instruction
 			return this.computeCost();
 		}
 		const label = this.labels[index];

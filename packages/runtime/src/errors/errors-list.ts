@@ -497,7 +497,7 @@ maximun uint128`,
 		number: 1073,
         message: "Labels length invalid",
 		title: "Labels length invalid",
-		description: "Amount of provided labels is invalid, got: %len, expected: [0, 255]",
+		description: "Length of provided labels is invalid, got: %len, expected: [0, 255]",
 	}
 };
 
