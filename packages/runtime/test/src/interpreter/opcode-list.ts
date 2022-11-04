@@ -7827,11 +7827,9 @@ describe("Teal Opcodes", function () {
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 			})
 
-			it("Should thorw an error no labels provided", function(){
-				expectRuntimeError(
-					() => new Switch([], line, interpreter),
-					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID);
-			})
+			it("Should not thorw an error if labels not provided", function(){
+				assert.doesNotThrow(()=>new Switch([], line, interpreter))
+			});
 
 			it("Should allow 255 labels", function () {
 				const upperLimit = 255;
