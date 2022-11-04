@@ -14,6 +14,12 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+### Features
+
+#### TEALv8
+
+- Support for `switch` opcode.
+
 ## v6.0.0 2022-11-04
 
 - Updated yarn to v3.2.1

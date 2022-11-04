@@ -1,5 +1,6 @@
 import { decodeAddress, getApplicationAddress } from "algosdk";
 import { assert } from "chai";
+
 import { bobAcc } from "../../../../algob/test/mocks/account";
 import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
