@@ -481,6 +481,9 @@ OpGasCost[7] = {
 	ecdsa_pk_decompress: 2400,
 	vrf_verify : 5700,
 };
+OpGasCost[8] = {
+	...OpGasCost[7],
+}
 
 export const enum MathOp {
 	// arithmetic

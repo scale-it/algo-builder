@@ -1,6 +1,6 @@
 {
 	"name": "@algo-builder/algob",
-	"version": "5.0.1",
+	"version": "6.0.0",
 	"author": "Robert Zaremba (https://zaremba.ch)",
 	"license": "Apache-2.0",
 	"homepage": "https://algobuilder.dev",
@@ -40,13 +40,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"files": [
-		"build/",
-		"LICENSE",
-		"README.md",
-		"setup_dev_project.sh",
-		"sample-project/"
-	],
+	"files": ["build/", "LICENSE", "README.md", "setup_dev_project.sh", "sample-project/"],
 	"devDependencies": {
 		"@types/chai": "^4.3.0",
 		"@types/debug": "^4.1.7",
@@ -96,19 +90,9 @@
 		"zod": "^3.19.1"
 	},
 	"nyc": {
-		"extension": [
-			".ts"
-		],
-		"exclude": [
-			"build",
-			"test",
-			"coverage",
-			".nyc_output"
-		],
-		"reporter": [
-			"text",
-			"lcovonly"
-		],
+		"extension": [".ts"],
+		"exclude": ["build", "test", "coverage", ".nyc_output"],
+		"reporter": ["text", "lcovonly"],
 		"all": true
 	}
 }

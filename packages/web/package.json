@@ -1,18 +1,11 @@
 {
 	"name": "@algo-builder/web",
-	"version": "5.0.1",
+	"version": "6.0.0",
 	"license": "Apache-2.0",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
 	"description": "package for the web",
-	"keywords": [
-		"smart-contracts",
-		"blockchain",
-		"algorand",
-		"dapps",
-		"javascript",
-		"tooling"
-	],
+	"keywords": ["smart-contracts", "blockchain", "algorand", "dapps", "javascript", "tooling"],
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"engines": {
@@ -60,25 +53,11 @@
 		"access": "public",
 		"no-git-tag-version": true
 	},
-	"files": [
-		"build/",
-		"LICENSE",
-		"README.md"
-	],
+	"files": ["build/", "LICENSE", "README.md"],
 	"nyc": {
-		"extension": [
-			".ts"
-		],
-		"exclude": [
-			"build",
-			"test",
-			"coverage",
-			".nyc_output"
-		],
-		"reporter": [
-			"text",
-			"lcovonly"
-		],
+		"extension": [".ts"],
+		"exclude": ["build", "test", "coverage", ".nyc_output"],
+		"reporter": ["text", "lcovonly"],
 		"all": true
 	}
 }

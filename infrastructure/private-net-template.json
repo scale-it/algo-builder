@@ -3,7 +3,7 @@
 		"NetworkName": "devnet",
 		"ConsensusProtocol": "future",
 		"FirstPartKeyRound": 0,
-        "LastPartKeyRound":  30000,
+		"LastPartKeyRound": 30000,
 		"Wallets": [
 			{
 				"Name": "Wallet1",
