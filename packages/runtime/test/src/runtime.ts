@@ -1466,7 +1466,7 @@ describe("Funtions related to runtime chain", function () {
 		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
 	});
 });
-describe.only("Application/assets limits for one account", function () {
+describe("Application/assets limits for one account", function () {
 	// Before there were limits for how many apps/assets one account is allowed to deploy/opt-in to.
 	// The limits were removed and this is what we test here.
 	useFixture(basicFixture);
