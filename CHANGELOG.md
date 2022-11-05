@@ -16,6 +16,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Features
 
+- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
+
 #### TEALv8
 
 - Support for `switch` opcode.
