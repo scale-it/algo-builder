@@ -77,22 +77,6 @@ Below diagram describes the flow of DAO application.
 
 <img src="./docs/DAO-Flow.svg" height="600" width="500" title="DAO flow" />
 
-## Setup Sigma Dao
-
-Setup the sigma_daos table. Indexer should be running before executing below script.
-
-Create a sigma dao user, if not already created:
-
-    make create-sigma-dao-user
-
-Setup sigma dao, indexer should be running before executing this script:
-
-    make setup-sigma-dao
-
-Run below script to delete the sigma dao user, sigma dao user should be present:
-
-    make drop-sigma-dao-user
-
 ## Spec document
 
 Please read the Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl) for more details about each use case.
