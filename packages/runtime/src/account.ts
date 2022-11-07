@@ -8,9 +8,6 @@ import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	APPLICATION_BASE_FEE,
 	ASSET_CREATION_FEE,
-	MAX_ALGORAND_ACCOUNT_ASSETS,
-	MAX_ALGORAND_ACCOUNT_CREATED_APPS,
-	MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS,
 	SSC_VALUE_BYTES,
 	SSC_VALUE_UINT,
 } from "./lib/constants";
@@ -241,14 +238,6 @@ export class AccountStore implements AccountStoreI {
 	 * @param asaDef Asset Definitions
 	 */
 	addAsset(assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
-		if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
-			throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS, {
-				name: name,
-				address: this.address,
-				max: MAX_ALGORAND_ACCOUNT_ASSETS,
-			});
-		}
-
 		this.minBalance += ASSET_CREATION_FEE;
 		const asset = new Asset(assetId, asaDef, this.address, name);
 		this.createdAssets.set(asset.id, asset.definitions);
@@ -331,19 +320,11 @@ export class AccountStore implements AccountStoreI {
 
 	/**
 	 * Deploy application in account's state
-	 * check maximum account creation limit
 	 * @param appID application index
 	 * @param appDefinition application definition metadata
 	 * NOTE - approval and clear program must be the TEAL code as string
 	 */
 	addApp(appID: number, appDefinition: types.AppDefinitionFromSource): CreatedAppM {
-		if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_CREATED_APPS) {
-			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
-				address: this.address,
-				max: MAX_ALGORAND_ACCOUNT_CREATED_APPS,
-			});
-		}
-
 		// raise minimum balance
 		// https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 		this.minBalance +=
@@ -361,12 +342,6 @@ export class AccountStore implements AccountStoreI {
 		if (localState) {
 			throw new Error(`${this.address} is already opted in to app ${appID}`);
 		} else {
-			if (this.appsLocalState.size === MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS) {
-				throw new Error(
-					`Maximum Opt In applications per account is ${MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS}`
-				);
-			}
-
 			// https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 			this.minBalance +=
 				APPLICATION_BASE_FEE +
@@ -389,13 +364,6 @@ export class AccountStore implements AccountStoreI {
 		if (accAssetHolding) {
 			console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
 		} else {
-			if (this.createdAssets.size + this.assets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
-				throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS, {
-					address: assetHolding.creator,
-					max: MAX_ALGORAND_ACCOUNT_ASSETS,
-				});
-			}
-
 			this.minBalance += ASSET_CREATION_FEE;
 			this.assets.set(assetIndex, assetHolding);
 		}
