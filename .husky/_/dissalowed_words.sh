@@ -14,7 +14,14 @@ for file in $files; do
   echo "am i even here?"
   echo $file
 done
+   
 
+
+
+
+
+
+   
 # for file in $(git diff --name-only);
 # do
 #     echo "$file"
