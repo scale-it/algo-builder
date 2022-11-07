@@ -217,7 +217,7 @@ describe("Interpreter", function () {
 			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
-			it("Should allow to read the account state of foreign apps based on app id", function () {
+			it.only("Should allow to read the account state of foreign apps based on app id", function () {
 				const prog = `
 				txn Applications 2
 				store 1

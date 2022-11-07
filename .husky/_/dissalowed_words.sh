@@ -7,7 +7,7 @@ status=0
 
 echo "################################test"
 
-for file in $(git diff --name-only --diff-filter=ACMT);
+for file in $(git diff --name-only --diff-filter=D);
 do
 echo $file
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
