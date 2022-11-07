@@ -6,6 +6,6 @@ echo "test"
 
 
 
-yarn run lint-staged
+yarn lint-staged
 echo "test2"
 
