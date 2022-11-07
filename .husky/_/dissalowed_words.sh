@@ -7,9 +7,9 @@ status=0
 
 echo "################################test"
 
-for file in $(git diff --name-only --diff-filter=D);
+for file in $(git diff --name-only);
 do
-echo $file
+    echo $file
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
     for line in $(grep -in -E "\.only\("  "$file" | cut -f1 -d:);
     do
