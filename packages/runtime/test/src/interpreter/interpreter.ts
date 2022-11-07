@@ -213,7 +213,7 @@ describe("Interpreter", function () {
 			});
 		});
 
-		describe("Immutable access to foreign app accounts", function () {
+		describe.only("Immutable access to foreign app accounts", function () {
 			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
