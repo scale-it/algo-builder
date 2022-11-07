@@ -188,7 +188,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			clearProgramFilename = "clear.teal";
 		});
 
-		it("Should pass: when updaed program length doesn't exceeds total allowed program length", function () {
+		it("Should pass when updaed program length doesn't exceeds total allowed program length", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
@@ -227,7 +227,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			assert.isDefined(runtime.getApp(appID));
 		});
 
-		it("Should fail: when updated program length exceeds total allowed program length", function () {
+		it("Should fail when updated program length exceeds total allowed program length", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
@@ -264,7 +264,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			);
 		});
 
-		it("Should fail: when no extra pages was defined for large approval program", function () {
+		it("Should fail when no extra pages was defined for large approval program", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
@@ -301,7 +301,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			);
 		});
 
-		it("Should pass: when sufficient extra pages was defined", function () {
+		it("Should pass when sufficient extra pages was defined", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
@@ -341,7 +341,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			assert.isDefined(runtime.getApp(appID));
 		});
 
-		it("Should fail: when sufficient extra pages was not defined", function () {
+		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
@@ -379,7 +379,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			);
 		});
 
-		it.only("Should fail: when sufficient extra pages was not defined", function () {
+		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
