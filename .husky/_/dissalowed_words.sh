@@ -5,6 +5,8 @@ COLOR_RED="$(tput setaf 1)"
 COLOR_YELLOW="$(tput setaf 3)"
 status=0
 
+echo "################################test"
+
 for file in $(git diff --name-only --diff-filter=ACMT);
 do
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
