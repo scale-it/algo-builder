@@ -2,5 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 . "$(dirname "$0")/_/dissalowed_words.sh"
 
-yarn run lint-staged
 
+echo "test"
+yarn lint-staged
+echo "test2"
