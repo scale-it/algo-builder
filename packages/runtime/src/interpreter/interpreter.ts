@@ -215,30 +215,49 @@ export class Interpreter {
 	): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
-		if (typeof accountRef === "bigint") {
-			if (accountRef === 0n) {
-				address = encodeAddress(this.runtime.ctx.tx.snd);
-				account = this.runtime.ctx.state.accounts.get(address);
-			} else {
-				const accIndex = accountRef - 1n;
-				checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
-				let pkBuffer;
-				if (this.runtime.ctx.tx.apat) {
-					pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
-				} else {
-					throw new Error("pk Buffer not found");
-				}
-				address = encodeAddress(pkBuffer);
-				account = create
-					? this.createAccountIfAbsent(address)
-					: this.runtime.ctx.state.accounts.get(address);
-			}
+
+		if (accountRef === 0n) {
+			address = encodeAddress(this.runtime.ctx.tx.snd);
+			account = this.runtime.ctx.state.accounts.get(address);
+			return this.runtime.assertAccountDefined(address, account, line);
+		} else if (typeof accountRef === "bigint") {
+			return this._getAccountFromReference(accountRef, line, create);
 		} else {
 			return this._getAccountFromAddr(accountRef, line, create, immutable);
 		}
 
+	}
+	
+	/**
+	 * Queries accesible accounts by smart contract. It can be either accounts defined
+	 * in accounts field or accounts associated with apps decalred in foreingApps array
+	 * @param accountRef index of account or app ID
+	 * @param line line number
+	 * @param create create flag
+	 * @retuns AccountStoreI object
+	 */
+	private _getAccountFromReference(accountRef: bigint, line: number, create: boolean): AccountStoreI {
+		let address: string;
+		// check if reference exists in foreign apps
+		if (this.runtime.ctx.tx.apfa !== undefined &&
+			this.runtime.ctx.tx.apfa.includes(Number(accountRef))) {
+			address = getApplicationAddress(accountRef);
+		} else { // reference to accounts
+			const accIndex = accountRef - 1n;
+			checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
+			if (this.runtime.ctx.tx.apat) {
+				address = encodeAddress(this.runtime.ctx.tx.apat[Number(accIndex)]);
+			} else {
+				throw new Error("pk Buffer not found");
+			}
+		}
+		const account = create
+			? this.createAccountIfAbsent(address)
+			: this.runtime.ctx.state.accounts.get(address);
+
 		return this.runtime.assertAccountDefined(address, account, line);
 	}
+
 
 	/**
 	 * Queries appIndex by app reference (offset to foreignApps array OR index directly)

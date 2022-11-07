@@ -2444,13 +2444,13 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv3
 			it("should push value from foreign assets array and push NumAssets", function () {
-				// should push Accounts[0] to stack
+				// should push Assets[0] to stack
 				let op = new Txn(["Assets", "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[0]), stack.pop());
 
-				// should push Accounts[1] to stack
+				// should push Assets[1] to stack
 				op = new Txn(["Assets", "1"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
