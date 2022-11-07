@@ -213,7 +213,7 @@ describe("Interpreter", function () {
 			});
 		});
 
-		describe.only("Immutable access to foreign app accounts", function () {
+		describe("Immutable access to foreign app accounts", function () {
 			this.beforeEach(function () {
 				setUpInterpreter(7, 1e9);
 			});
@@ -233,7 +233,7 @@ describe("Interpreter", function () {
 				assert.doesNotThrow(() => executeTEAL(prog));
 			});
 
-			it("Should allow to read the account state of foreign apps based on address", function () {
+			it.only("Should allow to read the account state of foreign apps based on address", function () {
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress
