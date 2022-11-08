@@ -2554,7 +2554,7 @@ describe("Teal Opcodes", function () {
 				interpreter.runtime = new Runtime([]);
 				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
 				interpreter.tealVersion = MaxTEALVersion;
-			})
+			});
 
 			it("Should throw exception if txn.lv - txn.fv > 1000 + 1", function () {
 				interpreter.runtime.ctx.tx.fv = 1999; //last valid = 3000, 3000 - (1999 - 1) > 1001
@@ -2572,9 +2572,10 @@ describe("Teal Opcodes", function () {
 
 			it("Should throw exception if teal version < 7", function () {
 				interpreter.tealVersion = 6;
-				expectRuntimeError(() =>
-				 new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
-				 RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD);
+				expectRuntimeError(
+					() => new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+				);
 			});
 
 			it("Should throw exception if round number is negative", function () {
@@ -2610,9 +2611,9 @@ describe("Teal Opcodes", function () {
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
 			});
 
-			it("Should push to the stack correct block timestamp", function(){
-				const op = new Gtxn(["0",TxFieldEnum.FirstValidTime], 1, interpreter);
-				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv?? 0;
+			it("Should push to the stack correct block timestamp", function () {
+				const op = new Gtxn(["0", TxFieldEnum.FirstValidTime], 1, interpreter);
+				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv ?? 0;
 				const expextedResult = interpreter.runtime.getBlock(firstTxFirstValid - 1).timestamp;
 				op.execute(stack);
 				assert.equal(expextedResult, stack.pop());
@@ -5123,8 +5124,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236,
-						2, 70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
+						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236, 2,
+						70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
 					])
 				);
 
@@ -5224,8 +5225,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35,
-						69, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35, 69, 119, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 					])
 				);
 			});
@@ -5297,8 +5298,8 @@ describe("Teal Opcodes", function () {
 					new Uint8Array([
 						151, 200, 103, 239, 94, 230, 133, 186, 92, 4, 163, 133, 89, 34, 193, 80, 86, 64,
 						223, 27, 83, 94, 252, 230, 80, 125, 26, 177, 77, 155, 56, 124, 72, 239, 162, 240,
-						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247,
-						89, 13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
+						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247, 89,
+						13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
 					])
 				);
 			});
@@ -5698,8 +5699,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22,
-						19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
+						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19,
+						23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
 					])
 				);
 			});
@@ -5739,8 +5740,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
-						254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
+						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254,
+						220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
 					])
 				);
 			});
@@ -6141,7 +6142,10 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("ecdsa_verify, should throw error if curve is not supported", function () {
-			expectRuntimeError(() => new EcdsaVerify(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaVerify(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_decompress", function () {
@@ -6161,7 +6165,10 @@ describe("Teal Opcodes", function () {
 				stack.pop(),
 				Buffer.from("50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352", "hex")
 			);
-			expectRuntimeError(() => new EcdsaPkDecompress(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkDecompress(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_recover", function () {
@@ -7695,7 +7702,7 @@ describe("Teal Opcodes", function () {
 
 		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
-		})
+		});
 
 		it("Should return 1 and hash of proof for valid proof and verification key", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
@@ -7713,7 +7720,7 @@ describe("Teal Opcodes", function () {
 			stack.push(proof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
-		})
+		});
 		it("Should throw error if proof size not equal 80", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
@@ -7721,7 +7728,7 @@ describe("Teal Opcodes", function () {
 			stack.push(wrongSizeProof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
-		})
+		});
 		it("Should return correct cost", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
@@ -7729,17 +7736,20 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			const cost = op.execute(stack);
 			assert.equal(cost, 5700);
-		})
+		});
 		it("Should throw error when field = VrfStandard", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
-		})
+		});
 		it("Should throw error when field is unknown", function () {
-			expectRuntimeError(() => new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
-		})
+			expectRuntimeError(
+				() => new VrfVerify(["wrongType"], 1),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE
+			);
+		});
 	});
 
 	describe("Ecdsa Secp256r1 curve", function () {
@@ -7775,7 +7785,7 @@ describe("Teal Opcodes", function () {
 
 			it("Should push 0 to stack if invalid signature provided", function () {
 				stack.push(message);
-				const wrongSignatureR = signature.r.toBuffer()
+				const wrongSignatureR = signature.r.toBuffer();
 				wrongSignatureR[0] = ~wrongSignatureR[0]; //flip the first bit
 				stack.push(wrongSignatureR);
 				stack.push(signature.s.toBuffer());
@@ -7804,13 +7814,13 @@ describe("Teal Opcodes", function () {
 	});
 
 	describe("Tealv8", function () {
-		describe("switch", function() {
+		describe("switch", function () {
 			let stack: Stack<StackElem>;
-		    let interpreter: Interpreter;
+			let interpreter: Interpreter;
 			const line = 1;
 			const tealV8 = 8;
 
-			this.beforeEach(function() {
+			this.beforeEach(function () {
 				stack = new Stack<StackElem>();
 				interpreter = new Interpreter();
 				interpreter.runtime = new Runtime([]);
@@ -7818,38 +7828,39 @@ describe("Teal Opcodes", function () {
 				interpreter.tealVersion = tealV8;
 			});
 
-			it("Should create a new switch opcode", function (){
-				assert.doesNotThrow(()=>new Switch(["label"], line, interpreter));
+			it("Should create a new switch opcode", function () {
+				assert.doesNotThrow(() => new Switch(["label"], line, interpreter));
 			});
 
-			it("Should throw an error if the stack length < 1", function(){
+			it("Should throw an error if the stack length < 1", function () {
 				const op = new Switch(["label"], line, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
-			})
+			});
 
-			it("Should not thorw an error if labels not provided", function(){
-				assert.doesNotThrow(()=>new Switch([], line, interpreter))
+			it("Should not thorw an error if labels not provided", function () {
+				assert.doesNotThrow(() => new Switch([], line, interpreter));
 			});
 
 			it("Should allow 255 labels", function () {
 				const upperLimit = 255;
-				const labels = [ ...Array(upperLimit).keys() ].map((i) => "label".concat(i.toString()))
-				assert.doesNotThrow(()=>new Switch(labels, line, interpreter));
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
+				assert.doesNotThrow(() => new Switch(labels, line, interpreter));
 			});
 
 			it("Should throw an error if 256 labels provided", function () {
 				const upperLimit = 256;
-				const labels = [ ...Array(upperLimit).keys() ].map((i) => "label".concat(i.toString()))
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
 				expectRuntimeError(
 					() => new Switch(labels, line, interpreter),
-					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID);
+					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID
+				);
 			});
 
-			it("Should not throw an error if index exceeds the lenght of labes provided", function(){
+			it("Should not throw an error if index exceeds the lenght of labes provided", function () {
 				stack.push(5n);
 				const op = new Switch(["label"], line, interpreter);
 				assert.doesNotThrow(() => op.execute(stack));
-			})
-		})
+			});
+		});
 	});
 });

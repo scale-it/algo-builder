@@ -29,7 +29,8 @@
 		"lint:check": "yarn workspaces foreach -p run lint:check",
 		"coverage": "yarn workspaces foreach -p run coverage",
 		"prepare": "husky install",
-		"algob": "yarn workspace @algo-builder/algob algob"
+		"algob": "yarn workspace @algo-builder/algob algob", 
+		"check:only": "./check_only.sh"
 	},
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.41.0",

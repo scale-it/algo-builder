@@ -14,6 +14,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+### Bug Fixes
+
+- Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part. 
+
 ### Features
 
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
