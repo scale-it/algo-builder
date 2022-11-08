@@ -3,3 +3,5 @@
 # . "$(dirname "$0")/_/dissalowed_words.sh"
 
 yarn lint-staged
+
+echo "hmmm"
