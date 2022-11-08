@@ -213,7 +213,7 @@ function setDummyAccInfo(acc: AccountStoreI): void {
 	acc.createdAssets = accInfo[0].createdAssets;
 }
 
-describe.only("Teal Opcodes", function () {
+describe("Teal Opcodes", function () {
 	const strArr = ["str1", "str2"].map(parsing.stringToBytes);
 
 	describe("Len", function () {
