@@ -1,6 +1,6 @@
 import { bobAcc } from "@algo-builder/algob/test/mocks/account";
 import { decodeAddress, getApplicationAddress } from "algosdk";
-import { assert, expect } from "chai";
+import { assert } from "chai";
 
 import { AccountStore, getProgram, Interpreter, Runtime } from "../../../src";
 import RUNTIME_ERRORS from "../../../src/errors/errors-list";
@@ -9,7 +9,6 @@ import {
 	AccountAddress,
 	AccountStoreI,
 	ExecutionMode,
-	StackElem,
 	TxOnComplete,
 } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";

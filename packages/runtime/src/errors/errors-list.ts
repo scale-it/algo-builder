@@ -492,6 +492,12 @@ maximun uint128`,
 		message: "Unknown block opcode field",
 		title: "Unknown field",
 		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	},
+	LABELS_LENGTH_INVALID: {
+		number: 1073,
+        message: "Labels length invalid",
+		title: "Labels length invalid",
+		description: "Length of provided labels is invalid, got: %len, expected: [0, 255]",
 	}
 };
 
@@ -514,13 +520,6 @@ const runtimeGeneralErrors = {
 			"Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
 		title: "Round Error",
 		description: `Round Error`,
-	},
-	MAX_LIMIT_APPS: {
-		number: 1303,
-		message:
-			"Error while creating app for %address%. Maximum created apps for an account is %max%",
-		title: "App Creation Error",
-		description: `App Creation Error`,
 	},
 	INVALID_SECRET_KEY: {
 		number: 1304,
@@ -644,7 +643,13 @@ const runtimeGeneralErrors = {
 		message: "Invalid block",
 		title: "Invalid block",
 		description: "Provided round does not correspond to any existing block",
-	}
+	},
+	ROUND_NOT_AVAILABLE: {
+		number: 1324,
+        message: "Round is not available",
+        title: "Invalid round",
+        description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+	},
 };
 
 const transactionErrors = {
@@ -748,13 +753,6 @@ const runtimeAsaErrors = {
 		message: `Asset with Index %assetId% not found`,
 		title: "Asset Not Found",
 		description: "Asset Not Found",
-	},
-	MAX_LIMIT_ASSETS: {
-		number: 1503,
-		message:
-			"Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
-		title: "Asset Creation Error",
-		description: `Asset Creation Error`,
 	},
 	MANAGER_ERROR: {
 		number: 1504,

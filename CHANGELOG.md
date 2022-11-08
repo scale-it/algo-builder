@@ -14,19 +14,29 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ## Unreleased
 
+### Bug Fixes
+
+- Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part. 
+
+### Features
+
+- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
+
+#### TEALv8
+
+- Support for `switch` opcode.
+
+## v6.0.0 2022-11-04
+
 - Updated yarn to v3.2.1
 - Changed default sample project license to ISC
 - Fix `txn AssetSender` should return zero address by default.
 - Add unit tests for all transaction types in runtime executeTx.
-- Add support loadLogic for *.teal program and SCParam.
+- Add support loadLogic for \*.teal program and SCParam.
 - Replace arrow functions with normal functions in all unit test which is recommended by `mocha`
 - Added support of `getProgram` which can get program string from `assetPath`(relative or absolute path) path.
 - Add `paths` to `algob.config.js` to specify list of paths.
-
-#### Examples
-
-- Added secret key to all accounts that are signing transactions in examples.
-- Increase test coverage of examples/dao.
+- Added error handling when a python module is not found and suggest solution to install the python module.
 
 ### Features
 
@@ -34,7 +44,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Improved `algob/project-dev-script.sh` which is script setting up a local project.
 - Add `Uint8Array` as a supported type for `TxParams.note`
 - Added `sendSignedTransaction(signedTransaction)` to `Runtime`. Method takes '`SignedTransaction` type
-from `algosdk` and sends it to the network. 
+  from `algosdk` and sends it to the network.
 - Added support for `SignedTransaction` object in `executeTx` method in `Runtime`.
 - Added verification for secret key signatures in `Runtime`.
 - Added replace2 and replace3 opcode to `runtime`.
@@ -58,8 +68,11 @@ from `algosdk` and sends it to the network.
 - Added logic signature and arguments size check in `runtime`.
 - Added support for `block` opcode to `Runtime`.
 - Added blocks to `Runtime`. It simulates the block generation by using radnom bytes generator as the first seed. The following seeds are MD5 hash of the seed from the previous block.
+- Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
+- Added support for `FirstValidTime` field for transactions opcode.
 
 #### @algo-builder/web
+
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
 - Added `appendSignMultisigTransaction` function to `WebMode` for appending signature to multisig transaction in the algosigner.
 - Added `MultiSignature` support in `executeTx` method for `AlgoSigner`.
@@ -75,8 +88,8 @@ from `algosdk` and sends it to the network.
 - Fix `KMDCredentialsFromEnv` loading using KMD_DATA. Algob was trying to use `env.$KMD_DATA` instead of `env.KMD_DATA`
 - Fix `gitxna 1 Logs 0` opcode. Previously any attempt to use this opcode would result in a "Not supported" error.
 - Fix `TxParams.noteb64` encoding - should use base64 decoder rather than TextEncoder.
-- Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation. 
-- Fix `global CallerApplicationID` opcode. Previously the opcode get the wrong caller application ID[798](https://github.com/scale-it/algo-builder/pull/798). 
+- Fix `ed25519verify` opcode implementation. Previously the signature was only checked against the data not the concatenation of "ProgData"||program||data. Additionally test scenarios was added to check the correct implementation.
+- Fix `global CallerApplicationID` opcode. Previously the opcode get the wrong caller application ID[798](https://github.com/scale-it/algo-builder/pull/798).
 
 ### Breaking Changes
 
@@ -90,14 +103,18 @@ from `algosdk` and sends it to the network.
 - `executeTx`, `sendAndWait`, `waitForConfirmation`, `sendTxAndWait` promise now returns [TxnReceipt](https://github.com/scale-it/algo-builder/blob/master/packages/web/src/types.ts#L458) instead of `algosdk.modelsv2.PendingTransactionResponse`.
 
 #### @algo-builder/algob
+
 - `sendAndWait`, `waitForConfirmation`, `executeSignedTxnFromFile`, `sendTxAndWait` promise now returns `TxnReceipt` instead of `ConfirmedTxInfo`.
 - `logTx` second argument of `txConfirmation` now expects type of `TxnReceipt` instead of `ConfirmedTxInfo`.
 
 ### Examples
 
+- Added secret key to all accounts that are signing transactions in examples.
+
 #### DAO
 
 - Add `add_proposal_with_asset.js` script use for create proposal with asset funds.
+- Increase test coverage
 
 ## v5.0.1 2022-07-11
 
