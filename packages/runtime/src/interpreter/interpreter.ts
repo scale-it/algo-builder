@@ -55,7 +55,7 @@ export class Interpreter {
 	length: number; // total length of 'compiled' TEAL code
 	// local stores for a transaction.
 	bytecblock: Uint8Array[];
-	intcblock: BigInt[];
+	intcblock: bigint[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
 	instructions: Op[];
@@ -171,7 +171,7 @@ export class Interpreter {
 
 		if (
 			txAccounts?.find((buff) => compareArray(Uint8Array.from(buff), accountPk)) !==
-			undefined ||
+				undefined ||
 			compareArray(accountPk, Uint8Array.from(this.runtime.ctx.tx.snd)) ||
 			// since tealv5, currentApplicationAddress is also allowed (directly)
 			compareArray(accountPk, decodeAddress(getApplicationAddress(appID)).publicKey) ||
@@ -615,11 +615,12 @@ export class Interpreter {
 			// txn had a 0 in FirstValid
 			lastAvail = 0; // So nothing will be available
 		}
-		if (firstAvail > round || round > lastAvail) {
-			throw new RuntimeError(
-				RUNTIME_ERRORS.GENERAL.ROUND_NOT_AVAILABLE,
-				{ round: round, firstAvail: firstAvail, lastAvail: lastAvail }
-			);
+		if (firstAvail > round || round > lastAvail || round === 0) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ROUND_NOT_AVAILABLE, {
+				round: round,
+				firstAvail: firstAvail,
+				lastAvail: lastAvail,
+			});
 		}
 	}
 }
