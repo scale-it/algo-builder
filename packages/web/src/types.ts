@@ -458,3 +458,11 @@ export interface ConfirmedTxInfo {
 export interface TxnReceipt extends ConfirmedTxInfo {
 	txID: string;
 }
+
+/**
+ * contractABI extends the algosdk type by appID which is helpful in algob
+ * since in every mode we know what is the network currently in use
+ */
+export interface contractABI extends algosdk.ABIContract {
+	appID: string;
+}
