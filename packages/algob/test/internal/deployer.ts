@@ -1,7 +1,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { ERRORS, getSuggestedParams, types as wtypes } from "@algo-builder/web";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
 import { AlgoTransferParam, SignType, TransactionType } from "@algo-builder/web/build/types";
-import algosdk, { Account, generateAccount, LogicSigAccount, Transaction } from "algosdk";
+import algosdk, { generateAccount, LogicSigAccount, Transaction } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -679,7 +679,8 @@ describe("DeployerDeployMode", function () {
 	});
 });
 describe("Helper functions", function () {
-	const env = mkEnv("network1");
+	useFixtureProject("abi-contract");
+	const env = mkEnv("testnet");
 	const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
 	let deployer: DeployerDeployMode;
 	let alice: algosdk.Account;
@@ -765,5 +766,13 @@ describe("Helper functions", function () {
 		assert.doesNotThrow(async () => {
 			await deployer.sendTxAndWait(signedTx, 10);
 		});
+	});
+
+	it("Should return correct ABIContract with the appID defined", function () {
+		const pathToFile = "basic-abi.json";
+		const contract = deployer.parseABIContractFile(pathToFile);
+		assert.isDefined(contract);
+		assert.isDefined(contract.appID);
+		assert.equal(contract.appID, 123456);
 	});
 });
