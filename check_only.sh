@@ -5,6 +5,7 @@ COLOR_RED="$(tput setaf 1)"
 COLOR_YELLOW="$(tput setaf 3)"
 status=0
 
+print "Running check for .only expression in staged files"
 for file in $(git diff HEAD  --staged --name-only);
 do
     if [ "${file: -3}" != ".ts" ] && [ "${file: -3}" != ".js" ]; then continue; fi
