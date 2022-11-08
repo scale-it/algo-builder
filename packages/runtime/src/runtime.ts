@@ -95,8 +95,9 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2000;
-		this.produceBlocks(this.round);
+		this.round = 0;
+		const numberOfInitialBlocks = 2000;
+		this.produceBlocks(numberOfInitialBlocks);
 		this.timestamp = 1;
 	}
 
@@ -1243,11 +1244,10 @@ export class Runtime {
 
 	/**
 	 * Produces N new blocks. If not arguments passed N = 1 by default
-	 * @param round current round number
+	 * @param numberOfBlocks current round number
 	 */
-	produceBlocks(round = 1) {
-		this.round = 1;
-		for (let blockN = 1; blockN <= round; blockN++) {
+	produceBlocks(numberOfBlocks = 1) {
+		for (let blockN = 1; blockN <= numberOfBlocks; blockN++) {
 			this._produceBlock();
 		}
 	}

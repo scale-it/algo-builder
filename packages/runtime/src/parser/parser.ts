@@ -28,6 +28,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -152,19 +153,17 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
 	Uncover,
-	Block,
 	VrfVerify,
-	Switch,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
 	MAX_APP_PROGRAM_COST,
-	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -424,7 +423,7 @@ opCodeMap[8] = {
 	bn254_add: Bn254Add,
 	bn254_scalar_mul: Bn254ScalarMul,
 	bn254_pairing: Bn254Pairing,
-	switch : Switch,
+	switch: Switch,
 };
 
 // list of opcodes with exactly one parameter.
