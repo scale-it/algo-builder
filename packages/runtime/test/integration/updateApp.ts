@@ -264,7 +264,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			);
 		});
 
-		it("Should fail when no extra pages was defined for large approval program", function () {
+		it("Should fail when no extra pages were defined for large approval program", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
