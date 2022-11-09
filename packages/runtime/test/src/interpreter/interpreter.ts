@@ -206,5 +206,45 @@ describe("Interpreter", function () {
 				assert.doesNotThrow(() => executeTEALWithTxArrayChange(prog));
 			});
 		});
+
+		describe("Immutable access to foreign app accounts", function () {
+			this.beforeEach(function () {
+				setUpInterpreter(7, 1e9);
+			});
+			
+			it("Should allow to read the account state of foreign apps based on app id", function () {
+				const prog = `
+				txn Applications 2
+				store 1
+				load 1
+				txn Applications 1
+				app_opted_in
+				load 1
+				min_balance
+				load 1
+				balance 
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+			});
+
+			it("Should allow to read the account state of foreign apps based on address", function () {
+				const prog = `
+				txn Applications 2
+				app_params_get AppAddress
+				assert
+				store 1
+				load 1
+				txn Applications 1
+				app_opted_in
+				load 1
+				min_balance
+				load 1
+				balance 
+				return
+				`;
+				assert.doesNotThrow(() => executeTEAL(prog));
+			});
+		});
 	});
 });

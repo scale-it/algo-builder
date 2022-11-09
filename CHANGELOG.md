@@ -19,6 +19,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part.
 
 ### Features
+- Allow user to query foreign applications accounts using the `appID` field.
 
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
