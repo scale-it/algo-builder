@@ -142,7 +142,6 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 		});
 
-
 		it("Should fail when program exceeds total allowed program length", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
@@ -196,6 +195,8 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 			);
 		});
 
+		const longApprovalTEAL2 = "very-long-approval-2-pages.teal";
+
 		it("Should pass when sufficient extra pages were defined", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
@@ -204,7 +205,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
@@ -227,7 +228,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
@@ -254,7 +255,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
