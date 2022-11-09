@@ -202,6 +202,22 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			return appID;
 		}
 
+		function updateApp(approvalProgramFilename: string, clearProgramFilename: string, appName: string, extraPages: number = 0) {
+			runtime.updateApp(
+				appName,
+				creator.address,
+				appID,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: approvalProgramFilename,
+					clearProgramFilename: clearProgramFilename,
+					extraPages: extraPages
+				},
+				{},
+				{}
+			)
+		}
+
 		it("Should pass when updated program length does not exceed total allowed program length", function () {
 			// create app
 			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app1");
@@ -211,19 +227,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			assert.isDefined(app);
 
 			assert.doesNotThrow(
-				() =>
-					runtime.updateApp(
-						"app1",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "counter-approval.teal",
-							clearProgramFilename: "clear.teal"
-						},
-						{},
-						{}
-					)
+				() => updateApp("counter-approval.teal", "clear.teal", "app1")
 			);
 
 			// verify updated app
@@ -239,19 +243,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			assert.isDefined(app);
 
 			expectRuntimeError(
-				() =>
-					runtime.updateApp(
-						"app2",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "very-long-approval.teal",
-							clearProgramFilename: "clear.teal"
-						},
-						{},
-						{}
-					),
+				() => updateApp("very-long-approval.teal", "clear.teal", "app2"),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
 			);
 		});
@@ -265,19 +257,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			assert.isDefined(app);
 
 			expectRuntimeError(
-				() =>
-					runtime.updateApp(
-						"app3",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "very-long-approval.teal", // no extra page defined
-							clearProgramFilename: "clear.teal"
-						},
-						{},
-						{}
-					),
+				() => updateApp("very-long-approval.teal", "clear.teal", "app3"),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
 			);
 		});
@@ -290,21 +270,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
+			// should pass because total 2 pages needed
 			assert.doesNotThrow(
-				() =>
-					runtime.updateApp(
-						"app4",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "very-long-approval-2-pages.teal",
-							clearProgramFilename: "clear.teal",
-							extraPages: 1 // should pass because total 2 pages needed
-						},
-						{},
-						{}
-					),
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app4", 1),
 			);
 
 			// verify updated app
@@ -319,21 +287,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
+			// should fail because total 2 pages needed because: program length > 2048
 			expectRuntimeError(
-				() =>
-					runtime.updateApp(
-						"app5",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "very-long-approval-2-pages.teal",
-							clearProgramFilename: "clear.teal",
-							extraPages: 0 // should fail because total 2 pages needed because: program length > 2048
-						},
-						{},
-						{}
-					),
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app5", 0),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
 			);
 		});
@@ -346,21 +302,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
+			// should fail because extra pages range is [0, 3]
 			expectRuntimeError(
-				() =>
-					runtime.updateApp(
-						"app6",
-						creator.address,
-						appID,
-						{
-							metaType: types.MetaType.FILE,
-							approvalProgramFilename: "very-long-approval-2-pages.teal",
-							clearProgramFilename: "clear.teal",
-							extraPages: 4 // should fail because extra pages range is [0, 3]
-						},
-						{},
-						{}
-					),
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app6", 4),
 				RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED
 			);
 		});
