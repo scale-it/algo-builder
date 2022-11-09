@@ -12,6 +12,7 @@ import type {
 } from "@randlabs/myalgo-connect";
 import MyAlgoConnect from "@randlabs/myalgo-connect";
 import algosdk, { decodeUnsignedTransaction } from "algosdk";
+
 import { senderAccount } from "./tx";
 
 export class MyAlgoConnectMock implements MyAlgoConnect {
@@ -83,14 +84,13 @@ export class MyAlgoConnectMock implements MyAlgoConnect {
 	 * @returns Returns signed teal
 	 */
 	signLogicSig(logic: Uint8Array | Base64, address: Address): Promise<Uint8Array> {
-		return new Promise((resolve, reject) => {
-			return resolve(new Uint8Array());
-		});
+		return emptyPromise();
 	}
 
 	/**
 	 * @async
-	 * @description Creates a signature the data that can later be verified by the contract through the ed25519verify opcode
+	 * @description Creates a signature the data that can later be verified by the contract through the
+	 * ed25519verify opcode
 	 * @param data Arbitrary data to sign
 	 * @param contractAddress Contract address/TEAL program hash
 	 * @param address Signer Address
@@ -101,9 +101,7 @@ export class MyAlgoConnectMock implements MyAlgoConnect {
 		contractAddress: Address,
 		address: Address
 	): Promise<Uint8Array> {
-		return new Promise((resolve, reject) => {
-			return resolve(new Uint8Array());
-		});
+		return emptyPromise();
 	}
 
 	signTxns(
@@ -116,8 +114,10 @@ export class MyAlgoConnectMock implements MyAlgoConnect {
 	}
 
 	signBytes(bytes: Uint8Array, address: string): Promise<Uint8Array> {
-		return new Promise((resolve, reject) => {
-			return resolve(new Uint8Array());
-		});
+		return emptyPromise();
 	}
+}
+
+function emptyPromise(): Promise<Uint8Array> {
+	return new Promise((resolve, _) => resolve(new Uint8Array()));
 }

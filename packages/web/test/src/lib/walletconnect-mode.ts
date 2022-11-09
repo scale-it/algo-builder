@@ -1,27 +1,30 @@
 import algosdk, { Account, Transaction } from "algosdk";
 import assert from "assert";
+
 import { testnetURL, types, WallectConnectSession } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
-import { WalletConnectMock } from "../../mocks/walletconnect-mock";
 import { receiverAccount, senderAccount } from "../../mocks/tx";
+import { WalletConnectMock } from "../../mocks/walletconnect-mock";
 
 describe("Webmode - Wallet Connect test cases ", function () {
 	let connector: WallectConnectSession;
 	let sender: Account;
 	let receiver: Account;
-
-	let algodClient: algosdk.Algodv2;
 	const walletURL: HttpNetworkConfig = {
 		token: "",
 		server: testnetURL,
 		port: "",
 	};
-	algodClient = algoexplorerAlgod(walletURL);
+	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
 
 	this.beforeEach(async function () {
 		sender = senderAccount;
 		receiver = receiverAccount;
+		const noop = () => {
+			/* do nothing */
+		};
+
 		connector = new WallectConnectSession(
 			walletURL,
 			new WalletConnectMock({
@@ -55,11 +58,11 @@ describe("Webmode - Wallet Connect test cases ", function () {
 					},
 				},
 				transport: {
-					open: () => {},
-					close: () => {},
-					send: () => {},
-					subscribe: () => {},
-					on: () => {},
+					open: noop,
+					close: noop,
+					send: noop,
+					subscribe: noop,
+					on: noop,
 				},
 			})
 		);

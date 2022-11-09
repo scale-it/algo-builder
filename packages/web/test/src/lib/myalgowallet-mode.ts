@@ -11,13 +11,12 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	let connector: MyAlgoWalletSession;
 	let sender: Account;
 	let receiver: Account;
-	let algodClient: algosdk.Algodv2;
 	const walletURL: HttpNetworkConfig = {
 		token: "",
 		server: testnetURL,
 		port: "",
 	};
-	algodClient = algoexplorerAlgod(walletURL);
+	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
 
 	beforeEach(() => {
 		sender = senderAccount;
