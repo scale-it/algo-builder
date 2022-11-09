@@ -27,7 +27,10 @@ async function run(
 	const aliceFunding = Object.assign({}, bobFunding);
 	aliceFunding.toAccountAddr = alice.addr;
 	aliceFunding.amountMicroAlgos = 2e6; // 5 Algo
-	await Promise.all([tryExecuteTx(deployer, [bobFunding]), tryExecuteTx(deployer, [aliceFunding])]);
+	await Promise.all([
+		tryExecuteTx(deployer, [bobFunding]),
+		tryExecuteTx(deployer, [aliceFunding]),
+	]);
 
 	/** ** now bob creates and deploys the escrow account ****/
 	console.log("hash of the secret:", scTmplParams.hash_image);
@@ -37,7 +40,7 @@ async function run(
 		throw error;
 	});
 
-	await deployer.fundLsig("HTLC_Lsig", { funder: bob, fundingMicroAlgo: 5e6 }, {})
+	await deployer.fundLsig("HTLC_Lsig", { funder: bob, fundingMicroAlgo: 5e6 }, {});
 
 	// Add user checkpoint
 	deployer.addCheckpointKV("User Checkpoint", "Fund Contract Account");

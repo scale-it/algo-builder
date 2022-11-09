@@ -1473,28 +1473,27 @@ describe("Application/assets limits for one account", function () {
 	let runtime: Runtime;
 	const approvalClearProgramFilename = "clear.teal";
 	const appDefinition: types.AppDefinitionFromFile = {
-			appName: "app",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: approvalClearProgramFilename,
-			clearProgramFilename: approvalClearProgramFilename,
-			globalBytes: 0,
-			globalInts: 0,
-			localBytes: 0,
-			localInts: 0,
-		};
-	let alice : AccountStore;
+		appName: "app",
+		metaType: types.MetaType.FILE,
+		approvalProgramFilename: approvalClearProgramFilename,
+		clearProgramFilename: approvalClearProgramFilename,
+		globalBytes: 0,
+		globalInts: 0,
+		localBytes: 0,
+		localInts: 0,
+	};
+	let alice: AccountStore;
 	const appsToBeDeployed = [...Array(20).keys()];
 
-    before(function () {
+	before(function () {
 		runtime = new Runtime([]);
 		[alice] = runtime.defaultAccounts();
-		
 	});
 
-	appsToBeDeployed.forEach(function(appIndex) {
+	appsToBeDeployed.forEach(function (appIndex) {
 		it(`Should deploy ${appIndex} app`, function () {
 			appDefinition.appName = "app".concat(appIndex.toString());
 			assert.doesNotThrow(() => runtime.deployApp(alice.account, appDefinition, {}));
 		});
-	})
+	});
 });

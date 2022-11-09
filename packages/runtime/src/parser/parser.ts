@@ -424,7 +424,7 @@ opCodeMap[8] = {
 	bn254_add: Bn254Add,
 	bn254_scalar_mul: Bn254ScalarMul,
 	bn254_pairing: Bn254Pairing,
-	switch : Switch,
+	switch: Switch,
 };
 
 // list of opcodes with exactly one parameter.

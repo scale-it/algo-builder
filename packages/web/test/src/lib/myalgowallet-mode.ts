@@ -16,14 +16,13 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 		token: "",
 		server: testnetURL,
 		port: "",
-	}
+	};
 	algodClient = algoexplorerAlgod(walletURL);
 
 	beforeEach(() => {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		connector = new MyAlgoWalletSession(walletURL, new MyAlgoConnectMock());
-
 	});
 
 	it("Should executeTx without throwing an error", async function () {
@@ -90,5 +89,4 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			});
 		});
 	});
-
 });

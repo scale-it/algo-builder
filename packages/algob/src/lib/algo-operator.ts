@@ -117,10 +117,7 @@ export interface AlgoOperator {
 		source: wtypes.SmartContract,
 		scTmplParams?: SCParams
 	) => Promise<wtypes.SourceCompiled>;
-	sendAndWait: (
-		rawTxns: Uint8Array | Uint8Array[],
-		waitRounds: number
-	) => Promise<TxnReceipt>;
+	sendAndWait: (rawTxns: Uint8Array | Uint8Array[], waitRounds: number) => Promise<TxnReceipt>;
 	getReceiptTxns: (txns: Transaction[]) => Promise<TxnReceipt[]>;
 }
 
@@ -149,7 +146,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 	/**
 	 * Source: https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
 	 * Function used to wait for a tx confirmation
-	 * @param txId txn ID for which confirmation is required 
+	 * @param txId txn ID for which confirmation is required
 	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
 	 * @returns TxnReceipt which includes confirmed txn response along with txID
 	 */
@@ -162,7 +159,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 			throw new Error(`Transaction Pool Error: ${pendingInfo["pool-error"] as string}`);
 		}
 		if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-			return { txID: txId, ...pendingInfo as ConfirmedTxInfo } as TxnReceipt
+			return { txID: txId, ...(pendingInfo as ConfirmedTxInfo) } as TxnReceipt;
 		}
 		throw new Error("timeout");
 	}

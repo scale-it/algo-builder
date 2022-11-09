@@ -16,7 +16,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Bug Fixes
 
-- Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part. 
+- Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part.
 
 ### Features
 

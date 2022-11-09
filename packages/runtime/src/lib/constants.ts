@@ -479,11 +479,11 @@ OpGasCost[7] = {
 	ed25519verify_bare: 1900,
 	ecdsa_verify: 2500,
 	ecdsa_pk_decompress: 2400,
-	vrf_verify : 5700,
+	vrf_verify: 5700,
 };
 OpGasCost[8] = {
 	...OpGasCost[7],
-}
+};
 
 export const enum MathOp {
 	// arithmetic
@@ -528,12 +528,12 @@ export const json_refTypes = {
 export enum blockFieldTypes {
 	BlkTimestamp = "BlkTimestamp",
 	BlkSeed = "BlkSeed",
-};
+}
 
 export enum vrfVerifyFieldTypes {
-    VrfAlgorand = "VrfAlgorand",
+	VrfAlgorand = "VrfAlgorand",
 	VrfStandard = "VrfStandard",
-};
+}
 
 export enum TxFieldEnum {
 	FirstValidTime = "FirstValidTime",

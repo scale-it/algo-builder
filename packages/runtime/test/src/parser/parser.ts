@@ -128,7 +128,7 @@ import {
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
-	LogicSigMaxSize
+	LogicSigMaxSize,
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";

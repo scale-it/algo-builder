@@ -67,8 +67,9 @@ We have also added a [config-overrides.js](https://github.com/scale-it/algo-buil
 
 ## Helper methods
 
-All web-modes classes expose helper methods to improve developer's experience with the framewok. These methods can be also found under the same name and for most of the time with the same interfaces in `Runtime`, and `Deployer`. These methods enable users to use `algosdk` types like `Transaction` and `SignedTransaction`. 
+All web-modes classes expose helper methods to improve developer's experience with the framewok. These methods can be also found under the same name and for most of the time with the same interfaces in `Runtime`, and `Deployer`. These methods enable users to use `algosdk` types like `Transaction` and `SignedTransaction`.
 List of the methods:
+
 - `makeTx` - creates`Transaction` object from `execParams`
 - `signTx` - signes `Transaction` and returns `SignedTransaction` object.
 - `makeAndSignTx` - combines funcnionality of the two methods listed above

@@ -3971,7 +3971,9 @@ export class EcdsaPkDecompress extends Op {
 	}
 
 	computeCost(): number {
-		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_pk_decompress"] : OpGasCost[7]["ecdsa_pk_decompress"];
+		return this.curveIndex === 0
+			? OpGasCost[5]["ecdsa_pk_decompress"]
+			: OpGasCost[7]["ecdsa_pk_decompress"];
 	}
 
 	/**
@@ -4364,10 +4366,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-						sig: Buffer.alloc(5),
-						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					}
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -5298,7 +5300,7 @@ export class Bn254Pairing extends Op {
  * Opcode: 0xd1 {uint8 block field}
  * Stack: ..., A: uint64 → ..., any
  * field F of block A. Fail unless A falls between txn.LastValid-1002 and txn.FirstValid (exclusive)
-*/
+ */
 export class Block extends Op {
 	readonly line: number;
 	readonly field: string;
@@ -5327,11 +5329,11 @@ export class Block extends Op {
 		this.interpreter.assertRoundIsAvailable(round);
 		const block = this.interpreter.runtime.getBlock(round);
 		//"BlkTimestamp" = seconds since epoch, assuming one round(block) = 4.5s truncated to 4s (BigInt)
-		const result = (this.field === blockFieldTypes.BlkSeed) ? block.seed : block.timestamp
+		const result = this.field === blockFieldTypes.BlkSeed ? block.seed : block.timestamp;
 		stack.push(result);
 		return this.computeCost();
 	}
-};
+}
 
 /**
  * Opcode: 0xd0 {uint8 parameters index}
@@ -5379,10 +5381,14 @@ export class VrfVerify extends Op {
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
 		if (proof.length !== proofLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, { length: proof.length });
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {
+				length: proof.length,
+			});
 		}
 		if (publicKey.length !== publicKeyLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, { length: publicKey.length });
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {
+				length: publicKey.length,
+			});
 		}
 		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
 			const hash = sha512(proof);
@@ -5396,20 +5402,20 @@ export class VrfVerify extends Op {
 }
 
 /**
-* TEALv8
-*/
+ * TEALv8
+ */
 
 /**
-* Opcode: 0x8d {uint8 branch count} [{int16 branch offset, big-endian}, ...]
-* Stack: ..., A: uint64 → ...
-* branch to the Ath label. Continue at following instruction if index A exceeds the number of labels.
-* Availability: v8
-*/
+ * Opcode: 0x8d {uint8 branch count} [{int16 branch offset, big-endian}, ...]
+ * Stack: ..., A: uint64 → ...
+ * branch to the Ath label. Continue at following instruction if index A exceeds the number of labels.
+ * Availability: v8
+ */
 export class Switch extends Op {
 	readonly line: number;
 	readonly labelsLength: number;
 	readonly labels: string[];
-	readonly interpreter: Interpreter
+	readonly interpreter: Interpreter;
 
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
@@ -5417,15 +5423,17 @@ export class Switch extends Op {
 		this.labels = args;
 		this.labelsLength = args.length;
 		this.interpreter = interpreter;
-		if(this.labelsLength > 255){
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID, {len: this.labelsLength});
+		if (this.labelsLength > 255) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID, {
+				len: this.labelsLength,
+			});
 		}
 	}
 
-	execute(stack: TEALStack, ): number {
-		this.assertMinStackLen(stack, 1, this.line)
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
 		const index = Number(this.assertBigInt(stack.pop(), this.line));
-		if(index > this.labelsLength || this.labelsLength === 0){
+		if (index > this.labelsLength || this.labelsLength === 0) {
 			//the index exceeds the labels length does nothing and continue at the following instruction
 			return this.computeCost();
 		}

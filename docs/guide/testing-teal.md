@@ -342,10 +342,10 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   	txnParams.appId = await runtime.deployApp(
   		john.account, // creator
   		{
-        appName: "CounterApp",
-        metaType: MetaType.FILE,
-  		  approvalProgramFilename: "counter-approval.teal",
-  		  clearProgramFilename: "clear-program",
+  			appName: "CounterApp",
+  			metaType: MetaType.FILE,
+  			approvalProgramFilename: "counter-approval.teal",
+  			clearProgramFilename: "clear-program",
   			globalBytes: 32,
   			globalInts: 32,
   			localBytes: 8,

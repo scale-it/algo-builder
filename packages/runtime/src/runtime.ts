@@ -25,7 +25,8 @@ import {
 	MaxExtraAppProgramPages,
 	seedLength,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR} from "./lib/constants";
+	ZERO_ADDRESS_STR,
+} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -915,7 +916,7 @@ export class Runtime {
 					appDefMap.set(index, appDef);
 					const appDefinition = appDef as types.AppDefinition;
 					this.validateExtraPages(appDefinition?.extraPages);
-				};
+				}
 				return txn;
 			});
 
@@ -1192,21 +1193,23 @@ export class Runtime {
 	produceBlock() {
 		let timestamp: bigint | undefined;
 		let seed: Uint8Array | undefined;
-		if (this.store.blocks.size === 0) { //create genesis block
+		if (this.store.blocks.size === 0) {
+			//create genesis block
 			seed = nacl.randomBytes(seedLength);
 			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
-		} else { //add another block
+		} else {
+			//add another block
 			const lastBlock = this.store.blocks.get(this.round);
 			if (lastBlock) {
 				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
 				timestamp = lastBlock.timestamp + BlockFinalisationTime;
-				this.round += 1;// we move to new a new round
+				this.round += 1; // we move to new a new round
 			}
 		}
 		if (timestamp && seed) {
 			this.store.blocks.set(this.round, { timestamp, seed });
 		} else {
-		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK);
 		}
 	}
 	/**
@@ -1222,12 +1225,12 @@ export class Runtime {
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
 	}
 	/**
-	 * Populates chain from first block to round number block (Produces N rounds) 
+	 * Populates chain from first block to round number block (Produces N rounds)
 	 * @param round current round number
 	 */
-	private populateChain(round:number) {
-		this.round = 1
-		for(let blockN = 1; blockN<=round; blockN++){
+	private populateChain(round: number) {
+		this.round = 1;
+		for (let blockN = 1; blockN <= round; blockN++) {
 			this.produceBlock();
 		}
 	}

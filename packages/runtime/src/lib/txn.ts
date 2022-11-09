@@ -144,7 +144,7 @@ export function txnSpecByField(
 	switch (txField) {
 		case TxFieldEnum.FirstValidTime: {
 			const oneBeforeFirstValid = (tx.fv === undefined ? 0 : tx.fv) - 1;
-			interpreter.assertRoundIsAvailable(oneBeforeFirstValid)
+			interpreter.assertRoundIsAvailable(oneBeforeFirstValid);
 			result = interpreter.runtime.getBlock(oneBeforeFirstValid).timestamp;
 			break;
 		}
