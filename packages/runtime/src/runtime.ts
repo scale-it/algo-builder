@@ -69,6 +69,7 @@ export class Runtime {
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
 	private timestamp: number;
+	private readonly numberOfInitialBlocks: number;
 
 	constructor(accounts: AccountStoreI[]) {
 		// runtime store
@@ -96,8 +97,8 @@ export class Runtime {
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
 		this.round = 0;
-		const numberOfInitialBlocks = 2000;
-		this.produceBlocks(numberOfInitialBlocks);
+		this.numberOfInitialBlocks = 2000;
+		this.produceBlocks(this.numberOfInitialBlocks);
 		this.timestamp = 1;
 	}
 
