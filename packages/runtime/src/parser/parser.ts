@@ -28,6 +28,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -152,13 +153,12 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
 	Uncover,
-	Block,
 	VrfVerify,
-	Switch,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,

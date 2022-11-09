@@ -55,7 +55,7 @@ export class Interpreter {
 	length: number; // total length of 'compiled' TEAL code
 	// local stores for a transaction.
 	bytecblock: Uint8Array[];
-	intcblock: BigInt[];
+	intcblock: bigint[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
 	instructions: Op[];

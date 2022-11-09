@@ -1,5 +1,5 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { spawnSync, SpawnSyncReturns, exec } from "child_process";
+import { exec,spawnSync, SpawnSyncReturns } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
