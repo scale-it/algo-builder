@@ -370,7 +370,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 							metaType: types.MetaType.FILE,
 							approvalProgramFilename: "very-long-approval-2-pages.teal",
 							clearProgramFilename: "clear.teal",
-							extraPages: 0 // should fail because total 2 pages needed because prgroam length > 2048
+							extraPages: 0 // should fail because total 2 pages needed because: program length > 2048
 						},
 						{},
 						{}
