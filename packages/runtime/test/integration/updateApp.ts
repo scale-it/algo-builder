@@ -270,7 +270,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// should pass because total 2 pages needed
+			// should pass because total 2 pages(1 + extra pages) needed
 			assert.doesNotThrow(
 				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app4", 1),
 			);
@@ -287,7 +287,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// should fail because total 2 pages needed because: program length > 2048
+			// should fail because total 2 pages (1 + extra pages) needed because: program length > 2048
 			expectRuntimeError(
 				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app5", 0),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
