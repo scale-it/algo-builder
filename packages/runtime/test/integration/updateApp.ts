@@ -187,7 +187,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			clearProgramFilename = "clear.teal";
 		});
 
-		it("Should pass when updaed program length doesn't exceeds total allowed program length", function () {
+		it("Should pass when updated program length does not exceed total allowed program length", function () {
 			// create app
 			appID = runtime.deployApp(
 				creator.account,
