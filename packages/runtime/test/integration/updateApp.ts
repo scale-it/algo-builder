@@ -187,19 +187,24 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			clearProgramFilename = "clear.teal";
 		});
 
-		it("Should pass when updated program length does not exceed total allowed program length", function () {
-			// create app
-			appID = runtime.deployApp(
+		function deployApp(approvalProgramFilename: string, clearProgramFilename: string, appName: string) {
+			const appID = runtime.deployApp(
 				creator.account,
 				{
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
+					approvalProgramFilename: approvalProgramFilename,
+					clearProgramFilename: clearProgramFilename,
 					...storageConfig,
-					appName: "app1",
+					appName: appName,
 				},
 				{}
 			).appID;
+			return appID;
+		}
+
+		it("Should pass when updated program length does not exceed total allowed program length", function () {
+			// create app
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app1");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			let app = runtime.getApp(appID);
