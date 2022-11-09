@@ -232,17 +232,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when updated program length exceeds total allowed program length", function () {
 			// create app
-			appID = runtime.deployApp(
-				creator.account,
-				{
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
-					...storageConfig,
-					appName: "app2",
-				},
-				{}
-			).appID;
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app2");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			const app = runtime.getApp(appID);
@@ -268,17 +258,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when no extra pages were defined for large approval program", function () {
 			// create app
-			appID = runtime.deployApp(
-				creator.account,
-				{
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
-					...storageConfig,
-					appName: "app3",
-				},
-				{}
-			).appID;
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app3");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			const app = runtime.getApp(appID);
@@ -304,17 +284,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should pass when sufficient extra pages was defined", function () {
 			// create app
-			appID = runtime.deployApp(
-				creator.account,
-				{
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
-					...storageConfig,
-					appName: "app4",
-				},
-				{}
-			).appID;
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app4");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			const app = runtime.getApp(appID);
@@ -343,17 +313,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
-			appID = runtime.deployApp(
-				creator.account,
-				{
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
-					...storageConfig,
-					appName: "app5",
-				},
-				{}
-			).appID;
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app5");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			const app = runtime.getApp(appID);
@@ -380,17 +340,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
-			appID = runtime.deployApp(
-				creator.account,
-				{
-					metaType: types.MetaType.FILE,
-					approvalProgramFilename: oldApprovalProgramFileName,
-					clearProgramFilename,
-					...storageConfig,
-					appName: "app6",
-				},
-				{}
-			).appID;
+			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app6");
 			runtime.optInToApp(creator.address, appID, {}, {});
 
 			const app = runtime.getApp(appID);
