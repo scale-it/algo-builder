@@ -230,7 +230,7 @@ export class Interpreter {
 	
 	/**
 	 * Queries accesible accounts by smart contract. It can be either accounts defined
-	 * in accounts field or accounts associated with apps decalred in foreingApps array
+	 * in accounts field or accounts associated with apps declared in foreingApps array
 	 * @param accountRef index of account or app ID
 	 * @param line line number
 	 * @param create create flag
