@@ -1,25 +1,25 @@
 network1:
-    timestamp: 1623663397441
-    metadata: {}
-    asa:
-      silver:
-        creator: addr-1-get-address-dry-run
+  timestamp: 1623663397441
+  metadata: {}
+  asa:
+    silver:
+      creator: addr-1-get-address-dry-run
+      txId: tx-id-dry-run
+      assetIndex: 1
+      confirmedRound: -1
+      assetDef:
+      total: 1
+      decimals: 1
+      unitName: ASA
+      defaultFrozen: false
+      deleted: true
+  ssc:
+    approval.teal-clear.teal:
+      1:
+        creator: 2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ-get-address-dry-run
         txId: tx-id-dry-run
-        assetIndex: 1
         confirmedRound: -1
-        assetDef:
-        total: 1
-        decimals: 1
-        unitName: ASA
-        defaultFrozen: false
-        deleted: true
-    ssc:
-      approval.teal-clear.teal:
-        1:
-          creator: 2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ-get-address-dry-run
-          txId: tx-id-dry-run
-          confirmedRound: -1
-          appID: 33
-          timestamp: 1
-          deleted: false
-    dLsig: {}
+        appID: 33
+        timestamp: 1
+        deleted: false
+  dLsig: {}

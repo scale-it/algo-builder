@@ -8,7 +8,8 @@ async function run(runtimeEnv, deployer) {
 	await fundAccount(deployer, [creator]);
 
 	// Create App
-	const nftAppInfo = await deployer.deployApp(
+	const nftAppInfo = await deployer
+		.deployApp(
 			creator,
 			{
 				appName: "NftApp",

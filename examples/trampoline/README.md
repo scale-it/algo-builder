@@ -1,4 +1,5 @@
 # Trampoline
+
 Note: This is a demo application, please don't use it in production. Thanks
 Fund app address during create
 
@@ -13,6 +14,7 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 If you run the file fundApplication.py, it will generate two file TEAL approval.teal and clear.teal
 
 ## Run
+
 ```
 yarn run algob deploy
 yarn run algob run scripts/run/create-fund-app.js

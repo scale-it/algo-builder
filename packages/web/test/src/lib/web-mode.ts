@@ -12,7 +12,7 @@ describe("Webmode - Algosigner test cases ", function () {
 
 	this.beforeEach(function () {
 		sender = senderAccount;
-		receiver = receiverAccount
+		receiver = receiverAccount;
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
 	});
 

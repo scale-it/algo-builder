@@ -80,8 +80,8 @@ let envCfg = {
 	accounts: accounts,
 	// You can set the path for assets to be relative or absolute
 	paths: {
-		assets: "assets"
-	}
+		assets: "assets",
+	},
 };
 
 module.exports = {

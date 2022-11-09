@@ -27,13 +27,15 @@ export const txObject = {
 	group: undefined,
 };
 
-const johnMne = "found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip"
+const johnMne =
+	"found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip";
 export const senderAccount = {
 	addr: "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-	sk: algosdk.mnemonicToSecretKey(johnMne).sk
-}
-const alicemne = "brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick"
+	sk: algosdk.mnemonicToSecretKey(johnMne).sk,
+};
+const alicemne =
+	"brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick";
 export const receiverAccount = {
 	addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 	sk: algosdk.mnemonicToSecretKey(alicemne).sk,
-}
+};

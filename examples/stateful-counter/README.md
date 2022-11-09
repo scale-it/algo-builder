@@ -195,19 +195,19 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-	const updatedRes = await deployer.updateApp(
-		"CounterApp", // app name use for checkpoint
-		creatorAccount,
-		{}, // pay flags
-		applicationID,
-		{
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: 'new_approval.teal',
-			clearProgramFilename: 'new_clear.teal'	
-		},
-		{}
-	);
-	console.log("Application Updated: ", updatedRes);
+const updatedRes = await deployer.updateApp(
+	"CounterApp", // app name use for checkpoint
+	creatorAccount,
+	{}, // pay flags
+	applicationID,
+	{
+		metaType: types.MetaType.FILE,
+		approvalProgramFilename: "new_approval.teal",
+		clearProgramFilename: "new_clear.teal",
+	},
+	{}
+);
+console.log("Application Updated: ", updatedRes);
 ```
 
 # 7. Delete Application

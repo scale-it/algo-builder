@@ -460,7 +460,8 @@ maximun uint128`,
 		number: 1067,
 		message: "vtf_standard not supported",
 		title: "Unsupported by runtime",
-		description: "vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
+		description:
+			"vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
 	},
 	INVALID_PUB_KEY_LENGTH: {
 		number: 1068,
@@ -482,7 +483,8 @@ maximun uint128`,
 	},
 	EXTRA_PAGES_EXCEEDED: {
 		number: 1071,
-		message: "Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+		message:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
 		title: "Extra pages",
 		description:
 			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
@@ -495,10 +497,10 @@ maximun uint128`,
 	},
 	LABELS_LENGTH_INVALID: {
 		number: 1073,
-        message: "Labels length invalid",
+		message: "Labels length invalid",
 		title: "Labels length invalid",
 		description: "Length of provided labels is invalid, got: %len, expected: [0, 255]",
-	}
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -646,9 +648,9 @@ const runtimeGeneralErrors = {
 	},
 	ROUND_NOT_AVAILABLE: {
 		number: 1324,
-        message: "Round is not available",
-        title: "Invalid round",
-        description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+		message: "Round is not available",
+		title: "Invalid round",
+		description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
 	},
 };
 

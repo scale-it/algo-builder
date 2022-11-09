@@ -64,11 +64,12 @@ We use functional notation to describe use cases we will implement.
   - _tx0_: Call to DAO App with _appArg_ == ["clear_vote_record"]. `proposalLsig.address()` is passed as first external account.
 
 - `close_proposal()` — Closes proposal record and returns back the deposit. Sender must be an account with a recorded proposal. Transaction composition:
+
   - _tx0_: Call to DAO App with _appArg_ == "close_proposal".
   - _tx1_: Withdraw _gov_tokens_ from _depositLsig_ back to _proposalLsig_ (ASA transfer).
 
 - `withdraw_from_proposal()` - Withdraw the assets from the proposalLsig back to the owner. Receiver must be the owner of the proposalLsig. Transaction composition:
- - _tx0_: Withdraw _gov_tokens_ from _proposalLsig_ back to _proposer_ (owner) (ASA transfer).
+- _tx0_: Withdraw _gov_tokens_ from _proposalLsig_ back to _proposer_ (owner) (ASA transfer).
 
 ## DAO flow
 
@@ -98,7 +99,7 @@ Please read the Algo Builder DAO [specification](https://paper.dropbox.com/doc/A
 
 ## Scripts
 
- The scripts provide only a sample code to show how to use the template. For your own needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
+The scripts provide only a sample code to show how to use the template. For your own needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
 To deploy the DAO, we created a deploy script in `scripts/deploy`. This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
 

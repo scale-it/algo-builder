@@ -117,7 +117,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 		);
 	});
 
-	describe('Extra Pages', function () {
+	describe("Extra Pages", function () {
 		it("Should pass when program length doesn't exceed total allowed program length", function () {
 			const execParams: types.ExecParams = {
 				sign: types.SignType.SecretKey,
@@ -132,7 +132,7 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 3
+					extraPages: 3,
 				},
 				payFlags: {
 					totalFee: 1000,
@@ -156,14 +156,17 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 3
+					extraPages: 3,
 				},
 				payFlags: {
 					totalFee: 1000,
 				},
 			};
 
-			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED)
+			expectRuntimeError(
+				() => runtime.executeTx([execParams]),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
 		});
 
 		it("Should fail when no extra pages was defined for large approval program", function () {
@@ -179,15 +182,20 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 					globalBytes: 1,
 					globalInts: 1,
 					localBytes: 1,
-					localInts: 1
+					localInts: 1,
 				},
 				payFlags: {
 					totalFee: 1000,
 				},
 			};
 
-			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+			expectRuntimeError(
+				() => runtime.executeTx([execParams]),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
 		});
+
+		const longApprovalTEAL2 = "very-long-approval-2-pages.teal";
 
 		it("Should pass when sufficient extra pages were defined", function () {
 			const execParams: types.ExecParams = {
@@ -197,19 +205,19 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 1 // should pass because total 2 pages needed. total page = default page(1) + extra page
+					extraPages: 1, // should pass because total 2 pages needed. total page = default page(1) + extra page
 				},
 				payFlags: {
 					totalFee: 1000,
 				},
 			};
-			assert.doesNotThrow(() => runtime.executeTx([execParams]))
+			assert.doesNotThrow(() => runtime.executeTx([execParams]));
 		});
 
 		it("Should fail when sufficient extra pages was not defined", function () {
@@ -220,20 +228,23 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 0 // should fail because total 2 pages needed
+					extraPages: 0, // should fail because total 2 pages needed
 				},
 				payFlags: {
 					totalFee: 1000,
 				},
 			};
 
-			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+			expectRuntimeError(
+				() => runtime.executeTx([execParams]),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
 		});
 
 		it("Should fail when extra pages is not within the defined limit of extra pages [0,3]", function () {
@@ -244,36 +255,42 @@ describe("Algorand Smart Contracts - Stateful Contract Account", function () {
 				appDefinition: {
 					appName: "App",
 					metaType: types.MetaType.FILE,
-					approvalProgramFilename: "very-long-approval-2-pages.teal",
+					approvalProgramFilename: longApprovalTEAL2,
 					clearProgramFilename: clearProgramFilename,
 					globalBytes: 1,
 					globalInts: 1,
 					localBytes: 1,
 					localInts: 1,
-					extraPages: 4 // should fail because extra pages range is [0, 3]
+					extraPages: 4, // should fail because extra pages range is [0, 3]
 				},
 				payFlags: {
 					totalFee: 1000,
 				},
 			};
 
-			expectRuntimeError(() => runtime.executeTx([execParams]), RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED);
+			expectRuntimeError(
+				() => runtime.executeTx([execParams]),
+				RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED
+			);
 		});
 
 		it("Should pass when program length = max possible program length", function () {
 			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2).fill(0);
 			const clearProgram = Buffer.alloc(0).fill(0);
 
-			assert.doesNotThrow(() => runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1));
+			assert.doesNotThrow(() =>
+				runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1)
+			);
 		});
 
 		it("Should fail when program length = (max possible program length + 1)", function () {
 			const approvalProgram = Buffer.alloc(MaxAppProgramLen * 2 + 1).fill(0);
 			const clearProgram = Buffer.alloc(0).fill(0);
 
-			expectRuntimeError(() =>
-				runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1),
-				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED);
+			expectRuntimeError(
+				() => runtime.ctx.assertProgramMaxLen(approvalProgram, clearProgram, 1),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
 		});
-	})
+	});
 });

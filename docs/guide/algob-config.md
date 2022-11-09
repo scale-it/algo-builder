@@ -172,9 +172,11 @@ You can merge accounts in the config file (eg by using `concat` method on an `Ar
 You can also construct different accounts for different networks.
 
 ## Paths
+
 You can add paths config in your network config `paths` to specify the path to which type of files you want. Currently we support `assets` path in `paths`
 
 Eg.
+
 ```js
 let defaultCfg = {
   host: "http://localhost",
@@ -200,7 +202,7 @@ Now in the algob script, you can use `deployer.assetPath`. Eg.
 async function run (runtimeEnv, deployer) {
   console.log('Script has started execution!');
   const assetPath = deployer.assetPath;
-  
+
 ```
 
 ## Indexer

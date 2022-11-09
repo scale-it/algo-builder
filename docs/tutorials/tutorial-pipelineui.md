@@ -27,7 +27,7 @@ This tutorial is to demonstrate [`pipeline-ui`](https://github.com/scale-it/algo
 
 <img src="./tutorial-pipelineui/assets/algosigner.png" height="200" title="AlgoSigner wallet connected" />
 
-5. Click on `Deploy` button to deploy the application. This initializes the application. On successful app deployment, you should be able to see something like below. 
+5. Click on `Deploy` button to deploy the application. This initializes the application. On successful app deployment, you should be able to see something like below.
 
 <img src="./tutorial-pipelineui/assets/app-deployed.png" height="200" title="App successfully deployed" />
 
@@ -39,24 +39,22 @@ Below method is called on clicking the `Increase Counter` button. Here, we are c
 
 ```ts
 appCall = () => {
-		const networkType = Pipeline.main
-			? NetworkType.MAIN_NET
-			: NetworkType.TEST_NET;
-		const webMode: WebMode = new WebMode(AlgoSigner, networkType);
-		const tx: types.ExecParams[] = [
-			{
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: {
-					addr: this.props.addr,
-					sk: new Uint8Array(0),
-				},
-				appID: this.props.appId,
-				payFlags: {},
+	const networkType = Pipeline.main ? NetworkType.MAIN_NET : NetworkType.TEST_NET;
+	const webMode: WebMode = new WebMode(AlgoSigner, networkType);
+	const tx: types.ExecParams[] = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: {
+				addr: this.props.addr,
+				sk: new Uint8Array(0),
 			},
-		];
-		webMode.executeTx(tx);
-	};
+			appID: this.props.appId,
+			payFlags: {},
+		},
+	];
+	webMode.executeTx(tx);
+};
 ```
 
 ## Summary
