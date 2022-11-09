@@ -172,7 +172,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), undefined);
 	});
 
-	describe("Extra Pages", function () {
+	describe("Extra Pages - Update application", function () {
 		useFixture("stateful");
 		const storageConfig = {
 			appName: "app",
@@ -199,7 +199,10 @@ describe("Algorand Smart Contracts - Update Application", function () {
 				},
 				{}
 			).appID;
-			return appID;
+			runtime.optInToApp(creator.address, appID, {}, {});
+
+			let app = runtime.getApp(appID);
+			assert.isDefined(app);
 		}
 
 		function updateApp(approvalProgramFilename: string, clearProgramFilename: string, appName: string, extraPages: number = 0) {
@@ -220,28 +223,17 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should pass when updated program length does not exceed total allowed program length", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app1");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			let app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app1");
 			assert.doesNotThrow(
 				() => updateApp("counter-approval.teal", "clear.teal", "app1")
 			);
-
 			// verify updated app
 			assert.isDefined(runtime.getApp(appID));
 		});
 
 		it("Should fail when updated program length exceeds total allowed program length", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app2");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			const app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app2");
 			expectRuntimeError(
 				() => updateApp("very-long-approval.teal", "clear.teal", "app2"),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
@@ -250,12 +242,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when no extra pages were defined for large approval program", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app3");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			const app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app3");
 			expectRuntimeError(
 				() => updateApp("very-long-approval.teal", "clear.teal", "app3"),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
@@ -264,29 +251,18 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should pass when sufficient extra pages was defined", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app4");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			const app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app4");
 			// should pass because total 2 pages(1 + extra pages) needed
 			assert.doesNotThrow(
 				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app4", 1),
 			);
-
 			// verify updated app
 			assert.isDefined(runtime.getApp(appID));
 		});
 
 		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app5");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			const app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app5");
 			// should fail because total 2 pages (1 + extra pages) needed because: program length > 2048
 			expectRuntimeError(
 				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app5", 0),
@@ -296,19 +272,13 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
 		it("Should fail when sufficient extra pages was not defined", function () {
 			// create app
-			appID = deployApp(oldApprovalProgramFileName, clearProgramFilename, "app6");
-			runtime.optInToApp(creator.address, appID, {}, {});
-
-			const app = runtime.getApp(appID);
-			assert.isDefined(app);
-
+			deployApp(oldApprovalProgramFileName, clearProgramFilename, "app6");
 			// should fail because extra pages range is [0, 3]
 			expectRuntimeError(
 				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app6", 4),
 				RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED
 			);
 		});
-
 	});
 
 });
