@@ -1441,6 +1441,48 @@ describe("Helper functions", function () {
 		});
 	});
 });
+
+describe("Atomic Transaction Composer", function () {
+	let runtime: Runtime;
+	const notABI = "not-ABI.json";
+	const notJSON = "not-JSON.teal";
+	const networkRuntimeNotDefined = "network-runtime-undefined.json";
+	const correctABI = "correct-ABI.json";
+	useFixture("atomic-transaction-composer");
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+	});
+
+	it("Should throw an error if file is not found", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile("doesNotExist.json");
+		});
+	});
+
+	it("Should throw an error if file is not ABI", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notABI);
+		});
+	});
+
+	it("Should throw an error if file is not json", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notJSON);
+		});
+	});
+
+	it("Should return the object with undefined appID", function () {
+		const contract = runtime.parseABIContractFile(networkRuntimeNotDefined);
+		assert.isUndefined(contract?.appID);
+	});
+
+	it("Should return ABIContract", function () {
+		const contract = runtime.parseABIContractFile(correctABI);
+		assert.isDefined(contract.appID);
+	});
+});
+
 describe("Funtions related to runtime chain", function () {
 	let runtime: Runtime;
 
@@ -1458,12 +1500,20 @@ describe("Funtions related to runtime chain", function () {
 		const currentRound = runtime.getRound();
 		const currentBlock = runtime.getBlock(currentRound);
 		//produce new block and move to next round
-		runtime.produceBlock();
+		runtime.produceBlocks();
 		const newRound = runtime.getRound();
 		const newBlock = runtime.getBlock(newRound);
 		assert.equal(currentRound + 1, newRound);
 		assert.notDeepEqual(currentBlock, newBlock);
 		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
+	});
+
+	it("Should produce N new blocks", function () {
+		const currentRound = runtime.getRound();
+		const N = 5;
+		runtime.produceBlocks(N);
+		const newCurrentRound = runtime.getRound();
+		assert.equal(currentRound + N, newCurrentRound);
 	});
 });
 describe("Application/assets limits for one account", function () {

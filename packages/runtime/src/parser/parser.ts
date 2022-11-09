@@ -164,7 +164,6 @@ import {
 	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
 	MAX_APP_PROGRAM_COST,
-	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";

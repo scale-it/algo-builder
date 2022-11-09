@@ -21,7 +21,13 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Features
 
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
+- Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
+- Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
+- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID`  will be added to a contract.
 
+### Breaking Changes
+
+- The method `ProduceBlock` has been  renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
 #### TEALv8
 
 - Support for `switch` opcode.

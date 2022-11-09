@@ -1,0 +1,16 @@
+{
+    "name":"network-runtime-undefined",
+    "networks":{
+        "MainNet":{
+            "appID": 123456
+        }
+    },
+    "methods":[
+        {
+            "name":"add",
+            "desc":"Add 2 integers",
+            "args":[ { "type":"uint64" }, { "type":"uint64" } ],
+            "returns": {"type":"uint64"}
+        }
+    ]
+}

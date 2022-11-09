@@ -126,10 +126,10 @@ import {
 import {
 	AcctParamQueryFields,
 	AppParamDefined,
+	LogicSigMaxSize,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
-	LogicSigMaxSize,
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
@@ -2567,6 +2567,7 @@ describe("Parser", function () {
 
 	describe("Gas cost of Opcodes from TEAL file", function () {
 		useFixture("teal-files");
+		const file = "test-arg.teal"; // byte size 3
 
 		let interpreter: Interpreter;
 		beforeEach(function () {

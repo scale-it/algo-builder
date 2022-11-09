@@ -1,4 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { runtimeGenesisHash } from "@algo-builder/web/build/lib/constants";
 import algosdk, {
 	Account as AccountSDK,
 	decodeAddress,
@@ -8,6 +9,7 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 import MD5 from "crypto-js/md5";
+import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -67,6 +69,7 @@ export class Runtime {
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
 	private timestamp: number;
+	private readonly numberOfInitialBlocks: number;
 
 	constructor(accounts: AccountStoreI[]) {
 		// runtime store
@@ -93,8 +96,9 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2000;
-		this.populateChain(this.round);
+		this.round = 0;
+		this.numberOfInitialBlocks = 2000;
+		this.produceBlocks(this.numberOfInitialBlocks);
 		this.timestamp = 1;
 	}
 
@@ -1188,9 +1192,22 @@ export class Runtime {
 	}
 
 	/**
+	 * Parses the file and return the ABIContract. If the appID for runtime
+	 * is specified it will be added to the returned object
+	 * @param pathToFile string
+	 * @retun parsed file
+	 */
+	parseABIContractFile(pathToFile: string): types.ABIContract {
+		const buff = readFileSync(pathToFile);
+		const contract: types.ABIContract = new algosdk.ABIContract(JSON.parse(buff.toString()));
+		contract.appID = contract.networks[runtimeGenesisHash]?.appID;
+		return contract;
+	}
+
+	/**
 	 * Produces new block and adds it to a Map where the keys are block numbers
 	 */
-	produceBlock() {
+	private _produceBlock() {
 		let timestamp: bigint | undefined;
 		let seed: Uint8Array | undefined;
 		if (this.store.blocks.size === 0) {
@@ -1212,6 +1229,7 @@ export class Runtime {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK);
 		}
 	}
+
 	/**
 	 * Returns a requested Block object. If it does not exist on chain throws an error
 	 * @param round block number
@@ -1224,14 +1242,14 @@ export class Runtime {
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
 	}
+
 	/**
-	 * Populates chain from first block to round number block (Produces N rounds)
-	 * @param round current round number
+	 * Produces N new blocks. If not arguments passed N = 1 by default
+	 * @param numberOfBlocks current round number
 	 */
-	private populateChain(round: number) {
-		this.round = 1;
-		for (let blockN = 1; blockN <= round; blockN++) {
-			this.produceBlock();
+	produceBlocks(numberOfBlocks = 1) {
+		for (let blockN = 1; blockN <= numberOfBlocks; blockN++) {
+			this._produceBlock();
 		}
 	}
 }

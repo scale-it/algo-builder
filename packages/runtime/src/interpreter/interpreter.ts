@@ -615,7 +615,7 @@ export class Interpreter {
 			// txn had a 0 in FirstValid
 			lastAvail = 0; // So nothing will be available
 		}
-		if (firstAvail > round || round > lastAvail) {
+		if (firstAvail > round || round > lastAvail || round === 0) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ROUND_NOT_AVAILABLE, {
 				round: round,
 				firstAvail: firstAvail,
