@@ -148,7 +148,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.isDefined(app);
 		assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
-		// update should be rejected because sender is not creator
 		expectRuntimeError(
 			() =>
 				runtime.updateApp(
@@ -206,7 +205,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			let app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			assert.doesNotThrow(
 				() =>
 					runtime.updateApp(
@@ -245,7 +243,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			expectRuntimeError(
 				() =>
 					runtime.updateApp(
@@ -282,7 +279,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			expectRuntimeError(
 				() =>
 					runtime.updateApp(
@@ -319,7 +315,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			assert.doesNotThrow(
 				() =>
 					runtime.updateApp(
@@ -359,7 +354,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			expectRuntimeError(
 				() =>
 					runtime.updateApp(
@@ -397,7 +391,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 			const app = runtime.getApp(appID);
 			assert.isDefined(app);
 
-			// update should be rejected because sender is not creator
 			expectRuntimeError(
 				() =>
 					runtime.updateApp(
