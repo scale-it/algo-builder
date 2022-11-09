@@ -55,7 +55,7 @@ export class Interpreter {
 	length: number; // total length of 'compiled' TEAL code
 	// local stores for a transaction.
 	bytecblock: Uint8Array[];
-	intcblock: BigInt[];
+	intcblock: bigint[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
 	instructions: Op[];
@@ -136,14 +136,14 @@ export class Interpreter {
 	 * When `create` flag is false we will create new account and add it to context.
 	 * @param accountPk public key of account
 	 * @param line line number in TEAL file
-	 * @param create create flag
+	 * @param createFlag create flag
 	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
 	private _getAccountFromAddr(
 		accountPk: Uint8Array,
 		line: number,
-		create: boolean,
+		createFlag: boolean,
 		immutable: boolean
 	): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
@@ -183,7 +183,7 @@ export class Interpreter {
 				) !== undefined)
 		) {
 			const address = encodeAddress(pkBuffer);
-			const account = create
+			const account = createFlag
 				? this.createAccountIfAbsent(address)
 				: this.runtime.ctx.state.accounts.get(address);
 
@@ -203,14 +203,14 @@ export class Interpreter {
 	 * When `create` flag is false we will create new account and add it to context.
 	 * @param accountRef index of account to fetch from account list
 	 * @param line line number
-	 * @param create create flag, default is true
+	 * @param createFlag create flag, default is true
 	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * NOTE: index 0 represents txn sender account
 	 */
 	getAccount(
 		accountRef: StackElem,
 		line: number,
-		create = false,
+		createFlag = false,
 		immutable = true
 	): AccountStoreI {
 		let account: AccountStoreI | undefined;
@@ -221,9 +221,9 @@ export class Interpreter {
 			account = this.runtime.ctx.state.accounts.get(address);
 			return this.runtime.assertAccountDefined(address, account, line);
 		} else if (typeof accountRef === "bigint") {
-			return this._getAccountFromReference(accountRef, line, create);
+			return this._getAccountFromReference(accountRef, line, createFlag);
 		} else {
-			return this._getAccountFromAddr(accountRef, line, create, immutable);
+			return this._getAccountFromAddr(accountRef, line, createFlag, immutable);
 		}
 
 	}
@@ -233,10 +233,10 @@ export class Interpreter {
 	 * in accounts field or accounts associated with apps declared in foreingApps array
 	 * @param accountRef index of account or app ID
 	 * @param line line number
-	 * @param create create flag
+	 * @param createFlag create flag
 	 * @retuns AccountStoreI object
 	 */
-	private _getAccountFromReference(accountRef: bigint, line: number, create: boolean): AccountStoreI {
+	private _getAccountFromReference(accountRef: bigint, line: number, createFlag: boolean): AccountStoreI {
 		let address: string;
 		// check if reference exists in foreign apps
 		if (this.runtime.ctx.tx.apfa !== undefined &&
@@ -251,7 +251,7 @@ export class Interpreter {
 				throw new Error("pk Buffer not found");
 			}
 		}
-		const account = create
+		const account = createFlag
 			? this.createAccountIfAbsent(address)
 			: this.runtime.ctx.state.accounts.get(address);
 
