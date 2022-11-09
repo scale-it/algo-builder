@@ -15,6 +15,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ## Unreleased
 
 ### Features
+- Allow user to query foreign applications accounts using the `appID` field.
 
 #### TEALv8
 

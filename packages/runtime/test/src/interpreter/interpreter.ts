@@ -198,7 +198,6 @@ describe("Interpreter", function () {
 				setUpInterpreter(7, 1e9);
 			});
 			it("Should not throw an error when accessing account that are in transaction's account field", function () {
-				// in which exact part are we accesing the account???
 				const prog = `
 				txn Applications 2
 				app_params_get AppAddress
