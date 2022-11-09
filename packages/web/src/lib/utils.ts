@@ -11,7 +11,7 @@ import {
  * @returns if the network is known the genesisHash otherwise returns undefined
  */
 export function getGenesisHashFromName(networkName: string): string | undefined {
-	switch (networkName) {
+	switch (networkName.toLowerCase()) {
 		case "mainnet":
 			return mainnetGenesisHash;
 		case "testnet":
