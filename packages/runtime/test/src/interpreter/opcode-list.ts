@@ -2313,7 +2313,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetAmount to stack", function () {
-				const op = new Txn(["AssetAmount"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetAmount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2321,7 +2321,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetSender to stack", function () {
-				const op = new Txn(["AssetSender"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetSender], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2329,7 +2329,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetReceiver to stack", function () {
-				const op = new Txn(["AssetReceiver"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetReceiver], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2337,7 +2337,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetCloseTo to stack", function () {
-				const op = new Txn(["AssetCloseTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetCloseTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2398,7 +2398,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ApprovalProgram to stack", function () {
-				const op = new Txn(["ApprovalProgram"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2445,19 +2445,19 @@ describe("Teal Opcodes", function () {
 			// introduced in TEALv3
 			it("should push value from foreign assets array and push NumAssets", function () {
 				// should push Assets[0] to stack
-				let op = new Txn(["Assets", "0"], 1, interpreter);
+				let op = new Txn([TxFieldEnum.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[0]), stack.pop());
 
 				// should push Assets[1] to stack
-				op = new Txn(["Assets", "1"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Assets, "1"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[1]), stack.pop());
 
 				// index 10 should be out_of_bound
-				op = new Txn(["Assets", "10"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Assets, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
 				op = new Txn(["NumAssets"], 1, interpreter);
@@ -2657,12 +2657,12 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from assets or applications array by index from tx group", function () {
-				let op = new Gtxn(["1", "Assets", "0"], 1, interpreter);
+				let op = new Gtxn(["1", TxFieldEnum.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
 
-				op = new Gtxn(["0", "Assets", "0"], 1, interpreter);
+				op = new Gtxn(["0", TxFieldEnum.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
@@ -2738,12 +2738,12 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push value from assets or applications array by index from tx group", function () {
-				let op = new Gitxn(["1", "Assets", "0"], 1, interpreter);
+				let op = new Gitxn(["1", TxFieldEnum.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
 
-				op = new Gitxn(["0", "Assets", "0"], 1, interpreter);
+				op = new Gitxn(["0", TxFieldEnum.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
@@ -2859,7 +2859,7 @@ describe("Teal Opcodes", function () {
 				);
 
 				expectRuntimeError(
-					() => new Txn(["ApprovalProgram"], 1, interpreter),
+					() => new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -4104,7 +4104,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Clawback", function () {
-			const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetClawback], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4118,7 +4118,7 @@ describe("Teal Opcodes", function () {
 
 		it("TEALv5: should push correct Asset Creator", function () {
 			interpreter.tealVersion = 5;
-			const op = new GetAssetDef(["AssetCreator"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetCreator], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -7464,18 +7464,18 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should throw an error when the max byte array size is exceeded(4096 bytes)", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(4097).fill(0);
-			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
 		});
 		it("Should throw an error when the max program is exceeded(2048 bytes)", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2049).fill(0);
-			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED);
 		});
 		it("Should ApprovalProgram and ApprovalProgramPages return the same value If approvalProgram.length =< 2048 ", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2000).fill(0);
-			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op1 = new Txn([TxFieldEnum.ApprovalProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7485,8 +7485,8 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return enitre ApprovalProgram in two steps with ApprovalProgramPages", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
-			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ApprovalProgramPages", "1"], 1, interpreter);
+			const op1 = new Txn([TxFieldEnum.ApprovalProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7522,12 +7522,12 @@ describe("Teal Opcodes", function () {
 			//at the end we are popping the values from the stack and compare them
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(3000).fill(0);
 			const opArray = [new ITxnBegin([], 1, interpreter)];
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
 			opArray.push(new ITxnField(["ClearStateProgramPages"], 1, interpreter));
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
 			opArray.push(new ITxnField(["ClearStateProgramPages"], 2, interpreter));
 			opArray.push(new Txn(["ClearStateProgramPages", "1"], 1, interpreter));
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
 			opArray.forEach(function (op) {
 				op.execute(stack);
 			});

@@ -915,7 +915,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetCreator", "123"],
+						["asset_params_get", TxFieldEnum.AssetCreator, "123"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -929,7 +929,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetCreator"],
+						["asset_params_get", TxFieldEnum.AssetCreator],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -1174,18 +1174,18 @@ describe("Parser", function () {
 
 			it("txn fields", function () {
 				let res = opcodeFromSentence(
-					["txn", "Assets", "1"],
+					["txn", TxFieldEnum.Assets, "1"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				let expected = new Txn(["Assets", "1"], 1, interpreter);
+				let expected = new Txn([TxFieldEnum.Assets, "1"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Assets", "0", "1"],
+							["txn", TxFieldEnum.Assets, "0", "1"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1196,7 +1196,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Assets", "random-string"],
+							["txn", TxFieldEnum.Assets, "random-string"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
