@@ -618,7 +618,7 @@ describe("Parser", function () {
 			);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txn", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txn", "fee"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 			);
 		});
@@ -1365,7 +1365,7 @@ describe("Parser", function () {
 
 				expectRuntimeError(
 					() =>
-						opcodeFromSentence(["gtxns", TxFieldEnum.Amount], 1, interpreter, ExecutionMode.APPLICATION),
+						opcodeFromSentence(["gtxns", "amount"], 1, interpreter, ExecutionMode.APPLICATION),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
