@@ -3974,7 +3974,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Total", function () {
-			const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetTotal], 1, interpreter);
 
 			stack.push(0n); // asset index
 

@@ -893,18 +893,18 @@ describe("Parser", function () {
 			);
 
 			res = opcodeFromSentence(
-				["asset_params_get", "AssetTotal"],
+				["asset_params_get", TxFieldEnum.AssetTotal],
 				1,
 				interpreter,
 				ExecutionMode.APPLICATION
 			);
-			expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
+			expected = new GetAssetDef([TxFieldEnum.AssetTotal], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetTotal", "123"],
+						["asset_params_get", TxFieldEnum.AssetTotal, "123"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -2524,7 +2524,7 @@ describe("Parser", function () {
 				new Pragma(["version", "5"], 1, interpreter),
 				new Balance([], 4, interpreter),
 				new GetAssetHolding(["AssetBalance"], 5, interpreter),
-				new GetAssetDef(["AssetTotal"], 6, interpreter),
+				new GetAssetDef([TxFieldEnum.AssetTotal], 6, interpreter),
 				new AppOptedIn([], 8, interpreter),
 				new AppLocalGet([], 9, interpreter),
 				new AppLocalGetEx([], 10, interpreter),
