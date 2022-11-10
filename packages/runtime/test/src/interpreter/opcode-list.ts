@@ -2467,21 +2467,21 @@ describe("Teal Opcodes", function () {
 
 			it("should push value from foreign applications array and push NumApplications", function () {
 				// special case: Txn.Applications[0] represents current_applications_id
-				let op = new Txn(["Applications", "0"], 1, interpreter);
+				let op = new Txn([TxFieldEnum.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apid), stack.pop());
 
 				// Txn.Applications[1] should push "1st" app_id from foreign Apps (Txn.ForeignApps[0])
-				op = new Txn(["Applications", "1"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Applications, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apfa[0]), stack.pop());
 
 				// index 10 should be out_of_bound
-				op = new Txn(["Applications", "10"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Applications, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
 				op = new Txn(["NumApplications"], 1, interpreter);
@@ -2678,12 +2678,12 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(3n, stack.pop());
 
 				// index 0 represent tx.apid (current application id)
-				op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
-				op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
+				op = new Gtxn(["0", TxFieldEnum.Applications, "2"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
@@ -2759,12 +2759,12 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(3n, stack.pop());
 
 				// index 0 represent tx.apid (current application id)
-				op = new Gitxn(["1", "Applications", "0"], 1, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
-				op = new Gitxn(["0", "Applications", "2"], 1, interpreter);
+				op = new Gitxn(["0", TxFieldEnum.Applications, "2"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());

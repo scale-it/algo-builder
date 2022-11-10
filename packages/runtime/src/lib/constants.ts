@@ -573,6 +573,7 @@ export enum TxFieldEnum {
 	AssetReserve = "AssetReserve",
 	AssetMetadataHash = "AssetMetadataHash",
 	AssetFreeze = "AssetFreeze",
+	AssetBalance = "AssetBalance",
 	Fee = "Fee",
 	FreezeAsset = "FreezeAsset",
 	FreezeAssetAccount = "FreezeAssetAccount",

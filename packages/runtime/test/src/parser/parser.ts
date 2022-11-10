@@ -1205,18 +1205,18 @@ describe("Parser", function () {
 				);
 
 				res = opcodeFromSentence(
-					["txn", "Applications", "0"],
+					["txn", TxFieldEnum.Applications, "0"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["Applications", "0"], 1, interpreter);
+				expected = new Txn([TxFieldEnum.Applications, "0"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Applications", "0", "11"],
+							["txn", TxFieldEnum.Applications, "0", "11"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1227,7 +1227,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Applications", "random-string"],
+							["txn", TxFieldEnum.Applications, "random-string"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION

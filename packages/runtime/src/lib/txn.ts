@@ -302,7 +302,7 @@ export function txAppArg(
 			return parseToStackElem(tx.snd, txField);
 		}
 		idx--; // if not sender, then reduce index by 1
-	} else if (txField === "Applications") {
+	} else if (txField === TxFieldEnum.Applications) {
 		if (idx === 0) {
 			return parseToStackElem(tx.apid ?? 0n, txField);
 		} // during ssc deploy tx.app_id is 0
