@@ -27,6 +27,7 @@ import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
+	Account,
 	AccountAddress,
 	AccountStoreI,
 	AppInfo,
@@ -409,6 +410,22 @@ export class Runtime {
 			new RuntimeAccount({ addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) })
 		);
 		this.store.accounts.set(feeSink.address, feeSink);
+	}
+
+	/**
+	 * Set up account from deployer to runtime
+	 * @param accounts: array of accounts
+	 */
+	addAccounts(accounts: Account[], balance: number | bigint, ): void {
+		for (const _acc of accounts) {
+			const acc = new AccountStore(
+				balance,
+				_acc
+			)
+			if (_acc.name)
+				this.store.accountNameAddress.set(_acc.name, _acc.addr);
+			this.store.accounts.set(_acc.addr, acc);
+		}
 	}
 
 	/**

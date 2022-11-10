@@ -53,6 +53,7 @@ from `algosdk` and sends it to the network.
 - Added additional checks for the `maxStackByteElementSize` and `maxProgramLength` in `Runtime`.
 - Added partial support for `bn254` opcodes. The full support delyed until the official release of `TEALv8/v9`.
 - Added a new pre-commit hook to check if there are any `.only`in tests . If there are any it will display error in which files/lines the problem was found.
+- Allow `Runtime` to get account from `algob.config.js`
 
 #### @algo-builder/web
 - Added support for logic signature to `executeTx` method of `Webmode` for AlgoSigner, MyAlgo Wallet and Wallet Connect.
