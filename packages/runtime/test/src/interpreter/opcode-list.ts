@@ -2033,11 +2033,11 @@ describe("Teal Opcodes", function () {
 
 		describe("Txn: Common Fields", function () {
 			it("should push txn fee to stack", function () {
-				const op = new Txn(["Fee"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.fee, "Fee"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.fee, TxFieldEnum.Fee), stack.pop());
 			});
 
 			it("should push txn firstRound to stack", function () {
@@ -2135,7 +2135,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn Amount to stack", function () {
-				const op = new Txn(["Amount"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Amount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2414,7 +2414,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from accounts or args array by index", function () {
-				let op = new Txn(["Accounts", "0"], 1, interpreter);
+				let op = new Txn([TxFieldEnum.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2422,14 +2422,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Txn(["Accounts", "1"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Txn(["Accounts", "2"], 1, interpreter);
+				op = new Txn([TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2620,7 +2620,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("push fee from 2nd transaction in group", function () {
-				const op = new Gtxn(["1", "Fee"], 1, interpreter);
+				const op = new Gtxn(["1", TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2628,7 +2628,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from accounts or args array by index from tx group", function () {
-				let op = new Gtxn(["1", "Accounts", "0"], 1, interpreter);
+				let op = new Gtxn(["1", TxFieldEnum.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2636,14 +2636,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gtxn(["1", "Accounts", "1"], 1, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gtxn(["1", "Accounts", "2"], 1, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2701,7 +2701,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push fee from 2nd transaction in group", function () {
-				const op = new Gitxn(["1", "Fee"], 1, interpreter);
+				const op = new Gitxn(["1", TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2709,7 +2709,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push value from accounts or args array by index from tx group", function () {
-				let op = new Gitxn(["1", "Accounts", "0"], 1, interpreter);
+				let op = new Gitxn(["1", TxFieldEnum.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2717,14 +2717,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gitxn(["1", "Accounts", "1"], 1, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gitxn(["1", "Accounts", "2"], 1, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2778,7 +2778,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from txn.Accounts to stack according to index", function () {
 				// index 0 should push sender's address to stack
-				let op = new Txna(["Accounts", "0"], 1, interpreter);
+				let op = new Txna([TxFieldEnum.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2786,14 +2786,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Txna(["Accounts", "1"], 1, interpreter);
+				op = new Txna([TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Txna(["Accounts", "2"], 1, interpreter);
+				op = new Txna([TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2816,7 +2816,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
-				let op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+				let op = new Gtxna(["0", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2824,14 +2824,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+				op = new Gtxna(["0", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gtxna(["0", "Accounts", "2"], 1, interpreter);
+				op = new Gtxna(["0", TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2842,7 +2842,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxna(["1", "Accounts", "0"], 1, interpreter),
+					new Gtxna(["1", TxFieldEnum.Accounts, "0"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -2909,7 +2909,7 @@ describe("Teal Opcodes", function () {
 
 			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
-				let op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				let op = new Gitxna(["0", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2917,14 +2917,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op = new Gitxna(["0", TxFieldEnum.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gitxna(["0", "Accounts", "2"], 1, interpreter);
+				op = new Gitxna(["0", TxFieldEnum.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2935,7 +2935,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gitxna(["1", "Accounts", "0"], 1, interpreter),
+					new Gitxna(["1", TxFieldEnum.Accounts, "0"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -2945,7 +2945,7 @@ describe("Teal Opcodes", function () {
 			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
-				let op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				let op = new Gitxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2954,7 +2954,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gitxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2962,7 +2962,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gitxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2974,7 +2974,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gitxnas(["1", "Accounts"], 1, interpreter),
+					new Gitxnas(["1", TxFieldEnum.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -4818,26 +4818,26 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Gtxns: should push value of txfield from tx in group", function () {
-			stack.push(0n); // tx to fetch "fee" of (set as first)
-			let op = new Gtxns(["Fee"], 1, interpreter);
+			stack.push(0n); // tx to fetch TxFieldEnum.Fee of (set as first)
+			let op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx0.fee as number), stack.pop());
 
 			stack.push(0n);
-			op = new Gtxns(["Amount"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx0.amt as bigint), stack.pop());
 
 			stack.push(1n); // should fetch data from 2nd tx in group
-			op = new Gtxns(["Fee"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx1.fee as number), stack.pop());
 
 			stack.push(1n);
-			op = new Gtxns(["Amount"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx1.amt as bigint), stack.pop());
@@ -4851,13 +4851,13 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Gtxns: should panic if length of stack is < 1", function () {
-			const op = new Gtxns(["Fee"], 1, interpreter);
+			const op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
 		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
-			const op = new Gtxns(["Fee"], 1, interpreter);
+			const op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
@@ -6371,7 +6371,7 @@ describe("Teal Opcodes", function () {
 			it("push addr from txn.Accounts to stack according to index", function () {
 				// index 0 should push sender's address to stack
 				stack.push(0n);
-				let op = new Txnas(["Accounts"], 1, interpreter);
+				let op = new Txnas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -6380,7 +6380,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Txnas(["Accounts"], 1, interpreter);
+				op = new Txnas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6388,7 +6388,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Txnas(["Accounts"], 1, interpreter);
+				op = new Txnas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6413,7 +6413,7 @@ describe("Teal Opcodes", function () {
 			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
-				let op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				let op = new Gtxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -6422,7 +6422,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gtxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6430,7 +6430,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gtxnas(["0", TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6442,7 +6442,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxnas(["1", "Accounts"], 1, interpreter),
+					new Gtxnas(["1", TxFieldEnum.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -6460,7 +6460,7 @@ describe("Teal Opcodes", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
 				stack.push(0n);
-				let op = new Gtxnsas(["Accounts"], 1, interpreter);
+				let op = new Gtxnsas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -6470,7 +6470,7 @@ describe("Teal Opcodes", function () {
 				// should push Accounts[0] to stack
 				stack.push(0n);
 				stack.push(1n);
-				op = new Gtxnsas(["Accounts"], 1, interpreter);
+				op = new Gtxnsas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6479,7 +6479,7 @@ describe("Teal Opcodes", function () {
 				// should push Accounts[1] to stack
 				stack.push(0n);
 				stack.push(2n);
-				op = new Gtxnsas(["Accounts"], 1, interpreter);
+				op = new Gtxnsas([TxFieldEnum.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6492,7 +6492,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxnsas(["Accounts"], 1, interpreter),
+					new Gtxnsas([TxFieldEnum.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -6960,7 +6960,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should succeed: query data use itxnas", function () {
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxFieldEnum.Accounts], 1, interpreter);
 			stack.push(1n);
 			op.execute(stack);
 
@@ -6969,7 +6969,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should fail: not any inner tx submited", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxFieldEnum.Accounts], 1, interpreter);
 			stack.push(1n);
 			expectRuntimeError(
 				() => op.execute(stack),
@@ -6978,7 +6978,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should fail: stack empty", function () {
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxFieldEnum.Accounts], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 	});

@@ -131,6 +131,7 @@ import {
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
+	TxFieldEnum
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
@@ -588,17 +589,17 @@ describe("Parser", function () {
 		});
 
 		it("should return correct objects for `txn`", function () {
-			let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE);
-			let expected = new Txn(["Fee"], 1, interpreter);
+			let res = opcodeFromSentence(["txn", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE);
+			let expected = new Txn([TxFieldEnum.Fee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txn", "Accounts", "1"],
+				["txn", TxFieldEnum.Accounts, "1"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txn(["Accounts", "1"], 1, interpreter);
+			expected = new Txn([TxFieldEnum.Accounts, "1"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -612,24 +613,24 @@ describe("Parser", function () {
 
 			expectRuntimeError(
 				() =>
-					opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+					opcodeFromSentence(["txn", TxFieldEnum.Fee, TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txn", "fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txn", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 			);
 		});
 
 		it("should return correct object for `gtxn`", function () {
 			let res = opcodeFromSentence(
-				["gtxn", "0", "Fee"],
+				["gtxn", "0", TxFieldEnum.Fee],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Gtxn(["0", "Fee"], 1, interpreter);
+			let expected = new Gtxn(["0", TxFieldEnum.Fee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -648,19 +649,19 @@ describe("Parser", function () {
 
 			expectRuntimeError(
 				() =>
-					opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+					opcodeFromSentence(["gtxn", "1AA", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			);
 		});
 
 		it("should return correct object for `txna`", function () {
 			let res = opcodeFromSentence(
-				["txna", "Accounts", "0"],
+				["txna", TxFieldEnum.Accounts, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Txna(["Accounts", "0"], 1, interpreter);
+			let expected = new Txna([TxFieldEnum.Accounts, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -673,7 +674,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txna", TxFieldEnum.Fee, "2"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 			);
 
@@ -683,19 +684,19 @@ describe("Parser", function () {
 			);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txna", TxFieldEnum.Fee, "A"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			);
 		});
 
 		it("should return correct object for `gtxna`", function () {
 			let res = opcodeFromSentence(
-				["gtxna", "1", "Accounts", "1"],
+				["gtxna", "1", TxFieldEnum.Accounts, "1"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
+			let expected = new Gtxna(["1", TxFieldEnum.Accounts, "1"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -710,7 +711,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["gtxna", "1", "Fee", "4"],
+						["gtxna", "1", TxFieldEnum.Fee, "4"],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -732,7 +733,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["gtxna", "1AB", "Fee", "4"],
+						["gtxna", "1AB", TxFieldEnum.Fee, "4"],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -1354,17 +1355,17 @@ describe("Parser", function () {
 
 			it("gtxns", function () {
 				const res = opcodeFromSentence(
-					["gtxns", "Amount"],
+					["gtxns", TxFieldEnum.Amount],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				const expected = new Gtxns(["Amount"], 1, interpreter);
+				const expected = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
-						opcodeFromSentence(["gtxns", "amount"], 1, interpreter, ExecutionMode.APPLICATION),
+						opcodeFromSentence(["gtxns", TxFieldEnum.Amount], 1, interpreter, ExecutionMode.APPLICATION),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -1372,7 +1373,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["gtxns", "0", "Amount"],
+							["gtxns", "0", TxFieldEnum.Amount],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1932,7 +1933,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["itxn_field", "Sender", "Fee"],
+							["itxn_field", "Sender", TxFieldEnum.Fee],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -2075,12 +2076,12 @@ describe("Parser", function () {
 			describe("gitxn Opcode", function () {
 				it("Should succeed: create new gitxn opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxn", "0", "Fee"],
+						["gitxn", "0", TxFieldEnum.Fee],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxn(["0", "Fee"], 1, interpreter);
+					let expected = new Gitxn(["0", TxFieldEnum.Fee], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
@@ -2101,7 +2102,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxn", "1AA", "Fee"],
+								["gitxn", "1AA", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2114,12 +2115,12 @@ describe("Parser", function () {
 			describe("gitxna Opcode", function () {
 				it("Should succeed: create new gitxna opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxna", "1", "Accounts", "1"],
+						["gitxna", "1", TxFieldEnum.Accounts, "1"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxna(["1", "Accounts", "1"], 1, interpreter);
+					let expected = new Gitxna(["1", TxFieldEnum.Accounts, "1"], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
@@ -2136,7 +2137,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxna", "1", "Fee", "4"],
+								["gitxna", "1", TxFieldEnum.Fee, "4"],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2158,7 +2159,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxna", "1AB", "Fee", "4"],
+								["gitxna", "1AB", TxFieldEnum.Fee, "4"],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2171,12 +2172,12 @@ describe("Parser", function () {
 			describe("gitxnas Opcode", function () {
 				it("Should succeed: create new gitxnas opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxnas", "1", "Accounts"],
+						["gitxnas", "1", TxFieldEnum.Accounts],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxnas(["1", "Accounts"], 1, interpreter);
+					let expected = new Gitxnas(["1", TxFieldEnum.Accounts], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
@@ -2193,7 +2194,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxnas", "1", "Fee"],
+								["gitxnas", "1", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2215,7 +2216,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxnas", "1AB", "Fee"],
+								["gitxnas", "1AB", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2229,12 +2230,12 @@ describe("Parser", function () {
 				it("Should succeed: create new itxnas opcode", function () {
 					// can parse opcode
 					const res = opcodeFromSentence(
-						["itxnas", "Accounts"],
+						["itxnas", TxFieldEnum.Accounts],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					const expected = new ITxnas(["Accounts"], 1, interpreter);
+					const expected = new ITxnas([TxFieldEnum.Accounts], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2246,7 +2247,7 @@ describe("Parser", function () {
 
 					expectRuntimeError(
 						() =>
-							opcodeFromSentence(["itxnas", "Fee"], 1, interpreter, ExecutionMode.APPLICATION),
+							opcodeFromSentence(["itxnas", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.APPLICATION),
 						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 					);
 				});
@@ -2548,10 +2549,10 @@ describe("Parser", function () {
 				new Gloadss([], 4, interpreter),
 				new AcctParamsGet(["AcctBalance"], 5, interpreter),
 				new ITxnNext([], 6, interpreter),
-				new Gitxn(["0", "Fee"], 7, interpreter),
-				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
-				new Gitxnas(["0", "Accounts"], 9, interpreter),
-				new ITxnas(["Accounts"], 10, interpreter),
+				new Gitxn(["0", TxFieldEnum.Fee], 7, interpreter),
+				new Gitxna(["1", TxFieldEnum.Accounts, "1"], 8, interpreter),
+				new Gitxnas(["0", TxFieldEnum.Accounts], 9, interpreter),
+				new ITxnas([TxFieldEnum.Accounts], 10, interpreter),
 			];
 			assert.deepEqual(res, expected);
 		});

@@ -35,7 +35,7 @@ const numberTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Fee", "FreezeAssetFrozen", "ConfigAssetDecimals", "ConfigAssetDefaultFrozen"]),
+	5: new Set([TxFieldEnum.Fee, TxFieldEnum.FreezeAssetFrozen, TxFieldEnum.ConfigAssetDecimals, TxFieldEnum.ConfigAssetDefaultFrozen]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 ["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
@@ -49,7 +49,7 @@ const uintTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Amount", "AssetAmount", "TypeEnum", "ConfigAssetTotal"]),
+	5: new Set([TxFieldEnum.Amount, TxFieldEnum.AssetAmount, TxFieldEnum.TypeEnum, TxFieldEnum.ConfigAssetTotal]),
 };
 uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 uintTxnFields[7] = cloneDeep(uintTxnFields[6]);

@@ -297,7 +297,7 @@ export function txAppArg(
 	 * + EncTx.Applications[0] represents current_application_id
 	 * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
 	 */
-	if (txField === "Accounts") {
+	if (txField === TxFieldEnum.Accounts) {
 		if (idx === 0) {
 			return parseToStackElem(tx.snd, txField);
 		}
