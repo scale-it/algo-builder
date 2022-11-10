@@ -50,6 +50,7 @@ import {
 	TxArrFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
+	TxFieldEnum
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -2403,7 +2404,7 @@ export class GetAssetDef extends Op {
 			] as keyof modelsv2.AssetParams;
 
 			switch (this.field) {
-				case "AssetTotal":
+				case TxFieldEnum.AssetTotal:
 					value = BigInt(AssetDefinition.total);
 					break;
 				case "AssetDecimals":
@@ -2414,11 +2415,7 @@ export class GetAssetDef extends Op {
 					break;
 				default:
 					def = AssetDefinition[s] as string;
-					if (isValidAddress(def)) {
-						value = decodeAddress(def).publicKey;
-					} else {
-						value = parsing.stringToBytes(def);
-					}
+					value = isValidAddress(def) ? decodeAddress(def).publicKey : parsing.stringToBytes(def);
 					break;
 			}
 
@@ -4366,10 +4363,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-							sig: Buffer.alloc(5),
-							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					  }
+						sig: Buffer.alloc(5),
+						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					}
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
