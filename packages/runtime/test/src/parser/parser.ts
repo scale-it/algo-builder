@@ -603,12 +603,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txn", "ApplicationArgs", "0"],
+				["txn", TxFieldEnum.ApplicationArgs, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
+			expected = new Txn([TxFieldEnum.ApplicationArgs, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -634,12 +634,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["gtxn", "0", "ApplicationArgs", "0"],
+				["gtxn", "0", TxFieldEnum.ApplicationArgs, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Gtxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+			expected = new Gtxn(["0", TxFieldEnum.ApplicationArgs, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -665,12 +665,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txna", "ApplicationArgs", "2"],
+				["txna", TxFieldEnum.ApplicationArgs, "2"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txna(["ApplicationArgs", "2"], 1, interpreter);
+			expected = new Txna([TxFieldEnum.ApplicationArgs, "2"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -700,12 +700,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["gtxna", "1", "ApplicationArgs", "4"],
+				["gtxna", "1", TxFieldEnum.ApplicationArgs, "4"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Gtxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+			expected = new Gtxna(["1", TxFieldEnum.ApplicationArgs, "4"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -1384,12 +1384,12 @@ describe("Parser", function () {
 
 			it("gtxnsa", function () {
 				const res = opcodeFromSentence(
-					["gtxnsa", "ApplicationArgs", "0"],
+					["gtxnsa", TxFieldEnum.ApplicationArgs, "0"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				const expected = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+				const expected = new Gtxnsa([TxFieldEnum.ApplicationArgs, "0"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
@@ -1407,7 +1407,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["gtxnsa", "0", "ApplicationArgs", "0"],
+							["gtxnsa", "0", TxFieldEnum.ApplicationArgs, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -2085,12 +2085,12 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxn", "0", "ApplicationArgs", "0"],
+						["gitxn", "0", TxFieldEnum.ApplicationArgs, "0"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+					expected = new Gitxn(["0", TxFieldEnum.ApplicationArgs, "0"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 				it("Should fail: create gitxn opcode with invalid parameters", function () {
@@ -2124,12 +2124,12 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxna", "1", "ApplicationArgs", "4"],
+						["gitxna", "1", TxFieldEnum.ApplicationArgs, "4"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+					expected = new Gitxna(["1", TxFieldEnum.ApplicationArgs, "4"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2181,12 +2181,12 @@ describe("Parser", function () {
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxnas", "1", "ApplicationArgs"],
+						["gitxnas", "1", TxFieldEnum.ApplicationArgs],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxnas(["1", "ApplicationArgs"], 1, interpreter);
+					expected = new Gitxnas(["1", TxFieldEnum.ApplicationArgs], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 

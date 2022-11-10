@@ -2382,7 +2382,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ApplicationID to stack", function () {
-				const op = new Txn(["ApplicationID"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ApplicationID], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2435,7 +2435,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Txn(["ApplicationArgs", "0"], 0, interpreter);
+				op = new Txn([TxFieldEnum.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2649,7 +2649,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Gtxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2730,7 +2730,7 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Gitxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2801,7 +2801,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("push addr from 1st AppArg to stack", function () {
-				const op = new Txna(["ApplicationArgs", "0"], 0, interpreter);
+				const op = new Txna([TxFieldEnum.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2854,7 +2854,7 @@ describe("Teal Opcodes", function () {
 
 				// for txn
 				expectRuntimeError(
-					() => new Txn(["ApplicationID"], 1, interpreter),
+					() => new Txn([TxFieldEnum.ApplicationID], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -4844,7 +4844,7 @@ describe("Teal Opcodes", function () {
 
 			// gtxn, gtxns also accepts array fields
 			stack.push(1n);
-			op = new Gtxns(["ApplicationArgs", "2"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.ApplicationArgs, "2"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("argC"), stack.pop());
@@ -4864,13 +4864,13 @@ describe("Teal Opcodes", function () {
 		it("Gtxnsa: should push value of txfieldArr[index] from tx in group", function () {
 			TXN_OBJ.apaa = [Buffer.from("arg1"), Buffer.from("arg2")];
 			stack.push(0n);
-			let op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+			let op = new Gtxnsa([TxFieldEnum.ApplicationArgs, "1"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("arg2"), stack.pop()); // args from tx0
 
 			stack.push(1n);
-			op = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+			op = new Gtxnsa([TxFieldEnum.ApplicationArgs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("argA"), stack.pop()); // args from tx1
@@ -4879,17 +4879,17 @@ describe("Teal Opcodes", function () {
 		it("Gtxnsa: should panic if index is out of bounds for txFieldArr", function () {
 			// should throw error as appArgs[10] is undefined
 			stack.push(0n);
-			let op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+			let op = new Gtxnsa([TxFieldEnum.ApplicationArgs, "10"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
 			stack.push(1n);
-			op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+			op = new Gtxnsa([TxFieldEnum.ApplicationArgs, "10"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
 		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
-			const op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+			const op = new Gtxnsa([TxFieldEnum.ApplicationArgs, "1"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 	});
@@ -6397,7 +6397,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from 1st AppArg to stack", function () {
 				stack.push(0n);
-				const op = new Txnas(["ApplicationArgs"], 0, interpreter);
+				const op = new Txnas([TxFieldEnum.ApplicationArgs], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
