@@ -77,6 +77,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added blocks to `Runtime`. It simulates the block generation by using radnom bytes generator as the first seed. The following seeds are MD5 hash of the seed from the previous block.
 - Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
 - Added support for `FirstValidTime` field for transactions opcode.
+- Added program length check on app update on the basis of extra pages in `runtime`.
 
 #### @algo-builder/web
 
