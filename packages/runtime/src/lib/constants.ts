@@ -40,10 +40,9 @@ export const MAX_INNER_TRANSACTIONS = 16;
 export const ALGORAND_MAX_LOGS_COUNT = 32;
 export const ALGORAND_MAX_LOGS_LENGTH = 1024;
 
-export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
-export const MAX_ALGORAND_ACCOUNT_CREATED_APPS = 10;
-
-export const MAX_ALGORAND_ACCOUNT_OPTEDIN_APPS = 50;
+export const publicKeyLength = 32;
+export const proofLength = 80;
+export const seedLength = 32;
 
 //smart contract constraints
 // https://developer.algorand.org/docs/get-details/parameter_tables/
@@ -55,6 +54,9 @@ export const MAX_LOCAL_SCHEMA_ENTRIES = 16;
 // https://github.com/algorand/go-algorand/blob/bd5a00092c8a63dba8314b97851e46ff247cf7c1/data/transactions/logic/eval.go#L1302
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
+
+export const MaxTxnLife = 1000;
+export const BlockFinalisationTime = 4n; // block finalisation time in seconds truncated down
 
 export const ZERO_ADDRESS = new Uint8Array(32);
 export const ZERO_ADDRESS_STR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
@@ -75,7 +77,6 @@ export const TxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } 
 		Sender: "snd",
 		Fee: "fee",
 		FirstValid: "fv",
-		FirstValidTime: null,
 		LastValid: "lv",
 		Note: "note",
 		Lease: "lx",
@@ -164,6 +165,7 @@ TxnFields[7] = {
 	ClearStateProgramPages: null,
 	NumApprovalProgramPages: null,
 	NumClearStateProgramPages: null,
+	FirstValidTime: null,
 };
 
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
@@ -475,6 +477,12 @@ OpGasCost[7] = {
 	...OpGasCost[6],
 	sha3_256: 130,
 	ed25519verify_bare: 1900,
+	ecdsa_verify: 2500,
+	ecdsa_pk_decompress: 2400,
+	vrf_verify: 5700,
+};
+OpGasCost[8] = {
+	...OpGasCost[7],
 };
 
 export const enum MathOp {
@@ -517,6 +525,16 @@ export const json_refTypes = {
 	JSONObject: "JSONObject",
 };
 
+export enum blockFieldTypes {
+	BlkTimestamp = "BlkTimestamp",
+	BlkSeed = "BlkSeed",
+}
+
+export enum vrfVerifyFieldTypes {
+	VrfAlgorand = "VrfAlgorand",
+	VrfStandard = "VrfStandard",
+}
+
 export enum TxFieldEnum {
 	FirstValidTime = "FirstValidTime",
 	TypeEnum = "TypeEnum",
@@ -548,4 +566,9 @@ export enum TxFieldEnum {
 	VotePK = "VotePK",
 	SelectionPK = "SelectionPK",
 	Note = "Note",
+}
+
+export enum CurveTypeEnum {
+	secp256k1 = "secp256k1",
+	secp256r1 = "p256", // alias used in the library for secp256r1
 }

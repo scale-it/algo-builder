@@ -15,17 +15,25 @@ async function run(runtimeEnv, deployer) {
 	};
 	const contractName = "dynamic-fee.py";
 	// setup a contract account and send 1 ALGO from master
-	await deployer.fundLsigByFile(
-		contractName,
-		{ funder: masterAccount, fundingMicroAlgo: 100000000 },
-		{ closeRemainderTo: masterAccount.addr },
-		scInitParam
-	);
+	await deployer
+		.fundLsigByFile(
+			contractName,
+			{ funder: masterAccount, fundingMicroAlgo: 100000000 },
+			{ closeRemainderTo: masterAccount.addr },
+			scInitParam
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	const contract = await deployer.loadLogicByFile(contractName, scInitParam);
 	const escrow = contract.address(); // contract account
 
-	await deployer.mkDelegatedLsig("dynamicFeeLsig", contractName, masterAccount, scInitParam); // sign contract
+	await deployer
+		.mkDelegatedLsig("dynamicFeeLsig", contractName, masterAccount, scInitParam)
+		.catch((error) => {
+			throw error;
+		}); // sign contract
 	const signedContract = await deployer.getLsig("dynamicFeeLsig");
 	console.log("Smart Sign ", signedContract);
 
@@ -38,7 +46,9 @@ async function run(runtimeEnv, deployer) {
 	];
 
 	// Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
-	await tryExecuteTx(deployer, transactions);
+	await tryExecuteTx(deployer, transactions).catch((error) => {
+		console.log(error);
+	});
 
 	transactions = [
 		mkTxnParams(masterAccount, escrow, 1000, signedContract, { totalFee: 1000 }),

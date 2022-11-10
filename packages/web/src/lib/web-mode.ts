@@ -18,7 +18,7 @@ import {
 	TxParams,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
-import { error,log } from "./logger";
+import { error, log } from "./logger";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -72,10 +72,9 @@ export class WebMode {
 				});
 			}
 			throw new Error(`Transaction not confirmed after ${waitRounds} rounds`);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -95,10 +94,9 @@ export class WebMode {
 				return await this.waitForConfirmation(txInfo.txId, waitRounds);
 			}
 			throw new Error("Transaction Error");
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -129,10 +127,9 @@ export class WebMode {
 				ledger: this.chainName,
 				tx: combinedBase64Txns,
 			});
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -143,10 +140,9 @@ export class WebMode {
 	async signTransaction(txns: WalletTransaction[]): Promise<JsonPayload> {
 		try {
 			return await this.algoSigner.signTxn(txns);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -180,10 +176,9 @@ export class WebMode {
 					: Number(userParams.firstValid) + Number(userParams.validRounds);
 
 			return s;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -245,10 +240,9 @@ export class WebMode {
 				};
 			}
 			return result;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -301,7 +295,8 @@ export class WebMode {
 					default:
 						return {
 							txn: txn,
-							authAddr: execParams[txnId].fromAccount?.addr || execParams[txnId].fromAccountAddr
+							authAddr:
+								execParams[txnId].fromAccount?.addr || execParams[txnId].fromAccountAddr,
 						}; // set signer
 				}
 			});
@@ -330,10 +325,9 @@ export class WebMode {
 				return await this.waitForConfirmation(txInfo.txId);
 			}
 			throw new Error("Transaction Error");
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -350,10 +344,9 @@ export class WebMode {
 				txns.push(mkTransaction(txn, txParams));
 			}
 			return txns;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -374,10 +367,9 @@ export class WebMode {
 			const blob = signedTx.blob as string;
 			const blobArray = this.algoSigner.encoding.base64ToMsgpack(blob);
 			return algosdk.decodeSignedTransaction(blobArray);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -395,12 +387,14 @@ export class WebMode {
 		try {
 			const signedTxns: SignedTransaction[] = [];
 			const txns: Transaction[] = this.makeTx(execParams, txParams);
-			txns.forEach(async (txn) => signedTxns.push(await this.signTx(txn)));
+			for (const transaction of txns) {
+				const signedTransaction = await this.signTx(transaction);
+				signedTxns.push(signedTransaction);
+			}
 			return signedTxns;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -422,10 +416,9 @@ export class WebMode {
 				}
 				throw new Error("Transaction Incorrect");
 			}
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 }

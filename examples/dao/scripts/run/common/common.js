@@ -6,6 +6,7 @@ async function tryExecuteTx(deployer, txnParams) {
 		return await deployer.executeTx(txnParameters);
 	} catch (e) {
 		console.error("Transaction Failed", e.response ? e.response.body : e);
+		throw e;
 	}
 }
 
@@ -32,11 +33,7 @@ async function fundAccount(deployer, accounts) {
 		});
 	}
 
-	try {
-		await deployer.executeTx(params);
-	} catch (e) {
-		console.error("Transaction Failed", e.response ? e.response.error.text : e);
-	}
+	await tryExecuteTx(deployer, params);
 }
 
 const ProposalType = {

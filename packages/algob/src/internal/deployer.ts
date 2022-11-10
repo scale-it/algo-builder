@@ -4,7 +4,7 @@ import {
 	types as rtypes,
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
-import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
+import { BuilderError, ERRORS, types as wtypes, utils } from "@algo-builder/web";
 import { mkTransaction } from "@algo-builder/web/build/lib/txn";
 import type {
 	Account,
@@ -15,18 +15,15 @@ import type {
 	Transaction,
 } from "algosdk";
 import * as algosdk from "algosdk";
+import { readFileSync } from "fs";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { CompileOp } from "../lib/compile";
-import { getDummyLsig, getLsig, getLsigFromCache } from "../lib/lsig";
+import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import {
-	CheckpointFunctionsImpl,
-	persistCheckpoint,
-	registerCheckpoints,
-} from "../lib/script-checkpoints";
-import { executeTx, makeAndSignTx, signTransactions } from "../lib/tx";
+import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
+import { executeTx } from "../lib/tx";
 import type {
 	AppCache,
 	ASCCache,
@@ -532,7 +529,12 @@ class DeployerBasicMode {
 				break;
 			}
 			case wtypes.SignType.LogicSignature: {
-				signer.lsig.lsig.args = signer.args ?? [];
+				if (signer?.lsig?.lsig?.args) {
+					signer.lsig.lsig.args = signer.args ?? [];
+				} else {
+					(signer.lsig as any).args = signer.args ?? []; // args property didn't exist in earlier version of API (for reference: see the multisig example)
+				}
+
 				decodedResult = algosdk.signLogicSigTransactionObject(transaction, signer.lsig).blob;
 				break;
 			}
@@ -575,6 +577,22 @@ class DeployerBasicMode {
 			const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
 			return this.sendAndWait(Uint8ArraySignedTx, rounds);
 		}
+	}
+
+	/**
+	 * Parses the file and return the ABIContract. If the currently used network is declared in ABI
+	 * the contract.appID will be set accordingly
+	 * @param pathToFile string
+	 * @retun parsed file
+	 */
+	parseABIContractFile(pathToFile: string): wtypes.ABIContract {
+		const buff = readFileSync(pathToFile);
+		const contract: wtypes.ABIContract = new algosdk.ABIContract(JSON.parse(buff.toString()));
+		const genesisHash = utils.getGenesisHashFromName(this.networkName);
+		if (genesisHash !== undefined) {
+			contract.appID = contract.networks[genesisHash].appID;
+		}
+		return contract;
 	}
 }
 

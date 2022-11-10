@@ -1,13 +1,12 @@
 import { types } from "@algo-builder/web";
-import { ExecParams, SignType, TransactionType } from "@algo-builder/web/build/types";
 import algosdk, { LogicSigAccount, Transaction } from "algosdk";
-import { assert } from "chai";
+import { assert, expect } from "chai";
 import sinon from "sinon";
 
 import { getProgram } from "../../src";
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { ASSET_CREATION_FEE } from "../../src/lib/constants";
+import { ASSET_CREATION_FEE, BlockFinalisationTime } from "../../src/lib/constants";
 import { mockSuggestedParams } from "../../src/mock/tx";
 import { Runtime } from "../../src/runtime";
 import { AccountStoreI } from "../../src/types";
@@ -1439,6 +1438,112 @@ describe("Helper functions", function () {
 		const signedTx = runtime.makeAndSignTx([execParams], txnParams, alice.account);
 		assert.doesNotThrow(() => {
 			runtime.sendTxAndWait(signedTx);
+		});
+	});
+});
+
+describe("Atomic Transaction Composer", function () {
+	let runtime: Runtime;
+	const notABI = "not-ABI.json";
+	const notJSON = "not-JSON.teal";
+	const networkRuntimeNotDefined = "network-runtime-undefined.json";
+	const correctABI = "correct-ABI.json";
+	useFixture("atomic-transaction-composer");
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+	});
+
+	it("Should throw an error if file is not found", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile("doesNotExist.json");
+		});
+	});
+
+	it("Should throw an error if file is not ABI", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notABI);
+		});
+	});
+
+	it("Should throw an error if file is not json", function () {
+		assert.throws(() => {
+			runtime.parseABIContractFile(notJSON);
+		});
+	});
+
+	it("Should return the object with undefined appID", function () {
+		const contract = runtime.parseABIContractFile(networkRuntimeNotDefined);
+		assert.isUndefined(contract?.appID);
+	});
+
+	it("Should return ABIContract", function () {
+		const contract = runtime.parseABIContractFile(correctABI);
+		assert.isDefined(contract.appID);
+	});
+});
+
+describe("Funtions related to runtime chain", function () {
+	let runtime: Runtime;
+
+	this.beforeEach(function () {
+		runtime = new Runtime([]);
+	});
+
+	it("Should return current block", function () {
+		const currentBlock = runtime.getBlock(runtime.getRound());
+		assert.equal(currentBlock.seed.length, 32);
+		expect(currentBlock.timestamp).to.be.a("bigint");
+	});
+
+	it("Should produce a new block and move to next round", function () {
+		const currentRound = runtime.getRound();
+		const currentBlock = runtime.getBlock(currentRound);
+		//produce new block and move to next round
+		runtime.produceBlocks();
+		const newRound = runtime.getRound();
+		const newBlock = runtime.getBlock(newRound);
+		assert.equal(currentRound + 1, newRound);
+		assert.notDeepEqual(currentBlock, newBlock);
+		assert.equal(currentBlock.timestamp + BlockFinalisationTime, newBlock.timestamp);
+	});
+
+	it("Should produce N new blocks", function () {
+		const currentRound = runtime.getRound();
+		const N = 5;
+		runtime.produceBlocks(N);
+		const newCurrentRound = runtime.getRound();
+		assert.equal(currentRound + N, newCurrentRound);
+	});
+});
+describe("Application/assets limits for one account", function () {
+	// Before there were limits for how many apps/assets one account is allowed to deploy/opt-in to.
+	// The limits were removed and this is what we test here.
+	useFixture(basicFixture);
+	let runtime: Runtime;
+	const approvalClearProgramFilename = "clear.teal";
+	const appDefinition: types.AppDefinitionFromFile = {
+		appName: "app",
+		metaType: types.MetaType.FILE,
+		approvalProgramFilename: approvalClearProgramFilename,
+		clearProgramFilename: approvalClearProgramFilename,
+		globalBytes: 0,
+		globalInts: 0,
+		localBytes: 0,
+		localInts: 0,
+	};
+	let alice: AccountStore;
+	const appsToBeDeployed = [...Array(20).keys()];
+
+	before(function () {
+		runtime = new Runtime([]);
+		[alice] = runtime.defaultAccounts();
+	});
+
+	appsToBeDeployed.forEach(function (appIndex) {
+		it(`Should deploy ${appIndex} app`, function () {
+			appDefinition.appName = "app".concat(appIndex.toString());
+			assert.doesNotThrow(() => runtime.deployApp(alice.account, appDefinition, {}));
 		});
 	});
 });

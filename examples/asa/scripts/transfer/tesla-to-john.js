@@ -1,5 +1,6 @@
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	const teslaAssetID = deployer.asa.get("tesla").assetIndex;
@@ -7,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 	const john = deployer.accountsByName.get("john");
 	const elon = deployer.accountsByName.get("elon-musk");
 
-	await deployer.executeTx([
+	await tryExecuteTx(deployer, [
 		{
 			type: types.TransactionType.TransferAsset,
 			sign: types.SignType.SecretKey,

@@ -17,6 +17,7 @@ import {
 	DEFAULT_STACK_ELEM,
 	LOGIC_SIG_MAX_COST,
 	MaxTEALVersion,
+	MaxTxnLife,
 	MinVersionSupportC2CCall,
 	TransactionTypeEnum,
 } from "../lib/constants";
@@ -54,7 +55,7 @@ export class Interpreter {
 	length: number; // total length of 'compiled' TEAL code
 	// local stores for a transaction.
 	bytecblock: Uint8Array[];
-	intcblock: BigInt[];
+	intcblock: bigint[];
 	scratch: StackElem[];
 	// TEAL parsed code - instantiated during the execution phase.
 	instructions: Op[];
@@ -135,14 +136,14 @@ export class Interpreter {
 	 * When `create` flag is false we will create new account and add it to context.
 	 * @param accountPk public key of account
 	 * @param line line number in TEAL file
-	 * @param create create flag
+	 * @param createFlag create flag
 	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
 	 */
 	private _getAccountFromAddr(
 		accountPk: Uint8Array,
 		line: number,
-		create: boolean,
+		createFlag: boolean,
 		immutable: boolean
 	): AccountStoreI {
 		const txAccounts = this.runtime.ctx.tx.apat; // tx.Accounts array
@@ -182,7 +183,7 @@ export class Interpreter {
 				) !== undefined)
 		) {
 			const address = encodeAddress(pkBuffer);
-			const account = create
+			const account = createFlag
 				? this.createAccountIfAbsent(address)
 				: this.runtime.ctx.state.accounts.get(address);
 
@@ -202,42 +203,61 @@ export class Interpreter {
 	 * When `create` flag is false we will create new account and add it to context.
 	 * @param accountRef index of account to fetch from account list
 	 * @param line line number
-	 * @param create create flag, default is true
+	 * @param createFlag create flag, default is true
 	 * @param immutable allow to access foreign application account or not(false), default is true
 	 * NOTE: index 0 represents txn sender account
 	 */
 	getAccount(
 		accountRef: StackElem,
 		line: number,
-		create = false,
+		createFlag = false,
 		immutable = true
 	): AccountStoreI {
 		let account: AccountStoreI | undefined;
 		let address: string;
-		if (typeof accountRef === "bigint") {
-			if (accountRef === 0n) {
-				address = encodeAddress(this.runtime.ctx.tx.snd);
-				account = this.runtime.ctx.state.accounts.get(address);
-			} else {
-				const accIndex = accountRef - 1n;
-				checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
-				let pkBuffer;
-				if (this.runtime.ctx.tx.apat) {
-					pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
-				} else {
-					throw new Error("pk Buffer not found");
-				}
-				address = encodeAddress(pkBuffer);
-				account = create
-					? this.createAccountIfAbsent(address)
-					: this.runtime.ctx.state.accounts.get(address);
-			}
+
+		if (accountRef === 0n) {
+			address = encodeAddress(this.runtime.ctx.tx.snd);
+			account = this.runtime.ctx.state.accounts.get(address);
+			return this.runtime.assertAccountDefined(address, account, line);
+		} else if (typeof accountRef === "bigint") {
+			return this._getAccountFromReference(accountRef, line, createFlag);
 		} else {
-			return this._getAccountFromAddr(accountRef, line, create, immutable);
+			return this._getAccountFromAddr(accountRef, line, createFlag, immutable);
 		}
+
+	}
+	
+	/**
+	 * Queries accesible accounts by smart contract. It can be either accounts defined
+	 * in accounts field or accounts associated with apps declared in foreingApps array
+	 * @param accountRef index of account or app ID
+	 * @param line line number
+	 * @param createFlag create flag
+	 * @retuns AccountStoreI object
+	 */
+	private _getAccountFromReference(accountRef: bigint, line: number, createFlag: boolean): AccountStoreI {
+		let address: string;
+		// check if reference exists in foreign apps
+		if (this.runtime.ctx.tx.apfa !== undefined &&
+			this.runtime.ctx.tx.apfa.includes(Number(accountRef))) {
+			address = getApplicationAddress(accountRef);
+		} else { // reference to accounts
+			const accIndex = accountRef - 1n;
+			checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat ?? [], line);
+			if (this.runtime.ctx.tx.apat) {
+				address = encodeAddress(this.runtime.ctx.tx.apat[Number(accIndex)]);
+			} else {
+				throw new Error("pk Buffer not found");
+			}
+		}
+		const account = createFlag
+			? this.createAccountIfAbsent(address)
+			: this.runtime.ctx.state.accounts.get(address);
 
 		return this.runtime.assertAccountDefined(address, account, line);
 	}
+
 
 	/**
 	 * Queries appIndex by app reference (offset to foreignApps array OR index directly)
@@ -594,5 +614,32 @@ export class Interpreter {
 			result = this.stack.pop();
 		}
 		return result;
+	}
+
+	/**
+	 * This functions checks if the requested round is avaiable to access. If it is
+	 * not throws an Error
+	 * @param round: round number
+	 * @returns void
+	 */
+	assertRoundIsAvailable(round: number): void {
+		let firstAvail = this.runtime.ctx.tx.lv - MaxTxnLife - 1;
+		if (firstAvail > this.runtime.ctx.tx.lv || firstAvail === 0) {
+			// early in chain's life
+			firstAvail = 1;
+		}
+		//in AVM all undefined fields are treated as zero
+		let lastAvail = this.runtime.ctx.tx.fv === undefined ? 0 : this.runtime.ctx.tx.fv - 1;
+		if (this.runtime.ctx.tx.fv === undefined || lastAvail > this.runtime.ctx.tx.fv) {
+			// txn had a 0 in FirstValid
+			lastAvail = 0; // So nothing will be available
+		}
+		if (firstAvail > round || round > lastAvail || round === 0) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ROUND_NOT_AVAILABLE, {
+				round: round,
+				firstAvail: firstAvail,
+				lastAvail: lastAvail,
+			});
+		}
 	}
 }

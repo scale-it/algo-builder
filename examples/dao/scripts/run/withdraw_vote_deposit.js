@@ -24,7 +24,9 @@ async function run(runtimeEnv, deployer) {
 	await withdrawVoteDeposit(deployer, voterB, 8);
 
 	// Transaction FAIL: withdrawing votes again would result in negative no.
-	await withdrawVoteDeposit(deployer, voterA, 6);
+	await withdrawVoteDeposit(deployer, voterA, 6).catch((error) => {
+		console.log(error);
+	});
 }
 
 module.exports = { default: run };

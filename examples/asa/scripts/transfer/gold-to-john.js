@@ -5,6 +5,7 @@
 
 const { balanceOf } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 	// query gold ASA from deployer (using checkpoint information),
@@ -19,7 +20,7 @@ async function run(runtimeEnv, deployer) {
 	const goldOwner = deployer.accountsByName.get("alice");
 
 	// execute asset transfer transaction
-	await deployer.executeTx([
+	await tryExecuteTx(deployer, [
 		{
 			type: types.TransactionType.TransferAsset,
 			sign: types.SignType.SecretKey,

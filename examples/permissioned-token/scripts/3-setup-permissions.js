@@ -1,5 +1,6 @@
 const { types } = require("@algo-builder/web");
 const accounts = require("./common/accounts");
+const { tryExecuteTx } = require("./common/common");
 
 /**
  * Deploy Permissions smart contract
@@ -18,21 +19,25 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
 
 	/** Deploy Permissions(rules) smart contract **/
 	console.log("\n** Deploying smart contract: permissions **");
-	const permissionAppInfo = await deployer.deployApp(
-		owner,
-		{
-			appName: "Permissions",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "permissions.py", // approval program
-			clearProgramFilename: "clear_state_program.py", // clear program
-			localInts: 1, // 1 to store whitelisted status in local state
-			localBytes: 0,
-			globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
-			globalBytes: 1, // to store permissions manager
-		},
-		{},
-		templateParam
-	); // pass perm_manager as a template param (to set during deploy)
+	const permissionAppInfo = await deployer
+		.deployApp(
+			owner,
+			{
+				appName: "Permissions",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "permissions.py", // approval program
+				clearProgramFilename: "clear_state_program.py", // clear program
+				localInts: 1, // 1 to store whitelisted status in local state
+				localBytes: 0,
+				globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
+				globalBytes: 1, // to store permissions manager
+			},
+			{},
+			templateParam
+		) // pass perm_manager as a template param (to set during deploy)
+		.catch((error) => {
+			throw error;
+		});
 	console.log(permissionAppInfo);
 
 	/**
@@ -46,23 +51,20 @@ async function setupPermissionsApp(runtimeEnv, deployer) {
    * + Currently only 1 permissions app is supported.
    */
 	console.log("\n** Linking permissions smart contract to the controller **");
-	try {
-		const appArgs = ["str:set_permission", `int:${permissionAppInfo.appID}`];
 
-		await deployer.executeTx([
-			{
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: owner, // asa manager account
-				appID: controllerappID,
-				payFlags: { totalFee: 1000 },
-				appArgs: appArgs,
-				foreignAssets: [tesla.assetIndex], // controller sc verifies if correct token is being used + asa.manager is correct one
-			},
-		]);
-	} catch (e) {
-		console.log("Error occurred", e.response.error);
-	}
+	const appArgs = ["str:set_permission", `int:${permissionAppInfo.appID}`];
+
+	await tryExecuteTx(deployer, [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: owner, // asa manager account
+			appID: controllerappID,
+			payFlags: { totalFee: 1000 },
+			appArgs: appArgs,
+			foreignAssets: [tesla.assetIndex], // controller sc verifies if correct token is being used + asa.manager is correct one
+		},
+	]);
 }
 
 module.exports = { default: setupPermissionsApp };

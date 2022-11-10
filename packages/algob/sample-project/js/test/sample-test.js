@@ -63,17 +63,19 @@ describe("Sample Test", function () {
 		const initialMasterBalance = master.balance();
 
 		try {
-			assert.throws(() => runtime.executeTx([
-				{
-					type: types.TransactionType.TransferAlgo,
-					sign: types.SignType.LogicSignature,
-					lsig: lsig,
-					fromAccountAddr: master.address,
-					toAccountAddr: fundReceiver.address,
-					amountMicroAlgos: amount,
-					payFlags: { totalFee: invalidTxFee },
-				},
-			]));
+			assert.throws(() =>
+				runtime.executeTx([
+					{
+						type: types.TransactionType.TransferAlgo,
+						sign: types.SignType.LogicSignature,
+						lsig: lsig,
+						fromAccountAddr: master.address,
+						toAccountAddr: fundReceiver.address,
+						amountMicroAlgos: amount,
+						payFlags: { totalFee: invalidTxFee },
+					},
+				])
+			);
 		} catch (error) {
 			console.log(error);
 		}

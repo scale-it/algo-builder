@@ -26,29 +26,29 @@ Below we demonstrate how to perform application call using `ExecParam` and `WebM
 
 ```js
 appCall = () => {
-		const webMode: WebMode = new WebMode(AlgoSigner, networkType);
-		const tx: types.ExecParams[] = [
-			{
-				type: types.TransactionType.CallApp,
-				sign: types.SignType.SecretKey,
-				fromAccount: {
-					addr: addr,
-					sk: new Uint8Array(0),
-				},
-				appID: 100,
-				payFlags: {},
+	const webMode: WebMode = new WebMode(AlgoSigner, networkType);
+	const tx: types.ExecParams[] = [
+		{
+			type: types.TransactionType.CallApp,
+			sign: types.SignType.SecretKey,
+			fromAccount: {
+				addr: addr,
+				sk: new Uint8Array(0),
 			},
-		];
-		webMode.executeTx(tx);
-	};
+			appID: 100,
+			payFlags: {},
+		},
+	];
+	webMode.executeTx(tx);
+};
 ```
 
 We can also use `SignedTransaction` and `executeTx` in runtime:
 
 ```js
-    const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
-    let signedTx: SignedTransaction = {txn: tx};
-    runtime.executeTx(signedTx);
+const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
+let signedTx: SignedTransaction = { txn: tx };
+runtime.executeTx(signedTx);
 ```
 
 ## ExecParams
@@ -64,7 +64,7 @@ If the length of `ExecParams` array is greater than one, it will be considered a
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: fee }  
+    payFlags: { totalFee: fee }
   }
 ```
 
@@ -302,13 +302,13 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 `deployer.executeTx` method supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) object which has following properties:
 
-
 - `type`: type of transaction.
 - `sign`: signature [`types`](https://github.com/scale-it/algo-builder/blob/2bcef8f611b349dfb8dc3542ed2f0a129a0c405c/packages/web/src/types.ts#L117).
 
 Ex:
 
 ```js
+>>>>>>> develop
 const tx = makeAssetCreateTxn(
   bobAcc.addr, mockSuggestedParam.fee,
   mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
@@ -343,11 +343,13 @@ export function isSDKTransactionAndSign(object: unknown): object is TransactionA
 This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.TransactionAndSign.html) objects and returns raw signed transaction. `SignedTransaction` is preferred when there is a transaction which is already signed and has to be sent to network.
 
 ```js
-const transaction: wtypes.TransactionAndSign = [{
-  transaction: SDKTx,
-  sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
-}]
-const rawSign = signTransactions(transaction)
+const transaction: wtypes.TransactionAndSign = [
+	{
+		transaction: SDKTx,
+		sign: { sign: wtypes.SignType.SecretKey, fromAccount: bobAcc },
+	},
+];
+const rawSign = signTransactions(transaction);
 ```
 
 `rawSign` has array of raw signed transactions.

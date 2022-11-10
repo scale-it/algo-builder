@@ -9,7 +9,7 @@
 import * as algob from "@algo-builder/algob";
 import { types as rtypes } from "@algo-builder/web";
 
-import { prepareParameters, withdrawExecuteTx } from "./common";
+import { prepareParameters, tryExecuteTx } from "./common";
 
 async function run(
 	runtimeEnv: algob.types.RuntimeEnv,
@@ -35,19 +35,14 @@ async function run(
 		payFlags: { totalFee: 1000 },
 	};
 
-	// Transaction Fails : as wrong secret value is used 
-	await withdrawExecuteTx(deployer, txnParams)
-		.catch(error => {
-			console.log(error)
-		})
+	// Transaction Fails : as wrong secret value is used
+	await tryExecuteTx(deployer, [txnParams]).catch((error) => {
+		console.log(error);
+	});
 
 	// Transaction Passes: as right secret value is used
 	txnParams.args = [algob.convert.stringToBytes(secret)];
-	await withdrawExecuteTx(deployer, txnParams)
-		.catch(error => {
-			throw error
-		})
-
+	await tryExecuteTx(deployer, [txnParams]);
 }
 
 module.exports = { default: run };

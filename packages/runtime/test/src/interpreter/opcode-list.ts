@@ -11,6 +11,7 @@ import algosdk, {
 import { assert } from "chai";
 import { ec as EC } from "elliptic";
 import { sha512_256 } from "js-sha512";
+import cloneDeep from "lodash.clonedeep";
 import { describe } from "mocha";
 import nacl from "tweetnacl";
 
@@ -45,6 +46,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -158,19 +160,26 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
 	Uncover,
+	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ASSET_CREATION_FEE,
+	blockFieldTypes,
+	CurveTypeEnum,
 	DEFAULT_STACK_ELEM,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
+	seedLength,
+	TxFieldEnum,
+	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 } from "../../../src/lib/constants";
 import {
@@ -2095,15 +2104,6 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(TXN_OBJ.rekey, stack.pop());
 			});
 
-			it("should throw error on FirstValidTime", function () {
-				execExpectError(
-					stack,
-					[],
-					new Txn(["FirstValidTime"], 1, interpreter),
-					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-				);
-			});
-
 			it("should push txn NumAppArgs to stack", function () {
 				const op = new Txn(["NumAppArgs"], 1, interpreter);
 				op.execute(stack);
@@ -2444,13 +2444,13 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv3
 			it("should push value from foreign assets array and push NumAssets", function () {
-				// should push Accounts[0] to stack
+				// should push Assets[0] to stack
 				let op = new Txn(["Assets", "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[0]), stack.pop());
 
-				// should push Accounts[1] to stack
+				// should push Assets[1] to stack
 				op = new Txn(["Assets", "1"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
@@ -2548,6 +2548,59 @@ describe("Teal Opcodes", function () {
 			});
 		});
 
+		describe("FirstValidTime", function () {
+			this.beforeEach(function () {
+				interpreter = new Interpreter();
+				interpreter.runtime = new Runtime([]);
+				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+				interpreter.tealVersion = MaxTEALVersion;
+			});
+
+			it("Should throw exception if txn.lv - txn.fv > 1000 + 1", function () {
+				interpreter.runtime.ctx.tx.fv = 1999; //last valid = 3000, 3000 - (1999 - 1) > 1001
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should push txn correct timestamp to stack", function () {
+				interpreter.runtime.ctx.tx.lv = TXN_OBJ.fv + 500;
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				const expectedResult = interpreter.runtime.getBlock(TXN_OBJ.fv - 1).timestamp;
+				op.execute(stack);
+				assert.equal(expectedResult, stack.pop());
+			});
+
+			it("Should throw exception if teal version < 7", function () {
+				interpreter.tealVersion = 6;
+				expectRuntimeError(
+					() => new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+				);
+			});
+
+			it("Should throw exception if round number is negative", function () {
+				interpreter.runtime.ctx.tx.fv = 0;
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should throw exception if round number is 0 even if last valid is low", function () {
+				interpreter.runtime.ctx.tx.fv = 1;
+				interpreter.runtime.ctx.tx.lv = 100;
+				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				assert.throws(() => op.execute(stack));
+			});
+
+			it("Should not throw error on FirstValidTime", function () {
+				execExpectError(
+					stack,
+					[],
+					new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+				);
+			});
+		});
+
 		describe("Gtxn", function () {
 			before(function () {
 				const tx = interpreter.runtime.ctx.tx;
@@ -2556,6 +2609,14 @@ describe("Teal Opcodes", function () {
 				// https://developer.algorand.org/docs/reference/transactions/
 				const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
+			});
+
+			it("Should push to the stack correct block timestamp", function () {
+				const op = new Gtxn(["0", TxFieldEnum.FirstValidTime], 1, interpreter);
+				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv ?? 0;
+				const expextedResult = interpreter.runtime.getBlock(firstTxFirstValid - 1).timestamp;
+				op.execute(stack);
+				assert.equal(expextedResult, stack.pop());
 			});
 
 			it("push fee from 2nd transaction in group", function () {
@@ -6081,14 +6142,10 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("ecdsa_verify, should throw error if curve is not supported", function () {
-			stack.push(msgHash);
-			stack.push(signature.r.toBuffer());
-			stack.push(signature.s.toBuffer());
-			stack.push(pkX);
-			stack.push(pkY);
-
-			const op = new EcdsaVerify(["2"], 1);
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaVerify(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_decompress", function () {
@@ -6097,7 +6154,7 @@ describe("Teal Opcodes", function () {
 			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
 			stack.push(Buffer.from(compressed, "hex"));
 
-			let op = new EcdsaPkDecompress(["0"], 1);
+			const op = new EcdsaPkDecompress(["0"], 1);
 			op.execute(stack);
 
 			assert.deepEqual(
@@ -6108,11 +6165,10 @@ describe("Teal Opcodes", function () {
 				stack.pop(),
 				Buffer.from("50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352", "hex")
 			);
-
-			stack.push(Buffer.from(compressed, "hex"));
-			op = new EcdsaPkDecompress(["2"], 1);
-
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkDecompress(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_recover", function () {
@@ -6148,6 +6204,7 @@ describe("Teal Opcodes", function () {
 			stack.push(pkY);
 			let op = new EcdsaVerify(["0"], 1);
 			assert.equal(1700, op.execute(stack));
+
 			//EcdsaPkDecompress
 			const compressed = "0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352";
 			stack.push(Buffer.from(compressed, "hex"));
@@ -6159,8 +6216,8 @@ describe("Teal Opcodes", function () {
 			stack.push(BigInt(signature.recoveryParam ?? 0n));
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
-			op = new EcdsaPkRecover(["0"], 1);
-			assert.equal(2000, op.execute(stack));
+			const opRecover = new EcdsaPkRecover(["0"], 1);
+			assert.equal(2000, opRecover.execute(stack));
 		});
 	});
 
@@ -6297,8 +6354,10 @@ describe("Teal Opcodes", function () {
 			interpreter = new Interpreter();
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.tx = TXN_OBJ;
-			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
-			// a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+			interpreter.tealVersion = MaxTEALVersion;
+			// set tealversion to latest (to support all tx fields)
+			// a) 'apas' represents 'foreignAssets',
+			// b) 'apfa' represents 'foreignApps' (id's of foreign apps)
 			// https://developer.algorand.org/docs/reference/transactions/
 			const tx2 = { ...TXN_OBJ, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
 			interpreter.runtime.ctx.gtxs = [TXN_OBJ, tx2];
@@ -7561,6 +7620,247 @@ describe("Teal Opcodes", function () {
 			stack.push(pointG2Bytes);
 			op.execute(stack);
 			assert.equal(expectedResult, stack.pop());
+		});
+	});
+	describe("Block opcode", function () {
+		const stack = new Stack<StackElem>();
+		let interpreter: Interpreter;
+		const FIRST_VALID = 2000n;
+		this.beforeEach(function () {
+			interpreter = new Interpreter();
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+			interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+		});
+
+		it("Should fail when accesing two behind FirstVaild because LastValid is 1000 after", function () {
+			stack.push(BigInt(FIRST_VALID - 2n));
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+
+		it("Should allow to acces two behind FirstValid if LastValid is 100 after", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
+			stack.push(BigInt(FIRST_VALID - 2n));
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.doesNotThrow(() => op.execute(stack));
+		});
+
+		it("Should return two different seeds for to different rounds", function () {
+			interpreter.runtime.ctx.tx.lv = Number(FIRST_VALID) + 100;
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			//first round
+			stack.push(FIRST_VALID - 1n);
+			op.execute(stack);
+			const seedRound1 = stack.pop();
+			//second round
+			stack.push(FIRST_VALID - 2n);
+			op.execute(stack);
+			const seedRound2 = stack.pop();
+			assert.notEqual(seedRound1, seedRound2);
+		});
+
+		it("Should fail when accesing block 0 even if last valid is low", function () {
+			interpreter.runtime.ctx.tx.lv = 100;
+			interpreter.runtime.ctx.tx.fv = 5;
+			stack.push(0n);
+			const op = new Block([blockFieldTypes.BlkTimestamp], 1, interpreter);
+			assert.throws(() => op.execute(stack));
+		});
+
+		it("Should return seed for a block that is within boundries and exist", function () {
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			op.execute(stack);
+			const result = stack.pop();
+			assert.equal((result as Buffer).length, seedLength);
+		});
+
+		it("Should return correct cost", function () {
+			stack.push(FIRST_VALID - 1n);
+			const op = new Block([blockFieldTypes.BlkSeed], 1, interpreter);
+			const cost = op.execute(stack);
+			assert.equal(cost, 1);
+		});
+	});
+
+	describe("vrf_verify", function () {
+		let stack = new Stack<StackElem>();
+		const publicKey = Buffer.from(
+			"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+			"hex"
+		);
+		const proof = Buffer.from(
+			"b6b4699f87d56126c9117a7da55bd0085246f4c56dbc95d20172612e9d38e8d7ca65e573a126ed88d4e30a46f80a666854d675cf3ba81de0de043c3774f061560f55edc256a787afe701677c0f602900",
+			"hex"
+		);
+		const message = Buffer.from("");
+		const expectedResult = Buffer.from(
+			"5b8e2bf68c9d33ec1477cb3e9305135f96a796163fb63983587ae1e3a6bfd3b1b3cbdee0d0cd465c0de7d30522ee003a6757b3ff7a737cc4a8717919d8940038",
+			"hex"
+		);
+
+		this.beforeEach(function () {
+			stack = new Stack<StackElem>();
+		});
+
+		it("Should return 1 and hash of proof for valid proof and verification key", function () {
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			op.execute(stack);
+			assert.deepEqual(1n, stack.pop());
+			assert.deepEqual(expectedResult, stack.pop());
+		});
+		it("Should throw error if pubKey size not equal 32", function () {
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
+			const wrongSizePubKey = Buffer.from("b6b4699f87d56126c9117");
+			stack.push(wrongSizePubKey);
+			stack.push(proof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
+		});
+		it("Should throw error if proof size not equal 80", function () {
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
+			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
+			stack.push(publicKey);
+			stack.push(wrongSizeProof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
+		});
+		it("Should return correct cost", function () {
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			const cost = op.execute(stack);
+			assert.equal(cost, 5700);
+		});
+		it("Should throw error when field = VrfStandard", function () {
+			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
+			stack.push(publicKey);
+			stack.push(proof);
+			stack.push(message);
+			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
+		});
+		it("Should throw error when field is unknown", function () {
+			expectRuntimeError(
+				() => new VrfVerify(["wrongType"], 1),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE
+			);
+		});
+	});
+
+	describe("Ecdsa Secp256r1 curve", function () {
+		const curve = new EC(CurveTypeEnum.secp256r1);
+		const keyPair = curve.genKeyPair();
+		const compressedPublicKey = keyPair.getPublic().encodeCompressed("hex");
+		const publicKeyX = keyPair.getPublic().getX().toBuffer();
+		const publicKeyY = keyPair.getPublic().getY().toBuffer();
+		const message = new Uint8Array([0]);
+		const signature = keyPair.sign(message);
+
+		let stack: Stack<StackElem>;
+		this.beforeEach(function () {
+			stack = new Stack<StackElem>();
+		});
+
+		describe("verfiy", function () {
+			it("Should return correct cost", function () {
+				const op = new EcdsaVerify(["1"], 1);
+				assert.equal(op.computeCost(), 2500);
+			});
+
+			it("Should push 1 to stack if correct data provided", function () {
+				stack.push(message);
+				stack.push(signature.r.toBuffer());
+				stack.push(signature.s.toBuffer());
+				stack.push(publicKeyX);
+				stack.push(publicKeyY);
+				const op = new EcdsaVerify(["1"], 1);
+				op.execute(stack);
+				assert.equal(stack.pop(), 1n);
+			});
+
+			it("Should push 0 to stack if invalid signature provided", function () {
+				stack.push(message);
+				const wrongSignatureR = signature.r.toBuffer();
+				wrongSignatureR[0] = ~wrongSignatureR[0]; //flip the first bit
+				stack.push(wrongSignatureR);
+				stack.push(signature.s.toBuffer());
+				stack.push(publicKeyX);
+				stack.push(publicKeyY);
+				const op = new EcdsaVerify(["1"], 1);
+				op.execute(stack);
+				assert.equal(stack.pop(), 0n);
+			});
+		});
+
+		describe("PK decompress", function () {
+			it("Should return correct cost", function () {
+				const op = new EcdsaPkDecompress(["1"], 1);
+				assert.equal(op.computeCost(), 2400);
+			});
+
+			it("Should decompress the public Key", function () {
+				stack.push(Buffer.from(compressedPublicKey, "hex"));
+				const op = new EcdsaPkDecompress(["1"], 1);
+				op.execute(stack);
+				assert.deepEqual(stack.pop(), publicKeyY);
+				assert.deepEqual(stack.pop(), publicKeyX);
+			});
+		});
+	});
+
+	describe("Tealv8", function () {
+		describe("switch", function () {
+			let stack: Stack<StackElem>;
+			let interpreter: Interpreter;
+			const line = 1;
+			const tealV8 = 8;
+
+			this.beforeEach(function () {
+				stack = new Stack<StackElem>();
+				interpreter = new Interpreter();
+				interpreter.runtime = new Runtime([]);
+				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+				interpreter.tealVersion = tealV8;
+			});
+
+			it("Should create a new switch opcode", function () {
+				assert.doesNotThrow(() => new Switch(["label"], line, interpreter));
+			});
+
+			it("Should throw an error if the stack length < 1", function () {
+				const op = new Switch(["label"], line, interpreter);
+				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+			});
+
+			it("Should not thorw an error if labels not provided", function () {
+				assert.doesNotThrow(() => new Switch([], line, interpreter));
+			});
+
+			it("Should allow 255 labels", function () {
+				const upperLimit = 255;
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
+				assert.doesNotThrow(() => new Switch(labels, line, interpreter));
+			});
+
+			it("Should throw an error if 256 labels provided", function () {
+				const upperLimit = 256;
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
+				expectRuntimeError(
+					() => new Switch(labels, line, interpreter),
+					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID
+				);
+			});
+
+			it("Should not throw an error if index exceeds the lenght of labes provided", function () {
+				stack.push(5n);
+				const op = new Switch(["label"], line, interpreter);
+				assert.doesNotThrow(() => op.execute(stack));
+			});
 		});
 	});
 });

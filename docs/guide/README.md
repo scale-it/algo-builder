@@ -193,10 +193,11 @@ You can write your scripts and tests in JavaScript. If you don't add any flag to
 ```shell
 yarn run algob init <path-where-to-create> --javascript
 ```
+
 #### Example on `algob init` with javascript
 
 You can use below command to initialize the javascript project in `sample-project` folder.
-If `sample-project` folder is not present then it will create one for you. 
+If `sample-project` folder is not present then it will create one for you.
 
 ```shell
 yarn run algob init ./sample-project --javascript
@@ -213,7 +214,7 @@ yarn run algob init <path-where-to-create> --typescript
 #### Example on `algob init` with typescript
 
 You can use below command to initialize the typescript project in `sample-project` folder.
-If `sample-project` folder is not present then it will create one for you. 
+If `sample-project` folder is not present then it will create one for you.
 
 ```shell
 yarn run algob init ./sample-project --typescript

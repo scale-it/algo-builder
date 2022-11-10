@@ -45,7 +45,7 @@ async function run(runtimeEnv, deployer) {
 	await tryExecuteTx(deployer, optInTx);
 
 	// Transaction will FAIL: deposit amount is not the same as app.global("deposit")
-	await closeProposal(deployer, proposalLsig, 7);
+	await closeProposal(deployer, proposalLsig, 7).catch((error) => console.log(error));
 
 	// Transaction will SUCCEED
 	await closeProposal(deployer, proposalLsig, 15);

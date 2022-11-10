@@ -1,6 +1,6 @@
 const { types } = require("@algo-builder/web");
 const accounts = require("./common/accounts");
-const { getClawbackParams } = require("./common/common");
+const { getClawbackParams, tryExecuteTx } = require("./common/common");
 
 /**
  * Compile and set clawback logic sig (escrow) with template parameters:
@@ -16,7 +16,11 @@ async function setupClawback(runtimeEnv, deployer) {
 	// NOTE: make sure to deploy ASA and controller before
 	const tesla = deployer.asa.get("tesla");
 	const clawbackParams = getClawbackParams(deployer);
-	await deployer.mkContractLsig("ClawbackLsig", "clawback.py", clawbackParams);
+	await deployer
+		.mkContractLsig("ClawbackLsig", "clawback.py", clawbackParams)
+		.catch((error) => {
+			throw error;
+		});
 
 	const clawbackLsig = deployer.getLsig("ClawbackLsig");
 	const clawbackAddress = clawbackLsig.address();
@@ -44,7 +48,7 @@ async function setupClawback(runtimeEnv, deployer) {
 			payFlags: { totalFee: 1000 },
 		},
 	];
-	await deployer.executeTx(assetConfigParams);
+	await tryExecuteTx(deployer, assetConfigParams);
 }
 
 module.exports = { default: setupClawback };

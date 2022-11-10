@@ -1,4 +1,5 @@
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -13,29 +14,35 @@ async function run(runtimeEnv, deployer) {
 		payFlags: {},
 	};
 	// transfer some algos to creator account
-	await deployer.executeTx([algoTxnParams]);
+	await tryExecuteTx(deployer, [algoTxnParams]);
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
-	const sscInfo = await deployer.deployApp(
-		creatorAccount,
-		{
-			appName: "CounterApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "approval_program.teal", // approval program
-			clearProgramFilename: "clear_program.teal", // clear program
-			localInts: 1,
-			localBytes: 1,
-			globalInts: 1,
-			globalBytes: 1,
-		},
-		{}
-	);
+	const sscInfo = await deployer
+		.deployApp(
+			creatorAccount,
+			{
+				appName: "CounterApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "approval_program.teal", // approval program
+				clearProgramFilename: "clear_program.teal", // clear program
+				localInts: 1,
+				localBytes: 1,
+				globalInts: 1,
+				globalBytes: 1,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(sscInfo);
 
 	// Opt-In for creator
-	await deployer.optInAccountToApp(creatorAccount, sscInfo.appID, {}, {});
+	await deployer.optInAccountToApp(creatorAccount, sscInfo.appID, {}, {}).catch((error) => {
+		throw error;
+	});
 }
 
 module.exports = { default: run };

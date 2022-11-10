@@ -3,6 +3,7 @@ import { assert } from "chai";
 import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
+import { Op } from "../../../src/interpreter/opcode";
 import {
 	AcctParamsGet,
 	Add,
@@ -125,6 +126,7 @@ import {
 import {
 	AcctParamQueryFields,
 	AppParamDefined,
+	LogicSigMaxSize,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
@@ -134,6 +136,8 @@ import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
+
+const tealTestArg = "test-arg.teal";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -2260,33 +2264,28 @@ describe("Parser", function () {
 			interpreter.tealVersion = 2;
 		});
 
+		function loadProgram(filename: string, mode = ExecutionMode.SIGNATURE): Op[] {
+			return parser(getProgram(filename), mode, interpreter);
+		}
+
 		it("Supported pragma version 6", function () {
-			const fileWithPragmav6 = "test-pragma-v6.teal";
-			assert.doesNotThrow(() =>
-				parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
-			);
+			assert.doesNotThrow(() => loadProgram("test-pragma-v6.teal"));
 		});
 
 		it("Supported pragma version 7", function () {
-			const fileWithPragmav7 = "test-pragma-v7.teal";
-			assert.doesNotThrow(() =>
-				parser(getProgram(fileWithPragmav7), ExecutionMode.SIGNATURE, interpreter)
-			);
+			assert.doesNotThrow(() => loadProgram("test-pragma-v7.teal"));
 		});
 
 		it("Should fail if declare pragma greater than 7", function () {
-			const fileWithPragmaInvalid = "test-pragma-invalid.teal";
 			expectRuntimeError(
-				() => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-invalid.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
 			);
 		});
 
 		it("Should return correct opcode list for '+'", async function () {
-			const file1 = "test-file-1.teal";
-			let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
+			let res = loadProgram("test-file-1.teal");
 			const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
-
 			assert.deepEqual(res, expected);
 
 			const expect = [
@@ -2295,28 +2294,24 @@ describe("Parser", function () {
 				new Int(["3"], 3),
 				new Add([], 4),
 			];
-			res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
-
+			res = loadProgram("test-file-2.teal");
 			assert.deepEqual(res, expect);
 		});
 
 		it("Should throw error if #pragma is not on 1st line", async function () {
-			let file = "test-pragma-1.teal";
 			expectRuntimeError(
-				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-1.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
 			);
 
-			file = "test-pragma-2.teal";
 			expectRuntimeError(
-				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-2.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
 			);
 		});
 
 		it("Should return correct opcode list for '-'", async function () {
-			const file = "test-file-3.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-3.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["5"], 2),
@@ -2328,8 +2323,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for '/'", async function () {
-			const file = "test-file-4.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-4.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["6"], 2),
@@ -2341,8 +2335,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for '*'", async function () {
-			const file = "test-file-5.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-5.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["5"], 4),
@@ -2354,8 +2347,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'addr'", async function () {
-			const file = "test-addr.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-addr.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2),
@@ -2365,8 +2357,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'byte'", async function () {
-			const file = "test-byte.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-byte.teal");
 			const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
 			const byte32 = "MFRGGZDFMY======";
 
@@ -2385,16 +2376,14 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'Len and Err'", async function () {
-			const file = "test-len-err.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-len-err.teal");
 			const expected = [new Len([], 1), new Err([], 2)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Bitwise'", async function () {
-			const file = "test-bitwise.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-bitwise.teal");
 			const expected = [
 				new BitwiseOr([], 2),
 				new BitwiseAnd([], 4),
@@ -2406,47 +2395,42 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'Mod'", async function () {
-			const file = "test-mod.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-mod.teal");
 			const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Arg'", async function () {
-			const file = "test-arg.teal";
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(0)];
 
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram(tealTestArg);
 			const expected = [new Arg(["0"], 1, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Intc and Bytec'", async function () {
-			const file = "test-int-bytec.teal";
 			interpreter.intcblock = [1n];
 			interpreter.bytecblock = [new Uint8Array(0)];
 
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-int-bytec.teal");
 			const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Store and Load'", async function () {
-			const file = "test-store-load.teal";
 			interpreter.scratch = [1n];
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-store-load.teal");
 			const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Crypto opcodes'", async function () {
-			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram(cryptoFile);
 			const expected = [
 				new Sha256([], 1, interpreter),
 				new Keccak256([], 2, interpreter),
@@ -2457,9 +2441,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'comparsions'", async function () {
-			const file = "test-compare.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-compare.teal");
 			const expected = [
 				new LessThan([], 1),
 				new GreaterThan([], 2),
@@ -2476,9 +2458,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'all others'", async function () {
-			const file = "test-others.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-others.teal");
 			const expected = [
 				new Pragma(["version", "6"], 1, interpreter),
 				new Itob([], 2),
@@ -2493,14 +2473,11 @@ describe("Parser", function () {
 				new Substring3([], 11),
 				new Divw([], 12),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'b, bz, bnz'", async function () {
-			const file = "test-branch.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-branch.teal");
 			const expected = [
 				new Branch(["label1"], 2, interpreter),
 				new BranchIfZero(["label2"], 3, interpreter),
@@ -2511,27 +2488,19 @@ describe("Parser", function () {
 		});
 
 		it("should return correct opcode list for 'return'", async function () {
-			const file = "test-return.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-return.teal");
 			const expected = [new Return([], 2, interpreter)];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'Label'", async function () {
-			const file = "test-label.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-label.teal");
 			const expected = [new Label(["label:"], 2)];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'global'", async function () {
-			const file = "test-global.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-global.teal");
 			const expected = [
 				new Global(["MinTxnFee"], 3, interpreter),
 				new Global(["MinBalance"], 4, interpreter),
@@ -2548,9 +2517,7 @@ describe("Parser", function () {
 		});
 
 		it("should return correct opcode list for `Stateful`", async function () {
-			const file = "test-stateful.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("test-stateful.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "5"], 1, interpreter),
 				new Balance([], 4, interpreter),
@@ -2568,14 +2535,11 @@ describe("Parser", function () {
 				new Int(["10"], 17),
 				new AppParamsGet(["AppCreator"], 18, interpreter),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for `teal v6`", async function () {
-			const file = "teal-v6.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("teal-v6.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "6"], 1, interpreter),
 				new Divw([], 2),
@@ -2588,24 +2552,22 @@ describe("Parser", function () {
 				new Gitxnas(["0", "Accounts"], 9, interpreter),
 				new ITxnas(["Accounts"], 10, interpreter),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for `teal v7`", async function () {
-			const file = "teal-v7.teal";
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("teal-v7.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
 				new Base64Decode(["URLEncoding"], 2),
 			];
-
 			assert.deepEqual(expected, res);
 		});
 	});
 
 	describe("Gas cost of Opcodes from TEAL file", function () {
 		useFixture("teal-files");
+		const file = "test-arg.teal"; // byte size 3
 
 		let interpreter: Interpreter;
 		beforeEach(function () {
@@ -2723,6 +2685,30 @@ describe("Parser", function () {
 				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
 				RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
 			);
+		});
+
+		it("Should pass when (program size + args size) = LogicSigMaxSize", function () {
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 3)];
+
+			assert.doesNotThrow(() =>
+				parser(getProgram(tealTestArg), ExecutionMode.SIGNATURE, interpreter)
+			);
+
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(tealTestArg), "base64").length, 3);
+		});
+
+		it("Should fail when (program size + args size) > LogicSigMaxSize", function () {
+			interpreter.runtime = new Runtime([]);
+			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 2)];
+
+			expectRuntimeError(
+				() => parser(getProgram(tealTestArg), ExecutionMode.SIGNATURE, interpreter),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+			// verify lsig size
+			assert.equal(Buffer.from(getProgram(tealTestArg), "base64").length, 3);
 		});
 	});
 });

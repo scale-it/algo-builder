@@ -1,4 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { runtimeGenesisHash } from "@algo-builder/web/build/lib/constants";
 import algosdk, {
 	Account as AccountSDK,
 	decodeAddress,
@@ -7,6 +8,8 @@ import algosdk, {
 	SignedTransaction,
 	Transaction,
 } from "algosdk";
+import MD5 from "crypto-js/md5";
+import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -19,7 +22,10 @@ import { compareArray } from "./lib/compare";
 import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
+	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
+	MaxExtraAppProgramPages,
+	seedLength,
 	TransactionTypeEnum,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
@@ -35,6 +41,7 @@ import {
 	ASADeploymentFlags,
 	ASAInfo,
 	AssetHoldingM,
+	Block,
 	Context,
 	EncTx,
 	ExecutionMode,
@@ -63,6 +70,7 @@ export class Runtime {
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
 	private timestamp: number;
+	private readonly numberOfInitialBlocks: number;
 
 	constructor(accounts: AccountStoreI[]) {
 		// runtime store
@@ -76,6 +84,7 @@ export class Runtime {
 			appCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize app counter with 8
 			assetCounter: ALGORAND_MAX_TX_ARRAY_LEN, // initialize asset counter with 8
 			txReceipts: new Map<string, TxReceipt>(), // receipt of each transaction, i.e map of {txID: txReceipt}
+			blocks: new Map<number, Block>(),
 		};
 
 		this._defaultAccounts = this._setupDefaultAccounts();
@@ -88,7 +97,9 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2;
+		this.round = 0;
+		this.numberOfInitialBlocks = 2000;
+		this.produceBlocks(this.numberOfInitialBlocks);
 		this.timestamp = 1;
 	}
 
@@ -596,7 +607,8 @@ export class Runtime {
 			appDef.foreignAssets,
 			appDef.note,
 			appDef.lease,
-			payFlags.rekeyTo
+			payFlags.rekeyTo,
+			appDef.extraPages
 		);
 
 		const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
@@ -921,7 +933,11 @@ export class Runtime {
 					}
 				}
 
-				if (appDef !== undefined) appDefMap.set(index, appDef);
+				if (appDef !== undefined) {
+					appDefMap.set(index, appDef);
+					const appDefinition = appDef as types.AppDefinition;
+					this.validateExtraPages(appDefinition?.extraPages);
+				}
 				return txn;
 			});
 
@@ -1073,6 +1089,19 @@ export class Runtime {
 	}
 
 	/**
+	 * Verifies extra pages do not exceed the limit
+	 * @param extraPages extra pages for program. Default value is 0
+	 */
+	validateExtraPages(extraPages = 0): void {
+		if (extraPages > MaxExtraAppProgramPages) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED, {
+				extraPages: extraPages,
+				maxExtraAppProgramPages: MaxExtraAppProgramPages,
+			});
+		}
+	}
+
+	/**
 	 * Verify multi-signature
 	 * @param signedTxn signedTransaction object
 	 */
@@ -1177,5 +1206,67 @@ export class Runtime {
 	 */
 	sendTxAndWait(transactions: SignedTransaction[]): TxnReceipt[] {
 		return this.executeTx(transactions);
+	}
+
+	/**
+	 * Parses the file and return the ABIContract. If the appID for runtime
+	 * is specified it will be added to the returned object
+	 * @param pathToFile string
+	 * @retun parsed file
+	 */
+	parseABIContractFile(pathToFile: string): types.ABIContract {
+		const buff = readFileSync(pathToFile);
+		const contract: types.ABIContract = new algosdk.ABIContract(JSON.parse(buff.toString()));
+		contract.appID = contract.networks[runtimeGenesisHash]?.appID;
+		return contract;
+	}
+
+	/**
+	 * Produces new block and adds it to a Map where the keys are block numbers
+	 */
+	private _produceBlock() {
+		let timestamp: bigint | undefined;
+		let seed: Uint8Array | undefined;
+		if (this.store.blocks.size === 0) {
+			//create genesis block
+			seed = nacl.randomBytes(seedLength);
+			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
+		} else {
+			//add another block
+			const lastBlock = this.store.blocks.get(this.round);
+			if (lastBlock) {
+				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
+				timestamp = lastBlock.timestamp + BlockFinalisationTime;
+				this.round += 1; // we move to new a new round
+			}
+		}
+		if (timestamp && seed) {
+			this.store.blocks.set(this.round, { timestamp, seed });
+		} else {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK);
+		}
+	}
+
+	/**
+	 * Returns a requested Block object. If it does not exist on chain throws an error
+	 * @param round block number
+	 * @returns Block
+	 */
+	getBlock(round: number): Block {
+		const block = cloneDeep(this.store.blocks.get(round));
+		if (block) {
+			return block;
+		}
+		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
+	}
+
+	/**
+	 * Produces N new blocks. If not arguments passed N = 1 by default
+	 * @param numberOfBlocks current round number
+	 */
+	produceBlocks(numberOfBlocks = 1) {
+		for (let blockN = 1; blockN <= numberOfBlocks; blockN++) {
+			this._produceBlock();
+		}
 	}
 }

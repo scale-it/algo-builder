@@ -3,7 +3,7 @@
 	"description": "Framework to automate development of Algorand Assets and Smart Contracts.",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
-	"packageManager": "yarn@3.2.1",
+	"packageManager": "yarn@3.2.4",
 	"license": "Apache-2.0",
 	"private": true,
 	"workspaces": [
@@ -29,21 +29,22 @@
 		"lint:check": "yarn workspaces foreach -p run lint:check",
 		"coverage": "yarn workspaces foreach -p run coverage",
 		"prepare": "husky install",
-		"algob": "yarn workspace @algo-builder/algob algob"
+		"algob": "yarn workspace @algo-builder/algob algob",
+		"check:only": "./check_only.sh"
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.1.0",
-		"@typescript-eslint/parser": "^5.1.0",
-		"eslint": "^8.10.0",
+		"@typescript-eslint/eslint-plugin": "^5.41.0",
+		"@typescript-eslint/parser": "^5.41.0",
+		"eslint": "^8.26.0",
 		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-promise": "^6.0.0",
-		"eslint-plugin-simple-import-sort": "^7.0.0",
-		"eslint-plugin-sonarjs": "^0.12.0",
-		"husky": "^7.0.4",
-		"lint-staged": "^12.3.5",
-		"mocha": "^9.2.1",
-		"prettier": "^2.5.1",
-		"typescript": "^4.6.2"
+		"eslint-plugin-promise": "^6.1.1",
+		"eslint-plugin-simple-import-sort": "^8.0.0",
+		"eslint-plugin-sonarjs": "^0.16.0",
+		"husky": "^8.0.1",
+		"lint-staged": "^13.0.3",
+		"mocha": "^10.1.0",
+		"prettier": "^2.7.1",
+		"typescript": "4.7.4"
 	},
 	"lint-staged": {
 		"**/{src,test,scripts}/**/*.{ts,js}": [

@@ -1,4 +1,5 @@
 /* eslint-disable sonarjs/no-identical-functions */
+import algosdk, { decodeUnsignedTransaction } from "algosdk";
 import {
 	AlgoSigner,
 	Encoding,
@@ -8,6 +9,7 @@ import {
 	Transaction,
 	WalletTransaction,
 } from "../../src/algo-signer-types";
+import { senderAccount } from "./tx";
 
 const suggestedParamsMock = {
 	flatFee: false,
@@ -93,14 +95,16 @@ export class AlgoSignerMock implements AlgoSigner {
 
 	signTxn(transactions: WalletTransaction[], error?: RequestErrors): Promise<JsonPayload> {
 		return new Promise((resolve, reject) => {
-			const result = Array(transactions.length);
-			for (let txnId = 0; txnId < transactions.length; ++txnId) {
-				result[txnId] = {
-					txID: "tx-id",
-					blob: "blod",
-				};
-			}
-			return resolve(result as unknown as JsonPayload);
+			return new Promise((resolve, reject) => {
+				const signedTransaction = [];
+				for (const txn of transactions) {
+					const decodedtransaction = decodeUnsignedTransaction(
+						this.encoding.base64ToMsgpack(txn.txn)
+					);
+					signedTransaction.push(algosdk.signTransaction(decodedtransaction, senderAccount.sk));
+				}
+				return resolve(signedTransaction);
+			});
 		});
 	}
 

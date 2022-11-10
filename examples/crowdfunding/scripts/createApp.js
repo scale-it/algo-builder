@@ -1,5 +1,6 @@
 const { convert } = require("@algo-builder/algob");
 const { types } = require("@algo-builder/web");
+const { tryExecuteTx } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 	const masterAccount = deployer.accountsByName.get("master-account");
@@ -14,9 +15,9 @@ async function run(runtimeEnv, deployer) {
 		amountMicroAlgos: 200000000,
 		payFlags: {},
 	};
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 	algoTxnParams.toAccountAddr = donorAccount.addr;
-	await deployer.executeTx(algoTxnParams);
+	await tryExecuteTx(deployer, algoTxnParams);
 
 	// Get begin date to pass in
 	const beginDate = Math.round(new Date().getTime() / 1000);
@@ -36,26 +37,34 @@ async function run(runtimeEnv, deployer) {
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
-	const appInfo = await deployer.deployApp(
-		creatorAccount,
-		{
-			appName: "CrowdfundingApp",
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "crowdFundApproval.teal", // approval program
-			clearProgramFilename: "crowdFundClear.teal", // clear program
-			localInts: 1,
-			localBytes: 0,
-			globalInts: 5,
-			globalBytes: 3,
-			appArgs: appArgs,
-		},
-		{}
-	);
+	const appInfo = await deployer
+		.deployApp(
+			creatorAccount,
+			{
+				appName: "CrowdfundingApp",
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "crowdFundApproval.teal", // approval program
+				clearProgramFilename: "crowdFundClear.teal", // clear program
+				localInts: 1,
+				localBytes: 0,
+				globalInts: 5,
+				globalBytes: 3,
+				appArgs: appArgs,
+			},
+			{}
+		)
+		.catch((error) => {
+			throw error;
+		});
 
 	console.log(appInfo);
 
 	// save lsig in checkpoint
-	await deployer.mkContractLsig("escrow", "crowdFundEscrow.py", { APP_ID: appInfo.appID });
+	await deployer
+		.mkContractLsig("escrow", "crowdFundEscrow.py", { APP_ID: appInfo.appID })
+		.catch((error) => {
+			throw error;
+		});
 
 	// Get Escrow Account Address
 	const escrowAccount = await deployer.getLsig("escrow");
@@ -68,18 +77,22 @@ async function run(runtimeEnv, deployer) {
 
 	appArgs = [convert.addressToPk(escrowAccount.address())];
 
-	const updatedRes = await deployer.updateApp(
-		"CrowdfundingApp",
-		creatorAccount,
-		{}, // pay flags
-		applicationID,
-		{
-			metaType: types.MetaType.FILE,
-			approvalProgramFilename: "crowdFundApproval.teal",
-			clearProgramFilename: "crowdFundClear.teal",
-		},
-		{ appArgs: appArgs }
-	);
+	const updatedRes = await deployer
+		.updateApp(
+			"CrowdfundingApp",
+			creatorAccount,
+			{}, // pay flags
+			applicationID,
+			{
+				metaType: types.MetaType.FILE,
+				approvalProgramFilename: "crowdFundApproval.teal",
+				clearProgramFilename: "crowdFundClear.teal",
+			},
+			{ appArgs: appArgs }
+		)
+		.catch((error) => {
+			throw error;
+		});
 	console.log("Application Updated: ", updatedRes);
 
 	console.log("Opting-In for Creator and Donor.");

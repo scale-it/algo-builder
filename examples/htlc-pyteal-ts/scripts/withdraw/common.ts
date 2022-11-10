@@ -3,6 +3,23 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, types as wtypes } from "@algo-builder/web";
 import { sha256 } from "js-sha256";
 
+export async function tryExecuteTx(
+	deployer: algob.types.Deployer,
+	txnParams: wtypes.ExecParams[]
+) {
+	try {
+		await deployer.executeTx(txnParams);
+	} catch (e) {
+		if (wtypes.isRequestError(e)) {
+			console.error("Transaction Failed", e?.response?.error);
+			throw e;
+		}
+		if (e instanceof BuilderError) console.error("Transaction Failed", e.message);
+		console.error("An unexpected error occurred:", e);
+		throw e;
+	}
+}
+
 /**
  * Returns account from algob config (by name)
  * @param deployer Deployer
@@ -17,23 +34,6 @@ export function getDeployerAccount(
 		throw new Error(`Account ${name} is not defined`);
 	}
 	return account;
-}
-
-export async function withdrawExecuteTx(
-	deployer: algob.types.Deployer,
-	txnParams: wtypes.ExecParams
-): Promise<void> {
-	try {
-		await deployer.executeTx([txnParams]);
-	} catch (e) {
-		if (wtypes.isRequestError(e)) {
-			console.error("Transaction Failed", e?.response?.error);
-			throw e
-		}
-		if (e instanceof BuilderError) console.error("Transaction Failed", e.message);
-		console.error("An unexpected error occurred:", e);
-		throw e
-	}
 }
 
 /**

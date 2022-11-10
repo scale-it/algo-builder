@@ -97,7 +97,7 @@ export abstract class Op {
 	 * @param arr array
 	 * @param line line number in TEAL file
 	 */
-	assertArrLength(arr: Uint8Array[] | BigInt[], line: number): void {
+	assertArrLength(arr: Uint8Array[] | bigint[], line: number): void {
 		if (!arr.length || arr.length > MAX_UINT8 + 1) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ASSERT_ARR_LENGTH, { line: line });
 		}
@@ -193,13 +193,14 @@ export abstract class Op {
 	 * @param index Index
 	 * @param line line number in TEAL file
 	 */
-	assert64BitIndex(index: bigint, line: number): void {
+	assert64BitIndex(index: bigint, line: number): bigint {
 		if (index > MAX_UINT6) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, {
 				index: index,
 				line: line,
 			});
 		}
+		return index;
 	}
 
 	/**

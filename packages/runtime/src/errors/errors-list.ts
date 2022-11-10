@@ -210,7 +210,7 @@ by an index that does not exist.`,
 	MAX_LEN_EXCEEDED: {
 		number: 1030,
 		message:
-			"Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
+			"Length of provided TEAL code = %length% bytes exceeds max length of %maxlen% bytes, Mode: %mode%",
 		title: "MaxLength Error",
 		description: `MaxLength Error`,
 	},
@@ -456,6 +456,51 @@ maximun uint128`,
 		description:
 			"Maximum program length %maxAppProgramLen% exceeded. Use `ApprovalProgramPages` instead",
 	},
+	UNSUPPORTED_VRF_STANDARD: {
+		number: 1067,
+		message: "vtf_standard not supported",
+		title: "Unsupported by runtime",
+		description:
+			"vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
+	},
+	INVALID_PUB_KEY_LENGTH: {
+		number: 1068,
+		message: "Wrong publicKey size",
+		title: "Wrong publicKey size",
+		description: "Wrong publicKey size. Got: %length%, expected 32",
+	},
+	INVALID_PROOF_LENGTH: {
+		number: 1069,
+		message: "Wrong proof size",
+		title: "Wrong proof size",
+		description: "Wrong proof size. Got: %length%, expected 80",
+	},
+	UNKNOWN_VRF_TYPE: {
+		number: 1070,
+		message: "Unknown vrf_verify field",
+		title: "Unknown field",
+		description: "Unknow field for vrf_verify opcode",
+	},
+	EXTRA_PAGES_EXCEEDED: {
+		number: 1071,
+		message:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+		title: "Extra pages",
+		description:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+	},
+	UNKNOWN_BLOCK_FIELD: {
+		number: 1072,
+		message: "Unknown block opcode field",
+		title: "Unknown field",
+		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
+	},
+	LABELS_LENGTH_INVALID: {
+		number: 1073,
+		message: "Labels length invalid",
+		title: "Labels length invalid",
+		description: "Length of provided labels is invalid, got: %len, expected: [0, 255]",
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -477,13 +522,6 @@ const runtimeGeneralErrors = {
 			"Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
 		title: "Round Error",
 		description: `Round Error`,
-	},
-	MAX_LIMIT_APPS: {
-		number: 1303,
-		message:
-			"Error while creating app for %address%. Maximum created apps for an account is %max%",
-		title: "App Creation Error",
-		description: `App Creation Error`,
 	},
 	INVALID_SECRET_KEY: {
 		number: 1304,
@@ -596,6 +634,24 @@ const runtimeGeneralErrors = {
 		description:
 			"Provided multisignature is invalid and was not able to authenticate the transaction",
 	},
+	PRODUCE_BLOCK: {
+		number: 1322,
+		message: "Produce block",
+		title: "Produce block",
+		description: "Runtime failed while trying to produce new block",
+	},
+	INVALID_BLOCK: {
+		number: 1323,
+		message: "Invalid block",
+		title: "Invalid block",
+		description: "Provided round does not correspond to any existing block",
+	},
+	ROUND_NOT_AVAILABLE: {
+		number: 1324,
+		message: "Round is not available",
+		title: "Invalid round",
+		description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+	},
 };
 
 const transactionErrors = {
@@ -699,13 +755,6 @@ const runtimeAsaErrors = {
 		message: `Asset with Index %assetId% not found`,
 		title: "Asset Not Found",
 		description: "Asset Not Found",
-	},
-	MAX_LIMIT_ASSETS: {
-		number: 1503,
-		message:
-			"Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
-		title: "Asset Creation Error",
-		description: `Asset Creation Error`,
 	},
 	MANAGER_ERROR: {
 		number: 1504,
