@@ -1245,12 +1245,12 @@ describe("Parser", function () {
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["txn", "GlobalNumUint"],
+					["txn", TxFieldEnum.GlobalNumUint],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["GlobalNumUint"], 1, interpreter);
+				expected = new Txn([TxFieldEnum.GlobalNumUint], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
@@ -1267,7 +1267,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "GlobalNumUint", "0"],
+							["txn", TxFieldEnum.GlobalNumUint, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1922,12 +1922,12 @@ describe("Parser", function () {
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["itxn_field", "ConfigAssetTotal"],
+					["itxn_field", TxFieldEnum.ConfigAssetTotal],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
+				expected = new ITxnField([TxFieldEnum.ConfigAssetTotal], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(

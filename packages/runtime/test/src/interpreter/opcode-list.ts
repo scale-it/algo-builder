@@ -2041,11 +2041,11 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn firstRound to stack", function () {
-				const op = new Txn(["FirstValid"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValid], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.fv, "FirstValid"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.fv, TxFieldEnum.FirstValid), stack.pop());
 			});
 
 			it("should push txn lastRound to stack", function () {
@@ -2143,7 +2143,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn CloseRemainderTo to stack", function () {
-				const op = new Txn(["CloseRemainderTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.CloseRemainderTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2211,7 +2211,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetTotal to stack", function () {
-				const op = new Txn(["ConfigAssetTotal"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetTotal], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2235,7 +2235,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetUnitName to stack", function () {
-				const op = new Txn(["ConfigAssetUnitName"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetUnitName], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2243,7 +2243,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetName to stack", function () {
-				const op = new Txn(["ConfigAssetName"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetName], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2251,7 +2251,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetURL to stack", function () {
-				const op = new Txn(["ConfigAssetURL"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetURL], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2406,7 +2406,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ClearStateProgram to stack", function () {
-				const op = new Txn(["ClearStateProgram"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ClearStateProgram], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2490,7 +2490,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push local, global uint and byte slices from state schema to stack", function () {
-				let op = new Txn(["GlobalNumUint"], 1, interpreter);
+				let op = new Txn([TxFieldEnum.GlobalNumUint], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apgs.nui), stack.pop());
@@ -2513,7 +2513,7 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv4
 			it("should push extra program pages to stack", function () {
-				const op = new Txn(["ExtraProgramPages"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ExtraProgramPages], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apep), stack.pop());
@@ -7496,8 +7496,8 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return entire ClearStateProgram in two steps", function () {
 			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
-			const op1 = new Txn(["ClearStateProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ClearStateProgramPages", "1"], 1, interpreter);
+			const op1 = new Txn([TxFieldEnum.ClearStateProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxFieldEnum.ClearStateProgramPages, "1"], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7523,10 +7523,10 @@ describe("Teal Opcodes", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(3000).fill(0);
 			const opArray = [new ITxnBegin([], 1, interpreter)];
 			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
-			opArray.push(new ITxnField(["ClearStateProgramPages"], 1, interpreter));
+			opArray.push(new ITxnField([TxFieldEnum.ClearStateProgramPages], 1, interpreter));
 			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
-			opArray.push(new ITxnField(["ClearStateProgramPages"], 2, interpreter));
-			opArray.push(new Txn(["ClearStateProgramPages", "1"], 1, interpreter));
+			opArray.push(new ITxnField([TxFieldEnum.ClearStateProgramPages], 2, interpreter));
+			opArray.push(new Txn([TxFieldEnum.ClearStateProgramPages, "1"], 1, interpreter));
 			opArray.push(new Txn([TxFieldEnum.ApprovalProgramPages, "1"], 1, interpreter));
 			opArray.forEach(function (op) {
 				op.execute(stack);

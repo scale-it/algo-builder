@@ -84,10 +84,10 @@ byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 	"Note",
 	TxFieldEnum.ApplicationArgs,
 	TxFieldEnum.ApprovalProgram,
-	"ClearStateProgram",
+	TxFieldEnum.ClearStateProgram,
 ].forEach((field) => byteTxnFields[6].add(field));
 byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
-[TxFieldEnum.ApprovalProgramPages, "ClearStateProgramPages"].forEach((field) =>
+[TxFieldEnum.ApprovalProgramPages, TxFieldEnum.ClearStateProgramPages].forEach((field) =>
 	byteTxnFields[7].add(field)
 );
 byteTxnFields[8] = cloneDeep(byteTxnFields[7]);
@@ -97,7 +97,7 @@ const strTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Type", "ConfigAssetName", "ConfigAssetUnitName", "ConfigAssetURL"]),
+	5: new Set(["Type", TxFieldEnum.ConfigAssetName, TxFieldEnum.ConfigAssetUnitName, TxFieldEnum.ConfigAssetURL]),
 };
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
@@ -125,7 +125,7 @@ const otherAddrTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([
 		"Sender",
 		"Receiver",
-		"CloseRemainderTo",
+		TxFieldEnum.CloseRemainderTo,
 		TxFieldEnum.AssetSender,
 		TxFieldEnum.AssetCloseTo,
 		TxFieldEnum.AssetReceiver,

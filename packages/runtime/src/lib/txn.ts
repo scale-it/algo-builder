@@ -49,7 +49,7 @@ export const assetTxnFields = new Set([
 ]);
 
 const globalAndLocalNumTxnFields = new Set([
-	"GlobalNumUint",
+	TxFieldEnum.GlobalNumUint,
 	"GlobalNumByteSlice",
 	"LocalNumUint",
 	"LocalNumByteSlice",
