@@ -873,18 +873,18 @@ describe("Parser", function () {
 			);
 
 			res = opcodeFromSentence(
-				["asset_holding_get", "AssetBalance"],
+				["asset_holding_get", TxFieldEnum.AssetBalance],
 				1,
 				interpreter,
 				ExecutionMode.APPLICATION
 			);
-			expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			expected = new GetAssetHolding([TxFieldEnum.AssetBalance], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_holding_get", "AssetBalance", "AssetFrozen"],
+						["asset_holding_get", TxFieldEnum.AssetBalance, TxFieldEnum.AssetFrozen],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -1913,12 +1913,12 @@ describe("Parser", function () {
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["itxn_field", "FreezeAsset"],
+					["itxn_field", TxFieldEnum.FreezeAsset],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new ITxnField(["FreezeAsset"], 1, interpreter);
+				expected = new ITxnField([TxFieldEnum.FreezeAsset], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
@@ -2523,7 +2523,7 @@ describe("Parser", function () {
 			const expected = [
 				new Pragma(["version", "5"], 1, interpreter),
 				new Balance([], 4, interpreter),
-				new GetAssetHolding(["AssetBalance"], 5, interpreter),
+				new GetAssetHolding([TxFieldEnum.AssetBalance], 5, interpreter),
 				new GetAssetDef([TxFieldEnum.AssetTotal], 6, interpreter),
 				new AppOptedIn([], 8, interpreter),
 				new AppLocalGet([], 9, interpreter),

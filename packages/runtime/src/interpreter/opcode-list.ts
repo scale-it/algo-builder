@@ -2334,10 +2334,10 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
-			case "AssetBalance":
+			case TxFieldEnum.AssetBalance:
 				value = BigInt(assetInfo.amount);
 				break;
-			case "AssetFrozen":
+			case TxFieldEnum.AssetFrozen:
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
 			default:

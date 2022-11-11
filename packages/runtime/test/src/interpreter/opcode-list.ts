@@ -2203,7 +2203,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAsset to stack", function () {
-				const op = new Txn(["ConfigAsset"], 1, interpreter); // ConfigAsset
+				const op = new Txn([TxFieldEnum.ConfigAsset], 1, interpreter); // ConfigAsset
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2219,7 +2219,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetDecimals to stack", function () {
-				const op = new Txn(["ConfigAssetDecimals"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAsset], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2351,7 +2351,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAsset to stack", function () {
-				const op = new Txn(["FreezeAsset"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FreezeAsset], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2359,7 +2359,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAssetAccount to stack", function () {
-				const op = new Txn(["FreezeAssetAccount"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FreezeAssetAccount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2367,7 +2367,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAssetFrozen to stack", function () {
-				const op = new Txn(["FreezeAssetFrozen"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FreezeAssetFrozen], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2864,17 +2864,17 @@ describe("Teal Opcodes", function () {
 				);
 
 				expectRuntimeError(
-					() => new Txn(["ConfigAssetDecimals"], 1, interpreter),
+					() => new Txn([TxFieldEnum.ConfigAsset], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["FreezeAssetAccount"], 1, interpreter),
+					() => new Txn([TxFieldEnum.FreezeAssetAccount], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["FreezeAssetAccount"], 1, interpreter),
+					() => new Txn([TxFieldEnum.FreezeAssetAccount], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -3924,7 +3924,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Balance", function () {
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([TxFieldEnum.AssetBalance], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(3n); // asset id
@@ -3938,7 +3938,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Freeze status", function () {
-			const op = new GetAssetHolding(["AssetFrozen"], 1, interpreter);
+			const op = new GetAssetHolding([TxFieldEnum.AssetFrozen], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(3n); // asset id
@@ -4039,7 +4039,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset URL", function () {
-			const op = new GetAssetDef(["AssetURL"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetURL], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4052,7 +4052,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset MetaData Hash", function () {
-			const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetMetadataHash], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4065,7 +4065,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Manager", function () {
-			const op = new GetAssetDef(["AssetManager"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetManager], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4078,7 +4078,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Reserve", function () {
-			const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetReserve], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4091,7 +4091,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Freeze", function () {
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4131,7 +4131,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push 0 if Asset not defined", function () {
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
 
 			stack.push(1n); // account index
 
@@ -4145,7 +4145,7 @@ describe("Teal Opcodes", function () {
 
 		it("should throw index out of bound error for Asset Param", function () {
 			interpreter.tealVersion = 1;
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
 
 			stack.push(4n); // asset index
 
@@ -4158,7 +4158,7 @@ describe("Teal Opcodes", function () {
 		it("tealv4: should push correct value accepting offset to foreignAssets", function () {
 			interpreter.tealVersion = 4;
 			// interpreter.runtime.ctx.tx.apas = [1234, 3];
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([TxFieldEnum.AssetBalance], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(0n); // this will push 1st value from Txn.ForeignAssets
@@ -4176,7 +4176,7 @@ describe("Teal Opcodes", function () {
 		it("tealv4: should return value as treating ref as offset, if it represents an index", function () {
 			interpreter.tealVersion = 4;
 			interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([TxFieldEnum.AssetBalance], 1, interpreter);
 
 			/*
 			 * We wanted to pass assetId directly (3n) here, but since length of
