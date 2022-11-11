@@ -2219,7 +2219,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetDecimals to stack", function () {
-				const op = new Txn([TxFieldEnum.ConfigAsset], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetDecimals], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
