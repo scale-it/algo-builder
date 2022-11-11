@@ -50,9 +50,9 @@ export const assetTxnFields = new Set([
 
 const globalAndLocalNumTxnFields = new Set([
 	TxFieldEnum.GlobalNumUint,
-	"GlobalNumByteSlice",
-	"LocalNumUint",
-	"LocalNumByteSlice",
+	TxFieldEnum.GlobalNumByteSlice,
+	TxFieldEnum.LocalNumUint,
+	TxFieldEnum.LocalNumByteSlice,
 ]);
 
 // return default value of txField if undefined,
@@ -133,7 +133,7 @@ export function txnSpecByField(
 		result = assetMetaData?.[s as keyof EncodedAssetParams];
 		return parseToStackElem(result, txField);
 	}
-	if (globalAndLocalNumTxnFields.has(txField)) {
+	if (globalAndLocalNumTxnFields.has(txField as TxFieldEnum)) {
 		const encAppGlobalSchema = txField.includes("Global") ? tx.apgs : tx.apls;
 		const s = TxnFields[tealVersion][txField];
 		result = encAppGlobalSchema?.[s as keyof EncodedGlobalStateSchema];
@@ -210,7 +210,7 @@ export function txnSpecByField(
 		}
 
 		case TxFieldEnum.StateProofPK: {
-			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// While running teal debugger, TxFieldEnum.StateProofPK always return 64 zero bytes.
 			// so we set up 64 zero bytes as default value of StateProofPK
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
@@ -224,7 +224,7 @@ export function txnSpecByField(
 			break;
 		}
 		default: {
-			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
+			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields[TxFieldEnum.Receiver]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
 		}
 	}
@@ -663,14 +663,14 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 	const tx = groupTx[groupTx.length - 1];
 	let result: StackElem;
 	switch (op.field) {
-		case "Logs": {
+		case TxFieldEnum.Logs: {
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			op.checkIndexBound(op.idx, logs, op.line);
 			result = logs[op.idx];
 			break;
 		}
-		case "NumLogs": {
+		case TxFieldEnum.NumLogs: {
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			result = BigInt(logs.length);

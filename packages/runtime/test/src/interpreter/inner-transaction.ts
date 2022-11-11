@@ -1292,7 +1292,7 @@ describe("Inner Transactions", function () {
 			});
 
 			it("should fail on invalid field keyreg transaction", function () {
-				["VotePK", "SelectionPK"].forEach((field) => {
+				[TxFieldEnum.VotePK, TxFieldEnum.SelectionPK].forEach((field) => {
 					program = `
             itxn_begin
             int 31

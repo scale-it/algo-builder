@@ -319,7 +319,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = wordsFromLine("         txn             LastValid       // comment here");
-			expected = ["txn", "LastValid"];
+			expected = ["txn", TxFieldEnum.LastValid];
 
 			assert.deepEqual(res, expected);
 
@@ -1236,12 +1236,12 @@ describe("Parser", function () {
 				);
 
 				res = opcodeFromSentence(
-					["txn", "NumAssets"],
+					["txn", TxFieldEnum.NumAssets],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["NumAssets"], 1, interpreter);
+				expected = new Txn([TxFieldEnum.NumAssets], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
@@ -1256,7 +1256,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "NumAssets", "0"],
+							["txn", TxFieldEnum.NumAssets, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1904,12 +1904,12 @@ describe("Parser", function () {
 
 			it("itxn_field f", function () {
 				let res = opcodeFromSentence(
-					["itxn_field", "Sender"],
+					["itxn_field", TxFieldEnum.Sender],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				let expected = new ITxnField(["Sender"], 1, interpreter);
+				let expected = new ITxnField([TxFieldEnum.Sender], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
@@ -1933,7 +1933,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["itxn_field", "Sender", TxFieldEnum.Fee],
+							["itxn_field", TxFieldEnum.Sender, TxFieldEnum.Fee],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION

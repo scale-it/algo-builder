@@ -2049,15 +2049,15 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn lastRound to stack", function () {
-				const op = new Txn(["LastValid"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastValid], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.lv, "LastValid"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.lv, TxFieldEnum.LastValid), stack.pop());
 			});
 
 			it("should push txn sender to stack", function () {
-				const op = new Txn(["Sender"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Sender], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2065,7 +2065,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn type to stack", function () {
-				const op = new Txn(["Type"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Type], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2073,7 +2073,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn typeEnum to stack", function () {
-				const op = new Txn(["TypeEnum"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.TypeEnum], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2081,7 +2081,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn lease to stack", function () {
-				const op = new Txn(["Lease"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Lease], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2089,7 +2089,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn note to stack", function () {
-				const op = new Txn(["Note"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Note], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2097,7 +2097,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn rekeyTo addr to stack", function () {
-				const op = new Txn(["RekeyTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.RekeyTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2105,7 +2105,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn NumAppArgs to stack", function () {
-				const op = new Txn(["NumAppArgs"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.NumAppArgs], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2113,7 +2113,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn NumAccounts to stack", function () {
-				const op = new Txn(["NumAccounts"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.NumAccounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2127,7 +2127,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn Receiver to stack", function () {
-				const op = new Txn(["Receiver"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Receiver], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2157,7 +2157,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VotePK to stack", function () {
-				const op = new Txn(["VotePK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VotePK], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2165,7 +2165,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn SelectionPK to stack", function () {
-				const op = new Txn(["SelectionPK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.SelectionPK], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2181,7 +2181,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VoteLast to stack", function () {
-				const op = new Txn(["VoteLast"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VoteLast], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2189,7 +2189,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VoteKeyDilution to stack", function () {
-				const op = new Txn(["VoteKeyDilution"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VoteKeyDilution], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2305,7 +2305,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn XferAsset to stack", function () {
-				const op = new Txn(["XferAsset"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.XferAsset], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2390,7 +2390,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn OnCompletion to stack", function () {
-				const op = new Txn(["OnCompletion"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.OnCompletion], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2460,7 +2460,7 @@ describe("Teal Opcodes", function () {
 				op = new Txn([TxFieldEnum.Assets, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
-				op = new Txn(["NumAssets"], 1, interpreter);
+				op = new Txn([TxFieldEnum.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(BigInt(TXN_OBJ.apas.length), stack.pop());
 			});
@@ -2484,7 +2484,7 @@ describe("Teal Opcodes", function () {
 				op = new Txn([TxFieldEnum.Applications, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
-				op = new Txn(["NumApplications"], 1, interpreter);
+				op = new Txn([TxFieldEnum.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(BigInt(TXN_OBJ.apfa.length), stack.pop());
 			});
@@ -2495,17 +2495,17 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apgs.nui), stack.pop());
 
-				op = new Txn(["GlobalNumByteSlice"], 1, interpreter);
+				op = new Txn([TxFieldEnum.GlobalNumByteSlice], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apgs.nbs), stack.pop());
 
-				op = new Txn(["LocalNumUint"], 1, interpreter);
+				op = new Txn([TxFieldEnum.LocalNumUint], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apls.nui), stack.pop());
 
-				op = new Txn(["LocalNumByteSlice"], 1, interpreter);
+				op = new Txn([TxFieldEnum.LocalNumByteSlice], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apls.nbs), stack.pop());
@@ -2521,7 +2521,7 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv5
 			it("should push txn.nonparticipation key to stack", function () {
-				const op = new Txn(["Nonparticipation"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Nonparticipation], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.nonpart), stack.pop());
@@ -2530,19 +2530,19 @@ describe("Teal Opcodes", function () {
 
 		describe("Txn: teal v6", function () {
 			it("should return empty log if no log emit before", function () {
-				const op = new Txn(["LastLog"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastLog], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(0));
 			});
 			it("should return last log", function () {
 				interpreter.runtime.ctx.lastLog = new Uint8Array([42, 32]);
-				const op = new Txn(["LastLog"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastLog], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
 			});
 
 			it("should return StateProofPK", function () {
-				const op = new Txn(["StateProofPK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.StateProofPK], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
 			});
@@ -2667,12 +2667,12 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
 
-				op = new Gtxn(["1", "NumAssets"], 1, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(2n, stack.pop());
 
-				op = new Gtxn(["1", "NumApplications"], 1, interpreter);
+				op = new Gtxn(["1", TxFieldEnum.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3n, stack.pop());
@@ -2748,12 +2748,12 @@ describe("Teal Opcodes", function () {
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
 
-				op = new Gitxn(["1", "NumAssets"], 1, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(2n, stack.pop());
 
-				op = new Gitxn(["1", "NumApplications"], 1, interpreter);
+				op = new Gitxn(["1", TxFieldEnum.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3n, stack.pop());
@@ -2880,12 +2880,12 @@ describe("Teal Opcodes", function () {
 
 				// for gtxn
 				expectRuntimeError(
-					() => new Gtxn(["0", "OnCompletion"], 1, interpreter),
+					() => new Gtxn(["0", TxFieldEnum.OnCompletion], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Gtxn(["0", "RekeyTo"], 1, interpreter),
+					() => new Gtxn(["0", TxFieldEnum.RekeyTo], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -7001,14 +7001,14 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put on top of the stack logs from innerTx", function () {
-			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			const op = new ITxn([TxFieldEnum.Logs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
 
 		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			const op = new ITxn([TxFieldEnum.Logs, "0"], 1, interpreter);
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
@@ -7017,7 +7017,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxn(["NumLogs"], 1, interpreter);
+			const op = new ITxn([TxFieldEnum.NumLogs], 1, interpreter);
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
@@ -7025,7 +7025,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put the number of logs on top of the stack", function () {
-			const op = new ITxn(["NumLogs"], 1, interpreter);
+			const op = new ITxn([TxFieldEnum.NumLogs], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1n, stack.pop());
 		});
@@ -7049,19 +7049,19 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put on top of the stack log from group transaction", function () {
-			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
+			const op = new Gitxna(["1", TxFieldEnum.Logs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
 		});
 
 		it("Should throw an error index out of bound", function () {
-			const op = new Gitxna(["1", "Logs", "2"], 1, interpreter);
+			const op = new Gitxna(["1", TxFieldEnum.Logs, "2"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
 		it("Should put on top of stack log from group transaction", function () {
 			stack.push(1n);
-			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
+			const op = new Gitxnas(["1", TxFieldEnum.Logs], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Python"));
 		});
@@ -7507,13 +7507,13 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return correct number of ApprovalProgramPages", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
-			const op = new Txn(["NumApprovalProgramPages"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.NumApprovalProgramPages], 1, interpreter);
 			op.execute(stack);
 			assert.equal(2n, stack.pop());
 		});
 		it("Should return correct number of ClearStateProgramPages", function () {
 			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
-			const op = new Txn(["NumClearStateProgramPages"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.NumClearStateProgramPages], 1, interpreter);
 			op.execute(stack);
 			assert.equal(2n, stack.pop());
 		});

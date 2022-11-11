@@ -38,7 +38,7 @@ const numberTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([TxFieldEnum.Fee, TxFieldEnum.FreezeAssetFrozen, TxFieldEnum.ConfigAssetDecimals, TxFieldEnum.ConfigAssetDefaultFrozen]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
-["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", TxFieldEnum.ApplicationID].forEach(
+[TxFieldEnum.VoteFirst, TxFieldEnum.VoteLast, TxFieldEnum.VoteKeyDilution, TxFieldEnum.Nonparticipation, TxFieldEnum.ApplicationID].forEach(
 	(field) => numberTxnFields[6].add(field)
 );
 numberTxnFields[7] = cloneDeep(numberTxnFields[6]);
@@ -62,7 +62,7 @@ const assetIDFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["XferAsset", TxFieldEnum.FreezeAsset, TxFieldEnum.ConfigAsset]),
+	5: new Set([TxFieldEnum.XferAsset, TxFieldEnum.FreezeAsset, TxFieldEnum.ConfigAsset]),
 };
 
 assetIDFields[6] = cloneDeep(assetIDFields[5]);
@@ -79,9 +79,9 @@ const byteTxnFields: { [key: number]: Set<string> } = {
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 [
-	"VotePK",
-	"SelectionPK",
-	"Note",
+	TxFieldEnum.VotePK,
+	TxFieldEnum.SelectionPK,
+	TxFieldEnum.Note,
 	TxFieldEnum.ApplicationArgs,
 	TxFieldEnum.ApprovalProgram,
 	TxFieldEnum.ClearStateProgram,
@@ -97,7 +97,7 @@ const strTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Type", TxFieldEnum.ConfigAssetName, TxFieldEnum.ConfigAssetUnitName, TxFieldEnum.ConfigAssetURL]),
+	5: new Set([TxFieldEnum.Type, TxFieldEnum.ConfigAssetName, TxFieldEnum.ConfigAssetUnitName, TxFieldEnum.ConfigAssetURL]),
 };
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
@@ -123,8 +123,8 @@ acfgAddrTxnFields[8] = cloneDeep(acfgAddrTxnFields[7]);
 
 const otherAddrTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([
-		"Sender",
-		"Receiver",
+		TxFieldEnum.Sender,
+		TxFieldEnum.Receiver,
 		TxFieldEnum.CloseRemainderTo,
 		TxFieldEnum.AssetSender,
 		TxFieldEnum.AssetCloseTo,
@@ -135,7 +135,7 @@ const otherAddrTxnFields: { [key: number]: Set<string> } = {
 
 otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
-["RekeyTo"].forEach((field) => otherAddrTxnFields[6].add(field));
+[TxFieldEnum.RekeyTo].forEach((field) => otherAddrTxnFields[6].add(field));
 otherAddrTxnFields[7] = cloneDeep(otherAddrTxnFields[6]);
 otherAddrTxnFields[8] = cloneDeep(otherAddrTxnFields[7]);
 
@@ -339,7 +339,7 @@ export function setInnerTxField(
 
 	// if everything goes well, set the [key, value]
 	if (encodedField === null) {
-		return subTxn; // could be for "TypeEnum"
+		return subTxn; // could be for TxFieldEnum.TypeEnum
 	} else if (assetTxnFields.has(field as TxFieldEnum)) {
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
