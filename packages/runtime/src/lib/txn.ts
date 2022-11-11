@@ -35,17 +35,17 @@ import {
 import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
-	"ConfigAssetTotal",
-	"ConfigAssetDecimals",
-	"ConfigAssetDefaultFrozen",
-	"ConfigAssetUnitName",
-	"ConfigAssetName",
-	"ConfigAssetURL",
-	"ConfigAssetMetadataHash",
-	"ConfigAssetManager",
-	"ConfigAssetReserve",
-	"ConfigAssetFreeze",
-	"ConfigAssetClawback",
+	TxFieldEnum.ConfigAssetTotal,
+	TxFieldEnum.ConfigAssetDecimals,
+	TxFieldEnum.ConfigAssetDefaultFrozen,
+	TxFieldEnum.ConfigAssetUnitName,
+	TxFieldEnum.ConfigAssetName,
+	TxFieldEnum.ConfigAssetURL,
+	TxFieldEnum.ConfigAssetMetadataHash,
+	TxFieldEnum.ConfigAssetManager,
+	TxFieldEnum.ConfigAssetReserve,
+	TxFieldEnum.ConfigAssetFreeze,
+	TxFieldEnum.ConfigAssetClawback,
 ]);
 
 const globalAndLocalNumTxnFields = new Set([
@@ -127,7 +127,7 @@ export function txnSpecByField(
 	let result; // store raw result, parse and return
 	const tealVersion = interpreter.tealVersion;
 	// handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
-	if (assetTxnFields.has(txField)) {
+	if (assetTxnFields.has(txField as TxFieldEnum)) {
 		const s = TxnFields[tealVersion][txField];
 		const assetMetaData = tx.apar;
 		result = assetMetaData?.[s as keyof EncodedAssetParams];

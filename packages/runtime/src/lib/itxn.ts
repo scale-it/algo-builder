@@ -62,7 +62,7 @@ const assetIDFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["XferAsset", "FreezeAsset", "ConfigAsset"]),
+	5: new Set(["XferAsset", TxFieldEnum.FreezeAsset, TxFieldEnum.ConfigAsset]),
 };
 
 assetIDFields[6] = cloneDeep(assetIDFields[5]);
@@ -129,7 +129,7 @@ const otherAddrTxnFields: { [key: number]: Set<string> } = {
 		TxFieldEnum.AssetSender,
 		TxFieldEnum.AssetCloseTo,
 		TxFieldEnum.AssetReceiver,
-		"FreezeAssetAccount",
+		TxFieldEnum.FreezeAssetAccount,
 	]),
 };
 
@@ -340,7 +340,7 @@ export function setInnerTxField(
 	// if everything goes well, set the [key, value]
 	if (encodedField === null) {
 		return subTxn; // could be for "TypeEnum"
-	} else if (assetTxnFields.has(field)) {
+	} else if (assetTxnFields.has(field as TxFieldEnum)) {
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
 	} else {
