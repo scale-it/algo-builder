@@ -134,7 +134,7 @@ export function txnSpecByField(
 		return parseToStackElem(result, txField);
 	}
 	if (globalAndLocalNumTxnFields.has(txField as TxFieldEnum)) {
-		const encAppGlobalSchema = txField.includes("Global") ? tx.apgs : tx.apls;
+		const encAppGlobalSchema = txField.includes(TxFieldEnum.Global) ? tx.apgs : tx.apls;
 		const s = TxnFields[tealVersion][txField];
 		result = encAppGlobalSchema?.[s as keyof EncodedGlobalStateSchema];
 		return parseToStackElem(result, txField);

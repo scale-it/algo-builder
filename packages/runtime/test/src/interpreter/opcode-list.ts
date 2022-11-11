@@ -3002,7 +3002,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinTxnFee to stack", function () {
-			const op = new Global(["MinTxnFee"], 1, interpreter);
+			const op = new Global([TxFieldEnum.MinTxnFee], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3010,7 +3010,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinBalance to stack", function () {
-			const op = new Global(["MinBalance"], 1, interpreter);
+			const op = new Global([TxFieldEnum.MinBalance], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3018,7 +3018,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MaxTxnLife to stack", function () {
-			const op = new Global(["MaxTxnLife"], 1, interpreter);
+			const op = new Global([TxFieldEnum.MaxTxnLife], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3026,7 +3026,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push ZeroAddress to stack", function () {
-			const op = new Global(["ZeroAddress"], 1, interpreter);
+			const op = new Global([TxFieldEnum.ZeroAddress], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3042,7 +3042,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push LogicSigVersion to stack", function () {
-			const op = new Global(["LogicSigVersion"], 1, interpreter);
+			const op = new Global([TxFieldEnum.LogicSigVersion], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3132,7 +3132,7 @@ describe("Teal Opcodes", function () {
 			interpreter.tealVersion = 1;
 
 			expectRuntimeError(
-				() => new Global(["LogicSigVersion"], 1, interpreter),
+				() => new Global([TxFieldEnum.LogicSigVersion], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 

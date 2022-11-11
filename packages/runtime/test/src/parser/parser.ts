@@ -744,39 +744,39 @@ describe("Parser", function () {
 
 		it("should return correct objects for `global`", function () {
 			let res = opcodeFromSentence(
-				["global", "MinTxnFee"],
+				["global", TxFieldEnum.MinTxnFee],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Global(["MinTxnFee"], 1, interpreter);
+			let expected = new Global([TxFieldEnum.MinTxnFee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "MinBalance"],
+				["global", TxFieldEnum.MinBalance],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["MinBalance"], 1, interpreter);
+			expected = new Global([TxFieldEnum.MinBalance], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "MaxTxnLife"],
+				["global", TxFieldEnum.MaxTxnLife],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["MaxTxnLife"], 1, interpreter);
+			expected = new Global([TxFieldEnum.MaxTxnLife], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "ZeroAddress"],
+				["global", TxFieldEnum.ZeroAddress],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["ZeroAddress"], 1, interpreter);
+			expected = new Global([TxFieldEnum.ZeroAddress], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -789,12 +789,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "LogicSigVersion"],
+				["global", TxFieldEnum.LogicSigVersion],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["LogicSigVersion"], 1, interpreter);
+			expected = new Global([TxFieldEnum.LogicSigVersion], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(["global", TxFieldEnum.Round], 1, interpreter, ExecutionMode.SIGNATURE);
@@ -835,7 +835,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["global", "MinTxnFee", "MinTxnFee"],
+						["global", TxFieldEnum.MinTxnFee, TxFieldEnum.MinTxnFee],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -2504,12 +2504,12 @@ describe("Parser", function () {
 		it("should return correct opcode list for 'global'", async function () {
 			const res = loadProgram("test-global.teal");
 			const expected = [
-				new Global(["MinTxnFee"], 3, interpreter),
-				new Global(["MinBalance"], 4, interpreter),
-				new Global(["MaxTxnLife"], 5, interpreter),
-				new Global(["ZeroAddress"], 6, interpreter),
+				new Global([TxFieldEnum.MinTxnFee], 3, interpreter),
+				new Global([TxFieldEnum.MinBalance], 4, interpreter),
+				new Global([TxFieldEnum.MaxTxnLife], 5, interpreter),
+				new Global([TxFieldEnum.ZeroAddress], 6, interpreter),
 				new Global([TxFieldEnum.GroupSize], 7, interpreter),
-				new Global(["LogicSigVersion"], 8, interpreter),
+				new Global([TxFieldEnum.LogicSigVersion], 8, interpreter),
 				new Global([TxFieldEnum.Round], 9, interpreter),
 				new Global([TxFieldEnum.LatestTimestamp], 10, interpreter),
 				new Global([TxFieldEnum.CurrentApplicationID], 11, interpreter),

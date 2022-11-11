@@ -620,6 +620,7 @@ export enum TxFieldEnum {
 	GroupSize = "GroupSize",
 	GroupID = "GroupID",
 	GroupIndex = "GroupIndex",
+	Global = "Global",
 	GlobalNumUint = "GlobalNumUint",
 	GlobalNumByteSlice = "GlobalNumByteSlice",
 	GlobalVal = "GlobalVal",
@@ -631,6 +632,10 @@ export enum TxFieldEnum {
 	Logs = "Logs",
 	LocalNumUint = "LocalNumUint",
 	LocalNumByteSlice = "LocalNumByteSlice",
+	LogicSigVersion = "LogicSigVersion",
+	MaxTxnLife = "MaxTxnLife",
+	MinTxnFee = "MinTxnFee",
+	MinBalance = "MinBalance",
 	OnCompletion = "OnCompletion",
 	OpcodeBudget = "OpcodeBudget",
 	Nonparticipation = "Nonparticipation",
@@ -658,6 +663,7 @@ export enum TxFieldEnum {
 	VoteLast = "VoteLast",
 	VoteKeyDilution = "VoteKeyDilution",
 	XferAsset = "XferAsset",
+	ZeroAddress = "ZeroAddress"
 }
 
 export enum CurveTypeEnum {
