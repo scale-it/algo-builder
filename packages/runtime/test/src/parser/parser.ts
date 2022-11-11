@@ -780,12 +780,12 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "GroupSize"],
+				["global", TxFieldEnum.GroupSize],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["GroupSize"], 1, interpreter);
+			expected = new Global([TxFieldEnum.GroupSize], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -797,39 +797,39 @@ describe("Parser", function () {
 			expected = new Global(["LogicSigVersion"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
-			res = opcodeFromSentence(["global", "Round"], 1, interpreter, ExecutionMode.SIGNATURE);
-			expected = new Global(["Round"], 1, interpreter);
+			res = opcodeFromSentence(["global", TxFieldEnum.Round], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global([TxFieldEnum.Round], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "LatestTimestamp"],
+				["global", TxFieldEnum.LatestTimestamp],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["LatestTimestamp"], 1, interpreter);
+			expected = new Global([TxFieldEnum.LatestTimestamp], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "CurrentApplicationID"],
+				["global", TxFieldEnum.CurrentApplicationID],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["CurrentApplicationID"], 1, interpreter);
+			expected = new Global([TxFieldEnum.CurrentApplicationID], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "CreatorAddress"],
+				["global", TxFieldEnum.CreatorAddress],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["CreatorAddress"], 1, interpreter);
+			expected = new Global([TxFieldEnum.CreatorAddress], 1, interpreter);
 			assert.deepEqual(res, expected);
 
-			res = opcodeFromSentence(["global", "GroupID"], 1, interpreter, ExecutionMode.SIGNATURE);
-			expected = new Global(["GroupID"], 1, interpreter);
+			res = opcodeFromSentence(["global", TxFieldEnum.GroupID], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global([TxFieldEnum.GroupID], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -2508,11 +2508,11 @@ describe("Parser", function () {
 				new Global(["MinBalance"], 4, interpreter),
 				new Global(["MaxTxnLife"], 5, interpreter),
 				new Global(["ZeroAddress"], 6, interpreter),
-				new Global(["GroupSize"], 7, interpreter),
+				new Global([TxFieldEnum.GroupSize], 7, interpreter),
 				new Global(["LogicSigVersion"], 8, interpreter),
-				new Global(["Round"], 9, interpreter),
-				new Global(["LatestTimestamp"], 10, interpreter),
-				new Global(["CurrentApplicationID"], 11, interpreter),
+				new Global([TxFieldEnum.Round], 9, interpreter),
+				new Global([TxFieldEnum.LatestTimestamp], 10, interpreter),
+				new Global([TxFieldEnum.CurrentApplicationID], 11, interpreter),
 			];
 
 			assert.deepEqual(res, expected);
@@ -2535,7 +2535,7 @@ describe("Parser", function () {
 				new AppLocalDel([], 15, interpreter),
 				new AppGlobalDel([], 16, interpreter),
 				new Int(["10"], 17),
-				new AppParamsGet(["AppCreator"], 18, interpreter),
+				new AppParamsGet([TxFieldEnum.AppCreator], 18, interpreter),
 			];
 			assert.deepEqual(res, expected);
 		});
@@ -2547,7 +2547,7 @@ describe("Parser", function () {
 				new Divw([], 2),
 				new Bsqrt([], 3),
 				new Gloadss([], 4, interpreter),
-				new AcctParamsGet(["AcctBalance"], 5, interpreter),
+				new AcctParamsGet([TxFieldEnum.AcctBalance], 5, interpreter),
 				new ITxnNext([], 6, interpreter),
 				new Gitxn(["0", TxFieldEnum.Fee], 7, interpreter),
 				new Gitxna(["1", TxFieldEnum.Accounts, "1"], 8, interpreter),
@@ -2561,7 +2561,7 @@ describe("Parser", function () {
 			const res = loadProgram("teal-v7.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
-				new Base64Decode(["URLEncoding"], 2),
+				new Base64Decode([TxFieldEnum.URLEncoding], 2),
 			];
 			assert.deepEqual(expected, res);
 		});
