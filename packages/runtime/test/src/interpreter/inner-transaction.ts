@@ -6,7 +6,7 @@ import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { getProgram, Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, TxFieldEnum } from "../../../src/lib/constants";
 import { AccountAddress, AccountStoreI, ExecutionMode, TxOnComplete } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
@@ -418,10 +418,10 @@ describe("Inner Transactions", function () {
 
 	describe("TestFieldTypes", function () {
 		const ConfigAddresses = [
-			"ConfigAssetManager",
-			"ConfigAssetReserve",
-			"ConfigAssetFreeze",
-			"ConfigAssetClawback",
+			TxFieldEnum.ConfigAssetManager,
+			TxFieldEnum.ConfigAssetReserve,
+			TxFieldEnum.ConfigAssetFreeze,
+			TxFieldEnum.ConfigAssetClawback,
 		];
 
 		it("should pass: teal understand 32 bytes value is address with acfg address", function () {

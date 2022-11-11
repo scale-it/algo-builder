@@ -2227,7 +2227,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-				const op = new Txn(["ConfigAssetDefaultFrozen"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetDefaultFrozen], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2259,7 +2259,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetMetadataHash to stack", function () {
-				const op = new Txn(["ConfigAssetMetadataHash"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetMetadataHash], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2267,7 +2267,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetManager to stack", function () {
-				const op = new Txn(["ConfigAssetManager"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetManager], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2275,7 +2275,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetReserve to stack", function () {
-				const op = new Txn(["ConfigAssetReserve"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetReserve], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2283,7 +2283,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetFreeze to stack", function () {
-				const op = new Txn(["ConfigAssetFreeze"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetFreeze], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2291,7 +2291,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetClawback to stack", function () {
-				const op = new Txn(["ConfigAssetClawback"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ConfigAssetClawback], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2890,7 +2890,7 @@ describe("Teal Opcodes", function () {
 				);
 
 				expectRuntimeError(
-					() => new Gtxn(["0", "ConfigAssetClawback"], 1, interpreter),
+					() => new Gtxn(["0", TxFieldEnum.ConfigAssetClawback], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 			});

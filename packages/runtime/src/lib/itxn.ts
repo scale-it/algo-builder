@@ -74,7 +74,7 @@ const byteTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["ConfigAssetMetadataHash"]),
+	5: new Set([TxFieldEnum.ConfigAssetMetadataHash]),
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
@@ -110,10 +110,10 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	3: new Set(),
 	4: new Set(),
 	5: new Set([
-		"ConfigAssetManager",
-		"ConfigAssetReserve",
-		"ConfigAssetFreeze",
-		"ConfigAssetClawback",
+		TxFieldEnum.ConfigAssetManager,
+		TxFieldEnum.ConfigAssetReserve,
+		TxFieldEnum.ConfigAssetFreeze,
+		TxFieldEnum.ConfigAssetClawback,
 	]),
 };
 
