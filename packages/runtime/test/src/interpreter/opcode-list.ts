@@ -3987,7 +3987,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Decimals", function () {
-			const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetDecimals], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4000,7 +4000,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Default Frozen", function () {
-			const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetDefaultFrozen], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4013,7 +4013,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Unit Name", function () {
-			const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetUnitName], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4026,7 +4026,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Name", function () {
-			const op = new GetAssetDef(["AssetName"], 1, interpreter);
+			const op = new GetAssetDef([TxFieldEnum.AssetName], 1, interpreter);
 
 			stack.push(0n); // asset index
 

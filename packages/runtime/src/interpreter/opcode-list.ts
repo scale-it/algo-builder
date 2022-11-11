@@ -2407,10 +2407,10 @@ export class GetAssetDef extends Op {
 				case TxFieldEnum.AssetTotal:
 					value = BigInt(AssetDefinition.total);
 					break;
-				case "AssetDecimals":
+				case TxFieldEnum.AssetDecimals:
 					value = BigInt(AssetDefinition.decimals);
 					break;
-				case "AssetDefaultFrozen":
+				case TxFieldEnum.AssetDefaultFrozen:
 					value = AssetDefinition.defaultFrozen ? 1n : 0n;
 					break;
 				default:
