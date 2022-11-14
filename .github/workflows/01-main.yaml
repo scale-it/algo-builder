@@ -15,20 +15,21 @@ on:
       - develop
 
 jobs:
-  algob-tests:
-    uses: ./.github/workflows/reusableWorkflow.yaml
-    package:
-      name: algob
-      command: cd packages/algob && yarn test
+  # algob-tests:
+  #   uses: ./.github/workflows/reusableWorkflow.yaml
+  #   package:
+  #     name: algob
+  #     command: cd packages/algob && yarn test
 
-  web-tests:
-    uses: ./.github/workflows/reusableWorkflow.yaml
-    package:
-      name: web
-      command: cd packages/web && yarn test
+  # web-tests:
+  #   uses: ./.github/workflows/reusableWorkflow.yaml
+  #   package:
+  #     name: web
+  #     command: cd packages/web && yarn test
 
   runtime-tests:
+    name: Runtime 
     uses: ./.github/workflows/reusableWorkflow.yaml
-    package:
+    with:
       name: runtime
       command: cd packages/runtime && yarn test
