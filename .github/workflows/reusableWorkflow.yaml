@@ -5,8 +5,10 @@ on:
     inputs:
       name:
         required: true
+        type: string
       command:
         required: true
+        type: string
 
 jobs:
   build:

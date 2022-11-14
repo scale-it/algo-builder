@@ -21,3 +21,4 @@ jobs:
     with:
       name: runtime
       command: cd packages/runtime && yarn test
+    secrets: inherit
