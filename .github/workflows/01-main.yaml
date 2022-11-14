@@ -15,49 +15,8 @@ on:
 
 jobs:
   job1:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Node
-        uses: actions/setup-node@v2-beta
-        with:
-          node-version: "16"
-          cache: "yarn"
-      - name: Yarn version check
-        run: yarn --version
-      - name: Install dependencies
-        run: yarn install
-      - name: Execute format
-        run: yarn format
-      - name: Execute lint
-        run: yarn lint
-      - name: Build packages
-        run: yarn build
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-          cache: "pipenv"
-      - name: Install poetry
-        run: pip install -U poetry
-      - name: Install pipenv
-        run: python -m pip install pipenv
-      - name: Install python dependencies
-        run: pipenv sync
-      - name: Install python dependencies
-        run: pipenv sync
-      - parallel:
-          algob:
-            steps:
-              - name: Execute algob tests
-                run: cd packages/algob && pipenv run yarn test
-          web:
-            steps:
-              - name: Execute web tests
-                run: cd packages/web && pipenv run yarn test
-          runtime:
-            steps:
-              - name: Execute runtime tests
-                run: cd packages/runtime && pipenv run yarn test
+    call-workflow-2-in-local-repo:
+      uses: ./.github/workflows/reusableWorkflow.yaml
+      steps:
+        - name: Execute algob tests
+            run: cd packages/algob && pipenv run yarn test
