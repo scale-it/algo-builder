@@ -1,5 +1,6 @@
 import algosdk, {
 	EncodedSignedTransaction,
+	encodeObj,
 	SignedTransaction,
 	SuggestedParams,
 	Transaction,
@@ -184,62 +185,49 @@ export class WebMode {
 
 	/**
 	 * Appends signature to a multisig transaction using algosigner
-	 * @param txns array of multisignature transaction with at least one signature
+	 * @param txn Multisignature Encoded Transaction  
 	 * @param signers a subset of addresses to sign the transaction
-	 * return an object containing a blob attribute encoded in base64
+	 * return an object containing a blob key encoded in base64
 	 */
 	async appendSignMultisigTransaction(
-		txns: WalletTransaction[],
-		signers: string[]
+		txn: EncodedSignedTransaction,
+		signers?: string[]
 	): Promise<JsonPayload> {
 		try {
-			const result: JsonPayload = {};
-			for (let i = 0; i < txns.length; ++i) {
-				const txn = txns[i];
-				const partialTxn = algosdk.decodeObj(
-					this.algoSigner.encoding.base64ToMsgpack(txn.txn)
-				) as EncodedSignedTransaction;
-				if (partialTxn.txn === undefined || partialTxn.msig === undefined) {
-					throw new Error(
-						"Input transaction must be multisigature transaction signed with at least 1 signature"
-					);
-				}
-				const txnToBeSign = algosdk.Transaction.from_obj_for_encoding(partialTxn.txn);
-				const txnToBeSign_Uint8Array = algosdk.encodeObj(txnToBeSign.get_obj_for_encoding());
-				const txnToBeSign_Base64 =
-					this.algoSigner.encoding.msgpackToBase64(txnToBeSign_Uint8Array);
+			const encodedTxn = this.algoSigner.encoding.msgpackToBase64(encodeObj(txn.txn))
+			const mparams = txn.msig as algosdk.EncodedMultisig;
+			const version = mparams.v;
+			const threshold = mparams.thr;
+			const addr = mparams.subsig.map((signData) => {
+				return algosdk.encodeAddress(signData.pk)
+			});
 
-				const mparams = partialTxn.msig as algosdk.EncodedMultisig;
-				const addrs = mparams.subsig.map((signData) => {
-					return algosdk.encodeAddress(signData.pk);
-				});
+			const multisigParams = {
+				version: version,
+				threshold: threshold,
+				addrs: addr,
+			};
 
-				const multisigParams = {
-					version: mparams.v,
-					threshold: mparams.thr,
-					addrs: addrs,
-				};
+			const signedTxn = await this.signTransaction([
+				{
+					txn: encodedTxn,
+					msig: multisigParams,
+					signers: signers,
+				},
+			]);
 
-				const signedTxn = await this.signTransaction([
-					{
-						txn: txnToBeSign_Base64,
-						msig: multisigParams,
-						signers: signers,
-					},
-				]);
-
-				const signedTxnJson = signedTxn[0] as JsonPayload;
-				const blob = signedTxnJson.blob as string;
-
-				const blob1 = this.algoSigner.encoding.base64ToMsgpack(txn.txn);
-				const blob2 = this.algoSigner.encoding.base64ToMsgpack(blob);
-				const combineBlob = algosdk.mergeMultisigTransactions([blob1, blob2]);
-				const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
-				result[i] = {
-					blob: outputBase64,
-				};
+			const signedTxnJson = signedTxn[0] as JsonPayload;
+			let combineBlob = this.algoSigner.encoding.base64ToMsgpack(signedTxnJson.blob as string)
+			// multiple signatures
+			if (txn.msig?.subsig.findIndex((item) => item.s?.length) !== -1) {
+				const blob1 = encodeObj(txn);
+				const blob2 = combineBlob
+				combineBlob = algosdk.mergeMultisigTransactions([blob1, blob2]);
 			}
-			return result;
+			const outputBase64 = this.algoSigner.encoding.msgpackToBase64(combineBlob);
+			return {
+				blob: outputBase64,
+			};
 		} catch (err) {
 			error(err);
 			throw err;
