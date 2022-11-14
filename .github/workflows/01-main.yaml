@@ -20,5 +20,5 @@ jobs:
     uses: ./.github/workflows/reusableWorkflow.yaml
     with:
       name: runtime
-      command: cd packages/runtime && yarn test
+      command: cd packages/runtime && pipenv run yarn test
     secrets: inherit
