@@ -15,8 +15,7 @@ on:
 
 jobs:
   job1:
-    call-workflow-2-in-local-repo:
-      uses: ./.github/workflows/reusableWorkflow.yaml
-      steps:
-        - name: Execute algob tests
-            run: cd packages/algob && pipenv run yarn test
+    uses: ./.github/workflows/reusableWorkflow.yaml
+    steps:
+      - name: Execute algob tests
+          run: cd packages/algob && pipenv run yarn test
