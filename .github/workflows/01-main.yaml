@@ -15,12 +15,20 @@ on:
       - develop
 
 jobs:
-  job1:
+  algob-tests:
     uses: ./.github/workflows/reusableWorkflow.yaml
+    package:
+      name: algob
+      command: cd packages/algob && yarn test
 
-  job2:
-    runs-on: ubuntu-20.04
-    needs: job1
-    steps:
-      - name: Execute algob tests
-        run: cd packages/algob && pipenv run yarn test
+  web-tests:
+    uses: ./.github/workflows/reusableWorkflow.yaml
+    package:
+      name: web
+      command: cd packages/web && yarn test
+
+  runtime-tests:
+    uses: ./.github/workflows/reusableWorkflow.yaml
+    package:
+      name: runtime
+      command: cd packages/runtime && yarn test

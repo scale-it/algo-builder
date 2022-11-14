@@ -2,6 +2,11 @@ name: Reusable workflow example
 
 on:
   workflow_call:
+    package:
+      name:
+        required: true
+      command:
+        required: true
 
 jobs:
   build:
@@ -36,5 +41,5 @@ jobs:
         run: python -m pip install pipenv
       - name: Install python dependencies
         run: pipenv sync
-      - name: Install python dependencies
-        run: pipenv sync
+      - name: Run ${{ package.name }} test
+        run: ${{ package.command }}
