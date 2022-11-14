@@ -42,6 +42,7 @@ numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 	(field) => numberTxnFields[6].add(field)
 );
 numberTxnFields[7] = cloneDeep(numberTxnFields[6]);
+numberTxnFields[8] = cloneDeep(numberTxnFields[7]);
 
 const uintTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -52,6 +53,7 @@ const uintTxnFields: { [key: number]: Set<string> } = {
 };
 uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 uintTxnFields[7] = cloneDeep(uintTxnFields[6]);
+uintTxnFields[8] = cloneDeep(uintTxnFields[7]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
@@ -65,6 +67,7 @@ const assetIDFields: { [key: number]: Set<string> } = {
 
 assetIDFields[6] = cloneDeep(assetIDFields[5]);
 assetIDFields[7] = cloneDeep(assetIDFields[6]);
+assetIDFields[8] = cloneDeep(assetIDFields[7]);
 
 const byteTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -87,6 +90,7 @@ byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
 ["ApprovalProgramPages", "ClearStateProgramPages"].forEach((field) =>
 	byteTxnFields[7].add(field)
 );
+byteTxnFields[8] = cloneDeep(byteTxnFields[7]);
 
 const strTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -98,6 +102,7 @@ const strTxnFields: { [key: number]: Set<string> } = {
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
 strTxnFields[7] = cloneDeep(strTxnFields[6]);
+strTxnFields[8] = cloneDeep(strTxnFields[7]);
 
 const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -114,6 +119,7 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 
 acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
 acfgAddrTxnFields[7] = cloneDeep(acfgAddrTxnFields[6]);
+acfgAddrTxnFields[8] = cloneDeep(acfgAddrTxnFields[7]);
 
 const otherAddrTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([
@@ -131,6 +137,7 @@ otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
 ["RekeyTo"].forEach((field) => otherAddrTxnFields[6].add(field));
 otherAddrTxnFields[7] = cloneDeep(otherAddrTxnFields[6]);
+otherAddrTxnFields[8] = cloneDeep(otherAddrTxnFields[7]);
 
 const txTypes: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -145,6 +152,7 @@ txTypes[6] = cloneDeep(txTypes[5]);
 txTypes[6].add("keyreg");
 txTypes[6].add("appl");
 txTypes[7] = cloneDeep(txTypes[6]);
+txTypes[8] = cloneDeep(txTypes[7]);
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))

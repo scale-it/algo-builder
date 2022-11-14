@@ -13,7 +13,7 @@ export const ALGORAND_MIN_TX_FEE = 1000;
 export const maxStringSize = 4096;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
-export const MaxTEALVersion = 7;
+export const MaxTEALVersion = 8;
 export const MinVersionSupportC2CCall = 6;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
@@ -167,6 +167,7 @@ TxnFields[7] = {
 	NumClearStateProgramPages: null,
 	FirstValidTime: null,
 };
+TxnFields[8] = cloneDeep(TxnFields[7]);
 
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
 	1: {},
@@ -189,6 +190,10 @@ ITxnFields[7] = {
 	...ITxnFields[6],
 };
 
+ITxnFields[8] = {
+	...ITxnFields[7],
+};
+
 // transaction fields of type array
 export const TxArrFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -199,6 +204,7 @@ TxArrFields[4] = cloneDeep(TxArrFields[3]);
 TxArrFields[5] = new Set([...TxArrFields[4], "Logs"]);
 TxArrFields[6] = cloneDeep(TxArrFields[5]);
 TxArrFields[7] = new Set([...TxArrFields[6], "ApprovalProgramPages", "ClearStateProgramPages"]);
+TxArrFields[8] = cloneDeep(TxArrFields[7]);
 
 // itxn fields of type array
 export const ITxArrFields: { [key: number]: Set<string> } = {
@@ -211,6 +217,7 @@ export const ITxArrFields: { [key: number]: Set<string> } = {
 
 ITxArrFields[6] = cloneDeep(ITxArrFields[5]);
 ITxArrFields[7] = cloneDeep(ITxArrFields[6]);
+ITxArrFields[8] = cloneDeep(ITxArrFields[7]);
 
 export const TxFieldDefaults: { [key: string]: any } = {
 	Sender: ZERO_ADDRESS,
@@ -298,6 +305,7 @@ AssetParamMap[5] = {
 
 AssetParamMap[6] = { ...AssetParamMap[5] };
 AssetParamMap[7] = { ...AssetParamMap[6] };
+AssetParamMap[8] = { ...AssetParamMap[7] };
 
 // app param use for app_params_get opcode
 export const AppParamDefined: { [key: number]: Set<string> } = {
@@ -320,6 +328,7 @@ export const AppParamDefined: { [key: number]: Set<string> } = {
 
 AppParamDefined[6] = cloneDeep(AppParamDefined[5]);
 AppParamDefined[7] = cloneDeep(AppParamDefined[6]);
+AppParamDefined[8] = cloneDeep(AppParamDefined[7]);
 
 // param use for query acct_params_get opcode
 
@@ -415,6 +424,10 @@ GlobalFields[6] = {
 
 GlobalFields[7] = {
 	...GlobalFields[6],
+};
+
+GlobalFields[8] = {
+	...GlobalFields[7],
 };
 
 // creating map for opcodes whose cost is other than 1

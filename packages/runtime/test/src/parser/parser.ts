@@ -119,6 +119,7 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Uncover,
@@ -2276,7 +2277,7 @@ describe("Parser", function () {
 			assert.doesNotThrow(() => loadProgram("test-pragma-v7.teal"));
 		});
 
-		it("Should fail if declare pragma greater than 7", function () {
+		it("Should fail if declare pragma greater than 8", function () {
 			expectRuntimeError(
 				() => loadProgram("test-pragma-invalid.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
@@ -2560,6 +2561,15 @@ describe("Parser", function () {
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
 				new Base64Decode(["URLEncoding"], 2),
+			];
+			assert.deepEqual(expected, res);
+		});
+
+		it("Should return correct opcode list for TEALv8", function () {
+			const res = loadProgram("teal-v8.teal", ExecutionMode.APPLICATION);
+			const expected = [
+				new Pragma(["version", "8"], 1, interpreter),
+				new Switch(["zero", "one"], 2, interpreter),
 			];
 			assert.deepEqual(expected, res);
 		});
