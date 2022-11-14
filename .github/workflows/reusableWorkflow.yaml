@@ -2,16 +2,9 @@ name: Reusable workflow example
 
 on:
   workflow_call:
-    inputs:
-      config-path:
-        required: true
-        type: string
-    secrets:
-      token:
-        required: true
 
 jobs:
-  triage:
+  build:
     name: Build and Test
     runs-on: ubuntu-20.04
     steps:
