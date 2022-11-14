@@ -47,8 +47,11 @@ jobs:
       - name: Install python dependencies
         run: pipenv sync
   algob-tests:
+    runs-on: ubuntu-20.04
     needs: job1
     steps:
+      - name: Install python dependencies
+        run: pipenv sync
       - name: Execute algob tests
         run: cd packages/algob && pipenv run yarn test
 
