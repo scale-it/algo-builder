@@ -4,6 +4,7 @@
 name: Run tests on push
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -16,6 +17,3 @@ on:
 jobs:
   job1:
     uses: ./.github/workflows/reusableWorkflow.yaml
-    steps:
-      - name: Execute algob tests
-        run: cd packages/algob && pipenv run yarn test
