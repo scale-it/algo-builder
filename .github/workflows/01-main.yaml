@@ -17,6 +17,10 @@ on:
 jobs:
   job1:
     uses: ./.github/workflows/reusableWorkflow.yaml
+
+  job2:
+    runs-on: ubuntu-20.04
+    needs: job1
     steps:
       - name: Execute algob tests
         run: cd packages/algob && pipenv run yarn test
