@@ -18,4 +18,4 @@ jobs:
     uses: ./.github/workflows/reusableWorkflow.yaml
     steps:
       - name: Execute algob tests
-          run: cd packages/algob && pipenv run yarn test
+        run: cd packages/algob && pipenv run yarn test
