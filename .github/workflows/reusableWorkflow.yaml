@@ -12,6 +12,7 @@ on:
 
 jobs:
   triage:
+    name: Build and Test
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
