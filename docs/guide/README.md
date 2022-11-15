@@ -117,7 +117,7 @@ Check the _requirements_ section above first.\_
 1.  Add assets and smart-contracts in the `assets` directory.
 1.  Add deployment scripts in `scripts` directory.
 1.  Run `yarn run algob deploy` to compile and deploy everything (all scripts nested directly in /scripts).
-1.  Run `yarn run algob run scriptPath/scriptName` to run a script.
+1.  Run `yarn run algob run --script  scriptPath/scriptName` to run a script.
 1.  To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>

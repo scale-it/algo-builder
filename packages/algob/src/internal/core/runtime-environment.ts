@@ -29,7 +29,7 @@ export class Environment implements RuntimeEnv {
 	private readonly _extenders: EnvironmentExtender[];
 
 	/**
-	 * Initializes the Algob Runtime Environment and the given
+	 * Initializes the algob run --script time Environment and the given
 	 * extender functions.
 	 *
 	 * @remarks The extenders' execution order is given by the order
@@ -99,7 +99,7 @@ export class Environment implements RuntimeEnv {
 	};
 
 	/**
-	 * Injects the properties of `this` (the Algob Runtime Environment) into the global scope.
+	 * Injects the properties of `this` (the algob run --script time Environment) into the global scope.
 	 *
 	 * @param blacklist a list of property names that won't be injected.
 	 *

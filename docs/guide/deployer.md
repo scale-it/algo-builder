@@ -22,7 +22,7 @@ Deployer class has the following modes:
 - Run Mode: In run mode user can access/read checkpoints, create logs but cannot write(create) checkpoints. Files placed in nested folders (non-direct children, eg: `scripts/transfer/run-script.js`) of `scripts/` folder are considered to be run in this mode.
   To run a script in the _run_ mode (the script will receive deployer instance in _run_ mode\_):
 
-        yarn run algob run scripts/transfer/run-script.js
+        yarn run algob run --script  --script  scripts/transfer/run-script.js
 
 **Note:** In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTx`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
 

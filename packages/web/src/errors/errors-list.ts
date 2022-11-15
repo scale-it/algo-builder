@@ -78,16 +78,16 @@ Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help 
 	},
 	CONTEXT_BRE_NOT_DEFINED: {
 		number: 6,
-		message: "algob Runtime Environment is not defined in the algobContext.",
-		title: "algob Runtime Environment not created",
+		message: "algob run --script time Environment is not defined in the algobContext.",
+		title: "algob run --script time Environment not created",
 		description: `algob initialization failed. This is a bug.
 
 Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`,
 	},
 	CONTEXT_BRE_ALREADY_DEFINED: {
 		number: 7,
-		message: "algob Runtime Environment is already defined in the algobContext",
-		title: "Tried to create the algob Runtime Environment twice",
+		message: "algob run --script time Environment is already defined in the algobContext",
+		title: "Tried to create the algob run --script time Environment twice",
 		description: `The algob initialization process was executed twice. This is a bug.
 
 Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`,
@@ -531,7 +531,7 @@ export const taskErrors = {
 		number: 601,
 		message: "Scripts don't exist: %scripts%.",
 		title: "Scripts don't exist.",
-		description: `Tried to use \`algob run\` to execute a non-existing script(s).
+		description: `Tried to use \`algob run --script \` to execute a non-existing script(s).
 
 Please double check your script's path`,
 	},
