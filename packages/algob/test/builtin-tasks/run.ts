@@ -22,7 +22,7 @@ describe("Run task", function () {
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["./scripts/does-not-exist"],
+					script: "./scripts/does-not-exist",
 				}),
 			ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
 			"./scripts/does-not-exist"
@@ -31,44 +31,44 @@ describe("Run task", function () {
 
 	it("Should run the scripts to completion", async function () {
 		await this.env.run(TASK_RUN, {
-			scripts: ["./scripts/async-script.js"],
+			script: "./scripts/async-script.js",
 		});
 	});
 
 	/* TODO:MM compile before running the task
   it("Should compile before running", async function () {
-    if (await fsExtra.pathExists("cache")) {
-      await fsExtra.remove("cache");
-    }
+	if (await fsExtra.pathExists("cache")) {
+	  await fsExtra.remove("cache");
+	}
 
-    if (await fsExtra.pathExists("artifacts")) {
-      await fsExtra.remove("artifacts");
-    }
+	if (await fsExtra.pathExists("artifacts")) {
+	  await fsExtra.remove("artifacts");
+	}
 
-    await this.env.run(TASK_RUN, {
-      scripts: ["./scripts/successful-script.js"],
-    });
+	await this.env.run(TASK_RUN, {
+	  scripts: ["./scripts/successful-script.js"],
+	});
 
-    const files = await fsExtra.readdir("artifacts");
-    assert.deepEqual(files, ["A.json"]);
+	const files = await fsExtra.readdir("artifacts");
+	assert.deepEqual(files, ["A.json"]);
 
-    await fsExtra.remove("artifacts");
+	await fsExtra.remove("artifacts");
   });
 
   it("Shouldn't compile if asked not to", async function () {
-    if (await fsExtra.pathExists("cache")) {
-      await fsExtra.remove("cache");
-    }
+	if (await fsExtra.pathExists("cache")) {
+	  await fsExtra.remove("cache");
+	}
 
-    if (await fsExtra.pathExists("artifacts")) {
-      await fsExtra.remove("artifacts");
-    }
+	if (await fsExtra.pathExists("artifacts")) {
+	  await fsExtra.remove("artifacts");
+	}
 
-    await this.env.run(TASK_RUN, {
-      scripts: ["./scripts/successful-script.js"],
-    });
+	await this.env.run(TASK_RUN, {
+	  scripts: ["./scripts/successful-script.js"],
+	});
 
-    assert.isFalse(await fsExtra.pathExists("artifacts"));
+	assert.isFalse(await fsExtra.pathExists("artifacts"));
   });
   */
 });

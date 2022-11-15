@@ -123,14 +123,12 @@ async function executeRunTask(
 	algoOp: AlgoOperator
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
-	console.log({ script, args })
 	const nonExistent = filterNonExistent([script]);
 	if (nonExistent.length !== 0) {
 		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
 			scripts: nonExistent,
 		});
 	}
-	console.log(runtimeEnv);
 	await runMultipleScripts(
 		runtimeEnv,
 		assertDirChildren(scriptsDirectory, [script]),
