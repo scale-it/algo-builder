@@ -35,6 +35,26 @@ describe("Run task", function () {
 		});
 	});
 
+	it("Should run the script without arguments", async function () {
+		await this.env.run(TASK_RUN, {
+			script: "./scripts/async-script.js",
+		});
+	});
+
+	it("Should run the script with empty arguments", async function () {
+		await this.env.run(TASK_RUN, {
+			script: "./scripts/async-script.js",
+			args: []
+		});
+	});
+
+	it("Should run the script with arguments", async function () {
+		await this.env.run(TASK_RUN, {
+			script: "./scripts/async-script.js",
+			args: ["arg1", "arg2"]
+		});
+	});
+
 	/* TODO:MM compile before running the task
   it("Should compile before running", async function () {
 	if (await fsExtra.pathExists("cache")) {
@@ -77,16 +97,14 @@ describe("Run task + clean", function () {
 	useCleanFixtureProject("scripts-dir");
 	useEnvironment();
 
-	it("Should allow to run multiple scripts", async function () {
+	it("Should allow to run single script", async function () {
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/2.js", "scripts/1.js"],
+			script: "scripts/1.js",
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
 			scriptOutput,
-			`scripts directory: script 2 executed
-scripts directory: script 1 executed
-`
+			`scripts directory: script 1 executed\n`
 		);
 	});
 
@@ -94,10 +112,10 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["scripts/1.js", "scripts/2.js", "scripts/3.js"],
+					script: "scripts/doesnotexist.js",
 				}),
 			ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
-			"scripts/3.js"
+			"scripts/doesnotexist.js"
 		);
 	});
 
@@ -105,33 +123,25 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: [
-						"scripts/other-scripts/1.js",
-						"scripts/other-scripts/failing.js",
-						"scripts/1.js",
-					],
+					script: "scripts/other-scripts/failing.js"
 				}),
 			ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
 			"scripts/other-scripts/failing.js"
 		);
-		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
-		assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
 	});
 
 	it("Should allow to rerun successful scripts twice", async function () {
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/2.js", "scripts/1.js"],
+			script: "scripts/1.js"
 		});
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/1.js", "scripts/2.js"],
+			script: "scripts/1.js"
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
 			scriptOutput,
-			`scripts directory: script 2 executed
+			`scripts directory: script 1 executed
 scripts directory: script 1 executed
-scripts directory: script 1 executed
-scripts directory: script 2 executed
 `
 		);
 	});
@@ -141,7 +151,7 @@ scripts directory: script 2 executed
 			fileNames: ["scripts/1.js"],
 		});
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/1.js"],
+			script: "scripts/1.js",
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
@@ -154,7 +164,7 @@ scripts directory: script 1 executed
 
 	it("Should not create a snapshot", async function () {
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/2.js"],
+			script: "scripts/2.js",
 		});
 		assert.isFalse(fs.existsSync("artifacts/scripts/2.js"));
 	});
@@ -163,7 +173,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["1.js", "scripts/2.js", "scripts/1.js"],
+					script: "1.js",
 				}),
 			ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
 			"1.js"
@@ -172,7 +182,7 @@ scripts directory: script 1 executed
 
 	it("Should not save metadata", async function () {
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/1.js"],
+			script: "scripts/1.js",
 		});
 		const persistedSnapshot = loadCheckpoint("./scripts/1.js");
 		assert.deepEqual(persistedSnapshot, {});
@@ -188,7 +198,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["scripts/other-scripts/put-metadata.js"],
+					script: "scripts/other-scripts/put-metadata.js",
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"addCheckpointKV"
@@ -203,7 +213,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["scripts/other-scripts/deploy-asa.js"],
+					script: "scripts/other-scripts/deploy-asa.js",
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"deployASA"
@@ -218,7 +228,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					scripts: ["scripts/other-scripts/deploy-asc.js"],
+					script: "scripts/other-scripts/deploy-asc.js",
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"fundLsigByFile"
