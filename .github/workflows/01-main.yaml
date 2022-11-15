@@ -1,7 +1,7 @@
 # https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow
 # starters: https://github.com/actions/starter-workflows/blob/main/ci/node.js.yml
 
-name: Run tests on push
+name: Run package tests on push
 
 on:
   workflow_dispatch:
@@ -15,10 +15,21 @@ on:
       - develop
 
 jobs:
+  algob-tests:
+    name: Runtime 
+    uses: ./.github/workflows/reusable-workflow.yaml
+    with:
+      command: cd packages/algob && pipenv run yarn test
+    secrets: inherit
+  web-tests:
+    name: web
+    uses: ./.github/workflows/reusable-workflow.yaml
+    with:
+      command: cd packages/web && pipenv run yarn test
+    secrets: inherit
   runtime-tests:
     name: Runtime 
-    uses: ./.github/workflows/reusableWorkflow.yaml
+    uses: ./.github/workflows/reusable-workflow.yaml
     with:
-      name: runtime
       command: cd packages/runtime && pipenv run yarn test
     secrets: inherit

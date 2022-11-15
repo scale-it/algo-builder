@@ -3,11 +3,9 @@ name: Reusable workflow example
 on:
   workflow_call:
     inputs:
-      name:
-        required: true
-        type: string
       command:
         required: true
+        description: "The package command that will trigger the tests."
         type: string
 
 jobs:
