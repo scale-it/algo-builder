@@ -16,7 +16,7 @@ on:
 
 jobs:
   algob-tests:
-    name: Runtime 
+    name: algob 
     uses: ./.github/workflows/reusable-workflow.yaml
     with:
       command: cd packages/algob && pipenv run yarn test
@@ -28,7 +28,7 @@ jobs:
       command: cd packages/web && pipenv run yarn test
     secrets: inherit
   runtime-tests:
-    name: Runtime 
+    name: runtime 
     uses: ./.github/workflows/reusable-workflow.yaml
     with:
       command: cd packages/runtime && pipenv run yarn test
