@@ -148,7 +148,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.isDefined(app);
 		assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
-		// update should be rejected because sender is not creator
 		expectRuntimeError(
 			() =>
 				runtime.updateApp(
@@ -172,4 +171,114 @@ describe("Algorand Smart Contracts - Update Application", function () {
 		assert.deepEqual(runtime.getGlobalState(appID, "global-key"), undefined);
 		assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), undefined);
 	});
+
+	describe("Extra Pages - Update application", function () {
+		useFixture("stateful");
+		const storageConfig = {
+			appName: "app",
+			globalBytes: 1,
+			globalInts: 1,
+			localBytes: 1,
+			localInts: 1,
+		};
+
+		this.beforeAll(function () {
+			oldApprovalProgramFileName = "counter-approval.teal";
+			clearProgramFilename = "clear.teal";
+		});
+
+		function deployApp(appName: string) {
+			const appID = runtime.deployApp(
+				creator.account,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: oldApprovalProgramFileName,
+					clearProgramFilename: clearProgramFilename,
+					...storageConfig,
+					appName: appName,
+				},
+				{}
+			).appID;
+			runtime.optInToApp(creator.address, appID, {}, {});
+
+			let app = runtime.getApp(appID);
+			assert.isDefined(app);
+		}
+
+		function updateApp(approvalProgramFilename: string, clearProgramFilename: string, appName: string, extraPages: number = 0) {
+			runtime.updateApp(
+				appName,
+				creator.address,
+				appID,
+				{
+					metaType: types.MetaType.FILE,
+					approvalProgramFilename: approvalProgramFilename,
+					clearProgramFilename: clearProgramFilename,
+					extraPages: extraPages
+				},
+				{},
+				{}
+			)
+		}
+
+		it("Should pass when updated program length does not exceed total allowed program length", function () {
+			// create app
+			deployApp("app1");
+			assert.doesNotThrow(
+				() => updateApp("counter-approval.teal", "clear.teal", "app1")
+			);
+			// verify updated app
+			assert.isDefined(runtime.getApp(appID));
+		});
+
+		it("Should fail when updated program length exceeds total allowed program length", function () {
+			// create app
+			deployApp("app2");
+			expectRuntimeError(
+				() => updateApp("very-long-approval.teal", "clear.teal", "app2"),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+		});
+
+		it("Should fail when no extra pages were defined for large approval program", function () {
+			// create app
+			deployApp("app3");
+			expectRuntimeError(
+				() => updateApp("very-long-approval.teal", "clear.teal", "app3"),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+		});
+
+		it("Should pass when sufficient extra pages was defined", function () {
+			// create app
+			deployApp("app4");
+			// should pass because total 2 pages(1 + extra pages) needed
+			assert.doesNotThrow(
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app4", 1),
+			);
+			// verify updated app
+			assert.isDefined(runtime.getApp(appID));
+		});
+
+		it("Should fail when sufficient extra pages was not defined", function () {
+			// create app
+			deployApp("app5");
+			// should fail because total 2 pages (1 + extra pages) needed because: program length > 2048
+			expectRuntimeError(
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app5", 0),
+				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
+			);
+		});
+
+		it("Should fail when sufficient extra pages was not defined", function () {
+			// create app
+			deployApp("app6");
+			// should fail because extra pages range is [0, 3]
+			expectRuntimeError(
+				() => updateApp("very-long-approval-2-pages.teal", "clear.teal", "app6", 4),
+				RUNTIME_ERRORS.TEAL.EXTRA_PAGES_EXCEEDED
+			);
+		});
+	});
+
 });

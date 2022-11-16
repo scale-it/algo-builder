@@ -214,7 +214,9 @@ export type SourceCompiled = {
 	clearProgramBytes: Uint8Array;
 };
 
-export type SmartContract = SourceFile | SourceCode | SourceCompiled;
+export type SmartContract = (SourceFile | SourceCode | SourceCompiled) & {
+	extraPages?: number;
+};
 
 export type AppDefinitionFromFile = StorageConfig & AppOptionalFlags & SourceFile;
 
@@ -243,11 +245,11 @@ export type UpdateAppParam = BasicParams &
 export type AppCallsParam = BasicParams &
 	AppOptionalFlags & {
 		type:
-			| TransactionType.CallApp
-			| TransactionType.ClearApp
-			| TransactionType.CloseApp
-			| TransactionType.DeleteApp
-			| TransactionType.OptInToApp;
+		| TransactionType.CallApp
+		| TransactionType.ClearApp
+		| TransactionType.CloseApp
+		| TransactionType.DeleteApp
+		| TransactionType.OptInToApp;
 		appID: number;
 	};
 

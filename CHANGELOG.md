@@ -19,16 +19,19 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part.
 
 ### Features
+
 - Allow user to query foreign applications accounts using the `appID` field.
 
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
-- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID`  will be added to a contract.
+- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
+- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 
 ### Breaking Changes
 
-- The method `ProduceBlock` has been  renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
+- The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
+
 #### TEALv8
 
 - Support for `switch` opcode.
@@ -77,8 +80,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added blocks to `Runtime`. It simulates the block generation by using radnom bytes generator as the first seed. The following seeds are MD5 hash of the seed from the previous block.
 - Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
 - Added support for `FirstValidTime` field for transactions opcode.
+- Added program length check on app update on the basis of extra pages in `runtime`.
 - Allow `Runtime` to get account from `algob.config.js`
-
 
 #### @algo-builder/web
 
