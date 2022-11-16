@@ -89,12 +89,12 @@ export class MyAlgoWalletSession {
 		}
 	}
 
-	// https://connect.myalgo.com/docs/interactive-examples/Connect
 	/**
 	 * @async
 	 * @description Connects to the MyAlgo Wallet by opening up its dialog box to login
 	 * @param allowMultipleAccounts allow selection of multiple accounts from MyAlgo Wallet, default is true
 	 * For Multisig you need to allow multiple accounts login
+	 * for more info visit: https://connect.myalgo.com/docs/interactive-examples/Connect
 	 */
 	async connectToMyAlgo(allowMultipleAccounts = true): Promise<void> {
 		try {
