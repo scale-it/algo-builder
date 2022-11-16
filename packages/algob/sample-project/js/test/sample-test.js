@@ -2,7 +2,6 @@ const { getProgram } = require("@algo-builder/runtime");
 const { Runtime, AccountStore } = require("@algo-builder/runtime");
 const { types } = require("@algo-builder/web");
 const { assert } = require("chai");
-const cfg = require("../algob.config");
 
 const minBalance = BigInt(1e6);
 const masterBalance = BigInt(10e6);
@@ -22,6 +21,10 @@ describe("Sample Test", function () {
 		master = new AccountStore(masterBalance);
 		fundReceiver = new AccountStore(minBalance);
 		runtime = new Runtime([master, fundReceiver]);
+		// ## ACCOUNTS loaded from algob.config.js file ##
+		// const cfg = require("../algob.config");
+		// runtime.addAccounts(cfg.networks.default.accounts, 1000000);
+		// console.log(runtime.getAccount(cfg.networks.default.accounts[0].addr));
 
 		lsig = runtime.createLsigAccount(feeCheckProgram);
 		lsig.sign(master.account.sk);
@@ -36,10 +39,6 @@ describe("Sample Test", function () {
 		const validTxFee = 10000;
 		assert.equal(fundReceiver.balance(), minBalance);
 		assert.equal(master.balance(), masterBalance);
-
-		// In case you want to get account from algob.config.js with network default
-		// runtime.addAccounts(cfg.networks.default.accounts, 1000000);
-		// console.log(runtime.getAccount(cfg.networks.default.accounts[0].addr));
 
 		runtime.executeTx([
 			{

@@ -25,9 +25,9 @@ import {
 	BlockFinalisationTime,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
-	TransactionTypeEnum,
 	seedLength,
-	ZERO_ADDRESS_STR
+	TransactionTypeEnum,
+	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
@@ -424,17 +424,13 @@ export class Runtime {
 	}
 
 	/**
-	 * Set up account from deployer to runtime
+	 * Adding accounts to Store
 	 * @param accounts: array of accounts
 	 */
-	addAccounts(accounts: Account[], balance: number | bigint, ): void {
+	addAccounts(accounts: Account[], balance: number | bigint): void {
 		for (const _acc of accounts) {
-			const acc = new AccountStore(
-				balance,
-				_acc
-			)
-			if (_acc.name)
-				this.store.accountNameAddress.set(_acc.name, _acc.addr);
+			const acc = new AccountStore(balance, _acc);
+			if (_acc.name) this.store.accountNameAddress.set(_acc.name, _acc.addr);
 			this.store.accounts.set(_acc.addr, acc);
 		}
 	}
