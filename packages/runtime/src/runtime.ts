@@ -424,8 +424,9 @@ export class Runtime {
 	}
 
 	/**
-	 * Adding accounts to Store
+	 * Add accounts to the Store
 	 * @param accounts: array of accounts
+	 * @param balance: balance for accounts
 	 */
 	addAccounts(accounts: Account[], balance: number | bigint): void {
 		for (const _acc of accounts) {
