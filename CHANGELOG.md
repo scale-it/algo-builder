@@ -30,6 +30,8 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
 - Add `TxFieldEnum` for transaction fields in `runtime`.
+- Add reusable workflow in GitHub action.
+- Add one batch for each package in GitHub action which uses reusable workflow.
 
 ### Breaking Changes
 
