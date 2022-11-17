@@ -41,5 +41,5 @@ jobs:
         run: python -m pip install pipenv
       - name: Install python dependencies
         run: pipenv sync
-      - name: Run test
+      - name: Run tests
         run: ${{ inputs.command }}
