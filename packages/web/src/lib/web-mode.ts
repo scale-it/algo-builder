@@ -5,8 +5,9 @@ import algosdk, {
 	SuggestedParams,
 	Transaction,
 } from "algosdk";
+import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
-import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
+import { AlgoSigner, JsonPayload, MultisigTransaction, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
 import {
 	ExecParams,
