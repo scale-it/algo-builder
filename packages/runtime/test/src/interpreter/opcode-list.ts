@@ -7082,29 +7082,29 @@ describe("Teal Opcodes", function () {
 
 		it("Should decode base64 encoded data and push it to stack", function () {
 			stack.push(toPushUrl);
-			const opUrl = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			const opUrl = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			opUrl.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 			stack.push(toPushStd);
-			const opStd = new Base64Decode([TxFieldEnum.StdEncoding], 0);
+			const opStd = new Base64Decode([JsonEncoding.StdEncoding], 0);
 			opStd.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 		});
 
 		it("Should throw an error when last stack element is not base64 encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseUrl, "utf-8")));
-			const op = new Base64Decode([TxFieldEnum.StdEncoding], 0);
+			const op = new Base64Decode([JsonEncoding.StdEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
 		});
 
 		it("Should throw an error when last stack element is not base64Url encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseStd, "utf-8")));
-			const op = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			const op = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64URL);
 		});
 
 		it("Should throw an error when the stack is empty", function () {
-			const op = new Base64Decode([TxFieldEnum.StdEncoding], 0);
+			const op = new Base64Decode([JsonEncoding.StdEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
@@ -7119,7 +7119,7 @@ describe("Teal Opcodes", function () {
 		it("Should calculate the correct cost", function () {
 			let toPush = Buffer.from("", "utf-8");
 			stack.push(toPush);
-			let op = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			let op = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			let cost = op.execute(stack);
 			assert.deepEqual(1, cost); // base64_decode cost = 1
 
@@ -7128,7 +7128,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			op = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(5, cost); // base64_decode cost = 5 (64 bytes -> 1 + 64/16)
 
@@ -7137,7 +7137,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			op = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(5, cost); // base64_decode cost = 5 (60 bytes -> 1 + ceil(60/16))
 
@@ -7146,7 +7146,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode([TxFieldEnum.URLEncoding], 0);
+			op = new Base64Decode([JsonEncoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(6, cost); // base64_decode cost = 6 (68 bytes -> 1 + ceil(68/16))
 		});

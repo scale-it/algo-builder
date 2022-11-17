@@ -50,7 +50,8 @@ import {
 	TxArrFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	TxFieldEnum
+	TxFieldEnum,
+	JsonEncoding
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -4986,11 +4987,11 @@ export class Base64Decode extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
-			case TxFieldEnum.URLEncoding: {
+			case JsonEncoding.URLEncoding: {
 				this.encoding = "base64url";
 				break;
 			}
-			case TxFieldEnum.StdEncoding: {
+			case JsonEncoding.StdEncoding: {
 				this.encoding = "base64";
 				break;
 			}

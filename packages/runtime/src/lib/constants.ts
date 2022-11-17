@@ -656,14 +656,17 @@ export enum TxFieldEnum {
 	TypeEnum = "TypeEnum",
 	TxID = "TxID",
 	Type = "Type",
-	URLEncoding = "URLEncoding",
-	StdEncoding = "StdEncoding",
 	VotePK = "VotePK",
 	VoteFirst = "VoteFirst",
 	VoteLast = "VoteLast",
 	VoteKeyDilution = "VoteKeyDilution",
 	XferAsset = "XferAsset",
 	ZeroAddress = "ZeroAddress"
+}
+
+export enum JsonEncoding {
+	URLEncoding = "URLEncoding",
+	StdEncoding = "StdEncoding"
 }
 
 export enum CurveTypeEnum {

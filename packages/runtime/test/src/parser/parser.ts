@@ -131,7 +131,8 @@ import {
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
-	TxFieldEnum
+	TxFieldEnum,
+	JsonEncoding
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
@@ -2561,7 +2562,7 @@ describe("Parser", function () {
 			const res = loadProgram("teal-v7.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
-				new Base64Decode([TxFieldEnum.URLEncoding], 2),
+				new Base64Decode([JsonEncoding.URLEncoding], 2),
 			];
 			assert.deepEqual(expected, res);
 		});
