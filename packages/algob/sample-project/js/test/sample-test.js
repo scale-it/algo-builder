@@ -22,10 +22,7 @@ describe("Sample Test", function () {
 		fundReceiver = new AccountStore(minBalance);
 		runtime = new Runtime([master, fundReceiver]);
 		// ## ACCOUNTS loaded from algob.config.js file ##
-		// const cfg = require("../algob.config");
-		// runtime.addAccounts(cfg.networks.default.accounts, 1000000);
-		// console.log(runtime.getAccount(cfg.networks.default.accounts[0].addr));
-
+		// runtime.loadAccountsFromConfig();
 		lsig = runtime.createLsigAccount(feeCheckProgram);
 		lsig.sign(master.account.sk);
 	});
