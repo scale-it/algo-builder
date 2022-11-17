@@ -9,6 +9,7 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 import MD5 from "crypto-js/md5";
+import findupSync from "findup-sync";
 import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
@@ -23,10 +24,12 @@ import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	BlockFinalisationTime,
+	JS_CONFIG_FILENAME,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
 	seedLength,
 	TransactionTypeEnum,
+	TS_CONFIG_FILENAME,
 	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
@@ -424,12 +427,23 @@ export class Runtime {
 	}
 
 	/**
-	 * Add accounts to the Store
-	 * @param accounts: array of accounts
+	 * Add accounts from config file to the Store
+	 * @param network: the network of accounts to add
 	 * @param balance: balance for accounts
 	 */
-	addAccounts(accounts: Account[], balance: number | bigint): void {
+	loadAccountsFromConfig(network = "default", balance?: number): void {
+		const find = findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]);
+		if (!find) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.CONFIG_FILE_NOT_FOUND);
+		}
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const config = require(find);
+
+		console.log(config);
+		console.log(config.networks[network]);
+		const accounts = config.networks[network].accounts;
 		for (const _acc of accounts) {
+			balance = balance ? balance : 1e6;
 			const acc = new AccountStore(balance, _acc);
 			if (_acc.name) this.store.accountNameAddress.set(_acc.name, _acc.addr);
 			this.store.accounts.set(_acc.addr, acc);

@@ -652,6 +652,12 @@ const runtimeGeneralErrors = {
 		title: "Invalid round",
 		description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
 	},
+	CONFIG_FILE_NOT_FOUND: {
+		number: 1325,
+		message: "Config file is not found",
+		title: "Config find not found",
+		description: "The config file in project is not found",
+	},
 };
 
 const transactionErrors = {
