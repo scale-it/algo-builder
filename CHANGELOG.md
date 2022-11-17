@@ -26,6 +26,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
 - Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
+- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 
 ### Breaking Changes
