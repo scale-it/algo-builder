@@ -194,6 +194,9 @@ export class WebMode {
 		signers?: string[]
 	): Promise<JsonPayload> {
 		try {
+			if (!txn.msig) {
+				throw new Error("Current transaction is not a Multisign Transaction.")
+			}
 			const encodedTxn = this.algoSigner.encoding.msgpackToBase64(encodeObj(txn.txn))
 			const mparams = txn.msig as algosdk.EncodedMultisig;
 			const version = mparams.v;
