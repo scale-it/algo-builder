@@ -5,8 +5,9 @@ import algosdk, {
 	SuggestedParams,
 	Transaction,
 } from "algosdk";
+import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
-import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
+import { AlgoSigner, JsonPayload, MultisigTransaction, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
 import {
 	ExecParams,
@@ -233,6 +234,37 @@ export class WebMode {
 			throw err;
 		}
 	}
+
+	/**
+	 * @async
+	 * @description Sign a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 */
+	signLogicSig(transaction: Transaction, logicSig: LogicSig): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing Lsig Transaction" + err);
+		}
+	}
+
+	/**
+	 * @async
+	 * @description Sign a Multisignature transaction
+	 * @param transaction msig and transaction object
+	 */
+	async signMultisigTxn(transaction: MultisigTransaction): Promise<JsonPayload> {
+		try {
+			return await this.algoSigner.signMultisig(transaction)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing msig transaction" + err);
+		}
+	}
+
 
 	/**
 	 * Execute single transaction or group of transactions (atomic transaction)

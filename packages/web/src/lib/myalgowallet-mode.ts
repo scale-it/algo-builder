@@ -91,6 +91,22 @@ export class MyAlgoWalletSession {
 
 	/**
 	 * @async
+	 * @description Sign a teal program
+	 * @param logic Teal program
+	 * @param address Signer Address
+	 * @returns Returns signed teal
+	 */
+	async signLogicSig(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
+		try {
+			return await this.connector.signLogicSig(logic, address)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing Lsig Transaction" + err);
+		}
+	}
+
+	/**
+	 * @async
 	 * @description Connects to the MyAlgo Wallet by opening up its dialog box to login
 	 * @param allowMultipleAccounts allow selection of multiple accounts from MyAlgo Wallet, default is true
 	 * For Multisig you need to allow multiple accounts login

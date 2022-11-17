@@ -2,6 +2,7 @@ import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk, { SignedTransaction, Transaction } from "algosdk";
+import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
@@ -158,6 +159,22 @@ export class WallectConnectSession {
 	}
 
 	/**
+	 * @async
+	 * @description Sign a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 */
+	signLogicSig(transaction: Transaction, logicSig: LogicSig): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing Lsig Transaction" + err);
+		}
+	}
+
+	/**
 	 * Sign a group of transaction(s) from a wallect connect session
 	 * @param txns Array of [{  SDK transaction object, shouldSign, signers, msig }] object
 	 * @param message optional message with txn
@@ -282,11 +299,11 @@ export class WallectConnectSession {
 					return txn.sign === SignType.LogicSignature
 						? { txn: txns[index], shouldSign: false } // logic signature
 						: {
-								txn: txns[index],
-								shouldSign: true,
-								signers:
-									execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
-						  }; // to be signed
+							txn: txns[index],
+							shouldSign: true,
+							signers:
+								execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
+						}; // to be signed
 				}
 			);
 			// only shouldSign txn are to be signed
