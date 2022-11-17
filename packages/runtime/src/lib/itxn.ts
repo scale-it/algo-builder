@@ -13,6 +13,8 @@ import {
 	TransactionTypeEnum,
 	TxFieldEnum,
 	TxnFields,
+	TxnRefFields,
+	TxnaField
 } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
@@ -35,7 +37,7 @@ const numberTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set([TxFieldEnum.Fee, TxFieldEnum.FreezeAssetFrozen, TxFieldEnum.ConfigAssetDecimals, TxFieldEnum.ConfigAssetDefaultFrozen]),
+	5: new Set([TxFieldEnum.Fee, TxnRefFields.FreezeAssetFrozen, TxnRefFields.ConfigAssetDecimals, TxnRefFields.ConfigAssetDefaultFrozen]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
 [TxFieldEnum.VoteFirst, TxFieldEnum.VoteLast, TxFieldEnum.VoteKeyDilution, TxFieldEnum.Nonparticipation, TxFieldEnum.ApplicationID].forEach(
@@ -49,7 +51,7 @@ const uintTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set([TxFieldEnum.Amount, TxFieldEnum.AssetAmount, TxFieldEnum.TypeEnum, TxFieldEnum.ConfigAssetTotal]),
+	5: new Set([TxFieldEnum.Amount, TxFieldEnum.AssetAmount, TxFieldEnum.TypeEnum, TxnRefFields.ConfigAssetTotal]),
 };
 uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 uintTxnFields[7] = cloneDeep(uintTxnFields[6]);
@@ -74,7 +76,7 @@ const byteTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set([TxFieldEnum.ConfigAssetMetadataHash]),
+	5: new Set([TxnRefFields.ConfigAssetMetadataHash]),
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
@@ -82,12 +84,12 @@ byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 	TxFieldEnum.VotePK,
 	TxFieldEnum.SelectionPK,
 	TxFieldEnum.Note,
-	TxFieldEnum.ApplicationArgs,
+	TxnaField.ApplicationArgs,
 	TxFieldEnum.ApprovalProgram,
 	TxFieldEnum.ClearStateProgram,
 ].forEach((field) => byteTxnFields[6].add(field));
 byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
-[TxFieldEnum.ApprovalProgramPages, TxFieldEnum.ClearStateProgramPages].forEach((field) =>
+[TxnaField.ApprovalProgramPages, TxnaField.ClearStateProgramPages].forEach((field) =>
 	byteTxnFields[7].add(field)
 );
 byteTxnFields[8] = cloneDeep(byteTxnFields[7]);
@@ -97,7 +99,7 @@ const strTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set([TxFieldEnum.Type, TxFieldEnum.ConfigAssetName, TxFieldEnum.ConfigAssetUnitName, TxFieldEnum.ConfigAssetURL]),
+	5: new Set([TxFieldEnum.Type, TxnRefFields.ConfigAssetName, TxnRefFields.ConfigAssetUnitName, TxnRefFields.ConfigAssetURL]),
 };
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
@@ -110,10 +112,10 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	3: new Set(),
 	4: new Set(),
 	5: new Set([
-		TxFieldEnum.ConfigAssetManager,
-		TxFieldEnum.ConfigAssetReserve,
-		TxFieldEnum.ConfigAssetFreeze,
-		TxFieldEnum.ConfigAssetClawback,
+		TxnRefFields.ConfigAssetManager,
+		TxnRefFields.ConfigAssetReserve,
+		TxnRefFields.ConfigAssetFreeze,
+		TxnRefFields.ConfigAssetClawback,
 	]),
 };
 
@@ -129,7 +131,7 @@ const otherAddrTxnFields: { [key: number]: Set<string> } = {
 		TxFieldEnum.AssetSender,
 		TxFieldEnum.AssetCloseTo,
 		TxFieldEnum.AssetReceiver,
-		TxFieldEnum.FreezeAssetAccount,
+		TxnRefFields.FreezeAssetAccount,
 	]),
 };
 
@@ -238,35 +240,35 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetDecimals: {
+		case TxnRefFields.ConfigAssetDecimals: {
 			const assetDecimals = txValue as bigint;
 			if (assetDecimals > 19n || assetDecimals < 0n) {
 				errMsg = "Decimals must be between 0 (non divisible) and 19";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetMetadataHash: {
+		case TxnRefFields.ConfigAssetMetadataHash: {
 			const assetMetadataHash = txValue as Uint8Array;
 			if (assetMetadataHash.length !== 32) {
 				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetUnitName: {
+		case TxnRefFields.ConfigAssetUnitName: {
 			const assetUnitName = txValue as string;
 			if (assetUnitName.length > 8) {
 				errMsg = "Unit name must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetName: {
+		case TxnRefFields.ConfigAssetName: {
 			const assetName = txValue as string;
 			if (assetName.length > 32) {
 				errMsg = "AssetName must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetURL: {
+		case TxnRefFields.ConfigAssetURL: {
 			const assetURL = txValue as string;
 			if (assetURL.length > 96) {
 				errMsg = "URL must not be longer than 96 bytes";
@@ -297,7 +299,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ApprovalProgramPages: {
+		case TxnaField.ApprovalProgramPages: {
 			encodedField = "apap";
 			const approvalProgram = (subTxn as any)[encodedField];
 			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
@@ -310,7 +312,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ClearStateProgramPages: {
+		case TxnaField.ClearStateProgramPages: {
 			encodedField = "apsu";
 			const clearStateProgram = (subTxn as any)[encodedField];
 			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
@@ -340,11 +342,11 @@ export function setInnerTxField(
 	// if everything goes well, set the [key, value]
 	if (encodedField === null) {
 		return subTxn; // could be for TxFieldEnum.TypeEnum
-	} else if (assetTxnFields.has(field as TxFieldEnum)) {
+	} else if (assetTxnFields.has(field as TxnRefFields)) {
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
 	} else {
-		if (field === TxFieldEnum.ApplicationArgs) {
+		if (field === TxnRefFields.ApplicationArgs) {
 			if ((subTxn as any)[encodedField] === undefined) {
 				(subTxn as any)[encodedField] = [];
 			}

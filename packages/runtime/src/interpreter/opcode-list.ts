@@ -28,6 +28,9 @@ import {
 	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
+	AssetHoldingField,
+	AssetParamGetField,
+	AppParamField,
 	AssetParamMap,
 	blockFieldTypes,
 	CurveTypeEnum,
@@ -51,7 +54,9 @@ import {
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 	TxFieldEnum,
-	JsonEncoding
+	Base64Encoding,
+	GlobalField,
+	AccountParamGetField
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -1837,7 +1842,7 @@ export class Global extends Op {
 
 	/**
 	 * Stores global field to query as string
-	 * @param args Expected arguments: [field] // Ex: [TxFieldEnum.GroupSize]
+	 * @param args Expected arguments: [field] // Ex: [GlobalField.GroupSize]
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
@@ -1854,11 +1859,11 @@ export class Global extends Op {
 	execute(stack: TEALStack): number {
 		let result;
 		switch (this.field) {
-			case TxFieldEnum.GroupSize: {
+			case GlobalField.GroupSize: {
 				result = this.interpreter.runtime.ctx.gtxs.length;
 				break;
 			}
-			case TxFieldEnum.CurrentApplicationID: {
+			case GlobalField.CurrentApplicationID: {
 				result = this.interpreter.runtime.ctx.tx.apid;
 				this.interpreter.runtime.assertAppDefined(
 					result as number,
@@ -1867,34 +1872,34 @@ export class Global extends Op {
 				);
 				break;
 			}
-			case TxFieldEnum.Round: {
+			case GlobalField.Round: {
 				result = this.interpreter.runtime.getRound();
 				break;
 			}
-			case TxFieldEnum.LatestTimestamp: {
+			case GlobalField.LatestTimestamp: {
 				result = this.interpreter.runtime.getTimestamp();
 				break;
 			}
-			case TxFieldEnum.CreatorAddress: {
+			case GlobalField.CreatorAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				const app = this.interpreter.getApp(appID, this.line);
 				result = decodeAddress(app.creator).publicKey;
 				break;
 			}
-			case TxFieldEnum.GroupID: {
+			case GlobalField.GroupID: {
 				result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
 				break;
 			}
-			case TxFieldEnum.CurrentApplicationAddress: {
+			case GlobalField.CurrentApplicationAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				result = decodeAddress(getApplicationAddress(appID)).publicKey;
 				break;
 			}
-			case TxFieldEnum.CallerApplicationID: {
+			case GlobalField.CallerApplicationID: {
 				result = this.interpreter.runtime.ctx.getCallerApplicationID();
 				break;
 			}
-			case TxFieldEnum.CallerApplicationAddress: {
+			case GlobalField.CallerApplicationAddress: {
 				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
 				result = decodeAddress(callerAddress).publicKey;
 				break;
@@ -2335,10 +2340,10 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
-			case TxFieldEnum.AssetBalance:
+			case AssetHoldingField.AssetBalance:
 				value = BigInt(assetInfo.amount);
 				break;
-			case TxFieldEnum.AssetFrozen:
+			case AssetHoldingField.AssetFrozen:
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
 			default:
@@ -2405,13 +2410,13 @@ export class GetAssetDef extends Op {
 			] as keyof modelsv2.AssetParams;
 
 			switch (this.field) {
-				case TxFieldEnum.AssetTotal:
+				case AssetHoldingField.AssetFrozen:
 					value = BigInt(AssetDefinition.total);
 					break;
-				case TxFieldEnum.AssetDecimals:
+				case AssetParamGetField.AssetDecimals:
 					value = BigInt(AssetDefinition.decimals);
 					break;
-				case TxFieldEnum.AssetDefaultFrozen:
+				case AssetParamGetField.AssetDefaultFrozen:
 					value = AssetDefinition.defaultFrozen ? 1n : 0n;
 					break;
 				default:
@@ -4033,7 +4038,7 @@ export class EcdsaPkRecover extends Op {
 			});
 		}
 
-		const ec = new EC("secp256k1");
+		const ec = new EC(CurveTypeEnum.secp256k1);
 		const signature = { r: signatureC, s: signatureD };
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
@@ -4744,33 +4749,33 @@ export class AppParamsGet extends Op {
 			let value: StackElem = 0n;
 			const appDef = this.interpreter.getApp(Number(appID), this.line);
 			switch (this.field) {
-				case TxFieldEnum.AppApprovalProgram:
+				case AssetParamGetField.AssetCreator:
 					value = parsing.stringToBytes(appDef["approval-program"]);
 					break;
-				case TxFieldEnum.AppClearStateProgram:
+				case AppParamField.AppClearStateProgram:
 					value = parsing.stringToBytes(appDef["clear-state-program"]);
 					break;
-				case TxFieldEnum.AppGlobalNumUint:
+				case AppParamField.AppGlobalNumUint:
 					value = BigInt(appDef["global-state-schema"].numUint);
 					break;
-				case TxFieldEnum.AppGlobalNumByteSlice:
+				case AppParamField.AppGlobalNumByteSlice:
 					value = BigInt(appDef["global-state-schema"].numByteSlice);
 					break;
-				case TxFieldEnum.AppLocalNumUint:
+				case AppParamField.AppLocalNumUint:
 					value = BigInt(appDef["local-state-schema"].numUint);
 					break;
-				case TxFieldEnum.AppLocalNumByteSlice:
+				case AppParamField.AppLocalNumByteSlice:
 					value = BigInt(appDef["local-state-schema"].numByteSlice);
 					break;
-				case TxFieldEnum.AppExtraProgramPages:
+				case AppParamField.AppExtraProgramPages:
 					// only return default number extra program pages in runtime
 					// should fix it in future.
 					value = 1n;
 					break;
-				case TxFieldEnum.AppCreator:
+				case AppParamField.AppCreator:
 					value = decodeAddress(appDef.creator).publicKey;
 					break;
-				case TxFieldEnum.AppAddress:
+				case AppParamField.AppAddress:
 					value = decodeAddress(getApplicationAddress(appID)).publicKey;
 			}
 
@@ -4823,15 +4828,15 @@ export class AcctParamsGet extends Op {
 
 		let value: StackElem = 0n;
 		switch (this.field) {
-			case TxFieldEnum.AcctBalance: {
+			case AccountParamGetField.AcctBalance: {
 				value = BigInt(accountInfo.balance());
 				break;
 			}
-			case TxFieldEnum.AcctMinBalance: {
+			case AccountParamGetField.AcctMinBalance: {
 				value = BigInt(accountInfo.minBalance);
 				break;
 			}
-			case TxFieldEnum.AcctAuthAddr: {
+			case AccountParamGetField.AcctAuthAddr: {
 				if (accountInfo.getSpendAddress() === accountInfo.address) {
 					value = ZERO_ADDRESS;
 				} else {
@@ -4987,11 +4992,11 @@ export class Base64Decode extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
-			case JsonEncoding.URLEncoding: {
+			case Base64Encoding.URLEncoding: {
 				this.encoding = "base64url";
 				break;
 			}
-			case JsonEncoding.StdEncoding: {
+			case Base64Encoding.StdEncoding: {
 				this.encoding = "base64";
 				break;
 			}
