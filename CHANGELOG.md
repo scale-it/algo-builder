@@ -19,17 +19,20 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part.
 
 ### Features
+
 - Allow user to query foreign applications accounts using the `appID` field.
 
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
-- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID`  will be added to a contract.
+- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
+- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 
 ### Breaking Changes
 
-- The method `ProduceBlock` has been  renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
+- The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
+
 #### TEALv8
 
 - Support for `switch` opcode.
