@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: "16"
           cache: "yarn"
-      - name: Yarn version check
+      - name: Check Yarn version
         run: yarn --version
       - name: Install dependencies
         run: yarn install
