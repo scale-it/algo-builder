@@ -843,7 +843,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["global", TxnRefFields.OnCompletion, TxnRefFields.OnCompletion],
+						["global", GlobalField.MinTxnFee, GlobalField.MinTxnFee],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -912,7 +912,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", AssetHoldingField.AssetFrozen, "123"],
+						["asset_params_get", AssetParamGetField.AssetTotal, "123"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION

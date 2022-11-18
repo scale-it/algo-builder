@@ -2872,7 +2872,7 @@ describe("Teal Opcodes", function () {
 				);
 
 				expectRuntimeError(
-					() => new Txn([TxFieldEnum.ConfigAsset], 1, interpreter),
+					() => new Txn([TxnRefFields.ConfigAssetDecimals], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
