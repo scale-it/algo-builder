@@ -7,7 +7,7 @@ import algosdk, {
 } from "algosdk";
 import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
-import { AlgoSigner, JsonPayload, MultisigTransaction, WalletTransaction } from "../algo-signer-types";
+import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
 import { BuilderError, ERRORS } from "../errors/errors";
 import {
 	ExecParams,
