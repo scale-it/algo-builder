@@ -2398,7 +2398,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn OnCompletion to stack", function () {
-				const op = new Txn([TxFieldEnum.OnCompletion], 1, interpreter);
+				const op = new Txn([TxnRefFields.OnCompletion], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2888,7 +2888,7 @@ describe("Teal Opcodes", function () {
 
 				// for gtxn
 				expectRuntimeError(
-					() => new Gtxn(["0", TxFieldEnum.OnCompletion], 1, interpreter),
+					() => new Gtxn(["0", TxnRefFields.OnCompletion], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
@@ -3010,7 +3010,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinTxnFee to stack", function () {
-			const op = new Global([TxFieldEnum.MinTxnFee], 1, interpreter);
+			const op = new Global([TxnRefFields.OnCompletion], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3018,7 +3018,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinBalance to stack", function () {
-			const op = new Global([TxFieldEnum.MinBalance], 1, interpreter);
+			const op = new Global([GlobalField.MinBalance], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3026,7 +3026,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MaxTxnLife to stack", function () {
-			const op = new Global([TxFieldEnum.MaxTxnLife], 1, interpreter);
+			const op = new Global([GlobalField.MaxTxnLife], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3034,7 +3034,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push ZeroAddress to stack", function () {
-			const op = new Global([TxFieldEnum.ZeroAddress], 1, interpreter);
+			const op = new Global([GlobalField.ZeroAddress], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3050,7 +3050,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push LogicSigVersion to stack", function () {
-			const op = new Global([TxFieldEnum.LogicSigVersion], 1, interpreter);
+			const op = new Global([GlobalField.LogicSigVersion], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3140,7 +3140,7 @@ describe("Teal Opcodes", function () {
 			interpreter.tealVersion = 1;
 
 			expectRuntimeError(
-				() => new Global([TxFieldEnum.LogicSigVersion], 1, interpreter),
+				() => new Global([GlobalField.LogicSigVersion], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
@@ -4099,7 +4099,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Freeze", function () {
-			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4139,7 +4139,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push 0 if Asset not defined", function () {
-			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(1n); // account index
 
@@ -4153,7 +4153,7 @@ describe("Teal Opcodes", function () {
 
 		it("should throw index out of bound error for Asset Param", function () {
 			interpreter.tealVersion = 1;
-			const op = new GetAssetDef([TxFieldEnum.AssetFreeze], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(4n); // asset index
 

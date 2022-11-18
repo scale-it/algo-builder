@@ -348,6 +348,7 @@ export enum TxnRefFields {
 	ConfigAssetFreeze = "ConfigAssetFreeze",
 	ConfigAssetClawback = "ConfigAssetClawback",
 	CreatedAssetID = "CreatedAssetID",
+	CreatedApplicationID = "CreatedApplicationID",
 	FirstValidTime = "FirstValidTime",
 	FreezeAssetAccount = "FreezeAssetAccount",
 	FreezeAssetFrozen = "FreezeAssetFrozen",
@@ -355,7 +356,8 @@ export enum TxnRefFields {
 	GlobalNumUint = "GlobalNumUint",
 	GroupIndex = "GroupIndex",
 	GlobalNumByteSlice = "GlobalNumByteSlice",
-	CreatedApplicationID = "CreatedApplicationID",
+	LocalNumByteSlice = "LocalNumByteSlice",
+	LocalNumUint = "LocalNumUint",
 	NumAppArgs = "NumAppArgs",
 	NumAccounts = "NumAccounts",
 	NumAssets = "NumAssets",
@@ -363,9 +365,8 @@ export enum TxnRefFields {
 	NumApprovalProgramPages = "NumApprovalProgramPages",
 	NumClearStateProgramPages = "NumClearStateProgramPages",
 	NumLogs = "NumLogs",
+	OnCompletion = "OnCompletion",
 	TxID = "TxID",
-	LocalNumUint = "LocalNumUint",
-	LocalNumByteSlice = "LocalNumByteSlice",
 }
 
 export enum TxnaField {
@@ -627,13 +628,13 @@ export enum GlobalField {
 	CurrentApplicationID = "CurrentApplicationID",
 	GroupSize = "GroupSize",
 	GroupID = "GroupID",
-	MinTxnFee = "MinTxnFee",
-	MinBalance = "MinBalance",
 	LatestTimestamp = "LatestTimestamp",
 	LogicSigVersion = "LogicSigVersion",
+	MaxTxnLife = "MaxTxnLife",
+	MinTxnFee = "MinTxnFee",
+	MinBalance = "MinBalance",
 	OpcodeBudget = "OpcodeBudget",
 	Round = "Round",
-	MaxTxnLife = "MaxTxnLife",
 	ZeroAddress = "ZeroAddress",
 }
 
@@ -644,9 +645,9 @@ export enum OpCodeField {
 	Fee = "Fee",
 	FirstValid = "FirstValid",
 	FirstValidTime = "FirstValidTime",
-	Note = "Note",
 	LastValid = "LastValid",
 	Lease = "Lease",
+	Note = "Note",
 	Receiver = "Receiver",
 	Sender = "Sender",
 	VotePK = "VotePK",
@@ -658,9 +659,9 @@ export enum AssetHoldingField {
 }
 
 export enum AccountParamGetField {
+	AcctAuthAddr = "AcctAuthAddr",
 	AcctBalance = "AcctBalance",
 	AcctMinBalance = "AcctMinBalance",
-	AcctAuthAddr = "AcctAuthAddr"
 }
 
 export enum TxFieldEnum {
@@ -674,13 +675,13 @@ export enum TxFieldEnum {
 	AssetReceiver = "AssetReceiver",
 	AssetCloseTo = "AssetCloseTo",
 	AssetName = "AssetName",
-	AssetFrozen = "AssetFrozen",
-	FreezeAccount = "FreezeAccount",
 	AssetParams = "AssetParams",
-	ConfigAsset = "ConfigAsset",
+	AssetFrozen = "AssetFrozen",
 	ClawbackAddr = "ClawbackAddr",
 	ClearStateProgram = "ClearStateProgram",
 	CloseRemainderTo = "CloseRemainderTo",
+	ConfigAsset = "ConfigAsset",
+	FreezeAccount = "FreezeAccount",
 	Decimals = "Decimals",
 	DefaultFrozen = "DefaultFrozen",
 	ExtraProgramPages = "ExtraProgramPages",
@@ -701,12 +702,12 @@ export enum TxFieldEnum {
 	ManagerAddr = "ManagerAddr",
 	MetaDataHash = "MetaDataHash",
 	Msig = "Msig",
+	Note = "Note",
+	Nonparticipation = "Nonparticipation",
+	NumberByteSlices = "NumberByteSlices",
 	NumberInts = "NumberInts",
 	OnComplete = "OnComplete",
 	OpcodeBudget = "OpcodeBudget",
-	Nonparticipation = "Nonparticipation",
-	NumberByteSlices = "NumberByteSlices",
-	Note = "Note",
 	RekeyTo = "RekeyTo",
 	Receiver = "Receiver",
 	ReserveAddr = "ReserveAddr",
@@ -729,8 +730,8 @@ export enum TxFieldEnum {
 }
 
 export enum Base64Encoding {
+	StdEncoding = "StdEncoding",
 	URLEncoding = "URLEncoding",
-	StdEncoding = "StdEncoding"
 }
 
 export enum CurveTypeEnum {
