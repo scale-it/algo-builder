@@ -27,6 +27,7 @@ import {
 	JS_CONFIG_FILENAME,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
+	NETWORK_DEFAULT,
 	seedLength,
 	TransactionTypeEnum,
 	TS_CONFIG_FILENAME,
@@ -431,17 +432,24 @@ export class Runtime {
 	 * @param network: the network of accounts to add
 	 * @param balance: balance for accounts
 	 */
-	loadAccountsFromConfig(network = "default", balance?: number): void {
+	loadAccountsFromConfig(network = NETWORK_DEFAULT, balance?: number): void {
 		const find = findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]);
 		if (!find) {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.CONFIG_FILE_NOT_FOUND);
 		}
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const config = require(find);
-
-		console.log(config);
-		console.log(config.networks[network]);
+		if (config.networks[network] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_NETWORK, {
+				network: network,
+			});
+		}
 		const accounts = config.networks[network].accounts;
+		if (accounts === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.NETWORK_ACCOUNT_NOT_FOUND, {
+				network: network,
+			});
+		}
 		for (const _acc of accounts) {
 			balance = balance ? balance : 1e6;
 			const acc = new AccountStore(balance, _acc);

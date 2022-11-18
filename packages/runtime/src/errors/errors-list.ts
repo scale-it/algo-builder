@@ -658,6 +658,18 @@ const runtimeGeneralErrors = {
 		title: "Config find not found",
 		description: "The config file in project is not found",
 	},
+	NETWORK_ACCOUNT_NOT_FOUND: {
+		number: 1326,
+		message: "Accounts in network %network% is not found",
+		title: "Accounts in network  is not found",
+		description: "Accounts not found in network %network%",
+	},
+	INVALID_NETWORK: {
+		number: 1327,
+		message: "Invalid network %network% not found in config",
+		title: "Invalid network not found in config",
+		description: "Not found network %network% in config",
+	},
 };
 
 const transactionErrors = {
