@@ -901,12 +901,12 @@ describe("Parser", function () {
 			);
 
 			res = opcodeFromSentence(
-				["asset_params_get", AssetHoldingField.AssetFrozen],
+				["asset_params_get", AssetParamGetField.AssetTotal],
 				1,
 				interpreter,
 				ExecutionMode.APPLICATION
 			);
-			expected = new GetAssetDef([AssetHoldingField.AssetFrozen], 1, interpreter);
+			expected = new GetAssetDef([AssetParamGetField.AssetTotal], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -2532,7 +2532,7 @@ describe("Parser", function () {
 				new Pragma(["version", "5"], 1, interpreter),
 				new Balance([], 4, interpreter),
 				new GetAssetHolding([AssetHoldingField.AssetBalance], 5, interpreter),
-				new GetAssetDef([AssetHoldingField.AssetFrozen], 6, interpreter),
+				new GetAssetDef([AssetParamGetField.AssetTotal], 6, interpreter),
 				new AppOptedIn([], 8, interpreter),
 				new AppLocalGet([], 9, interpreter),
 				new AppLocalGetEx([], 10, interpreter),
