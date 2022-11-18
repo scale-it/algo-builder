@@ -159,7 +159,6 @@ export class WallectConnectSession {
 	}
 
 	/**
-	 * @async
 	 * @description Sign a Logic Signature transaction
 	 * @param transaction algosdk.Transaction object
 	 * @param logicSig Logic Sig Account
