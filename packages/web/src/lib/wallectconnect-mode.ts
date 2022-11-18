@@ -2,7 +2,6 @@ import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk, { SignedTransaction, Transaction } from "algosdk";
-import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
@@ -164,7 +163,7 @@ export class WallectConnectSession {
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
 	 */
-	signLogicSig(transaction: Transaction, logicSig: LogicSig): { txID: string, blob: Uint8Array } {
+	signLogicSig(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
 		try {
 			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
@@ -316,7 +315,7 @@ export class WallectConnectSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig).blob);
+					signedTxn.splice(index, 0, this.signLogicSig(txn, signer.lsig).blob);
 				}
 			}
 
