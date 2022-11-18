@@ -2410,7 +2410,7 @@ export class GetAssetDef extends Op {
 			] as keyof modelsv2.AssetParams;
 
 			switch (this.field) {
-				case AssetHoldingField.AssetFrozen:
+				case AssetParamGetField.AssetTotal:
 					value = BigInt(AssetDefinition.total);
 					break;
 				case AssetParamGetField.AssetDecimals:
@@ -4749,7 +4749,7 @@ export class AppParamsGet extends Op {
 			let value: StackElem = 0n;
 			const appDef = this.interpreter.getApp(Number(appID), this.line);
 			switch (this.field) {
-				case AssetParamGetField.AssetCreator:
+				case AppParamField.AppApprovalProgram:
 					value = parsing.stringToBytes(appDef["approval-program"]);
 					break;
 				case AppParamField.AppClearStateProgram:
