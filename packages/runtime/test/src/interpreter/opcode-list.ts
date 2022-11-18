@@ -3010,7 +3010,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinTxnFee to stack", function () {
-			const op = new Global([TxnRefFields.OnCompletion], 1, interpreter);
+			const op = new Global([GlobalField.MinTxnFee], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3982,7 +3982,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Total", function () {
-			const op = new GetAssetDef([AssetHoldingField.AssetFrozen], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetTotal], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -6669,7 +6669,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppApprovalProgram", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet([AssetParamGetField.AssetCreator], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppApprovalProgram], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram("counter-approval.teal")));

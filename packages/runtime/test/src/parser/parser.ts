@@ -752,12 +752,12 @@ describe("Parser", function () {
 
 		it("should return correct objects for `global`", function () {
 			let res = opcodeFromSentence(
-				["global", TxnRefFields.OnCompletion],
+				["global", GlobalField.MinTxnFee],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Global([TxnRefFields.OnCompletion], 1, interpreter);
+			let expected = new Global([GlobalField.MinTxnFee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
@@ -2512,7 +2512,7 @@ describe("Parser", function () {
 		it("should return correct opcode list for 'global'", async function () {
 			const res = loadProgram("test-global.teal");
 			const expected = [
-				new Global([TxnRefFields.OnCompletion], 3, interpreter),
+				new Global([GlobalField.MinTxnFee], 3, interpreter),
 				new Global([GlobalField.MinBalance], 4, interpreter),
 				new Global([GlobalField.MaxTxnLife], 5, interpreter),
 				new Global([GlobalField.ZeroAddress], 6, interpreter),
