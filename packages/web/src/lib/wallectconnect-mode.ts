@@ -2,7 +2,6 @@ import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk, { SignedTransaction, Transaction } from "algosdk";
-import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
 import { WalletTransaction } from "../algo-signer-types";
 import {
