@@ -9,6 +9,7 @@ import type {
 	SignTransactionOptions,
 } from "@randlabs/myalgo-connect";
 import algosdk, { SignedTransaction, Transaction } from "algosdk";
+import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
 import { mkTxParams } from "..";
 import {
