@@ -252,21 +252,6 @@ export class WebMode {
 	}
 
 	/**
-	 * @async
-	 * @description Sign a Multisignature transaction
-	 * @param transaction msig and transaction object
-	 */
-	async signMultisigTxn(transaction: MultisigTransaction): Promise<JsonPayload> {
-		try {
-			return await this.algoSigner.signMultisig(transaction)
-		} catch (err) {
-			error(err);
-			throw new Error("Error while signing msig transaction" + err);
-		}
-	}
-
-
-	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
 	 * for more info.

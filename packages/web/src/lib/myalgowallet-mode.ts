@@ -9,6 +9,7 @@ import type {
 	SignTransactionOptions,
 } from "@randlabs/myalgo-connect";
 import algosdk, { SignedTransaction, Transaction } from "algosdk";
+import { LogicSig } from "algosdk/dist/types/src/logicsig";
 
 import { mkTxParams } from "..";
 import {
@@ -91,14 +92,31 @@ export class MyAlgoWalletSession {
 
 	/**
 	 * @async
-	 * @description Sign a teal program
+	 * @description Sign a teal program (https://algorand.github.io/js-algorand-sdk/modules.html#tealSign)
 	 * @param logic Teal program
 	 * @param address Signer Address
 	 * @returns Returns signed teal
+	 * for more info: https://connect.myalgo.com/docs/interactive-examples/TealSign
 	 */
-	async signLogicSig(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
+	async signLogicSigUsingTeal(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
 		try {
 			return await this.connector.signLogicSig(logic, address)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing teal program" + err);
+		}
+	}
+
+	/**
+	 * @async
+	 * @description Sign a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 */
+	signLogicSig(transaction: Transaction, logicSig: LogicSig): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
 			error(err);
 			throw new Error("Error while signing Lsig Transaction" + err);
