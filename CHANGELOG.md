@@ -21,7 +21,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Features
 
 - Allow user to query foreign applications accounts using the `appID` field.
-
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
