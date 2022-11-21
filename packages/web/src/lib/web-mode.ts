@@ -240,7 +240,7 @@ export class WebMode {
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
 	 */
-	signLogicSig(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSignatureTxn(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
 		try {
 			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
@@ -313,7 +313,7 @@ export class WebMode {
 				const signer: Sign = execParams[index];
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
-					const lsigTxn = this.signLogicSig(txn, signer.lsig)
+					const lsigTxn = this.signLogicSignatureTxn(txn, signer.lsig)
 					if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
 					signedTxn.splice(index, 0, {
 						blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),

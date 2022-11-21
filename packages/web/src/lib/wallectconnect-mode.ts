@@ -163,7 +163,7 @@ export class WallectConnectSession {
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
 	 */
-	signLogicSig(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSignatureTxn(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
 		try {
 			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
@@ -315,7 +315,7 @@ export class WallectConnectSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, this.signLogicSig(txn, signer.lsig).blob);
+					signedTxn.splice(index, 0, this.signLogicSignatureTxn(txn, signer.lsig).blob);
 				}
 			}
 
