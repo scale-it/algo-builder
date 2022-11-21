@@ -307,6 +307,7 @@ AssetParamMap[6] = { ...AssetParamMap[5] };
 AssetParamMap[7] = { ...AssetParamMap[6] };
 AssetParamMap[8] = { ...AssetParamMap[7] };
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#asset_params_get-f
 export enum AssetParamGetField {
 	AssetTotal = "AssetTotal",
 	AssetDecimals = "AssetDecimals",
@@ -322,6 +323,7 @@ export enum AssetParamGetField {
 	AssetCreator = "AssetCreator",
 }
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum AppParamField {
 	AppApprovalProgram = "AppApprovalProgram",
 	AppClearStateProgram = "AppClearStateProgram",
@@ -334,6 +336,7 @@ export enum AppParamField {
 	AppAddress = "AppAddress",
 }
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum TxnRefFields {
 	ApplicationArgs = "ApplicationArgs",
 	ConfigAssetTotal = "ConfigAssetTotal",
@@ -369,6 +372,7 @@ export enum TxnRefFields {
 	TxID = "TxID",
 }
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#txna-f-i
 export enum TxnaField {
 	Accounts = "Accounts",
 	ApprovalProgramPages = "ApprovalProgramPages",
@@ -620,6 +624,7 @@ export enum vrfVerifyFieldTypes {
 	VrfStandard = "VrfStandard",
 }
 
+// CallerApplicationAddress
 export enum GlobalField {
 	CallerApplicationAddress = "CallerApplicationAddress",
 	CallerApplicationID = "CallerApplicationID",
@@ -658,12 +663,14 @@ export enum AssetHoldingField {
 	AssetFrozen = "AssetFrozen"
 }
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#acct_params_get-f
 export enum AccountParamGetField {
 	AcctAuthAddr = "AcctAuthAddr",
 	AcctBalance = "AcctBalance",
 	AcctMinBalance = "AcctMinBalance",
 }
 
+// https://developer.algorand.org/docs/get-details/transactions/transactions/#common-fields-header-and-type
 export enum TxFieldEnum {
 	Amount = "Amount",
 	Accounts = "Accounts",
@@ -729,6 +736,7 @@ export enum TxFieldEnum {
 	XferAsset = "XferAsset",
 }
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#base64_decode-e
 export enum Base64Encoding {
 	StdEncoding = "StdEncoding",
 	URLEncoding = "URLEncoding",
