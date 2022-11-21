@@ -32,7 +32,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Breaking Changes
 
 - The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` now expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
+- `appendSignMultisigTransaction` is renamed to `signMsigTransaction` and expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 #### TEALv8
 
