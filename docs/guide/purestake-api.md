@@ -42,7 +42,7 @@ module.exports = {
 };
 ```
 
-And while running the script, you can simply pass this cfg with the `--network` flag. (eg. `algob run --script  scripts/run.js --network purestake`).
+And while running the script, you can simply pass this cfg with the `--network` flag. (eg. `algob run --script scripts/run.js --network purestake`).
 
 ## IndexerV2
 

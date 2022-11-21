@@ -30,7 +30,7 @@ The standard transaction file extension is `.txn`, but the code accepts any exte
 ### Run
 
 ```
-yarn run algob run --script  scripts/transfer.js
+yarn run algob run --script scripts/transfer.js
 ```
 
 ### More information

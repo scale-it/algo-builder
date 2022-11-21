@@ -38,8 +38,8 @@ yarn run algob deploy
 ### Run
 
 ```
-yarn run algob run --script  scripts/transfer/set-clear-level.js // set minimum level(to transfer asset)
-yarn run algob run --script  scripts/transfer/transfer-asset.js // transfer asset from Alice -> Bob
+yarn run algob run --script scripts/transfer/set-clear-level.js // set minimum level(to transfer asset)
+yarn run algob run --script scripts/transfer/transfer-asset.js // transfer asset from Alice -> Bob
 ```
 
 ### More information

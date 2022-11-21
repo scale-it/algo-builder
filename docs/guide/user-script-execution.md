@@ -25,7 +25,7 @@ Runs provided scripts and doesn't save script checkpoints.
 Useful to query the current state of blockchain.
 Example:
 
-    algob run --script  scripts/script1.js
+    algob run --script scripts/script1.js
 
 #### Deploy
 

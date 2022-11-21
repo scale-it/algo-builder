@@ -26,5 +26,5 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 ```
 yarn run algob deploy
-yarn run algob run --script  scripts/withdraw/htlc-withdraw.ts
+yarn run algob run --script scripts/withdraw/htlc-withdraw.ts
 ```

@@ -35,8 +35,8 @@ To Create Vote-Token Asset and Permissioned voting application:
 
 To Cast a Vote:
 
-    yarn run algob run --script  scripts/vote/vote.js
+    yarn run algob run --script scripts/vote/vote.js
 
 To see the results and delete the application:
 
-    yarn run algob run --script  scripts/vote/result.js
+    yarn run algob run --script scripts/vote/result.js
