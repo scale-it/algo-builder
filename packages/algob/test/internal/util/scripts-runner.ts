@@ -30,6 +30,12 @@ describe("Scripts runner", function () {
 		assert.equal(scriptOutput, "network1");
 	});
 
+	it("Should pass params to the script with arguments", async function () {
+		await runScript("./scripts/params-script.js", ["arg1", "arg2"], env, new DeployerRunMode(deployerCfg));
+		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+		assert.equal(scriptOutput, "network1");
+	});
+
 	it("Should run the script to completion", async function () {
 		const before = new Date();
 		await runScript("./scripts/async-script.js", [], env, new DeployerRunMode(deployerCfg));
