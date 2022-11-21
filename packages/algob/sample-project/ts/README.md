@@ -26,8 +26,8 @@ To run the `sample-project`:
 
 - To interact with your deployments you can create a script and run it using:
 
-* `algob run scripts/path_to/file1`
-* Don’t use algob run for deployments. This should be used only for auxiliary scripts, like ad-hock transactions (example: draining an account).
+* `algob run --script scripts/path_to/file1`
+* Don’t use algob run --script for deployments. This should be used only for auxiliary scripts, like ad-hock transactions (example: draining an account).
 
 - Run tests:
 

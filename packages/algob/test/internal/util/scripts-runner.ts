@@ -25,14 +25,20 @@ describe("Scripts runner", function () {
 	});
 
 	it("Should pass params to the script", async function () {
-		await runScript("./scripts/params-script.js", env, new DeployerRunMode(deployerCfg));
+		await runScript("./scripts/params-script.js", [], env, new DeployerRunMode(deployerCfg));
+		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+		assert.equal(scriptOutput, "network1");
+	});
+
+	it("Should pass params to the script with arguments", async function () {
+		await runScript("./scripts/params-script.js", ["arg1", "arg2"], env, new DeployerRunMode(deployerCfg));
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(scriptOutput, "network1");
 	});
 
 	it("Should run the script to completion", async function () {
 		const before = new Date();
-		await runScript("./scripts/async-script.js", env, new DeployerRunMode(deployerCfg));
+		await runScript("./scripts/async-script.js", [], env, new DeployerRunMode(deployerCfg));
 		const after = new Date();
 		assert.isAtLeast(after.getTime() - before.getTime(), 20);
 	});
@@ -40,7 +46,7 @@ describe("Scripts runner", function () {
 	it("Exception shouldn't crash the whole app", async function () {
 		await expectBuilderErrorAsync(
 			async () =>
-				await runScript("./scripts/failing-script.js", env, new DeployerRunMode(deployerCfg)),
+				await runScript("./scripts/failing-script.js", [], env, new DeployerRunMode(deployerCfg)),
 			ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
 			"./scripts/failing-script.js"
 		);
@@ -53,6 +59,7 @@ describe("Scripts runner", function () {
 			async () =>
 				await runScript(
 					"./scripts/no-default-method-script.js",
+					[],
 					env,
 					new DeployerRunMode(deployerCfg)
 				),
@@ -68,6 +75,7 @@ describe("Scripts runner", function () {
 			async () =>
 				await runScript(
 					"./scripts/failing-script-load.js",
+					[],
 					env,
 					new DeployerRunMode(deployerCfg)
 				),
@@ -81,6 +89,7 @@ describe("Scripts runner", function () {
 	it("Should ignore return value", async function () {
 		const out = await runScript(
 			"./scripts/successful-script-return-status.js",
+			[],
 			env,
 			new DeployerRunMode(deployerCfg)
 		);

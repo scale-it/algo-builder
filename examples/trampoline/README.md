@@ -17,5 +17,5 @@ If you run the file fundApplication.py, it will generate two file TEAL approval.
 
 ```
 yarn run algob deploy
-yarn run algob run scripts/run/create-fund-app.js
+yarn run algob run --script scripts/run/create-fund-app.js
 ```

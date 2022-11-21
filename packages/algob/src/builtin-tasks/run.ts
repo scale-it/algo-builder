@@ -22,7 +22,8 @@ import { CheckpointRepo, Deployer, RuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
-	scripts: string[];
+	script: string;
+	args: string[];
 }
 
 export function filterNonExistent(scripts: string[]): string[] {
@@ -56,6 +57,7 @@ function partitionIntoSorted(unsorted: string[]): string[][] {
 export async function runMultipleScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
+	args: string[],
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -67,6 +69,7 @@ export async function runMultipleScripts(
 		await runSortedScripts(
 			runtimeEnv,
 			scripts,
+			args,
 			onSuccessFn,
 			force,
 			logDebugTag,
@@ -80,6 +83,7 @@ export async function runMultipleScripts(
 async function runSortedScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
+	args: string[],
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -108,29 +112,28 @@ async function runSortedScripts(
 		}
 		deployerCfg.txWriter.setScriptName(relativeScriptPath);
 		log(`Running script ${relativeScriptPath}`);
-		await runScript(relativeScriptPath, runtimeEnv, deployer);
+		await runScript(relativeScriptPath, args, runtimeEnv, deployer);
 		onSuccessFn(deployerCfg.cpData, relativeScriptPath);
 	}
 }
 
 async function executeRunTask(
-	{ scripts }: Input,
+	{ script, args }: Input,
 	runtimeEnv: RuntimeEnv,
 	algoOp: AlgoOperator
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
-
-	const nonExistent = filterNonExistent(scripts);
+	const nonExistent = filterNonExistent([script]);
 	if (nonExistent.length !== 0) {
 		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
 			scripts: nonExistent,
 		});
 	}
-
 	await runMultipleScripts(
 		runtimeEnv,
-		assertDirChildren(scriptsDirectory, scripts),
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+		assertDirChildren(scriptsDirectory, [script]),
+		args,
+		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
 		true,
 		logDebugTag,
 		false,
@@ -140,6 +143,7 @@ async function executeRunTask(
 
 export default function (): void {
 	task(TASK_RUN, "Runs a user-defined script after compiling the project")
-		.addVariadicPositionalParam("scripts", "A js file to be run within algob's environment")
+		.addOptionalParam("script", "A js file to be run within algob's environment.")
+		.addOptionalVariadicPositionalParam("args", "Argument list to be passed to in the script.")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
 }
