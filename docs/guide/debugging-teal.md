@@ -26,7 +26,7 @@ If it displays the `tealdbg` help, you're good to go.
 
 Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTx](https://algobuilder.dev/api/algob/modules.html#executeTransaction) to execute same transaction on network).
 
-NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run --script --script ` commands.
+NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run --script` commands.
 
 ### Using dry run for debugging a TEAL program in an algob script
 
