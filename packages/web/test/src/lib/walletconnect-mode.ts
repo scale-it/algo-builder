@@ -1,4 +1,4 @@
-import algosdk, { Account, Transaction } from "algosdk";
+import algosdk, { Account, LogicSigAccount, Transaction } from "algosdk";
 import assert from "assert";
 
 import { testnetURL, types, WallectConnectSession } from "../../../src";
@@ -7,10 +7,14 @@ import { HttpNetworkConfig } from "../../../src/types";
 import { receiverAccount, senderAccount } from "../../mocks/tx";
 import { WalletConnectMock } from "../../mocks/walletconnect-mock";
 
+const fs = require('fs');
+const path = require('path');
+
 describe("Webmode - Wallet Connect test cases ", function () {
 	let connector: WallectConnectSession;
 	let sender: Account;
 	let receiver: Account;
+	let lsigAccount: LogicSigAccount
 	const walletURL: HttpNetworkConfig = {
 		token: "",
 		server: testnetURL,
@@ -18,7 +22,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
 	};
 	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
 
-	this.beforeEach(async function () {
+	this.beforeAll(async function () {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		const noop = () => {
@@ -66,6 +70,11 @@ describe("Webmode - Wallet Connect test cases ", function () {
 				},
 			})
 		);
+
+		const data = fs.readFileSync(path.join(__dirname, 'sample.teal'));
+		const results = await algodClient.compile(data).do();
+		lsigAccount = new LogicSigAccount(new Uint8Array(Buffer.from(results.result, "base64")));
+
 	});
 
 	it("Should run executeTx function without throwing an error", async function () {
@@ -77,6 +86,22 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			amountMicroAlgos: 1e6,
 			payFlags: {},
 		};
+		assert.doesNotThrow(async () => {
+			await connector.executeTx([txnParams]);
+		});
+	});
+
+	it("Should run executeTx function with a lsig transaction without throwing an error", async function () {
+		const txnParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.LogicSignature,
+			lsig: lsigAccount,
+			fromAccountAddr: lsigAccount.address(),
+			toAccountAddr: receiver.addr,
+			amountMicroAlgos: 1e6,
+			payFlags: {},
+		};
+
 		assert.doesNotThrow(async () => {
 			await connector.executeTx([txnParams]);
 		});
@@ -129,6 +154,23 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			const txnParams = await getSuggestedParams(algodClient);
 			assert.doesNotThrow(async () => {
 				await connector.makeAndSignTx([execParams], txnParams);
+			});
+		});
+
+		it("Should sign a lsig transaction and return a SignedTransaction object", async function () {
+			const execParams: types.AlgoTransferParam = {
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: lsigAccount.address(),
+				lsig: lsigAccount,
+				toAccountAddr: receiver.addr,
+				amountMicroAlgos: 1e6,
+				payFlags: {},
+			};
+			const txnParams = await getSuggestedParams(algodClient);
+			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
+			assert.doesNotThrow(() => {
+				connector.signLogicSignatureTxn(transactions[0], lsigAccount);
 			});
 		});
 	});
