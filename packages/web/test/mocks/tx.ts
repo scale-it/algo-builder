@@ -1,4 +1,10 @@
-import algosdk from "algosdk";
+import algosdk, { LogicSigAccount } from "algosdk";
+import { testnetURL } from "../../src";
+import { algoexplorerAlgod } from "../../src/lib/api";
+import { HttpNetworkConfig } from "../../src/types";
+
+const fs = require('fs');
+const path = require('path');
 
 export const txObject = {
 	name: "Transaction",
@@ -39,3 +45,15 @@ export const receiverAccount = {
 	addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 	sk: algosdk.mnemonicToSecretKey(alicemne).sk,
 };
+
+export async function createLsigAccount(): Promise<LogicSigAccount> {
+	const walletURL: HttpNetworkConfig = {
+		token: "",
+		server: testnetURL,
+		port: "",
+	};
+	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
+	const data = fs.readFileSync(path.join(__dirname, 'sample.teal'));
+	const results = await algodClient.compile(data).do();
+	return new LogicSigAccount(new Uint8Array(Buffer.from(results.result, "base64")));
+}

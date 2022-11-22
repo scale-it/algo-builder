@@ -5,10 +5,7 @@ import { MyAlgoWalletSession, testnetURL, types } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
 import { MyAlgoConnectMock } from "../../mocks/myalgowallet-mock";
-import { receiverAccount, senderAccount } from "../../mocks/tx";
-
-const fs = require('fs');
-const path = require('path');
+import { createLsigAccount, receiverAccount, senderAccount } from "../../mocks/tx";
 
 describe("Webmode - MyAlgo Wallet test cases ", () => {
 	let connector: MyAlgoWalletSession;
@@ -26,9 +23,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		connector = new MyAlgoWalletSession(walletURL, new MyAlgoConnectMock());
-		const data = fs.readFileSync(path.join(__dirname, 'sample.teal'));
-		const results = await algodClient.compile(data).do();
-		lsigAccount = new LogicSigAccount(new Uint8Array(Buffer.from(results.result, "base64")));
+		lsigAccount = await createLsigAccount()
 	});
 
 	it("Should executeTx without throwing an error", async function () {

@@ -4,11 +4,8 @@ import assert from "assert";
 import { testnetURL, types, WallectConnectSession } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
-import { receiverAccount, senderAccount } from "../../mocks/tx";
+import { createLsigAccount, receiverAccount, senderAccount } from "../../mocks/tx";
 import { WalletConnectMock } from "../../mocks/walletconnect-mock";
-
-const fs = require('fs');
-const path = require('path');
 
 describe("Webmode - Wallet Connect test cases ", function () {
 	let connector: WallectConnectSession;
@@ -71,10 +68,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			})
 		);
 
-		const data = fs.readFileSync(path.join(__dirname, 'sample.teal'));
-		const results = await algodClient.compile(data).do();
-		lsigAccount = new LogicSigAccount(new Uint8Array(Buffer.from(results.result, "base64")));
-
+		lsigAccount = await createLsigAccount()
 	});
 
 	it("Should run executeTx function without throwing an error", async function () {
