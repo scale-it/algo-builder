@@ -189,7 +189,7 @@ export class WebMode {
 	 * @param signers a subset of addresses to sign the transaction
 	 * return an object containing a blob key encoded in base64
 	 */
-	async appendSignMultisigTransaction(
+	async signMsigTransaction(
 		txn: EncodedSignedTransaction,
 		signers?: string[]
 	): Promise<JsonPayload> {
