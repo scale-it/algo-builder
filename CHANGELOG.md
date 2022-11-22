@@ -28,6 +28,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
+- `Runtime` now support for both string or index argument opcode
 
 ### Breaking Changes
 

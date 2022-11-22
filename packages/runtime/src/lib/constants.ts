@@ -169,6 +169,76 @@ TxnFields[7] = {
 };
 TxnFields[8] = cloneDeep(TxnFields[7]);
 
+export const TxnFieldsIndex = [
+	"Sender",
+	"Fee",
+	"FirstValid",
+	"FirstValidTime",
+	"LastValid",
+	"Note",
+	"Lease",
+	"Receiver",
+	"Amount",
+	"CloseRemainderTo",
+	"VotePK",
+	"SelectionPK",
+	"VoteFirst",
+	"VoteLast",
+	"VoteKeyDilution",
+	"Type",
+	"TypeEnum",
+	"XferAsset",
+	"AssetAmount",
+	"AssetSender",
+	"AssetReceiver",
+	"AssetCloseTo",
+	"GroupIndex",
+	"TxID",
+	"ApplicationID",
+	"OnCompletion",
+	"ApplicationArgs",
+	"NumAppArgs",
+	"Accounts",
+	"NumAccounts",
+	"ApprovalProgram",
+	"ClearStateProgram",
+	"RekeyTo",
+	"ConfigAsset",
+	"ConfigAssetTotal",
+	"ConfigAssetDecimals",
+	"ConfigAssetDefaultFrozen",
+	"ConfigAssetUnitName",
+	"ConfigAssetName",
+	"ConfigAssetURL",
+	"ConfigAssetMetadataHash",
+	"ConfigAssetManager",
+	"ConfigAssetReserve",
+	"ConfigAssetClawback",
+	"FreezeAsset",
+	"FreezeAssetAccount",
+	"FreezeAssetFrozen",
+	"Assets",
+	"NumAssets",
+	"Applications",
+	"NumApplications",
+	"GlobalNumUint",
+	"GlobalNumByteSlice",
+	"LocalNumUint",
+	"LocalNumByteSlice",
+	"ExtraProgramPages",
+	"Nonparticipation",
+	"Logs",
+	"NumLogs",
+	"CreatedAssetID",
+	"CreatedApplicationID",
+	"LastLog",
+	"StateProofPK",
+	"ApprovalProgramPages",
+	"NumApprovalProgramPages",
+	"ClearStateProgramPages",
+	"NumClearStateProgramPages",
+];
+
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
 	1: {},
 	2: {},
@@ -307,6 +377,21 @@ AssetParamMap[6] = { ...AssetParamMap[5] };
 AssetParamMap[7] = { ...AssetParamMap[6] };
 AssetParamMap[8] = { ...AssetParamMap[7] };
 
+export const AssetParamMapIndex = [
+	"AssetTotal",
+	"AssetDecimals",
+	"AssetDefaultFrozen",
+	"AssetUnitName",
+	"AssetName",
+	"AssetURL",
+	"AssetMetadataHash",
+	"AssetManager",
+	"AssetReserve",
+	"AssetFreeze",
+	"AssetClawback",
+	"AssetCreator",
+];
+
 // app param use for app_params_get opcode
 export const AppParamDefined: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -330,6 +415,18 @@ AppParamDefined[6] = cloneDeep(AppParamDefined[5]);
 AppParamDefined[7] = cloneDeep(AppParamDefined[6]);
 AppParamDefined[8] = cloneDeep(AppParamDefined[7]);
 
+export const AppParamDefinedIndex = [
+	"AppApprovalProgram",
+	"AppClearStateProgram",
+	"AppGlobalNumUint",
+	"AppGlobalNumByteSlice",
+	"AppLocalNumUint",
+	"AppLocalNumByteSlice",
+	"AppExtraProgramPages",
+	"AppCreator",
+	"AppAddress",
+];
+
 // param use for query acct_params_get opcode
 
 export const AcctParamQueryFields: { [key: string]: { version: number } } = {
@@ -337,6 +434,8 @@ export const AcctParamQueryFields: { [key: string]: { version: number } } = {
 	AcctMinBalance: { version: 6 },
 	AcctAuthAddr: { version: 6 },
 };
+
+export const AcctParamQueryFieldsIndex = ["AcctBalance", "AcctMinBalance", "AcctAuthAddr"];
 export const reDigit = /^\d+$/;
 export const reDec = /^(0|[1-9]\d*)$/;
 export const reHex = /^0x[0-9a-fA-F]+$/;
@@ -429,6 +528,24 @@ GlobalFields[7] = {
 GlobalFields[8] = {
 	...GlobalFields[7],
 };
+
+export const GlobalFieldsIndex = [
+	"MinTxnFee",
+	"MinBalance",
+	"MaxTxnLife",
+	"ZeroAddress",
+	"GroupSize",
+	"LogicSigVersion",
+	"Round",
+	"LatestTimestamp",
+	"CurrentApplicationID",
+	"CreatorAddress",
+	"CurrentApplicationAddress",
+	"GroupID",
+	"OpcodeBudget",
+	"CallerApplicationID",
+	"CallerApplicationAddress",
+];
 
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: { [key: number]: { [key: string]: number } } = {
@@ -543,6 +660,8 @@ export enum blockFieldTypes {
 	BlkSeed = "BlkSeed",
 }
 
+export const blockFieldIndex = ["BlkSeed", "BlkTimestamp"];
+
 export enum vrfVerifyFieldTypes {
 	VrfAlgorand = "VrfAlgorand",
 	VrfStandard = "VrfStandard",
@@ -584,4 +703,9 @@ export enum TxFieldEnum {
 export enum CurveTypeEnum {
 	secp256k1 = "secp256k1",
 	secp256r1 = "p256", // alias used in the library for secp256r1
+}
+
+export enum CurveTypeArgument {
+	secp256k1 = "Secp256k1",
+	secp256r1 = "Secp256r1",
 }

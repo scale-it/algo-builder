@@ -25,13 +25,19 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
 	AcctParamQueryFields,
+	AcctParamQueryFieldsIndex,
 	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
+	AppParamDefinedIndex,
 	AssetParamMap,
+	AssetParamMapIndex,
+	blockFieldIndex,
 	blockFieldTypes,
+	CurveTypeArgument,
 	CurveTypeEnum,
 	GlobalFields,
+	GlobalFieldsIndex,
 	ITxArrFields,
 	json_refTypes,
 	MathOp,
@@ -48,6 +54,7 @@ import {
 	publicKeyLength,
 	TransactionTypeEnum,
 	TxArrFields,
+	TxnFieldsIndex,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 } from "../lib/constants";
@@ -1437,8 +1444,17 @@ export class Txn extends Op {
 		this.line = line;
 		this.idx = undefined;
 
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
-		if (TxArrFields[interpreter.tealVersion].has(args[0])) {
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
+		if (TxArrFields[interpreter.tealVersion].has(argument)) {
 			// eg. txn Accounts 1
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
@@ -1446,9 +1462,9 @@ export class Txn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -1558,9 +1574,17 @@ export class Txna extends Op {
 		super();
 		this.line = line;
 		assertOnlyDigits(args[1], line);
-		this.assertTxArrFieldDefined(args[0], interpreter.tealVersion, line);
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertTxArrFieldDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.fieldIdx = Number(args[1]);
 		this.interpreter = interpreter;
 	}
@@ -1842,9 +1866,17 @@ export class Global extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		assertLen(args.length, 1, line);
-		this.assertGlobalDefined(args[0], interpreter.tealVersion, line);
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = GlobalFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertGlobalDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // global field
+		this.field = argument; // global field
 		this.interpreter = interpreter;
 		this.line = line;
 	}
@@ -2333,9 +2365,11 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
+			case "0":
 			case "AssetBalance":
 				value = BigInt(assetInfo.amount);
 				break;
+			case "1":
 			case "AssetFrozen":
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
@@ -2370,7 +2404,15 @@ export class GetAssetDef extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-		if (AssetParamMap[interpreter.tealVersion][args[0]] === undefined) {
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = AssetParamMapIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		if (AssetParamMap[interpreter.tealVersion][argument] === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
 				field: args[0],
 				line: line,
@@ -2378,7 +2420,7 @@ export class GetAssetDef extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: TEALStack): number {
@@ -3897,16 +3939,19 @@ export class EcdsaVerify extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else if (this.curveIndex === 1) {
-			this.curveType = CurveTypeEnum.secp256r1;
-		} else {
+		const argument = args[0];
+		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
-				index: this.curveIndex,
+				curve: argument,
 			});
+		}
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else {
+			this.curveType = CurveTypeEnum.secp256r1;
 		}
 	}
 
@@ -3957,16 +4002,19 @@ export class EcdsaPkDecompress extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else if (this.curveIndex === 1) {
-			this.curveType = CurveTypeEnum.secp256r1;
-		} else {
+		const argument = args[0];
+		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
-				index: this.curveIndex,
+				curve: argument,
 			});
+		}
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else {
+			this.curveType = CurveTypeEnum.secp256r1;
 		}
 	}
 
@@ -3999,6 +4047,7 @@ export class EcdsaPkDecompress extends Op {
 export class EcdsaPkRecover extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -4009,7 +4058,20 @@ export class EcdsaPkRecover extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
+		const argument = args[0];
+		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				curve: argument,
+			});
+		}
+		if (this.curveIndex === 0) {
+			this.curveType = CurveTypeEnum.secp256k1;
+		} else {
+			this.curveType = CurveTypeEnum.secp256r1;
+		}
 	}
 
 	computeCost(): number {
@@ -4028,14 +4090,7 @@ export class EcdsaPkRecover extends Op {
 		const recoverId = this.assertBigInt(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
+		const ec = new EC(this.curveType);
 		const signature = { r: signatureC, s: signatureD };
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
@@ -4725,8 +4780,15 @@ export class AppParamsGet extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-
-		if (!AppParamDefined[interpreter.tealVersion].has(args[0])) {
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = AppParamDefinedIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		if (!AppParamDefined[interpreter.tealVersion].has(argument)) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD, {
 				field: args[0],
 				line: line,
@@ -4734,7 +4796,7 @@ export class AppParamsGet extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: Stack<StackElem>): number {
@@ -4799,10 +4861,17 @@ export class AcctParamsGet extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = AcctParamQueryFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
 		if (
-			!AcctParamQueryFields[args[0]] ||
-			AcctParamQueryFields[args[0]].version > interpreter.tealVersion
+			!AcctParamQueryFields[argument] ||
+			AcctParamQueryFields[argument].version > interpreter.tealVersion
 		) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD, {
 				field: args[0],
@@ -4811,7 +4880,7 @@ export class AcctParamsGet extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: Stack<StackElem>): number {
@@ -4989,10 +5058,12 @@ export class Base64Decode extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
+			case "0":
 			case "URLEncoding": {
 				this.encoding = "base64url";
 				break;
 			}
+			case "1":
 			case "StdEncoding": {
 				this.encoding = "base64";
 				break;
@@ -5134,14 +5205,17 @@ export class Json_ref extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
+			case "0":
 			case json_refTypes.JSONString: {
 				this.jsonType = "byte";
 				break;
 			}
+			case "1":
 			case json_refTypes.JSONUint64: {
 				this.jsonType = "int";
 				break;
 			}
+			case "2":
 			case json_refTypes.JSONObject: {
 				this.jsonType = "object";
 				break;
@@ -5313,7 +5387,14 @@ export class Block extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		assertLen(args.length, 1, line);
-		const argument = args[0];
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = blockFieldIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
 		if (argument === blockFieldTypes.BlkSeed || argument === blockFieldTypes.BlkTimestamp) {
 			this.field = argument;
 		} else {
@@ -5356,10 +5437,12 @@ export class VrfVerify extends Op {
 		super();
 		this.line = line;
 		switch (argument) {
+			case "0":
 			case vrfVerifyFieldTypes.VrfAlgorand: {
 				this.vrfType = argument;
 				break;
 			}
+			case "1":
 			case vrfVerifyFieldTypes.VrfStandard: {
 				this.vrfType = argument;
 				break;

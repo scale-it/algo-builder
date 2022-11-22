@@ -3987,7 +3987,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Decimals", function () {
-			const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
+			const op = new GetAssetDef(["1"], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -6180,7 +6180,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
 
-			let op = new EcdsaPkRecover(["0"], 1);
+			const op = new EcdsaPkRecover(["0"], 1);
 			op.execute(stack);
 
 			assert.deepEqual(stack.pop(), pkY);
@@ -6190,9 +6190,11 @@ describe("Teal Opcodes", function () {
 			stack.push(2n);
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
-			op = new EcdsaPkRecover(["2"], 1);
 
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkRecover(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("Should calculate correct cost", function () {
