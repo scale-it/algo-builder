@@ -75,29 +75,29 @@ jobs:
         working-directory: ./examples/asa
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/transfer/gold-contract-sc.js
-          pipenv run yarn algob run scripts/transfer/gold-delegated-lsig.js
-          pipenv run yarn algob run scripts/transfer/gold-to-john.js
-          pipenv run yarn algob run scripts/transfer/master-fund-john.js
-          pipenv run yarn algob run scripts/transfer/tesla-to-john.js
+          pipenv run yarn algob run --script scripts/transfer/gold-contract-sc.js
+          pipenv run yarn algob run --script scripts/transfer/gold-delegated-lsig.js
+          pipenv run yarn algob run --script scripts/transfer/gold-to-john.js
+          pipenv run yarn algob run --script scripts/transfer/master-fund-john.js
+          pipenv run yarn algob run --script scripts/transfer/tesla-to-john.js
 
       - name: Example bond token
         working-directory: ./examples/bond
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/run/run.js
+          pipenv run yarn algob run --script scripts/run/run.js
 
       - name: Example crowdfunding
         working-directory: ./examples/crowdfunding
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/transfer/donate.js
+          pipenv run yarn algob run --script scripts/transfer/donate.js
 
       - name: Example htlc-pyteal-ts
         working-directory: ./examples/htlc-pyteal-ts
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/withdraw/htlc-withdraw.ts
+          pipenv run yarn algob run --script scripts/withdraw/htlc-withdraw.ts
 
       - name: Example multisig
         run: cd examples/multisig && pipenv run yarn algob deploy
@@ -106,20 +106,20 @@ jobs:
         working-directory: ./examples/nft
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/transfer/create-transfer-nft.js
+          pipenv run yarn algob run --script scripts/transfer/create-transfer-nft.js
 
       - name: Example permissioned-token
         working-directory: ./examples/permissioned-token
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/admin/issue.js
-          pipenv run yarn algob run scripts/permissions/whitelist.js
-          pipenv run yarn algob run scripts/user/transfer.js
-          pipenv run yarn algob run scripts/admin/force-transfer.js
-          pipenv run yarn algob run scripts/admin/update-reserve.js
-          pipenv run yarn algob run scripts/permissions/change-perm-manager.js
-          pipenv run yarn algob run scripts/admin/kill.js
-          pipenv run yarn algob run scripts/user/opt-out.js
+          pipenv run yarn algob run --script scripts/admin/issue.js
+          pipenv run yarn algob run --script scripts/permissions/whitelist.js
+          pipenv run yarn algob run --script scripts/user/transfer.js
+          pipenv run yarn algob run --script scripts/admin/force-transfer.js
+          pipenv run yarn algob run --script scripts/admin/update-reserve.js
+          pipenv run yarn algob run --script scripts/permissions/change-perm-manager.js
+          pipenv run yarn algob run --script scripts/admin/kill.js
+          pipenv run yarn algob run --script scripts/user/opt-out.js
 
   run-examples-batch-2:
     runs-on: ubuntu-20.04
@@ -160,15 +160,15 @@ jobs:
         working-directory: ./examples/permissioned-token-freezing
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/transfer/set-clear-level.js
-          pipenv run yarn algob run scripts/transfer/transfer-asset.js
+          pipenv run yarn algob run --script scripts/transfer/set-clear-level.js
+          pipenv run yarn algob run --script scripts/transfer/transfer-asset.js
 
       - name: Example permissioned-voting
         working-directory: ./examples/permissioned-voting
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/vote/vote.js
-          pipenv run yarn algob run scripts/vote/result.js
+          pipenv run yarn algob run --script scripts/vote/vote.js
+          pipenv run yarn algob run --script scripts/vote/result.js
 
       - name: Example ref-templates
         run: |
@@ -179,15 +179,15 @@ jobs:
         working-directory: ./examples/stateful-counter
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/interaction/call_application.js
-            pipenv run yarn algob run scripts/interaction/delete_application.js
+          pipenv run yarn algob run --script scripts/interaction/call_application.js
+            pipenv run yarn algob run --script scripts/interaction/delete_application.js
 
       - name: Example DAO
         working-directory: ./examples/dao
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/run/add_proposal.js
-          pipenv run yarn algob run scripts/run/deposit_vote_token.js
+          pipenv run yarn algob run --script scripts/run/add_proposal.js
+          pipenv run yarn algob run --script scripts/run/deposit_vote_token.js
 
   run-examples-batch-3:
     runs-on: ubuntu-20.04
@@ -228,15 +228,15 @@ jobs:
         working-directory: ./examples/unique-nft-asa
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/run/transfer-nft.js
+          pipenv run yarn algob run --script scripts/run/transfer-nft.js
       - name: Example inner-tx-create-assets
         working-directory: ./examples/inner-tx-create-assets
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/run/useInnerTxn.js
-          pipenv run yarn algob run scripts/run/useGroupTxn.js
+          pipenv run yarn algob run --script scripts/run/useInnerTxn.js
+          pipenv run yarn algob run --script scripts/run/useGroupTxn.js
       - name: Trampoline
         working-directory: ./examples/trampoline
         run: |
           pipenv run yarn algob deploy
-          pipenv run yarn algob run scripts/run/create-fund-app.js
+          pipenv run yarn algob run --script scripts/run/create-fund-app.js

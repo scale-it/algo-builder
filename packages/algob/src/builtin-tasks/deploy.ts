@@ -59,6 +59,7 @@ export async function executeDeployTask(
 	return await runMultipleScripts(
 		runtimeEnv,
 		scriptNames,
+		[],
 		onSuccessFn,
 		force,
 		logDebugTag,

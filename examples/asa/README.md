@@ -19,10 +19,10 @@ To deploy all assets simply run:
 
 It will go through all files in directly placed in the `scripts/` directory (so, it doesn't go recursively into the subdirectories) and run them in the _deploy_ mode. For more information about the deployer read the [deployer guide](https://algobuilder.dev/guide/deployer.html).
 
-Transfers can be executed by executing `algob run scripts/transfer/gold-to-john.js` and other scripts in `scripts/transfer/`.
+Transfers can be executed by executing `algob run --script scripts/transfer/gold-to-john.js` and other scripts in `scripts/transfer/`.
 These scripts contain logic to transfer assets to `john-account` but other accounts can be configured as well.
 
-Balances can be queried by executing `algob run scripts/query/john-balances.js`.
+Balances can be queried by executing `algob run --script scripts/query/john-balances.js`.
 
 This example also includes smart signatures in (`assets/` directory) that showcase the two different modes of operation (contract & signature delegation):
 
@@ -58,5 +58,5 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 ```
 yarn algob deploy
-yarn algob run scripts/query/john-balances.js
+yarn algob run --script scripts/query/john-balances.js
 ```

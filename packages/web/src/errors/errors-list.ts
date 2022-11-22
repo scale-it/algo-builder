@@ -531,7 +531,7 @@ export const taskErrors = {
 		number: 601,
 		message: "Scripts don't exist: %scripts%.",
 		title: "Scripts don't exist.",
-		description: `Tried to use \`algob run\` to execute a non-existing script(s).
+		description: `Tried to use \`algob run --script \` to execute a non-existing script(s).
 
 Please double check your script's path`,
 	},

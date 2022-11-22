@@ -59,8 +59,8 @@ You need to **_save the signed logic signature file in `examples/multisig/assets
 ### Run
 
 ```
-yarn run algob run scripts/multisig_goal_sc.js
-yarn run algob run scripts/multisig_sdk_sc.js
+yarn run algob run --script scripts/multisig_goal_sc.js
+yarn run algob run --script scripts/multisig_sdk_sc.js
 ```
 
 ### More information

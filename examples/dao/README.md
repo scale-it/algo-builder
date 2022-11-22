@@ -91,32 +91,32 @@ To deploy the DAO, we created a deploy script in `scripts/deploy`. This script d
 
 To add proposal (`{voting_start, voting_end}` is set as `{now + 1min, now + 3min}`). This records proposal in lsig (local state).:
 
-    yarn run algob run scripts/run/add_proposal.js
+    yarn run algob run --script scripts/run/add_proposal.js
 
 To deposit votes. Deposit is used to enable voting for all proposals. User can only vote with deposited tokens. Deposited tokens can be used for all proposals simultaneously.:
 
-    yarn run algob run scripts/run/deposit_vote_token.js
+    yarn run algob run --script scripts/run/deposit_vote_token.js
 
 To vote for a proposal (using deposited tokens). Records vote by voterAcc in proposal (vote can be one of `yes`, `no`, `abstain`):
 
-    yarn run algob run scripts/run/vote.js
+    yarn run algob run --script scripts/run/vote.js
 
 To execute a proposal (`execute_before` is set as 7min from the time of proposal creation):
 
-    yarn run algob run scripts/run/vote.js
+    yarn run algob run --script scripts/run/vote.js
 
 To withdraw deposited votes. User can only withdraw the deposit after the latest voting he participated in ended.:
 
-    yarn run algob run scripts/run/withdraw_vote_deposit.js
+    yarn run algob run --script scripts/run/withdraw_vote_deposit.js
 
 To clear vote record (from voter's account), fails if the proposal is still in progress. This clears sender's local state by removing a record of vote cast from a non-active proposal.:
 
-    yarn run algob run scripts/run/clear_vote_record.js
+    yarn run algob run --script scripts/run/clear_vote_record.js
 
 To close proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress. This closes proposal record and returns back the deposit. Sender must be an account with a recorded proposal.:
 
-    yarn run algob run scripts/run/close_proposal.js
+    yarn run algob run --script scripts/run/close_proposal.js
 
 To withdraw assets from proposalLsig back to the owner (proposer), fails if the receiver is not the owner of the proposalLsig:
 
-    yarn run algob run scripts/run/withdraw_from_proposal.js
+    yarn run algob run --script scripts/run/withdraw_from_proposal.js

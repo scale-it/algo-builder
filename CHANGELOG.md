@@ -28,12 +28,13 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
+- Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
 - `Runtime` now support for both string or index argument opcode
 
 ### Breaking Changes
 
 - The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` now expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
+- `appendSignMultisigTransaction` is renamed to `signMsigTransaction` and expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 #### TEALv8
 
