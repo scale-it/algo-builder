@@ -1462,7 +1462,6 @@ export class Txn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 
 		this.field = argument; // field
 		this.interpreter = interpreter;
@@ -1525,9 +1524,18 @@ export class Gtxn extends Op {
 			assertLen(args.length, 2, line);
 		}
 		assertOnlyDigits(args[0], line);
-		this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
+
+		let argument = args[1];
+		try {
+			const index = Number(args[1]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[1];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 		this.txIdx = Number(args[0]); // transaction group index
-		this.field = args[1]; // field
+		this.field = argument; // field
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
 	}
@@ -1637,10 +1645,19 @@ export class Gtxna extends Op {
 		assertLen(args.length, 3, line);
 		assertOnlyDigits(args[0], line);
 		assertOnlyDigits(args[2], line);
-		this.assertTxArrFieldDefined(args[1], interpreter.tealVersion, line);
+
+		let argument = args[1];
+		try {
+			const index = Number(args[1]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[1];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertTxArrFieldDefined(argument, interpreter.tealVersion, line);
 
 		this.txIdx = Number(args[0]); // transaction group index
-		this.field = args[1]; // field
+		this.field = argument; // field
 		this.fieldIdx = Number(args[2]); // transaction field array index
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
@@ -4296,9 +4313,17 @@ export class ITxnField extends Op {
 		super();
 		this.line = line;
 
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 		assertLen(args.length, 1, line);
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -4468,10 +4493,19 @@ export class ITxn extends Op {
 		super();
 		this.line = line;
 		this.idx = -1;
-		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertITxFieldDefined(argument, interpreter.tealVersion, line);
 		if (
-			TxArrFields[interpreter.tealVersion].has(args[0]) ||
-			ITxArrFields[interpreter.tealVersion].has(args[0])
+			TxArrFields[interpreter.tealVersion].has(argument) ||
+			ITxArrFields[interpreter.tealVersion].has(argument)
 		) {
 			// eg. itxn Accounts 1
 			assertLen(args.length, 2, line);
@@ -4480,7 +4514,7 @@ export class ITxn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -4510,9 +4544,17 @@ export class ITxna extends Op {
 		this.line = line;
 		assertLen(args.length, 2, line);
 		assertOnlyDigits(args[1], line);
-		this.assertITxArrFieldDefined(args[0], interpreter.tealVersion, line);
+		let argument = args[0];
+		try {
+			const index = Number(args[0]);
+			argument = TxnFieldsIndex[index];
+			if (argument === undefined) argument = args[0];
+		} catch {
+			//Bind value index to asset map
+		}
+		this.assertITxArrFieldDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.idx = Number(args[1]);
 		this.interpreter = interpreter;
 	}
