@@ -65,7 +65,7 @@ export async function runMultipleScripts(
 ): Promise<void> {
 	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
 	for (const scripts of partitionIntoSorted(scriptNames)) {
-		await runSortedScripts(
+		await runScripts(
 			runtimeEnv,
 			scripts,
 			args,
