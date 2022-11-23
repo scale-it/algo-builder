@@ -109,7 +109,7 @@ async function executeRunTask(
 		runtimeEnv,
 		[script],
 		args,
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
+		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
 		true,
 		logDebugTag,
 		false,
