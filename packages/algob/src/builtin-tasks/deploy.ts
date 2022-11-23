@@ -11,7 +11,8 @@ import {
 	toCheckpointFileName,
 } from "../lib/script-checkpoints";
 import { CheckpointRepo, RuntimeEnv } from "../types";
-import { runMultipleScripts } from "./run";
+import { DeployerConfig } from "../internal/deployer_cfg";
+import { runScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -55,8 +56,8 @@ export async function executeDeployTask(
 	const onSuccessFn = (cpData: CheckpointRepo, relativeScriptPath: string): void => {
 		persistCheckpoint(relativeScriptPath, cpData.strippedCP);
 	};
-
-	return await runMultipleScripts(
+	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+	return await runScripts(
 		runtimeEnv,
 		scriptNames,
 		[],
@@ -64,7 +65,7 @@ export async function executeDeployTask(
 		force,
 		logDebugTag,
 		true,
-		algoOp
+		deployerCfg
 	);
 }
 

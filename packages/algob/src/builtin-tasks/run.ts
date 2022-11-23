@@ -2,7 +2,6 @@ import { BuilderError, ERRORS } from "@algo-builder/web";
 import chalk from "chalk";
 import debug from "debug";
 import fsExtra from "fs-extra";
-
 import { task } from "../internal/core/config/config-env";
 import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";
@@ -54,33 +53,8 @@ function partitionIntoSorted(unsorted: string[]): string[][] {
 	);
 }
 
-export async function runMultipleScripts(
-	runtimeEnv: RuntimeEnv,
-	scriptNames: string[],
-	args: string[],
-	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
-	force: boolean,
-	logDebugTag: string,
-	allowWrite: boolean,
-	algoOp: AlgoOperator
-): Promise<void> {
-	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
-	for (const scripts of partitionIntoSorted(scriptNames)) {
-		await runSortedScripts(
-			runtimeEnv,
-			scripts,
-			args,
-			onSuccessFn,
-			force,
-			logDebugTag,
-			allowWrite,
-			deployerCfg
-		);
-	}
-}
-
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
-async function runSortedScripts(
+export async function runScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
 	args: string[],
@@ -129,15 +103,17 @@ async function executeRunTask(
 			scripts: nonExistent,
 		});
 	}
-	await runMultipleScripts(
+	assertDirChildren(scriptsDirectory, [script]);
+	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+	await runScripts(
 		runtimeEnv,
-		assertDirChildren(scriptsDirectory, [script]),
+		[script],
 		args,
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
+		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
 		true,
 		logDebugTag,
 		false,
-		algoOp
+		deployerCfg
 	);
 }
 
