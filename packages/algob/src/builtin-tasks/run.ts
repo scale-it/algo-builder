@@ -53,8 +53,33 @@ function partitionIntoSorted(unsorted: string[]): string[][] {
 	);
 }
 
+export async function runMultipleScripts(
+	runtimeEnv: RuntimeEnv,
+	scriptNames: string[],
+	args: string[],
+	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
+	force: boolean,
+	logDebugTag: string,
+	allowWrite: boolean,
+	algoOp: AlgoOperator
+): Promise<void> {
+	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+	for (const scripts of partitionIntoSorted(scriptNames)) {
+		await runSortedScripts(
+			runtimeEnv,
+			scripts,
+			args,
+			onSuccessFn,
+			force,
+			logDebugTag,
+			allowWrite,
+			deployerCfg
+		);
+	}
+}
+
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
-export async function runScripts(
+async function runScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
 	args: string[],
