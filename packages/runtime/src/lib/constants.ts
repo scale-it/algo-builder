@@ -746,3 +746,7 @@ export enum CurveTypeEnum {
 	secp256k1 = "secp256k1",
 	secp256r1 = "p256", // alias used in the library for secp256r1
 }
+
+export const JS_CONFIG_FILENAME = "algob.config.js";
+export const TS_CONFIG_FILENAME = "algob.config.ts";
+export const NETWORK_DEFAULT = "default";

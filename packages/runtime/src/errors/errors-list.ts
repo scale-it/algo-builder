@@ -652,6 +652,24 @@ const runtimeGeneralErrors = {
 		title: "Invalid round",
 		description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
 	},
+	CONFIG_FILE_NOT_FOUND: {
+		number: 1325,
+		message: "Config file is not found",
+		title: "Config file not found",
+		description: "The config file in project is not found",
+	},
+	NETWORK_ACCOUNT_NOT_FOUND: {
+		number: 1326,
+		message: "Accounts is not found in network %network%",
+		title: "Accounts is not found in network",
+		description: "Accounts not found in network %network%",
+	},
+	INVALID_NETWORK: {
+		number: 1327,
+		message: "Invalid network %network% not found in config",
+		title: "Invalid network not found in config",
+		description: "Not found network %network% in config",
+	},
 };
 
 const transactionErrors = {
