@@ -21,7 +21,8 @@ describe("Sample Test", function () {
 		master = new AccountStore(masterBalance);
 		fundReceiver = new AccountStore(minBalance);
 		runtime = new Runtime([master, fundReceiver]);
-		// ## ACCOUNTS loaded from algob.config.js file ##
+		// This is an example to retrieve account from config file
+		// if user wants to use it, uncomment the following section
 		// runtime.loadAccountsFromConfig();
 		lsig = runtime.createLsigAccount(feeCheckProgram);
 		lsig.sign(master.account.sk);
