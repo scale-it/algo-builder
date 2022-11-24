@@ -29,6 +29,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
+- Add guide about blocks in `Runtime`.
 
 ### Breaking Changes
 

@@ -25,16 +25,25 @@ The `@algo-builder/runtime` (TypeScript Algorand runtime) package has 4 major co
 ## Block Rounds/Height
 
 In Algorand blockchain, transaction processing is divided into rounds. At each round blockchain creates a block with transactions which update the state. All transactions in the same block have the same transaction time and block height.
-In Algo Builder Runtime, we don't have blocks. All transactions are processed immediately.
-However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract processing.
 
-The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user to set in when designing a test flow. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round and timestamp using `runtime.getRound()` and `runtime.getTimestamp()` respectively. <br />
-Example:
+All transactions are processed immediately. However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract processing.
 
-    runtime.setRoundAndTimestamp(5, 10); // set current block round to 5 and timestamp to 10
+Algo Builder `Runtime` supports its own implementation of blocks which imitates the behavior of blockchain and allows users to create more sofisticated test scenarios. Every time a new `Runtime` instance is created first `2000` blocks are created. The blocks will not be generated automatically. In order to move to the next block the method `runtime.produceBlocks()` must be invoked. The method will create one new block and move to it. This method can be used to create more than one new block at the time, to do it invoke the mentionded method with the desired parameter. In order to get information about a specific block the method `runtime.getBlock(blockNumber)` can be used. Each block contains information about its seed and timestamp. The seed of a first block and timestamp are randomly generated string of characters and the `unix timestamp` of the creation of runtime respectively. The seed of the following blocks are a `MD5` hash of the seed from the previous block and the timestamp is the timestamp of the previous block + `BlockFinalisationTime` which in algobuilder equals `4` seconds. 
 
-This means that current block round is set to 5 and transaction will pass only if its first valid round is less or equal 5 and the last valid round is greater than 5.
-Note: Block round and timestamp remains same until user will change it again.
+The default Runtime block round is set to `2000`.
+
+Example: 
+```typescript
+const runtime = new Runtime();
+//some tests
+runtime.produceBlocks(); //creates a new block
+//some more tests
+runtime.getBlock(1900);
+//some more tests
+runtime.produceBlocks(20); //creates 20 new blocks
+//some more tests
+runtime.getBlock(2000);
+```
 
 ## Project Structure
 
