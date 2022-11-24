@@ -35,13 +35,13 @@ The default Runtime block round is set to `2000`.
 Example: 
 ```typescript
 const runtime = new Runtime();
-//some tests
+//your tests
 runtime.produceBlocks(); //creates a new block
-//some more tests
+//your tests
 runtime.getBlock(1900);
-//some more tests
+//your tests
 runtime.produceBlocks(20); //creates 20 new blocks
-//some more tests
+//your tests
 runtime.getBlock(2000);
 ```
 
