@@ -32,6 +32,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add enums for opcode fields in `runtime`.
 - Add reusable workflow in GitHub action.
 - Add one batch for each package in GitHub action which uses reusable workflow.
+- Add guide about blocks in `Runtime`.
 
 ### Breaking Changes
 
