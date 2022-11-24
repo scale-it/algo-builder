@@ -21,7 +21,6 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Features
 
 - Allow user to query foreign applications accounts using the `appID` field.
-
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
@@ -29,6 +28,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
+- Add `TxFieldEnum` for transaction fields in `runtime`.
+- Add enums for opcode fields in `runtime`.
+- Add reusable workflow in GitHub action.
+- Add one batch for each package in GitHub action which uses reusable workflow.
 - Add guide about blocks in `Runtime`.
 
 ### Breaking Changes

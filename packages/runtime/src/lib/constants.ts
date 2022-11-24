@@ -307,6 +307,82 @@ AssetParamMap[6] = { ...AssetParamMap[5] };
 AssetParamMap[7] = { ...AssetParamMap[6] };
 AssetParamMap[8] = { ...AssetParamMap[7] };
 
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#asset_params_get-f
+export enum AssetParamGetField {
+	AssetTotal = "AssetTotal",
+	AssetDecimals = "AssetDecimals",
+	AssetDefaultFrozen = "AssetDefaultFrozen",
+	AssetUnitName = "AssetUnitName",
+	AssetName = "AssetName",
+	AssetURL = "AssetURL",
+	AssetMetadataHash = "AssetMetadataHash",
+	AssetManager = "AssetManager",
+	AssetReserve = "AssetReserve",
+	AssetFreeze = "AssetFreeze",
+	AssetClawback = "AssetClawback",
+	AssetCreator = "AssetCreator",
+}
+
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
+export enum AppParamField {
+	AppApprovalProgram = "AppApprovalProgram",
+	AppClearStateProgram = "AppClearStateProgram",
+	AppGlobalNumUint = "AppGlobalNumUint",
+	AppGlobalNumByteSlice = "AppGlobalNumByteSlice",
+	AppLocalNumUint = "AppLocalNumUint",
+	AppLocalNumByteSlice = "AppLocalNumByteSlice",
+	AppExtraProgramPages = "AppExtraProgramPages",
+	AppCreator = "AppCreator",
+	AppAddress = "AppAddress",
+}
+
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
+export enum TxnRefFields {
+	ApplicationArgs = "ApplicationArgs",
+	ConfigAssetTotal = "ConfigAssetTotal",
+	ConfigAssetDecimals = "ConfigAssetDecimals",
+	ConfigAssetDefaultFrozen = "ConfigAssetDefaultFrozen",
+	ConfigAssetUnitName = "ConfigAssetUnitName",
+	ConfigAssetName = "ConfigAssetName",
+	ConfigAssetURL = "ConfigAssetURL",
+	ConfigAssetMetadataHash = "ConfigAssetMetadataHash",
+	ConfigAssetManager = "ConfigAssetManager",
+	ConfigAssetReserve = "ConfigAssetReserve",
+	ConfigAssetFreeze = "ConfigAssetFreeze",
+	ConfigAssetClawback = "ConfigAssetClawback",
+	CreatedAssetID = "CreatedAssetID",
+	CreatedApplicationID = "CreatedApplicationID",
+	FirstValidTime = "FirstValidTime",
+	FreezeAssetAccount = "FreezeAssetAccount",
+	FreezeAssetFrozen = "FreezeAssetFrozen",
+	Global = "Global",
+	GlobalNumUint = "GlobalNumUint",
+	GroupIndex = "GroupIndex",
+	GlobalNumByteSlice = "GlobalNumByteSlice",
+	LocalNumByteSlice = "LocalNumByteSlice",
+	LocalNumUint = "LocalNumUint",
+	NumAppArgs = "NumAppArgs",
+	NumAccounts = "NumAccounts",
+	NumAssets = "NumAssets",
+	NumApplications = "NumApplications",
+	NumApprovalProgramPages = "NumApprovalProgramPages",
+	NumClearStateProgramPages = "NumClearStateProgramPages",
+	NumLogs = "NumLogs",
+	OnCompletion = "OnCompletion",
+	TxID = "TxID",
+}
+
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#txna-f-i
+export enum TxnaField {
+	Accounts = "Accounts",
+	ApprovalProgramPages = "ApprovalProgramPages",
+	Applications = "Applications",
+	ApplicationArgs = "ApplicationArgs",
+	Assets = "Assets",
+	ClearStateProgramPages = "ClearStateProgramPages",
+	Logs = "Logs"
+}
+
 // app param use for app_params_get opcode
 export const AppParamDefined: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -314,15 +390,15 @@ export const AppParamDefined: { [key: number]: Set<string> } = {
 	3: new Set(),
 	4: new Set(),
 	5: new Set([
-		"AppApprovalProgram",
-		"AppClearStateProgram",
-		"AppGlobalNumUint",
-		"AppGlobalNumByteSlice",
-		"AppLocalNumUint",
-		"AppLocalNumByteSlice",
-		"AppExtraProgramPages",
-		"AppCreator",
-		"AppAddress",
+		AppParamField.AppApprovalProgram,
+		AppParamField.AppClearStateProgram,
+		AppParamField.AppGlobalNumUint,
+		AppParamField.AppGlobalNumByteSlice,
+		AppParamField.AppLocalNumUint,
+		AppParamField.AppLocalNumByteSlice,
+		AppParamField.AppExtraProgramPages,
+		AppParamField.AppCreator,
+		AppParamField.AppAddress,
 	]),
 };
 
@@ -379,7 +455,7 @@ export const GlobalFields: { [key: number]: { [key: string]: any } } = {
 	1: {
 		MinTxnFee: ALGORAND_MIN_TX_FEE,
 		MinBalance: 10000,
-		MaxTxnLife: 1000,
+		MaxTxnLife: MaxTxnLife,
 		ZeroAddress: ZERO_ADDRESS,
 		GroupSize: null,
 	},
@@ -548,37 +624,122 @@ export enum vrfVerifyFieldTypes {
 	VrfStandard = "VrfStandard",
 }
 
-export enum TxFieldEnum {
+// CallerApplicationAddress
+export enum GlobalField {
+	CallerApplicationAddress = "CallerApplicationAddress",
+	CallerApplicationID = "CallerApplicationID",
+	CurrentApplicationAddress = "CurrentApplicationAddress",
+	CreatorAddress = "CreatorAddress",
+	CurrentApplicationID = "CurrentApplicationID",
+	GroupSize = "GroupSize",
+	GroupID = "GroupID",
+	LatestTimestamp = "LatestTimestamp",
+	LogicSigVersion = "LogicSigVersion",
+	MaxTxnLife = "MaxTxnLife",
+	MinTxnFee = "MinTxnFee",
+	MinBalance = "MinBalance",
+	OpcodeBudget = "OpcodeBudget",
+	Round = "Round",
+	ZeroAddress = "ZeroAddress",
+}
+
+export enum OpCodeField {
+	AcctBalance = "AcctBalance",
+	Amount = "Amount",
+	CloseRemainderTo = "CloseRemainderTo",
+	Fee = "Fee",
+	FirstValid = "FirstValid",
 	FirstValidTime = "FirstValidTime",
-	TypeEnum = "TypeEnum",
-	TxID = "TxID",
-	GroupIndex = "GroupIndex",
-	NumAppArgs = "NumAppArgs",
-	NumAccounts = "NumAccounts",
-	NumAssets = "NumAssets",
-	NumApplications = "NumApplications",
-	AssetSender = "AssetSender",
-	CreatedAssetID = "CreatedAssetID",
-	CreatedApplicationID = "CreatedApplicationID",
-	LastLog = "LastLog",
-	StateProofPK = "StateProofPK",
-	NumApprovalProgramPages = "NumApprovalProgramPages",
-	ApprovalProgramPages = "ApprovalProgramPages",
-	NumClearStateProgramPages = "NumClearStateProgramPages",
-	ClearStateProgramPages = "ClearStateProgramPages",
-	Logs = "Logs",
-	ApprovalProgram = "ApprovalProgram",
-	ClearStateProgram = "ClearStateProgram",
-	ConfigAssetDecimals = "ConfigAssetDecimals",
-	Type = "Type",
-	ApplicationArgs = "ApplicationArgs",
-	ConfigAssetMetadataHash = "ConfigAssetMetadataHash",
-	ConfigAssetUnitName = "ConfigAssetUnitName",
-	ConfigAssetName = "ConfigAssetName",
-	ConfigAssetURL = "ConfigAssetURL",
-	VotePK = "VotePK",
-	SelectionPK = "SelectionPK",
+	LastValid = "LastValid",
+	Lease = "Lease",
 	Note = "Note",
+	Receiver = "Receiver",
+	Sender = "Sender",
+	VotePK = "VotePK",
+}
+
+export enum AssetHoldingField {
+	AssetBalance = "AssetBalance",
+	AssetFrozen = "AssetFrozen"
+}
+
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#acct_params_get-f
+export enum AccountParamGetField {
+	AcctAuthAddr = "AcctAuthAddr",
+	AcctBalance = "AcctBalance",
+	AcctMinBalance = "AcctMinBalance",
+}
+
+// https://developer.algorand.org/docs/get-details/transactions/transactions/#common-fields-header-and-type
+export enum TxFieldEnum {
+	Amount = "Amount",
+	Accounts = "Accounts",
+	ApplicationID = "ApplicationID",
+	ApprovalProgram = "ApprovalProgram",
+	AppArguments = "App Arguments",
+	AssetAmount = "AssetAmount",
+	AssetSender = "AssetSender",
+	AssetReceiver = "AssetReceiver",
+	AssetCloseTo = "AssetCloseTo",
+	AssetName = "AssetName",
+	AssetParams = "AssetParams",
+	AssetFrozen = "AssetFrozen",
+	ClawbackAddr = "ClawbackAddr",
+	ClearStateProgram = "ClearStateProgram",
+	CloseRemainderTo = "CloseRemainderTo",
+	ConfigAsset = "ConfigAsset",
+	FreezeAccount = "FreezeAccount",
+	Decimals = "Decimals",
+	DefaultFrozen = "DefaultFrozen",
+	ExtraProgramPages = "ExtraProgramPages",
+	Fee = "Fee",
+	FreezeAddr = "FreezeAddr",
+	FreezeAsset = "FreezeAsset",
+	ForeignAssets = "ForeignAssets",
+	FirstValid = "FirstValid",
+	ForeignApps = "ForeignApps",
+	GenesisHash = "GenesisHash",
+	GlobalStateSchema = "GlobalStateSchema",
+	Group = "Group",
+	LastLog = "LastLog",
+	Lease = "Lease",
+	LastValid = "LastValid",
+	LogicSig = "LogicSig",
+	LocalStateSchema = "LocalStateSchema",
+	ManagerAddr = "ManagerAddr",
+	MetaDataHash = "MetaDataHash",
+	Msig = "Msig",
+	Note = "Note",
+	Nonparticipation = "Nonparticipation",
+	NumberByteSlices = "NumberByteSlices",
+	NumberInts = "NumberInts",
+	OnComplete = "OnComplete",
+	OpcodeBudget = "OpcodeBudget",
+	RekeyTo = "RekeyTo",
+	Receiver = "Receiver",
+	ReserveAddr = "ReserveAddr",
+	SelectionPK = "SelectionPK",
+	StateProofPK = "StateProofPK",
+	Sender = "Sender",
+	Sig = "Sig",
+	Total = "Total",
+	Transaction = "Transaction",
+	TypeEnum = "TypeEnum",
+	Type = "Type",
+	TxType = "TxType",
+	UnitName = "UnitName",
+	URL = "URL",
+	VotePK = "VotePK",
+	VoteFirst = "VoteFirst",
+	VoteLast = "VoteLast",
+	VoteKeyDilution = "VoteKeyDilution",
+	XferAsset = "XferAsset",
+}
+
+// https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#base64_decode-e
+export enum Base64Encoding {
+	StdEncoding = "StdEncoding",
+	URLEncoding = "URLEncoding",
 }
 
 export enum CurveTypeEnum {
