@@ -1,4 +1,10 @@
-import algosdk, { SuggestedParams, Transaction } from "algosdk";
+import algosdk, {
+	decodeAddress,
+	EncodedSignedTransaction,
+	MultisigMetadata,
+	SuggestedParams,
+	Transaction,
+} from "algosdk";
 
 import { types } from "..";
 import { BuilderError } from "../errors/errors";
@@ -516,4 +522,18 @@ export function getAssetReconfigureFields(transaction: Transaction): AssetModFie
 				: "";
 	}
 	return modificationFields;
+}
+
+export function mkMultisigEncodedTx(
+	mparams: MultisigMetadata,
+	tx: Transaction
+): EncodedSignedTransaction {
+	const subsig = [];
+	for (const address of mparams.addrs) {
+		subsig.push({ pk: decodeAddress(address).publicKey });
+	}
+	return {
+		msig: { v: mparams.version, thr: mparams.threshold, subsig: subsig },
+		txn: tx.get_obj_for_encoding(),
+	};
 }
