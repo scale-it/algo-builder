@@ -19,6 +19,8 @@ import {
 	TxFieldDefaults,
 	TxFieldEnum,
 	TxnFields,
+	TxnRefFields,
+	TxnaField,
 	ZERO_ADDRESS,
 	ZERO_ADDRESS_STR,
 } from "../lib/constants";
@@ -35,24 +37,24 @@ import {
 import { convertToString } from "./parsing";
 
 export const assetTxnFields = new Set([
-	"ConfigAssetTotal",
-	"ConfigAssetDecimals",
-	"ConfigAssetDefaultFrozen",
-	"ConfigAssetUnitName",
-	"ConfigAssetName",
-	"ConfigAssetURL",
-	"ConfigAssetMetadataHash",
-	"ConfigAssetManager",
-	"ConfigAssetReserve",
-	"ConfigAssetFreeze",
-	"ConfigAssetClawback",
+	TxnRefFields.ConfigAssetTotal,
+	TxnRefFields.ConfigAssetDecimals,
+	TxnRefFields.ConfigAssetDefaultFrozen,
+	TxnRefFields.ConfigAssetUnitName,
+	TxnRefFields.ConfigAssetName,
+	TxnRefFields.ConfigAssetURL,
+	TxnRefFields.ConfigAssetMetadataHash,
+	TxnRefFields.ConfigAssetManager,
+	TxnRefFields.ConfigAssetReserve,
+	TxnRefFields.ConfigAssetFreeze,
+	TxnRefFields.ConfigAssetClawback,
 ]);
 
 const globalAndLocalNumTxnFields = new Set([
-	"GlobalNumUint",
-	"GlobalNumByteSlice",
-	"LocalNumUint",
-	"LocalNumByteSlice",
+	TxnRefFields.GlobalNumUint,
+	TxnRefFields.GlobalNumByteSlice,
+	TxnRefFields.LocalNumUint,
+	TxnRefFields.LocalNumByteSlice,
 ]);
 
 // return default value of txField if undefined,
@@ -127,14 +129,14 @@ export function txnSpecByField(
 	let result; // store raw result, parse and return
 	const tealVersion = interpreter.tealVersion;
 	// handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
-	if (assetTxnFields.has(txField)) {
+	if (assetTxnFields.has(txField as TxnRefFields)) {
 		const s = TxnFields[tealVersion][txField];
 		const assetMetaData = tx.apar;
 		result = assetMetaData?.[s as keyof EncodedAssetParams];
 		return parseToStackElem(result, txField);
 	}
-	if (globalAndLocalNumTxnFields.has(txField)) {
-		const encAppGlobalSchema = txField.includes("Global") ? tx.apgs : tx.apls;
+	if (globalAndLocalNumTxnFields.has(txField as TxnRefFields)) {
+		const encAppGlobalSchema = txField.includes(TxnRefFields.Global) ? tx.apgs : tx.apls;
 		const s = TxnFields[tealVersion][txField];
 		result = encAppGlobalSchema?.[s as keyof EncodedGlobalStateSchema];
 		return parseToStackElem(result, txField);
@@ -142,7 +144,7 @@ export function txnSpecByField(
 
 	// handle other cases
 	switch (txField) {
-		case TxFieldEnum.FirstValidTime: {
+		case TxnRefFields.FirstValidTime: {
 			const oneBeforeFirstValid = (tx.fv === undefined ? 0 : tx.fv) - 1;
 			interpreter.assertRoundIsAvailable(oneBeforeFirstValid);
 			result = interpreter.runtime.getBlock(oneBeforeFirstValid).timestamp;
@@ -152,32 +154,32 @@ export function txnSpecByField(
 			result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
 			break;
 		}
-		case TxFieldEnum.TxID: {
+		case TxnRefFields.TxID: {
 			return parsing.stringToBytes(tx.txID);
 		}
-		case TxFieldEnum.GroupIndex: {
+		case TxnRefFields.GroupIndex: {
 			result = gtxns.indexOf(tx);
 			break;
 		}
-		case TxFieldEnum.NumAppArgs: {
+		case TxnRefFields.NumAppArgs: {
 			const appArg = TxnFields[tealVersion].ApplicationArgs as keyof EncTx;
 			const appArgs = tx[appArg] as Buffer[];
 			result = appArgs?.length;
 			break;
 		}
-		case TxFieldEnum.NumAccounts: {
+		case TxnRefFields.NumAccounts: {
 			const appAcc = TxnFields[tealVersion].Accounts as keyof EncTx;
 			const appAccounts = tx[appAcc] as Buffer[];
 			result = appAccounts?.length;
 			break;
 		}
-		case TxFieldEnum.NumAssets: {
+		case TxnRefFields.NumAssets: {
 			const encAppAsset = TxnFields[tealVersion].Assets as keyof EncTx; // 'apas'
 			const foreignAssetsArr = tx[encAppAsset] as Buffer[];
 			result = foreignAssetsArr?.length;
 			break;
 		}
-		case TxFieldEnum.NumApplications: {
+		case TxnRefFields.NumApplications: {
 			const encApp = TxnFields[tealVersion].Applications as keyof EncTx; // 'apfa'
 			const foreignAppsArr = tx[encApp] as Buffer[];
 			result = foreignAppsArr?.length;
@@ -190,13 +192,13 @@ export function txnSpecByField(
 			}
 			break;
 		}
-		case TxFieldEnum.CreatedAssetID: {
+		case TxnRefFields.CreatedAssetID: {
 			const asaInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as ASAInfo;
 			if (asaInfo !== undefined) result = BigInt(asaInfo.assetIndex);
 			else result = 0n;
 			break;
 		}
-		case TxFieldEnum.CreatedApplicationID: {
+		case TxnRefFields.CreatedApplicationID: {
 			const appInfo = interpreter.runtime.ctx.state.txReceipts.get(tx.txID) as AppInfo;
 			if (appInfo.appID !== undefined) result = BigInt(appInfo.appID);
 			else if (isEncTxApplicationCreate(tx))
@@ -210,21 +212,21 @@ export function txnSpecByField(
 		}
 
 		case TxFieldEnum.StateProofPK: {
-			// While running teal debugger, "StateProofPK" always return 64 zero bytes.
+			// While running teal debugger, TxFieldEnum.StateProofPK always return 64 zero bytes.
 			// so we set up 64 zero bytes as default value of StateProofPK
 			result = new Uint8Array(64).fill(0); // 64 zero bytes
 			break;
 		}
-		case TxFieldEnum.NumApprovalProgramPages: {
+		case TxnRefFields.NumApprovalProgramPages: {
 			tx.apap ? (result = Math.ceil(tx.apap.length / maxStringSize)) : (result = 0n);
 			break;
 		}
-		case TxFieldEnum.NumClearStateProgramPages: {
+		case TxnRefFields.NumClearStateProgramPages: {
 			tx.apsu ? (result = Math.ceil(tx.apsu.length / maxStringSize)) : (result = 0n);
 			break;
 		}
 		default: {
-			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
+			const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields[TxFieldEnum.Receiver]
 			result = tx[s as keyof EncTx]; // pk_buffer = tx['rcv']
 		}
 	}
@@ -253,12 +255,12 @@ export function txAppArg(
 ): StackElem {
 	const tealVersion: number = interpreter.tealVersion;
 
-	if (txField === TxFieldEnum.Logs) {
+	if (txField === TxnaField.Logs) {
 		const txReceipt = interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 		const logs: Uint8Array[] = txReceipt?.logs ?? [];
 		op.checkIndexBound(idx, logs, op.line);
 		return parseToStackElem(logs[idx], txField);
-	} else if (txField === TxFieldEnum.ApprovalProgramPages && tx.apap) {
+	} else if (txField === TxnaField.ApprovalProgramPages && tx.apap) {
 		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ApprovalProgramPages page index");
@@ -267,10 +269,10 @@ export function txAppArg(
 		const last = Math.min(first + maxStringSize, tx.apap.length);
 		const page = tx.apap.slice(first, last);
 		return parseToStackElem(page, txField);
-	} else if (txField === TxFieldEnum.NumApprovalProgramPages && tx.apap) {
+	} else if (txField === TxnRefFields.NumApprovalProgramPages && tx.apap) {
 		const pageCount = Math.ceil(tx.apap.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
-	} else if (txField === TxFieldEnum.ClearStateProgramPages && tx.apsu) {
+	} else if (txField === TxnaField.ClearStateProgramPages && tx.apsu) {
 		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		if (idx > pageCount) {
 			throw new Error("invalid ClearStateProgramPages page index");
@@ -279,7 +281,7 @@ export function txAppArg(
 		const last = Math.min(first + maxStringSize, tx.apsu.length);
 		const page = tx.apsu.slice(first, last);
 		return parseToStackElem(page, txField);
-	} else if (txField === TxFieldEnum.NumClearStateProgramPages && tx.apsu) {
+	} else if (txField === TxnRefFields.NumClearStateProgramPages && tx.apsu) {
 		const pageCount = Math.ceil(tx.apsu.length / maxStringSize);
 		return parseToStackElem(pageCount, txField);
 	}
@@ -297,12 +299,12 @@ export function txAppArg(
 	 * + EncTx.Applications[0] represents current_application_id
 	 * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
 	 */
-	if (txField === "Accounts") {
+	if (txField === TxnaField.Accounts) {
 		if (idx === 0) {
 			return parseToStackElem(tx.snd, txField);
 		}
 		idx--; // if not sender, then reduce index by 1
-	} else if (txField === "Applications") {
+	} else if (txField === TxnaField.Applications) {
 		if (idx === 0) {
 			return parseToStackElem(tx.apid ?? 0n, txField);
 		} // during ssc deploy tx.app_id is 0
@@ -663,14 +665,14 @@ export function executeITxn(op: ITxna | ITxn): StackElem {
 	const tx = groupTx[groupTx.length - 1];
 	let result: StackElem;
 	switch (op.field) {
-		case "Logs": {
+		case TxnaField.Logs: {
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			op.checkIndexBound(op.idx, logs, op.line);
 			result = logs[op.idx];
 			break;
 		}
-		case "NumLogs": {
+		case TxnRefFields.NumLogs: {
 			const txReceipt = op.interpreter.runtime.ctx.state.txReceipts.get(tx.txID);
 			const logs: Uint8Array[] = txReceipt?.logs ?? [];
 			result = BigInt(logs.length);

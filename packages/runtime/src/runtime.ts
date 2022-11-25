@@ -9,6 +9,7 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 import MD5 from "crypto-js/md5";
+import findupSync from "findup-sync";
 import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
@@ -23,16 +24,20 @@ import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	BlockFinalisationTime,
+	JS_CONFIG_FILENAME,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
-	TransactionTypeEnum,
+	NETWORK_DEFAULT,
 	seedLength,
-	ZERO_ADDRESS_STR
+	TransactionTypeEnum,
+	TS_CONFIG_FILENAME,
+	ZERO_ADDRESS_STR,
 } from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
+	Account,
 	AccountAddress,
 	AccountStoreI,
 	AppInfo,
@@ -420,6 +425,37 @@ export class Runtime {
 			new RuntimeAccount({ addr: ZERO_ADDRESS_STR, sk: new Uint8Array(0) })
 		);
 		this.store.accounts.set(feeSink.address, feeSink);
+	}
+
+	/**
+	 * Add accounts from config file to the Store
+	 * @param network: the network of accounts to add
+	 * @param balance: balance for accounts
+	 */
+	loadAccountsFromConfig(network = NETWORK_DEFAULT, balance?: number): void {
+		const find = findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]);
+		if (!find) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.CONFIG_FILE_NOT_FOUND);
+		}
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const config = require(find);
+		if (config.networks[network] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_NETWORK, {
+				network: network,
+			});
+		}
+		const accounts = config.networks[network].accounts;
+		if (accounts === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.NETWORK_ACCOUNT_NOT_FOUND, {
+				network: network,
+			});
+		}
+		for (const _acc of accounts) {
+			balance = balance ? balance : 1e6;
+			const acc = new AccountStore(balance, _acc);
+			if (_acc.name) this.store.accountNameAddress.set(_acc.name, _acc.addr);
+			this.store.accounts.set(_acc.addr, acc);
+		}
 	}
 
 	/**

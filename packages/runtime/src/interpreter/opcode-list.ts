@@ -30,6 +30,9 @@ import {
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
 	AppParamDefinedIndex,
+	AssetHoldingField,
+	AssetParamGetField,
+	AppParamField,
 	AssetParamMap,
 	AssetParamMapIndex,
 	blockFieldIndex,
@@ -57,6 +60,10 @@ import {
 	TxnFieldsIndex,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
+	TxFieldEnum,
+	Base64Encoding,
+	GlobalField,
+	AccountParamGetField
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -1876,7 +1883,7 @@ export class Global extends Op {
 
 	/**
 	 * Stores global field to query as string
-	 * @param args Expected arguments: [field] // Ex: ["GroupSize"]
+	 * @param args Expected arguments: [field] // Ex: [GlobalField.GroupSize]
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
@@ -1901,11 +1908,11 @@ export class Global extends Op {
 	execute(stack: TEALStack): number {
 		let result;
 		switch (this.field) {
-			case "GroupSize": {
+			case GlobalField.GroupSize: {
 				result = this.interpreter.runtime.ctx.gtxs.length;
 				break;
 			}
-			case "CurrentApplicationID": {
+			case GlobalField.CurrentApplicationID: {
 				result = this.interpreter.runtime.ctx.tx.apid;
 				this.interpreter.runtime.assertAppDefined(
 					result as number,
@@ -1914,40 +1921,40 @@ export class Global extends Op {
 				);
 				break;
 			}
-			case "Round": {
+			case GlobalField.Round: {
 				result = this.interpreter.runtime.getRound();
 				break;
 			}
-			case "LatestTimestamp": {
+			case GlobalField.LatestTimestamp: {
 				result = this.interpreter.runtime.getTimestamp();
 				break;
 			}
-			case "CreatorAddress": {
+			case GlobalField.CreatorAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				const app = this.interpreter.getApp(appID, this.line);
 				result = decodeAddress(app.creator).publicKey;
 				break;
 			}
-			case "GroupID": {
+			case GlobalField.GroupID: {
 				result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
 				break;
 			}
-			case "CurrentApplicationAddress": {
+			case GlobalField.CurrentApplicationAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				result = decodeAddress(getApplicationAddress(appID)).publicKey;
 				break;
 			}
-			case "CallerApplicationID": {
+			case GlobalField.CallerApplicationID: {
 				result = this.interpreter.runtime.ctx.getCallerApplicationID();
 				break;
 			}
-			case "CallerApplicationAddress": {
+			case GlobalField.CallerApplicationAddress: {
 				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
 				result = decodeAddress(callerAddress).publicKey;
 				break;
 			}
 
-			case "OpcodeBudget": {
+			case TxFieldEnum.OpcodeBudget: {
 				const maxBudget = this.interpreter.getBudget();
 				const currentTotalCost =
 					this.interpreter.mode === ExecutionMode.SIGNATURE
@@ -2382,12 +2389,12 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
-			case "0":
-			case "AssetBalance":
+      case "0":
+			case AssetHoldingField.AssetBalance:
 				value = BigInt(assetInfo.amount);
 				break;
-			case "1":
-			case "AssetFrozen":
+      case "1":
+			case AssetHoldingField.AssetFrozen:
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
 			default:
@@ -2462,22 +2469,18 @@ export class GetAssetDef extends Op {
 			] as keyof modelsv2.AssetParams;
 
 			switch (this.field) {
-				case "AssetTotal":
+				case AssetParamGetField.AssetTotal:
 					value = BigInt(AssetDefinition.total);
 					break;
-				case "AssetDecimals":
+				case AssetParamGetField.AssetDecimals:
 					value = BigInt(AssetDefinition.decimals);
 					break;
-				case "AssetDefaultFrozen":
+				case AssetParamGetField.AssetDefaultFrozen:
 					value = AssetDefinition.defaultFrozen ? 1n : 0n;
 					break;
 				default:
 					def = AssetDefinition[s] as string;
-					if (isValidAddress(def)) {
-						value = decodeAddress(def).publicKey;
-					} else {
-						value = parsing.stringToBytes(def);
-					}
+					value = isValidAddress(def) ? decodeAddress(def).publicKey : parsing.stringToBytes(def);
 					break;
 			}
 
@@ -4106,8 +4109,8 @@ export class EcdsaPkRecover extends Op {
 		const signatureC = this.assertBytes(stack.pop(), this.line);
 		const recoverId = this.assertBigInt(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
-
-		const ec = new EC(this.curveType);
+    
+    const ec = new EC(this.curveType);
 		const signature = { r: signatureC, s: signatureD };
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
@@ -4446,10 +4449,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-							sig: Buffer.alloc(5),
-							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					  }
+						sig: Buffer.alloc(5),
+						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					}
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -4850,33 +4853,33 @@ export class AppParamsGet extends Op {
 			let value: StackElem = 0n;
 			const appDef = this.interpreter.getApp(Number(appID), this.line);
 			switch (this.field) {
-				case "AppApprovalProgram":
+				case AppParamField.AppApprovalProgram:
 					value = parsing.stringToBytes(appDef["approval-program"]);
 					break;
-				case "AppClearStateProgram":
+				case AppParamField.AppClearStateProgram:
 					value = parsing.stringToBytes(appDef["clear-state-program"]);
 					break;
-				case "AppGlobalNumUint":
+				case AppParamField.AppGlobalNumUint:
 					value = BigInt(appDef["global-state-schema"].numUint);
 					break;
-				case "AppGlobalNumByteSlice":
+				case AppParamField.AppGlobalNumByteSlice:
 					value = BigInt(appDef["global-state-schema"].numByteSlice);
 					break;
-				case "AppLocalNumUint":
+				case AppParamField.AppLocalNumUint:
 					value = BigInt(appDef["local-state-schema"].numUint);
 					break;
-				case "AppLocalNumByteSlice":
+				case AppParamField.AppLocalNumByteSlice:
 					value = BigInt(appDef["local-state-schema"].numByteSlice);
 					break;
-				case "AppExtraProgramPages":
+				case AppParamField.AppExtraProgramPages:
 					// only return default number extra program pages in runtime
 					// should fix it in future.
 					value = 1n;
 					break;
-				case "AppCreator":
+				case AppParamField.AppCreator:
 					value = decodeAddress(appDef.creator).publicKey;
 					break;
-				case "AppAddress":
+				case AppParamField.AppAddress:
 					value = decodeAddress(getApplicationAddress(appID)).publicKey;
 			}
 
@@ -4936,15 +4939,15 @@ export class AcctParamsGet extends Op {
 
 		let value: StackElem = 0n;
 		switch (this.field) {
-			case "AcctBalance": {
+			case AccountParamGetField.AcctBalance: {
 				value = BigInt(accountInfo.balance());
 				break;
 			}
-			case "AcctMinBalance": {
+			case AccountParamGetField.AcctMinBalance: {
 				value = BigInt(accountInfo.minBalance);
 				break;
 			}
-			case "AcctAuthAddr": {
+			case AccountParamGetField.AcctAuthAddr: {
 				if (accountInfo.getSpendAddress() === accountInfo.address) {
 					value = ZERO_ADDRESS;
 				} else {
@@ -5101,12 +5104,12 @@ export class Base64Decode extends Op {
 		const argument = args[0];
 		switch (argument) {
 			case "0":
-			case "URLEncoding": {
+			case Base64Encoding.URLEncoding: {
 				this.encoding = "base64url";
 				break;
 			}
-			case "1":
-			case "StdEncoding": {
+      case "1":
+			case Base64Encoding.StdEncoding: {
 				this.encoding = "base64";
 				break;
 			}
