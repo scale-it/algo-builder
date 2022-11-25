@@ -13,11 +13,11 @@ yarn run algob deploy
 ## Deploy new application, asset and log id by group transaction
 
 ```
-yarn run algob run --script useGroupTxn.js
+yarn run algob run useGroupTxn.js
 ```
 
 ## Deploy new application, asset and log id by inner transaction
 
 ```
-yarn run algob run --script useInnerTxn.js
+yarn run algob run useInnerTxn.js
 ```

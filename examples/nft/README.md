@@ -25,5 +25,5 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 ```
 yarn run algob deploy
-yarn run algob run --script scripts/transfer/create-transfer-nft.js
+yarn run algob run scripts/transfer/create-transfer-nft.js
 ```
