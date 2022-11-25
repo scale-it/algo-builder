@@ -524,6 +524,10 @@ export function getAssetReconfigureFields(transaction: Transaction): AssetModFie
 	return modificationFields;
 }
 
+/**
+ * A function to construct a Multisig Encoded Transaction object, which is ready to be signed (internally
+ * using the Algorand SDK or a wallet)
+ **/
 export function mkMultisigEncodedTx(
 	mparams: MultisigMetadata,
 	tx: Transaction
