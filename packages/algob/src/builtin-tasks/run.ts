@@ -21,8 +21,8 @@ import { CheckpointRepo, Deployer, RuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
-	script: string;
-	args: string[];
+	script: string[];
+	args: string;
 }
 
 export function filterNonExistent(scripts: string[]): string[] {
@@ -122,18 +122,34 @@ async function executeRunTask(
 	algoOp: AlgoOperator
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
-	const nonExistent = filterNonExistent([script]);
+	let scriptArgs: string[] = [];
+	let scriptName;
+	if (script && script.length) {
+		// get script from script array, first element should be script
+		scriptName = script[0];
+		// reamining elemnts should be the script arguments
+		scriptArgs.push(...script.slice(1));
+	}
+	// check if args param was defined
+	if (args) {
+		// add argument at the starting of arguments array
+		scriptArgs = [args].concat(scriptArgs);
+	}
+	if (!scriptName) {
+		throw Error("Script not found. Please check the format: yarn algob run script.js --args arg1 arg2 arg3")
+	}
+	const nonExistent = filterNonExistent([scriptName]);
 	if (nonExistent.length !== 0) {
 		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
 			scripts: nonExistent,
 		});
 	}
-	assertDirChildren(scriptsDirectory, [script]);
+	assertDirChildren(scriptsDirectory, [scriptName]);
 	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
 	await runScripts(
 		runtimeEnv,
-		[script],
-		args,
+		[scriptName],
+		scriptArgs,
 		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
 		true,
 		logDebugTag,
@@ -143,8 +159,8 @@ async function executeRunTask(
 }
 
 export default function (): void {
-	task(TASK_RUN, "Runs a user-defined script after compiling the project")
-		.addOptionalParam("script", "A js file to be run within algob's environment.")
-		.addOptionalVariadicPositionalParam("args", "Argument list to be passed to in the script.")
+	task(TASK_RUN, "Runs a user-defined script after compiling the project\n\nExample: yarn algob run script.js --args arg1 arg2 arg3")
+		.addOptionalParam("args", "Argument list to be passed in the script.")
+		.addVariadicPositionalParam("script", "A js file to be run within algob's environment.")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
 }
