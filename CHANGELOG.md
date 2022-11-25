@@ -7,7 +7,7 @@ Guidelines:
 + if relevant, you can also provide a link to a pull request.
 
 Organize change log in the following section (in that order):
-Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
+Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, /example Updates
 -->
 
 # CHANGELOG
@@ -42,6 +42,10 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 #### TEALv8
 
 - Support for `switch` opcode.
+
+#### /example Updates
+
+- /examples/DAO has been moved to https://github.com/scale-it/sigmadao
 
 ## v6.0.0 2022-11-04
 
@@ -88,7 +92,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
 - Added support for `FirstValidTime` field for transactions opcode.
 - Added program length check on app update on the basis of extra pages in `runtime`.
-- Added support for  `Runtime` to add account from `config` file.
+- Added support for `Runtime` to add account from `config` file.
 
 #### @algo-builder/web
 
