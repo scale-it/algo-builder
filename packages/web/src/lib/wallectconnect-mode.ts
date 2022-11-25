@@ -158,7 +158,7 @@ export class WallectConnectSession {
 	}
 
 	/**
-	 * @description Sign a Logic Signature transaction
+	 * @description Signs a Logic Signature transaction
 	 * @param transaction algosdk.Transaction object
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
