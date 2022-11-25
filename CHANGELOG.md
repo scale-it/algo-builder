@@ -37,7 +37,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 ### Breaking Changes
 
 - The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` is renamed to `signMsigTransaction` and expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
+- `appendSignMultisigTransaction` is renamed to `signMsigTx` which expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 #### TEALv8
 
@@ -88,7 +88,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
 - Added support for `FirstValidTime` field for transactions opcode.
 - Added program length check on app update on the basis of extra pages in `runtime`.
-- Added support for  `Runtime` to add account from `config` file.
+- Added support for `Runtime` to add account from `config` file.
 
 #### @algo-builder/web
 
