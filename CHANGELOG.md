@@ -20,19 +20,31 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 
 ### Features
 
-- Allow user to query foreign applications accounts using the `appID` field.
-- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
-- Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
-- Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
+Algob:
+
 - Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
-- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
-- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
+
+Runtime:
+
 - Add `TxFieldEnum` for transaction fields in `runtime`.
 - Add enums for opcode fields in `runtime`.
-- Add reusable workflow in GitHub action.
 - Add one batch for each package in GitHub action which uses reusable workflow.
 - Add guide about blocks in `Runtime`.
+- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
+- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
+- Allow user to query foreign applications accounts using the `appID` field.
+
+Web:
+
+- Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
+- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
+- Add `web.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
+- Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
+
+CI:
+
+- Add reusable workflow in GitHub action.
 
 ### Breaking Changes
 
@@ -88,7 +100,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Added support for `secp256r1` curve to `ecdsa_verify` and `ecdsa_pk_decompress` opcodes.
 - Added support for `FirstValidTime` field for transactions opcode.
 - Added program length check on app update on the basis of extra pages in `runtime`.
-- Added support for  `Runtime` to add account from `config` file.
+- Added support for `Runtime` to add account from `config` file.
 
 #### @algo-builder/web
 
