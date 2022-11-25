@@ -91,7 +91,7 @@ export class MyAlgoWalletSession {
 
 	/**
 	 * @async
-	 * @description Sign a teal program (https://algorand.github.io/js-algorand-sdk/modules.html#tealSign)
+	 * @description Signs a teal program (https://algorand.github.io/js-algorand-sdk/modules.html#tealSign)
 	 * @param logic Teal program
 	 * @param address Signer Address
 	 * @returns Returns signed teal
