@@ -22,7 +22,7 @@ describe("Run task", function () {
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "./scripts/does-not-exist",
+					script: ["./scripts/does-not-exist"],
 				}),
 			ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
 			"./scripts/does-not-exist"
@@ -31,27 +31,27 @@ describe("Run task", function () {
 
 	it("Should run the scripts to completion", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "./scripts/async-script.js",
+			script: ["./scripts/async-script.js"],
 		});
 	});
 
 	it("Should run the script without arguments", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "./scripts/async-script.js",
+			script: ["./scripts/async-script.js"],
 		});
 	});
 
 	it("Should run the script with empty arguments", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "./scripts/async-script.js",
-			args: []
+			script: ["./scripts/async-script.js"],
+			args: ""
 		});
 	});
 
 	it("Should run the script with arguments", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "./scripts/async-script.js",
-			args: ["arg1", "arg2"]
+			script: ["./scripts/async-script.js"],
+			args: "arg1"
 		});
 	});
 
@@ -99,7 +99,7 @@ describe("Run task + clean", function () {
 
 	it("Should allow to run single script", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "scripts/1.js",
+			script: ["scripts/1.js"],
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
@@ -112,7 +112,7 @@ describe("Run task + clean", function () {
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "scripts/doesnotexist.js",
+					script: ["scripts/doesnotexist.js"],
 				}),
 			ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
 			"scripts/doesnotexist.js"
@@ -123,7 +123,7 @@ describe("Run task + clean", function () {
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "scripts/other-scripts/failing.js"
+					script: ["scripts/other-scripts/failing.js"]
 				}),
 			ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
 			"scripts/other-scripts/failing.js"
@@ -132,10 +132,10 @@ describe("Run task + clean", function () {
 
 	it("Should allow to rerun successful scripts twice", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "scripts/1.js"
+			script: ["scripts/1.js"]
 		});
 		await this.env.run(TASK_RUN, {
-			script: "scripts/1.js"
+			script: ["scripts/1.js"]
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
@@ -151,7 +151,7 @@ scripts directory: script 1 executed
 			fileNames: ["scripts/1.js"],
 		});
 		await this.env.run(TASK_RUN, {
-			script: "scripts/1.js",
+			script: ["scripts/1.js"],
 		});
 		const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
@@ -164,7 +164,7 @@ scripts directory: script 1 executed
 
 	it("Should not create a snapshot", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "scripts/2.js",
+			script: ["scripts/2.js"],
 		});
 		assert.isFalse(fs.existsSync("artifacts/scripts/2.js"));
 	});
@@ -173,7 +173,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "1.js",
+					script: ["1.js"],
 				}),
 			ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
 			"1.js"
@@ -182,7 +182,7 @@ scripts directory: script 1 executed
 
 	it("Should not save metadata", async function () {
 		await this.env.run(TASK_RUN, {
-			script: "scripts/1.js",
+			script: ["scripts/1.js"],
 		});
 		const persistedSnapshot = loadCheckpoint("./scripts/1.js");
 		assert.deepEqual(persistedSnapshot, {});
@@ -213,7 +213,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "scripts/other-scripts/deploy-asa.js",
+					script: ["scripts/other-scripts/deploy-asa.js"],
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"deployASA"
@@ -228,7 +228,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "scripts/other-scripts/deploy-asc.js",
+					script: ["scripts/other-scripts/deploy-asc.js"],
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"fundLsigByFile"
