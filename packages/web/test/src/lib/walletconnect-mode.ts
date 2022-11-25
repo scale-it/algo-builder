@@ -19,7 +19,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
 	};
 	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
 
-	this.beforeAll(async function () {
+	this.beforeEach(async function () {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		const noop = () => {
@@ -67,11 +67,10 @@ describe("Webmode - Wallet Connect test cases ", function () {
 				},
 			})
 		);
-
 		lsigAccount = await createLsigAccount()
 	});
 
-	it("Should run executeTx function without throwing an error", async function () {
+	it("Should run executeTx function without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
