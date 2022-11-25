@@ -198,7 +198,7 @@ scripts directory: script 1 executed
 		await expectBuilderErrorAsync(
 			async () =>
 				await this.env.run(TASK_RUN, {
-					script: "scripts/other-scripts/put-metadata.js",
+					script: ["scripts/other-scripts/put-metadata.js"],
 				}),
 			ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
 			"addCheckpointKV"
