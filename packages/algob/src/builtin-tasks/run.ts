@@ -135,27 +135,28 @@ async function executeRunTask(
 		// add argument at the starting of arguments array
 		scriptArgs = [args].concat(scriptArgs);
 	}
-	if (!scriptName) {
-		throw Error("Script not found. Please check the format: yarn algob run script.js --args arg1 arg2 arg3")
+	if (scriptName) {
+		const nonExistent = filterNonExistent([scriptName]);
+		if (nonExistent.length !== 0) {
+			throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+				scripts: nonExistent,
+			});
+		}
+		assertDirChildren(scriptsDirectory, [scriptName]);
+		const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+		await runScripts(
+			runtimeEnv,
+			[scriptName],
+			scriptArgs,
+			(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
+			true,
+			logDebugTag,
+			false,
+			deployerCfg
+		);
+	} else {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND_WITH_SUGGESTION);
 	}
-	const nonExistent = filterNonExistent([scriptName]);
-	if (nonExistent.length !== 0) {
-		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
-			scripts: nonExistent,
-		});
-	}
-	assertDirChildren(scriptsDirectory, [scriptName]);
-	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
-	await runScripts(
-		runtimeEnv,
-		[scriptName],
-		scriptArgs,
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
-		true,
-		logDebugTag,
-		false,
-		deployerCfg
-	);
 }
 
 export default function (): void {

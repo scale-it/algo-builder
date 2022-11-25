@@ -55,6 +55,28 @@ describe("Run task", function () {
 		});
 	});
 
+
+	it("Should fail if a script is not passed as first element of script array", async function () {
+		await expectBuilderErrorAsync(
+			async () =>
+				await this.env.run(TASK_RUN, {
+					script: ["arg1", "./scripts/does-not-exist"],
+				}),
+			ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
+			"arg1"
+		);
+	});
+
+	it("Should fail if empty script array is passed", async function () {
+		await expectBuilderErrorAsync(
+			async () =>
+				await this.env.run(TASK_RUN, {
+					script: [],
+				}),
+			ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND_WITH_SUGGESTION,
+		);
+	});
+
 	/* TODO:MM compile before running the task
   it("Should compile before running", async function () {
 	if (await fsExtra.pathExists("cache")) {
