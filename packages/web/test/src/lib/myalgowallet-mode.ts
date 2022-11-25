@@ -19,14 +19,14 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	};
 	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
 
-	before(async () => {
+	beforeEach(async () => {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		connector = new MyAlgoWalletSession(walletURL, new MyAlgoConnectMock());
 		lsigAccount = await createLsigAccount()
 	});
 
-	it("Should executeTx without throwing an error", async function () {
+	it("Should executeTx without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -42,7 +42,7 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 	});
 
 
-	it("Should run executeTx function with a lsig transaction without throwing an error", async function () {
+	it("Should run executeTx function with a lsig transaction without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.LogicSignature,

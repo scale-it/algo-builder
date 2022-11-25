@@ -85,7 +85,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
 		});
 	});
 
-	it("Should run executeTx function with a lsig transaction without throwing an error", async function () {
+	it("Should run executeTx function with a lsig transaction without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.LogicSignature,
