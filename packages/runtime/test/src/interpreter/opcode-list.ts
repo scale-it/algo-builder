@@ -2057,7 +2057,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn lastRound to stack", function () {
-				const op = new Txn(["4"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastValid], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
