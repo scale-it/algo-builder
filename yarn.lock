@@ -2207,19 +2207,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dao@workspace:examples/dao":
-  version: 0.0.0-use.local
-  resolution: "dao@workspace:examples/dao"
-  dependencies:
-    "@algo-builder/algob": "workspace:*"
-    "@algo-builder/runtime": "workspace:*"
-    "@algo-builder/web": "workspace:*"
-    algosdk: ^1.22.0
-    eslint: ^8.26.0
-    mocha: ^10.1.0
-  languageName: unknown
-  linkType: soft
-
 "debug@npm:4":
   version: 4.3.3
   resolution: "debug@npm:4.3.3"
