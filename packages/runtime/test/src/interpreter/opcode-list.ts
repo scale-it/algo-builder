@@ -168,27 +168,27 @@ import {
 	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
-	AssetHoldingField,
+	AccountParamGetField,
 	ALGORAND_ACCOUNT_MIN_BALANCE,
+	AppParamField,
 	ASSET_CREATION_FEE,
+	AssetHoldingField,
+	AssetParamGetField,
 	Base64Encoding,
 	blockFieldTypes,
 	CurveTypeEnum,
 	DEFAULT_STACK_ELEM,
+	GlobalField,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
 	seedLength,
 	TxFieldEnum,
+	TxnaField,
 	TxnRefFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	TxnaField,
-	GlobalField,
-	AssetParamGetField,
-	AppParamField,
-	AccountParamGetField
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -2057,7 +2057,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn lastRound to stack", function () {
-				const op = new Txn([TxFieldEnum.LastValid], 1, interpreter);
+				const op = new Txn(["4"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
