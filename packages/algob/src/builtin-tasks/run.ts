@@ -152,7 +152,7 @@ async function executeRunTask(
 }
 
 export default function (): void {
-	task(TASK_RUN, "Runs a user-defined script after compiling the project\n\nExample: yarn algob run script.js --args arg1 arg2 arg3")
+	task(TASK_RUN, `Runs a user-defined script after compiling the project\n\nExample: yarn algob run script.js --arg '{"firstname":"Jesper","surname":"Aaberg"}'`)
 		.addVariadicPositionalParam("script", "A script file to be run within algob's environment.")
 		.addOptionalParam("arg", "Argument to be passed in the script.")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
