@@ -1,5 +1,6 @@
 import algosdk, { Account, LogicSigAccount, Transaction } from "algosdk";
 import assert from "assert";
+import { expect } from "chai";
 
 import { MyAlgoWalletSession, testnetURL, types } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
@@ -88,7 +89,10 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			const txnParams = await getSuggestedParams(algodClient);
 			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
 			assert.doesNotThrow(async () => {
-				await connector.signTx(transactions[0]);
+				const signTx = await connector.signTx(transactions[0]);
+				expect(signTx).to.have.ownProperty("txn");
+				expect(signTx).to.have.ownProperty("sig");
+				expect(signTx.sig).to.exist;
 			});
 		});
 
@@ -103,11 +107,15 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			};
 			const txnParams = await getSuggestedParams(algodClient);
 			assert.doesNotThrow(async () => {
-				await connector.makeAndSignTx([execParams], txnParams);
+				const signTx = await connector.makeAndSignTx([execParams], txnParams);
+				expect(signTx[0]).to.have.ownProperty("txn");
+				expect(signTx[0]).to.have.ownProperty("sig");
+				expect(signTx[0].sig).to.exist;
 			});
+
 		});
 
-		it("Should sign a lsig transaction and return a SignedTransaction object", async function () {
+		it("Should sign a lsig transaction and return an object with blob and txID", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
 				sign: types.SignType.LogicSignature,
@@ -119,8 +127,12 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 			};
 			const txnParams = await getSuggestedParams(algodClient);
 			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
-			assert.doesNotThrow(() => {
-				connector.signLogicSignatureTxn(transactions[0], lsigAccount);
+			assert.doesNotThrow(async () => {
+				const signTx = connector.signLogicSignatureTxn(transactions[0], lsigAccount);
+				expect(signTx).to.have.ownProperty("blob");
+				expect(signTx).to.have.ownProperty("txID");
+				expect(signTx.blob).to.exist;
+				expect(signTx.txID).to.exist;
 			});
 		});
 	});
