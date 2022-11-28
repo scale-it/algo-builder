@@ -33,7 +33,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
 - Add reusable workflow in GitHub action.
 - Add one batch for each package in GitHub action which uses reusable workflow.
 - Add guide about blocks in `Runtime`.
-- `Runtime` now support for both string or index argument opcode
+- `Runtime` now supports both string and index argument opcode
 
 ### Breaking Changes
 

@@ -213,6 +213,7 @@ export const TxnFieldsIndex = [
 	"ConfigAssetMetadataHash",
 	"ConfigAssetManager",
 	"ConfigAssetReserve",
+	"ConfigAssetFreeze",
 	"ConfigAssetClawback",
 	"FreezeAsset",
 	"FreezeAssetAccount",
@@ -464,7 +465,7 @@ export enum TxnaField {
 	ApplicationArgs = "ApplicationArgs",
 	Assets = "Assets",
 	ClearStateProgramPages = "ClearStateProgramPages",
-	Logs = "Logs"
+	Logs = "Logs",
 }
 
 // app param use for app_params_get opcode
@@ -778,7 +779,7 @@ export enum OpCodeField {
 
 export enum AssetHoldingField {
 	AssetBalance = "AssetBalance",
-	AssetFrozen = "AssetFrozen"
+	AssetFrozen = "AssetFrozen",
 }
 
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#acct_params_get-f

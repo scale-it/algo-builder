@@ -369,4 +369,20 @@ export abstract class Op {
 			});
 		}
 	}
+
+	/**
+	 * Bind value index to field map
+	 * @param arg argument from opcode
+	 * @param indexArray Array of string map index
+	 */
+	assertFieldIndex(arg: string, indexArray: string[]): string {
+		let argument = arg;
+		try {
+			const index = Number(argument);
+			argument = indexArray[index] ? indexArray[index] : arg;
+		} catch {
+			//Bind value index to field map
+		}
+		return argument;
+	}
 }
