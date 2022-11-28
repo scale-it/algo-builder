@@ -59,7 +59,7 @@ describe("Scripts runner", function () {
 			async () =>
 				await runScript(
 					"./scripts/no-default-method-script.js",
-					[],
+					"",
 					env,
 					new DeployerRunMode(deployerCfg)
 				),
