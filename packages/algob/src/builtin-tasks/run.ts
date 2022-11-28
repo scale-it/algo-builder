@@ -21,8 +21,8 @@ import { CheckpointRepo, Deployer, RuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
-	script: string[];
-	args: string;
+	script: string;
+	arg: string;
 }
 
 export function filterNonExistent(scripts: string[]): string[] {
@@ -56,7 +56,7 @@ function partitionIntoSorted(unsorted: string[]): string[][] {
 export async function runMultipleScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
-	args: string[],
+	arg: string,
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -68,7 +68,7 @@ export async function runMultipleScripts(
 		await runScripts(
 			runtimeEnv,
 			scripts,
-			args,
+			arg,
 			onSuccessFn,
 			force,
 			logDebugTag,
@@ -82,7 +82,7 @@ export async function runMultipleScripts(
 async function runScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
-	args: string[],
+	arg: string,
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -111,29 +111,21 @@ async function runScripts(
 		}
 		deployerCfg.txWriter.setScriptName(relativeScriptPath);
 		log(`Running script ${relativeScriptPath}`);
-		await runScript(relativeScriptPath, args, runtimeEnv, deployer);
+		await runScript(relativeScriptPath, arg, runtimeEnv, deployer);
 		onSuccessFn(deployerCfg.cpData, relativeScriptPath);
 	}
 }
 
 async function executeRunTask(
-	{ script, args }: Input,
+	{ script, arg }: Input,
 	runtimeEnv: RuntimeEnv,
 	algoOp: AlgoOperator
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
-	let scriptArgs: string[] = [];
 	let scriptName;
 	if (script && script.length) {
 		// get script from script array, first element should be script
 		scriptName = script[0];
-		// reamining elemnts should be the script arguments
-		scriptArgs.push(...script.slice(1));
-	}
-	// check if args param was defined
-	if (args) {
-		// add argument at the starting of arguments array
-		scriptArgs = [args].concat(scriptArgs);
 	}
 	if (scriptName) {
 		const nonExistent = filterNonExistent([scriptName]);
@@ -147,7 +139,7 @@ async function executeRunTask(
 		await runScripts(
 			runtimeEnv,
 			[scriptName],
-			scriptArgs,
+			arg,
 			(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
 			true,
 			logDebugTag,
@@ -161,7 +153,7 @@ async function executeRunTask(
 
 export default function (): void {
 	task(TASK_RUN, "Runs a user-defined script after compiling the project\n\nExample: yarn algob run script.js --args arg1 arg2 arg3")
-		.addOptionalParam("args", "Argument list to be passed in the script.")
-		.addVariadicPositionalParam("script", "A js file to be run within algob's environment.")
+		.addVariadicPositionalParam("script", "A script file to be run within algob's environment.")
+		.addOptionalParam("arg", "Argument to be passed in the script.")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
 }
