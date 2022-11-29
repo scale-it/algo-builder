@@ -39,7 +39,7 @@ Web:
 
 - Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
-- Add `web.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
+- Add `tx.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 
 CI:
