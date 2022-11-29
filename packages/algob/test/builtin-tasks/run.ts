@@ -77,6 +77,13 @@ describe("Run task", function () {
 		);
 	});
 
+	it("Should throw error when a valid JSON string is not passed as argument in the script", async function () {
+		assert.throws(async () => await this.env.run(TASK_RUN, {
+			script: ["./scripts/async-script.js"],
+			args: "{name: users-name}"
+		}))
+	});
+
 	/* TODO:MM compile before running the task
   it("Should compile before running", async function () {
 	if (await fsExtra.pathExists("cache")) {
