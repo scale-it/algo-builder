@@ -116,6 +116,15 @@ async function runScripts(
 	}
 }
 
+const isValidJsonString = (str: string) => {
+	try {
+		JSON.parse(str);
+	} catch (e) {
+		return false;
+	}
+	return true;
+}
+
 async function executeRunTask(
 	{ script, arg }: Input,
 	runtimeEnv: RuntimeEnv,
@@ -123,6 +132,9 @@ async function executeRunTask(
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
 	let scriptName;
+	if (arg && !isValidJsonString(arg)) {
+		throw Error("The argument passed is not a valid JSON string.");
+	}
 	if (script && script.length) {
 		// get script from script array, first element should be script
 		scriptName = script[0];
