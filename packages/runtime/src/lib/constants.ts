@@ -441,7 +441,6 @@ export const AcctParamQueryFields: { [key: string]: { version: number } } = {
 	AcctAuthAddr: { version: 6 },
 };
 
-export const AcctParamQueryFieldsIndex = ["AcctBalance", "AcctMinBalance", "AcctAuthAddr"];
 export const reDigit = /^\d+$/;
 export const reDec = /^(0|[1-9]\d*)$/;
 export const reHex = /^0x[0-9a-fA-F]+$/;
@@ -648,7 +647,7 @@ export enum blockFieldTypes {
 	BlkSeed = "BlkSeed",
 }
 
-export const blockFieldIndex = ["BlkSeed", "BlkTimestamp"];
+export const blockFieldIndex = [blockFieldTypes.BlkSeed, blockFieldTypes.BlkTimestamp];
 
 export enum vrfVerifyFieldTypes {
 	VrfAlgorand = "VrfAlgorand",
@@ -718,6 +717,12 @@ export enum AccountParamGetField {
 	AcctBalance = "AcctBalance",
 	AcctMinBalance = "AcctMinBalance",
 }
+
+export const AcctParamQueryFieldsIndex = [
+	AccountParamGetField.AcctBalance,
+	AccountParamGetField.AcctMinBalance,
+	AccountParamGetField.AcctAuthAddr,
+];
 
 // https://developer.algorand.org/docs/get-details/transactions/transactions/#common-fields-header-and-type
 export enum TxFieldEnum {
