@@ -2207,19 +2207,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dao@workspace:examples/dao":
-  version: 0.0.0-use.local
-  resolution: "dao@workspace:examples/dao"
-  dependencies:
-    "@algo-builder/algob": "workspace:*"
-    "@algo-builder/runtime": "workspace:*"
-    "@algo-builder/web": "workspace:*"
-    algosdk: ^1.22.0
-    eslint: ^8.26.0
-    mocha: ^10.1.0
-  languageName: unknown
-  linkType: soft
-
 "debug@npm:4":
   version: 4.3.3
   resolution: "debug@npm:4.3.3"
@@ -6795,7 +6782,7 @@ __metadata:
 
 "typescript@patch:typescript@4.7.4#~builtin<compat/typescript>":
   version: 4.7.4
-  resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=701156"
+  resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
