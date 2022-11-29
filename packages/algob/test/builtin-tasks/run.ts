@@ -51,10 +51,9 @@ describe("Run task", function () {
 	it("Should run the script with arguments", async function () {
 		await this.env.run(TASK_RUN, {
 			script: ["./scripts/async-script.js"],
-			arg: "arg1"
+			arg: '{"name":"user"}'
 		});
 	});
-
 
 	it("Should fail if a script is not passed as first element of script array", async function () {
 		await expectBuilderErrorAsync(
