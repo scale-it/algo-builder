@@ -7,7 +7,7 @@ Guidelines:
 + if relevant, you can also provide a link to a pull request.
 
 Organize change log in the following section (in that order):
-Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, Template Updates
+Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, /example Updates
 -->
 
 # CHANGELOG
@@ -49,11 +49,15 @@ CI:
 ### Breaking Changes
 
 - The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` is renamed to `signMsigTransaction` and expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
+- `appendSignMultisigTransaction` is renamed to `signMsigTx` which expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 #### TEALv8
 
 - Support for `switch` opcode.
+
+#### /example Updates
+
+- /examples/DAO has been moved to https://github.com/scale-it/sigmadao
 
 ## v6.0.0 2022-11-04
 

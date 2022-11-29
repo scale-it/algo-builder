@@ -182,13 +182,6 @@ jobs:
           pipenv run yarn algob run --script scripts/interaction/call_application.js
             pipenv run yarn algob run --script scripts/interaction/delete_application.js
 
-      - name: Example DAO
-        working-directory: ./examples/dao
-        run: |
-          pipenv run yarn algob deploy
-          pipenv run yarn algob run --script scripts/run/add_proposal.js
-          pipenv run yarn algob run --script scripts/run/deposit_vote_token.js
-
   run-examples-batch-3:
     runs-on: ubuntu-20.04
     steps:
