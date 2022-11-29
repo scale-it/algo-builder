@@ -1524,14 +1524,7 @@ export class Gtxn extends Op {
 		}
 		assertOnlyDigits(args[0], line);
 
-		let argument = args[1];
-		try {
-			const index = Number(args[1]);
-			argument = TxnFieldsIndex[index];
-			if (argument === undefined) argument = args[1];
-		} catch {
-			//Bind value index to asset map
-		}
+		const argument = this.assertFieldIndex(args[1], TxnFieldsIndex);
 		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 		this.txIdx = Number(args[0]); // transaction group index
 		this.field = argument; // field
@@ -3934,11 +3927,8 @@ export class EcdsaVerify extends Op {
 				curve: argument,
 			});
 		}
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else {
-			this.curveType = CurveTypeEnum.secp256r1;
-		}
+
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
@@ -3997,11 +3987,7 @@ export class EcdsaPkDecompress extends Op {
 				curve: argument,
 			});
 		}
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else {
-			this.curveType = CurveTypeEnum.secp256r1;
-		}
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
@@ -4053,11 +4039,7 @@ export class EcdsaPkRecover extends Op {
 				curve: argument,
 			});
 		}
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else {
-			this.curveType = CurveTypeEnum.secp256r1;
-		}
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
@@ -4499,14 +4481,7 @@ export class ITxna extends Op {
 		this.line = line;
 		assertLen(args.length, 2, line);
 		assertOnlyDigits(args[1], line);
-		let argument = args[0];
-		try {
-			const index = Number(args[0]);
-			argument = TxnFieldsIndex[index];
-			if (argument === undefined) argument = args[0];
-		} catch {
-			//Bind value index to asset map
-		}
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
 		this.assertITxArrFieldDefined(argument, interpreter.tealVersion, line);
 
 		this.field = argument; // field
@@ -4777,14 +4752,7 @@ export class AppParamsGet extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-		let argument = args[0];
-		try {
-			const index = Number(args[0]);
-			argument = AppParamDefinedIndex[index];
-			if (argument === undefined) argument = args[0];
-		} catch {
-			//Bind value index to asset map
-		}
+		const argument = this.assertFieldIndex(args[0], AppParamDefinedIndex);
 		if (!AppParamDefined[interpreter.tealVersion].has(argument)) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD, {
 				field: args[0],

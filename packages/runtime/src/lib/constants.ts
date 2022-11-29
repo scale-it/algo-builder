@@ -169,77 +169,6 @@ TxnFields[7] = {
 };
 TxnFields[8] = cloneDeep(TxnFields[7]);
 
-export const TxnFieldsIndex = [
-	"Sender",
-	"Fee",
-	"FirstValid",
-	"FirstValidTime",
-	"LastValid",
-	"Note",
-	"Lease",
-	"Receiver",
-	"Amount",
-	"CloseRemainderTo",
-	"VotePK",
-	"SelectionPK",
-	"VoteFirst",
-	"VoteLast",
-	"VoteKeyDilution",
-	"Type",
-	"TypeEnum",
-	"XferAsset",
-	"AssetAmount",
-	"AssetSender",
-	"AssetReceiver",
-	"AssetCloseTo",
-	"GroupIndex",
-	"TxID",
-	"ApplicationID",
-	"OnCompletion",
-	"ApplicationArgs",
-	"NumAppArgs",
-	"Accounts",
-	"NumAccounts",
-	"ApprovalProgram",
-	"ClearStateProgram",
-	"RekeyTo",
-	"ConfigAsset",
-	"ConfigAssetTotal",
-	"ConfigAssetDecimals",
-	"ConfigAssetDefaultFrozen",
-	"ConfigAssetUnitName",
-	"ConfigAssetName",
-	"ConfigAssetURL",
-	"ConfigAssetMetadataHash",
-	"ConfigAssetManager",
-	"ConfigAssetReserve",
-	"ConfigAssetFreeze",
-	"ConfigAssetClawback",
-	"FreezeAsset",
-	"FreezeAssetAccount",
-	"FreezeAssetFrozen",
-	"Assets",
-	"NumAssets",
-	"Applications",
-	"NumApplications",
-	"GlobalNumUint",
-	"GlobalNumByteSlice",
-	"LocalNumUint",
-	"LocalNumByteSlice",
-	"ExtraProgramPages",
-	"Nonparticipation",
-	"Logs",
-	"NumLogs",
-	"CreatedAssetID",
-	"CreatedApplicationID",
-	"LastLog",
-	"StateProofPK",
-	"ApprovalProgramPages",
-	"NumApprovalProgramPages",
-	"ClearStateProgramPages",
-	"NumClearStateProgramPages",
-];
-
 export const ITxnFields: { [key: number]: { [key: string]: keyOfEncTx | null } } = {
 	1: {},
 	2: {},
@@ -378,20 +307,6 @@ AssetParamMap[6] = { ...AssetParamMap[5] };
 AssetParamMap[7] = { ...AssetParamMap[6] };
 AssetParamMap[8] = { ...AssetParamMap[7] };
 
-export const AssetParamMapIndex = [
-	"AssetTotal",
-	"AssetDecimals",
-	"AssetDefaultFrozen",
-	"AssetUnitName",
-	"AssetName",
-	"AssetURL",
-	"AssetMetadataHash",
-	"AssetManager",
-	"AssetReserve",
-	"AssetFreeze",
-	"AssetClawback",
-	"AssetCreator",
-];
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#asset_params_get-f
 export enum AssetParamGetField {
 	AssetTotal = "AssetTotal",
@@ -408,6 +323,21 @@ export enum AssetParamGetField {
 	AssetCreator = "AssetCreator",
 }
 
+export const AssetParamMapIndex = [
+	AssetParamGetField.AssetTotal,
+	AssetParamGetField.AssetDecimals,
+	AssetParamGetField.AssetDefaultFrozen,
+	AssetParamGetField.AssetUnitName,
+	AssetParamGetField.AssetName,
+	AssetParamGetField.AssetURL,
+	AssetParamGetField.AssetMetadataHash,
+	AssetParamGetField.AssetManager,
+	AssetParamGetField.AssetReserve,
+	AssetParamGetField.AssetFreeze,
+	AssetParamGetField.AssetClawback,
+	AssetParamGetField.AssetCreator,
+];
+
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum AppParamField {
 	AppApprovalProgram = "AppApprovalProgram",
@@ -420,6 +350,18 @@ export enum AppParamField {
 	AppCreator = "AppCreator",
 	AppAddress = "AppAddress",
 }
+
+export const AppParamDefinedIndex = [
+	AppParamField.AppApprovalProgram,
+	AppParamField.AppClearStateProgram,
+	AppParamField.AppGlobalNumUint,
+	AppParamField.AppGlobalNumByteSlice,
+	AppParamField.AppLocalNumUint,
+	AppParamField.AppLocalNumByteSlice,
+	AppParamField.AppExtraProgramPages,
+	AppParamField.AppCreator,
+	AppParamField.AppAddress,
+];
 
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum TxnRefFields {
@@ -490,18 +432,6 @@ export const AppParamDefined: { [key: number]: Set<string> } = {
 AppParamDefined[6] = cloneDeep(AppParamDefined[5]);
 AppParamDefined[7] = cloneDeep(AppParamDefined[6]);
 AppParamDefined[8] = cloneDeep(AppParamDefined[7]);
-
-export const AppParamDefinedIndex = [
-	"AppApprovalProgram",
-	"AppClearStateProgram",
-	"AppGlobalNumUint",
-	"AppGlobalNumByteSlice",
-	"AppLocalNumUint",
-	"AppLocalNumByteSlice",
-	"AppExtraProgramPages",
-	"AppCreator",
-	"AppAddress",
-];
 
 // param use for query acct_params_get opcode
 
@@ -604,24 +534,6 @@ GlobalFields[7] = {
 GlobalFields[8] = {
 	...GlobalFields[7],
 };
-
-export const GlobalFieldsIndex = [
-	"MinTxnFee",
-	"MinBalance",
-	"MaxTxnLife",
-	"ZeroAddress",
-	"GroupSize",
-	"LogicSigVersion",
-	"Round",
-	"LatestTimestamp",
-	"CurrentApplicationID",
-	"CreatorAddress",
-	"CurrentApplicationAddress",
-	"GroupID",
-	"OpcodeBudget",
-	"CallerApplicationID",
-	"CallerApplicationAddress",
-];
 
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: { [key: number]: { [key: string]: number } } = {
@@ -762,6 +674,24 @@ export enum GlobalField {
 	ZeroAddress = "ZeroAddress",
 }
 
+export const GlobalFieldsIndex = [
+	GlobalField.MinTxnFee,
+	GlobalField.MinBalance,
+	GlobalField.MaxTxnLife,
+	GlobalField.ZeroAddress,
+	GlobalField.GroupSize,
+	GlobalField.LogicSigVersion,
+	GlobalField.Round,
+	GlobalField.LatestTimestamp,
+	GlobalField.CurrentApplicationID,
+	GlobalField.CreatorAddress,
+	GlobalField.CurrentApplicationAddress,
+	GlobalField.GroupID,
+	GlobalField.OpcodeBudget,
+	GlobalField.CallerApplicationID,
+	GlobalField.CallerApplicationAddress,
+];
+
 export enum OpCodeField {
 	AcctBalance = "AcctBalance",
 	Amount = "Amount",
@@ -854,6 +784,77 @@ export enum TxFieldEnum {
 	VoteKeyDilution = "VoteKeyDilution",
 	XferAsset = "XferAsset",
 }
+
+export const TxnFieldsIndex = [
+	TxFieldEnum.Sender,
+	TxFieldEnum.Fee,
+	TxFieldEnum.FirstValid,
+	TxnRefFields.FirstValidTime,
+	TxFieldEnum.LastValid,
+	TxFieldEnum.Note,
+	TxFieldEnum.Lease,
+	TxFieldEnum.Receiver,
+	TxFieldEnum.Amount,
+	TxFieldEnum.CloseRemainderTo,
+	TxFieldEnum.VotePK,
+	TxFieldEnum.SelectionPK,
+	TxFieldEnum.VoteFirst,
+	TxFieldEnum.VoteLast,
+	TxFieldEnum.VoteKeyDilution,
+	TxFieldEnum.Type,
+	TxFieldEnum.TypeEnum,
+	TxFieldEnum.XferAsset,
+	TxFieldEnum.AssetAmount,
+	TxFieldEnum.AssetSender,
+	TxFieldEnum.AssetReceiver,
+	TxFieldEnum.AssetCloseTo,
+	TxnRefFields.GroupIndex,
+	TxnRefFields.TxID,
+	TxFieldEnum.ApplicationID,
+	TxnRefFields.OnCompletion,
+	TxnRefFields.ApplicationArgs,
+	TxnRefFields.NumAppArgs,
+	TxFieldEnum.Accounts,
+	TxnRefFields.NumAccounts,
+	TxFieldEnum.ApprovalProgram,
+	TxFieldEnum.ClearStateProgram,
+	TxFieldEnum.RekeyTo,
+	TxFieldEnum.ConfigAsset,
+	TxnRefFields.ConfigAssetTotal,
+	TxnRefFields.ConfigAssetDecimals,
+	TxnRefFields.ConfigAssetDefaultFrozen,
+	TxnRefFields.ConfigAssetUnitName,
+	TxnRefFields.ConfigAssetName,
+	TxnRefFields.ConfigAssetURL,
+	TxnRefFields.ConfigAssetMetadataHash,
+	TxnRefFields.ConfigAssetManager,
+	TxnRefFields.ConfigAssetReserve,
+	TxnRefFields.ConfigAssetFreeze,
+	TxnRefFields.ConfigAssetClawback,
+	TxFieldEnum.FreezeAsset,
+	TxnRefFields.FreezeAssetAccount,
+	TxnRefFields.FreezeAssetFrozen,
+	TxnaField.Assets,
+	TxnRefFields.NumAssets,
+	TxnaField.Applications,
+	TxnRefFields.NumApplications,
+	TxnRefFields.GlobalNumUint,
+	TxnRefFields.GlobalNumByteSlice,
+	TxnRefFields.LocalNumUint,
+	TxnRefFields.LocalNumByteSlice,
+	TxFieldEnum.ExtraProgramPages,
+	TxFieldEnum.Nonparticipation,
+	TxnaField.Logs,
+	TxnRefFields.NumLogs,
+	TxnRefFields.CreatedAssetID,
+	TxnRefFields.CreatedApplicationID,
+	TxFieldEnum.LastLog,
+	TxFieldEnum.StateProofPK,
+	TxnaField.ApprovalProgramPages,
+	TxnRefFields.NumApprovalProgramPages,
+	TxnaField.ClearStateProgramPages,
+	TxnRefFields.NumClearStateProgramPages,
+];
 
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#base64_decode-e
 export enum Base64Encoding {
