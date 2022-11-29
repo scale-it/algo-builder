@@ -672,7 +672,13 @@ Use 'deployer.isDefined(name)' to check if the name is already used.
 		message: "Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>'",
 		title: "Run file not found.",
 		description: "Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>'",
-	}
+	},
+	RUN_ARGUMENT_INVALID: {
+		number: 618,
+		message: "The JSON string passed is invalid.",
+		title: "Run argument is invalid.",
+		description: "The JSON string passed is invalid.",
+	},
 };
 
 export const pluginErrors = {

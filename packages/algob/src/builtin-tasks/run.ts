@@ -133,7 +133,7 @@ async function executeRunTask(
 	const logDebugTag = "algob:tasks:run";
 	let scriptName;
 	if (arg && !isValidJsonString(arg)) {
-		throw Error("The argument passed is not a valid JSON string.");
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_ARGUMENT_INVALID);
 	}
 	if (script && script.length) {
 		// get script from script array, first element should be script

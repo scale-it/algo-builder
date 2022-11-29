@@ -44,14 +44,14 @@ describe("Run task", function () {
 	it("Should run the script with empty arguments", async function () {
 		await this.env.run(TASK_RUN, {
 			script: ["./scripts/async-script.js"],
-			args: ""
+			arg: ""
 		});
 	});
 
 	it("Should run the script with arguments", async function () {
 		await this.env.run(TASK_RUN, {
 			script: ["./scripts/async-script.js"],
-			args: "arg1"
+			arg: "arg1"
 		});
 	});
 
@@ -78,10 +78,14 @@ describe("Run task", function () {
 	});
 
 	it("Should throw error when a valid JSON string is not passed as argument in the script", async function () {
-		assert.throws(async () => await this.env.run(TASK_RUN, {
-			script: ["./scripts/async-script.js"],
-			args: "{name: users-name}"
-		}))
+		await expectBuilderErrorAsync(
+			async () =>
+				await this.env.run(TASK_RUN, {
+					script: ["./scripts/async-script.js"],
+					arg: "{name: usersname}"
+				}),
+			ERRORS.BUILTIN_TASKS.RUN_ARGUMENT_INVALID
+		);
 	});
 
 	/* TODO:MM compile before running the task
