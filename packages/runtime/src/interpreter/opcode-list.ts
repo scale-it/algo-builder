@@ -41,6 +41,7 @@ import {
 	blockFieldTypes,
 	CurveTypeArgument,
 	CurveTypeEnum,
+	CurveTypeIndex,
 	GlobalField,
 	GlobalFields,
 	GlobalFieldsIndex,
@@ -3918,9 +3919,9 @@ export class EcdsaVerify extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		const argument = args[0];
-		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
-		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
 		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
@@ -3978,9 +3979,9 @@ export class EcdsaPkDecompress extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		const argument = args[0];
-		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
-		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
 		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
@@ -4030,9 +4031,9 @@ export class EcdsaPkRecover extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		const argument = args[0];
-		if (argument == "0" || argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
-		else if (argument == "1" || argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
 		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
