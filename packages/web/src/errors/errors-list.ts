@@ -671,7 +671,7 @@ Use 'deployer.isDefined(name)' to check if the name is already used.
 		number: 617,
 		message: `Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>' ,
 		title: "Run file not found.",
-		description: `Script not found. Please check the format: yarn algob run script.js --args arg1 arg2 arg3`,
+		description: `Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>' ,
 	}
 };
 
