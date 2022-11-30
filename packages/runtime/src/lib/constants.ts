@@ -879,7 +879,7 @@ export enum CurveTypeArgument {
 
 export const CurveTypeIndex = [CurveTypeArgument.secp256k1, CurveTypeArgument.secp256r1];
 
-export enum numIndex {
+export enum NumIndex {
 	index_0 = "0",
 	index_1 = "1",
 	index_2 = "2",

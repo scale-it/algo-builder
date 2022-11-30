@@ -56,7 +56,7 @@ import {
 	MAX_UINT64,
 	MAX_UINT128,
 	MaxTEALVersion,
-	numIndex,
+	NumIndex,
 	OpGasCost,
 	proofLength,
 	publicKeyLength,
@@ -2355,11 +2355,11 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
-			case numIndex.index_0:
+			case NumIndex.index_0:
 			case AssetHoldingField.AssetBalance:
 				value = BigInt(assetInfo.amount);
 				break;
-			case numIndex.index_1:
+			case NumIndex.index_1:
 			case AssetHoldingField.AssetFrozen:
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
@@ -5018,12 +5018,12 @@ export class Base64Decode extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
-			case numIndex.index_0:
+			case NumIndex.index_0:
 			case Base64Encoding.URLEncoding: {
 				this.encoding = "base64url";
 				break;
 			}
-			case numIndex.index_1:
+			case NumIndex.index_1:
 			case Base64Encoding.StdEncoding: {
 				this.encoding = "base64";
 				break;
@@ -5165,17 +5165,17 @@ export class Json_ref extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
-			case numIndex.index_0:
+			case NumIndex.index_0:
 			case json_refTypes.JSONString: {
 				this.jsonType = "byte";
 				break;
 			}
-			case numIndex.index_1:
+			case NumIndex.index_1:
 			case json_refTypes.JSONUint64: {
 				this.jsonType = "int";
 				break;
 			}
-			case numIndex.index_2:
+			case NumIndex.index_2:
 			case json_refTypes.JSONObject: {
 				this.jsonType = "object";
 				break;
@@ -5390,12 +5390,12 @@ export class VrfVerify extends Op {
 		super();
 		this.line = line;
 		switch (argument) {
-			case numIndex.index_0:
+			case NumIndex.index_0:
 			case vrfVerifyFieldTypes.VrfAlgorand: {
 				this.vrfType = argument;
 				break;
 			}
-			case numIndex.index_1:
+			case NumIndex.index_1:
 			case vrfVerifyFieldTypes.VrfStandard: {
 				this.vrfType = argument;
 				break;
