@@ -158,6 +158,22 @@ export class WallectConnectSession {
 	}
 
 	/**
+	 * @description Signs a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
+	 */
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
+			throw err
+		}
+	}
+
+	/**
 	 * Sign a group of transaction(s) from a wallect connect session
 	 * @param txns Array of [{  SDK transaction object, shouldSign, signers, msig }] object
 	 * @param message optional message with txn
@@ -282,11 +298,11 @@ export class WallectConnectSession {
 					return txn.sign === SignType.LogicSignature
 						? { txn: txns[index], shouldSign: false } // logic signature
 						: {
-								txn: txns[index],
-								shouldSign: true,
-								signers:
-									execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
-						  }; // to be signed
+							txn: txns[index],
+							shouldSign: true,
+							signers:
+								execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
+						}; // to be signed
 				}
 			);
 			// only shouldSign txn are to be signed
@@ -300,7 +316,7 @@ export class WallectConnectSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig).blob);
+					signedTxn.splice(index, 0, this.signLogicSigTx(txn, signer.lsig).blob);
 				}
 			}
 

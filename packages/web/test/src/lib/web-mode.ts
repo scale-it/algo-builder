@@ -1,19 +1,22 @@
-import algosdk, { Account, Transaction } from "algosdk";
+import algosdk, { Account, LogicSigAccount, Transaction } from "algosdk";
 import assert from "assert";
+import { expect } from "chai";
 
 import { types, WebMode } from "../../../src";
 import { AlgoSignerMock } from "../../mocks/algo-signer-mock";
-import { receiverAccount, senderAccount } from "../../mocks/tx";
+import { createLsigAccount, receiverAccount, senderAccount } from "../../mocks/tx";
 
 describe("Webmode - Algosigner test cases ", function () {
 	let webMode: WebMode;
 	let sender: Account;
 	let receiver: Account;
+	let lsigAccount: LogicSigAccount
 
-	this.beforeEach(function () {
+	this.beforeEach(async function () {
 		sender = senderAccount;
 		receiver = receiverAccount;
 		webMode = new WebMode(new AlgoSignerMock(), "Test");
+		lsigAccount = await createLsigAccount()
 	});
 
 	it("Should executeTx without throwing an error", function () {
@@ -29,6 +32,23 @@ describe("Webmode - Algosigner test cases ", function () {
 			await webMode.executeTx([txnParams]);
 		});
 	});
+
+	it("Should run executeTx function with a lsig transaction without throwing an error", async function () {
+		const txnParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.LogicSignature,
+			lsig: lsigAccount,
+			fromAccountAddr: lsigAccount.address(),
+			toAccountAddr: receiver.addr,
+			amountMicroAlgos: 1e6,
+			payFlags: {},
+		};
+
+		assert.doesNotThrow(async () => {
+			await webMode.executeTx([txnParams]);
+		});
+	});
+
 	describe("Helper functions", () => {
 		it("Should return a transaction object based on provided execParams", async function () {
 			const execParams: types.AlgoTransferParam = {
@@ -59,22 +79,31 @@ describe("Webmode - Algosigner test cases ", function () {
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			const transactions: Transaction[] = webMode.makeTx([execParams], txnParams);
 			assert.doesNotThrow(async () => {
-				await webMode.signTx(transactions[0]);
+				const signTx = await webMode.signTx(transactions[0]);
+				expect(signTx).to.have.ownProperty("txn");
+				expect(signTx).to.have.ownProperty("sig");
+				expect(signTx.sig).to.exist;
 			});
 		});
 
-		it("Should return a SignedTransaction object based on ExecParams", async function () {
+		it("Should sign a lsig transaction and return an object with blob and txID", async function () {
 			const execParams: types.AlgoTransferParam = {
 				type: types.TransactionType.TransferAlgo,
-				sign: types.SignType.SecretKey,
-				fromAccount: sender,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: lsigAccount.address(),
+				lsig: lsigAccount,
 				toAccountAddr: receiver.addr,
-				amountMicroAlgos: 10000n,
+				amountMicroAlgos: 1e6,
 				payFlags: {},
 			};
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
-			assert.doesNotThrow(async () => {
-				await webMode.makeAndSignTx([execParams], txnParams);
+			const transactions: Transaction[] = webMode.makeTx([execParams], txnParams);
+			assert.doesNotThrow(() => {
+				const signTx = webMode.signLogicSigTx(transactions[0], lsigAccount);
+				expect(signTx).to.have.ownProperty("blob");
+				expect(signTx).to.have.ownProperty("txID");
+				expect(signTx.blob).to.exist;
+				expect(signTx.txID).to.exist;
 			});
 		});
 	});

@@ -91,6 +91,40 @@ export class MyAlgoWalletSession {
 
 	/**
 	 * @async
+	 * @description Signs a teal program (https://algorand.github.io/js-algorand-sdk/modules.html#tealSign)
+	 * @param logic Teal program
+	 * @param address Signer Address
+	 * @returns Returns signed teal
+	 * for more info: https://connect.myalgo.com/docs/interactive-examples/TealSign
+	 * https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#delegated-approval
+	 */
+	async signLogic(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
+		try {
+			return await this.connector.signLogicSig(logic, address)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing teal program" + err);
+		}
+	}
+
+	/**
+	 * @description Takes a transaction and a LogicSig object and returns an encoded signed transaction.
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
+	 */
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
+			throw err
+		}
+	}
+
+	/**
+	 * @async
 	 * @description Connects to the MyAlgo Wallet by opening up its dialog box to login
 	 * @param allowMultipleAccounts allow selection of multiple accounts from MyAlgo Wallet, default is true
 	 * For Multisig you need to allow multiple accounts login
@@ -236,7 +270,7 @@ export class MyAlgoWalletSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig));
+					signedTxn.splice(index, 0, this.signLogicSigTx(txn, signer.lsig));
 				}
 			}
 

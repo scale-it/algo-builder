@@ -1,16 +1,18 @@
-import algosdk, { Account, Transaction } from "algosdk";
+import algosdk, { Account, LogicSigAccount, Transaction } from "algosdk";
 import assert from "assert";
+import { expect } from "chai";
 
 import { testnetURL, types, WallectConnectSession } from "../../../src";
 import { algoexplorerAlgod, getSuggestedParams } from "../../../src/lib/api";
 import { HttpNetworkConfig } from "../../../src/types";
-import { receiverAccount, senderAccount } from "../../mocks/tx";
+import { createLsigAccount, receiverAccount, senderAccount } from "../../mocks/tx";
 import { WalletConnectMock } from "../../mocks/walletconnect-mock";
 
 describe("Webmode - Wallet Connect test cases ", function () {
 	let connector: WallectConnectSession;
 	let sender: Account;
 	let receiver: Account;
+	let lsigAccount: LogicSigAccount
 	const walletURL: HttpNetworkConfig = {
 		token: "",
 		server: testnetURL,
@@ -66,9 +68,10 @@ describe("Webmode - Wallet Connect test cases ", function () {
 				},
 			})
 		);
+		lsigAccount = await createLsigAccount()
 	});
 
-	it("Should run executeTx function without throwing an error", async function () {
+	it("Should run executeTx function without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
 			sign: types.SignType.SecretKey,
@@ -77,6 +80,22 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			amountMicroAlgos: 1e6,
 			payFlags: {},
 		};
+		assert.doesNotThrow(async () => {
+			await connector.executeTx([txnParams]);
+		});
+	});
+
+	it("Should run executeTx function with a lsig transaction without throwing an error", function () {
+		const txnParams: types.AlgoTransferParam = {
+			type: types.TransactionType.TransferAlgo,
+			sign: types.SignType.LogicSignature,
+			lsig: lsigAccount,
+			fromAccountAddr: lsigAccount.address(),
+			toAccountAddr: receiver.addr,
+			amountMicroAlgos: 1e6,
+			payFlags: {},
+		};
+
 		assert.doesNotThrow(async () => {
 			await connector.executeTx([txnParams]);
 		});
@@ -113,7 +132,10 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			const txnParams = await getSuggestedParams(algodClient);
 			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
 			assert.doesNotThrow(async () => {
-				await connector.signTx(transactions[0]);
+				const signTx = await connector.signTx(transactions[0]);
+				expect(signTx).to.have.ownProperty("txn");
+				expect(signTx).to.have.ownProperty("sig");
+				expect(signTx.sig).to.exist;
 			});
 		});
 
@@ -128,7 +150,31 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			};
 			const txnParams = await getSuggestedParams(algodClient);
 			assert.doesNotThrow(async () => {
-				await connector.makeAndSignTx([execParams], txnParams);
+				const signTx = await connector.makeAndSignTx([execParams], txnParams);
+				expect(signTx[0]).to.have.ownProperty("txn");
+				expect(signTx[0]).to.have.ownProperty("sig");
+				expect(signTx[0].sig).to.exist;
+			});
+		});
+
+		it("Should sign a lsig transaction and return an object with blob and txID", async function () {
+			const execParams: types.AlgoTransferParam = {
+				type: types.TransactionType.TransferAlgo,
+				sign: types.SignType.LogicSignature,
+				fromAccountAddr: lsigAccount.address(),
+				lsig: lsigAccount,
+				toAccountAddr: receiver.addr,
+				amountMicroAlgos: 1e6,
+				payFlags: {},
+			};
+			const txnParams = await getSuggestedParams(algodClient);
+			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
+			assert.doesNotThrow(() => {
+				const signTx = connector.signLogicSigTx(transactions[0], lsigAccount);
+				expect(signTx).to.have.ownProperty("blob");
+				expect(signTx).to.have.ownProperty("txID");
+				expect(signTx.blob).to.exist;
+				expect(signTx.txID).to.exist;
 			});
 		});
 	});

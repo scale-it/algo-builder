@@ -95,16 +95,14 @@ export class AlgoSignerMock implements AlgoSigner {
 
 	signTxn(transactions: WalletTransaction[], error?: RequestErrors): Promise<JsonPayload> {
 		return new Promise((resolve, reject) => {
-			return new Promise((resolve, reject) => {
-				const signedTransaction = [];
-				for (const txn of transactions) {
-					const decodedtransaction = decodeUnsignedTransaction(
-						this.encoding.base64ToMsgpack(txn.txn)
-					);
-					signedTransaction.push(algosdk.signTransaction(decodedtransaction, senderAccount.sk));
-				}
-				return resolve(signedTransaction);
-			});
+			const signedTransaction = [];
+			for (const txn of transactions) {
+				const decodedtransaction = decodeUnsignedTransaction(
+					this.encoding.base64ToMsgpack(txn.txn)
+				);
+				signedTransaction.push(algosdk.signTransaction(decodedtransaction, senderAccount.sk));
+			}
+			return resolve(signedTransaction as unknown as JsonPayload);
 		});
 	}
 

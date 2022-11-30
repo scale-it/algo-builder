@@ -235,6 +235,22 @@ export class WebMode {
 	}
 
 	/**
+	 * @description Sign a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
+	 */
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
+			throw err
+		}
+	}
+
+	/**
 	 * Execute single transaction or group of transactions (atomic transaction)
 	 * Check out {@link https://algobuilder.dev/guide/execute-transaction.html#execute-transaction|execute-transaction}
 	 * for more info.
@@ -298,7 +314,7 @@ export class WebMode {
 				const signer: Sign = execParams[index];
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
-					const lsigTxn = algosdk.signLogicSigTransaction(txn, signer.lsig);
+					const lsigTxn = this.signLogicSigTx(txn, signer.lsig)
 					if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
 					signedTxn.splice(index, 0, {
 						blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),
