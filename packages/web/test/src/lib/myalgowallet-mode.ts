@@ -42,7 +42,6 @@ describe("Webmode - MyAlgo Wallet test cases ", () => {
 		});
 	});
 
-
 	it("Should run executeTx function with a lsig transaction without throwing an error", function () {
 		const txnParams: types.AlgoTransferParam = {
 			type: types.TransactionType.TransferAlgo,
