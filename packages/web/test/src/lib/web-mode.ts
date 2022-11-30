@@ -99,7 +99,7 @@ describe("Webmode - Algosigner test cases ", function () {
 			const txnParams = await webMode.getSuggestedParams(execParams.payFlags);
 			const transactions: Transaction[] = webMode.makeTx([execParams], txnParams);
 			assert.doesNotThrow(() => {
-				const signTx = webMode.signLogicSignatureTxn(transactions[0], lsigAccount);
+				const signTx = webMode.signLogicSigTx(transactions[0], lsigAccount);
 				expect(signTx).to.have.ownProperty("blob");
 				expect(signTx).to.have.ownProperty("txID");
 				expect(signTx.blob).to.exist;

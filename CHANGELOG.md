@@ -41,8 +41,8 @@ Web:
 - Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Add `tx.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
-- `signLogicSignatureTxn` is added to all three wallet class of `web` package to sign transaction using logic signature.
-- `signLogicSignature` is added to `MyAlgo Wallet` class where tealSign creates a signature compatible with ed25519verify opcode from contract address
+- `signLogicSigTx` is added to all three wallet class of `web` package to sign transaction using logic signature.
+- `signLogic` is added to `MyAlgo Wallet` class where tealSign creates a signature compatible with ed25519verify opcode from contract address
 
 CI:
 

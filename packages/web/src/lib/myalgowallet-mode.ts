@@ -96,8 +96,9 @@ export class MyAlgoWalletSession {
 	 * @param address Signer Address
 	 * @returns Returns signed teal
 	 * for more info: https://connect.myalgo.com/docs/interactive-examples/TealSign
+	 * https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#delegated-approval
 	 */
-	async signLogicSignature(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
+	async signLogic(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
 		try {
 			return await this.connector.signLogicSig(logic, address)
 		} catch (err) {
@@ -111,13 +112,14 @@ export class MyAlgoWalletSession {
 	 * @param transaction algosdk.Transaction object
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
 	 */
-	signLogicSignatureTxn(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
 		try {
 			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
 			error(err);
-			throw new Error("Error while signing Lsig Transaction" + err);
+			throw err
 		}
 	}
 
@@ -268,7 +270,7 @@ export class MyAlgoWalletSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, this.signLogicSignatureTxn(txn, signer.lsig));
+					signedTxn.splice(index, 0, this.signLogicSigTx(txn, signer.lsig));
 				}
 			}
 

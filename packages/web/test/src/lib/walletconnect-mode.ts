@@ -170,7 +170,7 @@ describe("Webmode - Wallet Connect test cases ", function () {
 			const txnParams = await getSuggestedParams(algodClient);
 			const transactions: Transaction[] = connector.makeTx([execParams], txnParams);
 			assert.doesNotThrow(() => {
-				const signTx = connector.signLogicSignatureTxn(transactions[0], lsigAccount);
+				const signTx = connector.signLogicSigTx(transactions[0], lsigAccount);
 				expect(signTx).to.have.ownProperty("blob");
 				expect(signTx).to.have.ownProperty("txID");
 				expect(signTx.blob).to.exist;
