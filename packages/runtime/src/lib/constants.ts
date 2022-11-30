@@ -323,6 +323,21 @@ export enum AssetParamGetField {
 	AssetCreator = "AssetCreator",
 }
 
+export const AssetParamMapIndex = [
+	AssetParamGetField.AssetTotal,
+	AssetParamGetField.AssetDecimals,
+	AssetParamGetField.AssetDefaultFrozen,
+	AssetParamGetField.AssetUnitName,
+	AssetParamGetField.AssetName,
+	AssetParamGetField.AssetURL,
+	AssetParamGetField.AssetMetadataHash,
+	AssetParamGetField.AssetManager,
+	AssetParamGetField.AssetReserve,
+	AssetParamGetField.AssetFreeze,
+	AssetParamGetField.AssetClawback,
+	AssetParamGetField.AssetCreator,
+];
+
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum AppParamField {
 	AppApprovalProgram = "AppApprovalProgram",
@@ -335,6 +350,18 @@ export enum AppParamField {
 	AppCreator = "AppCreator",
 	AppAddress = "AppAddress",
 }
+
+export const AppParamDefinedIndex = [
+	AppParamField.AppApprovalProgram,
+	AppParamField.AppClearStateProgram,
+	AppParamField.AppGlobalNumUint,
+	AppParamField.AppGlobalNumByteSlice,
+	AppParamField.AppLocalNumUint,
+	AppParamField.AppLocalNumByteSlice,
+	AppParamField.AppExtraProgramPages,
+	AppParamField.AppCreator,
+	AppParamField.AppAddress,
+];
 
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#app_params_get-f
 export enum TxnRefFields {
@@ -380,7 +407,7 @@ export enum TxnaField {
 	ApplicationArgs = "ApplicationArgs",
 	Assets = "Assets",
 	ClearStateProgramPages = "ClearStateProgramPages",
-	Logs = "Logs"
+	Logs = "Logs",
 }
 
 // app param use for app_params_get opcode
@@ -413,6 +440,7 @@ export const AcctParamQueryFields: { [key: string]: { version: number } } = {
 	AcctMinBalance: { version: 6 },
 	AcctAuthAddr: { version: 6 },
 };
+
 export const reDigit = /^\d+$/;
 export const reDec = /^(0|[1-9]\d*)$/;
 export const reHex = /^0x[0-9a-fA-F]+$/;
@@ -619,6 +647,8 @@ export enum blockFieldTypes {
 	BlkSeed = "BlkSeed",
 }
 
+export const blockFieldIndex = [blockFieldTypes.BlkSeed, blockFieldTypes.BlkTimestamp];
+
 export enum vrfVerifyFieldTypes {
 	VrfAlgorand = "VrfAlgorand",
 	VrfStandard = "VrfStandard",
@@ -643,6 +673,24 @@ export enum GlobalField {
 	ZeroAddress = "ZeroAddress",
 }
 
+export const GlobalFieldsIndex = [
+	GlobalField.MinTxnFee,
+	GlobalField.MinBalance,
+	GlobalField.MaxTxnLife,
+	GlobalField.ZeroAddress,
+	GlobalField.GroupSize,
+	GlobalField.LogicSigVersion,
+	GlobalField.Round,
+	GlobalField.LatestTimestamp,
+	GlobalField.CurrentApplicationID,
+	GlobalField.CreatorAddress,
+	GlobalField.CurrentApplicationAddress,
+	GlobalField.GroupID,
+	GlobalField.OpcodeBudget,
+	GlobalField.CallerApplicationID,
+	GlobalField.CallerApplicationAddress,
+];
+
 export enum OpCodeField {
 	AcctBalance = "AcctBalance",
 	Amount = "Amount",
@@ -660,7 +708,7 @@ export enum OpCodeField {
 
 export enum AssetHoldingField {
 	AssetBalance = "AssetBalance",
-	AssetFrozen = "AssetFrozen"
+	AssetFrozen = "AssetFrozen",
 }
 
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#acct_params_get-f
@@ -669,6 +717,12 @@ export enum AccountParamGetField {
 	AcctBalance = "AcctBalance",
 	AcctMinBalance = "AcctMinBalance",
 }
+
+export const AcctParamQueryFieldsIndex = [
+	AccountParamGetField.AcctBalance,
+	AccountParamGetField.AcctMinBalance,
+	AccountParamGetField.AcctAuthAddr,
+];
 
 // https://developer.algorand.org/docs/get-details/transactions/transactions/#common-fields-header-and-type
 export enum TxFieldEnum {
@@ -736,6 +790,77 @@ export enum TxFieldEnum {
 	XferAsset = "XferAsset",
 }
 
+export const TxnFieldsIndex = [
+	TxFieldEnum.Sender,
+	TxFieldEnum.Fee,
+	TxFieldEnum.FirstValid,
+	TxnRefFields.FirstValidTime,
+	TxFieldEnum.LastValid,
+	TxFieldEnum.Note,
+	TxFieldEnum.Lease,
+	TxFieldEnum.Receiver,
+	TxFieldEnum.Amount,
+	TxFieldEnum.CloseRemainderTo,
+	TxFieldEnum.VotePK,
+	TxFieldEnum.SelectionPK,
+	TxFieldEnum.VoteFirst,
+	TxFieldEnum.VoteLast,
+	TxFieldEnum.VoteKeyDilution,
+	TxFieldEnum.Type,
+	TxFieldEnum.TypeEnum,
+	TxFieldEnum.XferAsset,
+	TxFieldEnum.AssetAmount,
+	TxFieldEnum.AssetSender,
+	TxFieldEnum.AssetReceiver,
+	TxFieldEnum.AssetCloseTo,
+	TxnRefFields.GroupIndex,
+	TxnRefFields.TxID,
+	TxFieldEnum.ApplicationID,
+	TxnRefFields.OnCompletion,
+	TxnRefFields.ApplicationArgs,
+	TxnRefFields.NumAppArgs,
+	TxFieldEnum.Accounts,
+	TxnRefFields.NumAccounts,
+	TxFieldEnum.ApprovalProgram,
+	TxFieldEnum.ClearStateProgram,
+	TxFieldEnum.RekeyTo,
+	TxFieldEnum.ConfigAsset,
+	TxnRefFields.ConfigAssetTotal,
+	TxnRefFields.ConfigAssetDecimals,
+	TxnRefFields.ConfigAssetDefaultFrozen,
+	TxnRefFields.ConfigAssetUnitName,
+	TxnRefFields.ConfigAssetName,
+	TxnRefFields.ConfigAssetURL,
+	TxnRefFields.ConfigAssetMetadataHash,
+	TxnRefFields.ConfigAssetManager,
+	TxnRefFields.ConfigAssetReserve,
+	TxnRefFields.ConfigAssetFreeze,
+	TxnRefFields.ConfigAssetClawback,
+	TxFieldEnum.FreezeAsset,
+	TxnRefFields.FreezeAssetAccount,
+	TxnRefFields.FreezeAssetFrozen,
+	TxnaField.Assets,
+	TxnRefFields.NumAssets,
+	TxnaField.Applications,
+	TxnRefFields.NumApplications,
+	TxnRefFields.GlobalNumUint,
+	TxnRefFields.GlobalNumByteSlice,
+	TxnRefFields.LocalNumUint,
+	TxnRefFields.LocalNumByteSlice,
+	TxFieldEnum.ExtraProgramPages,
+	TxFieldEnum.Nonparticipation,
+	TxnaField.Logs,
+	TxnRefFields.NumLogs,
+	TxnRefFields.CreatedAssetID,
+	TxnRefFields.CreatedApplicationID,
+	TxFieldEnum.LastLog,
+	TxFieldEnum.StateProofPK,
+	TxnaField.ApprovalProgramPages,
+	TxnRefFields.NumApprovalProgramPages,
+	TxnaField.ClearStateProgramPages,
+	TxnRefFields.NumClearStateProgramPages,
+];
+
 // https://developer.algorand.org/docs/get-details/dapps/avm/teal/opcodes/?from_query=opcode#base64_decode-e
 export enum Base64Encoding {
 	StdEncoding = "StdEncoding",
@@ -745,6 +870,19 @@ export enum Base64Encoding {
 export enum CurveTypeEnum {
 	secp256k1 = "secp256k1",
 	secp256r1 = "p256", // alias used in the library for secp256r1
+}
+
+export enum CurveTypeArgument {
+	secp256k1 = "Secp256k1",
+	secp256r1 = "Secp256r1",
+}
+
+export const CurveTypeIndex = [CurveTypeArgument.secp256k1, CurveTypeArgument.secp256r1];
+
+export enum NumIndex {
+	index_0 = "0",
+	index_1 = "1",
+	index_2 = "2",
 }
 
 export const JS_CONFIG_FILENAME = "algob.config.js";

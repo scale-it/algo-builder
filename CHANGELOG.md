@@ -34,6 +34,7 @@ Runtime:
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
 - Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Allow user to query foreign applications accounts using the `appID` field.
+- `Runtime` now supports both string and index argument opcode
 
 Web:
 

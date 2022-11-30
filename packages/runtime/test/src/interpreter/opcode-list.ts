@@ -168,27 +168,27 @@ import {
 	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
-	AssetHoldingField,
+	AccountParamGetField,
 	ALGORAND_ACCOUNT_MIN_BALANCE,
+	AppParamField,
 	ASSET_CREATION_FEE,
+	AssetHoldingField,
+	AssetParamGetField,
 	Base64Encoding,
 	blockFieldTypes,
 	CurveTypeEnum,
 	DEFAULT_STACK_ELEM,
+	GlobalField,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
 	seedLength,
 	TxFieldEnum,
+	TxnaField,
 	TxnRefFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	TxnaField,
-	GlobalField,
-	AssetParamGetField,
-	AppParamField,
-	AccountParamGetField
 } from "../../../src/lib/constants";
 import {
 	bigEndianBytesToBigInt,
@@ -3996,7 +3996,6 @@ describe("Teal Opcodes", function () {
 
 		it("should push correct Asset Decimals", function () {
 			const op = new GetAssetDef([AssetParamGetField.AssetDecimals], 1, interpreter);
-
 			stack.push(0n); // asset index
 
 			op.execute(stack);
@@ -6188,7 +6187,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
 
-			let op = new EcdsaPkRecover(["0"], 1);
+			const op = new EcdsaPkRecover(["0"], 1);
 			op.execute(stack);
 
 			assert.deepEqual(stack.pop(), pkY);
@@ -6198,9 +6197,11 @@ describe("Teal Opcodes", function () {
 			stack.push(2n);
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
-			op = new EcdsaPkRecover(["2"], 1);
 
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkRecover(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("Should calculate correct cost", function () {

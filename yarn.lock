@@ -45,7 +45,7 @@ __metadata:
     sinon: ^14.0.1
     source-map-support: ^0.5.21
     tmp: ^0.2.1
-    ts-mocha: ^9.0.2
+    ts-mocha: ^10.0.0
     ts-node: ^10.9.1
     typedoc: ^0.23.19
     typescript: 4.7.4
@@ -1383,9 +1383,9 @@ __metadata:
   linkType: hard
 
 "ansi-regex@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "ansi-regex@npm:4.1.0"
-  checksum: 97aa4659538d53e5e441f5ef2949a3cffcb838e57aeaad42c4194e9d7ddb37246a6526c4ca85d3940a9d1e19b11cc2e114530b54c9d700c8baf163c31779baf8
+  version: 4.1.1
+  resolution: "ansi-regex@npm:4.1.1"
+  checksum: b1a6ee44cb6ecdabaa770b2ed500542714d4395d71c7e5c25baa631f680fb2ad322eb9ba697548d498a6fd366949fc8b5bfcf48d49a32803611f648005b01888
   languageName: node
   linkType: hard
 
@@ -4805,9 +4805,9 @@ __metadata:
   linkType: hard
 
 "minimist@npm:^1.2.0, minimist@npm:^1.2.5":
-  version: 1.2.5
-  resolution: "minimist@npm:1.2.5"
-  checksum: 86706ce5b36c16bfc35c5fe3dbb01d5acdc9a22f2b6cc810b6680656a1d2c0e44a0159c9a3ba51fb072bb5c203e49e10b51dcd0eec39c481f4c42086719bae52
+  version: 1.2.7
+  resolution: "minimist@npm:1.2.7"
+  checksum: 7346574a1038ca23c32e02252f603801f09384dd1d78b69a943a4e8c2c28730b80e96193882d3d3b22a063445f460e48316b29b8a25addca2d7e5e8f75478bec
   languageName: node
   linkType: hard
 
@@ -6573,20 +6573,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-mocha@npm:^9.0.2":
-  version: 9.0.2
-  resolution: "ts-mocha@npm:9.0.2"
+"ts-mocha@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "ts-mocha@npm:10.0.0"
   dependencies:
     ts-node: 7.0.1
     tsconfig-paths: ^3.5.0
   peerDependencies:
-    mocha: ^3.X.X || ^4.X.X || ^5.X.X || ^6.X.X || ^7.X.X || ^8.X.X || ^9.X.X
+    mocha: ^3.X.X || ^4.X.X || ^5.X.X || ^6.X.X || ^7.X.X || ^8.X.X || ^9.X.X || ^10.X.X
   dependenciesMeta:
     tsconfig-paths:
       optional: true
   bin:
     ts-mocha: bin/ts-mocha
-  checksum: 142a7fc2b7be156e2933b31ec0577d092789d4c55e5be0e42c038b92644983e970fdc3fd7b2fb12b007288e2be749d5897c064ecf7c48cb021f38401f5a95a67
+  checksum: b11f2a8ceecf195b0db724da429159982fef12e4357088fe900289223587217e8c126ead7929679edd58bf19ad96c5da5911535d26f535386632e18fbff10c40
   languageName: node
   linkType: hard
 

@@ -307,9 +307,9 @@ maximun uint128`,
 	},
 	CURVE_NOT_SUPPORTED: {
 		number: 1045,
-		message: "Curve index: %index% is not supported. [error-line: %line%]",
+		message: "Curve %curve% is not supported. [error-line: %line%]",
 		title: "curve not supported",
-		description: `curve index is not supported.`,
+		description: `curve is not supported.`,
 	},
 	ITXN_BEGIN_WITHOUT_ITXN_SUBMIT: {
 		number: 1046,
