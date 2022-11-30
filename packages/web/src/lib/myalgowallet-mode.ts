@@ -107,7 +107,7 @@ export class MyAlgoWalletSession {
 	}
 
 	/**
-	 * @description Signs a Logic Signature transaction
+	 * @description Takes a transaction and a LogicSig object and returns an encoded signed transaction.
 	 * @param transaction algosdk.Transaction object
 	 * @param logicSig Logic Sig Account
 	 * @returns Returns txID and blob object
