@@ -20,25 +20,37 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, /example Updates
 
 ### Features
 
-- Allow user to query foreign applications accounts using the `appID` field.
-- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
-- Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
-- Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
+Algob:
+
 - Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
-- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
-- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
 - Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
+
+Runtime:
+
 - Add `TxFieldEnum` for transaction fields in `runtime`.
 - Add enums for opcode fields in `runtime`.
-- Add reusable workflow in GitHub action.
 - Add one batch for each package in GitHub action which uses reusable workflow.
 - Add guide about blocks in `Runtime`.
+- Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
+- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
+- Allow user to query foreign applications accounts using the `appID` field.
 - `Runtime` now supports both string and index argument opcode
+
+Web:
+
+- Add `mainnetGenesisHash`, `testnetGenesisHash`, `betanetGenesisHash`, `runtimeGenesisHash` constants.
+- Added `allowMultipleAccounts` parameter to `connectToMyAlgo` method of `WebMode` to give user the flexibility to allow multi accounts login using MyAlgo Wallet.
+- Add `tx.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
+- Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
+
+CI:
+
+- Add reusable workflow in GitHub action.
 
 ### Breaking Changes
 
 - The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` is renamed to `signMsigTransaction` and expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
+- `appendSignMultisigTransaction` is renamed to `signMsigTx` which expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 #### TEALv8
 
