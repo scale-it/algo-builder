@@ -879,6 +879,12 @@ export enum CurveTypeArgument {
 
 export const CurveTypeIndex = [CurveTypeArgument.secp256k1, CurveTypeArgument.secp256r1];
 
+export enum numIndex {
+	index_0 = "0",
+	index_1 = "1",
+	index_2 = "2",
+}
+
 export const JS_CONFIG_FILENAME = "algob.config.js";
 export const TS_CONFIG_FILENAME = "algob.config.ts";
 export const NETWORK_DEFAULT = "default";
