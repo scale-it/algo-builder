@@ -233,3 +233,7 @@ jobs:
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/run/create-fund-app.js
+      - name: Script Argument Example
+        working-directory: ./examples/script-argument-example
+        run: |
+          pipenv run yarn algob run scripts/script.js --arg '{"name":"this was passed as agrument"}'
