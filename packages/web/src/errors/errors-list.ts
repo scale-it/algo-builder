@@ -675,7 +675,7 @@ Use 'deployer.isDefined(name)' to check if the name is already used.
 	},
 	RUN_ARGUMENT_INVALID: {
 		number: 618,
-		message: "The JSON string passed is invalid.",
+		message: "The JSON string passed %jsonString% is invalid.",
 		title: "Run argument is invalid.",
 		description: "The JSON string passed is invalid.",
 	},
