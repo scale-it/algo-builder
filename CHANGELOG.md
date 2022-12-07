@@ -63,6 +63,10 @@ Guide:
 
 - Added tutorials about lsig and msig management with Algo Builder.
 
+Others:
+
+- Update `yarn` to `v3.3.0`
+
 ### Breaking Changes
 
 - The method `Runtime.produceBlock` has been renamed to `Runtime.produceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
