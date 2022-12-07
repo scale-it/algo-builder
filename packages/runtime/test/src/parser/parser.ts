@@ -3,6 +3,7 @@ import { assert } from "chai";
 import { getProgram } from "../../../src";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
+import { Op } from "../../../src/interpreter/opcode";
 import {
 	AcctParamsGet,
 	Add,
@@ -118,23 +119,35 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Uncover,
 } from "../../../src/interpreter/opcode-list";
 import {
 	AcctParamQueryFields,
+	AccountParamGetField,
 	AppParamDefined,
+	AppParamField,
+	AssetParamGetField,
+	AssetHoldingField,
+	LogicSigMaxSize,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT64,
-	LogicSigMaxSize
+	TxFieldEnum,
+	Base64Encoding,
+	TxnRefFields,
+	TxnaField,
+	GlobalField
 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
 import { useFixture } from "../../helpers/integration";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
+
+const tealTestArg = "test-arg.teal";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -314,7 +327,7 @@ describe("Parser", function () {
 			assert.deepEqual(res, expected);
 
 			res = wordsFromLine("         txn             LastValid       // comment here");
-			expected = ["txn", "LastValid"];
+			expected = ["txn", TxFieldEnum.LastValid];
 
 			assert.deepEqual(res, expected);
 
@@ -584,31 +597,31 @@ describe("Parser", function () {
 		});
 
 		it("should return correct objects for `txn`", function () {
-			let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE);
-			let expected = new Txn(["Fee"], 1, interpreter);
+			let res = opcodeFromSentence(["txn", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE);
+			let expected = new Txn([TxFieldEnum.Fee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txn", "Accounts", "1"],
+				["txn", TxnaField.Accounts, "1"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txn(["Accounts", "1"], 1, interpreter);
+			expected = new Txn([TxnaField.Accounts, "1"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txn", "ApplicationArgs", "0"],
+				["txn", TxnaField.ApplicationArgs, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
+			expected = new Txn([TxnaField.ApplicationArgs, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
-					opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+					opcodeFromSentence(["txn", TxFieldEnum.Fee, TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
 			);
 
@@ -620,21 +633,21 @@ describe("Parser", function () {
 
 		it("should return correct object for `gtxn`", function () {
 			let res = opcodeFromSentence(
-				["gtxn", "0", "Fee"],
+				["gtxn", "0", TxFieldEnum.Fee],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Gtxn(["0", "Fee"], 1, interpreter);
+			let expected = new Gtxn(["0", TxFieldEnum.Fee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["gtxn", "0", "ApplicationArgs", "0"],
+				["gtxn", "0", TxnaField.ApplicationArgs, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Gtxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+			expected = new Gtxn(["0", TxnaField.ApplicationArgs, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
@@ -644,32 +657,32 @@ describe("Parser", function () {
 
 			expectRuntimeError(
 				() =>
-					opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter, ExecutionMode.SIGNATURE),
+					opcodeFromSentence(["gtxn", "1AA", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			);
 		});
 
 		it("should return correct object for `txna`", function () {
 			let res = opcodeFromSentence(
-				["txna", "Accounts", "0"],
+				["txna", TxnaField.Accounts, "0"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Txna(["Accounts", "0"], 1, interpreter);
+			let expected = new Txna([TxnaField.Accounts, "0"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["txna", "ApplicationArgs", "2"],
+				["txna", TxnaField.ApplicationArgs, "2"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Txna(["ApplicationArgs", "2"], 1, interpreter);
+			expected = new Txna([TxnaField.ApplicationArgs, "2"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txna", TxFieldEnum.Fee, "2"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 			);
 
@@ -679,34 +692,34 @@ describe("Parser", function () {
 			);
 
 			expectRuntimeError(
-				() => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter, ExecutionMode.SIGNATURE),
+				() => opcodeFromSentence(["txna", TxFieldEnum.Fee, "A"], 1, interpreter, ExecutionMode.SIGNATURE),
 				RUNTIME_ERRORS.TEAL.INVALID_TYPE
 			);
 		});
 
 		it("should return correct object for `gtxna`", function () {
 			let res = opcodeFromSentence(
-				["gtxna", "1", "Accounts", "1"],
+				["gtxna", "1", TxnaField.Accounts, "1"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
+			let expected = new Gtxna(["1", TxnaField.Accounts, "1"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["gtxna", "1", "ApplicationArgs", "4"],
+				["gtxna", "1", TxnaField.ApplicationArgs, "4"],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Gtxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+			expected = new Gtxna(["1", TxnaField.ApplicationArgs, "4"], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["gtxna", "1", "Fee", "4"],
+						["gtxna", "1", TxFieldEnum.Fee, "4"],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -728,7 +741,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["gtxna", "1AB", "Fee", "4"],
+						["gtxna", "1AB", TxFieldEnum.Fee, "4"],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -739,98 +752,98 @@ describe("Parser", function () {
 
 		it("should return correct objects for `global`", function () {
 			let res = opcodeFromSentence(
-				["global", "MinTxnFee"],
+				["global", GlobalField.MinTxnFee],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			let expected = new Global(["MinTxnFee"], 1, interpreter);
+			let expected = new Global([GlobalField.MinTxnFee], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "MinBalance"],
+				["global", GlobalField.MinBalance],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["MinBalance"], 1, interpreter);
+			expected = new Global([GlobalField.MinBalance], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "MaxTxnLife"],
+				["global", GlobalField.MaxTxnLife],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["MaxTxnLife"], 1, interpreter);
+			expected = new Global([GlobalField.MaxTxnLife], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "ZeroAddress"],
+				["global", GlobalField.ZeroAddress],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["ZeroAddress"], 1, interpreter);
+			expected = new Global([GlobalField.ZeroAddress], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "GroupSize"],
+				["global", GlobalField.GroupSize],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["GroupSize"], 1, interpreter);
+			expected = new Global([GlobalField.GroupSize], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "LogicSigVersion"],
+				["global", GlobalField.LogicSigVersion],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["LogicSigVersion"], 1, interpreter);
+			expected = new Global([GlobalField.LogicSigVersion], 1, interpreter);
 			assert.deepEqual(res, expected);
 
-			res = opcodeFromSentence(["global", "Round"], 1, interpreter, ExecutionMode.SIGNATURE);
-			expected = new Global(["Round"], 1, interpreter);
+			res = opcodeFromSentence(["global", GlobalField.Round], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global([GlobalField.Round], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "LatestTimestamp"],
+				["global", GlobalField.LatestTimestamp],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["LatestTimestamp"], 1, interpreter);
+			expected = new Global([GlobalField.LatestTimestamp], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "CurrentApplicationID"],
+				["global", GlobalField.CurrentApplicationID],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["CurrentApplicationID"], 1, interpreter);
+			expected = new Global([GlobalField.CurrentApplicationID], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			res = opcodeFromSentence(
-				["global", "CreatorAddress"],
+				["global", GlobalField.CreatorAddress],
 				1,
 				interpreter,
 				ExecutionMode.SIGNATURE
 			);
-			expected = new Global(["CreatorAddress"], 1, interpreter);
+			expected = new Global([GlobalField.CreatorAddress], 1, interpreter);
 			assert.deepEqual(res, expected);
 
-			res = opcodeFromSentence(["global", "GroupID"], 1, interpreter, ExecutionMode.SIGNATURE);
-			expected = new Global(["GroupID"], 1, interpreter);
+			res = opcodeFromSentence(["global", GlobalField.GroupID], 1, interpreter, ExecutionMode.SIGNATURE);
+			expected = new Global([GlobalField.GroupID], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["global", "MinTxnFee", "MinTxnFee"],
+						["global", GlobalField.MinTxnFee, GlobalField.MinTxnFee],
 						1,
 						interpreter,
 						ExecutionMode.SIGNATURE
@@ -868,18 +881,18 @@ describe("Parser", function () {
 			);
 
 			res = opcodeFromSentence(
-				["asset_holding_get", "AssetBalance"],
+				["asset_holding_get", AssetHoldingField.AssetBalance],
 				1,
 				interpreter,
 				ExecutionMode.APPLICATION
 			);
-			expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			expected = new GetAssetHolding([AssetHoldingField.AssetBalance], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_holding_get", "AssetBalance", "AssetFrozen"],
+						["asset_holding_get", AssetHoldingField.AssetBalance, AssetHoldingField.AssetFrozen],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -888,18 +901,18 @@ describe("Parser", function () {
 			);
 
 			res = opcodeFromSentence(
-				["asset_params_get", "AssetTotal"],
+				["asset_params_get", AssetParamGetField.AssetTotal],
 				1,
 				interpreter,
 				ExecutionMode.APPLICATION
 			);
-			expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
+			expected = new GetAssetDef([AssetParamGetField.AssetTotal], 1, interpreter);
 			assert.deepEqual(res, expected);
 
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetTotal", "123"],
+						["asset_params_get", AssetParamGetField.AssetTotal, "123"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -910,7 +923,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetCreator", "123"],
+						["asset_params_get", AssetParamGetField.AssetCreator, "123"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -924,7 +937,7 @@ describe("Parser", function () {
 			expectRuntimeError(
 				() =>
 					opcodeFromSentence(
-						["asset_params_get", "AssetCreator"],
+						["asset_params_get", AssetParamGetField.AssetCreator],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
@@ -1169,18 +1182,18 @@ describe("Parser", function () {
 
 			it("txn fields", function () {
 				let res = opcodeFromSentence(
-					["txn", "Assets", "1"],
+					["txn", TxnaField.Assets, "1"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				let expected = new Txn(["Assets", "1"], 1, interpreter);
+				let expected = new Txn([TxnaField.Assets, "1"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Assets", "0", "1"],
+							["txn", TxnaField.Assets, "0", "1"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1191,7 +1204,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Assets", "random-string"],
+							["txn", TxnaField.Assets, "random-string"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1200,18 +1213,18 @@ describe("Parser", function () {
 				);
 
 				res = opcodeFromSentence(
-					["txn", "Applications", "0"],
+					["txn", TxnaField.Applications, "0"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["Applications", "0"], 1, interpreter);
+				expected = new Txn([TxnaField.Applications, "0"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Applications", "0", "11"],
+							["txn", TxnaField.Applications, "0", "11"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1222,7 +1235,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "Applications", "random-string"],
+							["txn", TxnaField.Applications, "random-string"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1231,27 +1244,27 @@ describe("Parser", function () {
 				);
 
 				res = opcodeFromSentence(
-					["txn", "NumAssets"],
+					["txn", TxnRefFields.NumAssets],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["NumAssets"], 1, interpreter);
+				expected = new Txn([TxnRefFields.NumAssets], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["txn", "GlobalNumUint"],
+					["txn", TxnRefFields.GlobalNumUint],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new Txn(["GlobalNumUint"], 1, interpreter);
+				expected = new Txn([TxnRefFields.GlobalNumUint], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "NumAssets", "0"],
+							["txn", TxnRefFields.NumAssets, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1262,7 +1275,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["txn", "GlobalNumUint", "0"],
+							["txn", TxnRefFields.GlobalNumUint, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1350,12 +1363,12 @@ describe("Parser", function () {
 
 			it("gtxns", function () {
 				const res = opcodeFromSentence(
-					["gtxns", "Amount"],
+					["gtxns", TxFieldEnum.Amount],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				const expected = new Gtxns(["Amount"], 1, interpreter);
+				const expected = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
@@ -1368,7 +1381,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["gtxns", "0", "Amount"],
+							["gtxns", "0", TxFieldEnum.Amount],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1379,12 +1392,12 @@ describe("Parser", function () {
 
 			it("gtxnsa", function () {
 				const res = opcodeFromSentence(
-					["gtxnsa", "ApplicationArgs", "0"],
+					["gtxnsa", TxnaField.ApplicationArgs, "0"],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				const expected = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+				const expected = new Gtxnsa([TxnaField.ApplicationArgs, "0"], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
@@ -1402,7 +1415,7 @@ describe("Parser", function () {
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["gtxnsa", "0", "ApplicationArgs", "0"],
+							["gtxnsa", "0", TxnaField.ApplicationArgs, "0"],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -1899,36 +1912,36 @@ describe("Parser", function () {
 
 			it("itxn_field f", function () {
 				let res = opcodeFromSentence(
-					["itxn_field", "Sender"],
+					["itxn_field", TxFieldEnum.Sender],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				let expected = new ITxnField(["Sender"], 1, interpreter);
+				let expected = new ITxnField([TxFieldEnum.Sender], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["itxn_field", "FreezeAsset"],
+					["itxn_field", TxFieldEnum.FreezeAsset],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new ITxnField(["FreezeAsset"], 1, interpreter);
+				expected = new ITxnField([TxFieldEnum.FreezeAsset], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				res = opcodeFromSentence(
-					["itxn_field", "ConfigAssetTotal"],
+					["itxn_field", TxnRefFields.ConfigAssetTotal],
 					1,
 					interpreter,
 					ExecutionMode.APPLICATION
 				);
-				expected = new ITxnField(["ConfigAssetTotal"], 1, interpreter);
+				expected = new ITxnField([TxnRefFields.ConfigAssetTotal], 1, interpreter);
 				assert.deepEqual(res, expected);
 
 				expectRuntimeError(
 					() =>
 						opcodeFromSentence(
-							["itxn_field", "Sender", "Fee"],
+							["itxn_field", TxFieldEnum.Sender, TxFieldEnum.Fee],
 							1,
 							interpreter,
 							ExecutionMode.APPLICATION
@@ -2071,21 +2084,21 @@ describe("Parser", function () {
 			describe("gitxn Opcode", function () {
 				it("Should succeed: create new gitxn opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxn", "0", "Fee"],
+						["gitxn", "0", TxFieldEnum.Fee],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxn(["0", "Fee"], 1, interpreter);
+					let expected = new Gitxn(["0", TxFieldEnum.Fee], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxn", "0", "ApplicationArgs", "0"],
+						["gitxn", "0", TxnaField.ApplicationArgs, "0"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxn(["0", "ApplicationArgs", "0"], 1, interpreter);
+					expected = new Gitxn(["0", TxnaField.ApplicationArgs, "0"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 				it("Should fail: create gitxn opcode with invalid parameters", function () {
@@ -2097,7 +2110,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxn", "1AA", "Fee"],
+								["gitxn", "1AA", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2110,21 +2123,21 @@ describe("Parser", function () {
 			describe("gitxna Opcode", function () {
 				it("Should succeed: create new gitxna opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxna", "1", "Accounts", "1"],
+						["gitxna", "1", TxnaField.Accounts, "1"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxna(["1", "Accounts", "1"], 1, interpreter);
+					let expected = new Gitxna(["1", TxnaField.Accounts, "1"], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxna", "1", "ApplicationArgs", "4"],
+						["gitxna", "1", TxnaField.ApplicationArgs, "4"],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+					expected = new Gitxna(["1", TxnaField.ApplicationArgs, "4"], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2132,7 +2145,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxna", "1", "Fee", "4"],
+								["gitxna", "1", TxFieldEnum.Fee, "4"],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2154,7 +2167,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxna", "1AB", "Fee", "4"],
+								["gitxna", "1AB", TxFieldEnum.Fee, "4"],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2167,21 +2180,21 @@ describe("Parser", function () {
 			describe("gitxnas Opcode", function () {
 				it("Should succeed: create new gitxnas opcode", function () {
 					let res = opcodeFromSentence(
-						["gitxnas", "1", "Accounts"],
+						["gitxnas", "1", TxnaField.Accounts],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					let expected = new Gitxnas(["1", "Accounts"], 1, interpreter);
+					let expected = new Gitxnas(["1", TxnaField.Accounts], 1, interpreter);
 					assert.deepEqual(res, expected);
 
 					res = opcodeFromSentence(
-						["gitxnas", "1", "ApplicationArgs"],
+						["gitxnas", "1", TxnaField.ApplicationArgs],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					expected = new Gitxnas(["1", "ApplicationArgs"], 1, interpreter);
+					expected = new Gitxnas(["1", TxnaField.ApplicationArgs], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2189,7 +2202,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxnas", "1", "Fee"],
+								["gitxnas", "1", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2211,7 +2224,7 @@ describe("Parser", function () {
 					expectRuntimeError(
 						() =>
 							opcodeFromSentence(
-								["gitxnas", "1AB", "Fee"],
+								["gitxnas", "1AB", TxFieldEnum.Fee],
 								1,
 								interpreter,
 								ExecutionMode.APPLICATION
@@ -2225,12 +2238,12 @@ describe("Parser", function () {
 				it("Should succeed: create new itxnas opcode", function () {
 					// can parse opcode
 					const res = opcodeFromSentence(
-						["itxnas", "Accounts"],
+						["itxnas", TxnaField.Accounts],
 						1,
 						interpreter,
 						ExecutionMode.APPLICATION
 					);
-					const expected = new ITxnas(["Accounts"], 1, interpreter);
+					const expected = new ITxnas([TxnaField.Accounts], 1, interpreter);
 					assert.deepEqual(res, expected);
 				});
 
@@ -2242,7 +2255,7 @@ describe("Parser", function () {
 
 					expectRuntimeError(
 						() =>
-							opcodeFromSentence(["itxnas", "Fee"], 1, interpreter, ExecutionMode.APPLICATION),
+							opcodeFromSentence(["itxnas", TxFieldEnum.Fee], 1, interpreter, ExecutionMode.APPLICATION),
 						RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 					);
 				});
@@ -2261,33 +2274,28 @@ describe("Parser", function () {
 			interpreter.tealVersion = 2;
 		});
 
+		function loadProgram(filename: string, mode = ExecutionMode.SIGNATURE): Op[] {
+			return parser(getProgram(filename), mode, interpreter);
+		}
+
 		it("Supported pragma version 6", function () {
-			const fileWithPragmav6 = "test-pragma-v6.teal";
-			assert.doesNotThrow(() =>
-				parser(getProgram(fileWithPragmav6), ExecutionMode.SIGNATURE, interpreter)
-			);
+			assert.doesNotThrow(() => loadProgram("test-pragma-v6.teal"));
 		});
 
 		it("Supported pragma version 7", function () {
-			const fileWithPragmav7 = "test-pragma-v7.teal";
-			assert.doesNotThrow(() =>
-				parser(getProgram(fileWithPragmav7), ExecutionMode.SIGNATURE, interpreter)
-			);
+			assert.doesNotThrow(() => loadProgram("test-pragma-v7.teal"));
 		});
 
-		it("Should fail if declare pragma greater than 7", function () {
-			const fileWithPragmaInvalid = "test-pragma-invalid.teal";
+		it("Should fail if declare pragma greater than 8", function () {
 			expectRuntimeError(
-				() => parser(getProgram(fileWithPragmaInvalid), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-invalid.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
 			);
 		});
 
 		it("Should return correct opcode list for '+'", async function () {
-			const file1 = "test-file-1.teal";
-			let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
+			let res = loadProgram("test-file-1.teal");
 			const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
-
 			assert.deepEqual(res, expected);
 
 			const expect = [
@@ -2296,28 +2304,24 @@ describe("Parser", function () {
 				new Int(["3"], 3),
 				new Add([], 4),
 			];
-			res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
-
+			res = loadProgram("test-file-2.teal");
 			assert.deepEqual(res, expect);
 		});
 
 		it("Should throw error if #pragma is not on 1st line", async function () {
-			let file = "test-pragma-1.teal";
 			expectRuntimeError(
-				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-1.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
 			);
 
-			file = "test-pragma-2.teal";
 			expectRuntimeError(
-				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				() => loadProgram("test-pragma-2.teal"),
 				RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
 			);
 		});
 
 		it("Should return correct opcode list for '-'", async function () {
-			const file = "test-file-3.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-3.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["5"], 2),
@@ -2329,8 +2333,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for '/'", async function () {
-			const file = "test-file-4.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-4.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["6"], 2),
@@ -2342,8 +2345,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for '*'", async function () {
-			const file = "test-file-5.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-file-5.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Int(["5"], 4),
@@ -2355,8 +2357,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'addr'", async function () {
-			const file = "test-addr.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-addr.teal");
 			const expected = [
 				new Pragma(["version", "4"], 1, interpreter),
 				new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2),
@@ -2366,8 +2367,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'byte'", async function () {
-			const file = "test-byte.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-byte.teal");
 			const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
 			const byte32 = "MFRGGZDFMY======";
 
@@ -2386,16 +2386,14 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'Len and Err'", async function () {
-			const file = "test-len-err.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-len-err.teal");
 			const expected = [new Len([], 1), new Err([], 2)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Bitwise'", async function () {
-			const file = "test-bitwise.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-bitwise.teal");
 			const expected = [
 				new BitwiseOr([], 2),
 				new BitwiseAnd([], 4),
@@ -2407,47 +2405,42 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'Mod'", async function () {
-			const file = "test-mod.teal";
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-mod.teal");
 			const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Arg'", async function () {
-			const file = "test-arg.teal";
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(0)];
 
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram(tealTestArg);
 			const expected = [new Arg(["0"], 1, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Intc and Bytec'", async function () {
-			const file = "test-int-bytec.teal";
 			interpreter.intcblock = [1n];
 			interpreter.bytecblock = [new Uint8Array(0)];
 
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-int-bytec.teal");
 			const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Store and Load'", async function () {
-			const file = "test-store-load.teal";
 			interpreter.scratch = [1n];
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-store-load.teal");
 			const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("Should return correct opcode list for 'Crypto opcodes'", async function () {
-			const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram(cryptoFile);
 			const expected = [
 				new Sha256([], 1, interpreter),
 				new Keccak256([], 2, interpreter),
@@ -2458,9 +2451,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'comparsions'", async function () {
-			const file = "test-compare.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-compare.teal");
 			const expected = [
 				new LessThan([], 1),
 				new GreaterThan([], 2),
@@ -2477,9 +2468,7 @@ describe("Parser", function () {
 		});
 
 		it("Should return correct opcode list for 'all others'", async function () {
-			const file = "test-others.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-others.teal");
 			const expected = [
 				new Pragma(["version", "6"], 1, interpreter),
 				new Itob([], 2),
@@ -2494,14 +2483,11 @@ describe("Parser", function () {
 				new Substring3([], 11),
 				new Divw([], 12),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'b, bz, bnz'", async function () {
-			const file = "test-branch.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-branch.teal");
 			const expected = [
 				new Branch(["label1"], 2, interpreter),
 				new BranchIfZero(["label2"], 3, interpreter),
@@ -2512,51 +2498,41 @@ describe("Parser", function () {
 		});
 
 		it("should return correct opcode list for 'return'", async function () {
-			const file = "test-return.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-return.teal");
 			const expected = [new Return([], 2, interpreter)];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'Label'", async function () {
-			const file = "test-label.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-label.teal");
 			const expected = [new Label(["label:"], 2)];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for 'global'", async function () {
-			const file = "test-global.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
+			const res = loadProgram("test-global.teal");
 			const expected = [
-				new Global(["MinTxnFee"], 3, interpreter),
-				new Global(["MinBalance"], 4, interpreter),
-				new Global(["MaxTxnLife"], 5, interpreter),
-				new Global(["ZeroAddress"], 6, interpreter),
-				new Global(["GroupSize"], 7, interpreter),
-				new Global(["LogicSigVersion"], 8, interpreter),
-				new Global(["Round"], 9, interpreter),
-				new Global(["LatestTimestamp"], 10, interpreter),
-				new Global(["CurrentApplicationID"], 11, interpreter),
+				new Global([GlobalField.MinTxnFee], 3, interpreter),
+				new Global([GlobalField.MinBalance], 4, interpreter),
+				new Global([GlobalField.MaxTxnLife], 5, interpreter),
+				new Global([GlobalField.ZeroAddress], 6, interpreter),
+				new Global([GlobalField.GroupSize], 7, interpreter),
+				new Global([GlobalField.LogicSigVersion], 8, interpreter),
+				new Global([GlobalField.Round], 9, interpreter),
+				new Global([GlobalField.LatestTimestamp], 10, interpreter),
+				new Global([GlobalField.CurrentApplicationID], 11, interpreter),
 			];
 
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for `Stateful`", async function () {
-			const file = "test-stateful.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("test-stateful.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "5"], 1, interpreter),
 				new Balance([], 4, interpreter),
-				new GetAssetHolding(["AssetBalance"], 5, interpreter),
-				new GetAssetDef(["AssetTotal"], 6, interpreter),
+				new GetAssetHolding([AssetHoldingField.AssetBalance], 5, interpreter),
+				new GetAssetDef([AssetParamGetField.AssetTotal], 6, interpreter),
 				new AppOptedIn([], 8, interpreter),
 				new AppLocalGet([], 9, interpreter),
 				new AppLocalGetEx([], 10, interpreter),
@@ -2567,46 +2543,50 @@ describe("Parser", function () {
 				new AppLocalDel([], 15, interpreter),
 				new AppGlobalDel([], 16, interpreter),
 				new Int(["10"], 17),
-				new AppParamsGet(["AppCreator"], 18, interpreter),
+				new AppParamsGet([AppParamField.AppCreator], 18, interpreter),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for `teal v6`", async function () {
-			const file = "teal-v6.teal";
-
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("teal-v6.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "6"], 1, interpreter),
 				new Divw([], 2),
 				new Bsqrt([], 3),
 				new Gloadss([], 4, interpreter),
-				new AcctParamsGet(["AcctBalance"], 5, interpreter),
+				new AcctParamsGet([AccountParamGetField.AcctBalance], 5, interpreter),
 				new ITxnNext([], 6, interpreter),
-				new Gitxn(["0", "Fee"], 7, interpreter),
-				new Gitxna(["1", "Accounts", "1"], 8, interpreter),
-				new Gitxnas(["0", "Accounts"], 9, interpreter),
-				new ITxnas(["Accounts"], 10, interpreter),
+				new Gitxn(["0", TxFieldEnum.Fee], 7, interpreter),
+				new Gitxna(["1", TxnaField.Accounts, "1"], 8, interpreter),
+				new Gitxnas(["0", TxnaField.Accounts], 9, interpreter),
+				new ITxnas([TxnaField.Accounts], 10, interpreter),
 			];
-
 			assert.deepEqual(res, expected);
 		});
 
 		it("should return correct opcode list for `teal v7`", async function () {
-			const file = "teal-v7.teal";
-			const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
+			const res = loadProgram("teal-v7.teal", ExecutionMode.APPLICATION);
 			const expected = [
 				new Pragma(["version", "7"], 1, interpreter),
-				new Base64Decode(["URLEncoding"], 2),
+				new Base64Decode([Base64Encoding.URLEncoding], 2),
 			];
+			assert.deepEqual(expected, res);
+		});
 
+		it("Should return correct opcode list for TEALv8", function () {
+			const res = loadProgram("teal-v8.teal", ExecutionMode.APPLICATION);
+			const expected = [
+				new Pragma(["version", "8"], 1, interpreter),
+				new Switch(["zero", "one"], 2, interpreter),
+			];
 			assert.deepEqual(expected, res);
 		});
 	});
 
 	describe("Gas cost of Opcodes from TEAL file", function () {
 		useFixture("teal-files");
+		const file = "test-arg.teal"; // byte size 3
 
 		let interpreter: Interpreter;
 		beforeEach(function () {
@@ -2727,27 +2707,27 @@ describe("Parser", function () {
 		});
 
 		it("Should pass when (program size + args size) = LogicSigMaxSize", function () {
-			const file = "test-arg.teal"; // byte size 3
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 3)];
 
-			assert.doesNotThrow(() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter));
+			assert.doesNotThrow(() =>
+				parser(getProgram(tealTestArg), ExecutionMode.SIGNATURE, interpreter)
+			);
 
 			// verify lsig size
-			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
+			assert.equal(Buffer.from(getProgram(tealTestArg), "base64").length, 3);
 		});
 
 		it("Should fail when (program size + args size) > LogicSigMaxSize", function () {
-			const file = "test-arg.teal"; // byte size 3
 			interpreter.runtime = new Runtime([]);
 			interpreter.runtime.ctx.args = [new Uint8Array(LogicSigMaxSize - 2)];
 
 			expectRuntimeError(
-				() => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
+				() => parser(getProgram(tealTestArg), ExecutionMode.SIGNATURE, interpreter),
 				RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED
 			);
 			// verify lsig size
-			assert.equal(Buffer.from(getProgram(file), "base64").length, 3);
+			assert.equal(Buffer.from(getProgram(tealTestArg), "base64").length, 3);
 		});
 	});
 });

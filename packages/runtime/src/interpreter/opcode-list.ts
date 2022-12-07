@@ -24,13 +24,27 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
+	AccountParamGetField,
 	AcctParamQueryFields,
+	AcctParamQueryFieldsIndex,
 	ALGORAND_MAX_LOGS_COUNT,
 	ALGORAND_MAX_LOGS_LENGTH,
 	AppParamDefined,
+	AppParamDefinedIndex,
+	AppParamField,
+	AssetHoldingField,
+	AssetParamGetField,
 	AssetParamMap,
+	AssetParamMapIndex,
+	Base64Encoding,
+	blockFieldIndex,
 	blockFieldTypes,
+	CurveTypeArgument,
+	CurveTypeEnum,
+	CurveTypeIndex,
+	GlobalField,
 	GlobalFields,
+	GlobalFieldsIndex,
 	ITxArrFields,
 	json_refTypes,
 	MathOp,
@@ -42,14 +56,16 @@ import {
 	MAX_UINT64,
 	MAX_UINT128,
 	MaxTEALVersion,
+	NumIndex,
 	OpGasCost,
 	proofLength,
 	publicKeyLength,
 	TransactionTypeEnum,
 	TxArrFields,
+	TxFieldEnum,
+	TxnFieldsIndex,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
-	CurveTypeEnum,
 } from "../lib/constants";
 import { addInnerTransaction, calculateInnerTxCredit, setInnerTxField } from "../lib/itxn";
 import { bigintSqrt } from "../lib/math";
@@ -1437,8 +1453,9 @@ export class Txn extends Op {
 		this.line = line;
 		this.idx = undefined;
 
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
-		if (TxArrFields[interpreter.tealVersion].has(args[0])) {
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
+		if (TxArrFields[interpreter.tealVersion].has(argument)) {
 			// eg. txn Accounts 1
 			assertLen(args.length, 2, line);
 			assertOnlyDigits(args[1], line);
@@ -1446,9 +1463,8 @@ export class Txn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -1509,9 +1525,11 @@ export class Gtxn extends Op {
 			assertLen(args.length, 2, line);
 		}
 		assertOnlyDigits(args[0], line);
-		this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
+
+		const argument = this.assertFieldIndex(args[1], TxnFieldsIndex);
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 		this.txIdx = Number(args[0]); // transaction group index
-		this.field = args[1]; // field
+		this.field = argument; // field
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
 	}
@@ -1558,9 +1576,10 @@ export class Txna extends Op {
 		super();
 		this.line = line;
 		assertOnlyDigits(args[1], line);
-		this.assertTxArrFieldDefined(args[0], interpreter.tealVersion, line);
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
+		this.assertTxArrFieldDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.fieldIdx = Number(args[1]);
 		this.interpreter = interpreter;
 	}
@@ -1613,10 +1632,12 @@ export class Gtxna extends Op {
 		assertLen(args.length, 3, line);
 		assertOnlyDigits(args[0], line);
 		assertOnlyDigits(args[2], line);
-		this.assertTxArrFieldDefined(args[1], interpreter.tealVersion, line);
+
+		const argument = this.assertFieldIndex(args[1], TxnFieldsIndex);
+		this.assertTxArrFieldDefined(argument, interpreter.tealVersion, line);
 
 		this.txIdx = Number(args[0]); // transaction group index
-		this.field = args[1]; // field
+		this.field = argument; // field
 		this.fieldIdx = Number(args[2]); // transaction field array index
 		this.groupTxn = interpreter.runtime.ctx.gtxs;
 		this.interpreter = interpreter;
@@ -1835,16 +1856,17 @@ export class Global extends Op {
 
 	/**
 	 * Stores global field to query as string
-	 * @param args Expected arguments: [field] // Ex: ["GroupSize"]
+	 * @param args Expected arguments: [field] // Ex: [GlobalField.GroupSize]
 	 * @param line line number in TEAL file
 	 * @param interpreter interpreter object
 	 */
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		assertLen(args.length, 1, line);
-		this.assertGlobalDefined(args[0], interpreter.tealVersion, line);
+		const argument = this.assertFieldIndex(args[0], GlobalFieldsIndex);
+		this.assertGlobalDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // global field
+		this.field = argument; // global field
 		this.interpreter = interpreter;
 		this.line = line;
 	}
@@ -1852,11 +1874,11 @@ export class Global extends Op {
 	execute(stack: TEALStack): number {
 		let result;
 		switch (this.field) {
-			case "GroupSize": {
+			case GlobalField.GroupSize: {
 				result = this.interpreter.runtime.ctx.gtxs.length;
 				break;
 			}
-			case "CurrentApplicationID": {
+			case GlobalField.CurrentApplicationID: {
 				result = this.interpreter.runtime.ctx.tx.apid;
 				this.interpreter.runtime.assertAppDefined(
 					result as number,
@@ -1865,40 +1887,40 @@ export class Global extends Op {
 				);
 				break;
 			}
-			case "Round": {
+			case GlobalField.Round: {
 				result = this.interpreter.runtime.getRound();
 				break;
 			}
-			case "LatestTimestamp": {
+			case GlobalField.LatestTimestamp: {
 				result = this.interpreter.runtime.getTimestamp();
 				break;
 			}
-			case "CreatorAddress": {
+			case GlobalField.CreatorAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				const app = this.interpreter.getApp(appID, this.line);
 				result = decodeAddress(app.creator).publicKey;
 				break;
 			}
-			case "GroupID": {
+			case GlobalField.GroupID: {
 				result = Uint8Array.from(this.interpreter.runtime.ctx.tx.grp ?? ZERO_ADDRESS);
 				break;
 			}
-			case "CurrentApplicationAddress": {
+			case GlobalField.CurrentApplicationAddress: {
 				const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 				result = decodeAddress(getApplicationAddress(appID)).publicKey;
 				break;
 			}
-			case "CallerApplicationID": {
+			case GlobalField.CallerApplicationID: {
 				result = this.interpreter.runtime.ctx.getCallerApplicationID();
 				break;
 			}
-			case "CallerApplicationAddress": {
+			case GlobalField.CallerApplicationAddress: {
 				const callerAddress = this.interpreter.runtime.ctx.getCallerApplicationAddress();
 				result = decodeAddress(callerAddress).publicKey;
 				break;
 			}
 
-			case "OpcodeBudget": {
+			case TxFieldEnum.OpcodeBudget: {
 				const maxBudget = this.interpreter.getBudget();
 				const currentTotalCost =
 					this.interpreter.mode === ExecutionMode.SIGNATURE
@@ -2333,10 +2355,12 @@ export class GetAssetHolding extends Op {
 		}
 		let value: StackElem;
 		switch (this.field) {
-			case "AssetBalance":
+			case NumIndex.index_0:
+			case AssetHoldingField.AssetBalance:
 				value = BigInt(assetInfo.amount);
 				break;
-			case "AssetFrozen":
+			case NumIndex.index_1:
+			case AssetHoldingField.AssetFrozen:
 				value = assetInfo["is-frozen"] ? 1n : 0n;
 				break;
 			default:
@@ -2370,7 +2394,8 @@ export class GetAssetDef extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-		if (AssetParamMap[interpreter.tealVersion][args[0]] === undefined) {
+		const argument = this.assertFieldIndex(args[0], AssetParamMapIndex);
+		if (AssetParamMap[interpreter.tealVersion][argument] === undefined) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, {
 				field: args[0],
 				line: line,
@@ -2378,7 +2403,7 @@ export class GetAssetDef extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: TEALStack): number {
@@ -2403,22 +2428,20 @@ export class GetAssetDef extends Op {
 			] as keyof modelsv2.AssetParams;
 
 			switch (this.field) {
-				case "AssetTotal":
+				case AssetParamGetField.AssetTotal:
 					value = BigInt(AssetDefinition.total);
 					break;
-				case "AssetDecimals":
+				case AssetParamGetField.AssetDecimals:
 					value = BigInt(AssetDefinition.decimals);
 					break;
-				case "AssetDefaultFrozen":
+				case AssetParamGetField.AssetDefaultFrozen:
 					value = AssetDefinition.defaultFrozen ? 1n : 0n;
 					break;
 				default:
 					def = AssetDefinition[s] as string;
-					if (isValidAddress(def)) {
-						value = decodeAddress(def).publicKey;
-					} else {
-						value = parsing.stringToBytes(def);
-					}
+					value = isValidAddress(def)
+						? decodeAddress(def).publicKey
+						: parsing.stringToBytes(def);
 					break;
 			}
 
@@ -3897,17 +3920,17 @@ export class EcdsaVerify extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else if (this.curveIndex === 1) {
-			this.curveType = CurveTypeEnum.secp256r1;
-		} else {
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
-				index: this.curveIndex,
+				curve: argument,
 			});
 		}
+
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
@@ -3957,21 +3980,22 @@ export class EcdsaPkDecompress extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
-		if (this.curveIndex === 0) {
-			this.curveType = CurveTypeEnum.secp256k1;
-		} else if (this.curveIndex === 1) {
-			this.curveType = CurveTypeEnum.secp256r1;
-		} else {
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
 				line: this.line,
-				index: this.curveIndex,
+				curve: argument,
 			});
 		}
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
-		return this.curveIndex === 0 ? OpGasCost[5]["ecdsa_pk_decompress"] : OpGasCost[7]["ecdsa_pk_decompress"];
+		return this.curveIndex === 0
+			? OpGasCost[5]["ecdsa_pk_decompress"]
+			: OpGasCost[7]["ecdsa_pk_decompress"];
 	}
 
 	/**
@@ -3997,6 +4021,7 @@ export class EcdsaPkDecompress extends Op {
 export class EcdsaPkRecover extends Op {
 	readonly line: number;
 	readonly curveIndex: number;
+	readonly curveType: string;
 
 	/**
 	 * Asserts 1 arguments are passed.
@@ -4007,7 +4032,16 @@ export class EcdsaPkRecover extends Op {
 		super();
 		this.line = line;
 		assertLen(args.length, 1, line);
-		this.curveIndex = Number(args[0]);
+		const argument = this.assertFieldIndex(args[0], CurveTypeIndex);
+		if (argument == CurveTypeArgument.secp256k1) this.curveIndex = 0;
+		else if (argument == CurveTypeArgument.secp256r1) this.curveIndex = 1;
+		else {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
+				line: this.line,
+				curve: argument,
+			});
+		}
+		this.curveType = this.curveIndex === 0 ? CurveTypeEnum.secp256k1 : CurveTypeEnum.secp256r1;
 	}
 
 	computeCost(): number {
@@ -4026,14 +4060,7 @@ export class EcdsaPkRecover extends Op {
 		const recoverId = this.assertBigInt(stack.pop(), this.line);
 		const data = this.assertBytes(stack.pop(), this.line);
 
-		if (this.curveIndex !== 0) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED, {
-				line: this.line,
-				index: this.curveIndex,
-			});
-		}
-
-		const ec = new EC("secp256k1");
+		const ec = new EC(this.curveType);
 		const signature = { r: signatureC, s: signatureD };
 		const pubKey = ec.recoverPubKey(data, signature, Number(recoverId));
 		const x = pubKey.getX();
@@ -4239,9 +4266,10 @@ export class ITxnField extends Op {
 		super();
 		this.line = line;
 
-		this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
+		this.assertTxFieldDefined(argument, interpreter.tealVersion, line);
 		assertLen(args.length, 1, line);
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -4364,10 +4392,10 @@ export class ITxnSubmit extends Op {
 			const signedTransactions: algosdk.SignedTransaction[] = execParams.map((txnParam) =>
 				types.isExecParams(txnParam)
 					? {
-						sig: Buffer.alloc(5),
-						sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
-						txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
-					}
+							sig: Buffer.alloc(5),
+							sgnr: Buffer.from(algosdk.decodeAddress(contractAddress).publicKey),
+							txn: webTx.mkTransaction(txnParam, mockSuggestedParams(txnParam.payFlags, 1)),
+					  }
 					: txnParam
 			);
 			this.interpreter.runtime.ctx.processTransactions(signedTransactions);
@@ -4411,10 +4439,12 @@ export class ITxn extends Op {
 		super();
 		this.line = line;
 		this.idx = -1;
-		this.assertITxFieldDefined(args[0], interpreter.tealVersion, line);
+
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
+		this.assertITxFieldDefined(argument, interpreter.tealVersion, line);
 		if (
-			TxArrFields[interpreter.tealVersion].has(args[0]) ||
-			ITxArrFields[interpreter.tealVersion].has(args[0])
+			TxArrFields[interpreter.tealVersion].has(argument) ||
+			ITxArrFields[interpreter.tealVersion].has(argument)
 		) {
 			// eg. itxn Accounts 1
 			assertLen(args.length, 2, line);
@@ -4423,7 +4453,7 @@ export class ITxn extends Op {
 		} else {
 			assertLen(args.length, 1, line);
 		}
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.interpreter = interpreter;
 	}
 
@@ -4453,9 +4483,10 @@ export class ITxna extends Op {
 		this.line = line;
 		assertLen(args.length, 2, line);
 		assertOnlyDigits(args[1], line);
-		this.assertITxArrFieldDefined(args[0], interpreter.tealVersion, line);
+		const argument = this.assertFieldIndex(args[0], TxnFieldsIndex);
+		this.assertITxArrFieldDefined(argument, interpreter.tealVersion, line);
 
-		this.field = args[0]; // field
+		this.field = argument; // field
 		this.idx = Number(args[1]);
 		this.interpreter = interpreter;
 	}
@@ -4723,8 +4754,8 @@ export class AppParamsGet extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-
-		if (!AppParamDefined[interpreter.tealVersion].has(args[0])) {
+		const argument = this.assertFieldIndex(args[0], AppParamDefinedIndex);
+		if (!AppParamDefined[interpreter.tealVersion].has(argument)) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD, {
 				field: args[0],
 				line: line,
@@ -4732,7 +4763,7 @@ export class AppParamsGet extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: Stack<StackElem>): number {
@@ -4744,33 +4775,33 @@ export class AppParamsGet extends Op {
 			let value: StackElem = 0n;
 			const appDef = this.interpreter.getApp(Number(appID), this.line);
 			switch (this.field) {
-				case "AppApprovalProgram":
+				case AppParamField.AppApprovalProgram:
 					value = parsing.stringToBytes(appDef["approval-program"]);
 					break;
-				case "AppClearStateProgram":
+				case AppParamField.AppClearStateProgram:
 					value = parsing.stringToBytes(appDef["clear-state-program"]);
 					break;
-				case "AppGlobalNumUint":
+				case AppParamField.AppGlobalNumUint:
 					value = BigInt(appDef["global-state-schema"].numUint);
 					break;
-				case "AppGlobalNumByteSlice":
+				case AppParamField.AppGlobalNumByteSlice:
 					value = BigInt(appDef["global-state-schema"].numByteSlice);
 					break;
-				case "AppLocalNumUint":
+				case AppParamField.AppLocalNumUint:
 					value = BigInt(appDef["local-state-schema"].numUint);
 					break;
-				case "AppLocalNumByteSlice":
+				case AppParamField.AppLocalNumByteSlice:
 					value = BigInt(appDef["local-state-schema"].numByteSlice);
 					break;
-				case "AppExtraProgramPages":
+				case AppParamField.AppExtraProgramPages:
 					// only return default number extra program pages in runtime
 					// should fix it in future.
 					value = 1n;
 					break;
-				case "AppCreator":
+				case AppParamField.AppCreator:
 					value = decodeAddress(appDef.creator).publicKey;
 					break;
-				case "AppAddress":
+				case AppParamField.AppAddress:
 					value = decodeAddress(getApplicationAddress(appID)).publicKey;
 			}
 
@@ -4797,10 +4828,10 @@ export class AcctParamsGet extends Op {
 		this.line = line;
 		this.interpreter = interpreter;
 		assertLen(args.length, 1, line);
-
+		const argument = this.assertFieldIndex(args[0], AcctParamQueryFieldsIndex);
 		if (
-			!AcctParamQueryFields[args[0]] ||
-			AcctParamQueryFields[args[0]].version > interpreter.tealVersion
+			!AcctParamQueryFields[argument] ||
+			AcctParamQueryFields[argument].version > interpreter.tealVersion
 		) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ACCT_FIELD, {
 				field: args[0],
@@ -4809,7 +4840,7 @@ export class AcctParamsGet extends Op {
 			});
 		}
 
-		this.field = args[0];
+		this.field = argument;
 	}
 
 	execute(stack: Stack<StackElem>): number {
@@ -4823,15 +4854,15 @@ export class AcctParamsGet extends Op {
 
 		let value: StackElem = 0n;
 		switch (this.field) {
-			case "AcctBalance": {
+			case AccountParamGetField.AcctBalance: {
 				value = BigInt(accountInfo.balance());
 				break;
 			}
-			case "AcctMinBalance": {
+			case AccountParamGetField.AcctMinBalance: {
 				value = BigInt(accountInfo.minBalance);
 				break;
 			}
-			case "AcctAuthAddr": {
+			case AccountParamGetField.AcctAuthAddr: {
 				if (accountInfo.getSpendAddress() === accountInfo.address) {
 					value = ZERO_ADDRESS;
 				} else {
@@ -4987,11 +5018,13 @@ export class Base64Decode extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
-			case "URLEncoding": {
+			case NumIndex.index_0:
+			case Base64Encoding.URLEncoding: {
 				this.encoding = "base64url";
 				break;
 			}
-			case "StdEncoding": {
+			case NumIndex.index_1:
+			case Base64Encoding.StdEncoding: {
 				this.encoding = "base64";
 				break;
 			}
@@ -5132,14 +5165,17 @@ export class Json_ref extends Op {
 		assertLen(args.length, 1, line);
 		const argument = args[0];
 		switch (argument) {
+			case NumIndex.index_0:
 			case json_refTypes.JSONString: {
 				this.jsonType = "byte";
 				break;
 			}
+			case NumIndex.index_1:
 			case json_refTypes.JSONUint64: {
 				this.jsonType = "int";
 				break;
 			}
+			case NumIndex.index_2:
 			case json_refTypes.JSONObject: {
 				this.jsonType = "object";
 				break;
@@ -5298,7 +5334,7 @@ export class Bn254Pairing extends Op {
  * Opcode: 0xd1 {uint8 block field}
  * Stack: ..., A: uint64 → ..., any
  * field F of block A. Fail unless A falls between txn.LastValid-1002 and txn.FirstValid (exclusive)
-*/
+ */
 export class Block extends Op {
 	readonly line: number;
 	readonly field: string;
@@ -5311,27 +5347,27 @@ export class Block extends Op {
 	constructor(args: string[], line: number, interpreter: Interpreter) {
 		super();
 		assertLen(args.length, 1, line);
-		const argument = args[0];
-		if (argument === blockFieldTypes.BlkSeed|| argument === blockFieldTypes.BlkTimestamp) {
+		const argument = this.assertFieldIndex(args[0], blockFieldIndex);
+		if (argument === blockFieldTypes.BlkSeed || argument === blockFieldTypes.BlkTimestamp) {
 			this.field = argument;
 		} else {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, {field: argument});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_BLOCK_FIELD, { field: argument });
 		}
 		this.line = line;
 		this.interpreter = interpreter;
 	}
-	
+
 	execute(stack: TEALStack): number {
 		this.assertMinStackLen(stack, 1, this.line);
 		const round = Number(this.assertBigInt(stack.pop(), this.line));
 		this.interpreter.assertRoundIsAvailable(round);
 		const block = this.interpreter.runtime.getBlock(round);
 		//"BlkTimestamp" = seconds since epoch, assuming one round(block) = 4.5s truncated to 4s (BigInt)
-		const result = (this.field === blockFieldTypes.BlkSeed) ? block.seed : block.timestamp
+		const result = this.field === blockFieldTypes.BlkSeed ? block.seed : block.timestamp;
 		stack.push(result);
 		return this.computeCost();
 	}
-};
+}
 
 /**
  * Opcode: 0xd0 {uint8 parameters index}
@@ -5354,10 +5390,12 @@ export class VrfVerify extends Op {
 		super();
 		this.line = line;
 		switch (argument) {
+			case NumIndex.index_0:
 			case vrfVerifyFieldTypes.VrfAlgorand: {
 				this.vrfType = argument;
 				break;
 			}
+			case NumIndex.index_1:
 			case vrfVerifyFieldTypes.VrfStandard: {
 				this.vrfType = argument;
 				break;
@@ -5379,10 +5417,14 @@ export class VrfVerify extends Op {
 		const publicKey = this.assertBytes(stack.pop(), this.line);
 
 		if (proof.length !== proofLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {length: proof.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH, {
+				length: proof.length,
+			});
 		}
 		if (publicKey.length !== publicKeyLength) {
-			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {length: publicKey.length});
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH, {
+				length: publicKey.length,
+			});
 		}
 		if (this.vrfType === vrfVerifyFieldTypes.VrfAlgorand) {
 			const hash = sha512(proof);
@@ -5391,6 +5433,49 @@ export class VrfVerify extends Op {
 		} else {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
 		}
+		return this.computeCost();
+	}
+}
+
+/**
+ * TEALv8
+ */
+
+/**
+ * Opcode: 0x8d {uint8 branch count} [{int16 branch offset, big-endian}, ...]
+ * Stack: ..., A: uint64 → ...
+ * branch to the Ath label. Continue at following instruction if index A exceeds the number of labels.
+ * Availability: v8
+ */
+export class Switch extends Op {
+	readonly line: number;
+	readonly labelsLength: number;
+	readonly labels: string[];
+	readonly interpreter: Interpreter;
+
+	constructor(args: string[], line: number, interpreter: Interpreter) {
+		super();
+		this.line = line;
+		this.labels = args;
+		this.labelsLength = args.length;
+		this.interpreter = interpreter;
+		if (this.labelsLength > 255) {
+			throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID, {
+				len: this.labelsLength,
+			});
+		}
+	}
+
+	execute(stack: TEALStack): number {
+		this.assertMinStackLen(stack, 1, this.line);
+		const index = Number(this.assertBigInt(stack.pop(), this.line));
+		if (index > this.labelsLength || this.labelsLength === 0) {
+			//the index exceeds the labels length does nothing and continue at the following instruction
+			return this.computeCost();
+		}
+		const label = this.labels[index];
+		this.interpreter.jumpToLabel(label, this.line);
+
 		return this.computeCost();
 	}
 }

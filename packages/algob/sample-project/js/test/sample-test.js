@@ -21,7 +21,9 @@ describe("Sample Test", function () {
 		master = new AccountStore(masterBalance);
 		fundReceiver = new AccountStore(minBalance);
 		runtime = new Runtime([master, fundReceiver]);
-
+		// This is an example to retrieve account from config file
+		// if user wants to use it, uncomment the following section
+		// runtime.loadAccountsFromConfig();
 		lsig = runtime.createLsigAccount(feeCheckProgram);
 		lsig.sign(master.account.sk);
 	});
@@ -58,17 +60,19 @@ describe("Sample Test", function () {
 		const initialMasterBalance = master.balance();
 
 		try {
-			assert.throws(() => runtime.executeTx([
-				{
-					type: types.TransactionType.TransferAlgo,
-					sign: types.SignType.LogicSignature,
-					lsig: lsig,
-					fromAccountAddr: master.address,
-					toAccountAddr: fundReceiver.address,
-					amountMicroAlgos: amount,
-					payFlags: { totalFee: invalidTxFee },
-				},
-			]));
+			assert.throws(() =>
+				runtime.executeTx([
+					{
+						type: types.TransactionType.TransferAlgo,
+						sign: types.SignType.LogicSignature,
+						lsig: lsig,
+						fromAccountAddr: master.address,
+						toAccountAddr: fundReceiver.address,
+						amountMicroAlgos: amount,
+						payFlags: { totalFee: invalidTxFee },
+					},
+				])
+			);
 		} catch (error) {
 			console.log(error);
 		}

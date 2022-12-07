@@ -7,7 +7,7 @@ Algo Builder team maintains this repository of of verified smart contract templa
 - [JS] [asa](./asa): a project that demonstrates how to create and manage Algorand Standard Assets (ASA).
 - [JS] [bond](./bond): fixed interest rate token, modelled based on corporate bonds.
 - [JS] [crowdfunding](./crowdfunding): crowdfunding smart contract based on [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/).
-- [JS] [DAO](./dao): template to create, manage and participate in a DAO.
+- [JS] [DAO](https://github.com/scale-it/sigmadao): template to create, manage and participate in a DAO.
 - [JS] [multisig](./multisig): demonstration of creating a logic signature (lsig) signed by multiple accounts.
 - [JS] [nft](./nft): Non-Fungible-Token using stateful TEAL.
 - [JS] [permissioned voting](./permissioned-voting): a Permissioned Voting smart contract. [tutorial](https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/).

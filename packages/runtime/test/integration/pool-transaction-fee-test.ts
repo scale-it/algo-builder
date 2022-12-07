@@ -208,7 +208,7 @@ describe("Pooled Transaction Fees Test", function () {
 				toAccountAddr: elonUnfunded.address,
 				amountMicroAlgos: amount,
 				payFlags: { totalFee: fee }, // this covers fee of entire group txns
-			}
+			},
 		];
 
 		assert.doesNotThrow(() => runtime.executeTx(groupTx));
@@ -218,7 +218,6 @@ describe("Pooled Transaction Fees Test", function () {
 		assert.equal(elonUnfunded.balance(), BigInt(amount));
 		assert.isDefined(elonUnfunded.getAssetHolding(assetId));
 	});
-
 });
 
 describe("Pooled Transaction Fees Test with App and Asset", function () {
@@ -331,7 +330,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 					sign: types.SignType.SecretKey,
 					fromAccount: alice.account, // funded account
 					appID: appInfo.appID,
-					payFlags: { totalFee: 1 } // partially covering it's fee
+					payFlags: { totalFee: 1 }, // partially covering it's fee
 				},
 				{
 					type: types.TransactionType.TransferAlgo,
@@ -339,7 +338,7 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 					fromAccount: john.account,
 					toAccountAddr: elonUnfunded.address,
 					amountMicroAlgos: amount,
-					payFlags: { totalFee: fee }
+					payFlags: { totalFee: fee },
 				},
 			];
 
@@ -385,5 +384,4 @@ describe("Pooled Transaction Fees Test with App and Asset", function () {
 			);
 		}
 	});
-
 });

@@ -1,4 +1,10 @@
-import algosdk from "algosdk";
+import algosdk, { LogicSigAccount } from "algosdk";
+import { testnetURL } from "../../src";
+import { algoexplorerAlgod } from "../../src/lib/api";
+import { HttpNetworkConfig } from "../../src/types";
+
+const fs = require('fs');
+const path = require('path');
 
 export const txObject = {
 	name: "Transaction",
@@ -27,13 +33,27 @@ export const txObject = {
 	group: undefined,
 };
 
-const johnMne = "found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip"
+const johnMne =
+	"found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip";
 export const senderAccount = {
 	addr: "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-	sk: algosdk.mnemonicToSecretKey(johnMne).sk
-}
-const alicemne = "brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick"
+	sk: algosdk.mnemonicToSecretKey(johnMne).sk,
+};
+const alicemne =
+	"brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick";
 export const receiverAccount = {
 	addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
 	sk: algosdk.mnemonicToSecretKey(alicemne).sk,
+};
+
+export async function createLsigAccount(): Promise<LogicSigAccount> {
+	const walletURL: HttpNetworkConfig = {
+		token: "",
+		server: testnetURL,
+		port: "",
+	};
+	const algodClient: algosdk.Algodv2 = algoexplorerAlgod(walletURL);
+	const data = fs.readFileSync(path.join(__dirname, 'sample.teal'));
+	const results = await algodClient.compile(data).do();
+	return new LogicSigAccount(new Uint8Array(Buffer.from(results.result, "base64")));
 }

@@ -1,5 +1,5 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { spawnSync, SpawnSyncReturns, exec } from "child_process";
+import { exec, spawnSync, SpawnSyncReturns } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
@@ -99,7 +99,9 @@ export class PyCompileOp {
 	private validatePythonModule(module: string) {
 		exec(`pip list | grep ${module}`, (err: any) => {
 			if (err) {
-				throw new Error(`"${module}" module not found. Please try running "pip install ${module}"`);
+				throw new Error(
+					`"${module}" module not found. Please try running "pip install ${module}"`
+				);
 			}
 		});
 	}

@@ -118,6 +118,7 @@ Check the _requirements_ section above first.\_
 1.  Add deployment scripts in `scripts` directory.
 1.  Run `yarn run algob deploy` to compile and deploy everything (all scripts nested directly in /scripts).
 1.  Run `yarn run algob run scriptPath/scriptName` to run a script.
+    You can add JSON string as the last argument to the CLI `run` or `deploy` command. It will represent arguments provided to the script. For example, if we want to provide 2 arguments: `arg1: number` and `arg2: string`, then use the invoke the CLI with: `yarn run algob run scriptPath/scriptName '{"arg1": 1, "arg2": "some string"}'`
 1.  To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>
@@ -193,10 +194,11 @@ You can write your scripts and tests in JavaScript. If you don't add any flag to
 ```shell
 yarn run algob init <path-where-to-create> --javascript
 ```
+
 #### Example on `algob init` with javascript
 
 You can use below command to initialize the javascript project in `sample-project` folder.
-If `sample-project` folder is not present then it will create one for you. 
+If `sample-project` folder is not present then it will create one for you.
 
 ```shell
 yarn run algob init ./sample-project --javascript
@@ -213,7 +215,7 @@ yarn run algob init <path-where-to-create> --typescript
 #### Example on `algob init` with typescript
 
 You can use below command to initialize the typescript project in `sample-project` folder.
-If `sample-project` folder is not present then it will create one for you. 
+If `sample-project` folder is not present then it will create one for you.
 
 ```shell
 yarn run algob init ./sample-project --typescript

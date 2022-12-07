@@ -35,15 +35,14 @@ async function run(
 		payFlags: { totalFee: 1000 },
 	};
 
-	// Transaction Fails : as wrong secret value is used 
-	await tryExecuteTx(deployer, [txnParams])
-		.catch(error => {
-			console.log(error)
-		})
+	// Transaction Fails : as wrong secret value is used
+	await tryExecuteTx(deployer, [txnParams]).catch((error) => {
+		console.log(error);
+	});
 
 	// Transaction Passes: as right secret value is used
 	txnParams.args = [algob.convert.stringToBytes(secret)];
-	await tryExecuteTx(deployer, [txnParams])
+	await tryExecuteTx(deployer, [txnParams]);
 }
 
 module.exports = { default: run };

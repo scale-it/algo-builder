@@ -160,6 +160,7 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
@@ -167,17 +168,25 @@ import {
 	VrfVerify,
 } from "../../../src/interpreter/opcode-list";
 import {
+	AccountParamGetField,
 	ALGORAND_ACCOUNT_MIN_BALANCE,
+	AppParamField,
 	ASSET_CREATION_FEE,
+	AssetHoldingField,
+	AssetParamGetField,
+	Base64Encoding,
 	blockFieldTypes,
 	CurveTypeEnum,
 	DEFAULT_STACK_ELEM,
+	GlobalField,
 	MAX_UINT8,
 	MAX_UINT64,
 	MaxTEALVersion,
 	MIN_UINT8,
 	seedLength,
 	TxFieldEnum,
+	TxnaField,
+	TxnRefFields,
 	vrfVerifyFieldTypes,
 	ZERO_ADDRESS,
 } from "../../../src/lib/constants";
@@ -2032,31 +2041,31 @@ describe("Teal Opcodes", function () {
 
 		describe("Txn: Common Fields", function () {
 			it("should push txn fee to stack", function () {
-				const op = new Txn(["Fee"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.fee, "Fee"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.fee, TxFieldEnum.Fee), stack.pop());
 			});
 
 			it("should push txn firstRound to stack", function () {
-				const op = new Txn(["FirstValid"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FirstValid], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.fv, "FirstValid"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.fv, TxFieldEnum.FirstValid), stack.pop());
 			});
 
 			it("should push txn lastRound to stack", function () {
-				const op = new Txn(["LastValid"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastValid], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
-				assert.deepEqual(parseToStackElem(TXN_OBJ.lv, "LastValid"), stack.pop());
+				assert.deepEqual(parseToStackElem(TXN_OBJ.lv, TxFieldEnum.LastValid), stack.pop());
 			});
 
 			it("should push txn sender to stack", function () {
-				const op = new Txn(["Sender"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Sender], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2064,7 +2073,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn type to stack", function () {
-				const op = new Txn(["Type"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Type], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2072,7 +2081,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn typeEnum to stack", function () {
-				const op = new Txn(["TypeEnum"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.TypeEnum], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2080,7 +2089,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn lease to stack", function () {
-				const op = new Txn(["Lease"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Lease], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2088,7 +2097,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn note to stack", function () {
-				const op = new Txn(["Note"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Note], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2096,7 +2105,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn rekeyTo addr to stack", function () {
-				const op = new Txn(["RekeyTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.RekeyTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2104,7 +2113,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn NumAppArgs to stack", function () {
-				const op = new Txn(["NumAppArgs"], 1, interpreter);
+				const op = new Txn([TxnRefFields.NumAppArgs], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2112,7 +2121,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn NumAccounts to stack", function () {
-				const op = new Txn(["NumAccounts"], 1, interpreter);
+				const op = new Txn([TxnRefFields.NumAccounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2126,7 +2135,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn Receiver to stack", function () {
-				const op = new Txn(["Receiver"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Receiver], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2134,7 +2143,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn Amount to stack", function () {
-				const op = new Txn(["Amount"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Amount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2142,7 +2151,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn CloseRemainderTo to stack", function () {
-				const op = new Txn(["CloseRemainderTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.CloseRemainderTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2156,7 +2165,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VotePK to stack", function () {
-				const op = new Txn(["VotePK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VotePK], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2164,7 +2173,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn SelectionPK to stack", function () {
-				const op = new Txn(["SelectionPK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.SelectionPK], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2180,7 +2189,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VoteLast to stack", function () {
-				const op = new Txn(["VoteLast"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VoteLast], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2188,7 +2197,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn VoteKeyDilution to stack", function () {
-				const op = new Txn(["VoteKeyDilution"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.VoteKeyDilution], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2202,7 +2211,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAsset to stack", function () {
-				const op = new Txn(["ConfigAsset"], 1, interpreter); // ConfigAsset
+				const op = new Txn([TxFieldEnum.ConfigAsset], 1, interpreter); // ConfigAsset
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2210,7 +2219,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetTotal to stack", function () {
-				const op = new Txn(["ConfigAssetTotal"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetTotal], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2218,7 +2227,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetDecimals to stack", function () {
-				const op = new Txn(["ConfigAssetDecimals"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetDecimals], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2226,7 +2235,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-				const op = new Txn(["ConfigAssetDefaultFrozen"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetDefaultFrozen], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2234,7 +2243,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetUnitName to stack", function () {
-				const op = new Txn(["ConfigAssetUnitName"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetUnitName], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2242,7 +2251,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetName to stack", function () {
-				const op = new Txn(["ConfigAssetName"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetName], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2250,7 +2259,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetURL to stack", function () {
-				const op = new Txn(["ConfigAssetURL"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetURL], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2258,7 +2267,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetMetadataHash to stack", function () {
-				const op = new Txn(["ConfigAssetMetadataHash"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetMetadataHash], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2266,7 +2275,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetManager to stack", function () {
-				const op = new Txn(["ConfigAssetManager"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetManager], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2274,7 +2283,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetReserve to stack", function () {
-				const op = new Txn(["ConfigAssetReserve"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetReserve], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2282,7 +2291,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetFreeze to stack", function () {
-				const op = new Txn(["ConfigAssetFreeze"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetFreeze], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2290,7 +2299,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ConfigAssetClawback to stack", function () {
-				const op = new Txn(["ConfigAssetClawback"], 1, interpreter);
+				const op = new Txn([TxnRefFields.ConfigAssetClawback], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2304,7 +2313,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn XferAsset to stack", function () {
-				const op = new Txn(["XferAsset"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.XferAsset], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2312,7 +2321,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetAmount to stack", function () {
-				const op = new Txn(["AssetAmount"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetAmount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2320,7 +2329,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetSender to stack", function () {
-				const op = new Txn(["AssetSender"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetSender], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2328,7 +2337,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetReceiver to stack", function () {
-				const op = new Txn(["AssetReceiver"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetReceiver], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2336,7 +2345,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn AssetCloseTo to stack", function () {
-				const op = new Txn(["AssetCloseTo"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.AssetCloseTo], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2350,7 +2359,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAsset to stack", function () {
-				const op = new Txn(["FreezeAsset"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.FreezeAsset], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2358,7 +2367,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAssetAccount to stack", function () {
-				const op = new Txn(["FreezeAssetAccount"], 1, interpreter);
+				const op = new Txn([TxnRefFields.FreezeAssetAccount], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2366,7 +2375,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn FreezeAssetFrozen to stack", function () {
-				const op = new Txn(["FreezeAssetFrozen"], 1, interpreter);
+				const op = new Txn([TxnRefFields.FreezeAssetFrozen], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2381,7 +2390,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ApplicationID to stack", function () {
-				const op = new Txn(["ApplicationID"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ApplicationID], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2389,7 +2398,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn OnCompletion to stack", function () {
-				const op = new Txn(["OnCompletion"], 1, interpreter);
+				const op = new Txn([TxnRefFields.OnCompletion], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2397,7 +2406,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ApprovalProgram to stack", function () {
-				const op = new Txn(["ApprovalProgram"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2405,7 +2414,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push txn ClearStateProgram to stack", function () {
-				const op = new Txn(["ClearStateProgram"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ClearStateProgram], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2413,7 +2422,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from accounts or args array by index", function () {
-				let op = new Txn(["Accounts", "0"], 1, interpreter);
+				let op = new Txn([TxnaField.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2421,20 +2430,20 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Txn(["Accounts", "1"], 1, interpreter);
+				op = new Txn([TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Txn(["Accounts", "2"], 1, interpreter);
+				op = new Txn([TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Txn(["ApplicationArgs", "0"], 0, interpreter);
+				op = new Txn([TxnaField.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2443,68 +2452,68 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv3
 			it("should push value from foreign assets array and push NumAssets", function () {
-				// should push Accounts[0] to stack
-				let op = new Txn(["Assets", "0"], 1, interpreter);
+				// should push Assets[0] to stack
+				let op = new Txn([TxnaField.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[0]), stack.pop());
 
-				// should push Accounts[1] to stack
-				op = new Txn(["Assets", "1"], 1, interpreter);
+				// should push Assets[1] to stack
+				op = new Txn([TxnaField.Assets, "1"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apas[1]), stack.pop());
 
 				// index 10 should be out_of_bound
-				op = new Txn(["Assets", "10"], 1, interpreter);
+				op = new Txn([TxnaField.Assets, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
-				op = new Txn(["NumAssets"], 1, interpreter);
+				op = new Txn([TxnRefFields.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(BigInt(TXN_OBJ.apas.length), stack.pop());
 			});
 
 			it("should push value from foreign applications array and push NumApplications", function () {
 				// special case: Txn.Applications[0] represents current_applications_id
-				let op = new Txn(["Applications", "0"], 1, interpreter);
+				let op = new Txn([TxnaField.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apid), stack.pop());
 
 				// Txn.Applications[1] should push "1st" app_id from foreign Apps (Txn.ForeignApps[0])
-				op = new Txn(["Applications", "1"], 1, interpreter);
+				op = new Txn([TxnaField.Applications, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apfa[0]), stack.pop());
 
 				// index 10 should be out_of_bound
-				op = new Txn(["Applications", "10"], 1, interpreter);
+				op = new Txn([TxnaField.Applications, "10"], 1, interpreter);
 				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
-				op = new Txn(["NumApplications"], 1, interpreter);
+				op = new Txn([TxnRefFields.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(BigInt(TXN_OBJ.apfa.length), stack.pop());
 			});
 
 			it("should push local, global uint and byte slices from state schema to stack", function () {
-				let op = new Txn(["GlobalNumUint"], 1, interpreter);
+				let op = new Txn([TxnRefFields.GlobalNumUint], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apgs.nui), stack.pop());
 
-				op = new Txn(["GlobalNumByteSlice"], 1, interpreter);
+				op = new Txn([TxnRefFields.GlobalNumByteSlice], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apgs.nbs), stack.pop());
 
-				op = new Txn(["LocalNumUint"], 1, interpreter);
+				op = new Txn([TxnRefFields.LocalNumUint], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apls.nui), stack.pop());
 
-				op = new Txn(["LocalNumByteSlice"], 1, interpreter);
+				op = new Txn([TxnRefFields.LocalNumByteSlice], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apls.nbs), stack.pop());
@@ -2512,7 +2521,7 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv4
 			it("should push extra program pages to stack", function () {
-				const op = new Txn(["ExtraProgramPages"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.ExtraProgramPages], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.apep), stack.pop());
@@ -2520,7 +2529,7 @@ describe("Teal Opcodes", function () {
 
 			// introduced in TEALv5
 			it("should push txn.nonparticipation key to stack", function () {
-				const op = new Txn(["Nonparticipation"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.Nonparticipation], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.equal(BigInt(TXN_OBJ.nonpart), stack.pop());
@@ -2529,19 +2538,19 @@ describe("Teal Opcodes", function () {
 
 		describe("Txn: teal v6", function () {
 			it("should return empty log if no log emit before", function () {
-				const op = new Txn(["LastLog"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastLog], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(0));
 			});
 			it("should return last log", function () {
 				interpreter.runtime.ctx.lastLog = new Uint8Array([42, 32]);
-				const op = new Txn(["LastLog"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.LastLog], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array([42, 32]));
 			});
 
 			it("should return StateProofPK", function () {
-				const op = new Txn(["StateProofPK"], 1, interpreter);
+				const op = new Txn([TxFieldEnum.StateProofPK], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), new Uint8Array(64).fill(0));
 			});
@@ -2553,17 +2562,17 @@ describe("Teal Opcodes", function () {
 				interpreter.runtime = new Runtime([]);
 				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
 				interpreter.tealVersion = MaxTEALVersion;
-			})
+			});
 
 			it("Should throw exception if txn.lv - txn.fv > 1000 + 1", function () {
 				interpreter.runtime.ctx.tx.fv = 1999; //last valid = 3000, 3000 - (1999 - 1) > 1001
-				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				const op = new Txn([TxnRefFields.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
 			it("Should push txn correct timestamp to stack", function () {
 				interpreter.runtime.ctx.tx.lv = TXN_OBJ.fv + 500;
-				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				const op = new Txn([TxnRefFields.FirstValidTime], 1, interpreter);
 				const expectedResult = interpreter.runtime.getBlock(TXN_OBJ.fv - 1).timestamp;
 				op.execute(stack);
 				assert.equal(expectedResult, stack.pop());
@@ -2571,21 +2580,22 @@ describe("Teal Opcodes", function () {
 
 			it("Should throw exception if teal version < 7", function () {
 				interpreter.tealVersion = 6;
-				expectRuntimeError(() =>
-				 new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
-				 RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD);
+				expectRuntimeError(
+					() => new Txn([TxnRefFields.FirstValidTime], 1, interpreter),
+					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+				);
 			});
 
 			it("Should throw exception if round number is negative", function () {
 				interpreter.runtime.ctx.tx.fv = 0;
-				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				const op = new Txn([TxnRefFields.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
 			it("Should throw exception if round number is 0 even if last valid is low", function () {
 				interpreter.runtime.ctx.tx.fv = 1;
 				interpreter.runtime.ctx.tx.lv = 100;
-				const op = new Txn([TxFieldEnum.FirstValidTime], 1, interpreter);
+				const op = new Txn([TxnRefFields.FirstValidTime], 1, interpreter);
 				assert.throws(() => op.execute(stack));
 			});
 
@@ -2593,7 +2603,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Txn([TxFieldEnum.FirstValidTime], 1, interpreter),
+					new Txn([TxnRefFields.FirstValidTime], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
 				);
 			});
@@ -2609,16 +2619,16 @@ describe("Teal Opcodes", function () {
 				interpreter.runtime.ctx.gtxs = [tx, tx2];
 			});
 
-			it("Should push to the stack correct block timestamp", function(){
-				const op = new Gtxn(["0",TxFieldEnum.FirstValidTime], 1, interpreter);
-				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv?? 0;
+			it("Should push to the stack correct block timestamp", function () {
+				const op = new Gtxn(["0", TxnRefFields.FirstValidTime], 1, interpreter);
+				const firstTxFirstValid = interpreter.runtime.ctx.gtxs[0].fv ?? 0;
 				const expextedResult = interpreter.runtime.getBlock(firstTxFirstValid - 1).timestamp;
 				op.execute(stack);
 				assert.equal(expextedResult, stack.pop());
 			});
 
 			it("push fee from 2nd transaction in group", function () {
-				const op = new Gtxn(["1", "Fee"], 1, interpreter);
+				const op = new Gtxn(["1", TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2626,7 +2636,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from accounts or args array by index from tx group", function () {
-				let op = new Gtxn(["1", "Accounts", "0"], 1, interpreter);
+				let op = new Gtxn(["1", TxnaField.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2634,20 +2644,20 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gtxn(["1", "Accounts", "1"], 1, interpreter);
+				op = new Gtxn(["1", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gtxn(["1", "Accounts", "2"], 1, interpreter);
+				op = new Gtxn(["1", TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Gtxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op = new Gtxn(["1", TxnaField.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2655,33 +2665,33 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("should push value from assets or applications array by index from tx group", function () {
-				let op = new Gtxn(["1", "Assets", "0"], 1, interpreter);
+				let op = new Gtxn(["1", TxnaField.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
 
-				op = new Gtxn(["0", "Assets", "0"], 1, interpreter);
+				op = new Gtxn(["0", TxnaField.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
 
-				op = new Gtxn(["1", "NumAssets"], 1, interpreter);
+				op = new Gtxn(["1", TxnRefFields.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(2n, stack.pop());
 
-				op = new Gtxn(["1", "NumApplications"], 1, interpreter);
+				op = new Gtxn(["1", TxnRefFields.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3n, stack.pop());
 
 				// index 0 represent tx.apid (current application id)
-				op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
+				op = new Gtxn(["1", TxnaField.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
-				op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
+				op = new Gtxn(["0", TxnaField.Applications, "2"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
@@ -2699,7 +2709,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push fee from 2nd transaction in group", function () {
-				const op = new Gitxn(["1", "Fee"], 1, interpreter);
+				const op = new Gitxn(["1", TxFieldEnum.Fee], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2707,7 +2717,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push value from accounts or args array by index from tx group", function () {
-				let op = new Gitxn(["1", "Accounts", "0"], 1, interpreter);
+				let op = new Gitxn(["1", TxnaField.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2715,20 +2725,20 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gitxn(["1", "Accounts", "1"], 1, interpreter);
+				op = new Gitxn(["1", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gitxn(["1", "Accounts", "2"], 1, interpreter);
+				op = new Gitxn(["1", TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
 
-				op = new Gitxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+				op = new Gitxn(["1", TxnaField.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2736,33 +2746,33 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("Should push value from assets or applications array by index from tx group", function () {
-				let op = new Gitxn(["1", "Assets", "0"], 1, interpreter);
+				let op = new Gitxn(["1", TxnaField.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
 
-				op = new Gitxn(["0", "Assets", "0"], 1, interpreter);
+				op = new Gitxn(["0", TxnaField.Assets, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
 
-				op = new Gitxn(["1", "NumAssets"], 1, interpreter);
+				op = new Gitxn(["1", TxnRefFields.NumAssets], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(2n, stack.pop());
 
-				op = new Gitxn(["1", "NumApplications"], 1, interpreter);
+				op = new Gitxn(["1", TxnRefFields.NumApplications], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(3n, stack.pop());
 
 				// index 0 represent tx.apid (current application id)
-				op = new Gitxn(["1", "Applications", "0"], 1, interpreter);
+				op = new Gitxn(["1", TxnaField.Applications, "0"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
-				op = new Gitxn(["0", "Applications", "2"], 1, interpreter);
+				op = new Gitxn(["0", TxnaField.Applications, "2"], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1, stack.length());
 				assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
@@ -2776,7 +2786,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from txn.Accounts to stack according to index", function () {
 				// index 0 should push sender's address to stack
-				let op = new Txna(["Accounts", "0"], 1, interpreter);
+				let op = new Txna([TxnaField.Accounts, "0"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -2784,14 +2794,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Txna(["Accounts", "1"], 1, interpreter);
+				op = new Txna([TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Txna(["Accounts", "2"], 1, interpreter);
+				op = new Txna([TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2799,7 +2809,7 @@ describe("Teal Opcodes", function () {
 			});
 
 			it("push addr from 1st AppArg to stack", function () {
-				const op = new Txna(["ApplicationArgs", "0"], 0, interpreter);
+				const op = new Txna([TxnaField.ApplicationArgs, "0"], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2814,7 +2824,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
-				let op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+				let op = new Gtxna(["0", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2822,14 +2832,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+				op = new Gtxna(["0", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gtxna(["0", "Accounts", "2"], 1, interpreter);
+				op = new Gtxna(["0", TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2840,7 +2850,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxna(["1", "Accounts", "0"], 1, interpreter),
+					new Gtxna(["1", TxnaField.Accounts, "0"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -2852,43 +2862,43 @@ describe("Teal Opcodes", function () {
 
 				// for txn
 				expectRuntimeError(
-					() => new Txn(["ApplicationID"], 1, interpreter),
+					() => new Txn([TxFieldEnum.ApplicationID], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["ApprovalProgram"], 1, interpreter),
+					() => new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["ConfigAssetDecimals"], 1, interpreter),
+					() => new Txn([TxnRefFields.ConfigAssetDecimals], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["FreezeAssetAccount"], 1, interpreter),
+					() => new Txn([TxnRefFields.FreezeAssetAccount], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Txn(["FreezeAssetAccount"], 1, interpreter),
+					() => new Txn([TxnRefFields.FreezeAssetAccount], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				// for gtxn
 				expectRuntimeError(
-					() => new Gtxn(["0", "OnCompletion"], 1, interpreter),
+					() => new Gtxn(["0", TxnRefFields.OnCompletion], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Gtxn(["0", "RekeyTo"], 1, interpreter),
+					() => new Gtxn(["0", TxFieldEnum.RekeyTo], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 
 				expectRuntimeError(
-					() => new Gtxn(["0", "ConfigAssetClawback"], 1, interpreter),
+					() => new Gtxn(["0", TxnRefFields.ConfigAssetClawback], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
 				);
 			});
@@ -2907,7 +2917,7 @@ describe("Teal Opcodes", function () {
 
 			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
-				let op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				let op = new Gitxna(["0", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2915,14 +2925,14 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(senderPk, stack.pop());
 
 				// should push Accounts[0] to stack
-				op = new Gitxna(["0", "Accounts", "1"], 1, interpreter);
+				op = new Gitxna(["0", TxnaField.Accounts, "1"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
 				assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
 
 				// should push Accounts[1] to stack
-				op = new Gitxna(["0", "Accounts", "2"], 1, interpreter);
+				op = new Gitxna(["0", TxnaField.Accounts, "2"], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2933,7 +2943,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gitxna(["1", "Accounts", "0"], 1, interpreter),
+					new Gitxna(["1", TxnaField.Accounts, "0"], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -2943,7 +2953,7 @@ describe("Teal Opcodes", function () {
 			it("Should push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
-				let op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				let op = new Gitxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -2952,7 +2962,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gitxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2960,7 +2970,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Gitxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gitxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -2972,7 +2982,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gitxnas(["1", "Accounts"], 1, interpreter),
+					new Gitxnas(["1", TxnaField.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -3000,7 +3010,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinTxnFee to stack", function () {
-			const op = new Global(["MinTxnFee"], 1, interpreter);
+			const op = new Global([GlobalField.MinTxnFee], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3008,7 +3018,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MinBalance to stack", function () {
-			const op = new Global(["MinBalance"], 1, interpreter);
+			const op = new Global([GlobalField.MinBalance], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3016,7 +3026,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push MaxTxnLife to stack", function () {
-			const op = new Global(["MaxTxnLife"], 1, interpreter);
+			const op = new Global([GlobalField.MaxTxnLife], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3024,7 +3034,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push ZeroAddress to stack", function () {
-			const op = new Global(["ZeroAddress"], 1, interpreter);
+			const op = new Global([GlobalField.ZeroAddress], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3032,7 +3042,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push GroupSize to stack", function () {
-			const op = new Global(["GroupSize"], 1, interpreter);
+			const op = new Global([GlobalField.GroupSize], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3040,7 +3050,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push LogicSigVersion to stack", function () {
-			const op = new Global(["LogicSigVersion"], 1, interpreter);
+			const op = new Global([GlobalField.LogicSigVersion], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3049,7 +3059,7 @@ describe("Teal Opcodes", function () {
 
 		it("should push Round to stack", function () {
 			interpreter.runtime.setRoundAndTimestamp(500, 1);
-			const op = new Global(["Round"], 1, interpreter);
+			const op = new Global([GlobalField.Round], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3058,7 +3068,7 @@ describe("Teal Opcodes", function () {
 
 		it("should push LatestTimestamp to stack", function () {
 			interpreter.runtime.setRoundAndTimestamp(500, 100);
-			const op = new Global(["LatestTimestamp"], 1, interpreter);
+			const op = new Global([GlobalField.LatestTimestamp], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3066,7 +3076,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push CurrentApplicationID to stack", function () {
-			const op = new Global(["CurrentApplicationID"], 1, interpreter);
+			const op = new Global([GlobalField.CurrentApplicationID], 1, interpreter);
 			op.execute(stack);
 
 			const top = stack.pop();
@@ -3074,7 +3084,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push CreatorAddress to stack", function () {
-			const op = new Global(["CreatorAddress"], 1, interpreter);
+			const op = new Global([GlobalField.CreatorAddress], 1, interpreter);
 			op.execute(stack);
 
 			// creator of app (id = 1848) is set as elonAddr in ../mock/stateful
@@ -3082,7 +3092,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("TEALv5: should push GroupID to stack", function () {
-			const op = new Global(["GroupID"], 1, interpreter);
+			const op = new Global([GlobalField.GroupID], 1, interpreter);
 			op.execute(stack);
 
 			assert.deepEqual(Uint8Array.from(TXN_OBJ.grp), stack.pop());
@@ -3090,7 +3100,7 @@ describe("Teal Opcodes", function () {
 
 		it("TEALv5: should push zero 32 bytes to stack if global.groupID not found", function () {
 			(TXN_OBJ.grp as any) = undefined;
-			const op = new Global(["GroupID"], 1, interpreter);
+			const op = new Global([GlobalField.GroupID], 1, interpreter);
 			op.execute(stack);
 
 			assert.deepEqual(ZERO_ADDRESS, stack.pop());
@@ -3103,7 +3113,7 @@ describe("Teal Opcodes", function () {
 			});
 			it("Tealv6: CalllerApplicationAddress", function () {
 				// caller app id = 1
-				const op = new Global(["CallerApplicationAddress"], 1, interpreter);
+				const op = new Global([GlobalField.CallerApplicationAddress], 1, interpreter);
 				op.execute(stack);
 				assert.deepEqual(decodeAddress(getApplicationAddress(1n)).publicKey, stack.pop());
 
@@ -3115,7 +3125,7 @@ describe("Teal Opcodes", function () {
 
 			it("Tealv6: CallerApplicationID", function () {
 				// caller app id = 1
-				const op = new Global(["CallerApplicationID"], 1, interpreter);
+				const op = new Global([GlobalField.CallerApplicationID], 1, interpreter);
 				op.execute(stack);
 				assert.equal(1n, stack.pop());
 
@@ -3130,44 +3140,44 @@ describe("Teal Opcodes", function () {
 			interpreter.tealVersion = 1;
 
 			expectRuntimeError(
-				() => new Global(["LogicSigVersion"], 1, interpreter),
+				() => new Global([GlobalField.LogicSigVersion], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			expectRuntimeError(
-				() => new Global(["Round"], 1, interpreter),
+				() => new Global([GlobalField.Round], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			expectRuntimeError(
-				() => new Global(["LatestTimestamp"], 1, interpreter),
+				() => new Global([GlobalField.LatestTimestamp], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			expectRuntimeError(
-				() => new Global(["CurrentApplicationID"], 1, interpreter),
+				() => new Global([GlobalField.CurrentApplicationID], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			interpreter.tealVersion = 2;
 			expectRuntimeError(
-				() => new Global(["CreatorAddress"], 1, interpreter),
+				() => new Global([GlobalField.CreatorAddress], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			interpreter.tealVersion = 4;
 			expectRuntimeError(
-				() => new Global(["GroupID"], 1, interpreter),
+				() => new Global([GlobalField.GroupID], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 
 			interpreter.tealVersion = 5;
 			expectRuntimeError(
-				() => new Global(["CallerApplicationID"], 1, interpreter),
+				() => new Global([GlobalField.CallerApplicationID], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 			expectRuntimeError(
-				() => new Global(["CallerApplicationAddress"], 1, interpreter),
+				() => new Global([GlobalField.CallerApplicationAddress], 1, interpreter),
 				RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
 			);
 		});
@@ -3922,7 +3932,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Balance", function () {
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([AssetHoldingField.AssetBalance], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(3n); // asset id
@@ -3936,7 +3946,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Freeze status", function () {
-			const op = new GetAssetHolding(["AssetFrozen"], 1, interpreter);
+			const op = new GetAssetHolding([AssetHoldingField.AssetFrozen], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(3n); // asset id
@@ -3972,7 +3982,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Total", function () {
-			const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetTotal], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -3985,8 +3995,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Decimals", function () {
-			const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
-
+			const op = new GetAssetDef([AssetParamGetField.AssetDecimals], 1, interpreter);
 			stack.push(0n); // asset index
 
 			op.execute(stack);
@@ -3998,7 +4007,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Default Frozen", function () {
-			const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetDefaultFrozen], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4011,7 +4020,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Unit Name", function () {
-			const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetUnitName], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4024,7 +4033,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Name", function () {
-			const op = new GetAssetDef(["AssetName"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetName], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4037,7 +4046,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset URL", function () {
-			const op = new GetAssetDef(["AssetURL"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetURL], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4050,7 +4059,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset MetaData Hash", function () {
-			const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetMetadataHash], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4063,7 +4072,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Manager", function () {
-			const op = new GetAssetDef(["AssetManager"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetManager], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4076,7 +4085,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Reserve", function () {
-			const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetReserve], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4089,7 +4098,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Freeze", function () {
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4102,7 +4111,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push correct Asset Clawback", function () {
-			const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetClawback], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4116,7 +4125,7 @@ describe("Teal Opcodes", function () {
 
 		it("TEALv5: should push correct Asset Creator", function () {
 			interpreter.tealVersion = 5;
-			const op = new GetAssetDef(["AssetCreator"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetCreator], 1, interpreter);
 
 			stack.push(0n); // asset index
 
@@ -4129,7 +4138,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("should push 0 if Asset not defined", function () {
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(1n); // account index
 
@@ -4143,7 +4152,7 @@ describe("Teal Opcodes", function () {
 
 		it("should throw index out of bound error for Asset Param", function () {
 			interpreter.tealVersion = 1;
-			const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+			const op = new GetAssetDef([AssetParamGetField.AssetFreeze], 1, interpreter);
 
 			stack.push(4n); // asset index
 
@@ -4156,7 +4165,7 @@ describe("Teal Opcodes", function () {
 		it("tealv4: should push correct value accepting offset to foreignAssets", function () {
 			interpreter.tealVersion = 4;
 			// interpreter.runtime.ctx.tx.apas = [1234, 3];
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([AssetHoldingField.AssetBalance], 1, interpreter);
 
 			stack.push(1n); // account index
 			stack.push(0n); // this will push 1st value from Txn.ForeignAssets
@@ -4174,7 +4183,7 @@ describe("Teal Opcodes", function () {
 		it("tealv4: should return value as treating ref as offset, if it represents an index", function () {
 			interpreter.tealVersion = 4;
 			interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
-			const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+			const op = new GetAssetHolding([AssetHoldingField.AssetBalance], 1, interpreter);
 
 			/*
 			 * We wanted to pass assetId directly (3n) here, but since length of
@@ -4816,59 +4825,59 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Gtxns: should push value of txfield from tx in group", function () {
-			stack.push(0n); // tx to fetch "fee" of (set as first)
-			let op = new Gtxns(["Fee"], 1, interpreter);
+			stack.push(0n); // tx to fetch TxFieldEnum.Fee of (set as first)
+			let op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx0.fee as number), stack.pop());
 
 			stack.push(0n);
-			op = new Gtxns(["Amount"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx0.amt as bigint), stack.pop());
 
 			stack.push(1n); // should fetch data from 2nd tx in group
-			op = new Gtxns(["Fee"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx1.fee as number), stack.pop());
 
 			stack.push(1n);
-			op = new Gtxns(["Amount"], 1, interpreter);
+			op = new Gtxns([TxFieldEnum.Amount], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.equal(BigInt(tx1.amt as bigint), stack.pop());
 
 			// gtxn, gtxns also accepts array fields
 			stack.push(1n);
-			op = new Gtxns(["ApplicationArgs", "2"], 1, interpreter);
+			op = new Gtxns([TxnaField.ApplicationArgs, "2"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("argC"), stack.pop());
 		});
 
 		it("Gtxns: should panic if length of stack is < 1", function () {
-			const op = new Gtxns(["Fee"], 1, interpreter);
+			const op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
 		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
-			const op = new Gtxns(["Fee"], 1, interpreter);
+			const op = new Gtxns([TxFieldEnum.Fee], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
 		it("Gtxnsa: should push value of txfieldArr[index] from tx in group", function () {
 			TXN_OBJ.apaa = [Buffer.from("arg1"), Buffer.from("arg2")];
 			stack.push(0n);
-			let op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+			let op = new Gtxnsa([TxnaField.ApplicationArgs, "1"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("arg2"), stack.pop()); // args from tx0
 
 			stack.push(1n);
-			op = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+			op = new Gtxnsa([TxnaField.ApplicationArgs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1, stack.length());
 			assert.deepEqual(parsing.stringToBytes("argA"), stack.pop()); // args from tx1
@@ -4877,17 +4886,17 @@ describe("Teal Opcodes", function () {
 		it("Gtxnsa: should panic if index is out of bounds for txFieldArr", function () {
 			// should throw error as appArgs[10] is undefined
 			stack.push(0n);
-			let op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+			let op = new Gtxnsa([TxnaField.ApplicationArgs, "10"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 
 			stack.push(1n);
-			op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+			op = new Gtxnsa([TxnaField.ApplicationArgs, "10"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
 		it("Gtxns: should panic if transaction index is out of bounds", function () {
 			stack.push(5n); // we only have 2 transactions in group
-			const op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+			const op = new Gtxnsa([TxnaField.ApplicationArgs, "1"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 	});
@@ -5122,8 +5131,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236,
-						2, 70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
+						3, 35, 69, 118, 1, 35, 69, 117, 3, 35, 69, 118, 1, 35, 69, 117, 2, 70, 138, 236, 2,
+						70, 138, 236, 2, 70, 138, 236, 2, 70, 138, 236,
 					])
 				);
 
@@ -5223,8 +5232,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35,
-						69, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						1, 35, 69, 118, 0, 35, 69, 118, 255, 35, 69, 118, 1, 35, 69, 119, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 					])
 				);
 			});
@@ -5296,8 +5305,8 @@ describe("Teal Opcodes", function () {
 					new Uint8Array([
 						151, 200, 103, 239, 94, 230, 133, 186, 92, 4, 163, 133, 89, 34, 193, 80, 86, 64,
 						223, 27, 83, 94, 252, 230, 80, 125, 26, 177, 77, 155, 56, 124, 72, 239, 162, 240,
-						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247,
-						89, 13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
+						235, 209, 133, 37, 238, 179, 103, 90, 241, 149, 73, 143, 244, 119, 43, 196, 247, 89,
+						13, 249, 250, 58, 240, 46, 253, 28, 210, 100,
 					])
 				);
 			});
@@ -5697,8 +5706,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22,
-						19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
+						227, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 22, 19,
+						23, 18, 22, 19, 23, 18, 22, 19, 23, 18, 28,
 					])
 				);
 			});
@@ -5738,8 +5747,8 @@ describe("Teal Opcodes", function () {
 				assert.deepEqual(
 					stack.pop(),
 					new Uint8Array([
-						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
-						254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
+						94, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254,
+						220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137, 254, 220, 186, 137,
 					])
 				);
 			});
@@ -6077,7 +6086,7 @@ describe("Teal Opcodes", function () {
 
 	describe("Tealv5: ECDSA", function () {
 		const stack = new Stack<StackElem>();
-		const ec = new EC("secp256k1");
+		const ec = new EC(CurveTypeEnum.secp256k1);
 		const key = ec.genKeyPair();
 		const pkX = key.getPublic().getX().toBuffer();
 		const pkY = key.getPublic().getY().toBuffer();
@@ -6140,7 +6149,10 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("ecdsa_verify, should throw error if curve is not supported", function () {
-			expectRuntimeError(() => new EcdsaVerify(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaVerify(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_decompress", function () {
@@ -6160,7 +6172,10 @@ describe("Teal Opcodes", function () {
 				stack.pop(),
 				Buffer.from("50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352", "hex")
 			);
-			expectRuntimeError(() => new EcdsaPkDecompress(["2"], 1), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkDecompress(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("ecdsa_pk_recover", function () {
@@ -6172,7 +6187,7 @@ describe("Teal Opcodes", function () {
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
 
-			let op = new EcdsaPkRecover(["0"], 1);
+			const op = new EcdsaPkRecover(["0"], 1);
 			op.execute(stack);
 
 			assert.deepEqual(stack.pop(), pkY);
@@ -6182,9 +6197,11 @@ describe("Teal Opcodes", function () {
 			stack.push(2n);
 			stack.push(signature.r.toBuffer());
 			stack.push(signature.s.toBuffer());
-			op = new EcdsaPkRecover(["2"], 1);
 
-			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED);
+			expectRuntimeError(
+				() => new EcdsaPkRecover(["2"], 1),
+				RUNTIME_ERRORS.TEAL.CURVE_NOT_SUPPORTED
+			);
 		});
 
 		it("Should calculate correct cost", function () {
@@ -6363,7 +6380,7 @@ describe("Teal Opcodes", function () {
 			it("push addr from txn.Accounts to stack according to index", function () {
 				// index 0 should push sender's address to stack
 				stack.push(0n);
-				let op = new Txnas(["Accounts"], 1, interpreter);
+				let op = new Txnas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
@@ -6372,7 +6389,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Txnas(["Accounts"], 1, interpreter);
+				op = new Txnas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6380,7 +6397,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Txnas(["Accounts"], 1, interpreter);
+				op = new Txnas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6389,7 +6406,7 @@ describe("Teal Opcodes", function () {
 
 			it("push addr from 1st AppArg to stack", function () {
 				stack.push(0n);
-				const op = new Txnas(["ApplicationArgs"], 0, interpreter);
+				const op = new Txnas([TxnaField.ApplicationArgs], 0, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6405,7 +6422,7 @@ describe("Teal Opcodes", function () {
 			it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
-				let op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				let op = new Gtxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -6414,7 +6431,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[0] to stack
 				stack.push(1n);
-				op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gtxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6422,7 +6439,7 @@ describe("Teal Opcodes", function () {
 
 				// should push Accounts[1] to stack
 				stack.push(2n);
-				op = new Gtxnas(["0", "Accounts"], 1, interpreter);
+				op = new Gtxnas(["0", TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6434,7 +6451,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxnas(["1", "Accounts"], 1, interpreter),
+					new Gtxnas(["1", TxnaField.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -6452,7 +6469,7 @@ describe("Teal Opcodes", function () {
 				// index 0 should push sender's address to stack from 1st tx
 				stack.push(0n);
 				stack.push(0n);
-				let op = new Gtxnsas(["Accounts"], 1, interpreter);
+				let op = new Gtxnsas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
@@ -6462,7 +6479,7 @@ describe("Teal Opcodes", function () {
 				// should push Accounts[0] to stack
 				stack.push(0n);
 				stack.push(1n);
-				op = new Gtxnsas(["Accounts"], 1, interpreter);
+				op = new Gtxnsas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6471,7 +6488,7 @@ describe("Teal Opcodes", function () {
 				// should push Accounts[1] to stack
 				stack.push(0n);
 				stack.push(2n);
-				op = new Gtxnsas(["Accounts"], 1, interpreter);
+				op = new Gtxnsas([TxnaField.Accounts], 1, interpreter);
 				op.execute(stack);
 
 				assert.equal(1, stack.length());
@@ -6484,7 +6501,7 @@ describe("Teal Opcodes", function () {
 				execExpectError(
 					stack,
 					[],
-					new Gtxnsas(["Accounts"], 1, interpreter),
+					new Gtxnsas([TxnaField.Accounts], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
 				);
 			});
@@ -6653,7 +6670,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppApprovalProgram", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppApprovalProgram"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppApprovalProgram], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram("counter-approval.teal")));
@@ -6661,7 +6678,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppClearStateProgram", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppClearStateProgram"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppClearStateProgram], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes(getProgram("clear.teal")));
@@ -6669,7 +6686,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppGlobalNumUint", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppGlobalNumUint"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppGlobalNumUint], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numUint));
@@ -6677,7 +6694,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppGlobalNumByteSlice", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppGlobalNumByteSlice"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppGlobalNumByteSlice], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(stack.pop(), BigInt(appInfo["global-state-schema"].numByteSlice));
@@ -6685,7 +6702,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppLocalNumUint", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppLocalNumUint"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppLocalNumUint], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numUint));
@@ -6693,7 +6710,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppLocalNumByteSlice", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppLocalNumByteSlice"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppLocalNumByteSlice], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(stack.pop(), BigInt(appInfo["local-state-schema"].numByteSlice));
@@ -6701,7 +6718,7 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppExtraProgramPages", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppExtraProgramPages"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppExtraProgramPages], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(stack.pop(), 1n);
@@ -6709,14 +6726,14 @@ describe("Teal Opcodes", function () {
 
 		it("should return AppCreator", function () {
 			stack.push(BigInt(appID));
-			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppCreator], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
 			assert.equal(encodeAddress(stack.pop() as Uint8Array), alan.address);
 		});
 
 		it("should return AppAddress", function () {
-			const op = new AppParamsGet(["AppAddress"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppAddress], 1, interpreter);
 			stack.push(BigInt(appID));
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n);
@@ -6725,7 +6742,7 @@ describe("Teal Opcodes", function () {
 
 		it("return '0,0' when app is undefined", function () {
 			stack.push(10n);
-			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppCreator], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 0n);
 			assert.equal(stack.pop(), 0n);
@@ -6733,7 +6750,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should fail number element in stack less than 1", function () {
 			assert.equal(stack.length(), 0);
-			const op = new AppParamsGet(["AppCreator"], 1, interpreter);
+			const op = new AppParamsGet([AppParamField.AppCreator], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
@@ -6743,7 +6760,7 @@ describe("Teal Opcodes", function () {
 				interpreter.tealVersion = version;
 				stack.push(BigInt(appID));
 				expectRuntimeError(
-					() => new AppParamsGet(["AppCreator"], 1, interpreter),
+					() => new AppParamsGet([AppParamField.AppCreator], 1, interpreter),
 					RUNTIME_ERRORS.TEAL.UNKNOWN_APP_FIELD
 				);
 			});
@@ -6855,21 +6872,21 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should return balance", function () {
-			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctBalance], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.equal(stack.pop(), alice.balance());
 		});
 
 		it("Should return min balance", function () {
-			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctMinBalance], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.equal(stack.pop(), BigInt(alice.minBalance));
 		});
 
 		it("Should return Auth Address", function () {
-			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctAuthAddr], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.deepEqual(stack.pop(), ZERO_ADDRESS);
@@ -6879,14 +6896,14 @@ describe("Teal Opcodes", function () {
 			// set spend key for alice is bob
 			alice.rekeyTo(bob.address);
 			interpreter.runtime.ctx.state.accounts.set(alice.address, alice);
-			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctAuthAddr], 1, interpreter);
 			op.execute(stack);
 			assert.equal(stack.pop(), 1n); // balance > 0
 			assert.deepEqual(stack.pop(), decodeAddress(bob.address).publicKey);
 		});
 
 		it("Should return balance with account own zero balance", function () {
-			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctBalance], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
 			assert.equal(stack.pop(), 0n); // balance = 0
@@ -6894,7 +6911,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should return min balance with account own zero balance", function () {
-			op = new AcctParamsGet(["AcctMinBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctMinBalance], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
 			assert.equal(stack.pop(), 0n); // balance = 0
@@ -6902,7 +6919,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should return Auth Address with account own zero balance", function () {
-			op = new AcctParamsGet(["AcctAuthAddr"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctAuthAddr], 1, interpreter);
 			stack.push(decodeAddress(zeroBalanceAddr).publicKey);
 			op.execute(stack);
 			assert.equal(stack.pop(), 0n); // balance = 0
@@ -6917,7 +6934,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw error if query account not in ref account list", function () {
-			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctBalance], 1, interpreter);
 			stack.push(decodeAddress(bob.address).publicKey);
 
 			expectRuntimeError(
@@ -6934,7 +6951,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should throw error if top element in stack is not an address", function () {
-			op = new AcctParamsGet(["AcctBalance"], 1, interpreter);
+			op = new AcctParamsGet([AccountParamGetField.AcctBalance], 1, interpreter);
 			stack.push(parsing.stringToBytes("ABCDE"));
 
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_ADDR);
@@ -6952,7 +6969,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should succeed: query data use itxnas", function () {
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxnaField.Accounts], 1, interpreter);
 			stack.push(1n);
 			op.execute(stack);
 
@@ -6961,7 +6978,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should fail: not any inner tx submited", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxnaField.Accounts], 1, interpreter);
 			stack.push(1n);
 			expectRuntimeError(
 				() => op.execute(stack),
@@ -6970,7 +6987,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should fail: stack empty", function () {
-			const op = new ITxnas(["Accounts"], 1, interpreter);
+			const op = new ITxnas([TxnaField.Accounts], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 	});
@@ -6993,14 +7010,14 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put on top of the stack logs from innerTx", function () {
-			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			const op = new ITxn([TxnaField.Logs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Hello"));
 		});
 
 		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxn(["Logs", "0"], 1, interpreter);
+			const op = new ITxn([TxnaField.Logs, "0"], 1, interpreter);
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
@@ -7009,7 +7026,7 @@ describe("Teal Opcodes", function () {
 
 		it("Should throw an error, no inner transaction", function () {
 			interpreter.innerTxnGroups = [];
-			const op = new ITxn(["NumLogs"], 1, interpreter);
+			const op = new ITxn([TxnRefFields.NumLogs], 1, interpreter);
 			expectRuntimeError(
 				() => op.execute(stack),
 				RUNTIME_ERRORS.TEAL.NO_INNER_TRANSACTION_AVAILABLE
@@ -7017,7 +7034,7 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put the number of logs on top of the stack", function () {
-			const op = new ITxn(["NumLogs"], 1, interpreter);
+			const op = new ITxn([TxnRefFields.NumLogs], 1, interpreter);
 			op.execute(stack);
 			assert.equal(1n, stack.pop());
 		});
@@ -7041,19 +7058,19 @@ describe("Teal Opcodes", function () {
 		});
 
 		it("Should put on top of the stack log from group transaction", function () {
-			const op = new Gitxna(["1", "Logs", "0"], 1, interpreter);
+			const op = new Gitxna(["1", TxnaField.Logs, "0"], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Monty"));
 		});
 
 		it("Should throw an error index out of bound", function () {
-			const op = new Gitxna(["1", "Logs", "2"], 1, interpreter);
+			const op = new Gitxna(["1", TxnaField.Logs, "2"], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND);
 		});
 
 		it("Should put on top of stack log from group transaction", function () {
 			stack.push(1n);
-			const op = new Gitxnas(["1", "Logs"], 1, interpreter);
+			const op = new Gitxnas(["1", TxnaField.Logs], 1, interpreter);
 			op.execute(stack);
 			assert.deepEqual(stack.pop(), parsing.stringToBytes("Python"));
 		});
@@ -7074,29 +7091,29 @@ describe("Teal Opcodes", function () {
 
 		it("Should decode base64 encoded data and push it to stack", function () {
 			stack.push(toPushUrl);
-			const opUrl = new Base64Decode(["URLEncoding"], 0);
+			const opUrl = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			opUrl.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 			stack.push(toPushStd);
-			const opStd = new Base64Decode(["StdEncoding"], 0);
+			const opStd = new Base64Decode([Base64Encoding.StdEncoding], 0);
 			opStd.execute(stack);
 			assert.deepEqual(expectedBytes, stack.pop());
 		});
 
 		it("Should throw an error when last stack element is not base64 encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseUrl, "utf-8")));
-			const op = new Base64Decode(["StdEncoding"], 0);
+			const op = new Base64Decode([Base64Encoding.StdEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64);
 		});
 
 		it("Should throw an error when last stack element is not base64Url encoded", function () {
 			stack.push(new Uint8Array(Buffer.from(encoded64BaseStd, "utf-8")));
-			const op = new Base64Decode(["URLEncoding"], 0);
+			const op = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_BASE64URL);
 		});
 
 		it("Should throw an error when the stack is empty", function () {
-			const op = new Base64Decode(["StdEncoding"], 0);
+			const op = new Base64Decode([Base64Encoding.StdEncoding], 0);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
 		});
 
@@ -7111,7 +7128,7 @@ describe("Teal Opcodes", function () {
 		it("Should calculate the correct cost", function () {
 			let toPush = Buffer.from("", "utf-8");
 			stack.push(toPush);
-			let op = new Base64Decode(["URLEncoding"], 0);
+			let op = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			let cost = op.execute(stack);
 			assert.deepEqual(1, cost); // base64_decode cost = 1
 
@@ -7120,7 +7137,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode(["URLEncoding"], 0);
+			op = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(5, cost); // base64_decode cost = 5 (64 bytes -> 1 + 64/16)
 
@@ -7129,7 +7146,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode(["URLEncoding"], 0);
+			op = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(5, cost); // base64_decode cost = 5 (60 bytes -> 1 + ceil(60/16))
 
@@ -7138,7 +7155,7 @@ describe("Teal Opcodes", function () {
 				"utf-8"
 			);
 			stack.push(toPush);
-			op = new Base64Decode(["URLEncoding"], 0);
+			op = new Base64Decode([Base64Encoding.URLEncoding], 0);
 			cost = op.execute(stack);
 			assert.deepEqual(6, cost); // base64_decode cost = 6 (68 bytes -> 1 + ceil(68/16))
 		});
@@ -7456,18 +7473,18 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should throw an error when the max byte array size is exceeded(4096 bytes)", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(4097).fill(0);
-			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.MAX_BYTE_ARRAY_EXCEEDED);
 		});
 		it("Should throw an error when the max program is exceeded(2048 bytes)", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2049).fill(0);
-			const op = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.PROGRAM_LENGTH_EXCEEDED);
 		});
 		it("Should ApprovalProgram and ApprovalProgramPages return the same value If approvalProgram.length =< 2048 ", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(2000).fill(0);
-			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ApprovalProgram"], 1, interpreter);
+			const op1 = new Txn([TxnaField.ApprovalProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxFieldEnum.ApprovalProgram], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7477,8 +7494,8 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return enitre ApprovalProgram in two steps with ApprovalProgramPages", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
-			const op1 = new Txn(["ApprovalProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ApprovalProgramPages", "1"], 1, interpreter);
+			const op1 = new Txn([TxnaField.ApprovalProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxnaField.ApprovalProgramPages, "1"], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7488,8 +7505,8 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return entire ClearStateProgram in two steps", function () {
 			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
-			const op1 = new Txn(["ClearStateProgramPages", "0"], 1, interpreter);
-			const op2 = new Txn(["ClearStateProgramPages", "1"], 1, interpreter);
+			const op1 = new Txn([TxnaField.ClearStateProgramPages, "0"], 1, interpreter);
+			const op2 = new Txn([TxnaField.ClearStateProgramPages, "1"], 1, interpreter);
 			op1.execute(stack);
 			const op1Result = stack.pop();
 			op2.execute(stack);
@@ -7499,13 +7516,13 @@ describe("Teal Opcodes", function () {
 		});
 		it("Should return correct number of ApprovalProgramPages", function () {
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(5000).fill(0);
-			const op = new Txn(["NumApprovalProgramPages"], 1, interpreter);
+			const op = new Txn([TxnRefFields.NumApprovalProgramPages], 1, interpreter);
 			op.execute(stack);
 			assert.equal(2n, stack.pop());
 		});
 		it("Should return correct number of ClearStateProgramPages", function () {
 			interpreter.runtime.ctx.tx.apsu = Buffer.alloc(5000).fill(0);
-			const op = new Txn(["NumClearStateProgramPages"], 1, interpreter);
+			const op = new Txn([TxnRefFields.NumClearStateProgramPages], 1, interpreter);
 			op.execute(stack);
 			assert.equal(2n, stack.pop());
 		});
@@ -7514,12 +7531,12 @@ describe("Teal Opcodes", function () {
 			//at the end we are popping the values from the stack and compare them
 			interpreter.runtime.ctx.tx.apap = Buffer.alloc(3000).fill(0);
 			const opArray = [new ITxnBegin([], 1, interpreter)];
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
-			opArray.push(new ITxnField(["ClearStateProgramPages"], 1, interpreter));
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
-			opArray.push(new ITxnField(["ClearStateProgramPages"], 2, interpreter));
-			opArray.push(new Txn(["ClearStateProgramPages", "1"], 1, interpreter));
-			opArray.push(new Txn(["ApprovalProgramPages", "1"], 1, interpreter));
+			opArray.push(new Txn([TxnaField.ApprovalProgramPages, "1"], 1, interpreter));
+			opArray.push(new ITxnField([TxnaField.ClearStateProgramPages], 1, interpreter));
+			opArray.push(new Txn([TxnaField.ApprovalProgramPages, "1"], 1, interpreter));
+			opArray.push(new ITxnField([TxnaField.ClearStateProgramPages], 2, interpreter));
+			opArray.push(new Txn([TxnaField.ClearStateProgramPages, "1"], 1, interpreter));
+			opArray.push(new Txn([TxnaField.ApprovalProgramPages, "1"], 1, interpreter));
 			opArray.forEach(function (op) {
 				op.execute(stack);
 			});
@@ -7694,7 +7711,7 @@ describe("Teal Opcodes", function () {
 
 		this.beforeEach(function () {
 			stack = new Stack<StackElem>();
-		})
+		});
 
 		it("Should return 1 and hash of proof for valid proof and verification key", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
@@ -7712,7 +7729,7 @@ describe("Teal Opcodes", function () {
 			stack.push(proof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PUB_KEY_LENGTH);
-		})
+		});
 		it("Should throw error if proof size not equal 80", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			const wrongSizeProof = Buffer.from("b6b4699f87d56126c9117");
@@ -7720,7 +7737,7 @@ describe("Teal Opcodes", function () {
 			stack.push(wrongSizeProof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_PROOF_LENGTH);
-		})
+		});
 		it("Should return correct cost", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfAlgorand], 1);
 			stack.push(publicKey);
@@ -7728,17 +7745,20 @@ describe("Teal Opcodes", function () {
 			stack.push(message);
 			const cost = op.execute(stack);
 			assert.equal(cost, 5700);
-		})
+		});
 		it("Should throw error when field = VrfStandard", function () {
 			const op = new VrfVerify([vrfVerifyFieldTypes.VrfStandard], 1);
 			stack.push(publicKey);
 			stack.push(proof);
 			stack.push(message);
 			expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.UNSUPPORTED_VRF_STANDARD);
-		})
+		});
 		it("Should throw error when field is unknown", function () {
-			expectRuntimeError(() => new VrfVerify(["wrongType"], 1), RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE);
-		})
+			expectRuntimeError(
+				() => new VrfVerify(["wrongType"], 1),
+				RUNTIME_ERRORS.TEAL.UNKNOWN_VRF_TYPE
+			);
+		});
 	});
 
 	describe("Ecdsa Secp256r1 curve", function () {
@@ -7774,7 +7794,7 @@ describe("Teal Opcodes", function () {
 
 			it("Should push 0 to stack if invalid signature provided", function () {
 				stack.push(message);
-				const wrongSignatureR = signature.r.toBuffer()
+				const wrongSignatureR = signature.r.toBuffer();
 				wrongSignatureR[0] = ~wrongSignatureR[0]; //flip the first bit
 				stack.push(wrongSignatureR);
 				stack.push(signature.s.toBuffer());
@@ -7798,6 +7818,57 @@ describe("Teal Opcodes", function () {
 				op.execute(stack);
 				assert.deepEqual(stack.pop(), publicKeyY);
 				assert.deepEqual(stack.pop(), publicKeyX);
+			});
+		});
+	});
+
+	describe("Tealv8", function () {
+		describe("switch", function () {
+			let stack: Stack<StackElem>;
+			let interpreter: Interpreter;
+			const line = 1;
+			const tealV8 = 8;
+
+			this.beforeEach(function () {
+				stack = new Stack<StackElem>();
+				interpreter = new Interpreter();
+				interpreter.runtime = new Runtime([]);
+				interpreter.runtime.ctx.tx = cloneDeep(TXN_OBJ);
+				interpreter.tealVersion = tealV8;
+			});
+
+			it("Should create a new switch opcode", function () {
+				assert.doesNotThrow(() => new Switch(["label"], line, interpreter));
+			});
+
+			it("Should throw an error if the stack length < 1", function () {
+				const op = new Switch(["label"], line, interpreter);
+				expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH);
+			});
+
+			it("Should not thorw an error if labels not provided", function () {
+				assert.doesNotThrow(() => new Switch([], line, interpreter));
+			});
+
+			it("Should allow 255 labels", function () {
+				const upperLimit = 255;
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
+				assert.doesNotThrow(() => new Switch(labels, line, interpreter));
+			});
+
+			it("Should throw an error if 256 labels provided", function () {
+				const upperLimit = 256;
+				const labels = [...Array(upperLimit).keys()].map((i) => "label".concat(i.toString()));
+				expectRuntimeError(
+					() => new Switch(labels, line, interpreter),
+					RUNTIME_ERRORS.TEAL.LABELS_LENGTH_INVALID
+				);
+			});
+
+			it("Should not throw an error if index exceeds the lenght of labes provided", function () {
+				stack.push(5n);
+				const op = new Switch(["label"], line, interpreter);
+				assert.doesNotThrow(() => op.execute(stack));
 			});
 		});
 	});

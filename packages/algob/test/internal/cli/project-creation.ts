@@ -24,7 +24,10 @@ describe("Init project", function () {
 		withInfrastructure: boolean,
 		isNpm: boolean
 	) {
-		assert.isTrue(fs.existsSync(`./${location}/algob.config.js`) || fs.existsSync(`./${location}/algob.config.ts`));
+		assert.isTrue(
+			fs.existsSync(`./${location}/algob.config.js`) ||
+				fs.existsSync(`./${location}/algob.config.ts`)
+		);
 		if (isTs) {
 			assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
 		} else {

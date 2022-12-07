@@ -28,6 +28,7 @@ import {
 	BitwiseNot,
 	BitwiseOr,
 	BitwiseXor,
+	Block,
 	Bn254Add,
 	Bn254Pairing,
 	Bn254ScalarMul,
@@ -152,18 +153,17 @@ import {
 	Substring,
 	Substring3,
 	Swap,
+	Switch,
 	Txn,
 	Txna,
 	Txnas,
 	Uncover,
-	Block,
 	VrfVerify,
 } from "../interpreter/opcode-list";
 import {
 	LOGIC_SIG_MAX_COST,
 	LogicSigMaxSize,
 	MAX_APP_PROGRAM_COST,
-	MaxAppProgramLen,
 	OpGasCost,
 } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -423,6 +423,7 @@ opCodeMap[8] = {
 	bn254_add: Bn254Add,
 	bn254_scalar_mul: Bn254ScalarMul,
 	bn254_pairing: Bn254Pairing,
+	switch: Switch,
 };
 
 // list of opcodes with exactly one parameter.
@@ -491,6 +492,7 @@ const interpreterReqList = new Set([
 	"sha3_256",
 	"ed25519verify",
 	"block",
+	"switch",
 ]);
 
 const signatureModeOps = new Set(["arg", "args", "arg_0", "arg_1", "arg_2", "arg_3"]);

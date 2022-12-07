@@ -30,9 +30,9 @@ You can connect to `web` package in your react app by using different wallets. C
 
     Create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
-      ```js
-      const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
-      ```
+    ```js
+    const wcSession = new WebMode(AlgoSigner, CHAIN_NAME);
+    ```
 
 2.  ### MyAlgo Wallet:
 

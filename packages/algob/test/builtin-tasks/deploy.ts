@@ -304,7 +304,7 @@ script3: META from third defined: third-ok
 		});
 		fs.unlinkSync(testFixtureOutputFile);
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/2.js"],
+			script: ["scripts/2.js"],
 		});
 		const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(
@@ -321,7 +321,7 @@ script2: META from third defined: undefined\n`
 		});
 		fs.unlinkSync(testFixtureOutputFile);
 		await this.env.run(TASK_RUN, {
-			scripts: ["scripts/2.js"],
+			script: ["scripts/2.js"],
 		});
 		const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
 		assert.equal(

@@ -3,17 +3,20 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, types as wtypes } from "@algo-builder/web";
 import { sha256 } from "js-sha256";
 
-export async function tryExecuteTx(deployer: algob.types.Deployer, txnParams: wtypes.ExecParams[]) {
+export async function tryExecuteTx(
+	deployer: algob.types.Deployer,
+	txnParams: wtypes.ExecParams[]
+) {
 	try {
 		await deployer.executeTx(txnParams);
 	} catch (e) {
 		if (wtypes.isRequestError(e)) {
 			console.error("Transaction Failed", e?.response?.error);
-			throw e
+			throw e;
 		}
 		if (e instanceof BuilderError) console.error("Transaction Failed", e.message);
 		console.error("An unexpected error occurred:", e);
-		throw e
+		throw e;
 	}
 }
 

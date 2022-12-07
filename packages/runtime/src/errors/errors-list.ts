@@ -307,9 +307,9 @@ maximun uint128`,
 	},
 	CURVE_NOT_SUPPORTED: {
 		number: 1045,
-		message: "Curve index: %index% is not supported. [error-line: %line%]",
+		message: "Curve %curve% is not supported. [error-line: %line%]",
 		title: "curve not supported",
-		description: `curve index is not supported.`,
+		description: `curve is not supported.`,
 	},
 	ITXN_BEGIN_WITHOUT_ITXN_SUBMIT: {
 		number: 1046,
@@ -460,7 +460,8 @@ maximun uint128`,
 		number: 1067,
 		message: "vtf_standard not supported",
 		title: "Unsupported by runtime",
-		description: "vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
+		description:
+			"vrf_standard field is not supported yet by algorand. Use vrf_algorand instead",
 	},
 	INVALID_PUB_KEY_LENGTH: {
 		number: 1068,
@@ -482,7 +483,8 @@ maximun uint128`,
 	},
 	EXTRA_PAGES_EXCEEDED: {
 		number: 1071,
-		message: "Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
+		message:
+			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
 		title: "Extra pages",
 		description:
 			"Allowed extra pages range is from 0 to %maxExtraAppProgramPages% but got %extraPages% extra pages",
@@ -492,7 +494,13 @@ maximun uint128`,
 		message: "Unknown block opcode field",
 		title: "Unknown field",
 		description: "Block opcode support only BlkTimestamp and BlkSeed field, got: %field",
-	}
+	},
+	LABELS_LENGTH_INVALID: {
+		number: 1073,
+		message: "Labels length invalid",
+		title: "Labels length invalid",
+		description: "Length of provided labels is invalid, got: %len, expected: [0, 255]",
+	},
 };
 
 const runtimeGeneralErrors = {
@@ -514,13 +522,6 @@ const runtimeGeneralErrors = {
 			"Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
 		title: "Round Error",
 		description: `Round Error`,
-	},
-	MAX_LIMIT_APPS: {
-		number: 1303,
-		message:
-			"Error while creating app for %address%. Maximum created apps for an account is %max%",
-		title: "App Creation Error",
-		description: `App Creation Error`,
 	},
 	INVALID_SECRET_KEY: {
 		number: 1304,
@@ -647,9 +648,27 @@ const runtimeGeneralErrors = {
 	},
 	ROUND_NOT_AVAILABLE: {
 		number: 1324,
-        message: "Round is not available",
-        title: "Invalid round",
-        description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+		message: "Round is not available",
+		title: "Invalid round",
+		description: "round %round is not available. It's outside [%firstAvail-%lastAvail]",
+	},
+	CONFIG_FILE_NOT_FOUND: {
+		number: 1325,
+		message: "Config file is not found",
+		title: "Config file not found",
+		description: "The config file in project is not found",
+	},
+	NETWORK_ACCOUNT_NOT_FOUND: {
+		number: 1326,
+		message: "Accounts is not found in network %network%",
+		title: "Accounts is not found in network",
+		description: "Accounts not found in network %network%",
+	},
+	INVALID_NETWORK: {
+		number: 1327,
+		message: "Invalid network %network% not found in config",
+		title: "Invalid network not found in config",
+		description: "Not found network %network% in config",
 	},
 };
 
@@ -754,13 +773,6 @@ const runtimeAsaErrors = {
 		message: `Asset with Index %assetId% not found`,
 		title: "Asset Not Found",
 		description: "Asset Not Found",
-	},
-	MAX_LIMIT_ASSETS: {
-		number: 1503,
-		message:
-			"Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
-		title: "Asset Creation Error",
-		description: `Asset Creation Error`,
 	},
 	MANAGER_ERROR: {
 		number: 1504,

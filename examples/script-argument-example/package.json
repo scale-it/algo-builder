@@ -1,0 +1,26 @@
+{
+	"name": "script-argument-example",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@algo-builder/algob": "workspace:*",
+		"@algo-builder/runtime": "workspace:*",
+		"@algo-builder/web": "workspace:*",
+		"algosdk": "^1.24.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.26.0",
+		"mocha": "^10.1.0"
+	},
+	"scripts": {
+		"algob": "algob",
+		"lint:check": "eslint --ext .js,.ts scripts",
+		"lint": "eslint --fix --ext .js,.ts scripts",
+		"build:docs": "echo ok",
+		"build": "echo ok"
+	},
+	"mocha": {
+		"file": "../../test/setup.js"
+	}
+}

@@ -13,6 +13,8 @@ import {
 	TransactionTypeEnum,
 	TxFieldEnum,
 	TxnFields,
+	TxnRefFields,
+	TxnaField
 } from "../lib/constants";
 import { EncTx, StackElem } from "../types";
 import { convertToString } from "./parsing";
@@ -35,23 +37,25 @@ const numberTxnFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Fee", "FreezeAssetFrozen", "ConfigAssetDecimals", "ConfigAssetDefaultFrozen"]),
+	5: new Set([TxFieldEnum.Fee, TxnRefFields.FreezeAssetFrozen, TxnRefFields.ConfigAssetDecimals, TxnRefFields.ConfigAssetDefaultFrozen]),
 };
 numberTxnFields[6] = cloneDeep(numberTxnFields[5]);
-["VoteFirst", "VoteLast", "VoteKeyDilution", "Nonparticipation", "ApplicationID"].forEach(
+[TxFieldEnum.VoteFirst, TxFieldEnum.VoteLast, TxFieldEnum.VoteKeyDilution, TxFieldEnum.Nonparticipation, TxFieldEnum.ApplicationID].forEach(
 	(field) => numberTxnFields[6].add(field)
 );
 numberTxnFields[7] = cloneDeep(numberTxnFields[6]);
+numberTxnFields[8] = cloneDeep(numberTxnFields[7]);
 
 const uintTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Amount", "AssetAmount", "TypeEnum", "ConfigAssetTotal"]),
+	5: new Set([TxFieldEnum.Amount, TxFieldEnum.AssetAmount, TxFieldEnum.TypeEnum, TxnRefFields.ConfigAssetTotal]),
 };
 uintTxnFields[6] = cloneDeep(uintTxnFields[5]);
 uintTxnFields[7] = cloneDeep(uintTxnFields[6]);
+uintTxnFields[8] = cloneDeep(uintTxnFields[7]);
 
 // these are also uint values, but require that the asset
 // be present in Txn.Assets[] array
@@ -60,44 +64,47 @@ const assetIDFields: { [key: number]: Set<string> } = {
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["XferAsset", "FreezeAsset", "ConfigAsset"]),
+	5: new Set([TxFieldEnum.XferAsset, TxFieldEnum.FreezeAsset, TxFieldEnum.ConfigAsset]),
 };
 
 assetIDFields[6] = cloneDeep(assetIDFields[5]);
 assetIDFields[7] = cloneDeep(assetIDFields[6]);
+assetIDFields[8] = cloneDeep(assetIDFields[7]);
 
 const byteTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["ConfigAssetMetadataHash"]),
+	5: new Set([TxnRefFields.ConfigAssetMetadataHash]),
 };
 
 byteTxnFields[6] = cloneDeep(byteTxnFields[5]);
 [
-	"VotePK",
-	"SelectionPK",
-	"Note",
-	"ApplicationArgs",
-	"ApprovalProgram",
-	"ClearStateProgram",
+	TxFieldEnum.VotePK,
+	TxFieldEnum.SelectionPK,
+	TxFieldEnum.Note,
+	TxnaField.ApplicationArgs,
+	TxFieldEnum.ApprovalProgram,
+	TxFieldEnum.ClearStateProgram,
 ].forEach((field) => byteTxnFields[6].add(field));
 byteTxnFields[7] = cloneDeep(byteTxnFields[6]);
-["ApprovalProgramPages", "ClearStateProgramPages"].forEach((field) =>
+[TxnaField.ApprovalProgramPages, TxnaField.ClearStateProgramPages].forEach((field) =>
 	byteTxnFields[7].add(field)
 );
+byteTxnFields[8] = cloneDeep(byteTxnFields[7]);
 
 const strTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
 	2: new Set(),
 	3: new Set(),
 	4: new Set(),
-	5: new Set(["Type", "ConfigAssetName", "ConfigAssetUnitName", "ConfigAssetURL"]),
+	5: new Set([TxFieldEnum.Type, TxnRefFields.ConfigAssetName, TxnRefFields.ConfigAssetUnitName, TxnRefFields.ConfigAssetURL]),
 };
 
 strTxnFields[6] = cloneDeep(strTxnFields[5]);
 strTxnFields[7] = cloneDeep(strTxnFields[6]);
+strTxnFields[8] = cloneDeep(strTxnFields[7]);
 
 const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -105,32 +112,34 @@ const acfgAddrTxnFields: { [key: number]: Set<string> } = {
 	3: new Set(),
 	4: new Set(),
 	5: new Set([
-		"ConfigAssetManager",
-		"ConfigAssetReserve",
-		"ConfigAssetFreeze",
-		"ConfigAssetClawback",
+		TxnRefFields.ConfigAssetManager,
+		TxnRefFields.ConfigAssetReserve,
+		TxnRefFields.ConfigAssetFreeze,
+		TxnRefFields.ConfigAssetClawback,
 	]),
 };
 
 acfgAddrTxnFields[6] = cloneDeep(acfgAddrTxnFields[5]);
 acfgAddrTxnFields[7] = cloneDeep(acfgAddrTxnFields[6]);
+acfgAddrTxnFields[8] = cloneDeep(acfgAddrTxnFields[7]);
 
 const otherAddrTxnFields: { [key: number]: Set<string> } = {
 	5: new Set([
-		"Sender",
-		"Receiver",
-		"CloseRemainderTo",
-		"AssetSender",
-		"AssetCloseTo",
-		"AssetReceiver",
-		"FreezeAssetAccount",
+		TxFieldEnum.Sender,
+		TxFieldEnum.Receiver,
+		TxFieldEnum.CloseRemainderTo,
+		TxFieldEnum.AssetSender,
+		TxFieldEnum.AssetCloseTo,
+		TxFieldEnum.AssetReceiver,
+		TxnRefFields.FreezeAssetAccount,
 	]),
 };
 
 otherAddrTxnFields[6] = cloneDeep(otherAddrTxnFields[5]);
 // add new inner transaction fields support in teal v6.
-["RekeyTo"].forEach((field) => otherAddrTxnFields[6].add(field));
+[TxFieldEnum.RekeyTo].forEach((field) => otherAddrTxnFields[6].add(field));
 otherAddrTxnFields[7] = cloneDeep(otherAddrTxnFields[6]);
+otherAddrTxnFields[8] = cloneDeep(otherAddrTxnFields[7]);
 
 const txTypes: { [key: number]: Set<string> } = {
 	1: new Set(),
@@ -145,6 +154,7 @@ txTypes[6] = cloneDeep(txTypes[5]);
 txTypes[6].add("keyreg");
 txTypes[6].add("appl");
 txTypes[7] = cloneDeep(txTypes[6]);
+txTypes[8] = cloneDeep(txTypes[7]);
 
 /**
  * Sets inner transaction field to subTxn (eg. set assetReceiver('rcv'))
@@ -230,35 +240,35 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetDecimals: {
+		case TxnRefFields.ConfigAssetDecimals: {
 			const assetDecimals = txValue as bigint;
 			if (assetDecimals > 19n || assetDecimals < 0n) {
 				errMsg = "Decimals must be between 0 (non divisible) and 19";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetMetadataHash: {
+		case TxnRefFields.ConfigAssetMetadataHash: {
 			const assetMetadataHash = txValue as Uint8Array;
 			if (assetMetadataHash.length !== 32) {
 				errMsg = "assetMetadataHash must be a 32 byte Uint8Array or string.";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetUnitName: {
+		case TxnRefFields.ConfigAssetUnitName: {
 			const assetUnitName = txValue as string;
 			if (assetUnitName.length > 8) {
 				errMsg = "Unit name must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetName: {
+		case TxnRefFields.ConfigAssetName: {
 			const assetName = txValue as string;
 			if (assetName.length > 32) {
 				errMsg = "AssetName must not be longer than 8 bytes";
 			}
 			break;
 		}
-		case TxFieldEnum.ConfigAssetURL: {
+		case TxnRefFields.ConfigAssetURL: {
 			const assetURL = txValue as string;
 			if (assetURL.length > 96) {
 				errMsg = "URL must not be longer than 96 bytes";
@@ -289,7 +299,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ApprovalProgramPages: {
+		case TxnaField.ApprovalProgramPages: {
 			encodedField = "apap";
 			const approvalProgram = (subTxn as any)[encodedField];
 			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
@@ -302,7 +312,7 @@ export function setInnerTxField(
 			}
 			break;
 		}
-		case TxFieldEnum.ClearStateProgramPages: {
+		case TxnaField.ClearStateProgramPages: {
 			encodedField = "apsu";
 			const clearStateProgram = (subTxn as any)[encodedField];
 			const maxPossible = MaxAppProgramLen * (1 + MaxExtraAppProgramPages);
@@ -331,12 +341,12 @@ export function setInnerTxField(
 
 	// if everything goes well, set the [key, value]
 	if (encodedField === null) {
-		return subTxn; // could be for "TypeEnum"
-	} else if (assetTxnFields.has(field)) {
+		return subTxn; // could be for TxFieldEnum.TypeEnum
+	} else if (assetTxnFields.has(field as TxnRefFields)) {
 		(subTxn as any).apar = (subTxn as any).apar ?? {};
 		(subTxn as any).apar[encodedField] = txValue;
 	} else {
-		if (field === TxFieldEnum.ApplicationArgs) {
+		if (field === TxnRefFields.ApplicationArgs) {
 			if ((subTxn as any)[encodedField] === undefined) {
 				(subTxn as any)[encodedField] = [];
 			}

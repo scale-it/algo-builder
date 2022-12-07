@@ -97,7 +97,7 @@ export abstract class Op {
 	 * @param arr array
 	 * @param line line number in TEAL file
 	 */
-	assertArrLength(arr: Uint8Array[] | BigInt[], line: number): void {
+	assertArrLength(arr: Uint8Array[] | bigint[], line: number): void {
 		if (!arr.length || arr.length > MAX_UINT8 + 1) {
 			throw new RuntimeError(RUNTIME_ERRORS.TEAL.ASSERT_ARR_LENGTH, { line: line });
 		}
@@ -368,5 +368,21 @@ export abstract class Op {
 				line: this.line,
 			});
 		}
+	}
+
+	/**
+	 * Bind value index to field map
+	 * @param arg argument from opcode
+	 * @param indexArray Array of string map index
+	 */
+	assertFieldIndex(arg: string, indexArray: string[]): string {
+		let argument = arg;
+		try {
+			const index = Number(argument);
+			argument = indexArray[index] ? indexArray[index] : arg;
+		} catch {
+			//Bind value index to field map
+		}
+		return argument;
 	}
 }

@@ -62,6 +62,7 @@ function displayErr(error: Error | BuilderError | any, relativeScriptPath: strin
 
 export async function runScript(
 	relativeScriptPath: string,
+	arg: string,
 	runtimeEnv: RuntimeEnv,
 	deployer: Deployer
 ): Promise<void> {
@@ -78,7 +79,7 @@ export async function runScript(
 		});
 	}
 	try {
-		await requiredScript.default(runtimeEnv, deployer);
+		await requiredScript.default(runtimeEnv, deployer, arg);
 	} catch (error) {
 		displayErr(error, relativeScriptPath);
 	}

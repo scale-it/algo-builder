@@ -2,6 +2,10 @@ import { decodeAddress, generateAccount } from "algosdk";
 
 import { bobAccount, elonMuskAccount, johnAccount } from "./account";
 
+import {
+	TxFieldEnum,
+} from "../../src/lib/constants";
+
 export const ALGORAND_MIN_TX_FEE = 1000;
 
 const account = generateAccount();
@@ -24,7 +28,7 @@ const txn_obj = {
 	aamt: 100,
 	fv: 2000,
 	lv: 3000,
-	note: Buffer.from("Note"),
+	note: Buffer.from(TxFieldEnum.Note),
 	gen: "default-v1",
 	gh: Buffer.from("default-v1"),
 	lx: Buffer.from(""),

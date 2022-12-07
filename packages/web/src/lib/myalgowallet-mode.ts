@@ -85,15 +85,55 @@ export class MyAlgoWalletSession {
 			}
 		} catch (err) {
 			error(err);
+			throw err;
+		}
+	}
+
+	/**
+	 * @async
+	 * @description Signs a teal program (https://algorand.github.io/js-algorand-sdk/modules.html#tealSign)
+	 * @param logic Teal program
+	 * @param address Signer Address
+	 * @returns Returns signed teal
+	 * for more info: https://connect.myalgo.com/docs/interactive-examples/TealSign
+	 * https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#delegated-approval
+	 */
+	async signLogic(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
+		try {
+			return await this.connector.signLogicSig(logic, address)
+		} catch (err) {
+			error(err);
+			throw new Error("Error while signing teal program" + err);
+		}
+	}
+
+	/**
+	 * @description Takes a transaction and a LogicSig object and returns an encoded signed transaction.
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
+	 */
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
+		} catch (err) {
+			error(err);
 			throw err
 		}
 	}
 
-	// https://connect.myalgo.com/docs/interactive-examples/Connect
-	async connectToMyAlgo(): Promise<void> {
+	/**
+	 * @async
+	 * @description Connects to the MyAlgo Wallet by opening up its dialog box to login
+	 * @param allowMultipleAccounts allow selection of multiple accounts from MyAlgo Wallet, default is true
+	 * For Multisig you need to allow multiple accounts login
+	 * for more info visit: https://connect.myalgo.com/docs/interactive-examples/Connect
+	 */
+	async connectToMyAlgo(allowMultipleAccounts = true): Promise<void> {
 		try {
 			this.accounts = await this.connector.connect({
-				shouldSelectOneAccount: false, // for multisig we need to allow multiple accounts login
+				shouldSelectOneAccount: !allowMultipleAccounts,
 				openManager: true,
 			});
 			this.addresses = this.accounts.map((account) => account.address);
@@ -115,10 +155,9 @@ export class MyAlgoWalletSession {
 	): Promise<SignedTx> {
 		try {
 			return await this.connector.signTransaction(txn.toByte(), signOptions);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -146,10 +185,9 @@ export class MyAlgoWalletSession {
 				txnsGroup.map((txn) => txn.toByte()),
 				signOptions
 			);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -166,23 +204,19 @@ export class MyAlgoWalletSession {
 		try {
 			const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
 			return await this.waitForConfirmation(txInfo.txId, waitRounds);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
 	/**
-	* Function used to wait for a tx confirmation
-	* @param txId txn ID for which confirmation is required 
-	* @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
-	* @returns TxnReceipt which includes confirmed txn response along with txID
-	*/
-	async waitForConfirmation(
-		txId: string,
-		waitRounds = WAIT_ROUNDS
-	): Promise<TxnReceipt> {
+	 * Function used to wait for a tx confirmation
+	 * @param txId txn ID for which confirmation is required
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
+	 */
+	async waitForConfirmation(txId: string, waitRounds = WAIT_ROUNDS): Promise<TxnReceipt> {
 		try {
 			const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 			if (pendingInfo["pool-error"]) {
@@ -190,10 +224,9 @@ export class MyAlgoWalletSession {
 			}
 			const txnReceipt = { txID: txId, ...pendingInfo };
 			return txnReceipt as TxnReceipt;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -237,7 +270,7 @@ export class MyAlgoWalletSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig));
+					signedTxn.splice(index, 0, this.signLogicSigTx(txn, signer.lsig));
 				}
 			}
 
@@ -247,10 +280,9 @@ export class MyAlgoWalletSession {
 
 			log("confirmedTx: ", confirmedTx);
 			return confirmedTx;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -267,10 +299,9 @@ export class MyAlgoWalletSession {
 				txns.push(mkTransaction(txn, txParams));
 			}
 			return txns;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -284,10 +315,9 @@ export class MyAlgoWalletSession {
 			const signedTx = await this.connector.signTransaction(transaction.toByte());
 			const blob = signedTx.blob;
 			return algosdk.decodeSignedTransaction(blob);
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -306,14 +336,13 @@ export class MyAlgoWalletSession {
 			const signedTxns: SignedTransaction[] = [];
 			const txns: Transaction[] = this.makeTx(execParams, txParams);
 			for (const transaction of txns) {
-				const signedTransaction = await this.signTx(transaction)
-				signedTxns.push(signedTransaction)
+				const signedTransaction = await this.signTx(transaction);
+				signedTxns.push(signedTransaction);
 			}
 			return signedTxns;
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -331,10 +360,9 @@ export class MyAlgoWalletSession {
 				const Uint8ArraySignedTx = transactions.map((txn) => algosdk.encodeObj(txn));
 				return await this.sendAndWait(Uint8ArraySignedTx, rounds);
 			}
-		}
-		catch (err) {
+		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 }

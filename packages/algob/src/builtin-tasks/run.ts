@@ -2,7 +2,6 @@ import { BuilderError, ERRORS } from "@algo-builder/web";
 import chalk from "chalk";
 import debug from "debug";
 import fsExtra from "fs-extra";
-
 import { task } from "../internal/core/config/config-env";
 import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";
@@ -22,7 +21,8 @@ import { CheckpointRepo, Deployer, RuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
-	scripts: string[];
+	script: string;
+	arg: string;
 }
 
 export function filterNonExistent(scripts: string[]): string[] {
@@ -56,6 +56,7 @@ function partitionIntoSorted(unsorted: string[]): string[][] {
 export async function runMultipleScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
+	arg: string,
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -64,9 +65,10 @@ export async function runMultipleScripts(
 ): Promise<void> {
 	const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
 	for (const scripts of partitionIntoSorted(scriptNames)) {
-		await runSortedScripts(
+		await runScripts(
 			runtimeEnv,
 			scripts,
+			arg,
 			onSuccessFn,
 			force,
 			logDebugTag,
@@ -77,9 +79,10 @@ export async function runMultipleScripts(
 }
 
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
-async function runSortedScripts(
+async function runScripts(
 	runtimeEnv: RuntimeEnv,
 	scriptNames: string[],
+	arg: string,
 	onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
 	force: boolean,
 	logDebugTag: string,
@@ -108,38 +111,63 @@ async function runSortedScripts(
 		}
 		deployerCfg.txWriter.setScriptName(relativeScriptPath);
 		log(`Running script ${relativeScriptPath}`);
-		await runScript(relativeScriptPath, runtimeEnv, deployer);
+		await runScript(relativeScriptPath, arg, runtimeEnv, deployer);
 		onSuccessFn(deployerCfg.cpData, relativeScriptPath);
 	}
 }
 
+const isValidJsonString = (str: string) => {
+	try {
+		JSON.parse(str);
+	} catch (e) {
+		return false;
+	}
+	return true;
+}
+
 async function executeRunTask(
-	{ scripts }: Input,
+	{ script, arg }: Input,
 	runtimeEnv: RuntimeEnv,
 	algoOp: AlgoOperator
 ): Promise<any> {
 	const logDebugTag = "algob:tasks:run";
-
-	const nonExistent = filterNonExistent(scripts);
-	if (nonExistent.length !== 0) {
-		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
-			scripts: nonExistent,
+	let scriptName;
+	if (arg && !isValidJsonString(arg)) {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_ARGUMENT_INVALID, {
+			jsonString: arg
 		});
 	}
-
-	await runMultipleScripts(
-		runtimeEnv,
-		assertDirChildren(scriptsDirectory, scripts),
-		(_cpData: CheckpointRepo, _relativeScriptPath: string) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-		true,
-		logDebugTag,
-		false,
-		algoOp
-	);
+	if (script && script.length) {
+		// get script from script array, first element should be script
+		scriptName = script[0];
+	}
+	if (scriptName) {
+		const nonExistent = filterNonExistent([scriptName]);
+		if (nonExistent.length !== 0) {
+			throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+				scripts: nonExistent,
+			});
+		}
+		assertDirChildren(scriptsDirectory, [scriptName]);
+		const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
+		await runScripts(
+			runtimeEnv,
+			[scriptName],
+			arg,
+			(_cpData: CheckpointRepo, _relativeScriptPath: string) => { }, // eslint-disable-line @typescript-eslint/no-empty-function
+			true,
+			logDebugTag,
+			false,
+			deployerCfg
+		);
+	} else {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND_WITH_SUGGESTION);
+	}
 }
 
 export default function (): void {
-	task(TASK_RUN, "Runs a user-defined script after compiling the project")
-		.addVariadicPositionalParam("scripts", "A js file to be run within algob's environment")
+	task(TASK_RUN, `Runs a user-defined script after compiling the project\n\nExample: yarn algob run script.js --arg '{"firstname":"Jesper","surname":"Aaberg"}'`)
+		.addVariadicPositionalParam("script", "A script file to be run within algob's environment.")
+		.addOptionalParam("arg", "Argument in JSON string to be passed in the script.")
 		.setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
 }

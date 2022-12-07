@@ -79,8 +79,8 @@ let envCfg = {
 	...algodCred,
 	accounts: accounts,
 	paths: {
-		assets: "assets"
-	}
+		assets: "assets",
+	},
 };
 
 module.exports = {

@@ -1,4 +1,5 @@
 import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { runtimeGenesisHash } from "@algo-builder/web/build/lib/constants";
 import algosdk, {
 	Account as AccountSDK,
 	decodeAddress,
@@ -8,6 +9,8 @@ import algosdk, {
 	Transaction,
 } from "algosdk";
 import MD5 from "crypto-js/md5";
+import findupSync from "findup-sync";
+import { readFileSync } from "fs";
 import cloneDeep from "lodash.clonedeep";
 import nacl from "tweetnacl";
 
@@ -21,15 +24,20 @@ import {
 	ALGORAND_ACCOUNT_MIN_BALANCE,
 	ALGORAND_MAX_TX_ARRAY_LEN,
 	BlockFinalisationTime,
+	JS_CONFIG_FILENAME,
 	MAX_APP_PROGRAM_COST,
 	MaxExtraAppProgramPages,
+	NETWORK_DEFAULT,
 	seedLength,
 	TransactionTypeEnum,
-	ZERO_ADDRESS_STR} from "./lib/constants";
+	TS_CONFIG_FILENAME,
+	ZERO_ADDRESS_STR,
+} from "./lib/constants";
 import { convertToString } from "./lib/parsing";
 import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
+	Account,
 	AccountAddress,
 	AccountStoreI,
 	AppInfo,
@@ -66,6 +74,7 @@ export class Runtime {
 	// https://developer.algorand.org/docs/features/transactions/?query=round
 	private round: number;
 	private timestamp: number;
+	private readonly numberOfInitialBlocks: number;
 
 	constructor(accounts: AccountStoreI[]) {
 		// runtime store
@@ -92,8 +101,9 @@ export class Runtime {
 
 		// context for interpreter
 		this.ctx = new Ctx(cloneDeep(this.store), <EncTx>{}, [], [], this);
-		this.round = 2000;
-		this.populateChain(this.round);
+		this.round = 0;
+		this.numberOfInitialBlocks = 2000;
+		this.produceBlocks(this.numberOfInitialBlocks);
 		this.timestamp = 1;
 	}
 
@@ -418,6 +428,37 @@ export class Runtime {
 	}
 
 	/**
+	 * Add accounts from config file to the Store
+	 * @param network: the network of accounts to add
+	 * @param balance: balance for accounts
+	 */
+	loadAccountsFromConfig(network = NETWORK_DEFAULT, balance?: number): void {
+		const find = findupSync([JS_CONFIG_FILENAME, TS_CONFIG_FILENAME]);
+		if (!find) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.CONFIG_FILE_NOT_FOUND);
+		}
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const config = require(find);
+		if (config.networks[network] === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_NETWORK, {
+				network: network,
+			});
+		}
+		const accounts = config.networks[network].accounts;
+		if (accounts === undefined) {
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.NETWORK_ACCOUNT_NOT_FOUND, {
+				network: network,
+			});
+		}
+		for (const _acc of accounts) {
+			balance = balance ? balance : 1e6;
+			const acc = new AccountStore(balance, _acc);
+			if (_acc.name) this.store.accountNameAddress.set(_acc.name, _acc.addr);
+			this.store.accounts.set(_acc.addr, acc);
+		}
+	}
+
+	/**
 	 * Creates new transaction object (tx, gtxs) from given txnParams and signes it
 	 * @param txnParams : Transaction parameters for current txn or txn Group
 	 * @returns: [current SignedTransaction, SignedTransaction group]
@@ -612,6 +653,7 @@ export class Runtime {
 		this.addCtxAppCreateTxn(sender, appDefinition, payFlags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		this.validateExtraPages(appDefinition?.extraPages);
 		const txReceipt = this.ctx.deployApp(sender.addr, appDefinition, 0, scTmplParams);
 		this.store = this.ctx.state;
 		return txReceipt;
@@ -718,6 +760,7 @@ export class Runtime {
 		this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
 		this.ctx.debugStack = debugStack;
 		this.ctx.budget = MAX_APP_PROGRAM_COST;
+		this.validateExtraPages(newAppCode?.extraPages);
 		const txReceipt = this.ctx.updateApp(appID, newAppCode, 0, scTmplParams);
 
 		// If successful, Update programs and state
@@ -915,7 +958,7 @@ export class Runtime {
 					appDefMap.set(index, appDef);
 					const appDefinition = appDef as types.AppDefinition;
 					this.validateExtraPages(appDefinition?.extraPages);
-				};
+				}
 				return txn;
 			});
 
@@ -1187,28 +1230,44 @@ export class Runtime {
 	}
 
 	/**
+	 * Parses the file and return the ABIContract. If the appID for runtime
+	 * is specified it will be added to the returned object
+	 * @param pathToFile string
+	 * @retun parsed file
+	 */
+	parseABIContractFile(pathToFile: string): types.ABIContract {
+		const buff = readFileSync(pathToFile);
+		const contract: types.ABIContract = new algosdk.ABIContract(JSON.parse(buff.toString()));
+		contract.appID = contract.networks[runtimeGenesisHash]?.appID;
+		return contract;
+	}
+
+	/**
 	 * Produces new block and adds it to a Map where the keys are block numbers
 	 */
-	produceBlock() {
+	private _produceBlock() {
 		let timestamp: bigint | undefined;
 		let seed: Uint8Array | undefined;
-		if (this.store.blocks.size === 0) { //create genesis block
+		if (this.store.blocks.size === 0) {
+			//create genesis block
 			seed = nacl.randomBytes(seedLength);
 			timestamp = BigInt(Math.round(new Date().getTime() / 1000));
-		} else { //add another block
+		} else {
+			//add another block
 			const lastBlock = this.store.blocks.get(this.round);
 			if (lastBlock) {
 				seed = new TextEncoder().encode(MD5(lastBlock.seed.toString()).toString());
 				timestamp = lastBlock.timestamp + BlockFinalisationTime;
-				this.round += 1;// we move to new a new round
+				this.round += 1; // we move to new a new round
 			}
 		}
 		if (timestamp && seed) {
 			this.store.blocks.set(this.round, { timestamp, seed });
 		} else {
-		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK); 
+			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.PRODUCE_BLOCK);
 		}
 	}
+
 	/**
 	 * Returns a requested Block object. If it does not exist on chain throws an error
 	 * @param round block number
@@ -1221,14 +1280,14 @@ export class Runtime {
 		}
 		throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_BLOCK);
 	}
+
 	/**
-	 * Populates chain from first block to round number block (Produces N rounds) 
-	 * @param round current round number
+	 * Produces N new blocks. If not arguments passed N = 1 by default
+	 * @param numberOfBlocks current round number
 	 */
-	private populateChain(round:number) {
-		this.round = 1
-		for(let blockN = 1; blockN<=round; blockN++){
-			this.produceBlock();
+	produceBlocks(numberOfBlocks = 1) {
+		for (let blockN = 1; blockN <= numberOfBlocks; blockN++) {
+			this._produceBlock();
 		}
 	}
 }

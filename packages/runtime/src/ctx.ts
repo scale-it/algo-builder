@@ -19,7 +19,7 @@ import {
 	MAX_GLOBAL_SCHEMA_ENTRIES,
 	MAX_LOCAL_SCHEMA_ENTRIES,
 	ZERO_ADDRESS_STR,
-	MaxAppProgramLen
+	MaxAppProgramLen,
 } from "./lib/constants";
 import {
 	calculateFeeCredit,
@@ -138,7 +138,11 @@ export class Ctx implements Context {
 	 * @param clearProgramBytes Clear program bytes
 	 * @param extraPages Extra pages. Default extra page is 0.
 	 */
-	assertProgramMaxLen(approvalProgramBytes: Uint8Array, clearProgramBytes: Uint8Array, extraPages: number = 0): void {
+	assertProgramMaxLen(
+		approvalProgramBytes: Uint8Array,
+		clearProgramBytes: Uint8Array,
+		extraPages: number = 0
+	): void {
 		const approvalProgramLength = approvalProgramBytes.length;
 		const clearProgramLengthProgram = clearProgramBytes.length;
 		const approvalClearProgramLength = approvalProgramLength + clearProgramLengthProgram;
@@ -787,6 +791,9 @@ export class Ctx implements Context {
 			throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
 		}
 
+		const approvalProgramBytes = Buffer.from(approvalProgTEAL, "base64");
+		const clearProgramBytes = Buffer.from(clearProgTEAL, "base64");
+		this.assertProgramMaxLen(approvalProgramBytes, clearProgramBytes, appSourceCode.extraPages);
 		this.verifyTEALVersionIsMatch(approvalProgTEAL, clearProgTEAL);
 		const appParams = this.getApp(appID);
 		const txReceipt = this.runtime.run(

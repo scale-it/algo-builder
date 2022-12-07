@@ -4,7 +4,7 @@ layout: splash
 
 # SignedTransaction
 
-`Runtime` supports transactions described as `ExecParams` and traditional `algosdk.SignedTransaction` objects. This allow for easier interaction with `algosdk` and provides more flexibility and functionality. We can create transactions and sign them using `algosdk` methods and execute them in `Runtime`. 
+`Runtime` supports transactions described as `ExecParams` and traditional `algosdk.SignedTransaction` objects. This allow for easier interaction with `algosdk` and provides more flexibility and functionality. We can create transactions and sign them using `algosdk` methods and execute them in `Runtime`.
 
 ## Example
 
@@ -19,17 +19,19 @@ const [alice, bob] = runtime.defaultAccounts();
 const suggestedParams = mockSuggestedParams({ totalFee: 1000 }, runtime.getRound());
 // create transaction using algosdk
 const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: alice.address, 
-        to: bob.address, 
-        amount: 5e6, //5 algo 
-        note: undefined,
-        suggestedParams: suggestedParams});
+	from: alice.address,
+	to: bob.address,
+	amount: 5e6, //5 algo
+	note: undefined,
+	suggestedParams: suggestedParams,
+});
 // sign it and decode it to signedTransaction object
 const signedTransacion = algosdk.decodeSignedTransaction(transaction.signTxn(alice.account.sk));
 // submit the transaction
 const confirmedTxn = runtime.executeTx([signedTransacion]);
 console.log(confirmedTxn);
 ```
+
 Check the example in our [tests](../../packages/runtime/test/src/guide-examples.ts).
 
 # Multisignature
@@ -50,43 +52,41 @@ const suggestedParams = mockSuggestedParams({ totalFee: 1000 }, runtime.getRound
 // create multisignature parameters
 const addrs = [bob.address, charlie.address];
 const multiSigParams = {
-    version: 1,
-    threshold: 2,
-    addrs: addrs};
+	version: 1,
+	threshold: 2,
+	addrs: addrs,
+};
 // create multisignature address
 const multSigAddr = algosdk.multisigAddress(multiSigParams);
 // rekey alice to multisignature account
 const txParam: types.AlgoTransferParam = {
-    type: types.TransactionType.TransferAlgo,
-    sign: types.SignType.SecretKey,
-    fromAccount: alice.account,
-    fromAccountAddr: alice.address,
-    toAccountAddr: alice.address,
-    amountMicroAlgos: 0,
-    payFlags: {totalFee: 1000, rekeyTo: multSigAddr},
+	type: types.TransactionType.TransferAlgo,
+	sign: types.SignType.SecretKey,
+	fromAccount: alice.account,
+	fromAccountAddr: alice.address,
+	toAccountAddr: alice.address,
+	amountMicroAlgos: 0,
+	payFlags: { totalFee: 1000, rekeyTo: multSigAddr },
 };
 runtime.executeTx([txParam]);
 // sync accounts
 [alice, bob, charlie, elon] = runtime.defaultAccounts();
 // create transaction using algosdk
 const txn = algosdk.makePaymentTxnWithSuggestedParams(
-    alice.account.addr, // from
-    elon.account.addr, // to
-    5e6, // 5 algo
-    undefined,
-    undefined,
-    suggestedParams);
+	alice.account.addr, // from
+	elon.account.addr, // to
+	5e6, // 5 algo
+	undefined,
+	undefined,
+	suggestedParams
+);
 // Sign with first account
-const rawSignedTxn = algosdk.signMultisigTransaction(
-    txn,
-    multiSigParams,
-    bob.account.sk
-).blob;
+const rawSignedTxn = algosdk.signMultisigTransaction(txn, multiSigParams, bob.account.sk).blob;
 // Sign with second account
 const twosigs = algosdk.appendSignMultisigTransaction(
-    rawSignedTxn,
-    multiSigParams,
-    charlie.account.sk
+	rawSignedTxn,
+	multiSigParams,
+	charlie.account.sk
 ).blob;
 // decode the transaction
 const signedTxn: SignedTransaction = algosdk.decodeSignedTransaction(twosigs);

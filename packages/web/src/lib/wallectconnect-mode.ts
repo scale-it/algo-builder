@@ -59,7 +59,7 @@ export class WallectConnectSession {
 					await this.close();
 				} catch (e) {
 					error("Can't close walletconnect connection", e);
-					throw e
+					throw e;
 				}
 			} else {
 				warn(`A session is already active`);
@@ -77,7 +77,7 @@ export class WallectConnectSession {
 			await this.connector.killSession();
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -94,7 +94,7 @@ export class WallectConnectSession {
 			});
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -111,7 +111,7 @@ export class WallectConnectSession {
 			});
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -129,7 +129,7 @@ export class WallectConnectSession {
 			});
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -139,10 +139,7 @@ export class WallectConnectSession {
 	 * @param message optional message with txn
 	 * @returns raw signed txn
 	 */
-	async signTransaction(
-		txn: algosdk.Transaction,
-		message?: string
-	): Promise<Uint8Array> {
+	async signTransaction(txn: algosdk.Transaction, message?: string): Promise<Uint8Array> {
 		try {
 			const txnInGroup: TransactionInGroup = {
 				txn,
@@ -154,6 +151,22 @@ export class WallectConnectSession {
 				throw new Error("Transaction was returned unsigned");
 			}
 			return response[0];
+		} catch (err) {
+			error(err);
+			throw err;
+		}
+	}
+
+	/**
+	 * @description Signs a Logic Signature transaction
+	 * @param transaction algosdk.Transaction object
+	 * @param logicSig Logic Sig Account
+	 * @returns Returns txID and blob object
+	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
+	 */
+	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+		try {
+			return algosdk.signLogicSigTransaction(transaction, logicSig)
 		} catch (err) {
 			error(err);
 			throw err
@@ -205,14 +218,14 @@ export class WallectConnectSession {
 				requestParams.push({ message });
 			}
 			const request = formatJsonRpcRequest(ALGORAND_SIGN_TRANSACTION_REQUEST, requestParams);
-			const result: Array<string | null> = await this.connector.sendCustomRequest(request)
+			const result: Array<string | null> = await this.connector.sendCustomRequest(request);
 
 			return result.map((element) => {
 				return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
 			});
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -231,20 +244,17 @@ export class WallectConnectSession {
 			return await this.waitForConfirmation(txInfo.txId, waitRounds);
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
 	/**
-	* Function used to wait for a tx confirmation
-	* @param txId txn ID for which confirmation is required 
-	* @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
-	* @returns TxnReceipt which includes confirmed txn response along with txID
-	*/
-	async waitForConfirmation(
-		txId: string,
-		waitRounds = WAIT_ROUNDS
-	): Promise<TxnReceipt> {
+	 * Function used to wait for a tx confirmation
+	 * @param txId txn ID for which confirmation is required
+	 * @param waitRounds number of rounds to wait for transaction to be confirmed - default is 10
+	 * @returns TxnReceipt which includes confirmed txn response along with txID
+	 */
+	async waitForConfirmation(txId: string, waitRounds = WAIT_ROUNDS): Promise<TxnReceipt> {
 		try {
 			const pendingInfo = await algosdk.waitForConfirmation(this.algodClient, txId, waitRounds);
 			if (pendingInfo["pool-error"]) {
@@ -254,7 +264,7 @@ export class WallectConnectSession {
 			return txnReceipt as TxnReceipt;
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -288,8 +298,10 @@ export class WallectConnectSession {
 					return txn.sign === SignType.LogicSignature
 						? { txn: txns[index], shouldSign: false } // logic signature
 						: {
-							txn: txns[index], shouldSign: true,
-							signers: execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr
+							txn: txns[index],
+							shouldSign: true,
+							signers:
+								execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
 						}; // to be signed
 				}
 			);
@@ -304,7 +316,7 @@ export class WallectConnectSession {
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
 					if (!Array.isArray(signedTxn)) signedTxn = [];
-					signedTxn.splice(index, 0, algosdk.signLogicSigTransaction(txn, signer.lsig).blob);
+					signedTxn.splice(index, 0, this.signLogicSigTx(txn, signer.lsig).blob);
 				}
 			}
 
@@ -318,7 +330,7 @@ export class WallectConnectSession {
 			return confirmedTx;
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -337,7 +349,7 @@ export class WallectConnectSession {
 			return txns;
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -350,7 +362,9 @@ export class WallectConnectSession {
 		try {
 			const txns = [transaction];
 			const txnsToSign = txns.map((txn) => {
-				const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString("base64");
+				const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString(
+					"base64"
+				);
 				return { txn: encodedTxn };
 			});
 			const requestParams = [txnsToSign];
@@ -365,7 +379,7 @@ export class WallectConnectSession {
 			return algosdk.decodeSignedTransaction(decodedResult[0]);
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -384,13 +398,13 @@ export class WallectConnectSession {
 			const signedTxns: SignedTransaction[] = [];
 			const txns: Transaction[] = this.makeTx(execParams, txParams);
 			for (const transaction of txns) {
-				const signedTransaction = await this.signTx(transaction)
-				signedTxns.push(signedTransaction)
+				const signedTransaction = await this.signTx(transaction);
+				signedTxns.push(signedTransaction);
 			}
 			return signedTxns;
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -410,7 +424,7 @@ export class WallectConnectSession {
 			}
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 }
