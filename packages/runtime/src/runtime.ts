@@ -1,4 +1,4 @@
-import { parsing, tx as webTx, types } from "@algo-builder/web";
+import { Executor, parsing, tx as webTx, types } from "@algo-builder/web";
 import { runtimeGenesisHash } from "@algo-builder/web/build/lib/constants";
 import algosdk, {
 	Account as AccountSDK,

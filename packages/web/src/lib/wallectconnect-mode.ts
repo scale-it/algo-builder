@@ -20,10 +20,11 @@ import {
 } from "../types";
 import { algoexplorerAlgod, mkTxParams } from "./api";
 import { ALGORAND_SIGN_TRANSACTION_REQUEST, WAIT_ROUNDS } from "./constants";
+import { Executor } from "./executor";
 import { error, log, warn } from "./logger";
 import { mkTransaction } from "./txn";
 
-export class WallectConnectSession {
+export class WallectConnectSession implements Executor {
 	readonly connector: WalletConnect;
 	private readonly algodClient: algosdk.Algodv2;
 	wcAccounts: string[];
@@ -164,12 +165,15 @@ export class WallectConnectSession {
 	 * @returns Returns txID and blob object
 	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
 	 */
-	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSigTx(
+		transaction: Transaction,
+		logicSig: algosdk.LogicSigAccount
+	): { txID: string; blob: Uint8Array } {
 		try {
-			return algosdk.signLogicSigTransaction(transaction, logicSig)
+			return algosdk.signLogicSigTransaction(transaction, logicSig);
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -298,11 +302,11 @@ export class WallectConnectSession {
 					return txn.sign === SignType.LogicSignature
 						? { txn: txns[index], shouldSign: false } // logic signature
 						: {
-							txn: txns[index],
-							shouldSign: true,
-							signers:
-								execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
-						}; // to be signed
+								txn: txns[index],
+								shouldSign: true,
+								signers:
+									execParams[index].fromAccount?.addr || execParams[index].fromAccountAddr,
+						  }; // to be signed
 				}
 			);
 			// only shouldSign txn are to be signed

@@ -19,13 +19,14 @@ import {
 	TxParams,
 } from "../types";
 import { WAIT_ROUNDS } from "./constants";
+import { Executor } from "./executor";
 import { error, log } from "./logger";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
 const LAST_ROUND = "last-round";
 
-export class WebMode {
+export class WebMode implements Executor {
 	algoSigner: AlgoSigner;
 	chainName: string;
 
@@ -241,12 +242,15 @@ export class WebMode {
 	 * @returns Returns txID and blob object
 	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
 	 */
-	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSigTx(
+		transaction: Transaction,
+		logicSig: algosdk.LogicSigAccount
+	): { txID: string; blob: Uint8Array } {
 		try {
-			return algosdk.signLogicSigTransaction(transaction, logicSig)
+			return algosdk.signLogicSigTransaction(transaction, logicSig);
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -314,7 +318,7 @@ export class WebMode {
 				const signer: Sign = execParams[index];
 				if (signer.sign === SignType.LogicSignature) {
 					signer.lsig.lsig.args = signer.args ? signer.args : [];
-					const lsigTxn = this.signLogicSigTx(txn, signer.lsig)
+					const lsigTxn = this.signLogicSigTx(txn, signer.lsig);
 					if (!Array.isArray(signedTxn)) signedTxn = []; // only logic signature txn are provided
 					signedTxn.splice(index, 0, {
 						blob: this.algoSigner.encoding.msgpackToBase64(lsigTxn.blob),

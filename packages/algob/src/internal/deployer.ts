@@ -4,7 +4,7 @@ import {
 	types as rtypes,
 	validateOptInAccNames,
 } from "@algo-builder/runtime";
-import { BuilderError, ERRORS, types as wtypes, utils } from "@algo-builder/web";
+import { BuilderError, ERRORS, Executor, types as wtypes, utils } from "@algo-builder/web";
 import { mkTransaction } from "@algo-builder/web/build/lib/txn";
 import type {
 	Account,
@@ -599,7 +599,7 @@ class DeployerBasicMode {
 /**
  * This class is what user interacts with in deploy task
  */
-export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
+export class DeployerDeployMode extends DeployerBasicMode implements Deployer, Executor {
 	get isDeployMode(): boolean {
 		return true;
 	}
@@ -990,7 +990,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 /**
  * This class is what user interacts with in run task mode
  */
-export class DeployerRunMode extends DeployerBasicMode implements Deployer {
+export class DeployerRunMode extends DeployerBasicMode implements Deployer, Executor {
 	get isDeployMode(): boolean {
 		return false;
 	}
