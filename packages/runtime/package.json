@@ -1,6 +1,6 @@
 {
 	"name": "@algo-builder/runtime",
-	"version": "6.0.0",
+	"version": "7.0.0",
 	"license": "Apache-2.0",
 	"homepage": "https://algobuilder.dev",
 	"repository": "https://github.com/scale-it/algo-builder.git",
@@ -36,7 +36,7 @@
 		"@nodelib/fs.walk": "^1.2.8",
 		"@types/crypto-js": "^4.1.1",
 		"@types/json-bigint": "^1.0.1",
-		"algosdk": "^1.22.0",
+		"algosdk": "^1.24.0",
 		"chalk": "^4.1.2",
 		"crypto-js": "^4.1.1",
 		"debug": "^4.3.4",

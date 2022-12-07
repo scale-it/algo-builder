@@ -59,7 +59,7 @@ export async function executeDeployTask(
 	return await runMultipleScripts(
 		runtimeEnv,
 		scriptNames,
-		[],
+		"", // empty argument passed
 		onSuccessFn,
 		force,
 		logDebugTag,

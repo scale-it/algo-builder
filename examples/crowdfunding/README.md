@@ -31,19 +31,19 @@ To Create Crowdfunding Stateful Smart Contract Application
 
 To Donate:
 
-        yarn run algob run --script scripts/transfer/donate.js
+        yarn run algob run scripts/transfer/donate.js
 
 To Claim:
 
-        yarn run algob run --script scripts/transfer/claim.js
+        yarn run algob run scripts/transfer/claim.js
 
 To Reclaim:
 
-        yarn run algob run --script scripts/transfer/reclaim.js
+        yarn run algob run scripts/transfer/reclaim.js
 
 To Delete application and tranfer remaining funds to crreator:
 
-        yarn run algob run --script scripts/transfer/delete.js
+        yarn run algob run scripts/transfer/delete.js
 
 - Some points to be noted:
   - Creator can only claim funds when total goal is reached.

@@ -2,7 +2,7 @@
  * Description:
  * This file demonstrates the example to run teal debugger for transfer Algorand
  * Standard Assets(ASA) & MicroAlgos using delegated lsig (between 2 user accounts).
- * You can run it using `algob run --script scripts/transfer/gold-delegated-lsig.debug.js`
+ * You can run it using `algob run scripts/transfer/gold-delegated-lsig.debug.js`
  */
 const { types } = require("@algo-builder/web");
 const { Tealdbg } = require("@algo-builder/algob");
