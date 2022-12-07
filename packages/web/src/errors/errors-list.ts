@@ -531,7 +531,7 @@ export const taskErrors = {
 		number: 601,
 		message: "Scripts don't exist: %scripts%.",
 		title: "Scripts don't exist.",
-		description: `Tried to use \`algob run --script \` to execute a non-existing script(s).
+		description: `Tried to use \`algob run \` to execute a non-existing script(s).
 
 Please double check your script's path`,
 	},
@@ -666,6 +666,18 @@ Use 'deployer.isDefined(name)' to check if the name is already used.
 
 Use 'deployer.isDefined(name)' to check if the name is already used.
 `,
+	},
+	RUN_FILE_NOT_FOUND_WITH_SUGGESTION: {
+		number: 617,
+		message: "Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>'",
+		title: "Run file not found.",
+		description: "Script not found. Please check the format: yarn algob run script.js --arg '<JSON String>'",
+	},
+	RUN_ARGUMENT_INVALID: {
+		number: 618,
+		message: "Invalid JSON string: %jsonString%",
+		title: "Run argument is invalid.",
+		description: "Invalid JSON string: %jsonString%",
 	},
 };
 

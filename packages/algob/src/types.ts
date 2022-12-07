@@ -436,7 +436,7 @@ export interface Deployer {
 
 	/**
 	 * Sets metadata key value for a current network in the chckpoint file based on the
-	 * current deployment script. If run in a non deployment mode (eg `algob run --script script_name.js`)
+	 * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)
 	 * it will throw an exception. */
 	addCheckpointKV: (key: string, value: string) => void;
 

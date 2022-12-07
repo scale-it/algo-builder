@@ -8,7 +8,7 @@ layout: splash
 
 In algob, scripts are JS files stored in the `scripts` directory and are meant to interact with the blockchain (deploy ASA, ASC1, run transactions...).
 
-Scripts are run through `algob run --script` and `algob deploy` commands. `algob` is using `algob.config.js` to get information about network and accounts and is executing incremental scripts found in `scripts/`.
+Scripts are run through `algob run` and `algob deploy` commands. `algob` is using `algob.config.js` to get information about network and accounts and is executing incremental scripts found in `scripts/`.
 
 Please see the [architecture document](https://paper.dropbox.com/published/Algorand-builder-specs--A7njBF~7_VHYy0l3m3RAKgYVBg-c4ycJtlcmEaRIbptAPqNYS6#:h2=Scripts) to see how the scripts are organized and how to use them.
 
@@ -16,7 +16,7 @@ Please see the [architecture document](https://paper.dropbox.com/published/Algor
 
 As noted above there are two commands to execute scripts:
 
-- `algob run --script`
+- `algob run`
 - `algob deploy`
 
 #### Run
@@ -25,7 +25,7 @@ Runs provided scripts and doesn't save script checkpoints.
 Useful to query the current state of blockchain.
 Example:
 
-    algob run --script scripts/script1.js
+    algob run scripts/script1.js
 
 #### Deploy
 
