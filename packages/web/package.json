@@ -37,7 +37,7 @@
 		"@walletconnect/client": "^1.8.0",
 		"@walletconnect/types": "^1.8.0",
 		"algorand-walletconnect-qrcode-modal": "^1.8.0",
-		"algosdk": "^1.22.0",
+		"algosdk": "^1.24.0",
 		"debug": "^4.3.4",
 		"zod": "^3.19.1"
 	},
