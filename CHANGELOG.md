@@ -14,16 +14,18 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, /example Updates
 
 ## Unreleased
 
+## v7.0.0 2022-11-04
+
 ### Bug Fixes
 
-- Fixed `pre-commit` scirpt that did not work properly and skiped the `lint-staged` part.
+- Fixed `pre-commit` script that did not work properly and skipped the `lint-staged` part.
 
 ### Features
 
 Algob:
 
-- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additonal field `appID` will be added to a contract.
-- Added arguments feature in `yarn algob run` cli. The new format is `yarn alob run --script script1.js arg1 arg2`.
+- Add `parseABIContractFile(pathToFilePath)` method to `Runtime` and `Deployer`. If the currently used network is defined in the ABI file additional field `appID` will be added to a contract.
+- Added arguments feature in `yarn algob run` CLI. The new format is `yarn alob run scripts/script1.js <args_as_json_object>`. Example of 2 arguments passed to the script1: `yarn alob run scripts/script1.js '{"arg1": 1, "arg2": "string"}'`. See more details in [#850](https://github.com/scale-it/algo-builder/pull/850/files).
 
 Runtime:
 
@@ -32,9 +34,13 @@ Runtime:
 - Add one batch for each package in GitHub action which uses reusable workflow.
 - Add guide about blocks in `Runtime`.
 - Remove limits from `Runtime` for amount of apps/assets one account can create/opt-in to.
-- Add support for TEALv8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
+- Add support for TEAL v8 opcode execution in runtime. The `MaxTEALVersion` is now `8`.
 - Allow user to query foreign applications accounts using the `appID` field.
 - `Runtime` now supports both string and index argument opcode
+
+TEAL v8:
+
+- Support for `switch` opcode.
 
 Web:
 
@@ -43,24 +49,24 @@ Web:
 - Add `tx.mkMultisigEncodedTx` helper function to create multisig encoded transaction.
 - Add `getGenesisHashFromName(name: string)` utility function to `@algo-builder/web`.
 - `signLogicSigTx` is added to all three wallet class of `web` package to sign transaction using logic signature.
-- `signLogic` is added to `MyAlgo Wallet` class where tealSign creates a signature compatible with ed25519verify opcode from contract address
+- `signLogic` is added to `MyAlgo Wallet` class where tealSign creates a signature compatible with `ed25519verify` opcode from contract address
 
 CI:
 
 - Add reusable workflow in GitHub action.
 
-### Breaking Changes
-
-- The method `ProduceBlock` has been renamed to `ProduceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
-- `appendSignMultisigTransaction` is renamed to `signMsigTx` which expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
-
-#### TEALv8
-
-- Support for `switch` opcode.
-
 #### /example Updates
 
 - /examples/DAO has been moved to https://github.com/scale-it/sigmadao
+
+Guide:
+
+- Added tutorials about lsig and msig management with Algo Builder.
+
+### Breaking Changes
+
+- The method `Runtime.produceBlock` has been renamed to `Runtime.produceBlocks(numberOfBlocks=1)` and now accepts optional parameter that allows user to specify the number of blocks that will be produced.
+- `appendSignMultisigTransaction` is renamed to `signMsigTx` which expects `EncodedSignedTransaction` as first argument and returns an object containing a blob key encoded in base64.
 
 ## v6.0.0 2022-11-04
 
