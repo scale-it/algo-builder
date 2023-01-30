@@ -3,8 +3,9 @@ import { exec, execSync, spawnSync, SpawnSyncReturns } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
-import { PythonCommand, PythonCommands } from "./constants";
+import { PythonCommand, PythonCommands, searchStrCommand } from "./constants";
 import { getPathFromDirRecursive } from "./files";
+import Os from "os";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -33,6 +34,20 @@ export class PyCompileOp {
 		}
 
 		return content;
+	}
+
+	/**
+	 * Description: Check if current OS is Windows
+	 */
+	private isWindows(): boolean {
+		return Os.platform() === "win32";
+	}
+
+	/**
+	 * Description: Returns the command to search strings according to OS
+	 */
+	private getSearchStrCommand(): searchStrCommand {
+		return this.isWindows() ? searchStrCommand.Windows : searchStrCommand.UnixLinux;
 	}
 
 	/**
@@ -90,10 +105,10 @@ export class PyCompileOp {
 			}
 			return command;
 		});
-		if (!pyCommand){
-			throw new Error(`executable python command not found.`)
+		if (!pyCommand) {
+			throw new Error(`executable python command not found.`);
 		}
-		return pyCommand
+		return pyCommand;
 	}
 
 	/**
@@ -117,7 +132,8 @@ export class PyCompileOp {
 	 * @param module: Module to be checked if installed or not.
 	 */
 	private validatePythonModule(module: string) {
-		exec(`pip list | grep ${module}`, (err: any) => {
+		const searchStrCommand = this.getSearchStrCommand();
+		exec(`pip list | ${searchStrCommand} ${module}`, (err: any) => {
 			if (err) {
 				throw new Error(
 					`"${module}" module not found. Please try running "pip install ${module}"`

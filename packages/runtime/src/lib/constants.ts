@@ -891,3 +891,8 @@ export const NETWORK_DEFAULT = "default";
 
 export const PythonCommands = ['python3', 'python', 'py'] as const;
 export type PythonCommand = typeof PythonCommands[number];
+
+export enum searchStrCommand {
+	Windows = "Findstr",
+	UnixLinux = "grep",
+}
