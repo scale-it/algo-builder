@@ -1,9 +1,10 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { BuilderError, ERRORS, types } from "@algo-builder/web";
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs-extra";
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { NO_FILE_OR_DIRECTORY_ERROR } from "./constants";
 
 function normalizePaths(mainPath: string, paths: string[]): string[] {
 	return paths.map((n) => path.relative(mainPath, n));
@@ -45,7 +46,7 @@ export function loadEncodedTxFromFile(fileName: string): Uint8Array | undefined 
 		const buffer = fs.readFileSync(p);
 		return Uint8Array.from(buffer);
 	} catch (e) {
-		if (types.isFileError(e) && e?.errno === -2) {
+		if ((e as NodeJS.ErrnoException)?.code === NO_FILE_OR_DIRECTORY_ERROR) {
 			return undefined;
 		} // handling a not existing file
 		throw e;

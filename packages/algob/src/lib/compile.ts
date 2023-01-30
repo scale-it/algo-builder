@@ -9,6 +9,7 @@ import YAML from "yaml";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, SCParams } from "../types";
+import { NO_FILE_OR_DIRECTORY_ERROR } from "./constants";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -111,7 +112,7 @@ export class CompileOp {
 			const p = path.join(CACHE_DIR, filename + ".yaml");
 			return YAML.parse(await fs.promises.readFile(p, "utf8")) as ASCCache;
 		} catch (e) {
-			if (types.isFileError(e) && e?.errno === -2) {
+			if ((e as NodeJS.ErrnoException)?.code === NO_FILE_OR_DIRECTORY_ERROR) {
 				return undefined;
 			} // handling a not existing file
 			throw e;
