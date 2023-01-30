@@ -888,3 +888,6 @@ export enum NumIndex {
 export const JS_CONFIG_FILENAME = "algob.config.js";
 export const TS_CONFIG_FILENAME = "algob.config.ts";
 export const NETWORK_DEFAULT = "default";
+
+export const PythonCommands = ['python3', 'python', 'py'] as const;
+export type PythonCommand = typeof PythonCommands[number];

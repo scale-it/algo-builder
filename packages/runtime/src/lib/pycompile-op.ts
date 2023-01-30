@@ -1,8 +1,9 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { exec, spawnSync, SpawnSyncReturns } from "child_process";
+import { exec, execSync, spawnSync, SpawnSyncReturns } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
+import { PythonCommand, PythonCommands } from "./constants";
 import { getPathFromDirRecursive } from "./files";
 
 export const tealExt = ".teal";
@@ -78,18 +79,37 @@ export class PyCompileOp {
 	}
 
 	/**
+	 * Description: Check and returns the executable python command
+	 */
+	private getPythonCommand(): PythonCommand {
+		const pyCommand = PythonCommands.find((command: PythonCommand) => {
+			try {
+				execSync(command + " -v", { stdio: "pipe" });
+			} catch {
+				return false;
+			}
+			return command;
+		});
+		if (!pyCommand){
+			throw new Error(`executable python command not found.`)
+		}
+		return pyCommand
+	}
+
+	/**
 	 * Description: Runs a subprocess to execute python script
 	 * @param filename : python filename in assets folder
 	 * @param scInitParam : Smart contract initialization parameters.
 	 */
 	private runPythonScript(filename: string, scInitParam?: string): SpawnSyncReturns<string> {
 		const filePath = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
+		const pythonCommand = this.getPythonCommand();
 		// used spawnSync instead of spawn, as it is synchronous
 		if (scInitParam === undefined) {
-			return spawnSync("python3", [filePath], { encoding: "utf8" });
+			return spawnSync(pythonCommand, [filePath], { encoding: "utf8" });
 		}
 
-		return spawnSync("python3", [filePath, scInitParam], { encoding: "utf8" });
+		return spawnSync(pythonCommand, [filePath, scInitParam], { encoding: "utf8" });
 	}
 
 	/**
