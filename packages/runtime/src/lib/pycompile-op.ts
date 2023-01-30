@@ -84,7 +84,7 @@ export class PyCompileOp {
 	private getPythonCommand(): PythonCommand {
 		const pyCommand = PythonCommands.find((command: PythonCommand) => {
 			try {
-				execSync(command + " -v", { stdio: "pipe" });
+				execSync(command + " -V", { stdio: "pipe" });
 			} catch {
 				return false;
 			}
