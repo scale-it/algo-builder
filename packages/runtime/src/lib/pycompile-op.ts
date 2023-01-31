@@ -1,9 +1,11 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
-import { exec, spawnSync, SpawnSyncReturns } from "child_process";
+import { exec, execSync, spawnSync, SpawnSyncReturns } from "child_process";
 import YAML from "yaml";
 
 import type { ReplaceParams, SCParams } from "../types";
+import { PythonCommand, PythonCommands, searchStrCommand } from "./constants";
 import { getPathFromDirRecursive } from "./files";
+import Os from "os";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -32,6 +34,20 @@ export class PyCompileOp {
 		}
 
 		return content;
+	}
+
+	/**
+	 * Description: Check if current OS is Windows
+	 */
+	private isWindows(): boolean {
+		return Os.platform() === "win32";
+	}
+
+	/**
+	 * Description: Returns the command to search strings according to OS
+	 */
+	private getSearchStrCommand(): searchStrCommand {
+		return this.isWindows() ? searchStrCommand.Windows : searchStrCommand.UnixLinux;
 	}
 
 	/**
@@ -78,18 +94,37 @@ export class PyCompileOp {
 	}
 
 	/**
+	 * Description: Check and returns the executable python command
+	 */
+	private getPythonCommand(): PythonCommand {
+		const pyCommand = PythonCommands.find((command: PythonCommand) => {
+			try {
+				execSync(command + " -V", { stdio: "pipe" });
+			} catch {
+				return false;
+			}
+			return command;
+		});
+		if (!pyCommand) {
+			throw new Error(`executable python command not found.`);
+		}
+		return pyCommand;
+	}
+
+	/**
 	 * Description: Runs a subprocess to execute python script
 	 * @param filename : python filename in assets folder
 	 * @param scInitParam : Smart contract initialization parameters.
 	 */
 	private runPythonScript(filename: string, scInitParam?: string): SpawnSyncReturns<string> {
 		const filePath = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
+		const pythonCommand = this.getPythonCommand();
 		// used spawnSync instead of spawn, as it is synchronous
 		if (scInitParam === undefined) {
-			return spawnSync("python3", [filePath], { encoding: "utf8" });
+			return spawnSync(pythonCommand, [filePath], { encoding: "utf8" });
 		}
 
-		return spawnSync("python3", [filePath, scInitParam], { encoding: "utf8" });
+		return spawnSync(pythonCommand, [filePath, scInitParam], { encoding: "utf8" });
 	}
 
 	/**
@@ -97,7 +132,8 @@ export class PyCompileOp {
 	 * @param module: Module to be checked if installed or not.
 	 */
 	private validatePythonModule(module: string) {
-		exec(`pip list | grep ${module}`, (err: any) => {
+		const searchStrCommand = this.getSearchStrCommand();
+		exec(`pip list | ${searchStrCommand} ${module}`, (err: any) => {
 			if (err) {
 				throw new Error(
 					`"${module}" module not found. Please try running "pip install ${module}"`

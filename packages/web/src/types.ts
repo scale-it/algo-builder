@@ -334,15 +334,6 @@ export interface RequestError extends Error {
 	error?: Error;
 }
 
-export interface FileError extends Error {
-	errno: number;
-}
-
-// This function is used to check if given objects implements `FileError` interface
-export function isFileError(object: unknown): object is FileError {
-	return Object.prototype.hasOwnProperty.call(object, "errno");
-}
-
 // This function is used to check if given objects implements `RequestError` interface
 // https://www.technicalfeeder.com/2021/02/how-to-check-if-a-object-implements-an-interface-in-typescript/
 export function isRequestError(object: unknown): object is RequestError {

@@ -19,6 +19,7 @@ Features, Bug Fixes, API Breaking, Deprecated, Infrastructure, /example Updates
 ### Bug Fixes
 
 - Fixed `pre-commit` script that did not work properly and skipped the `lint-staged` part.
+- Fixed compiling contracts on Windows.
 
 ### Features
 

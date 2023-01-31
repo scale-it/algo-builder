@@ -1,5 +1,4 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { types } from "@algo-builder/web";
 import {
 	Account,
 	appendSignMultisigTransaction,
@@ -17,6 +16,7 @@ import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { LogicSig } from "../types";
+import { NO_FILE_OR_DIRECTORY_ERROR } from "./constants";
 import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";
@@ -56,7 +56,7 @@ export async function readMsigFromFile(filename: string): Promise<EncodedMultisi
 		const msig = fs.readFileSync(p, "utf8").split("LogicSig: ")[1];
 		return await decodeMsigObj(msig);
 	} catch (e) {
-		if (types.isFileError(e) && e?.errno === -2) {
+		if ((e as NodeJS.ErrnoException)?.code === NO_FILE_OR_DIRECTORY_ERROR) {
 			return undefined;
 		} // handling a not existing file
 		throw e;
@@ -77,7 +77,7 @@ export async function readBinaryMultiSig(filename: string): Promise<string | und
 		const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
 		return fs.readFileSync(p, "base64");
 	} catch (e) {
-		if (types.isFileError(e) && e?.errno === -2) {
+		if ((e as NodeJS.ErrnoException)?.code === NO_FILE_OR_DIRECTORY_ERROR) {
 			return undefined;
 		} // handling a not existing file
 		throw e;
