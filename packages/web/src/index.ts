@@ -11,6 +11,7 @@ export { WebMode } from "./lib/web-mode";
 export { WallectConnectSession } from "./lib/wallectconnect-mode";
 export { MyAlgoWalletSession } from "./lib/myalgowallet-mode";
 export { getSuggestedParams, mkTxParams } from "./lib/api";
+export { Executor } from "./lib/executor";
 export {
 	mainnetURL,
 	testnetURL,

@@ -22,9 +22,9 @@ import {
 } from "../types";
 import { algoexplorerAlgod } from "./api";
 import { WAIT_ROUNDS } from "./constants";
+import { Executor } from "./executor";
 import { error, log } from "./logger";
 import { mkTransaction } from "./txn";
-
 interface MyAlgoConnect {
 	/**
 	 * @async
@@ -68,7 +68,7 @@ interface MyAlgoConnect {
 	signLogicSig(logic: Uint8Array | Base64, address: Address): Promise<Uint8Array>;
 }
 
-export class MyAlgoWalletSession {
+export class MyAlgoWalletSession implements Executor {
 	connector!: MyAlgoConnect;
 	private readonly algodClient: algosdk.Algodv2;
 	accounts: Accounts[] = [];
@@ -100,7 +100,7 @@ export class MyAlgoWalletSession {
 	 */
 	async signLogic(logic: string | Uint8Array, address: string): Promise<Uint8Array> {
 		try {
-			return await this.connector.signLogicSig(logic, address)
+			return await this.connector.signLogicSig(logic, address);
 		} catch (err) {
 			error(err);
 			throw new Error("Error while signing teal program" + err);
@@ -114,12 +114,15 @@ export class MyAlgoWalletSession {
 	 * @returns Returns txID and blob object
 	 * for more info: https://developer.algorand.org/docs/get-details/dapps/smart-contracts/smartsigs/modes/#contract-account
 	 */
-	signLogicSigTx(transaction: Transaction, logicSig: algosdk.LogicSigAccount): { txID: string, blob: Uint8Array } {
+	signLogicSigTx(
+		transaction: Transaction,
+		logicSig: algosdk.LogicSigAccount
+	): { txID: string; blob: Uint8Array } {
 		try {
-			return algosdk.signLogicSigTransaction(transaction, logicSig)
+			return algosdk.signLogicSigTransaction(transaction, logicSig);
 		} catch (err) {
 			error(err);
-			throw err
+			throw err;
 		}
 	}
 
@@ -147,6 +150,7 @@ export class MyAlgoWalletSession {
 	 * https://connect.myalgo.com/docs/interactive-examples/PaymentTransaction
 	 * Sign a single transaction from a my algo wallet session
 	 * @param txn { SDK transaction object, shouldSign, signers, msig } object
+	 * @param signOptions Sign Transaction Options
 	 * @returns raw signed txn
 	 */
 	async signTransaction(
