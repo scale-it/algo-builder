@@ -50,7 +50,7 @@
 		"sha3": "^2.1.4",
 		"source-map-support": "^0.5.21",
 		"tweetnacl-ts": "^1.0.3",
-		"yaml": "^1.10.2",
+		"yaml": "^2.2.2",
 		"zod": "^3.19.1"
 	},
 	"devDependencies": {
