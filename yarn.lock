@@ -49,7 +49,7 @@ __metadata:
     ts-node: ^10.9.1
     typedoc: ^0.23.19
     typescript: 4.7.4
-    yaml: ^1.10.2
+    yaml: ^2.2.2
     zod: ^3.19.1
   bin:
     algob: build/internal/cli/cli.js
@@ -93,7 +93,7 @@ __metadata:
     tweetnacl-ts: ^1.0.3
     typedoc: ^0.23.19
     typescript: 4.7.4
-    yaml: ^1.10.2
+    yaml: ^2.2.2
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -7019,17 +7019,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^1.10.2":
-  version: 1.10.2
-  resolution: "yaml@npm:1.10.2"
-  checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
-  languageName: node
-  linkType: hard
-
 "yaml@npm:^2.1.1":
   version: 2.1.3
   resolution: "yaml@npm:2.1.3"
   checksum: 91316062324a93f9cb547469092392e7d004ff8f70c40fecb420f042a4870b2181557350da56c92f07bd44b8f7a252b0be26e6ade1f548e1f4351bdd01c9d3c7
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "yaml@npm:2.2.2"
+  checksum: d90c235e099e30094dcff61ba3350437aef53325db4a6bcd04ca96e1bfe7e348b191f6a7a52b5211e2dbc4eeedb22a00b291527da030de7c189728ef3f2b4eb3
   languageName: node
   linkType: hard
 
